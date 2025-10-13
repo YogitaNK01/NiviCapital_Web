@@ -1,0 +1,51 @@
+<!-- components/bar-chart/bar-chart.component.html -->
+<div class="chart-container m-2">
+  <div class="chart-title">{{ title }}</div>
+  
+  <svg [attr.width]="width" [attr.height]="height">
+    <!-- Y-axis grid lines -->
+    <g *ngFor="let tick of getYAxisTicks()" class="grid-line">
+      <line
+        x1="50"
+        [attr.y1]="getYPosition(tick)"
+        [attr.x2]="width - 20"
+        [attr.y2]="getYPosition(tick)"
+        stroke="#e5e7eb"
+        stroke-width="1"
+      />
+      <text
+        x="45"
+        [attr.y]="getYPosition(tick) + 4"
+        text-anchor="end"
+        class="axis-label"
+      >
+        {{ tick }}
+      </text>
+    </g>
+
+    <!-- Bars -->
+    <g *ngFor="let bar of bars">
+      <rect
+        [attr.x]="bar.x"
+        [attr.y]="bar.y"
+        [attr.width]="bar.width"
+        [attr.height]="bar.height"
+        [attr.fill]="bar.color"
+        class="bar"
+        rx="3"
+      />
+    </g>
+
+    <!-- X-axis labels -->
+    <g *ngFor="let label of labels; let i = index">
+      <text
+        [attr.x]="60 + i * ((width - 80) / labels.length) + ((width - 80) / labels.length) / 2"
+        [attr.y]="height - 15"
+        text-anchor="middle"
+        class="axis-label"
+      >
+        {{ label }}
+      </text>
+    </g>
+  </svg>
+</div>

@@ -1,0 +1,26 @@
+@use 'variables' as *;
+@use 'typography' as *;
+
+
+.form-check{
+    display: flex;
+    align-items: center;
+}
+.form-check-input{
+    width: 24px;
+    height: 24px;
+}
+.form-check-input:checked {
+      background-color: $color-primary;
+    border-color: $color-primary;
+}
+
+.form-check-label{
+    margin: $spacing_5;
+    font-style: $font-weight-regular;
+    font-weight: $font-weight-regular;
+    line-height: $spacing_10;
+    letter-spacing: 0.16px;
+}
+
+

@@ -1,0 +1,52 @@
+@use 'variables' as *;
+
+.customClass {
+    width: 125px;
+     border-radius: $border-radius-rounded;
+
+}
+.primary{
+ background-color: $primary-btn;
+   color: #fff;
+ 
+}
+.secondary {
+    background-color: $secondary-btn;
+      color: #fff;
+
+}
+.info{
+ background-color: $info-btn;
+   color: #fff;
+
+}
+.warning {
+    background-color: $warning-btn;
+      color: #fff;
+
+}
+.success{
+ background-color: $success-btn;
+   color: #fff;
+
+}
+.error {
+    background-color: $error-btn;
+      color: #fff;
+
+}
+
+.btn-icon {
+   padding: 0;
+   width: 170px;
+  color: #fff;
+
+}
+.btn-label {
+    color: #fff!important;
+}
+
+.btn-sidebar
+{ 
+    border: 1px solid;
+  border-radius: 999px; }

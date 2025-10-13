@@ -1,0 +1,159 @@
+@use 'variables' as *;
+@use 'typography' as *;
+
+
+.input-container {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.input-label {
+  
+    text-align: start;
+
+     color: $neutral-text-primary;
+      font-size: $font-size-body_md;
+      font-style: $font-weight-regular;
+      font-weight: $font-weight-regular;
+      line-height: $spacing_10;
+      letter-spacing: 0.16px;
+      margin-bottom: 0.5rem;
+}
+
+.input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  
+  &.disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}
+
+.input-field {
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  color: $neutral-text-primary;
+  background-color: #ffffff;
+  transition: all 0.2s ease-in-out;
+  outline: none;
+  border-radius: $border_radius_s;
+      border: $border_3 solid $input-default;
+      font-size: $spacing_7;
+
+  &:focus {
+    border-color: $input-focus;
+  }
+
+  &::placeholder {
+    color: #9ca3af;
+  }
+
+  &:hover{
+    border-color:$input-hover
+  }
+
+  &:disabled {
+    background-color: #f9fafb;
+    cursor: not-allowed;
+  }
+
+  &.has-left-icon {
+    // padding-left: 2.5rem;
+  }
+
+  &.has-right-icon {
+    padding-right: 3rem;
+  }
+
+  .input-wrapper.error & {
+    border-color:$error-text-dark;
+    
+    &:focus {
+      border-color: $error-text-dark;
+      box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+    }
+  }
+
+  .input-wrapper.success & {
+    border-color: $success-text-dark;
+    
+    &:focus {
+      border-color: $success-text-dark;
+      box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+    }
+  }
+}
+
+.icon-left {
+  position: absolute;
+  left: 0.75rem;
+  color: #9ca3af;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.icon-right-search {
+  position: absolute;
+  right: 0.75rem;
+  color: #9ca3af;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.icon-right-container {
+  position: absolute;
+  right: 0.75rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  z-index: 10;
+  pointer-events: auto;
+}
+
+.icon-right {
+  color: #9ca3af;
+  flex-shrink: 0;
+
+  &.clickable {
+    cursor: pointer;
+    transition: color 0.2s;
+
+    &:hover {
+      color: #6b7280;
+    }
+  }
+
+  &.success-icon {
+    color: $success-text-dark;
+  }
+
+  &.error-icon {
+    color: $error-text-dark;
+  }
+
+  &.info-icon {
+    color: #9ca3af;
+  }
+}
+.icon-right.clickable {
+  cursor: pointer;
+  pointer-events: auto; /* make sure clicks register */
+}
+.help-text {
+  margin-top: 0.25rem;
+  font-size: 0.75rem;
+  color: $neutral-text-secondary;
+  font-style: italic;
+    text-align: start;
+
+  &.error {
+    color: $error-text-dark;
+  }
+
+  &.success {
+    color: $success-text-dark;
+  }
+}

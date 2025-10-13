@@ -1,0 +1,46 @@
+<!-- components/chart/chart.component.html -->
+<div class="chart-container  m-2">
+  <div class="chart-title">{{ title }}</div>
+  
+  <div class="chart-content">
+    <svg [attr.width]="width" [attr.height]="height" viewBox="0 0 200 200">
+      <!-- Donut segments -->
+      <g *ngFor="let segment of segments">
+        <path
+          [attr.d]="segment.path"
+          [attr.fill]="segment.color"
+          class="chart-segment"
+        />
+      </g>
+      
+      <!-- Center value (optional) -->
+      <text 
+        *ngIf="showValue && centerValue"
+        x="100" 
+        y="95" 
+        text-anchor="middle" 
+        class="center-label"
+      >
+        Total Value
+      </text>
+      <text 
+        *ngIf="showValue && centerValue"
+        x="100" 
+        y="110" 
+        text-anchor="middle" 
+        class="center-value"
+      >
+        {{ centerValue }}
+      </text>
+    </svg>
+
+    <!-- Legend (Below Chart - Horizontal) -->
+    <div class="chart-legend">
+      <div *ngFor="let item of data" class="legend-item">
+        <span class="legend-color" [style.background-color]="item.color"></span>
+        <span class="legend-label">{{ item.label }}</span>
+      </div>
+    </div>
+  </div>
+</div>
+

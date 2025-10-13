@@ -1,0 +1,304 @@
+$font-family-base: 'DM Sans', sans-serif;
+
+//----------------------Colors----------------------------
+//  Colors
+$color-primary: #F33B48;
+$color-secondary: #0A4472;
+$color-neutral: #464851;
+
+// primary hex
+$primary-50: #FFE9ED;
+$primary-100: #FEC9D0;
+$primary-200: #F29195;
+$primary-300: #E9656C;
+$primary-400-main: #F33B48;
+$primary-500: #F8192A;
+$primary-600: #E9012B;
+$primary-700: #E9012B;
+$primary-800: #CB001D;
+$primary-900: #BB010F;
+
+//secondary hex
+$secondary-50: #E4F0F6;
+$secondary-100: #BBDAEB;
+$secondary-200: #92C3DE;
+$secondary-300: #6CADCF;
+$secondary-400: #539CC8;
+$secondary-500: #3A8DC1;
+$secondary-600: #3180B4;
+$secondary-700: #2570A3;
+$secondary-800: #1B5F92;
+$secondary-900: #0D4472;
+
+//neutral hex
+$neutral-00: #FFFFFF;
+$neutral-50: #F4F6FF;
+$neutral-100: #EDF0FF;
+$neutral-200: #F5F5F5;
+$neutral-300: #E4E6F1;
+$neutral-400: #C2C4CE;
+$neutral-500: #A4A5B0;
+$neutral-600: #7A7C86;
+$neutral-700: #666771;
+$neutral-800-main: #464851;
+$neutral-900: #25262F;
+
+//info hex
+$info-00: #FFFFFF;
+$info-50: #E1F5FE;
+$info-100: #B3E4FD;
+$info-200: #81D3FA;
+$info-300: #4EC3F7;
+$info-400: #29B5F6;
+$info-500-main: #03A8F4;
+$info-600: #0499E5;
+$info-700: #0387D1;
+$info-800: #0476BC;
+$info-900: #02559B;
+
+//warning hex
+$warning-00: #FFFFFF;
+$warning-50: #FFFEE6;
+$warning-100: #FFFAC1;
+$warning-200: #FFF697;
+$warning-300: #FDF26B;
+$warning-400: #FCEC46;
+$warning-500: #F8E713;
+$warning-600: #FFDC1A;
+$warning-700: #FFC310;
+$warning-800-main: #FFAA00;
+$warning-900: #FD7E00;
+
+//success hex
+$success-00: #FFFFFF;
+$success-50: #EAF6EA;
+$success-100: #CBE9CC;
+$success-200: #ACDAAB;
+$success-300: #8ACD8A;
+$success-400: #72C271;
+$success-500: #5AB757;
+$success-600: #51A74F;
+$success-700: #459543;
+$success-800-main: #3B8439;
+$success-900: #296427;
+
+//error hex
+$error-00: #FFFFFF;
+$error-50: #FEEAEC;
+$error-100: #FFCACD;
+$error-200: #FC9590;
+$error-300: #F66964;
+$error-400: #FF4239;
+$error-500: #FF2A0F;
+$error-600: #F61B15;
+$error-700-main: #E40010;
+$error-800: #D70005;
+$error-900: #CA0001;
+
+//-------------------background ---------------------------
+
+$bg : #FFF;
+$surface : $neutral-200;
+$accent_sec : $secondary-900;
+$accent_prim : $primary-400-main;
+$onAccent : $neutral-50;
+$error-onContainer : $error-900;
+$error-container : $error-100;
+$success-onContainer : $success-900;
+$success-container : $success-100;
+$warning-onContainer : $warning-800-main;
+$warning-container : $warning-100;
+$info-onContainer : $info-800;
+$info-container : $info-100;
+
+//-------------------------Text--------------------------
+//neutral Text
+$neutral-text-primary : $neutral-900;
+$neutral-text-secondary : $neutral-700;
+$neutral-text-tertiary : $neutral-50;
+
+//primary Text
+$primary-text : $primary-500;
+$primary-text-light : $primary-200;
+$primary-text-dark : $primary-600;
+
+//secondary Text
+$secondary-text : $secondary-700;
+$secondary-text-light : $secondary-200;
+$secondary-text-dark : $secondary-900;
+
+//error Text
+$error-text : $error-700-main;
+$error-text-light : $error-200;
+$error-text-dark : $error-900;
+
+//success Text
+$success-text : $success-800-main;
+$success-text-light : $success-300;
+$success-text-dark : $success-900;
+
+//warning Text
+$warning-text : $warning-700;
+$warning-text-light : $warning-600;
+$warning-text-dark : $warning-900;
+
+//info Text
+$info-text : $info-500-main;
+$info-text-light : $info-200;
+$info-text-dark : $info-800;
+
+//-------------------------Buttons--------------------------
+
+//primary buttons
+$primary-btn : $primary-400-main;
+$primary_solid_hover : $primary-700;
+$primary_outline_hover : $primary-50;
+$primary_disabled:$primary-100;
+$primary_focus:$primary-700;
+
+//secondary buttons
+$secondary-btn : $secondary-700;
+$secondary_solid_hover : $secondary-900;
+$secondary_outline_hover : $secondary-50;
+$secondary_disabled:$secondary-100;
+$secondary_focus:$secondary-900;
+
+//info buttons
+$info-btn : $info-500-main;
+$info_solid_hover : $info-800;
+$info_outline_hover : $info-50;
+$info_disabled:$info-100;
+$info_focus:$info-700;
+
+//warning buttons
+$warning-btn : $warning-600;
+$warning_solid_hover : $warning-700;
+$warning_outline_hover : $warning-200;
+$warning_disabled:$warning-50;
+$warning_focus:$warning-800-main;
+
+//success buttons
+$success-btn : $success-600;
+$success_solid_hover : $success-800-main;
+$success_outline_hover : $success-50;
+$success_disabled:$success-100;
+$success_focus:$success-900;
+
+//error buttons
+$error-btn : $error-700-main;
+$error_solid_hover : $error-800;
+$error_outline_hover : $error-50;
+$error_disabled:$error-100;
+$error_focus:$error-900;
+
+//-------------------------Input--------------------------
+
+$input-default :  $neutral-500;
+$input-hover :  $neutral-700;
+$input-focus :  $secondary-500;
+$input-error :  $error-900;
+$input-success :  $success-900;
+$input-disabled :  $neutral-200;
+
+//-------------------------Border color--------------------------
+
+//primary border
+$primary_border_1:$primary-50;
+$primary_border_2:$primary-100;
+$primary_border_3:$primary-500;
+$primary_border_4:$primary-700;
+
+//secondary border
+
+$secondary_border_1:$secondary-50;
+$secondary_border_2:$secondary-100;
+$secondary_border_3:$secondary-500;
+$secondary_border_4:$secondary-700;
+
+//neutral border
+$neutral_border_1:$neutral-00;
+$neutral_border_2:$neutral-300;
+$neutral_border_3:$neutral-500;
+$neutral_border_4:$neutral-700;
+
+//invert border
+$invert_border_1:$neutral-900;
+$invert_border_2:$neutral-700;
+$invert_border_3:$neutral-400;
+$invert_border_4:$neutral-300;
+
+//info border
+$info_border_1:$info-50;
+$info_border_2:$info-100;
+$info_border_3:$info-300;
+$info_border_4:$info-700;
+
+//error border
+$error_border_1:$error-50;
+$error_border_2:$error-100;
+$error_border_3:$error-500;
+$error_border_4:$error-700-main;
+
+//success border
+$success_border_1:$success-50;
+$success_border_2:$success-100;
+$success_border_3:$success-600;
+$success_border_4:$success-800-main;
+
+//warning border
+$warning_border_1:$warning-50;
+$warning_border_2:$warning-100;
+$warning_border_3:$warning-600;
+$warning_border_4:$warning-800-main;
+
+
+//-------------------------Border size--------------------------
+
+$border_1:1px;
+$border_2:1.5px;
+$border_3:2px;
+$border_4:2.5px;
+$border_5:3px;
+$border_6:3.5px;
+
+//-------------------------Border radius--------------------------
+$border_radius_rounded:999px;
+$border_radius_xl:24px;
+$border_radius_l:16px;
+$border_radius_m:12px;
+$border_radius_s:8px;
+$border_radius_xs:4px;
+$border_radius_none:0px;
+
+//-------------------------Spacing--------------------------
+
+$spacing:4px;
+$spacing_2:6px;
+$spacing_3:8px;
+$spacing_4:10px;
+$spacing_5:12px;
+$spacing_6:14px;
+$spacing_7:16px;
+$spacing_8:18px;
+$spacing_9:20px;
+$spacing_10:22px;
+$spacing_11:24px;
+$spacing_12:26px;
+$spacing_13:28px;
+$spacing_14:30px;
+$spacing_15:32px;
+$spacing_16:34px;
+$spacing_17:36px;
+$spacing_18:40px;
+$spacing_19:44px;
+$spacing_20:48px;
+$spacing_21:52px;
+$spacing_22:56px;
+$spacing_23:60px;
+$spacing_24:70px;
+$spacing_25:80px;
+$spacing_26:90px;
+$spacing_27:100px;
+
+
+

@@ -1,0 +1,260 @@
+@use 'variables' as *;
+@use 'typography' as *;
+
+
+.upload-wrapper {
+  display: flex;
+  height: $spacing_21;
+  padding: $spacing $spacing_5;
+  flex-direction: column;
+  justify-content: center;
+  gap: $spacing_4;
+  align-self: stretch;
+  border-radius: $border_radius_l;
+  border: 1px solid $input-default;
+  width: 100%;
+
+  .upload-label {
+    color: $neutral-text-primary;
+    font-size: $font-size-body_md;
+    font-style: $font-weight-regular;
+    font-weight: $font-weight-regular;
+    line-height: $spacing_10;
+    letter-spacing: 0.16px;
+
+  }
+
+  .upload-area {
+    display: flex;
+    height: $spacing_21;
+    padding: $spacing_11;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: $spacing_4;
+    align-self: stretch;
+    cursor: pointer;
+    transition: all 0.2s ease;
+
+
+    &:hover:not(.disabled):not(.has-file) {
+      border-color: $input-default;
+     
+    }
+
+    &.disabled {
+      cursor: not-allowed;
+      opacity: 0.5;
+      background: $input-disabled;
+    }
+
+    &.has-file {
+      cursor: default;
+    }
+  }
+
+  .upload-content {
+
+    gap: 8px;
+    display: flex;
+    color: $neutral-text-primary;
+    font-size: $spacing_8;
+    font-style: $font-weight-regular;
+    font-weight: $font-weight-regular;
+    line-height: $spacing_11;
+    letter-spacing: 0.18px;
+
+    .upload-icon {
+      color: #6b7280;
+    }
+
+    .upload-text {
+      font-size: 14px;
+      font-weight: 500;
+      color: #374151;
+    }
+
+    &.uploading {
+      align-items: stretch;
+    }
+
+    &.success {
+      gap: 12px;
+      width: 100%;
+    }
+
+    &.error {
+      .error-icon {
+        color: $error-text;
+      }
+
+      .error-text {
+        font-size: $spacing_7;
+        color: $error-text;
+        max-width: 250px;
+      }
+
+      .retry-btn {
+        margin-top: 8px;
+        padding: 6px 16px;
+        background: $error-text;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        font-size: 13px;
+        cursor: pointer;
+        transition: background 0.2s;
+
+        &:hover {
+          background: #dc2626;
+        }
+      }
+    }
+
+    &.disabled {
+
+      .upload-icon,
+      .upload-text {
+        color: #9ca3af;
+      }
+    }
+  }
+
+  .file-info {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: $spacing_9;
+    align-self: stretch;
+    width: 100%;
+
+
+    .file-name-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 8px;
+
+    }
+
+    .file-name {
+      width: 100%;
+      color: $neutral-text-primary;
+      font-size: $spacing_8;
+      font-style: $font-weight-regular;
+      font-weight: $font-weight-regular;
+      line-height: $spacing_11;
+      letter-spacing: 0.18px;
+    }
+
+    .progress-text {
+      font-size: 13px;
+      color: #6b7280;
+      font-weight: 600;
+    }
+
+    .remove-btn {
+      display: flex;
+      width: $spacing_8;
+      height: $spacing_8;
+      padding: $spacing;
+      justify-content: space-between;
+      align-items: center;
+      aspect-ratio: 1/1;
+      border: none;
+      background-color: transparent;
+    }
+  }
+
+  .file-preview {
+    width: 60px;
+    height: 60px;
+    border-radius: 8px;
+    overflow: hidden;
+    border: 2px solid #e5e7eb;
+    background: #f9fafb;
+
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+  }
+
+  .progress-bar-container {
+    width: 100%;
+    height: 8px;
+    background: #e5e7eb;
+    border-radius: 4px;
+    overflow: hidden;
+
+    .progress-bar {
+      height: 100%;
+      background: #3b82f6;
+      border-radius: 4px;
+      transition: width 0.3s ease;
+    }
+  }
+
+  .success-text {
+    font-size: $spacing_7;
+    color: $success-text;
+    font-weight: $font-weight-regular;
+    ;
+  }
+
+
+  .helper-text {
+    color: $neutral-text-secondary;
+    font-size: $font-size-body_sm;
+    font-style: italic;
+    font-weight: $font-weight-regular;
+    line-height: $spacing_9;
+    letter-spacing: 0.14px;
+
+    &.error-text {
+      color: $error-text;
+    }
+
+    &.success-text {
+      color: $success-text;
+    }
+  }
+
+  // State-specific styles
+  &.upload-focus {
+
+    border-color: #3b82f6;
+    background: #eff6ff;
+
+  }
+
+  &.upload-success &.upload-label {
+
+    border-color: $success-text;
+    border-style: solid;
+
+  }
+
+  &.upload-error {
+
+    border-color: $error-text;
+    border-style: solid;
+    background: #fef2f2;
+
+  }
+
+  &.upload-uploading {
+
+    border-color: #3b82f6;
+    border-style: solid;
+
+  }
+}
+
+// Responsive adjustments
+@media (max-width: 640px) {
+  .upload-wrapper {
+    max-width: 100%;
+  }
+}

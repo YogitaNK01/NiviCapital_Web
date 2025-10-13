@@ -1,0 +1,90 @@
+@use 'variables' as *;
+
+
+
+// Base button
+.btn {
+ 
+  display: block;
+  padding: 12px 20px;   
+  width: 100%; 
+  height: 100%;    
+  font-size: 14px;
+   gap: $spacing_3;
+  flex-shrink: 0;
+  border: none;
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+  }
+}
+.btn-full {
+   display: block;  
+  width: 100%!important;
+}
+.btn-auto {
+  width: auto!important;
+}
+.btnclass{
+   width: auto!important;
+}
+// Outline style (optional class)
+.btn-outline {
+  background-color: $primary-btn;
+  border: 1px solid $primary-btn;
+  color: $primary-btn;
+
+  &:hover {
+    background-color: $primary-btn;
+    color: #fff;
+  }
+}
+
+
+// Alignment variations
+.btn-center {
+  justify-content: center;
+}
+.btn-left {
+  justify-content: flex-start;
+}
+.btn-right {
+  justify-content: flex-end;
+}
+
+// Outline style
+.btn-outline {
+  background-color: transparent;
+  border: 1px solid $primary-btn;
+  color: $primary-btn;
+
+  &:hover {
+    background-color: $primary-btn;
+    color: #fff;
+  }
+}
+
+// Icon + Label style
+.btn-icon {
+  display: flex;
+  align-items: center;
+  gap: 8px; /* space between icon and text */
+  width: 170px!important;
+}
+//edit btn
+.edit {
+
+}
+img,
+  svg {
+    width: 1px;
+    height: 14px;
+    flex-shrink: 0;
+  }
+
+.border-radius{
+    border-radius: $border-radius-rounded;
+
+}
+

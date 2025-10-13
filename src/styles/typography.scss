@@ -1,0 +1,36 @@
+@use './variables' as *;
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap');
+
+//----------------------Typeface----------------------------
+
+body {
+  font-family: $font-family-base;
+ 
+}
+
+//----------------------Size----------------------------
+//  size
+$font-size-dp_1: 64px;
+$font-size-dp_2: 48px;
+$font-size-dp_3: 32px;
+$font-size-xxl: 30px;
+$font-size-xl: 28px;
+$font-size-h1: 24px;
+$font-size-h2: 22px;
+$font-size-h3: 20px;
+$font-size-body_lg: 18px;
+$font-size-body_md: 16px;
+$font-size-body_sm: 14px;
+$font-size-body_xs: 12px;
+
+//----------------------Weight----------------------------
+//  size
+$font-weight-light: light;     //300
+$font-weight-regular: normal; //normal 400
+$font-weight-medium: medium;    //500
+$font-weight-semibold: semibold; //600
+$font-weight-bold: bold;         //700
+$font-weight-italic: italic;
+$font-weight-Light: light;
+
+$font-style-italic: italic;

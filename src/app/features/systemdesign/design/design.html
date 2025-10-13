@@ -1,0 +1,361 @@
+<div class="design-container">
+    <div class="container-fluid p-4">
+        <!-- buttons -->
+        <div class="card m-5" *ngIf="activeSection === 'buttons'">
+            <div class="card-header">
+                Buttons
+            </div>
+            <div class="card-body">
+                <div class="row m-4 text-center">
+                    <div class="col d-flex flex-wrap justify-content-center gap-4">
+                        <app-buttons label="Primary" color="primary" class="customClass primary"></app-buttons>
+                        <app-buttons label="Secondary" color="secondary" class="customClass secondary"></app-buttons>
+                        <app-buttons label="Info" color="info" class="customClass info"></app-buttons>
+                        <app-buttons label="Warning" color="warning" class="customClass warning"></app-buttons>
+                        <app-buttons label="Success" color="success" class="customClass success"></app-buttons>
+                        <app-buttons label="error" color="error" class="customClass error"></app-buttons>
+                    </div>
+                </div>
+
+                <div class="row m-5 text-center">
+                    <div class="col d-flex flex-wrap justify-content-center gap-2">
+
+                        <app-buttons label="Search" class="customClass primary"></app-buttons>
+                        <button class="btn btn-sidebar">
+                            <img src="/assets/images/icons/logout.svg" alt="Logout">
+                        </button>
+                        <app-buttons label="Edit" class="btn btn-icon edit" [outline]="true">
+                            <img src="/assets/images/icons/edit.svg" alt="edit">
+
+                        </app-buttons>
+                        <app-buttons label="Download CIF" class="btn btn-icon primary btn-label">
+                            <img src="/assets/images/icons/import.svg" alt="Download">
+
+                        </app-buttons>
+
+                    </div>
+                </div>
+            </div>
+
+
+        </div>
+        <!-- checkbox -->
+        <div class="card m-5" *ngIf="activeSection === 'checkbox'">
+            <div class="card-header">
+                Checkbox
+            </div>
+            <div class="card-body">
+                <div class="row m-5 text-center">
+                    <div class="col d-flex flex-wrap justify-content-center gap-4">
+                        <app-checkbox [checked]="isCheckedDefault_rb" [disabled]="false" [indeterminate]="false"
+                            label="Default" (checkedChange)="onCheckboxChange($event, 'Default')">
+                        </app-checkbox>
+
+                        <app-checkbox [checked]="isCheckedChecked_rb" [disabled]="false" [indeterminate]="false"
+                            label="Checked" (checkedChange)="onCheckboxChange($event, 'Checked')">
+                        </app-checkbox>
+
+                        <app-checkbox [checked]="false" [indeterminate]="true" [disabled]="false"
+                            label="Indeterminate checkbox" (checkedChange)="onCheckboxChange($event, 'Indeterminate')">
+                        </app-checkbox>
+
+                        <app-checkbox [checked]="false" [disabled]="true" [indeterminate]="false" label="Disabled"
+                            (checkedChange)="onCheckboxChange($event, 'Disabled')">
+                        </app-checkbox>
+
+                        <app-checkbox [checked]="true" [disabled]="true" [indeterminate]="false"
+                            label="Checked Disabled" (checkedChange)="onCheckboxChange($event, 'Checked Disabled')">
+                        </app-checkbox>
+
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- charts -->
+        <div class="card m-5" *ngIf="activeSection === 'charts'">
+
+            <div class="card-header">
+                Charts
+            </div>
+            <div class="card-body">
+                <div class="row m-4 text-center">
+
+                    <div class=" d-flex justify-content-center">
+
+
+                        <div class="charts-grid">
+                            <!-- Chart 1: Simple Donut Chart -->
+                            <app-charts [title]="'Donut Chart'" [data]="chartData1"></app-charts>
+
+                            <!-- Chart 2: Donut Chart with Center Value -->
+                            <app-charts [title]="'small Chart'" [data]="chartData2" [width]="300" [height]="300"
+                                [radius]="50" [innerRadius]="10" [centerX]="100" [centerY]="100"></app-charts>
+
+                            <!-- Chart 3: Another Example -->
+                            <app-charts [title]="'Large Chart*'" [data]="chartData3" [width]="290" [height]="290"
+                                [radius]="80" [innerRadius]="50" [centerX]="100" [centerY]="100"></app-charts>
+
+                            <!-- Chart 4: With Different Data -->
+                            <app-charts [title]="'Donut Chart'" [data]="chartData4" [showValue]="true"
+                                [centerValue]="'$9,999.99'"></app-charts>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row m-4 text-center">
+
+                    <div class=" d-flex p-3 justify-content-center">
+
+                        <div class="charts-grid">
+                            <app-barcharts [title]="'Column chart'" [labels]="monthLabels" [datasets]="barDatasets"
+                                [width]="400" [height]="250"></app-barcharts>
+
+                            <app-barcharts [title]="'Column chart'" [singleBarMultiDataset]="true"
+                                [labels]="monthLabels" [datasets]="barDatasets" [width]="400"
+                                [height]="250"></app-barcharts>
+
+                            <app-barcharts [title]="'Horizontal Chart'" [labels]="['Jan', 'Feb', 'Mar', 'Apr']"
+                                [datasets]="barDatasets" [horizontal]="true" [barWidth]="30"
+                                [singleBarMultiDataset]="true" [width]="400" [height]="250"></app-barcharts>
+
+                            <!-- Horizontal, single bar with multiple dataset stacked -->
+                            <app-barcharts [title]="'Horizontal Chart'" [labels]="['Jan','Feb','Mar']"
+                                [datasets]="barDatasets" [width]="400" [height]="250" [horizontal]="true"
+                                [barWidth]="30"></app-barcharts>
+
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row m-4 p-3 text-center">
+
+                    <div class=" d-flex p-3  justify-content-center">
+                        <div class="charts-grid d-flex">
+                            <app-areacharts [title]="'Weekly Disbursement'" [labels]="weekLabelsarea"
+                                [datasets]="areaDatasets" [width]="400" [height]="250"></app-areacharts>
+
+                            <app-areacharts [title]="'Weekly Disbursement'" [labels]="weekLabelsarea"
+                                [datasets]="areaDatasetsarea" [type]="'area'" [fillOpacity]="0.6" [width]="400"
+                                [height]="250">
+                            </app-areacharts>
+
+                            <!-- Chart 2: Simple Line Chart (like image 2, left) -->
+                            <app-areacharts [title]="'Line Chart'" [labels]="lineLabels" [datasets]="lineDatasets"
+                                [type]="'line'" [showFill]="false" [strokeWidth]="2" [width]="400" [height]="250">
+                            </app-areacharts>
+
+                            <!-- Chart 3: Overlay/Wave Chart (like image 2, right) -->
+                            <app-areacharts [title]="'Line Chart'" [labels]="overlayLabels" [datasets]="overlayDatasets"
+                                [type]="'overlay'" [showFill]="false" [strokeWidth]="2.5" [width]="400" [height]="250">
+                            </app-areacharts>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- dropdown -->
+        <div class="card  m-5" *ngIf="activeSection === 'dropdown'">
+            <div class="card-header">
+                Dropdown
+            </div>
+            <div class="card-body">
+                <div class="row m-5 text-center">
+
+                    <div class=" d-flex">
+
+                        <div class="col card shadow-sm p-3 m-3">
+
+                            <!-- Basic dropdown -->
+                            <app-dropdown [options]="myOptions" [(selectedValue)]="selectedOption"
+                                placeholder="Dropdown" (selectedValueChange)="onSelectionChange($event)">
+                            </app-dropdown>
+
+
+                        </div>
+
+
+                        <div class="col card shadow-sm p-3 m-3">
+
+                            <app-dropdown [options]="myOptions2" [(selectedValue)]="selectedOption2" placeholder="All"
+                                (selectedValueChange)="onSelectionChange2($event)">
+                            </app-dropdown>
+                        </div>
+
+                        <div class="col card shadow-sm p-3 m-3">
+                            <!-- Search Input -->
+                            <app-dropdown [options]="largeOptions" [(selectedValue)]="selectedOption3" placeholder=""
+                                [searchable]="true" (selectedValueChange)="onSelectionChange3($event)">
+                            </app-dropdown>
+                        </div>
+
+                        <div class="col card shadow-sm p-3 m-3">
+
+                            <!-- Basic Input -->
+                            <app-dropdown [options]="largeOptionsdata" [(selectedValue)]="selectedOption4"
+                                placeholder="" [searchable]="true" (selectedValueChange)="onSelectionChange4($event)">
+                            </app-dropdown>
+                        </div>
+
+                    </div>
+
+
+
+                </div>
+            </div>
+        </div>
+
+        <!-- inputfield -->
+        <div class="card  mb-4" *ngIf="activeSection === 'inputfield'">
+            <div class="card-header">
+                Input Field
+            </div>
+            <div class="card-body">
+                <div class="row mb-4 text-center">
+
+                    <div class="col-12 col-md-4 mb-4">
+
+                        <div class="card shadow-sm p-3 mb-3">
+
+                            <!-- Basic Input -->
+                            <app-inputfield label="Input Label" placeholder="Input" helpText="Help text">
+                            </app-inputfield>
+                        </div>
+
+
+                        <div class="card shadow-sm p-3 mb-3">
+                            <!-- Search Input -->
+                            <app-inputfield label="Input Label" placeholder="Search..." helpText="Help text"
+                                [showSearch]="true">
+                            </app-inputfield>
+                        </div>
+
+                    </div>
+
+                    <div class="col-12 col-md-4 mb-4">
+                        <div class="card shadow-sm p-3 mb-3">
+
+                            <!-- Basic Input -->
+                            <app-inputfield label="Input Label" placeholder="Input" helpText="Help text"
+                                [showInfo]="true">
+                            </app-inputfield>
+                        </div>
+
+
+                        <div class="card shadow-sm p-3 mb-3">
+                            <!-- password Input -->
+                            <!-- <app-inputfield label="Input Label" type="password" placeholder="password" helpText="Help text" >
+              </app-inputfield> -->
+
+                            <app-inputfield label="Password" type="password" placeholder="Enter password"
+                                helpText="Click eye to show/hide">
+                            </app-inputfield>
+                        </div>
+                    </div>
+
+                    <div class="col-12 col-md-4 mb-4 mb-3">
+                        <div class="card shadow-sm p-3 mb-3">
+
+                            <!-- success Input -->
+                            <app-inputfield label="Input Label" placeholder="Input" state="success"
+                                helpText="Help text">
+                            </app-inputfield>
+                        </div>
+
+
+                        <div class="card shadow-sm p-3 mb-3">
+                            <!-- error Input -->
+                            <app-inputfield label="Input Label" placeholder="input" state="error" helpText="Help text">
+                            </app-inputfield>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <!-- radiobuttons -->
+        <div class="card m-5" *ngIf="activeSection === 'radiobuttons'">
+            <div class="card-header">
+                Radiobuttons
+            </div>
+            <div class="card-body">
+                <div class="row m-5 text-center">
+                    <div class="col d-flex flex-wrap justify-content-center gap-4">
+
+                        <app-radiobuttons name="optionsGroup1" [checked]="checkselectedOption_rb === 'option1'"
+                            (checkedChange)="checkselectedOption_rb = 'option1'" label="Default">
+                        </app-radiobuttons>
+
+                        <!-- Checked -->
+                        <app-radiobuttons name="optionsGroup2" [checked]="checkselectedOption_rb === 'option2'"
+                            (checkedChange)="checkselectedOption_rb = 'option2'" label="Checked">
+                        </app-radiobuttons>
+
+                        <!-- Disabled -->
+                        <app-radiobuttons name="optionsGroup3" [checked]="false" [disabled]="true"
+                            label="Disabled Option">
+                        </app-radiobuttons>
+
+                        <!-- Checked + Disabled -->
+                        <app-radiobuttons name="optionsGroup4" [checked]="true" [disabled]="true"
+                            label="Disabled Checked Option">
+                        </app-radiobuttons>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- upload buttons -->
+        <div class="card  m-5" *ngIf="activeSection === 'uploadbuttons'">
+            <div class="card-header">
+                Upload Buttons
+            </div>
+            <div class="card-body">
+                <div class="row m-3 ">
+
+                    <div class=" d-flex">
+
+                        <div class="col  p-3 m-3">
+
+                            <!-- Example 1: Basic upload -->
+                            <app-uploadbtn [config]="basicConfig" (fileChange)="onFileChange($event, 'upload1')">
+                            </app-uploadbtn>
+
+
+                        </div>
+
+
+                        <div class="col  p-3 m-3">
+
+                            <!-- Example 2: With custom config -->
+                            <app-uploadbtn [config]="customConfig" (fileChange)="onFileChange($event, 'upload2')">
+                            </app-uploadbtn>
+                        </div>
+
+                        <div class="col  p-3 m-3">
+                            <!-- Example 3: Disabled state -->
+                            <app-uploadbtn [config]="basicConfig" [disabled]="true">
+                            </app-uploadbtn>
+                        </div>
+
+                        <div class="col  p-3 m-3">
+
+                            <!-- Example 4: Different file types -->
+                            <app-uploadbtn [config]="pdfConfig" (fileChange)="onFileChange($event, 'upload5')">
+                            </app-uploadbtn>
+                        </div>
+
+                    </div>
+
+
+
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>

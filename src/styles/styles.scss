@@ -1,0 +1,58 @@
+@use './indexstyle' as *;
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap');
+
+
+html, body {
+  font-family: $font-family-base;
+  font-weight: $font-weight-regular;
+}
+// :root {
+//     --color-primary: #4f46e5;
+//     --color-secondary: #9333ea;
+//     --font-weight-bold: 600;
+//     --color-primary-dark: #4338ca;
+//     --color-background: #f9fafb;
+//     --color-surface: #ffffff;
+//     --color-text: #111827;
+//     --color-muted: #6b7280;
+
+// }
+
+
+/* styles.css - Global Styles */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Helvetica Neue', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background: #f5f5f5;
+}
+
+html, body {
+  height: 100%;
+}
+
+/* Scrollbar Styling */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #ccc;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #999;
+}

@@ -1,0 +1,86 @@
+/* components/chart/chart.component.css */
+.chart-container {
+  background: white;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  display: inline-block;
+  min-width: 300px;
+}
+
+.chart-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #333;
+  margin: 0 0 20px 0;
+}
+
+.chart-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+}
+
+svg {
+  display: block;
+}
+
+.chart-segment {
+  transition: opacity 0.2s;
+  cursor: pointer;
+}
+
+.chart-segment:hover {
+  opacity: 0.8;
+}
+
+.center-label {
+  font-size: 11px;
+  fill: #999;
+  font-weight: 500;
+}
+
+.center-value {
+  font-size: 18px;
+  fill: #333;
+  font-weight: 700;
+}
+
+.chart-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  justify-content: center;
+  align-items: center;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: #666;
+}
+
+.legend-color {
+  width: 12px;
+  height: 12px;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+.legend-label {
+  white-space: nowrap;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .chart-legend {
+    gap: 12px;
+  }
+  
+  .legend-item {
+    font-size: 12px;
+  }
+}

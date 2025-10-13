@@ -1,0 +1,92 @@
+<div class="app-container">
+  <!-- Sidebar -->
+  <!-- <aside class="sidebar" [class.sidebar-closed]="!sidebarOpen">
+  
+
+    <nav class="sidebar-nav">
+     
+      <a *ngFor="let item of menuItems" 
+   [routerLink]="item.route" 
+   routerLinkActive="active" 
+   #rla="routerLinkActive" 
+  [routerLinkActiveOptions]="{ exact: true }" 
+  [class.active]="rla.isActive"
+   class="nav-item">
+  <span class="nav-icon">
+    <img [src]="rla.isActive && sidebarOpen ? item.iconActive : item.icon" alt="{{ item.label }}"  class="menu-icon">
+  </span>
+  <span class="nav-label" >{{ item.label }}</span>
+  <span class="nav-icon-arrow"><img *ngIf="sidebarOpen" src="/assets/images/icons/arrow-down.svg" alt="Expand"
+            class="arrow-icon" height="15" width="15" /></span>
+</a>
+
+    </nav>
+    
+
+  </aside> -->
+
+  <aside class="sidebar" [class.closed]="!sidebarOpen">
+      <div class="sidebar-header">
+      <div class="logo">
+
+        <span class="logo-text">Nivi Capital</span>
+      </div>
+    </div>
+  <nav class="sidebar-nav">
+    <a *ngFor="let item of menuItems" 
+       [routerLink]="item.route"
+       routerLinkActive="active" 
+       #rla="routerLinkActive" 
+       [routerLinkActiveOptions]="{ exact: true }"
+       [class.active]="rla.isActive"
+       class="nav-item">
+      <span class="nav-icon">
+        <img [src]="rla.isActive && sidebarOpen ? item.iconActive : item.icon" alt="{{ item.label }}" class="menu-icon">
+      </span>
+      <span class="nav-label">{{ item.label }}</span>
+      <span class="nav-icon-arrow">
+        <img *ngIf="sidebarOpen" src="/assets/images/icons/arrow-down.svg" alt="Expand"
+             class="arrow-icon" height="15" width="15" />
+      </span>
+    </a>
+  </nav>
+</aside>
+
+
+  <!-- Main Content Area -->
+  <div class="main-content">
+    <!-- Header -->
+    <header class="header">
+      <button class="menu-toggle" (click)="toggleSidebar()">
+        <span class="hamburger"></span>
+        <span class="hamburger"></span>
+        <span class="hamburger"></span>
+      </button>
+
+      <div class="header-title">
+        Welcome
+      </div>
+
+      <!-- <div class="header-actions">
+        <button class="notification-btn">
+          <span class="bell-icon">🔔</span>
+        </button>
+        
+        <div class="user-profile">
+          <img src="https://i.pravatar.cc/40?img=12" alt="Harry Jones" class="avatar">
+          <span class="user-name"></span>
+          <span class="dropdown-arrow">▼</span>
+        </div>
+
+        <button class="settings-btn">
+          <span class="settings-icon">⚙️</span>
+        </button>
+      </div> -->
+    </header>
+
+    <!-- Routed Content -->
+    <main class="content">
+      <router-outlet></router-outlet>
+    </main>
+  </div>
+</div>

@@ -1,0 +1,273 @@
+@use 'variables' as *;
+@use 'typography' as *;
+
+.dropdown-container {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+
+  height: 52px;
+  padding: $spacing_7;
+  align-items: center;
+  gap: $spacing_4;
+  align-self: stretch;
+  border-radius: $border_radius_s;
+  border: 1px solid $input-default;
+  align-items: flex-start;
+}
+
+.dropdown-input {
+  width: 100%;
+  gap: $spacing_4;
+  display: flex;
+  height: 52px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  cursor: pointer;
+  background-color: #fff;
+}
+
+.dropdown-label {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: $neutral-text-secondary;
+  margin-bottom: 0.5rem;
+}
+
+::ng-deep app-dropdown .dropdown-list {
+  background-color: $bg !important;
+  border: 1px solid #eaeaed;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+.dropdown-list {
+  border: 1px solid #eaeaed;
+  margin-top: $spacing_4 ;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  width: 100%;
+  max-height: 200px;
+  overflow-y: auto;
+  z-index: 100;
+  border-radius: $spacing_5;
+  box-shadow: 0 $spacing_4 $spacing_18 0 rgba(0, 0, 0, 0.10);
+  padding: $spacing_5;
+  height: auto;
+  overflow: hidden;
+}
+
+
+.dropdown-wrapper {
+  position: relative;
+  width: 100%;
+
+  &.disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    pointer-events: none;
+  }
+}
+
+.dropdown-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid #d1d5db;
+  border-radius: 0.5rem;
+  background-color: #ffffff;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    border-color: $input-hover;
+  }
+
+  .dropdown-wrapper.open & {
+    border-color: $input-focus;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  }
+}
+
+.dropdown-text {
+  font-size: 0.875rem;
+  color: $neutral-text-primary;
+}
+
+.dropdown-icon {
+  color: #9ca3af;
+  transition: transform 0.2s ease;
+
+  &.rotate {
+    transform: rotate(180deg);
+  }
+}
+
+.dropdown-menu {
+  position: absolute;
+  top: calc(100% + 0.25rem);
+  left: 0;
+  right: 0;
+  background-color: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.5rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  z-index: 1000;
+  max-height: 300px;
+  display: flex;
+  flex-direction: column;
+}
+
+.dropdown-search {
+  position: relative;
+  padding: 0.75rem;
+  border-bottom: 1px solid #e5e7eb;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.search-box {
+  padding: $spacing_2 $spacing_5;
+  border-bottom: 1px solid #eee;
+    display: flex;
+    align-items: center;
+
+  .search-wrapper {
+    display: flex; // horizontal layout
+    align-items: center; // vertical centering
+    position: relative;
+  }
+
+  .search-icon {
+    width: $spacing_9;
+    height: $spacing_9;
+    margin-right: 8px; // spacing between icon and input
+    flex-shrink: 0; // prevent shrinking
+  }
+
+  .search-input {
+    flex: 1; // input takes remaining space
+    font-size: $font-size-body_sm;
+    border: none;
+    outline: none;
+
+    &:focus {
+      border-color: #3f51b5;
+    }
+  }
+}
+
+
+.clear-icon {
+  color: #9ca3af;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: color 0.2s;
+
+  &:hover {
+    color: #6b7280;
+  }
+}
+
+.dropdown-options {
+  overflow-y: auto;
+  max-height: 250px;
+}
+
+.dropdown-option {
+  padding: 0.75rem;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+  border-left: 3px solid transparent;
+
+  &:hover {
+    background-color: #f3f4f6;
+  }
+
+  &.selected {
+    background-color: #dbeafe;
+    border-left-color: #3b82f6;
+  }
+}
+
+.option-content {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.option-icon {
+  color: #6b7280;
+  flex-shrink: 0;
+}
+
+.option-label {
+  font-size: 0.875rem;
+  color: $neutral-text-primary;
+}
+
+.no-results {
+  padding: 1rem;
+  text-align: center;
+  font-size: 0.875rem;
+  color: $neutral-text-secondary;
+}
+
+
+
+
+.label {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  color: $neutral-600;
+  font-size: $spacing_6;
+  font-style: $font-weight-regular;
+  font-weight: $font-weight-regular;
+  line-height: $spacing_10;
+}
+
+.arrow {
+  display: flex;
+  width: $spacing_9;
+  height: $spacing_9;
+  justify-content: center;
+  align-items: center;
+}
+
+.dropdown-item {
+  display: flex;
+  align-items: center;
+  padding: 11px; // your requested padding
+  gap: 10px; // space between icon and text
+  cursor: pointer;
+
+  color: #404040;
+
+  font-size: $font-size-body_sm;
+  font-style: normal;
+  font-weight: $font-weight-regular;
+  line-height: $spacing_9;
+  letter-spacing: 0.14px;
+}
+
+
+.dropdown-item:hover {
+  background-color: $input-focus !important;
+}
+
+
+.item-icon {
+  width: 20px;
+  height: 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}

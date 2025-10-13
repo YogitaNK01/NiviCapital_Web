@@ -1,0 +1,18 @@
+<button 
+  class="btn"
+  [ngClass]="[
+    outline ? 'btn-outline' : '', 
+    borderradius ? 'border-radius':'',
+    customClass
+  ]"
+  [ngStyle]="{
+    'background-color': !outline && color ? color : '',
+    'color': outline && color ? color : '',
+    'border': border ? border : '',
+    'height': height ? height : ''
+  }"
+  [attr.type]="type || 'button'"><ng-content></ng-content>
+  <span class="btn-label">{{ label }}</span>
+</button>
+
+
