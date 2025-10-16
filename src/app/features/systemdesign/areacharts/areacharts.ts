@@ -30,6 +30,7 @@ export class Areacharts implements OnInit, OnChanges {
   @Input() showGrid: boolean = true;
   @Input() showXAxis: boolean = true;
   @Input() showYAxis: boolean = true;
+  @Input() tension: number = 0.4; // Curve tension (0-1)
 
   padding = { top: 20, right: 20, bottom: 40, left: 50 };
   areas: any[] = [];
@@ -60,21 +61,31 @@ export class Areacharts implements OnInit, OnChanges {
         y: this.getYPos(value)
       }));
 
-      // Create smooth curve
-      let strokePath = this.createSmoothPath(points);
+      // // Create smooth curve
+      // let strokePath = this.createSmoothPath(points);
 
-      // Fill path
+      // // Fill path
+      // let fillPath = '';
+      // if (this.shouldShowFill()) {
+      //   const baseline = this.getYPos(this.minValue);
+      //   fillPath = `M ${points[0].x} ${baseline} L ${points[0].x} ${points[0].y}`;
+      //   for (let i = 1; i < points.length; i++) {
+      //     const prev = points[i - 1];
+      //     const curr = points[i];
+      //     const cpX = (prev.x + curr.x) / 2;
+      //     fillPath += ` Q ${cpX} ${prev.y}, ${curr.x} ${curr.y}`;
+      //   }
+      //   fillPath += ` L ${points[points.length - 1].x} ${baseline} Z`;
+      // }
+
+       // Create smooth curve using cubic Bezier
+      let strokePath = this.createSmoothCubicPath(points);
+
+      // Fill path with smooth curves
       let fillPath = '';
       if (this.shouldShowFill()) {
         const baseline = this.getYPos(this.minValue);
-        fillPath = `M ${points[0].x} ${baseline} L ${points[0].x} ${points[0].y}`;
-        for (let i = 1; i < points.length; i++) {
-          const prev = points[i - 1];
-          const curr = points[i];
-          const cpX = (prev.x + curr.x) / 2;
-          fillPath += ` Q ${cpX} ${prev.y}, ${curr.x} ${curr.y}`;
-        }
-        fillPath += ` L ${points[points.length - 1].x} ${baseline} Z`;
+        fillPath = this.createSmoothCubicPath(points, baseline);
       }
 
       return {
@@ -85,6 +96,62 @@ export class Areacharts implements OnInit, OnChanges {
         label: dataset.label || ''
       };
     });
+  }
+
+  createSmoothCubicPath(points: {x: number, y: number}[], baseline?: number): string {
+    if (points.length === 0) return '';
+    if (points.length === 1) {
+      const p = points[0];
+      if (baseline !== undefined) {
+        return `M ${p.x} ${baseline} L ${p.x} ${p.y} L ${p.x} ${baseline} Z`;
+      }
+      return `M ${p.x} ${p.y}`;
+    }
+
+    // Calculate control points for smooth cubic Bezier curves
+    const controlPoints = this.calculateControlPoints(points);
+
+    let path = `M ${points[0].x} ${points[0].y}`;
+
+    // Create cubic Bezier curve segments
+    for (let i = 0; i < points.length - 1; i++) {
+      const cp1 = controlPoints[i * 2];
+      const cp2 = controlPoints[i * 2 + 1];
+      const end = points[i + 1];
+      path += ` C ${cp1.x} ${cp1.y}, ${cp2.x} ${cp2.y}, ${end.x} ${end.y}`;
+    }
+
+    // If baseline is provided, close the path for fill
+    if (baseline !== undefined) {
+      const lastPoint = points[points.length - 1];
+      path += ` L ${lastPoint.x} ${baseline} L ${points[0].x} ${baseline} Z`;
+    }
+
+    return path;
+  }
+
+  calculateControlPoints(points: {x: number, y: number}[]): {x: number, y: number}[] {
+    const controlPoints: {x: number, y: number}[] = [];
+    
+    for (let i = 0; i < points.length - 1; i++) {
+      const p0 = i > 0 ? points[i - 1] : points[i];
+      const p1 = points[i];
+      const p2 = points[i + 1];
+      const p3 = i < points.length - 2 ? points[i + 2] : p2;
+
+      // Calculate control point 1 (after p1)
+      const cp1x = p1.x + (p2.x - p0.x) * this.tension;
+      const cp1y = p1.y + (p2.y - p0.y) * this.tension;
+
+      // Calculate control point 2 (before p2)
+      const cp2x = p2.x - (p3.x - p1.x) * this.tension;
+      const cp2y = p2.y - (p3.y - p1.y) * this.tension;
+
+      controlPoints.push({ x: cp1x, y: cp1y });
+      controlPoints.push({ x: cp2x, y: cp2y });
+    }
+
+    return controlPoints;
   }
 
   createSmoothPath(points: {x: number, y: number}[]): string {

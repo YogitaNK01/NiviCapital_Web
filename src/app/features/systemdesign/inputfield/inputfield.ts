@@ -9,7 +9,15 @@ import { FormsModule } from '@angular/forms';
   styleUrls: ['./inputfield.scss']
 })
 export class Inputfield {
- @Input() label: string = '';
+   // ✅ Text inputs
+  @Input() label: string = '';
+  @Input() helpTextValue: string = '';
+
+  // ✅ Visibility toggles
+  @Input() showLabel: boolean = true;
+  @Input() showHelpText: boolean = true;
+
+//  @Input() label: string = '';
   @Input() placeholder: string = '';
   @Input() helpText: string = '';
   @Input() type: 'text' | 'password' | 'email' | 'search' = 'text';

@@ -1,50 +1,40 @@
-
 <div class="dropdown-container">
   <!-- Dropdown Input -->
   <div class="dropdown-input" (click)="toggleDropdown()">
-    <div class="label">{{ selectedLabel }}</div>
+    <!-- ✅ Avatar support -->
+    <ng-container *ngIf="hasAvatar; else noAvatar">
+      <img [src]="avatarUrl" alt="User Avatar" class="avatar" />
+    </ng-container>
+
+    <!-- Placeholder if no avatar -->
+    <ng-template #noAvatar>
+    </ng-template>
+
+    <div class="label text-common">{{ selectedLabel }}</div>
     <div class="arrow">
-       <img
-      [src]="isOpen ? '/assets/images/icons/arrow-up.svg' : '/assets/images/icons/arrow-down.svg'"
-      alt="Arrow"
-      class="dropdown-arrow"
-      width="20"
-      height="20"
-    />
+      <img [src]="isOpen ? '/assets/images/icons/arrow-up.svg' : '/assets/images/icons/arrow-down.svg'" alt="Arrow"
+        class="dropdown-arrow" width="20" height="20" />
     </div>
   </div>
 
 
-  
+
   <!-- Dropdown List -->
   <div class="dropdown-list dropdown-listdata" *ngIf="isOpen">
-     <!-- Search box (if enabled) -->
+    <!-- Search box (if enabled) -->
     <div *ngIf="searchable" class="search-box">
-       <img src="/assets/images/icons/search-normal.svg" alt="Search" class="search-icon" />
-      <input
-          type="text"
-          [(ngModel)]="searchTerm"
-          placeholder="Search..."
-          class="search-input"
-        />
+      <img src="/assets/images/icons/search-normal.svg" alt="Search" class="search-icon" />
+      <input type="text" [(ngModel)]="searchTerm" placeholder="Search..." class="search-input" />
 
-        <!-- Clear button -->
-    <img
-      *ngIf="searchTerm"
-      src="/assets/images/icons/close.svg"
-      alt="Clear"
-      class="clear-icon"
-      (click)="searchTerm=''"
-    />
+      <!-- Clear button -->
+      <img *ngIf="searchTerm" src="/assets/images/icons/close.svg" alt="Clear" class="clear-icon"
+        (click)="searchTerm=''" />
     </div>
-    <div
-      class="dropdown-item"
-       *ngFor="let option of filteredOptions; let last = last"
-    (click)="selectOption(option)"
-    [class.no-border]="last"
-    >
- <img *ngIf="option.icon" [src]="option.icon" class="item-icon" />
-       <span>{{ option.label }}</span>
+    <div class="dropdown-item" *ngFor="let option of filteredOptions; let last = last" (click)="selectOption(option)"
+      [class.no-border]="last">
+      <!-- <img *ngIf="option.icon" [src]="option.icon" class="item-icon" /> -->
+       <img *ngIf="option.icon && option.icon.trim() !== ''" [src]="option.icon" class="item-icon" />
+      <span>{{ option.label }}</span>
     </div>
   </div>
 </div>

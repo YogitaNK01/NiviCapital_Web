@@ -5,7 +5,7 @@
 // Base button
 .btn {
  
-  display: block;
+  display: flex;
   padding: 12px 20px;   
   width: 100%; 
   height: 100%;    
@@ -13,12 +13,48 @@
    gap: $spacing_3;
   flex-shrink: 0;
   border: none;
+  color: #fff;
+box-sizing: border-box; 
+
+
+  &.primary{
+ background-color: $primary-btn;
+  
+ 
+}
+&.secondary {
+    background-color: $secondary-btn;
+     
+
+}
+&.info{
+ background-color: $info-btn;
+  
+
+}
+&.warning {
+    background-color: $warning-btn;
+     
+
+}
+&.success{
+ background-color: $success-btn;
+  
+
+}
+&.error {
+    background-color: $error-btn;
+     
+
+}
 
   &:disabled {
     cursor: not-allowed;
     opacity: 0.6;
   }
 }
+
+
 .btn-full {
    display: block;  
   width: 100%!important;
@@ -35,10 +71,10 @@
   border: 1px solid $primary-btn;
   color: $primary-btn;
 
-  &:hover {
-    background-color: $primary-btn;
-    color: #fff;
-  }
+  // &:hover {
+  //   background-color: $primary-btn;
+  //   color: #fff;
+  // }
 }
 
 
@@ -59,10 +95,10 @@
   border: 1px solid $primary-btn;
   color: $primary-btn;
 
-  &:hover {
-    background-color: $primary-btn;
-    color: #fff;
-  }
+  // &:hover {
+  //   background-color: $primary-btn;
+  //   color: #fff;
+  // }
 }
 
 // Icon + Label style
@@ -72,14 +108,10 @@
   gap: 8px; /* space between icon and text */
   width: 170px!important;
 }
-//edit btn
-.edit {
 
-}
-img,
-  svg {
-    width: 1px;
-    height: 14px;
+img,svg {
+    width: 24px;
+    height: 24px;
     flex-shrink: 0;
   }
 
@@ -88,3 +120,7 @@ img,
 
 }
 
+.btn-label {
+  flex-shrink: 0; // Don't let text shrink
+  white-space: nowrap; // Keep text on one line
+}

@@ -1,1 +1,155 @@
-<p>customer works!</p>
+<div class="dashboard-container main-content-feature">
+  <!-- Header -->
+  <div class="content-header">
+    <div class="content-title text-dp-3-bold">
+      Dashboard-Customer
+    </div>
+    <div class="user-info">
+
+      <div>
+        <nav aria-label="breadcrumb" class="breadcrumb">
+          <ol class="breadcrumb-list">
+            <li class="breadcrumb-item text-common "><a routerLink="/home">Home</a></li>
+            <li class="breadcrumb-item active text-common " aria-current="page">Dashboard</li>
+          </ol>
+        </nav>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- Stats Cards -->
+  <div class="stats-container">
+    <div class="stat-card commonbox">
+      <div class="metrics ">
+        <div class="key-data">
+          <div class="key-data1">
+            <p class=" text-common">Total Customers</p>
+            <h2 class=" text-dp-3-bold">{{ totalCustomers | number }}</h2>
+            <p class=" text-body-2">{{ customerGrowth }}</p>
+          </div>
+          <img src="/assets/images/sidemenu/note.svg" alt="Message" class="key-card-image" />
+
+        </div>
+
+      </div>
+    </div>
+
+    <div class="stat-card commonbox">
+      <div class="metrics ">
+        <div class="key-data">
+          <div class="key-data1">
+            <p class=" text-common">KYC Completed</p>
+            <h2 class=" text-dp-3-bold">{{ kycCompleted }}%</h2>
+            <p class=" text-body-2">{{ kycGrowth }}</p>
+          </div>
+          <img src="/assets/images/sidemenu/note.svg" alt="Message" class="key-card-image" />
+
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- Customer Database Section -->
+  <div class="database-section">
+    <div class="section-header">
+      <div class="db-title text-dp-2-bold">Customer Database</div>
+      <div class="section-controls">
+        <div class="search-box">
+          <app-inputfield label="Input Label" placeholder="Search for result" helpText="Help text" [showSearch]="true"
+            [showLabel]="false" [showHelpText]="false">
+          </app-inputfield>
+        </div>
+
+     
+
+
+                      <div class="search-dropdown">
+            <app-dropdown [options]="Kycstatus" [(selectedValue)]="selectedOption2" placeholder="All KYC Status"
+              (selectedValueChange)="getkycstatus($event)">
+            </app-dropdown>
+          </div>
+
+          <div class="search-dropdown">
+            <app-dropdown [options]="kyctype" [(selectedValue)]="selectedOption2" placeholder="All Types"
+              (selectedValueChange)="getkyc_type($event)">
+            </app-dropdown>
+          </div>
+
+         
+            <div class="add-button">
+           <app-buttons label="Add Customer" class="btn btn-icon Add customClass" [outline]="true">
+                            <img src="/assets/images/icons/addred.svg" alt="Add">
+
+                        </app-buttons></div>
+        </div>
+      </div>
+
+      <!-- Table -->
+      <div class="table-container">
+        <table class="customer-table">
+          <thead>
+            <tr>
+              <th><input type="checkbox" /></th>
+              <th>CIF ID</th>
+              <th>Customer Name</th>
+              <th>Mobile</th>
+              <th>Email</th>
+              <th>Status</th>
+              <th>Loan Status</th>
+              <th>Registration Date</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let customer of customers">
+              <td><input type="checkbox" /></td>
+              <td>{{ customer.cifId }}</td>
+              <td>{{ customer.customerName }}</td>
+              <td>{{ customer.mobile }}</td>
+              <td>{{ customer.email }}</td>
+              <td>
+                <span class="status-badge" [ngClass]="getStatusClass(customer.status)">
+                  {{ customer.status }}
+                </span>
+              </td>
+              <td>
+                <span class="status-badge" [ngClass]="getStatusClass(customer.loanStatus)">
+                  {{ customer.loanStatus }}
+                </span>
+              </td>
+              <td>{{ customer.registrationDate }}</td>
+              <td>
+                <button class="action-button">⋮</button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Pagination -->
+      <div class="pagination">
+        <button class="pagination-btn" [disabled]="currentPage === 1" (click)="onPageChange(currentPage - 1)">
+          <span>‹</span>
+        </button>
+        <button class="pagination-btn" [class.active]="currentPage === 1" (click)="onPageChange(1)">
+          1
+        </button>
+        <button class="pagination-btn" [class.active]="currentPage === 2" (click)="onPageChange(2)">
+          2
+        </button>
+        <span class="pagination-ellipsis">...</span>
+        <button class="pagination-btn" (click)="onPageChange(9)">9</button>
+        <button class="pagination-btn" (click)="onPageChange(10)">10</button>
+        <button class="pagination-btn" (click)="onPageChange(currentPage + 1)">
+          <span>›</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="dashboard-footer">
+      <p>Copyright © 2025 Nivi Capital. All rights reserved</p>
+    </div>
+  </div>

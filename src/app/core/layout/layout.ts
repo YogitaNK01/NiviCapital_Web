@@ -1,7 +1,8 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { NavigationEnd, Router, RouterModule } from '@angular/router';
 import { filter } from 'rxjs';
+import { Dropdown, DropdownOption } from '../../features/systemdesign/dropdown/dropdown';
 
 
 interface MenuItem {
@@ -16,7 +17,7 @@ interface MenuItem {
 
 @Component({
   selector: 'app-layout',
-  imports: [RouterModule,CommonModule],
+  imports: [RouterModule,CommonModule,Dropdown],
   templateUrl: './layout.html',
   styleUrl: './layout.scss',
    standalone: true,
@@ -31,13 +32,13 @@ export class Layout {
   menuItems: MenuItem[] = [];
 
   systemdesignMenu: MenuItem[] = [
-    { icon: '⚙️', label: 'Buttons', route: '/systemdesign/buttons', expanded: false },
-    { icon: '⚙️', label: 'Inputfield', route: '/systemdesign/inputfield', expanded: false },
-    { icon: '⚙️', label: 'Charts', route: '/systemdesign/charts', expanded: false },
-    { icon: '⚙️', label: 'Dropdown', route: '/systemdesign/dropdown', expanded: false },
-    { icon: '⚙️', label: 'Checkbox', route: '/systemdesign/checkbox', expanded: false },
-    { icon: '⚙️', label: 'Radio Buttons', route: '/systemdesign/radiobuttons', expanded: false },
-    { icon: '⚙️', label: 'Upload Buttons', route: '/systemdesign/uploadbuttons', expanded: false },
+    { icon: '/assets/images/sidemenu/dashboard.svg', label: 'Buttons', iconActive: '/assets/images/sidemenu/dashboard-active.svg', route: '/systemdesign/buttons', expanded: false },
+    { icon: '/assets/images/sidemenu/dashboard.svg', label: 'Inputfield',iconActive: '/assets/images/sidemenu/dashboard-active.svg',  route: '/systemdesign/inputfield', expanded: false },
+    { icon: '/assets/images/sidemenu/dashboard.svg', label: 'Charts', iconActive: '/assets/images/sidemenu/dashboard-active.svg', route: '/systemdesign/charts', expanded: false },
+    { icon: '/assets/images/sidemenu/dashboard.svg', label: 'Dropdown',iconActive: '/assets/images/sidemenu/dashboard-active.svg',  route: '/systemdesign/dropdown', expanded: false },
+    { icon: '/assets/images/sidemenu/dashboard.svg', label: 'Checkbox', iconActive: '/assets/images/sidemenu/dashboard-active.svg', route: '/systemdesign/checkbox', expanded: false },
+    { icon: '/assets/images/sidemenu/dashboard.svg', label: 'Radio Buttons', iconActive: '/assets/images/sidemenu/dashboard-active.svg', route: '/systemdesign/radiobuttons', expanded: false },
+    { icon: '/assets/images/sidemenu/dashboard.svg', label: 'Upload Buttons',iconActive: '/assets/images/sidemenu/dashboard-active.svg',  route: '/systemdesign/uploadbuttons', expanded: false },
 
   ];
 
@@ -78,6 +79,23 @@ export class Layout {
     } else {
       this.menuItems = []; // fallback
     }
+  }
+
+  //dropdown
+
+  @Input() avatarUrl='https://i.pravatar.cc/40?img=12';
+  @Input() hasAvatar = true;
+  
+  selectedOption: string = '';
+  myOptions: DropdownOption[] = [
+    { label: 'Manage Account', value: 'pdf', icon: '/assets/images/sidemenu/user.svg' },
+    { label: 'Change Password', value: 'excel', icon: '/assets/images/icons/lock.svg' },
+    { label: 'Activity Log', value: 'json', icon: '/assets/images/icons/lock.svg' },
+    { label: 'Logout', value: 'others', icon: '/assets/images/icons/logout-icon.svg' }
+  ];
+
+  onSelectionChange(value: string) {
+    console.log('Selected:1', value);
   }
 
 }

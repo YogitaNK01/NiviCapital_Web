@@ -134,8 +134,8 @@
 .search-box {
   padding: $spacing_2 $spacing_5;
   border-bottom: 1px solid #eee;
-    display: flex;
-    align-items: center;
+  display: flex;
+  align-items: center;
 
   .search-wrapper {
     display: flex; // horizontal layout
@@ -227,11 +227,13 @@
   flex-direction: column;
   justify-content: center;
   align-items: flex-start;
-  color: $neutral-600;
-  font-size: $spacing_6;
-  font-style: $font-weight-regular;
   font-weight: $font-weight-regular;
   line-height: $spacing_10;
+  color: $neutral-text-secondary;
+font-size: $font-size-body_md;;
+font-style: normal;
+letter-spacing: 0.16px;
+
 }
 
 .arrow {
@@ -248,14 +250,16 @@
   padding: 11px; // your requested padding
   gap: 10px; // space between icon and text
   cursor: pointer;
-
   color: #404040;
-
   font-size: $font-size-body_sm;
   font-style: normal;
   font-weight: $font-weight-regular;
   line-height: $spacing_9;
   letter-spacing: 0.14px;
+
+   &:not(:has(.item-icon)) {
+    gap: 0;
+  }
 }
 
 
@@ -270,4 +274,18 @@
   display: flex;
   justify-content: center;
   align-items: center;
+}
+
+.avatar {
+  width: 32px;
+  height: 32px;
+  padding: $spacing_8;
+  border-radius: $spacing_23;
+  background: url("/assets/images/dashboard/profileimg.png"); //center center / contain no-repeat;
+  background-color: $error-100; // fallback color behind the image
+  background-size: cover;
+  // background-position: center center;
+  // background-repeat: no-repeat;
+
+
 }

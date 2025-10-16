@@ -1,0 +1,95 @@
+@use './variables' as *;
+@use './typography' as *;
+
+
+.main-content-feature {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  color: #1e293b;
+  // padding: 1rem;---------------------------
+
+  .content-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+
+
+    .content-title {
+      font-weight: 400;
+    }
+
+
+  }
+}
+
+//breadcrum
+
+.breadcrumb-list {
+  list-style: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.breadcrumb-item a {
+  text-decoration: none;
+  font-size: $font-size-body_lg;
+  line-height: 20px;
+}
+
+.breadcrumb-item.active {
+  font-weight: 700;
+
+
+}
+
+//common box
+.commonbox {
+  border-radius: $border_radius_m;
+  border: $border_1 solid $neutral-300;
+  background: $bg, ;
+  box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.05);
+}
+
+//card keu metrics
+
+.metrics {
+  width: 100%;
+  gap: $spacing_4;
+  display: flex;
+  flex-direction: column;
+}
+
+.metric {
+  width: 100%; //538.5px;
+  justify-content: space-between;
+  align-items: center;
+  border-radius: $spacing_5;
+  background: $bg;
+
+}
+
+.key-card-image {
+  width: $spacing_23;
+  height: $spacing_23;
+  padding: $spacing_8;
+  border-radius: $spacing_23;
+  background: $secondary-50;
+}
+
+.divider {
+  width: 100%; // 547px;
+  height: 1px;
+  background-color: $neutral-300;
+}
+
+.key-data {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}

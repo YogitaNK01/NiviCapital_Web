@@ -3,6 +3,7 @@
   [ngClass]="[
     outline ? 'btn-outline' : '', 
     borderradius ? 'border-radius':'',
+    color,
     customClass
   ]"
   [ngStyle]="{
@@ -12,7 +13,7 @@
     'height': height ? height : ''
   }"
   [attr.type]="type || 'button'"><ng-content></ng-content>
-  <span class="btn-label">{{ label }}</span>
+  <span class="btn-label  text-dp-3-regular">{{ label }}</span>
 </button>
 
 

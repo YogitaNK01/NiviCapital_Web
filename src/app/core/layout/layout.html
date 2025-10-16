@@ -1,56 +1,44 @@
 <div class="app-container">
-  <!-- Sidebar -->
-  <!-- <aside class="sidebar" [class.sidebar-closed]="!sidebarOpen">
-  
-
-    <nav class="sidebar-nav">
-     
-      <a *ngFor="let item of menuItems" 
-   [routerLink]="item.route" 
-   routerLinkActive="active" 
-   #rla="routerLinkActive" 
-  [routerLinkActiveOptions]="{ exact: true }" 
-  [class.active]="rla.isActive"
-   class="nav-item">
-  <span class="nav-icon">
-    <img [src]="rla.isActive && sidebarOpen ? item.iconActive : item.icon" alt="{{ item.label }}"  class="menu-icon">
-  </span>
-  <span class="nav-label" >{{ item.label }}</span>
-  <span class="nav-icon-arrow"><img *ngIf="sidebarOpen" src="/assets/images/icons/arrow-down.svg" alt="Expand"
-            class="arrow-icon" height="15" width="15" /></span>
-</a>
-
-    </nav>
-    
-
-  </aside> -->
 
   <aside class="sidebar" [class.closed]="!sidebarOpen">
-      <div class="sidebar-header">
-      <div class="logo">
-
-        <span class="logo-text">Nivi Capital</span>
-      </div>
+    <!-- Header -->
+    <div class="sidebar-header">
+      <img [src]="sidebarOpen ? '/assets/images/login/sidemenulogo.png' : '/assets/images/login/logo.svg'" alt="Logo"
+        class="sidebar-logo" />
     </div>
-  <nav class="sidebar-nav">
-    <a *ngFor="let item of menuItems" 
-       [routerLink]="item.route"
-       routerLinkActive="active" 
-       #rla="routerLinkActive" 
-       [routerLinkActiveOptions]="{ exact: true }"
-       [class.active]="rla.isActive"
-       class="nav-item">
-      <span class="nav-icon">
-        <img [src]="rla.isActive && sidebarOpen ? item.iconActive : item.icon" alt="{{ item.label }}" class="menu-icon">
-      </span>
-      <span class="nav-label">{{ item.label }}</span>
-      <span class="nav-icon-arrow">
-        <img *ngIf="sidebarOpen" src="/assets/images/icons/arrow-down.svg" alt="Expand"
-             class="arrow-icon" height="15" width="15" />
-      </span>
-    </a>
-  </nav>
-</aside>
+    <!-- Main navigation -->
+
+    <nav class="sidebar-nav">
+      <a *ngFor="let item of menuItems" [routerLink]="item.route" routerLinkActive="active" #rla="routerLinkActive"
+        [routerLinkActiveOptions]="{ exact: true }" [class.active]="rla.isActive" class="nav-item">
+        <span class="nav-icon">
+          <img [src]="rla.isActive && sidebarOpen ? item.iconActive : item.icon" alt="{{ item.label }}"
+            class="menu-icon">
+        </span>
+        <span class="nav-label">{{ item.label }}</span>
+        <span class="nav-icon-arrow">
+          <img *ngIf="sidebarOpen" src="/assets/images/icons/arrow-down.svg" alt="Expand" class="arrow-icon" height="15"
+            width="15" />
+        </span>
+      </a>
+    </nav>
+
+
+    <!-- Footer buttons -->
+    <div class="sidebar-footer">
+      <button class="btn btn-sidebar">
+        <img [src]="sidebarOpen ? '/assets/images/icons/setting.svg' : '/assets/images/icons/setting-icon.svg' "
+          alt="setting" class="menu-icon">
+      </button>
+
+      <button class="btn btn-sidebar">
+        <img [src]=" sidebarOpen ? '/assets/images/icons/logout.svg' : '/assets/images/icons/logout-icon.svg' "
+          alt="logout" class="menu-icon">
+      </button>
+    </div>
+
+
+  </aside>
 
 
   <!-- Main Content Area -->
@@ -67,21 +55,25 @@
         Welcome
       </div>
 
-      <!-- <div class="header-actions">
-        <button class="notification-btn">
-          <span class="bell-icon">🔔</span>
+      <div class="header-actions">
+        <button class="search-btn">
+          <img src="/assets/images/icons/search-normal.svg" alt="Message" class="card-image" />
         </button>
-        
+        <div class="header-divider"></div>
+        <button class="notification-btn">
+          <img src="/assets/images/icons/notification-bing.svg" alt="Message" class="card-image" />
+        </button>
+        <div class="header-divider"></div>
         <div class="user-profile">
-          <img src="https://i.pravatar.cc/40?img=12" alt="Harry Jones" class="avatar">
-          <span class="user-name"></span>
-          <span class="dropdown-arrow">▼</span>
+          <app-dropdown [options]="myOptions" [(selectedValue)]="selectedOption" placeholder="Harry John"
+            (selectedValueChange)="onSelectionChange($event)" [avatarUrl]="avatarUrl" [hasAvatar]="hasAvatar">
+          </app-dropdown>
         </div>
-
+        <!-- <div class="header-divider"></div>
         <button class="settings-btn">
           <span class="settings-icon">⚙️</span>
-        </button>
-      </div> -->
+        </button> -->
+      </div>
     </header>
 
     <!-- Routed Content -->

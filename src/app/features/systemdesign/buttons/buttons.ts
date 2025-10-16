@@ -18,4 +18,7 @@ export class Buttons {
   @Input() width: string = '';     
   @Input() type: 'button' | 'submit' | 'reset' = 'button';
   @Input() borderradius: boolean = false;
+  @Input() bgcolor: 'primary' | 'secondary' | 'blue' = 'primary';
+
+
 }

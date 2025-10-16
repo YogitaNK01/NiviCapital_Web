@@ -48,7 +48,7 @@ activeSection: string = 'buttons';
   checkselectedOption = 'option2';
 
   
-//-------------------------areacharts---------------------------------
+//-------------------------bar charts---------------------------------
 @Input() datasets: any;
    // Define data in the component class for cleaner templates
   monthLabels = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'];
@@ -165,6 +165,9 @@ activeSection: string = 'buttons';
 
   //---------------------------dropdown-------------------------------
 
+    @Input() avatarUrl='https://i.pravatar.cc/40?img=12';
+  @Input() hasAvatar = false;
+  
   selectedOption: string = '';
   myOptions: DropdownOption[] = [
     { label: 'Download in .PDF', value: 'pdf', icon: '/assets/images/icons/note.svg' },

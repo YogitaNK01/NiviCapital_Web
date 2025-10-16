@@ -81,76 +81,90 @@
                 Charts
             </div>
             <div class="card-body">
-                <div class="row m-4 text-center">
+                <div class="row text-center">
 
                     <div class=" d-flex justify-content-center">
 
-
+                    <!-- donut-chart -->
                         <div class="charts-grid">
                             <!-- Chart 1: Simple Donut Chart -->
+                             <div class="chart-container  m-2">
                             <app-charts [title]="'Donut Chart'" [data]="chartData1"></app-charts>
-
+                            </div>
                             <!-- Chart 2: Donut Chart with Center Value -->
+                               <div class="chart-container  m-2">
                             <app-charts [title]="'small Chart'" [data]="chartData2" [width]="300" [height]="300"
                                 [radius]="50" [innerRadius]="10" [centerX]="100" [centerY]="100"></app-charts>
+                                </div>
 
                             <!-- Chart 3: Another Example -->
-                            <app-charts [title]="'Large Chart*'" [data]="chartData3" [width]="290" [height]="290"
-                                [radius]="80" [innerRadius]="50" [centerX]="100" [centerY]="100"></app-charts>
+                               <div class="chart-container  m-2">
+                            <app-charts [title]="'Large Chart'" [data]="chartData3" [width]="290" [height]="290"
+                                [radius]="80" [innerRadius]="50" [centerX]="100" [centerY]="100"></app-charts></div>
 
                             <!-- Chart 4: With Different Data -->
+                               <div class="chart-container  m-2">
                             <app-charts [title]="'Donut Chart'" [data]="chartData4" [showValue]="true"
-                                [centerValue]="'$9,999.99'"></app-charts>
+                                [centerValue]="'$9,999.99'"></app-charts></div>
                         </div>
                     </div>
                 </div>
 
-                <div class="row m-4 text-center">
+                <div class="row text-center">
 
                     <div class=" d-flex p-3 justify-content-center">
 
+                        <!-- barcharts -->
                         <div class="charts-grid">
+                             <div class="chart-container  m-2">
                             <app-barcharts [title]="'Column chart'" [labels]="monthLabels" [datasets]="barDatasets"
-                                [width]="400" [height]="250"></app-barcharts>
+                                [width]="400" [height]="250"></app-barcharts></div>
 
+                                 <div class="chart-container  m-2">
                             <app-barcharts [title]="'Column chart'" [singleBarMultiDataset]="true"
                                 [labels]="monthLabels" [datasets]="barDatasets" [width]="400"
-                                [height]="250"></app-barcharts>
+                                [height]="250"></app-barcharts></div>
 
+                                 <div class="chart-container  m-2">
                             <app-barcharts [title]="'Horizontal Chart'" [labels]="['Jan', 'Feb', 'Mar', 'Apr']"
                                 [datasets]="barDatasets" [horizontal]="true" [barWidth]="30"
-                                [singleBarMultiDataset]="true" [width]="400" [height]="250"></app-barcharts>
+                                [singleBarMultiDataset]="true" [width]="400" [height]="250"></app-barcharts></div>
 
                             <!-- Horizontal, single bar with multiple dataset stacked -->
+                              <div class="chart-container  m-2">
                             <app-barcharts [title]="'Horizontal Chart'" [labels]="['Jan','Feb','Mar']"
                                 [datasets]="barDatasets" [width]="400" [height]="250" [horizontal]="true"
-                                [barWidth]="30"></app-barcharts>
+                                [barWidth]="30"></app-barcharts></div>
 
                         </div>
                     </div>
                 </div>
 
-                <div class="row m-4 p-3 text-center">
+                <div class="row p-3 text-center">
 
                     <div class=" d-flex p-3  justify-content-center">
-                        <div class="charts-grid d-flex">
+                        <div class="charts-grid ">
+                             <div class="chart-container  m-2">
                             <app-areacharts [title]="'Weekly Disbursement'" [labels]="weekLabelsarea"
-                                [datasets]="areaDatasets" [width]="400" [height]="250"></app-areacharts>
+                                [datasets]="areaDatasets" [width]="400" [height]="250"></app-areacharts></div>
 
+                                 <div class="chart-container  m-2">
                             <app-areacharts [title]="'Weekly Disbursement'" [labels]="weekLabelsarea"
                                 [datasets]="areaDatasetsarea" [type]="'area'" [fillOpacity]="0.6" [width]="400"
                                 [height]="250">
-                            </app-areacharts>
+                            </app-areacharts></div>
 
+                             <div class="chart-container  m-2">
                             <!-- Chart 2: Simple Line Chart (like image 2, left) -->
                             <app-areacharts [title]="'Line Chart'" [labels]="lineLabels" [datasets]="lineDatasets"
                                 [type]="'line'" [showFill]="false" [strokeWidth]="2" [width]="400" [height]="250">
-                            </app-areacharts>
+                            </app-areacharts></div>
 
+                             <div class="chart-container  m-2">
                             <!-- Chart 3: Overlay/Wave Chart (like image 2, right) -->
                             <app-areacharts [title]="'Line Chart'" [labels]="overlayLabels" [datasets]="overlayDatasets"
                                 [type]="'overlay'" [showFill]="false" [strokeWidth]="2.5" [width]="400" [height]="250">
-                            </app-areacharts>
+                            </app-areacharts></div>
                         </div>
                     </div>
                 </div>
@@ -171,7 +185,7 @@
 
                             <!-- Basic dropdown -->
                             <app-dropdown [options]="myOptions" [(selectedValue)]="selectedOption"
-                                placeholder="Dropdown" (selectedValueChange)="onSelectionChange($event)">
+                                placeholder="Dropdown" (selectedValueChange)="onSelectionChange($event)" [avatarUrl]="avatarUrl" [hasAvatar]="hasAvatar">
                             </app-dropdown>
 
 
@@ -229,7 +243,7 @@
                         <div class="card shadow-sm p-3 mb-3">
                             <!-- Search Input -->
                             <app-inputfield label="Input Label" placeholder="Search..." helpText="Help text"
-                                [showSearch]="true">
+                                [showSearch]="true" [showLabel]="false" [showHelpText]="false" >
                             </app-inputfield>
                         </div>
 

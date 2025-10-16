@@ -1,5 +1,5 @@
 <!-- components/bar-chart/bar-chart.component.html -->
-<div class="chart-container m-2">
+<div class="chart-container ">
   <div class="chart-title">{{ title }}</div>
   
   <svg [attr.width]="width" [attr.height]="height">
@@ -10,8 +10,8 @@
         [attr.y1]="getYPosition(tick)"
         [attr.x2]="width - 20"
         [attr.y2]="getYPosition(tick)"
-        stroke="#e5e7eb"
-        stroke-width="1"
+        stroke="#e1e1e1"
+        stroke-width="2"
       />
       <text
         x="45"
@@ -25,15 +25,49 @@
 
     <!-- Bars -->
     <g *ngFor="let bar of bars">
-      <rect
-        [attr.x]="bar.x"
-        [attr.y]="bar.y"
-        [attr.width]="bar.width"
-        [attr.height]="bar.height"
-        [attr.fill]="bar.color"
-        class="bar"
-        rx="3"
-      />
+     <!-- <path
+  *ngIf="bar.width > 0"
+  [attr.d]="
+    'M' + bar.x + ',' + bar.y +                
+    ' h' + (bar.width - 10) +                 
+    ' a10,10 0 0 1 10,10' +                    
+    ' v' + (bar.height - 20) +                
+    ' a10,10 0 0 1 -10,10' +                   
+    ' h' + (-bar.width + 10) +                 
+    ' z'
+  "
+  [attr.fill]="bar.color"
+/>
+      <path
+  *ngIf="bar.height > 0"
+  [attr.d]="
+    'M' + bar.x + ',' + (bar.y + bar.height) +
+    ' v' + (-bar.height + 10) +
+    ' a10,10 0 0 1 10,-10 h' + (bar.width - 20) +
+    ' a10,10 0 0 1 10,10 v' + (bar.height - 10) + ' z'
+  "
+  [attr.fill]="bar.color"
+/> -->
+
+<path
+  *ngIf="(bar.width > 0 && bar.orientation === 'horizontal') || (bar.height > 0 && bar.orientation === 'vertical')"
+  [attr.d]="
+    bar.orientation === 'horizontal'
+    ?   'M' + bar.x + ',' + bar.y +               
+        ' h' + (bar.width - 10) +
+        ' a10,10 0 0 1 10,10' +
+        ' v' + (bar.height - 20) +
+        ' a10,10 0 0 1 -10,10' +
+        ' h' + (-bar.width + 10) +
+        ' z'
+    :   'M' + bar.x + ',' + (bar.y + bar.height) + 
+        ' v' + (-bar.height + 10) +
+        ' a10,10 0 0 1 10,-10 h' + (bar.width - 20) +
+        ' a10,10 0 0 1 10,10 v' + (bar.height - 10) + ' z'
+  "
+  [attr.fill]="bar.color"
+/>
+
     </g>
 
     <!-- X-axis labels -->
