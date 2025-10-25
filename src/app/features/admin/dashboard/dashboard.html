@@ -26,9 +26,10 @@
         <div class="left-col">
             <!-- Alerts -->
             <div class="alerts ">
-                 <div *ngFor="let alert of alerts" class="alert commonbox " [ngClass]="alert.type">
+                 <div *ngFor="let alert of alerts" class="alert commonbox text-common" [ngClass]="alert.type">
                     {{ alert.message }}
-                    <span class="close">×</span>
+                    <!-- <span class="close">×</span> -->
+                    <img src="/assets/images/icons/close.svg" alt="Clear" class="clear-icon"  />  <!-- (click)="" -->
                 </div> 
             </div>
 
@@ -44,7 +45,7 @@
                             helpText="Help text" [showSearch]="true" [showLabel]="false" [showHelpText]="false">
                         </app-inputfield></div>
                     <div class="search-btn">
-                        <app-buttons label="Submit" color="primary" class="customClass "></app-buttons>
+                        <app-buttons label="Search" color="primary" class="customClass "></app-buttons>
                     </div>
 
                 </div> 
@@ -166,4 +167,10 @@
             </div>
         </div>
     </div>
+
+     <!-- footer -->
+    <div class="content-footer">
+        <div>Copyright © 2025 Nivi Capital. All rights reserved</div>
+    </div>
+    
 </div>

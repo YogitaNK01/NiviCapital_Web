@@ -51,10 +51,10 @@ export class Layout {
     { icon: '/assets/images/sidemenu/document-upload.svg', label: 'Documents', route: '/admin/customer2', expanded: false },
      { icon: '/assets/images/sidemenu/tag-user.svg', label: 'Communication', route: '/admin/dashboard3', expanded: false },
     { icon: '/assets/images/sidemenu/cpu-setting.svg', label: 'Configuration', route: '/admin/customer3', expanded: false },
-     { icon: '/assets/images/sidemenu/profile-circle.svg', label: 'user Management', route: '/admin/dashboard4', expanded: false },
+     { icon: '/assets/images/sidemenu/profile-circle.svg', label: 'User Management', route: '/admin/dashboard4', expanded: false },
     { icon: '/assets/images/sidemenu/note.svg', label: 'Analytics', route: '/admin/customer4', expanded: false },
     { icon: '/assets/images/sidemenu/note.svg', label: 'Products', route: '/admin/customer5', expanded: false },
-
+    { icon: '/assets/images/sidemenu/note.svg', label: 'System Design', route: 'systemdesign/buttons', expanded: false },
    
   ];
 

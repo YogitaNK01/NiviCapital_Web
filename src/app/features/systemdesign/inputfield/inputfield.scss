@@ -9,23 +9,23 @@
 }
 
 .input-label {
-  
-    text-align: start;
 
-     color: $neutral-text-primary;
-      font-size: $font-size-body_md;
-      font-style: $font-weight-regular;
-      font-weight: $font-weight-regular;
-      line-height: $spacing_10;
-      letter-spacing: 0.16px;
-      margin-bottom: 0.5rem;
+  text-align: start;
+
+  color: $neutral-text-primary;
+  font-size: $font-size-body_md;
+  font-style: $font-weight-regular;
+  font-weight: $font-weight-regular;
+  line-height: $spacing_10;
+  letter-spacing: 0.16px;
+  margin-bottom: 0.5rem;
 }
 
 .input-wrapper {
   position: relative;
   display: flex;
   align-items: center;
-  
+
   &.disabled {
     opacity: 0.6;
     cursor: not-allowed;
@@ -33,15 +33,16 @@
 }
 
 .input-field {
-  width: 100%;height: 52px;
+  width: 100%;
+  height: 52px;
   padding: 0.5rem 0.75rem;
   color: $neutral-text-primary;
   background-color: #ffffff;
   transition: all 0.2s ease-in-out;
   outline: none;
   border-radius: $border_radius_s;
-      border: $border_3 solid $input-default;
-      font-size: $spacing_7;
+  border: $border_3 solid $input-default;
+  font-size: $spacing_7;
 
   &:focus {
     border-color: $input-focus;
@@ -51,8 +52,8 @@
     color: #9ca3af;
   }
 
-  &:hover{
-    border-color:$input-hover
+  &:hover {
+    border-color: $input-hover
   }
 
   &:disabled {
@@ -69,8 +70,8 @@
   }
 
   .input-wrapper.error & {
-    border-color:$error-text-dark;
-    
+    border-color: $error-text-dark;
+
     &:focus {
       border-color: $error-text-dark;
       box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
@@ -79,7 +80,7 @@
 
   .input-wrapper.success & {
     border-color: $success-text-dark;
-    
+
     &:focus {
       border-color: $success-text-dark;
       box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
@@ -138,16 +139,19 @@
     color: #9ca3af;
   }
 }
+
 .icon-right.clickable {
   cursor: pointer;
-  pointer-events: auto; /* make sure clicks register */
+  pointer-events: auto;
+  /* make sure clicks register */
 }
+
 .help-text {
   margin-top: 0.25rem;
   font-size: 0.75rem;
   color: $neutral-text-secondary;
   font-style: italic;
-    text-align: start;
+  text-align: start;
 
   &.error {
     color: $error-text-dark;

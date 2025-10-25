@@ -23,20 +23,20 @@
 
 //stat font
 .text-dp-3-bold {
-  margin-top: 10px;
+  margin-top: $spacing_4;
   color: $secondary-900;
   margin-bottom: $spacing_9;
 
 }
 
-.text-body-2 {
+.greentext {
   color: $success-text;
 }
 
 /* Database Section */
 
 .db-title {
-  flex: 0 0 40%;
+  flex: 0 0 48%;
 }
 
 .section-header {
@@ -46,15 +46,8 @@
   padding-bottom: $spacing_14;
 }
 
-.section-title {
-  font-size: 18px;
-  font-weight: 600;
-  color: #1a1a1a;
-  margin: 0 0 16px 0;
-}
-
 .section-controls {
-  flex: 0 0 59%;
+  flex: 0 0 53%;
   display: flex;
   gap: $spacing_7;
   flex-wrap: wrap;
@@ -68,26 +61,37 @@
 }
 
 ::ng-deep app-dropdown .dropdown-container {
-  background-color: $bg !important;
-  border: 1px solid #eaeaed;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-  width: 185px !important;
+  // background-color: $bg !important;
+  // border: 1px solid #eaeaed;
+  // box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  // width: 185px !important;
+  // height: 42px !important;
+  // padding: 10px !important;
+}
+
+::ng-deep app-dropdown .dropdown-container.custom-style {
   height: 42px !important;
-  padding: 10px !important;
+  padding: $spacing_4 !important;
 }
 
 ::ng-deep app-dropdown .dropdown-list {
-
   width: auto;
+}
+
+::ng-deep app-dropdown .dropdown-container .dropdown-input .label-container .Showtext {
+  color: $neutral_text_secondary;
+  font-size: $font-size-body_md;
+  font-style: normal;
+  font-weight: 400;
+  line-height: $spacing_10;
+  letter-spacing: 0.16px;
 }
 
 /* Add Button */
 
 
 .customClass {
-  // height: 42px;
-  // width: 178px;
-  // padding: 2px 3px;
+
   width: auto !important; // Allow content to determine width
   min-width: 178px; // Minimum size
   max-width: 200px; // Maximum size
@@ -96,125 +100,212 @@
 }
 
 ::ng-deep app-buttons .btn-label {
-  color: var(--system-text-primary_text-brand_primary_text, #F8192A);
+  color: $primary_text;
 }
 
+::ng-deep app-buttons .btn-outline {
+  padding: 5px !important;
+}
 
 /* Table */
+
+// Table Container
 .table-container {
-  overflow-x: auto;
-  margin-bottom: 24px;
-}
-
-.customer-table {
   width: 100%;
-  border-collapse: collapse;
-  font-size: 14px;
+  overflow-x: auto;
+  padding-bottom: $spacing_14;
 }
 
-.customer-table thead {
-  background-color: #f8f9fa;
-}
+// Material Table Overrides
+::ng-deep {
 
-.customer-table th {
-  padding: 12px 16px;
-  text-align: left;
-  font-weight: 600;
-  color: #4b5563;
-  font-size: 13px;
-  border-bottom: 1px solid #e5e7eb;
-}
+  // Table styling
+  .mat-mdc-table {}
 
-.customer-table td {
-  padding: 16px;
-  border-bottom: 1px solid #f3f4f6;
-  color: #1f2937;
-}
+  // Header row
+  .mat-mdc-header-row {}
 
-.customer-table tbody tr:hover {
-  background-color: #f9fafb;
-}
+  // Header cells
+  .mat-mdc-header-cell {
+    border-bottom: none;
 
-.customer-table input[type="checkbox"] {
-  cursor: pointer;
-  width: 16px;
-  height: 16px;
+    &:first-child {
+      // padding-left: 24px;
+      border: none;
+      border-radius: $spacing_5 0 0 $spacing_5;
+    }
+
+    &:last-child {
+      // padding-right: 24px;
+      border-radius: 0 $spacing_5 $spacing_5 0;
+    }
+  }
+
+  // Body rows
+  .mat-mdc-row {
+
+
+    &:hover {
+      background-color: #F9FAFB;
+    }
+
+    &:last-child {
+      border-bottom: 0.1px solid $neutral_border_2 !important;
+    }
+  }
+
+  // Body cells
+  .mat-mdc-cell {
+    // border-bottom-color: $neutral_border_2 !important;
+
+
+    &:first-child {
+      // padding-left: 24px;
+    }
+
+    &:last-child {
+      border-bottom-color: $neutral_border_2 !important;
+    }
+  }
+
+  // Checkbox styling
+  .mat-mdc-checkbox {
+    .mdc-checkbox__background {
+      border-color: #D1D5DB;
+      border-radius: 4px;
+    }
+
+    &.mat-mdc-checkbox-checked .mdc-checkbox__background {
+      background-color: #3B82F6;
+      border-color: #3B82F6;
+    }
+  }
+
+  // Remove Material ripple effect (optional)
+  .mat-mdc-checkbox .mat-ripple-element {
+    display: none;
+  }
 }
 
 /* Status Badges */
 .status-badge {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
   padding: 4px 12px;
   border-radius: 12px;
   font-size: 12px;
   font-weight: 500;
+  line-height: 1.5;
+
+  &.status-completed {
+    background-color: #D1FAE5;
+    color: #065F46;
+  }
+
+  &.status-pending {
+    background-color: #FEF3C7;
+    color: #92400E;
+  }
+
+  &.status-document-issue {
+    background-color: #FEE2E2;
+    color: #991B1B;
+  }
 }
 
-.status-completed {
-  background-color: #d1fae5;
-  color: #065f46;
-}
-
-.status-pending {
-  background-color: #fef3c7;
-  color: #92400e;
-}
-
-.status-document-issue {
-  background-color: #fee2e2;
-  color: #991b1b;
-}
-
-/* Action Button */
+// Action button styling
 .action-button {
   background: none;
   border: none;
   font-size: 20px;
-  color: #9ca3af;
+  color: #9CA3AF;
   cursor: pointer;
   padding: 4px 8px;
   transition: color 0.2s;
+  line-height: 1;
+
+  &:hover {
+    color: #4B5563;
+  }
 }
 
-.action-button:hover {
-  color: #4b5563;
+// Responsive table
+@media (max-width: 768px) {
+  .table-container {
+    border-radius: 8px;
+
+    ::ng-deep {
+
+      .mat-mdc-header-cell,
+      .mat-mdc-cell {
+        padding: 12px 8px;
+
+        &:first-child {
+          padding-left: 16px;
+        }
+
+        &:last-child {
+          padding-right: 16px;
+        }
+      }
+
+      .mat-mdc-row {
+        height: auto;
+        min-height: 56px;
+      }
+    }
+  }
 }
 
 /* Pagination */
 .pagination {
   display: flex;
   align-items: center;
-  gap: 8px;
-  justify-content: flex-start;
+  gap: $spacing_3;
+
 }
 
 .pagination-btn {
-  min-width: 36px;
-  height: 36px;
-  padding: 0 12px;
-  border: 1px solid #e5e7eb;
-  background-color: white;
-  color: #4b5563;
-  border-radius: 6px;
-  font-size: 14px;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.pagination-btn:hover:not(:disabled) {
-  border-color: #3b82f6;
-  color: #3b82f6;
-}
-
-.pagination-btn.active {
-  background-color: #ef4444;
-  color: white;
-  border-color: #ef4444;
-}
-
-.pagination-btn:disabled {
+  width: $spacing_15;
+  height: $spacing_15;
   opacity: 0.5;
-  cursor: not-allowed;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: $spacing;
+
+
+   border-radius: $spacing;
+  border: $border_1 solid $neutral-300;
+  background: $bg;
+ 
+   &:hover {
+    border-color: $primary-500;
+    opacity: 1;
+  }
+
+
+  &:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+
+  &.active {
+    border-color: $primary-500 !important;
+    
+    /* target inner text or number */
+    .pagecount {
+      color: $primary-500 !important;
+    }
+  }
+}
+
+.pagecount {
+  width: $spacing_11;
+  height: $spacing_10;
+  font-size: $font-size-body_sm;
+  text-align: center;
+  color: grey;
 }
 
 .pagination-ellipsis {
@@ -222,41 +313,29 @@
   padding: 0 4px;
 }
 
-/* Footer */
-.dashboard-footer {
-  margin-top: 40px;
-  padding-top: 24px;
-  border-top: 1px solid #e5e7eb;
-  text-align: center;
-}
 
-.dashboard-footer p {
-  font-size: 12px;
-  color: #6b7280;
-  margin: 0;
-}
 
-/* Responsive */
-@media (max-width: 768px) {
-  .dashboard-container {
-    padding: 16px;
-  }
+// /* Responsive */
+// @media (max-width: 768px) {
+//   .dashboard-container {
+//     padding: 16px;
+//   }
 
-  .section-controls {
-    flex-direction: column;
-  }
+//   .section-controls {
+//     flex-direction: column;
+//   }
 
-  .search-box {
-    min-width: 100%;
-  }
+//   .search-box {
+//     min-width: 100%;
+//   }
 
-  .filter-select,
-  .add-button {
-    width: 100%;
-  }
+//   .filter-select,
+//   .add-button {
+//     width: 100%;
+//   }
 
-  .table-container {
-    border-radius: 8px;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  }
-}
+//   .table-container {
+//     border-radius: 8px;
+//     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+//   }
+// }

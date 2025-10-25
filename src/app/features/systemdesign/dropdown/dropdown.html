@@ -1,4 +1,4 @@
-<div class="dropdown-container">
+<div class="dropdown-container" [class.custom-style]="customStyle">
   <!-- Dropdown Input -->
   <div class="dropdown-input" (click)="toggleDropdown()">
     <!-- ✅ Avatar support -->
@@ -10,7 +10,16 @@
     <ng-template #noAvatar>
     </ng-template>
 
-    <div class="label text-common">{{ selectedLabel }}</div>
+    <!-- <div class="label text-common">{{ selectedLabel }}</div> -->
+     <div class="label-container">
+  <div class="label text-common Showtext">{{ selectedLabel }}</div>
+
+  <!-- Subtext (only if enabled and not empty) -->
+  <div *ngIf="showSubtext && subtext" class="subtext text-secondary">
+    {{ subtext }}
+  </div>
+</div>
+
     <div class="arrow">
       <img [src]="isOpen ? '/assets/images/icons/arrow-up.svg' : '/assets/images/icons/arrow-down.svg'" alt="Arrow"
         class="dropdown-arrow" width="20" height="20" />

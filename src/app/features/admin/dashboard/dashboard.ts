@@ -17,8 +17,7 @@ import { Areacharts, AreaDataset } from '../../systemdesign/areacharts/areachart
 })
 export class Dashboard {
 
-   userName = 'Harry Jones';
-  userId = 'NCID - 2424';
+ 
 
   alerts = [
     {

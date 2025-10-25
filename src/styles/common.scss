@@ -22,8 +22,17 @@
       font-weight: 400;
     }
 
-
   }
+
+}
+
+.content-footer {
+  display: flex;
+  height: 75vh;
+  flex-direction: column;
+  align-items: center;
+  color: $neutral-text-primary;
+  padding: $spacing_7 ;
 }
 
 //breadcrum
@@ -92,4 +101,44 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+}
+
+//table styling
+
+.mat-mdc-table {
+  background-color: $bg !important;
+}
+
+/* Table header row */
+.mat-mdc-header-row {
+  background-color: $secondary-50 ;
+  border: none !important;
+
+}
+
+.mat-mdc-cell {
+  border-bottom-color: $neutral_border_2 !important;
+
+}
+
+.mat-header-label {
+  font-family: $font-family-base;
+  font-style: normal;
+  font-weight: 700 !important;
+  font-size: $font-size-body_lg; //18px
+  line-height: $spacing_11; //24px
+  letter-spacing: 0.18px;
+  padding: $spacing_11 $spacing_9 !important;
+  border: none !important;
+}
+
+.mat-content-td {
+  font-family: $font-family-base;
+  font-style: normal;
+  font-weight: 500 !important;
+  font-size: $font-size-body_lg; //18px
+  line-height: $spacing_11; //24px
+  letter-spacing: 0.18px;
+  padding: $spacing_11 $spacing_9 !important;
+
 }

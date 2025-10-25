@@ -4,7 +4,7 @@
     <!-- Header -->
     <div class="sidebar-header">
       <img [src]="sidebarOpen ? '/assets/images/login/sidemenulogo.png' : '/assets/images/login/logo.svg'" alt="Logo"
-        class="sidebar-logo" />
+         routerLink="/admin/dashboard" class="sidebar-logo" />
     </div>
     <!-- Main navigation -->
 
@@ -65,8 +65,8 @@
         </button>
         <div class="header-divider"></div>
         <div class="user-profile">
-          <app-dropdown [options]="myOptions" [(selectedValue)]="selectedOption" placeholder="Harry John"
-            (selectedValueChange)="onSelectionChange($event)" [avatarUrl]="avatarUrl" [hasAvatar]="hasAvatar">
+          <app-dropdown [options]="myOptions" [(selectedValue)]="selectedOption" placeholder="Harry John" [showSubtext]="true"
+           subtext="NCID-2424" (selectedValueChange)="onSelectionChange($event)" [avatarUrl]="avatarUrl" [hasAvatar]="hasAvatar">
           </app-dropdown>
         </div>
         <!-- <div class="header-divider"></div>

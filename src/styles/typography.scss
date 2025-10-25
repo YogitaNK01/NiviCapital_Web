@@ -5,7 +5,7 @@
 
 body {
   font-family: $font-family-base;
- 
+
 }
 
 //----------------------Size----------------------------
@@ -25,11 +25,11 @@ $font-size-body_xs: 12px;
 
 //----------------------Weight----------------------------
 //  size
-$font-weight-light: light;     //300
+$font-weight-light: light; //300
 $font-weight-regular: normal; //normal 400
-$font-weight-medium: medium;    //500
+$font-weight-medium: medium; //500
 $font-weight-semibold: semibold; //600
-$font-weight-bold: bold;         //700
+$font-weight-bold: bold; //700
 $font-weight-italic: italic;
 $font-weight-Light: light;
 
@@ -39,40 +39,41 @@ $font-style-italic: italic;
 // -------------------------------------------------------------
 
 .text-common {
+  font-family:$font-family-base;
   font-style: $font-weight-regular;
-  color: $neutral-text-primary; /* default text color, can override */
-  letter-spacing: 0.32px; /* default, can override if needed */
-  color: var(--system-text-neutral_text-primary, #25262F);
-font-style: normal;
-font-size: $font-size-body_lg; //18px
-font-weight: 400;  
-line-height: $spacing_11; //24px
-letter-spacing: 0.18px;
+  color: $neutral-text-primary;
+   letter-spacing: 0.32px;
+  color: $neutral_text-primary;
+  font-style: normal;
+  font-size: $font-size-body_lg; //18px
+  font-weight: 400;
+  line-height: $spacing_11; //24px
+  letter-spacing: 0.18px;
 }
 
 /* Display / Heading styles */
 .text-dp-3-regular {
   @extend .text-common;
- font-size: $font-size-body_lg;  //18px
-font-weight: $font-weight-medium; //500
-line-height: $spacing_11;       //24px
-letter-spacing: 0.18px;
+  font-size: $font-size-body_lg; //18px
+  font-weight: $font-weight-medium; //500
+  line-height: $spacing_11; //24px
+  letter-spacing: 0.18px;
 }
 
 .text-dp-2-bold {
   @extend .text-common;
-  font-size: $font-size-h2;  //22px
-  font-weight:$font-weight-bold; //700
-  line-height: $spacing_13;  //28px
+  font-size: $font-size-h2; //22px
+  font-weight: $font-weight-bold; //700
+  line-height: $spacing_13; //28px
   letter-spacing: 0.22px;
 }
 
 .text-dp-3-bold {
   @extend .text-common;
-  font-size: $font-size-dp_3;  //32px
-  font-weight:$font-weight-bold; //700
- line-height: $spacing_18; //40px
-letter-spacing: 0.32px;
+  font-size: $font-size-dp_3; //32px
+  font-weight: $font-weight-bold; //700
+  line-height: $spacing_18; //40px
+  letter-spacing: 0.32px;
 }
 
 .text-dp-1-medium {
@@ -92,7 +93,7 @@ letter-spacing: 0.32px;
 
 .text-body-2 {
   @extend .text-common;
-  font-size:$font-size-body_sm; // 14px
+  font-size: $font-size-body_sm; // 14px
   font-weight: 500;
   line-height: $spacing_9; //20px;
   letter-spacing: 0.14px;

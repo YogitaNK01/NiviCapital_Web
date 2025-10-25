@@ -24,7 +24,10 @@ export class Dropdown {
   searchTerm: string = '';
 
   @Input() avatarUrl?: string;
-  @Input() hasAvatar : boolean = false;
+  @Input() hasAvatar: boolean = false;
+
+  @Input() showSubtext: boolean = false;
+  @Input() subtext: string = '';
 
   @Input() label: string = '';
   @Input() placeholder: string = 'Select';
@@ -41,12 +44,13 @@ export class Dropdown {
   @Input() selectedValue: string = '';
   @Output() selectedValueChange = new EventEmitter<string>();
 
+  @Input() customStyle: boolean = false;
 
 
   toggleDropdown() {
     console.log("data---------------")
     this.isOpen = !this.isOpen;
-    
+
   }
 
 

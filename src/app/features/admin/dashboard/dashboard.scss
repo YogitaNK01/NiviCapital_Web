@@ -40,6 +40,7 @@
                 gap: $spacing_4;
                 align-self: stretch;
                 width: 100%;
+                justify-content: space-between;
 
                 .close {
                     cursor: pointer;
@@ -84,7 +85,12 @@
 
             }
 
+          ::ng-deep app-buttons .btn-label {
+            color: white;
+            width: 100px;
+         }  
         }
+        
 
          //main screen 3fr 1fr
     .dashboard-grid-main {
