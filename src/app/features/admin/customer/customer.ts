@@ -8,6 +8,8 @@ import { Buttons } from '../../systemdesign/buttons/buttons';
 import { MatTableModule } from '@angular/material/table';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { Checkbox } from '../../systemdesign/checkbox/checkbox';
+import { MatTabsModule } from '@angular/material/tabs';
+import { MatIconModule } from '@angular/material/icon';
 
 export interface Customerstable {
   id: string;
@@ -87,7 +89,7 @@ const ELEMENT_DATA: Customerstable[] = [
 
 @Component({
   selector: 'app-customer',
-  imports: [CommonModule, FormsModule, MatTableModule, MatCheckboxModule, Inputfield, Dropdown, Buttons, Checkbox],
+  imports: [CommonModule, FormsModule, MatTableModule, MatCheckboxModule,MatTabsModule ,MatIconModule , Inputfield, Dropdown, Buttons, Checkbox],
   standalone: true,
   templateUrl: './customer.html',
   styleUrl: './customer.scss'
@@ -107,6 +109,9 @@ export class Customer {
   displayedColumns: string[] = ['select', 'CIFID', 'CustomerName', 'Mobile', 'Email', 'Status', 'LoanStatus', 'RegistrationDate'];
   dataSource = ELEMENT_DATA;
 
+  // View control
+  showTable = true;
+  selectedCustomer: Customerstable | null = null;
 
   //dropdown data
   // @Input() avatarUrl='https://i.pravatar.cc/40?img=12';
@@ -160,7 +165,7 @@ export class Customer {
     return classes[status] || '';
   }
 
-  // table checkbox
+  /*****************  table checkbox *******************/
 
   /** Toggle a single row */
   toggleRow(row: Customerstable) {

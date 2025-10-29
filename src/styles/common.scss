@@ -8,15 +8,17 @@
   flex-direction: column;
   gap: 1rem;
   color: #1e293b;
-  // padding: 1rem;---------------------------
 
   .content-header {
     display: flex;
     justify-content: space-between;
-    align-items: center;
+    align-items: center; //baseline center
     flex-wrap: wrap;
     gap: 0.5rem;
+    text-align: center;
+    margin-bottom: 0.5rem;
 
+   
 
     .content-title {
       font-weight: 400;
@@ -36,6 +38,14 @@
 }
 
 //breadcrum
+.breadcrumb {
+  display: flex;
+  justify-content: center; 
+  align-items: center;
+  margin-bottom: 0;
+  width: 100%;
+  text-align: center;
+}
 
 .breadcrumb-list {
   list-style: none;
@@ -43,6 +53,7 @@
   align-items: center;
   gap: 8px;
   flex-wrap: wrap;
+  justify-content: center;
 }
 
 .breadcrumb-item a {

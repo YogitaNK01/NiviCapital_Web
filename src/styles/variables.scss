@@ -254,51 +254,92 @@ $warning_border_4:$warning-800-main;
 
 //-------------------------Border size--------------------------
 
-$border_1:1px;
-$border_2:1.5px;
-$border_3:2px;
-$border_4:2.5px;
-$border_5:3px;
-$border_6:3.5px;
+// $border_1:1px;
+// $border_2:1.5px;
+// $border_3:2px;
+// $border_4:2.5px;
+// $border_5:3px;
+// $border_6:3.5px;
+
+$border_1:0.0625rem;
+$border_2:0.09375rem;
+$border_3:0.125rem;
+$border_4:0.15625rem;
+$border_5:0.1875rem;
+$border_6:0.21875rem;
 
 //-------------------------Border radius--------------------------
-$border_radius_rounded:999px;
-$border_radius_xl:24px;
-$border_radius_l:16px;
-$border_radius_m:12px;
-$border_radius_s:8px;
-$border_radius_xs:4px;
-$border_radius_none:0px;
+// $border_radius_rounded:999px;
+// $border_radius_xl:24px;
+// $border_radius_l:16px;
+// $border_radius_m:12px;
+// $border_radius_s:8px;
+// $border_radius_xs:4px;
+// $border_radius_none:0px;
+
+$border_radius_rounded:62.4375rem;
+$border_radius_xl:1.5rem;
+$border_radius_l:1rem;
+$border_radius_m:0.75rem;
+$border_radius_s:0.5rem;
+$border_radius_xs:0.25rem;
+$border_radius_none:0rem;
 
 //-------------------------Spacing--------------------------
 
-$spacing:4px;
-$spacing_2:6px;
-$spacing_3:8px;
-$spacing_4:10px;
-$spacing_5:12px;
-$spacing_6:14px;
-$spacing_7:16px;
-$spacing_8:18px;
-$spacing_9:20px;
-$spacing_10:22px;
-$spacing_11:24px;
-$spacing_12:26px;
-$spacing_13:28px;
-$spacing_14:30px;
-$spacing_15:32px;
-$spacing_16:34px;
-$spacing_17:36px;
-$spacing_18:40px;
-$spacing_19:44px;
-$spacing_20:48px;
-$spacing_21:52px;
-$spacing_22:56px;
-$spacing_23:60px;
-$spacing_24:70px;
-$spacing_25:80px;
-$spacing_26:90px;
-$spacing_27:100px;
+// $spacing:4px;
+// $spacing_2:6px;
+// $spacing_3:8px;
+// $spacing_4:10px;
+// $spacing_5:12px;
+// $spacing_6:14px;
+// $spacing_7:16px;
+// $spacing_8:18px;
+// $spacing_9:20px;
+// $spacing_10:22px;
+// $spacing_11:24px;
+// $spacing_12:26px;
+// $spacing_13:28px;
+// $spacing_14:30px;
+// $spacing_15:32px;
+// $spacing_16:34px;
+// $spacing_17:36px;
+// $spacing_18:40px;
+// $spacing_19:44px;
+// $spacing_20:48px;
+// $spacing_21:52px;
+// $spacing_22:56px;
+// $spacing_23:60px;
+// $spacing_24:70px;
+// $spacing_25:80px;
+// $spacing_26:90px;
+// $spacing_27:100px;
 
-
+$spacing:0.25rem;
+$spacing_2:0.375rem;
+$spacing_3:0.5rem;
+$spacing_4:0.625rem;
+$spacing_5:0.75rem;
+$spacing_6:0.875rem;
+$spacing_7:1rem;
+$spacing_8:1.125rem;
+$spacing_9:1.25rem;
+$spacing_10:1.375rem;
+$spacing_11:1.5rem;
+$spacing_12:1.625rem;
+$spacing_13:1.75rem;
+$spacing_14:1.875rem;
+$spacing_15:2rem;
+$spacing_16:2.125rem;
+$spacing_17:2.25rem;
+$spacing_18:2.5rem;
+$spacing_19:2.75rem;
+$spacing_20:3rem;
+$spacing_21:3.25rem;
+$spacing_22:3.5rem;
+$spacing_23:3.75rem;
+$spacing_24:4.375rem;
+$spacing_25:5rem;
+$spacing_26:95.625rem;
+$spacing_27:6.25rem;
 

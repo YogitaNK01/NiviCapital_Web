@@ -11,7 +11,7 @@ export class Buttons {
    @Input() label: string = 'Button';
   @Input() size: 'sm' | 'md' | 'lg' = 'md';
   @Input() outline: boolean = false;
-  @Input() customClass: string = ''; // extra css classes from parent
+  @Input() btncustomClass: string = ''; // extra css classes from parent
   @Input() color: string = ''; // optional inline color override
   @Input() border: string = ''; // optional inline border override
   @Input() height: string = '';           // Height (ex: "40px" / "3rem")

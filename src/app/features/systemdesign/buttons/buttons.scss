@@ -4,49 +4,54 @@
 
 // Base button
 .btn {
- 
+
   display: flex;
-  padding: 12px 20px;   
-  width: 100%; 
-  height: 100%;    
+  padding: 12px 20px;
+  width: 100%;
+  height: 100%;
   font-size: 14px;
-   gap: $spacing_3;
+  gap: $spacing_3;
   flex-shrink: 0;
   border: none;
-  color: #fff;
-box-sizing: border-box; 
+  // color: #fff;
+  box-sizing: border-box;
 
 
-  &.primary{
- background-color: $primary-btn;
-  
- 
-}
-&.secondary {
+  &.primary {
+    background-color: $primary-btn;
+    color: #ffffff !important;
+
+  }
+
+  &.secondary {
     background-color: $secondary-btn;
-     
+    color: #fff;
 
-}
-&.info{
- background-color: $info-btn;
-  
+  }
 
-}
-&.warning {
+  &.info {
+    background-color: $info-btn;
+    color: #fff;
+
+  }
+
+  &.warning {
     background-color: $warning-btn;
-     
 
-}
-&.success{
- background-color: $success-btn;
-  
+    color: #fff;
+  }
 
-}
-&.error {
+  &.success {
+    background-color: $success-btn;
+    color: #fff;
+
+  }
+
+  &.error {
     background-color: $error-btn;
-     
+    color: #fff;
 
-}
+  }
 
   &:disabled {
     cursor: not-allowed;
@@ -56,25 +61,16 @@ box-sizing: border-box;
 
 
 .btn-full {
-   display: block;  
-  width: 100%!important;
+  display: block;
+  width: 100% !important;
 }
-.btn-auto {
-  width: auto!important;
-}
-.btnclass{
-   width: auto!important;
-}
-// Outline style (optional class)
-.btn-outline {
-  background-color: $primary-btn;
-  border: 1px solid $primary-btn;
-  color: $primary-btn;
 
-  // &:hover {
-  //   background-color: $primary-btn;
-  //   color: #fff;
-  // }
+.btn-auto {
+  width: auto !important;
+}
+
+.btnclass {
+  width: auto !important;
 }
 
 
@@ -82,9 +78,11 @@ box-sizing: border-box;
 .btn-center {
   justify-content: center;
 }
+
 .btn-left {
   justify-content: flex-start;
 }
+
 .btn-right {
   justify-content: flex-end;
 }
@@ -93,34 +91,40 @@ box-sizing: border-box;
 .btn-outline {
   background-color: transparent;
   border: 1px solid $primary-btn;
-  color: $primary-btn;
+  color: $primary-500;
 
-  // &:hover {
-  //   background-color: $primary-btn;
-  //   color: #fff;
-  // }
+  &:active {
+    border-color: $primary-btn;
+    // color: #fff;
+  }
+  &.btn-label {
+ color: blue;
+}
 }
 
 // Icon + Label style
 .btn-icon {
   display: flex;
   align-items: center;
-  gap: 8px; /* space between icon and text */
-  width: 170px!important;
+  gap: 8px;
+  /* space between icon and text */
+  width: 170px !important;
 }
 
-img,svg {
-    width: 24px;
-    height: 24px;
-    flex-shrink: 0;
-  }
+img,
+svg {
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+}
 
-.border-radius{
-    border-radius: $border-radius-rounded;
+.border-radius {
+  border-radius: $border-radius-rounded;
 
 }
 
 .btn-label {
   flex-shrink: 0; // Don't let text shrink
   white-space: nowrap; // Keep text on one line
+  color: #fff;
 }

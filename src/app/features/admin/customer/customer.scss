@@ -90,7 +90,7 @@
 /* Add Button */
 
 
-.customClass {
+.btncustomClass {
 
   width: auto !important; // Allow content to determine width
   min-width: 178px; // Minimum size
@@ -105,6 +105,11 @@
 
 ::ng-deep app-buttons .btn-outline {
   padding: 5px !important;
+}
+
+::ng-deep app-buttons .btn.btn-outline .btn-label {
+
+  color: $primary-500!important;
 }
 
 /* Table */

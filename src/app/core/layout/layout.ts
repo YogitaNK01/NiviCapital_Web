@@ -45,7 +45,7 @@ export class Layout {
   adminMenu: MenuItem[] = [
     { icon: '/assets/images/sidemenu/dashboard.svg', iconActive: '/assets/images/sidemenu/dashboard-active.svg' ,label: 'Dashbboard', route: '/admin/dashboard', expanded: false },
     { icon: '/assets/images/sidemenu/user.svg', iconActive: '/assets/images/sidemenu/user-active.svg' , label: 'Customer', route: '/admin/customer', expanded: false },
-     { icon: '/assets/images/sidemenu/money-recive.svg', label: 'Loan Operations', route: '/admin/dashboard1', expanded: false },
+     { icon: '/assets/images/sidemenu/money-recive.svg', iconActive: '/assets/images/sidemenu/money-recive.svg' ,label: 'Loan Operations', route: '/admin/customer/customerdetails', expanded: false },
     { icon: '/assets/images/sidemenu/candle.svg', label: 'FX Operations', route: '/admin/customer1', expanded: false },
      { icon: '/assets/images/sidemenu/wallet-money.svg', label: 'LMS', route: '/admin/dashboard2', expanded: false },
     { icon: '/assets/images/sidemenu/document-upload.svg', label: 'Documents', route: '/admin/customer2', expanded: false },

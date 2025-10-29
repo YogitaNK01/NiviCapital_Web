@@ -10,18 +10,31 @@ body {
 
 //----------------------Size----------------------------
 //  size
-$font-size-dp_1: 64px;
-$font-size-dp_2: 48px;
-$font-size-dp_3: 32px;
-$font-size-xxl: 30px;
-$font-size-xl: 28px;
-$font-size-h1: 24px;
-$font-size-h2: 22px;
-$font-size-h3: 20px;
-$font-size-body_lg: 18px;
-$font-size-body_md: 16px;
-$font-size-body_sm: 14px;
-$font-size-body_xs: 12px;
+// $font-size-dp_1: 64px;
+// $font-size-dp_2: 48px;
+// $font-size-dp_3: 32px;
+// $font-size-xxl: 30px;
+// $font-size-xl: 28px;
+// $font-size-h1: 24px;
+// $font-size-h2: 22px;
+// $font-size-h3: 20px;
+// $font-size-body_lg: 18px;
+// $font-size-body_md: 16px;
+// $font-size-body_sm: 14px;
+// $font-size-body_xs: 12px;
+
+$font-size-dp_1:4rem;
+$font-size-dp_2: 3rem;
+$font-size-dp_3: 2rem;
+$font-size-xxl: 1.875rem;
+$font-size-xl:1.75rem;
+$font-size-h1: 1.5rem;
+$font-size-h2: 1.375rem;
+$font-size-h3: 1.25rem;
+$font-size-body_lg: 1.125rem;
+$font-size-body_md: 1rem;
+$font-size-body_sm:0.875rem;
+$font-size-body_xs: 0.75rem;
 
 //----------------------Weight----------------------------
 //  size
@@ -43,7 +56,6 @@ $font-style-italic: italic;
   font-style: $font-weight-regular;
   color: $neutral-text-primary;
    letter-spacing: 0.32px;
-  color: $neutral_text-primary;
   font-style: normal;
   font-size: $font-size-body_lg; //18px
   font-weight: 400;
@@ -79,8 +91,9 @@ $font-style-italic: italic;
 .text-dp-1-medium {
   @extend .text-common;
   font-size: $font-size-h1; // 24px
-  font-weight: $font-weight-medium; //500
-  line-height: $spacing_15; //32px
+  font-weight: $font-weight-bold; //700
+  line-height: $spacing_14; //30px
+  letter-spacing: 0.24px;
 }
 
 /* Body / Paragraph styles */
@@ -106,4 +119,32 @@ $font-style-italic: italic;
   font-size: $font-size-body_xs; // 12px
   font-weight: 400;
   line-height: $spacing_7 ; //16px;
+}
+
+/* customer information tabs */
+.text-label {
+ font-family:$font-family-base;
+  font-style: $font-weight-regular;
+  color: $neutral-text-primary;
+   letter-spacing: 0.32px;
+  font-style: normal;
+  font-size: $font-size-body_lg; //18px
+  font-weight: 400;
+  line-height: $spacing_11; //24px
+  letter-spacing: 0.18px;
+}
+  .text-label-data {
+  @extend .text-label;
+  font-size: $font-size-h3; //20px
+  font-weight: $font-weight-bold; //700
+  line-height: $spacing_12; //26px
+  letter-spacing: 0.2px;
+
+}
+
+/* loan mangament-product table header data*/
+.table-head {
+  @extend .text-label;
+  font-size: $font-size-body_lg; //18px
+  font-weight: $font-weight-bold; //700
 }
