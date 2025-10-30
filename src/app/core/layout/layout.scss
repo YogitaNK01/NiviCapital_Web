@@ -205,7 +205,9 @@ letter-spacing: 0.16px;
   flex: 1;
   display: flex;
   flex-direction: column;
-  overflow: hidden;
+  // height: 100vh;
+  // box-sizing: border-box;
+  overflow: hidden; 
 }
 
 /* Header Styles */
@@ -425,7 +427,34 @@ flex-shrink: 0;
 
 
 
-//-------------------------------------------input field-------------------------------------
 
 
 
+/* RESPONSIVE STYLES */
+@media (max-width: 992px) {
+  .layout {
+    flex-direction: column;
+  }
+
+  .sidebar {
+    position: fixed;
+    left: 0;
+    top: 0;
+    height: 100%;
+    transform: translateX(-100%);
+    width: 240px;
+    transition: transform 0.3s ease;
+
+    &.closed {
+      transform: translateX(0);
+    }
+
+    .sidebar-header .toggle-btn {
+      display: block;
+    }
+  }
+
+  .main-content {
+    padding: 16px;
+  }
+}
