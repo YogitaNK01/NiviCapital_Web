@@ -22,7 +22,7 @@
 }
 
 //stat font
-.text-dp-3-bold {
+.stat-label {
   margin-top: $spacing_4;
   color: $secondary-900;
   margin-bottom: $spacing_9;
@@ -36,7 +36,7 @@
 /* Database Section */
 
 .db-title {
-  flex: 0 0 48%;
+  flex: 0 0 45%;
 }
 
 .section-header {
@@ -47,7 +47,7 @@
 }
 
 .section-controls {
-  flex: 0 0 53%;
+  flex: 0 0 56%;
   display: flex;
   gap: $spacing_7;
   flex-wrap: wrap;
@@ -61,12 +61,7 @@
 }
 
 ::ng-deep app-dropdown .dropdown-container {
-  // background-color: $bg !important;
-  // border: 1px solid #eaeaed;
-  // box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-  // width: 185px !important;
-  // height: 42px !important;
-  // padding: 10px !important;
+  
 }
 
 ::ng-deep app-dropdown .dropdown-container.custom-style {
@@ -78,14 +73,7 @@
   width: auto;
 }
 
-::ng-deep app-dropdown .dropdown-container .dropdown-input .label-container .Showtext {
-  color: $neutral_text_secondary;
-  font-size: $font-size-body_md;
-  font-style: normal;
-  font-weight: 400;
-  line-height: $spacing_10;
-  letter-spacing: 0.16px;
-}
+
 
 /* Add Button */
 

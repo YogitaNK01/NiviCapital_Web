@@ -3,8 +3,12 @@ import { Layout } from './core/layout/layout';
 
 export const routes: Routes = [
 
-  
+  {
+  path: '',
+  loadChildren: () => import('./auth/auth-module').then(m => m.AuthModule)
+},
     {
+      
   path: '',
   component: Layout,
   children: [

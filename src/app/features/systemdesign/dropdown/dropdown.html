@@ -10,15 +10,16 @@
     <ng-template #noAvatar>
     </ng-template>
 
-    <!-- <div class="label text-common">{{ selectedLabel }}</div> -->
-     <div class="label-container">
-  <div class="label text-common Showtext">{{ selectedLabel }}</div>
+    <div class="label-container" *ngIf="showSubtext && subtext">
+      <div class="label text-common  profilelabel">{{ selectedLabel }}</div>
 
-  <!-- Subtext (only if enabled and not empty) -->
-  <div *ngIf="showSubtext && subtext" class="subtext text-secondary">
-    {{ subtext }}
-  </div>
-</div>
+      <div  class="subtext text-secondary">
+        {{ subtext }}
+      </div>
+    </div>
+     <div class="label-container" *ngIf="!showSubtext && !subtext">
+      <div class="label text-common Showtext ">{{ selectedLabel }}</div>
+     </div>
 
     <div class="arrow">
       <img [src]="isOpen ? '/assets/images/icons/arrow-up.svg' : '/assets/images/icons/arrow-down.svg'" alt="Arrow"
@@ -42,7 +43,7 @@
     <div class="dropdown-item" *ngFor="let option of filteredOptions; let last = last" (click)="selectOption(option)"
       [class.no-border]="last">
       <!-- <img *ngIf="option.icon" [src]="option.icon" class="item-icon" /> -->
-       <img *ngIf="option.icon && option.icon.trim() !== ''" [src]="option.icon" class="item-icon" />
+      <img *ngIf="option.icon && option.icon.trim() !== ''" [src]="option.icon" class="item-icon" />
       <span>{{ option.label }}</span>
     </div>
   </div>

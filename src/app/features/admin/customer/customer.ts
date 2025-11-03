@@ -1,100 +1,46 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, OnInit, ViewChild } from '@angular/core';
 
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Inputfield } from '../../systemdesign/inputfield/inputfield';
 import { Dropdown, DropdownOption } from '../../systemdesign/dropdown/dropdown';
 import { Buttons } from '../../systemdesign/buttons/buttons';
-import { MatTableModule } from '@angular/material/table';
+import { MatTableDataSource, MatTableModule } from '@angular/material/table';
+import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
+import { MatSort, MatSortModule } from '@angular/material/sort';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { Checkbox } from '../../systemdesign/checkbox/checkbox';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatIconModule } from '@angular/material/icon';
+import { HttpClient, HttpClientModule } from '@angular/common/http';
+import { Router, RouterModule } from '@angular/router';
 
 export interface Customerstable {
-  id: string;
-  cifId: string;
-  customerName: string;
-  mobile: string;
-  email: string;
-  status: 'Completed' | 'Pending' | 'Document Issue';
-  loanStatus: 'Completed' | 'Pending' | 'Document Issue';
-  registrationDate: string;
+  id: number;
+  cif: string;
+  firstName: string | null;
+  lastName: string | null;
+  phoneNumber: string;
+  emailId: string | null;
+  kycStatus: string;
+  productType?: string;
+  planToStart?: string;
+
+
 }
 
-// customers: Customers_[] = [
-const ELEMENT_DATA: Customerstable[] = [
-  {
-    id: '1',
-    cifId: 'CIF123456',
-    customerName: 'Rajesh Kumar',
-    mobile: '+91 8285868***',
-    email: 'rajesh.k***@gmail.com',
-    status: 'Completed',
-    loanStatus: 'Completed',
-    registrationDate: '2024-12-28'
-  },
-  {
-    id: '2',
-    cifId: 'CIF123456',
-    customerName: 'Anita Patel',
-    mobile: '+91 8285868***',
-    email: 'rajesh.k***@gmail.com',
-    status: 'Completed',
-    loanStatus: 'Completed',
-    registrationDate: '2024-12-28'
-  },
-  {
-    id: '3',
-    cifId: 'CIF123456',
-    customerName: 'Suresh Gupta',
-    mobile: '+91 8285868***',
-    email: 'rajesh.k***@gmail.com',
-    status: 'Pending',
-    loanStatus: 'Pending',
-    registrationDate: '2024-12-28'
-  },
-  {
-    id: '4',
-    cifId: 'CIF123456',
-    customerName: 'Amit Sharma',
-    mobile: '+91 8285868***',
-    email: 'rajesh.k***@gmail.com',
-    status: 'Document Issue',
-    loanStatus: 'Document Issue',
-    registrationDate: '2024-12-28'
-  },
-  {
-    id: '5',
-    cifId: 'CIF123456',
-    customerName: 'Rajesh Kumar',
-    mobile: '+91 8285868***',
-    email: 'rajesh.k***@gmail.com',
-    status: 'Pending',
-    loanStatus: 'Pending',
-    registrationDate: '2024-12-28'
-  },
-  {
-    id: '6',
-    cifId: 'CIF123456',
-    customerName: 'Rajesh Kumar',
-    mobile: '+91 8285868***',
-    email: 'rajesh.k***@gmail.com',
-    status: 'Pending',
-    loanStatus: 'Pending',
-    registrationDate: '2024-12-28'
-  }
-];
 
 
 @Component({
   selector: 'app-customer',
-  imports: [CommonModule, FormsModule, MatTableModule, MatCheckboxModule,MatTabsModule ,MatIconModule , Inputfield, Dropdown, Buttons, Checkbox],
+  imports: [CommonModule, FormsModule, MatTableModule, MatCheckboxModule, MatTabsModule, MatPaginatorModule,
+    MatSortModule, MatIconModule, RouterModule, HttpClientModule, Inputfield, Dropdown, Buttons, Checkbox],
   standalone: true,
   templateUrl: './customer.html',
   styleUrl: './customer.scss'
 })
-export class Customer {
+export class Customer implements OnInit {
+
   totalCustomers = 12456;
   customerGrowth = '12% from last month';
   kycCompleted = 98.5;
@@ -103,11 +49,21 @@ export class Customer {
   searchQuery = '';
   selectedKycStatus = 'All KYC Status';
   selectedType = 'All Types';
-  currentPage = 1;
+
   selection: Customerstable[] = [];
   //mat table
-  displayedColumns: string[] = ['select', 'CIFID', 'CustomerName', 'Mobile', 'Email', 'Status', 'LoanStatus', 'RegistrationDate'];
-  dataSource = ELEMENT_DATA;
+  displayedColumns: string[] = ['select', 'CIFID', 'customerName', 'mobile', 'email', 'status', 'loanStatus', 'registrationDate'];
+  // dataSource = ELEMENT_DATA;
+  dataSource = new MatTableDataSource<any>([]);
+  @ViewChild(MatPaginator) paginator!: MatPaginator;
+  @ViewChild(MatSort) sort!: MatSort;
+
+  pageSize = 5;
+  currentPage = 1;
+  totalItems: any;
+  fullData: any[] = [];
+AlluserData: any[] = [];
+  userData: any;
 
   // View control
   showTable = true;
@@ -128,6 +84,82 @@ export class Customer {
     { label: 'Pending', value: 'Pending' },
     { label: 'Document Issue', value: 'Document Issue' }
   ];
+
+
+  constructor(public http: HttpClient, public router: Router) { }
+  // 
+  ngOnInit(): void {
+    this.getuserdeatils()
+
+
+  }
+  //get table data from api
+  getuserdeatils() {
+    this.http.get<any[]>('/api/verification/users').subscribe({
+      next: (response) => {
+
+        this.AlluserData =response
+          this.fullData = (response as any[]).map((item, index) => ({
+          id: index + 1,
+          CIFID: item.cif ?? "-",
+          CustomerName: `${item.firstName ?? ''} ${item.lastName ?? ''}`.trim() ?? "-",
+          mobile: item.phoneNumber ?? "-",
+          email: item.emailId ?? '',
+          status: item.kycStatus ?? "-",
+          loanStatus: item.kycStatus ?? "-",
+          registrationDate: item.planToStart ?? "-",
+          userId: item.userId ?? "-"
+        }));
+
+        this.totalItems = this.fullData.length;
+        this.dataSource.sort = this.sort;
+        this.updatePagedData();
+      },
+      error: (error) => {
+        console.error(' API Error:', error);
+      },
+      complete: () => {
+        console.log(' Request completed');
+      }
+    })
+  }
+  //pagination
+  ngAfterViewInit() {
+    this.dataSource.paginator = this.paginator;
+  }
+  get totalPages() {
+    return Math.ceil(this.totalItems / this.pageSize);
+  }
+  get totalPagesArray() {
+    return Array.from({ length: this.totalPages }, (_, i) => i + 1);
+  }
+
+  onPageChange(page: number) {
+    if (page < 1 || page > this.totalPages) return;
+    this.currentPage = page;
+    this.updatePagedData();
+  }
+
+  updatePagedData() {
+    const startIndex = (this.currentPage - 1) * this.pageSize;
+    const endIndex = startIndex + this.pageSize;
+    this.dataSource.data = this.fullData.slice(startIndex, endIndex);
+  }
+
+  //user details 
+  goToUserDetails(data: string) {
+    const fullUser = this.AlluserData.find(item => item.userId === data);
+
+    if (fullUser) {
+      localStorage.setItem('selecteduserDetails', JSON.stringify(fullUser));
+      this.router.navigate(['/admin/customerdetails']);
+    } else {
+      console.warn('User not found in fullData for CIFID:', data);
+    }
+
+
+    // this.router.navigate(['/admin/customerdetails'],{ state: { user: data }});
+  }
 
   getkycstatus(value: string) {
     console.log('Selected:2', value);
@@ -151,10 +183,7 @@ export class Customer {
     console.log('Add customer clicked');
   }
 
-  onPageChange(page: number) {
-    this.currentPage = page;
-    console.log('Page changed to:', page);
-  }
+
 
   getStatusClass(status: string): string {
     const classes: { [key: string]: string } = {
@@ -178,22 +207,22 @@ export class Customer {
   }
 
   /** Select all rows */
- toggleAllRows(checked: boolean) {
-  if (checked) {
-    this.selection = [...this.dataSource];
-  } else {
-    this.selection = [];
+  toggleAllRows(checked: boolean) {
+    if (checked) {
+      this.selection = [...this.dataSource.data];
+    } else {
+      this.selection = [];
+    }
   }
-}
 
 
   /** Check if all rows selected */
   isAllSelected() {
-    return this.selection.length === this.dataSource.length && this.selection.length > 0;
+    return this.selection.length === this.dataSource.data.length && this.selection.length > 0;
   }
 
   /** Check if some rows selected */
   isSomeSelected() {
-    return this.selection.length > 0 && this.selection.length < this.dataSource.length;
+    return this.selection.length > 0 && this.selection.length < this.dataSource.data.length;
   }
 }

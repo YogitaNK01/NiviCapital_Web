@@ -1,4 +1,4 @@
-<div class="dashboard-container main-content-feature">
+<div class="dashboard main-content-feature">
   <!-- Header -->
   <div class="content-header">
     <div class="content-title text-dp-3-bold">
@@ -7,14 +7,14 @@
     <div class="user-info">
 
       <div>
-      <nav aria-label="breadcrumb" class="breadcrumb">
-        <ol class="breadcrumb-list">
-          <li class="breadcrumb-item text-common "><a routerLink="/home">Home</a></li>
-          <li class="breadcrumb-item active text-common " aria-current="page">Customer</li>
-        </ol>
-      </nav>
+        <nav aria-label="breadcrumb" class="breadcrumb">
+          <ol class="breadcrumb-list">
+            <li class="breadcrumb-item text-common "><a routerLink="/home">Home</a></li>
+            <li class="breadcrumb-item active text-common " aria-current="page">Customer</li>
+          </ol>
+        </nav>
 
-    </div>
+      </div>
     </div>
   </div>
 
@@ -25,7 +25,7 @@
         <div class="key-data">
           <div class="key-data1">
             <p class=" text-common">Total Customers</p>
-            <h2 class=" text-dp-3-bold">{{ totalCustomers | number }}</h2>
+            <h2 class=" text-dp-3-bold stat-label">{{ totalCustomers | number }}</h2>
             <p class=" text-body-2 greentext">{{ customerGrowth }}</p>
           </div>
           <img src="/assets/images/sidemenu/note.svg" alt="Message" class="key-card-image" />
@@ -67,13 +67,13 @@
 
 
         <div class="search-dropdown">
-          <app-dropdown [options]="Kycstatus" [(selectedValue)]="selectedOption2" [customStyle]="true"
+          <app-dropdown class="menu-dropdown" [options]="Kycstatus" [(selectedValue)]="selectedOption2" [customStyle]="true"
             placeholder="All KYC Status" (selectedValueChange)="getkycstatus($event)">
           </app-dropdown>
         </div>
 
         <div class="search-dropdown">
-          <app-dropdown [options]="kyctype" [(selectedValue)]="selectedOption2" placeholder="All Types"
+          <app-dropdown class="menu-dropdown" [options]="kyctype" [(selectedValue)]="selectedOption2" placeholder="All Types"
             [customStyle]="true" (selectedValueChange)="getkyc_type($event)">
           </app-dropdown>
         </div>
@@ -113,41 +113,41 @@
         <!-- CIF ID Column -->
         <ng-container matColumnDef="CIFID">
           <th mat-header-cell *matHeaderCellDef class="mat-header-label">CIF ID </th>
-          <td mat-cell *matCellDef="let element" class="mat-content-td"> {{element.cifId}} </td>
+          <td mat-cell *matCellDef="let element" class="mat-content-td" (click)="goToUserDetails(element.userId)"> {{element.CIFID}} </td>
         </ng-container>
 
         <!-- Customer Name Column -->
-        <ng-container matColumnDef="CustomerName">
+        <ng-container matColumnDef="customerName">
           <th mat-header-cell *matHeaderCellDef class="mat-header-label"> Customer Name </th>
-          <td mat-cell *matCellDef="let element" class="mat-content-td"> {{element.customerName}} </td>
+          <td mat-cell *matCellDef="let element" class="mat-content-td"> {{element.CustomerName}} </td>
         </ng-container>
 
         <!-- Mobile Column -->
-        <ng-container matColumnDef="Mobile">
+        <ng-container matColumnDef="mobile">
           <th mat-header-cell *matHeaderCellDef class="mat-header-label"> Mobile </th>
           <td mat-cell *matCellDef="let element" class="mat-content-td"> {{element.mobile}} </td>
         </ng-container>
 
         <!-- Email Column -->
-        <ng-container matColumnDef="Email">
+        <ng-container matColumnDef="email">
           <th mat-header-cell *matHeaderCellDef class="mat-header-label"> Email </th>
           <td mat-cell *matCellDef="let element" class="mat-content-td"> {{element.email}} </td>
         </ng-container>
 
         <!-- Status Column -->
-        <ng-container matColumnDef="Status">
+        <ng-container matColumnDef="status">
           <th mat-header-cell *matHeaderCellDef class="mat-header-label"> Status </th>
           <td mat-cell *matCellDef="let element" class="mat-content-td"> {{element.status}} </td>
         </ng-container>
 
         <!-- Loan Status Column -->
-        <ng-container matColumnDef="LoanStatus">
+        <ng-container matColumnDef="loanStatus">
           <th mat-header-cell *matHeaderCellDef class="mat-header-label"> Loan Status </th>
           <td mat-cell *matCellDef="let element" class="mat-content-td"> {{element.loanStatus}} </td>
         </ng-container>
 
         <!-- Registration Date Column -->
-        <ng-container matColumnDef="RegistrationDate">
+        <ng-container matColumnDef="registrationDate">
           <th mat-header-cell *matHeaderCellDef class="mat-header-label"> Registration Date </th>
           <td mat-cell *matCellDef="let element" class="mat-content-td"> {{element.registrationDate}} </td>
         </ng-container>
@@ -168,24 +168,22 @@
     </div>
 
     <!-- Pagination -->
+
+
+
     <div class="pagination">
       <button class="pagination-btn" [disabled]="currentPage === 1" (click)="onPageChange(currentPage - 1)">
         <img class="arrow-icon" src="/assets/images/icons/arrow-left-pg.svg" alt="Previous" height="20" width="20" />
       </button>
-      <button class="pagination-btn" [class.active]="currentPage === 1" (click)="onPageChange(1)">
-        <span class="pagecount text-body-2">1</span>
+      <button *ngFor="let page of totalPagesArray" class="pagination-btn" [class.active]="page === currentPage"
+        (click)="onPageChange(page)">
+        <span class="pagecount text-body-2">{{ page }}</span>
       </button>
-      <button class="pagination-btn" [class.active]="currentPage === 2" (click)="onPageChange(2)">
-        <span class="pagecount text-body-2">2</span>
-      </button>
-      <span class="pagination-ellipsis">...</span>
-      <button class="pagination-btn" [class.active]="currentPage === 9" (click)="onPageChange(9)"> <span
-          class="pagecount text-body-2">9</span></button>
-      <button class="pagination-btn" [class.active]="currentPage === 10" (click)="onPageChange(10)"> <span
-          class="pagecount text-body-2">10</span></button>
-      <button class="pagination-btn" (click)="onPageChange(currentPage + 1)">
+
+      <button class="pagination-btn" [disabled]="currentPage === totalPages" (click)="onPageChange(currentPage + 1)">
         <img src="/assets/images/icons/arrow-right-pg.svg" height="20" width="20" alt="Previous" />
       </button>
+
     </div>
   </div>
 
@@ -193,4 +191,5 @@
   <div class="content-footer">
     <p>Copyright © 2025 Nivi Capital. All rights reserved</p>
   </div>
+  
 </div>

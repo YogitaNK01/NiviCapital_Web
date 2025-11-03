@@ -31,7 +31,7 @@
           alt="setting" class="menu-icon">
       </button>
 
-      <button class="btn btn-sidebar">
+      <button class="btn btn-sidebar" (click)="logout()">
         <img [src]=" sidebarOpen ? '/assets/images/icons/logout.svg' : '/assets/images/icons/logout-icon.svg' "
           alt="logout" class="menu-icon">
       </button>
@@ -65,10 +65,11 @@
         </button>
         <div class="header-divider"></div>
         <div class="user-profile">
-          <app-dropdown [options]="myOptions" [(selectedValue)]="selectedOption" placeholder="Harry John" [showSubtext]="true"
+          <app-dropdown  class="profile-dropdown" [options]="myOptions"  placeholder="Harry John" [(selectedValue)]="selectedOption" [showSubtext]="true"
            subtext="NCID-2424" (selectedValueChange)="onSelectionChange($event)" [avatarUrl]="avatarUrl" [hasAvatar]="hasAvatar">
-          </app-dropdown>
+          </app-dropdown>  <!-- [(selectedValue)]="selectedOption" -->
         </div>
+       
         <!-- <div class="header-divider"></div>
         <button class="settings-btn">
           <span class="settings-icon">⚙️</span>

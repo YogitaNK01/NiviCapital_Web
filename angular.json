@@ -23,18 +23,20 @@
             ],
             "tsConfig": "tsconfig.app.json",
             "inlineStyleLanguage": "scss",
-           "assets": [
+            "assets": [
               "src/favicon.ico",
               "src/assets"
             ],
-           "styles": [
+            "styles": [
               "node_modules/bootstrap/dist/css/bootstrap.min.css",
               "src/styles/styles.scss"
             ],
-           "scripts": [],
-           "stylePreprocessorOptions": {
-            "includePaths": ["src/styles"]
-          }
+            "scripts": [],
+            "stylePreprocessorOptions": {
+              "includePaths": [
+                "src/styles"
+              ]
+            }
           },
           "configurations": {
             "production": {
@@ -50,12 +52,18 @@
                   "maximumError": "8kB"
                 }
               ],
-              "outputHashing": "all"
+              "outputHashing": "all", "fileReplacements": [
+      {
+       "replace": "src/app/app.environment.ts",
+        "with": "src/app/app.environment.prod.ts"
+      }
+    ]
             },
             "development": {
               "optimization": false,
               "extractLicenses": false,
               "sourceMap": true
+              
             }
           },
           "defaultConfiguration": "production"
@@ -70,7 +78,10 @@
               "buildTarget": "Nivicapital:build:development"
             }
           },
-          "defaultConfiguration": "development"
+          "defaultConfiguration": "development",
+          "options": {
+            "proxyConfig": "proxy.conf.json"
+          }
         },
         "extract-i18n": {
           "builder": "@angular/build:extract-i18n"

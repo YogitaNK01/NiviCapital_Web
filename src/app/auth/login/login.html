@@ -1,0 +1,64 @@
+<div class="container-fluid login-page">
+    <div class="login-form">
+
+        <div class="companyinfo text-center">
+            <!-- Logo -->
+            <div class="logoimg">
+                <img class="logoimg" src="/assets/images/login/logo.png" alt="Logo">
+            </div>
+            <div>
+                <p class="text-header1-login">Welcome Chirag</p>
+
+                <p class="text-common text-muted msg">Please sign in to continue</p>
+            </div>
+
+        </div>
+
+
+        <!-- Form -->
+        <form class="loginformclass" #loginForm="ngForm" (ngSubmit)="onSubmit(loginForm)">
+
+            <div class="userinputs">
+                <!-- Username -->
+                <div class="formgroup ">
+
+                    <label for="username" class="form-label">User ID</label>
+                    <input type="text" id="username" name="username" class="form-control form-control-input" required
+                        [(ngModel)]="loginData.username" #username="ngModel" />
+                    <!-- <div class="text-danger small" *ngIf="username.invalid && username.touched">
+        Username is required
+      </div> -->
+                </div>
+
+                <!-- Password -->
+                <div class="formgroup ">
+
+                    <label for="password" class="form-label">Password</label>
+                    <input type="password" id="password" name="password" class="form-control form-control-input"
+                        required minlength="4" [(ngModel)]="loginData.password" #password="ngModel" />
+                    <!-- <div class="text-danger small" *ngIf="password.invalid && password.touched">
+        Password is required (min 4 chars)
+      </div> -->
+                </div>
+            </div>
+            <div class="form-check ">
+                <app-checkbox [checked]="isloginChecked" [disabled]="false" [indeterminate]="false"
+                    label="Remember password?" (checkedChange)="onCheckboxChange($event, 'Default')">
+                </app-checkbox>
+
+
+            </div>
+
+            <!-- Submit -->
+            <div class="d-flex justify-content-center submit-btn  ">
+                <app-buttons type="submit" label="Sign In" class="text-center w-100"></app-buttons>
+            </div>
+
+            <!-- Forgot Password -->
+            <div class="forgot-pass ">
+                <a class="text-dp-3-regular" href="#">Forgot Password?</a>
+            </div>
+        </form>
+
+    </div>
+</div>

@@ -31,8 +31,9 @@
 .secondary {
   background-color: $secondary-btn;
   color: #fff;
-
+  width: 312px;
 }
+
 
 .back-button {
   margin-right: 10px;
@@ -417,12 +418,68 @@
   }
 }
 
+
+
+.gauge-label:nth-child(1) {
+  align-items: flex-start;
+  text-align: left;
+  margin: 75px -50px;
+
+  // @media (max-width: 768px) {
+  //   margin: 32px 0 0 0;
+  // }
+
+  // @media (max-width: 480px) {
+
+  //   margin: 28px 0 0 0;
+
+  // }
+}
+
+.gauge-label:nth-child(2) {
+  align-items: center;
+  margin:-50px ;
+
+  // @media (max-width: 768px) {
+  //   margin: -36px 0 0 -92px;
+  // }
+
+  // @media (max-width: 480px) {
+  //   margin: -32px 0 0 -80px;
+  // }
+}
+
+.gauge-label:nth-child(3) {
+  align-items: center;
+  margin:  -50px ;
+
+  // @media (max-width: 768px) {
+  //   margin: -36px -100px 0 0;
+  // }
+
+  // @media (max-width: 480px) {
+  //   margin: -32px -88px 0 0;
+  // }
+}
+
+.gauge-label:nth-child(4) {
+  align-items: flex-end;
+  text-align: right;
+  margin: 75px -50px;;
+
+  // @media (max-width: 768px) {
+  //   margin: 32px 0 0 0;
+  // }
+
+  // @media (max-width: 480px) {
+  //   margin: 28px 0 0 0;
+  // }
+}
+
 .gauge-container {
-  // width: 400px;
-  // height: 200px;
-  // position: relative;
+  position: relative;
   width: 100%;
-  max-width: 350px;
+  max-width: 400px;
   margin: 0 auto;
 
   @media (max-width: 768px) {
@@ -436,26 +493,25 @@
   }
 }
 
-.gauge-container canvas {
-  width: 100% !important;
-  height: 100% !important;
+canvas {
+  width: 100%;
+  display: block;
 }
 
+/* Labels above arc */
 .gauge-labels {
-  // position: absolute;
-  // top: 140px;
-  // left: 0;
-  // right: 0;
-  // display: flex;
-  // justify-content: space-between;
-  // width: 420px;
-  // margin: 0 auto;
-
+  position: absolute;
+  top: 10px;
+  left: 0;
+  width: 100%;
   display: flex;
   justify-content: space-between;
+  text-align: center;
+  font-size: 12px;
+  color: #25262F;
   flex-wrap: wrap;
-  gap: $spacing_4;
-  margin-top: $spacing_6;
+  gap: 58px; //$spacing_22;
+  // margin-top: $spacing_25;
 
   @media (max-width: 768px) {
     top: 112px;
@@ -466,81 +522,11 @@
     top: 98px;
     width: 294px;
   }
-}
 
-.gauge-label {
-  display: flex;
-  flex-direction: column;
-  font-size: $font-size-body_xs;
-  letter-spacing: 0.12px;
-  color: #25262F;
-
-  @media (max-width: 768px) {
-    font-size: 10px;
-  }
-
-  @media (max-width: 480px) {
-    font-size: 9px;
-  }
-}
-
-.gauge-label:nth-child(1) {
-  align-items: flex-start;
-  text-align: left;
-  margin: 40px 0 0 0;
-
-  @media (max-width: 768px) {
-    margin: 32px 0 0 0;
-  }
-
-  @media (max-width: 480px) {
-
-    margin: 28px 0 0 0;
-
-  }
-}
-
-.gauge-label:nth-child(2) {
-  align-items: center;
-  margin: -45px 0 0 -115px;
-
-  @media (max-width: 768px) {
-    margin: -36px 0 0 -92px;
-  }
-
-  @media (max-width: 480px) {
-    margin: -32px 0 0 -80px;
-  }
-}
-
-.gauge-label:nth-child(3) {
-  align-items: center;
-  margin: -45px -125px 0 0;
-
-  @media (max-width: 768px) {
-    margin: -36px -100px 0 0;
-  }
-
-  @media (max-width: 480px) {
-    margin: -32px -88px 0 0;
-  }
-}
-
-.gauge-label:nth-child(4) {
-  align-items: flex-end;
-  text-align: right;
-  margin: 40px 0px 0 0px;
-
-  @media (max-width: 768px) {
-    margin: 32px 0 0 0;
-  }
-
-  @media (max-width: 480px) {
-    margin: 28px 0 0 0;
-  }
 }
 
 .gauge-label-value {
+  display: block;
   font-size: $font-size-body_xs;
   letter-spacing: 0.12px;
   color: #25262F;
@@ -554,18 +540,6 @@
   }
 }
 
-.gauge-label span:last-child {
-  font-size: 10px;
-  color: #999;
-
-  @media (max-width: 768px) {
-    font-size: 9px;
-  }
-
-  @media (max-width: 480px) {
-    font-size: 8px;
-  }
-}
 
 .report-date {
   margin-top: 15px;
@@ -589,7 +563,7 @@
   flex: 1 1 auto;
   display: flex;
   flex-direction: column;
-  gap: 80px;
+  gap: 50px;
   align-items: center;
 
   @media (max-width: 1024px) {
@@ -768,3 +742,8 @@
 .downloadbtn.btn {
   padding: 0;
 }
+
+
+//////////////////////////////////////////////////////////////////////
+
+

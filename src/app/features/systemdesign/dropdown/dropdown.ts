@@ -48,7 +48,7 @@ export class Dropdown {
 
 
   toggleDropdown() {
-    console.log("data---------------")
+    // console.log("data---------------")
     this.isOpen = !this.isOpen;
 
   }
@@ -57,12 +57,16 @@ export class Dropdown {
 
   selectOption(option: DropdownOption) {
     this.selectedValue = option.value;
-    this.selectionChange.emit(this.selectedValue);
+    this.selectedValueChange.emit(option.value);
     this.isOpen = false;
   }
 
   get selectedLabel(): string {
-    if (!this.options || this.options.length === 0) return this.placeholder;
+    if (this.showSubtext && this.subtext) {
+    return this.placeholder;
+  }
+
+    // if (!this.options || this.options.length === 0) return this.placeholder;
     const selected = this.options.find(o => o.value === this.selectedValue);
     return selected ? selected.label : this.placeholder;
   }

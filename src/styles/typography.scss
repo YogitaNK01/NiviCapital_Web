@@ -148,3 +148,12 @@ $font-style-italic: italic;
   font-size: $font-size-body_lg; //18px
   font-weight: $font-weight-bold; //700
 }
+
+//login page 
+
+.text-header1-login {
+  @extend .text-common;
+  font-size: $font-size-dp_2; //48px
+  line-height: $spacing_21; //52px
+  letter-spacing: 0.48px;
+}

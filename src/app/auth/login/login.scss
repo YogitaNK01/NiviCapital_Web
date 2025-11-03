@@ -1,0 +1,135 @@
+@use 'variables' as *;
+@use 'typography' as *;
+@use 'common' as *;
+
+.login-page {
+    height: 100vh;
+    width: 100%;
+    background: url("/assets/images/login/banner.png"); //center center / contain no-repeat;
+    background-color: #f8f9fa; // fallback color behind the image
+    background-size: cover;
+    //   background-position: center center;
+    //   background-repeat: no-repeat;
+    display: flex;
+
+}
+
+.login-form {
+    display: flex;
+    flex-direction: column;
+    padding: $spacing_18;
+    border-radius: $border_radius_m;
+    width: 100%;
+    max-width: 543px;
+    height: 811px;
+    align-items: center;
+
+    box-shadow: 0 4px 4px 0 rgba(0, 0, 0, 0.25);
+    background-color: $bg;
+    margin-top: $spacing_27;
+    margin-left: $spacing_27;
+    margin-bottom: $spacing_27;
+    gap: $spacing_24;
+    flex-shrink: 0;
+    border: $border_1 solid $neutral_border_2;
+
+
+    .logoimg {
+        width: 175px;
+        height: 96px;
+        // margin-bottom: 1.5rem;
+    }
+
+    .companyinfo {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 40px;
+        align-self: stretch;
+    }
+
+    .msg {
+        color: black;
+        font-size: $font-size-h3;
+        line-height: $font-weight-regular;
+        letter-spacing: 0.3px;
+        opacity: 0.6;
+
+
+    }
+
+    .loginformclass {
+        // display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        align-self: stretch;
+    }
+
+    .loginformclass input.form-control {
+        height: $spacing_21;
+
+    }
+
+    .userinputs {
+        display: flex;
+        flex-direction: column;
+        gap: 18px;
+
+    }
+
+
+}
+
+.form-check {
+    padding: $spacing_15 0;
+}
+
+::ng-deep app-buttons .btn{
+    border-radius: $border-radius-rounded;
+    background-color: $primary-btn;
+    color: #fff;
+    height: auto;
+
+    &:hover , &:active{
+    background-color: $primary-btn;
+    // color: #fff;
+  }
+}
+  ::ng-deep app-buttons .btn{
+    display: flex;
+    justify-content: center;
+  }
+
+
+.forgot-pass {
+    padding: $spacing_10 0;
+    text-decoration-skip-ink: none;
+    text-underline-position: from-font;
+
+    a {
+        color: #000;
+    }
+
+}
+
+
+/* ✅ Responsive */
+@media (max-width: 768px) {
+    .login-page {
+        justify-content: center;
+        /* center on mobile */
+        padding: 1rem;
+    }
+
+    .login-form {
+        max-width: 100%;
+        height: auto;
+        padding: 1.5rem;
+        margin: 0;
+    }
+
+    .companyinfo .logoimg {
+        width: 140px;
+    }
+}
