@@ -1,0 +1,10 @@
+
+ <div class="pdf-container" *ngIf="pdfUrl">
+  <iframe [src]="pdfUrl" width="100%" height="800px"></iframe>
+</div>
+
+<ng-template #loading>
+  <p>Generating Sanction Letter...</p>
+</ng-template>
+
+

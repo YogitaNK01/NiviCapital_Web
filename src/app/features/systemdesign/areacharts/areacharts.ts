@@ -41,6 +41,25 @@ export class Areacharts implements OnInit, OnChanges {
   ngOnInit() { this.render(); }
   ngOnChanges() { this.render(); }
 
+  
+ onResize() {
+    // this.updateChartSize();
+  }
+
+  updateChartSize() {
+    const screenWidth = window.innerWidth;
+
+    if (screenWidth <= 480) {
+      this.width = 250;
+      this.height = 200;
+    } else if (screenWidth <= 768) {
+      this.width = 400;
+      this.height = 300;
+    } else {
+      this.width = 500;
+      this.height = 350;
+    }
+  }
   render() {
     const allValues = this.datasets.flatMap(d => d.data);
     this.maxValue = Math.ceil(Math.max(...allValues) / 20) * 20;

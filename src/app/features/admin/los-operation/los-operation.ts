@@ -1,20 +1,19 @@
-import { Component, Input, OnInit, ViewChild } from '@angular/core';
-
-import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
-import { Inputfield } from '../../systemdesign/inputfield/inputfield';
-import { Dropdown, DropdownOption } from '../../systemdesign/dropdown/dropdown';
-import { Buttons } from '../../systemdesign/buttons/buttons';
-import { MatTableDataSource, MatTableModule } from '@angular/material/table';
+import { HttpClient, HttpClientModule } from '@angular/common/http';
+import { Component, ViewChild } from '@angular/core';
 import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
 import { MatSort, MatSortModule } from '@angular/material/sort';
-import { MatCheckboxModule } from '@angular/material/checkbox';
-import { Checkbox } from '../../systemdesign/checkbox/checkbox';
-import { MatTabsModule } from '@angular/material/tabs';
-import { MatIconModule } from '@angular/material/icon';
-import { HttpClient, HttpClientModule } from '@angular/common/http';
+import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { Router, RouterModule } from '@angular/router';
 import { Main } from '../../../core/service/main';
+import { Dropdown, DropdownOption } from '../../systemdesign/dropdown/dropdown';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatIconModule } from '@angular/material/icon';
+import { MatTabsModule } from '@angular/material/tabs';
+import { Buttons } from '../../systemdesign/buttons/buttons';
+import { Checkbox } from '../../systemdesign/checkbox/checkbox';
+import { Inputfield } from '../../systemdesign/inputfield/inputfield';
 
 export interface Customerstable {
   id: number;
@@ -30,16 +29,15 @@ export interface Customerstable {
 
 }
 
-
 @Component({
-  selector: 'app-customer',
+  selector: 'app-los-operation',
   imports: [CommonModule, FormsModule, MatTableModule, MatCheckboxModule, MatTabsModule, MatPaginatorModule,
     MatSortModule, MatIconModule, RouterModule, HttpClientModule, Inputfield, Dropdown, Buttons, Checkbox],
-  standalone: true,
-  templateUrl: './customer.html',
-  styleUrl: './customer.scss'
+  templateUrl: './los-operation.html',
+  styleUrl: './los-operation.scss'
 })
-export class Customer implements OnInit {
+export class LosOperation {
+
 
   
   customerGrowth = '12% from last month';
@@ -327,4 +325,5 @@ getUploadedDocumnets(){
   isSomeSelected() {
     return this.selection.length > 0 && this.selection.length < this.dataSource.data.length;
   }
+
 }

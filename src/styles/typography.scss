@@ -61,6 +61,11 @@ $font-style-italic: italic;
   font-weight: 400;
   line-height: $spacing_11; //24px
   letter-spacing: 0.18px;
+
+  @media ( max-width:768px){
+    font-family:$font-family-base;
+    font-size: $font-size-body_sm;
+  }
 }
 
 /* Display / Heading styles */
@@ -78,6 +83,12 @@ $font-style-italic: italic;
   font-weight: $font-weight-bold; //700
   line-height: $spacing_13; //28px
   letter-spacing: 0.22px;
+
+   @media ( max-width:768px){
+    font-family:$font-family-base;
+    font-size: $font-size-h3;
+    
+  }
 }
 
 .text-dp-3-bold {

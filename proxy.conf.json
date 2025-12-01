@@ -1,6 +1,6 @@
 {
-  "/api": {
-    "target": "http://192.168.5.42:9090",
+  "/nivicap": {
+    "target": "http://192.168.5.42:8080",
     "secure": false,
     "changeOrigin": true,
     "logLevel": "debug"

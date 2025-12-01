@@ -36,7 +36,7 @@ export class Layout {
   //================================sidemenu for system design===============================================
 
   sidebarOpen = true;
-
+isMobile = false;
   menuItems: MenuItem[] = [];
 
   systemdesignMenu: MenuItem[] = [
@@ -53,8 +53,8 @@ export class Layout {
   adminMenu: MenuItem[] = [
     { icon: '/assets/images/sidemenu/dashboard.svg', iconActive: '/assets/images/sidemenu/dashboard-active.svg', label: 'Dashbboard', route: '/admin/dashboard', expanded: false },
     { icon: '/assets/images/sidemenu/user.svg', iconActive: '/assets/images/sidemenu/user-active.svg', label: 'Customer', route: '/admin/customer', expanded: false },
-    { icon: '/assets/images/sidemenu/money-recive.svg', iconActive: '/assets/images/sidemenu/money-recive.svg', label: 'Loan Operations', route: '/admin/customerdetails1', expanded: false },
-    { icon: '/assets/images/sidemenu/candle.svg', label: 'FX Operations', route: '/admin/customer1', expanded: false },
+    { icon: '/assets/images/sidemenu/money-recive.svg', iconActive: '/assets/images/sidemenu/money-recive.svg', label: 'Loan Operations', route: '/admin/losoperation', expanded: false },
+    { icon: '/assets/images/sidemenu/candle.svg', label: 'FX Operations', route: '/admin/sanctionletter', expanded: false },
     { icon: '/assets/images/sidemenu/wallet-money.svg', label: 'LMS', route: '/admin/dashboard2', expanded: false },
     { icon: '/assets/images/sidemenu/document-upload.svg', label: 'Documents', route: '/admin/customer2', expanded: false },
     { icon: '/assets/images/sidemenu/tag-user.svg', label: 'Communication', route: '/admin/dashboard3', expanded: false },
@@ -65,6 +65,16 @@ export class Layout {
     { icon: '/assets/images/sidemenu/note.svg', label: 'System Design', route: 'systemdesign/buttons', expanded: false },
 
   ];
+
+  ngOnInit() {
+  this.checkScreenSize();
+  window.addEventListener('resize', this.checkScreenSize.bind(this));
+}
+
+checkScreenSize() {
+  this.isMobile = window.innerWidth < 768;
+  this.sidebarOpen = !this.isMobile; // default: open on desktop, closed on mobile
+}
 
   toggleSidebar() {
     this.sidebarOpen = !this.sidebarOpen;

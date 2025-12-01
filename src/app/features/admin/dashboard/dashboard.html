@@ -4,7 +4,7 @@
         <div class="content-title text-dp-3-bold">
             Dashboard
         </div>
-        <div class="user-info">
+        <div class="user-info-breadcrumb">
 
             <div>
                 <nav aria-label="breadcrumb" class="breadcrumb">
@@ -23,7 +23,7 @@
     <!-- Cards grid -->
     <div class="dashboard-grid-main">
         <!-- Left column -->
-        <div class="left-col">
+        <div class="left-col-main">
             <!-- Alerts -->
             <div class="alerts ">
                  <div *ngFor="let alert of alerts" class="alert commonbox text-common" [ngClass]="alert.type">
@@ -123,7 +123,7 @@
         </div>
 
         <!-- Right column Quick Links-->
-        <div class="right-col">
+        <div class="right-col-main">
 
 
             <div class="card quick-links commonbox">

@@ -22,9 +22,23 @@
       font-weight: 400;
     }
 
+    @media (max-width: 768px) {
+      // display: block;
+
+    }
   }
 
 }
+
+ @media (max-width: 768px) {
+      
+      .text-dp-3-bold {
+        font-size: 1.5rem;
+      }
+      .user-info-breadcrumb {
+        display: none;
+      }
+    }
 
 .content-footer {
   display: flex;
@@ -104,6 +118,7 @@
   width: 100%; // 547px;
   height: 1px;
   background-color: $neutral-300;
+  margin: 0.5rem 0;
 }
 
 .key-data {
@@ -151,3 +166,39 @@
   padding: $spacing_11 $spacing_9 !important;
 
 }
+
+
+///btns colors by their status
+ .status {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 16px;
+  font-weight: 500;
+  text-align: center;
+  min-width: 100px;
+}
+
+/* Completed / Verified / active */
+.Completed, .activestatus {
+  background-color: $success-100;
+  color: $success-text-dark
+}
+
+/* Pending */
+.Pending {
+  background-color:$warning-container;
+  color: #9B4800; /* brownish text */
+}
+/* Document Issue */
+.document-Issue {
+  background-color:$error-container;
+  color: $error-text-dark;
+}
+
+
+/* in active */
+.inactive {
+  background-color:$warning-container;
+  color: $warning-text-dark; /* brownish text */
+}
+

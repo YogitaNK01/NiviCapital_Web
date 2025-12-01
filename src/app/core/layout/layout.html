@@ -1,10 +1,16 @@
 <div class="app-container">
 
-  <aside class="sidebar" [class.closed]="!sidebarOpen">
+  <!-- ✅ Sidebar Overlay for mobile -->
+  <div class="sidebar-overlay" [class.show]="sidebarOpen" *ngIf="isMobile" (click)="toggleSidebar()"></div>
+
+
+  <aside class="sidebar" [class.closed]="!sidebarOpen" [class.mobile-open]="isMobile && sidebarOpen">
     <!-- Header -->
     <div class="sidebar-header">
       <img [src]="sidebarOpen ? '/assets/images/login/sidemenulogo.png' : '/assets/images/login/logo.svg'" alt="Logo"
-         routerLink="/admin/dashboard" class="sidebar-logo" />
+        routerLink="/admin/dashboard" class="sidebar-logo" />
+      <img src="/assets/images/icons/arrow-right.svg" *ngIf="isMobile" (click)="toggleSidebar()" alt="Arrow"
+        class="card-arrow">
     </div>
     <!-- Main navigation -->
 
@@ -28,12 +34,12 @@
     <div class="sidebar-footer">
       <button class="btn btn-sidebar">
         <img [src]="sidebarOpen ? '/assets/images/icons/setting.svg' : '/assets/images/icons/setting-icon.svg' "
-          alt="setting" class="menu-icon">
+          alt="setting" class="menu-icon sidebar-footer-btn">
       </button>
 
       <button class="btn btn-sidebar" (click)="logout()">
         <img [src]=" sidebarOpen ? '/assets/images/icons/logout.svg' : '/assets/images/icons/logout-icon.svg' "
-          alt="logout" class="menu-icon">
+          alt="logout" class="menu-icon sidebar-footer-btn">
       </button>
     </div>
 
@@ -56,20 +62,21 @@
       </div>
 
       <div class="header-actions">
-        <button class="search-btn">
+        <button class="header-actions-icons search-btn">
           <img src="/assets/images/icons/search-normal.svg" alt="Message" class="card-image" />
         </button>
         <div class="header-divider"></div>
-        <button class="notification-btn">
+        <button class="header-actions-icons notification-btn">
           <img src="/assets/images/icons/notification-bing.svg" alt="Message" class="card-image" />
         </button>
         <div class="header-divider"></div>
         <div class="user-profile">
-          <app-dropdown  class="profile-dropdown" [options]="myOptions"  placeholder="Harry John" [(selectedValue)]="selectedOption" [showSubtext]="true"
-           subtext="NCID-2424" (selectedValueChange)="onSelectionChange($event)" [avatarUrl]="avatarUrl" [hasAvatar]="hasAvatar">
-          </app-dropdown>  <!-- [(selectedValue)]="selectedOption" -->
+          <app-dropdown class="profile-dropdown" [options]="myOptions" placeholder="Harry John"
+            [(selectedValue)]="selectedOption" [showSubtext]="true" subtext="NCID-2424"
+            (selectedValueChange)="onSelectionChange($event)" [avatarUrl]="avatarUrl" [hasAvatar]="hasAvatar">
+          </app-dropdown> <!-- [(selectedValue)]="selectedOption" -->
         </div>
-       
+
         <!-- <div class="header-divider"></div>
         <button class="settings-btn">
           <span class="settings-icon">⚙️</span>

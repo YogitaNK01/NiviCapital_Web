@@ -1,9 +1,13 @@
-import { CommonModule} from '@angular/common';
+import { CommonModule } from '@angular/common';
 import { Component, ElementRef, Input, ViewChild } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTabsModule } from '@angular/material/tabs';
 import { Buttons } from '../../systemdesign/buttons/buttons';
 import { Router } from '@angular/router';
+import { Aesutil } from '../../../utils/aesutil';
+import { Sanctionletter } from '../sanctionletter/sanctionletter';
+import { Main } from '../../../core/service/main';
+import { Quicklinks } from '../quicklinks/quicklinks';
 
 interface CreditStats {
   totalCredit: string;
@@ -31,15 +35,43 @@ interface CibilHistory {
 @Component({
   selector: 'app-customerdetails',
   standalone: true,
-
-  imports: [CommonModule, MatTabsModule, MatIconModule, Buttons],
+  imports: [CommonModule, MatTabsModule, MatIconModule, Buttons, Sanctionletter,Quicklinks],
   templateUrl: './customerdetails.html',
   styleUrl: './customerdetails.scss'
 })
 export class Customerdetails {
+
   selectedTabIndex = 0;
   userData: any;
+  kycData: any;
   issalaried: Boolean = false;
+
+  kyc_documents: any[] = [];
+  edu_documents: any[] = [];
+  allApplicants: any[] = [];
+  selecteduser: any;
+  selectedDoc: any = null;
+
+  tenthMarksheet: any;
+  tenthLC: any;
+  twelthMarksheet: any;
+  twelfthLC: any;
+  ugMarksheet: any;
+  ugLC: any;
+  pgMarksheet: any;
+  pgLC: any;
+  pgCert: any;
+  scorecard: any;
+  uniofferletter: any;
+  salaryslip1: any;
+  salaryslip2: any;
+  salaryslip3: any;
+  form16: any;
+  itr1: any
+  itr2: any;
+  itr3: any;
+  bankstatement: any;
+  ielts: any
 
   @ViewChild('gaugeCanvas', { static: false }) gaugeCanvas!: ElementRef<HTMLCanvasElement>;
 
@@ -64,30 +96,167 @@ export class Customerdetails {
     outstandingAmount: '₹6,75,000'
   };
 
-  address: Address = {
-    addressLine1: '123, Main Street, Anytown',
-    addressLine2: 'Lorem ipsum dummy text',
-    country: 'India',
-    state: 'Maharashtra',
-    city: 'Mumbai',
-    zipcode: '400001'
-  };
+
 
   cibilHistory: CibilHistory[] = [
     { dateGenerated: '25/07/2025', name: 'Vighnesh', generatedBy: 'Sandeep', creditScore: 780 },
     { dateGenerated: '22/11/2024', name: 'Vighnesh', generatedBy: 'Aarti', creditScore: 820 },
     { dateGenerated: '04/05/2024', name: 'Vighnesh', generatedBy: 'Priya', creditScore: 690 }
   ];
-  constructor(public router:Router){}
+  constructor(public router: Router, private aes: Aesutil, private service: Main) { }
 
-  ngOnInit(): void {
-   console.log("loaded data")
+  async ngOnInit(): Promise<void> {
+    console.log("loaded data")
     const saved = localStorage.getItem('selecteduserDetails');
     this.userData = saved ? JSON.parse(saved) : null;
-    console.log('Received user data:', this.userData);
+    const kyc = sessionStorage.getItem('kycs');
+    this.kycData = kyc ? JSON.parse(kyc) : null;
+    console.log('kycData user data:', this.kycData);
+     this.kyc_documents = this.kycData[0].documents;
+         console.log('kycData.documents data:', this.kyc_documents);
+    // this.encryptAadhar();
+    // this.decryptAadhar()
+// this. getAllDocumnets();
+   
+
+
   }
-  
-  
+
+
+  getAllDocumnets() {
+    this.service.getUserDocuments(this.service.docofselectedUser.id).subscribe({
+      next: (response) => {
+
+        this.edu_documents = response.documents;
+        console.log('all Documents:', this.edu_documents);
+
+      //10th
+        this.tenthMarksheet = this.edu_documents.find(
+          d => d.documentSubcategory === '10th' && d.type === 'MARKSHEET'
+        );
+        console.log('all tenthMarksheet:', this.tenthMarksheet);
+
+        this.tenthLC = this.edu_documents.find(
+          d => d.documentSubcategory === '10th' && d.type === 'LC'
+        );
+
+         //12th
+        this.twelthMarksheet = this.edu_documents.find(
+          d => d.documentSubcategory === '12th' && d.type === 'MARKSHEET'
+        );
+        this.twelfthLC = this.edu_documents.find(
+          d => d.documentSubcategory === '12th' && d.type === 'LC'
+        );
+
+        //UG
+        this.ugMarksheet = this.edu_documents.find(
+          d => d.documentSubcategory === 'undergrad' && d.type === 'MARKSHEET'
+        );
+
+        this.ugLC = this.edu_documents.find(
+          d => d.documentSubcategory === 'undergrad' && d.type === 'MARKSHEET'
+        );
+
+        //PG
+        this.pgMarksheet = this.edu_documents.find(
+          d => d.documentSubcategory === 'postgrad' && d.type === 'MARKSHEET'
+        );
+        this.pgCert = this.edu_documents.find(
+          d => d.documentSubcategory === 'postgrad' && d.type === 'CERTIFICATE'
+        );
+
+        //scorecard 
+        this.scorecard = this.edu_documents.find(
+          d => d.documentSubcategory === 'ielts' && d.type === 'SCOREREPORT'
+        );
+        //offer letter
+        this.uniofferletter = this.edu_documents.find(
+          d => d.documentSubcategory === 'universityOffer' && d.type === 'UNIVERSITYOFFERLETTER'
+        );
+
+        //salaryslips
+        this.salaryslip1 = this.edu_documents.find(
+          d => d.documentSubcategory === 'firstMonthSalary' && d.type === 'SalarySlip1'
+        );
+        this.salaryslip2 = this.edu_documents.find(
+          d => d.documentSubcategory === 'firstMonthSalary' && d.type === 'SalarySlip2'
+        );
+         this.salaryslip3 = this.edu_documents.find(
+          d => d.documentSubcategory === 'firstMonthSalary' && d.type === 'SalarySlip3'
+        );
+
+        //itr
+        this.itr1 = this.edu_documents.find(
+          d => d.documentSubcategory === 'itr' && d.type === 'Itr1'
+        );
+        this.itr2 = this.edu_documents.find(
+          d => d.documentSubcategory === 'itr' && d.type === 'Itr2'
+        );
+         this.itr3 = this.edu_documents.find(
+          d => d.documentSubcategory === 'itr' && d.type === 'Itr3'
+        );
+
+        //form16
+        this.form16 = this.edu_documents.find(
+          d => d.documentSubcategory === 'form16' && d.type === 'Form16'
+        );
+
+        //bankstatement
+        this.bankstatement = this.edu_documents.find(
+          d => d.documentSubcategory === 'statement' && d.type === 'BankStatement'
+        );
+
+        //ielts
+        //  this.ielts = this.edu_documents.find(
+        //   d => d.documentSubcategory === 'firstMonthSalary' && d.type === 'SalarySlip3'
+        // );
+
+
+
+      },
+      error: (error) => {
+        console.error('Error fetching users:', error);
+      }
+    });
+
+  }
+
+  downloadImage(data: any) {
+
+     this.service.downloadDocs(this.service.docofselectedUser.id, data);
+   
+  }
+
+  async encryptAadhar() {
+    const aadhaarNumber = 'abcde1234f'; // example input
+    var result: any;
+    try {
+      result = await this.aes.encrypt(this.kycData[0].aadhaarNumber);
+      console.log('✅ Encrypted Aadhaar:', result.ciphertext);
+      console.log('🔑 IV (Base64):', result.iv);
+    } catch (error) {
+      console.error('Encryption failed:', error);
+    }
+
+    setTimeout(async () => {
+      try {
+        const decryptedAadhar = await this.aes.decrypt(result.ciphertext, result.iv);
+        console.log('Decrypted Aadhaar:', decryptedAadhar);
+      } catch (e) {
+        console.error('Error decrypting Aadhaar:', e);
+      }
+    }, 5000);
+
+  }
+
+  async decryptAadhar() {
+    const encryptedAadhar = 'FaRC2vqwGdG8Nx66B52ShPQch47vneHV0v4=';
+    const ivBase64 = 'Hk9V3jvL7p7F+uPL'; // whatever IV came with it
+
+
+  }
+
+
   drawGauge(): void {
     const canvas = this.gaugeCanvas.nativeElement;
     const ctx = canvas.getContext('2d');
@@ -224,13 +393,7 @@ export class Customerdetails {
     window.open(imagePath, '_blank');
   }
 
-  downloadImage(imagePath: string): void {
-    // ✅ Triggers file download
-    const link = document.createElement('a');
-    link.href = imagePath;
-    link.download = imagePath.split('/').pop() || 'downloaded-image.png';
-    link.click();
-  }
+
 
 
   /****************   customer detail tabs ****************/
@@ -247,4 +410,14 @@ export class Customerdetails {
     console.log('Editing customer:');
   }
 
+  /****************  Quick links ****************/
+ onQuickLinkTabChange(tabIndex: number) {
+    this.selectedTabIndex = tabIndex;
+    
+    // Smooth scroll to top of content
+    const tabContent = document.querySelector('.tab-content');
+    if (tabContent) {
+      tabContent.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }
 }

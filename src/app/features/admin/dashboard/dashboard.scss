@@ -9,107 +9,117 @@
     flex-direction: column;
     gap: 1rem;
     color: #1e293b;
-    // padding: 1rem;---------------------------
-
-    // .dashboard-header {
-    //     display: flex;
-    //     justify-content: space-between;
-    //     align-items: center;
-    //     flex-wrap: wrap;
-    //     gap: 0.5rem;
 
 
-    //     .header-title {
-    //         font-weight: 400;
-    //     }
 
-        
-    
+    //alerts 
+    .alerts {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        width: 100%;
 
-        //alerts 
-        .alerts {
+        .alert {
+            display: flex;
+            padding: $spacing_5 $spacing_7;
+            align-items: center;
+            gap: $spacing_4;
+            align-self: stretch;
+            width: 100%;
+            justify-content: space-between;
+
+            .close {
+                cursor: pointer;
+                font-weight: bold;
+            }
+        }
+
+        @media (max-width: 768px) {
             display: flex;
             flex-direction: column;
-            gap: 8px;
-            width: 100%;
+            gap: 0px;
+        }
+    }
 
-            .alert {
-                display: flex;
-                padding: $spacing_5 $spacing_7;
-                align-items: center;
-                gap: $spacing_4;
-                align-self: stretch;
-                width: 100%;
-                justify-content: space-between;
+    // search-bar
+    .search-bar {
+        padding: $spacing_9;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: $spacing_7;
+        align-self: stretch;
+        width: 100%;
 
-                .close {
-                    cursor: pointer;
-                    font-weight: bold;
-                }
-            }
+        .search-title {
+            padding: 0 0 $spacing_7 0;
+
         }
 
-        // search-bar
-        .search-bar {
-            padding: $spacing_9;
-            flex-direction: column;
-            align-items: flex-start;
+        .search-data {
+            display: flex;
             gap: $spacing_7;
-            align-self: stretch;
-            width: 100%; 
+            flex-wrap: wrap;
+        }
 
-            .search-title {
-                padding: 0 0 $spacing_7 0;
- 
-            }
+        .search-dropdown {
+            width: 100%;
+            max-width: 256px;
+        }
 
-            .search-data {
-                display: flex;
-                gap: $spacing_7;
-                flex-wrap: wrap;
-            }
+        .search-input {
+            // width: 100%;
+            flex: 1;
+            min-width: 150px;
+        }
 
-            .search-dropdown {
-                width: 100%;
-                max-width: 256px;
-            }
+        .search-btn .btn {
+            padding: 0;
 
-            .search-input {
-                // width: 100%;
-                flex: 1;
-               min-width: 150px;
-            }
+        }
 
-            .search-btn .btn {
-                padding: 0;
-
-            }
-
-          ::ng-deep app-buttons .btn-label {
+        ::ng-deep app-buttons .btn-label {
             color: white;
             width: 100px;
-         }  
         }
-        
 
-         //main screen 3fr 1fr
+        @media (max-width: 768px) {
+            .search-data {
+                flex-direction: column;
+                gap: $spacing_5;
+            }
+
+            .search-dropdown,
+            .search-input {
+                max-width: 100%;
+            }
+        }
+    }
+
+
+    //Main Grid Layout screen 3fr 1fr
     .dashboard-grid-main {
         display: grid;
         grid-template-columns: 3fr 1fr;
         gap: 1rem;
         // padding: $spacing_9 0;
 
-        
-    @media (max-width: 1024px) {
-      grid-template-columns: 1fr;
-    }
+
+        @media (max-width: 1024px) {
+            grid-template-columns: 2fr 1fr;
+        }
+
+        @media (max-width: 768px) {
+            grid-template-columns: 1fr;
+            display: flex;
+            flex-direction: column;
+        }
 
         //quick-links 
         .quick-links {
             padding: $spacing_9;
             gap: $spacing_7;
 
-            
+
             .clickable-card {
                 display: flex;
                 padding: $spacing_9;
@@ -117,14 +127,14 @@
                 gap: $spacing_7;
                 border-radius: $border_radius_m;
                 background: $secondary-50;
-               flex-direction: row;
+                flex-direction: row;
                 padding: 1rem;
                 cursor: pointer;
 
                 gap: 0.5rem;
                 width: 100%;
 
-                 &:hover {
+                &:hover {
                     transform: translateY(-3px);
                     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
                 }
@@ -133,11 +143,11 @@
                     display: flex;
                     align-items: center;
                     gap: $spacing_7;
-                     flex: 1;
+                    flex: 1;
                 }
 
                 .card-text {
-                  flex: 1;
+                    flex: 1;
                 }
 
                 .card-image {
@@ -157,6 +167,11 @@
                     font-size: $font-size-body_lg ;
                     line-height: $spacing_6;
                     letter-spacing: 0.18px;
+
+                    @media(max-width:768) {
+                        line-height: 0.95rem;
+                        letter-spacing: 1px;
+                    }
                 }
 
                 .card-subtext {
@@ -167,21 +182,27 @@
                 }
             }
 
+            @media (max-width: 768px) {
+                .clickable-card {
+                    flex-direction: column;
+                    align-items: flex-start;
+                    gap: $spacing_5;
+                }
+            }
         }
 
-        
+
 
     }
 
-    .dashboard-grid ,.dashboard-grid2 {
+    // Smaller Grids
+    .dashboard-grid,
+    .dashboard-grid2 {
         display: grid;
         grid-template-columns: 1fr 1fr;
         gap: 1rem;
         padding: $spacing_9 0;
 
-        @media (max-width: 768px) {
-            grid-template-columns: 1fr; // stack
-        }
 
         .card {
             background: $bg;
@@ -206,22 +227,6 @@
             flex: 1 0 0;
 
 
-            // .metrics {
-            //     width: 100%;
-            //     gap: $spacing_4;
-            //     display: flex;
-            //     flex-direction: column;
-            // }
-
-            // .metric {
-            //     width: 100%;   //538.5px;
-            //     justify-content: space-between;
-            //     align-items: center;
-            //     border-radius: $spacing_5;
-            //     background: $bg;
-
-            // }
-
             .text-dp-3-bold {
                 margin-top: 10px;
                 color: $secondary-900;
@@ -233,64 +238,39 @@
                 color: $success-text;
             }
 
-            // .key-card-image {
-            //     width: $spacing_23;
-            //     height: $spacing_23;
-            //     padding: $spacing_8;
-            //     border-radius: $spacing_23;
-            //     background: $secondary-50;
-            // }
 
             .divider {
-                width:100%;  // 547px;
+                width: 100%; // 547px;
                 height: 1px;
                 background-color: $neutral-300;
             }
 
-            // .key-data {
-            //     display: flex;
-            //     justify-content: space-between;
-            //     align-items: center;
-            // }
         }
 
 
+
+
+        @media (max-width: 1024px) {
+            grid-template-columns: 1fr;
+        }
+
+        @media (max-width: 768px) {
+            display: block;
+
+            .dashboard-grid,
+            .dashboard-grid2 {
+                padding: 1rem 0;
+            }
+
+            .card {
+                margin: 0.5rem 0;
+            }
+
+
+        }
     }
 
     .dashboard-grid2 {
         padding: 0;
     }
 }
-
-
-
-
-// //breadcrum
-
-// .breadcrumb-list {
-//     list-style: none;
-//     display: flex;
-//     align-items: center;
-//     gap: 8px;
-//     flex-wrap: wrap;
-// }
-
-// .breadcrumb-item a {
-//     text-decoration: none;
-//     font-size: $font-size-body_lg;
-//     line-height: 20px;
-// }
-
-// .breadcrumb-item.active {
-//    font-weight: 700;
-
-
-// }
-
-// //common box
-// .commonbox {
-//     border-radius: $border_radius_m;
-//     border: $border_1 solid $neutral-300;
-//     background: $bg, ;
-//     box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.05);
-// }

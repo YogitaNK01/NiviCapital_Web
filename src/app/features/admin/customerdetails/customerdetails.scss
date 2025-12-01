@@ -8,6 +8,16 @@
   width: 170px;
   padding: $spacing_3 $spacing_5;
   justify-content: center;
+
+
+}
+
+@media(max-width:700px) {
+  ::ng-deep app-buttons .btn.btn-outline {
+    padding: 0.4rem;
+    width: auto;
+  }
+
 }
 
 ::ng-deep app-buttons .btn.btn-outline .btn-label {
@@ -90,11 +100,11 @@
 }
 
 .userdetails {
-  display: flex;
-  flex-direction: column;
+  // display: flex;
+  // flex-direction: column;
   height: calc(100vh - 230px); // Adjust based on your header/breadcrumb height
   min-height: 500px; // Minimum height to prevent collapsing
-  overflow: hidden;
+  overflow: auto;
 
   @media (max-width: 768px) {
     height: calc(100vh - 200px);
@@ -143,7 +153,7 @@
   min-height: 100%;
   height: auto;
   padding: $spacing_9;
-  // padding-bottom: $spacing_20;
+  // padding-bottom: $spacing_15;
 
   @media (max-width: 768px) {
     padding: 16px;
@@ -163,14 +173,14 @@
   align-items: flex-start;
   gap: $spacing_10;
   align-self: stretch;
-  // margin-bottom: $spacing_12; // Space between sections
-
+  
   &:last-child {
     margin-bottom: 0;
   }
 
-  @media (max-width: 480px) {
+  @media (max-width: 800px) {
     margin-bottom: 24px;
+    // padding-top: $spacing_7;
   }
 }
 
@@ -195,7 +205,7 @@
 
   @media (max-width: 480px) {
     grid-template-columns: 1fr;
-    gap: 12px;
+    // gap: 12px;
   }
 }
 
@@ -204,6 +214,10 @@
   height: $spacing_25;
   flex-direction: column;
   gap: $spacing_2;
+
+  @media (max-width: 480px) {
+    height: $spacing_20;
+  }
 
   label {
 
@@ -258,24 +272,32 @@
 
   @media (max-width: 768px) {
     grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-    gap: 16px;
+    gap: $spacing_7;
   }
 
   @media (max-width: 480px) {
     grid-template-columns: 1fr;
-    /* stack vertically on mobile */
-    gap: 12px;
+    gap: $spacing_7;
+  }
+
+  .info-grid-img.info-item {
+    height: $spacing_23
   }
 }
 
 .img-box {
   display: flex;
-  padding: 1rem;
+  padding: $spacing_7;
   justify-content: space-between;
   align-items: baseline;
   align-self: stretch;
   border-radius: 0.625rem;
   background: #F5F5F5;
+
+  @media (max-width: 480px) {
+    padding: $spacing_3;
+
+  }
 }
 
 .icons {
@@ -353,7 +375,7 @@
   align-self: stretch;
 }
 
-///-----------------last credit score tab-------
+///----------------------------last credit score tab-------
 
 // Credit score containerdata
 .containerdata {
@@ -425,55 +447,30 @@
   text-align: left;
   margin: 75px -50px;
 
-  // @media (max-width: 768px) {
-  //   margin: 32px 0 0 0;
-  // }
 
-  // @media (max-width: 480px) {
-
-  //   margin: 28px 0 0 0;
-
-  // }
 }
 
 .gauge-label:nth-child(2) {
   align-items: center;
-  margin:-50px ;
+  margin: -50px;
 
-  // @media (max-width: 768px) {
-  //   margin: -36px 0 0 -92px;
-  // }
 
-  // @media (max-width: 480px) {
-  //   margin: -32px 0 0 -80px;
-  // }
 }
 
 .gauge-label:nth-child(3) {
   align-items: center;
-  margin:  -50px ;
+  margin: -50px;
 
-  // @media (max-width: 768px) {
-  //   margin: -36px -100px 0 0;
-  // }
 
-  // @media (max-width: 480px) {
-  //   margin: -32px -88px 0 0;
-  // }
 }
 
 .gauge-label:nth-child(4) {
   align-items: flex-end;
   text-align: right;
-  margin: 75px -50px;;
+  margin: 75px -50px;
+  ;
 
-  // @media (max-width: 768px) {
-  //   margin: 32px 0 0 0;
-  // }
 
-  // @media (max-width: 480px) {
-  //   margin: 28px 0 0 0;
-  // }
 }
 
 .gauge-container {
@@ -661,29 +658,31 @@ canvas {
   text-align: center;
 
   .row {
-  padding: 20px;
-  border-bottom: 1px solid #e5e7eb;
+    padding: 20px;
+    border-bottom: 1px solid #e5e7eb;
 
-  @media (max-width: 768px) {
-    padding: 16px;
+    @media (max-width: 768px) {
+      padding: 16px;
+    }
+
+    @media (max-width: 480px) {
+      padding: 12px;
+    }
   }
 
-  @media (max-width: 480px) {
-    padding: 12px;
+  .row:last-of-type {
+    border-bottom: none;
   }
-}
 
-.row:last-of-type {
-  border-bottom: none;
-}
+  .col {
+    flex: 1;
+    position: relative;
+  }
 
-.col {
-  flex: 1;
-  position: relative;
-}
-
-.col:first-child {
-}
+  @media (max-width: 780px) {
+     display: flex;
+  flex-direction: row;
+  }
 }
 
 
@@ -695,15 +694,15 @@ canvas {
   border-left: 1px solid #e5e7eb;
   background-color: #e5e7eb;
 
-  @media (max-width: 480px) {
-    display: none;
+  @media (max-width: 780px) {
+    // display: none;
   }
 }
 
 .stats-container-main {
   position: relative;
   display: flex;
- // gap: $spacing_25;  //$spacing_9;
+  // gap: $spacing_25;  //$spacing_9;
   align-items: stretch;
 
   @media (max-width: 1024px) {

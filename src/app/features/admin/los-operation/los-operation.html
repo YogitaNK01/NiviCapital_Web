@@ -18,44 +18,31 @@
     </div>
   </div>
 
-  <!-- Stats Cards -->
-  <div class="stats-container">
-    <div class="stat-card commonbox">
-      <div class="metrics ">
-        <div class="key-data">
-          <div class="key-data1">
-            <p class=" text-common">Total Customers</p>
-            <h2 class=" text-dp-3-bold stat-label">{{ totalItems | number }}</h2>
-            <p class=" text-body-2 greentext">{{ customerGrowth }}</p>
-          </div>
-          <img src="/assets/images/sidemenu/note.svg" alt="Message" class="key-card-image" />
+ <!-- search -->
 
-        </div>
+   <div class="search-bar commonbox">
+                <div class="search-title text-common text-dp-2-bold">Search</div>
+                 <div class="search-data text-common">
+                    <div class="search-dropdown"><app-dropdown [options]="Kycstatus"
+                            [(selectedValue)]="selectedOption1" placeholder="All"
+                            (selectedValueChange)="onSelectionChange2($event)">
+                        </app-dropdown></div>
+                    <div class="search-input"> <app-inputfield label="Input Label" placeholder="Search..."
+                            helpText="Help text" [showSearch]="true" [showLabel]="false" [showHelpText]="false">
+                        </app-inputfield></div>
+                    <div class="search-btn">
+                        <app-buttons label="Search" color="primary" class="btncustomClass "></app-buttons>
+                    </div>
 
-      </div>
-    </div>
+                </div> 
+            </div>
 
-    <div class="stat-card commonbox">
-      <div class="metrics ">
-        <div class="key-data">
-          <div class="key-data1">
-            <p class=" text-common">KYC Completed</p>
-            <h2 class=" text-dp-3-bold">{{ kycCompleted }}%</h2>
-            <p class=" text-body-2 greentext">{{ kycGrowth }}</p>
-          </div>
-          <img src="/assets/images/sidemenu/note.svg" alt="Message" class="key-card-image" />
-
-        </div>
-
-      </div>
-    </div>
-  </div>
 
   <!-- Customer Database Section -->
   <div class="database-section">
     <!-- header  -->
     <div class="section-header">
-      <div class="db-title text-dp-2-bold">Customer Database</div>
+   
       <div class="section-controls">
         <div class="search-box">
           <app-inputfield label="Input Label" placeholder="Search for result" helpText="Help text" [showSearch]="true"

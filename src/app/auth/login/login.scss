@@ -125,11 +125,16 @@
     .login-form {
         max-width: 100%;
         height: auto;
-        padding: 1.5rem;
+        padding: 1rem;
         margin: 0;
-    }
+     gap: 20px;
 
     .companyinfo .logoimg {
         width: 140px;
+       
+    }
+}
+    .text-header1-login{
+        font-size: $font-size-dp_3;
     }
 }

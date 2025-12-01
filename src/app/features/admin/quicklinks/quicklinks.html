@@ -1,0 +1,30 @@
+ <div class="quick-links-container" [class.expanded]="isExpanded">
+      <!-- Toggle Tab -->
+      <div class="quick-links-tab" (click)="toggleQuickLinks()" >
+        
+        <img 
+          [src]="isExpanded ? '/assets/images/icons/arrow-left-pg.svg' : '/assets/images/icons/arrow-left-pg.svg'" 
+          alt="toggle"
+          class="toggle-icon" alt="Previous" height="30" width="30"
+        /><span class="tab-text text-label-data">Quick Links</span>
+      </div>
+ 
+      <!-- Links Panel -->
+      <div class="quick-links-panel" *ngIf="isExpanded">
+        <div class="links-header text-dp-3-regular">Quick Links</div>
+        
+        <div class="links-list">
+          <div 
+            class="link-item" 
+            *ngFor="let link of quickLinks"
+            (click)="onLinkClick(link)"
+            [class.active]="link.isActive"
+          >
+            <img [src]="link.icon" [alt]="link.label" class="link-icon" />
+            <span class="link-label text-body-1">{{ link.label }}</span>
+          </div>
+        </div>
+      </div><!-- Backdrop -->
+      <div class="backdrop" *ngIf="isExpanded" (click)="toggleQuickLinks()"></div>
+   
+    </div>

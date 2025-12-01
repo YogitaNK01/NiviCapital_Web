@@ -6,7 +6,7 @@
     <div class="content-title text-dp-3-bold">
       Customer Information File
     </div>
-    <div class="user-info">
+    <div class="user-info-breadcrumb">
 
       <nav aria-label="breadcrumb" class="breadcrumb">
         <ol class="breadcrumb-list">
@@ -36,7 +36,7 @@
     <div class="tab-container">
       <mat-tab-group class="tabs" [(selectedIndex)]="selectedTabIndex">
 
-          
+
         <!-- PI -->
         <mat-tab label="PI">
           <div class="tab-content">
@@ -158,15 +158,15 @@
               <div class="info-grid">
                 <div class="info-item">
                   <label class="text-label">Aadhaar Number</label>
-                  <p class="text-label-data">XXXX XXXX 3210</p>
+                  <p class="text-label-data">{{kycData[0].aadhaarNumber??"-"}} </p>
                 </div>
                 <div class="info-item">
                   <label class="text-label">PAN Number</label>
-                  <p class="text-label-data">ABCDE****H</p>
+                  <p class="text-label-data">{{kycData[0].panNumber??"-"}}</p>
                 </div>
                 <div class="info-item">
                   <label class="text-label">Passport</label>
-                  <p class="text-label-data">A1234567</p>
+                  <p class="text-label-data">{{kycData[0].passportNo??"-"}}</p>
                 </div>
               </div>
             </div>
@@ -178,27 +178,27 @@
               <div class="info-grid">
                 <div class="info-item">
                   <label class="text-label">Address Line 1</label>
-                  <p class="text-label-data">House No. 25</p>
+                  <p class="text-label-data">{{kycData[0].addresses[0].line1??"-"}}</p>
                 </div>
                 <div class="info-item">
                   <label class="text-label">Address Line 2</label>
-                  <p class="text-label-data">Gandhi Nagar</p>
+                  <p class="text-label-data">{{kycData[0].addresses[0].line1??"-"}}</p>
                 </div>
                 <div class="info-item">
                   <label class="text-label">Country</label>
-                  <p class="text-label-data">India</p>
+                  <p class="text-label-data">{{kycData[0].addresses[0].country??"-"}}</p>
                 </div>
                 <div class="info-item">
                   <label class="text-label">State</label>
-                  <p class="text-label-data">Maharashtra</p>
+                  <p class="text-label-data">{{kycData[0].addresses[0].state??"-"}}</p>
                 </div>
                 <div class="info-item">
                   <label class="text-label">City</label>
-                  <p class="text-label-data"> Mumbai</p>
+                  <p class="text-label-data"> {{kycData[0].addresses[0].city??"-"}}</p>
                 </div>
                 <div class="info-item">
                   <label class="text-label">Zipcode</label>
-                  <p class="text-label-data">400001</p>
+                  <p class="text-label-data">{{kycData[0].addresses[0].zipCode??"-"}}</p>
                 </div>
 
 
@@ -212,28 +212,30 @@
               <div class="info-grid">
                 <div class="info-item">
                   <label class="text-label">Address Line 1</label>
-                  <p class="text-label-data">House No. 25</p>
+                  <p class="text-label-data">{{kycData[0].addresses[1].line1??"-"}}</p>
                 </div>
                 <div class="info-item">
                   <label class="text-label">Address Line 2</label>
-                  <p class="text-label-data">Gandhi Nagar</p>
+                  <p class="text-label-data">{{kycData[0].addresses[1].line1??"-"}}</p>
                 </div>
                 <div class="info-item">
                   <label class="text-label">Country</label>
-                  <p class="text-label-data">India</p>
+                  <p class="text-label-data">{{kycData[0].addresses[1].country??"-"}}</p>
                 </div>
                 <div class="info-item">
                   <label class="text-label">State</label>
-                  <p class="text-label-data">Maharashtra</p>
+                  <p class="text-label-data">{{kycData[0].addresses[1].state??"-"}}</p>
                 </div>
                 <div class="info-item">
                   <label class="text-label">City</label>
-                  <p class="text-label-data"> Mumbai</p>
+                  <p class="text-label-data"> {{kycData[0].addresses[1].city??"-"}}</p>
                 </div>
                 <div class="info-item">
                   <label class="text-label">Zipcode</label>
-                  <p class="text-label-data">400001</p>
+                  <p class="text-label-data">{{kycData[0].addresses[1].zipCode??"-"}}</p>
                 </div>
+
+
               </div>
             </div>
 
@@ -373,12 +375,12 @@
               <h3 class="section-title text-dp-2-bold">Applicant KYC</h3>
               <hr _ngcontent-ng-c3098784094="" class="divider">
               <div class="info-grid-img">
-                <div class="info-item">
+                <!-- <div class="info-item">
                   <label class="text-label">Photo</label>
                   <div class="img-box">
-                    <p class="text-label-data">Rajesh.png</p>
+                    <p class="text-label-data">{{kycData[0].documents[0].fileName?"-"}}</p>
                     <div class="icons">
-                      <span class=""><img src="/assets/images/icons/eyered.svg" alt="view"></span>
+                      <span class=""><img src="/assets/images/icons/eyered.svg" (click)="fetchDocuments()" alt="view"></span>
                       <span class=""><img src="/assets/images/icons/import-red.svg" alt="Download"></span>
                     </div>
                   </div>
@@ -415,14 +417,45 @@
                       <span class=""><img src="/assets/images/icons/import-red.svg" alt="Download"></span>
                     </div>
                   </div>
+                </div> -->
+
+                <div class="info-item" *ngFor="let doc of kyc_documents">
+                  <label class="text-label">{{ doc.docType }}</label>
+                  <div class="img-box">
+                    <p class="text-label-data">{{ doc.docType || '-' }}</p>
+
+                    <div class="icons">
+                     
+                      <span>
+                        <img src="/assets/images/icons/eyered.svg" alt="view"  />
+                      </span>
+
+                
+                      <span>
+                        <img src="/assets/images/icons/import-red.svg" alt="download"  />
+                      </span>
+                    </div>
+                  </div>
                 </div>
+
+                <!-- Optional: Image/PDF preview modal -->
+                <div class="preview-modal" *ngIf="selectedDoc">
+                  <div class="modal-content">
+                    <span class="close" (click)="selectedDoc = null">&times;</span>
+                    <img *ngIf="selectedDoc.previewUrl.includes('image')" [src]="selectedDoc.previewUrl" />
+                    <iframe *ngIf="selectedDoc.previewUrl.includes('pdf')" [src]="selectedDoc.previewUrl"></iframe>
+                  </div>
+                </div>
+
+
                 <div class="info-item">
                   <label class="text-label">E-KYC Status</label>
-                  <p class="text-label-data"> Verified</p>
+                  <p class="text-label-data"> {{kycData[0].status??"-"}}</p>
                 </div>
 
               </div>
             </div>
+
 
 
           </div>
@@ -433,17 +466,18 @@
           <div class="tab-content">
             <!-- Education Details -->
             <div class="section">
-              <h3 class="section-title text-dp-1-medium">Education Details</h3>
+              <h3 class="section-title text-dp-2-bold">Education Details</h3>
               <hr _ngcontent-ng-c3098784094="" class="divider">
               <div class="info-grid-img">
                 <div class="info-item">
                   <label class="text-label">10th</label>
                   <div class="img-box">
-                    <p class="text-label-data">Marksheet.png</p>
+                    <!-- <p class="text-label-data">{{ tenthMarksheet.documentSubcategory?'Marksheet.png':"-" }}</p> -->
+                     <p class="text-label-data">Marksheet.png</p>
                     <div class="icons">
                       <span class="" (click)="viewImage('/assets/images/dashboard/profileimg.png')"><img
                           src="/assets/images/icons/eyered.svg" alt="view"></span>
-                      <span class="" (click)="downloadImage('/assets/images/dashboard/profileimg.png')"><img
+                      <span class="" (click)="downloadImage(tenthMarksheet.id)"><img
                           src="/assets/images/icons/import-red.svg" alt="Download"></span>
                     </div>
                   </div>
@@ -455,11 +489,12 @@
                 <div class="info-item">
                   <label class="text-label">12th</label>
                   <div class="img-box">
-                    <p class="text-label-data">Marksheet.png</p>
+                     <p class="text-label-data">Marksheet.png</p>
+                    <!-- <p class="text-label-data">{{ twelfthMarksheet.documentSubcategory?'Marksheet.png':"-" }}</p> -->
                     <div class="icons">
                       <span class="" (click)="viewImage('/assets/images/dashboard/profileimg.png')"><img
                           src="/assets/images/icons/eyered.svg" alt="view"></span>
-                      <span class="" (click)="downloadImage('/assets/images/dashboard/profileimg.png')"><img
+                      <span class="" (click)="downloadImage(twelthMarksheet.id)"><img
                           src="/assets/images/icons/import-red.svg" alt="Download"></span>
                     </div>
                   </div>
@@ -471,11 +506,12 @@
                 <div class="info-item">
                   <label class="text-label">Undergraduate</label>
                   <div class="img-box">
-                    <p class="text-label-data">Marksheet.png</p>
+                     <p class="text-label-data">Marksheet.png</p>
+                    <!-- <p class="text-label-data">{{ ugMarksheet.documentSubcategory?'Marksheet.png':"-" }}</p> -->
                     <div class="icons">
                       <span class="" (click)="viewImage('/assets/images/dashboard/profileimg.png')"><img
                           src="/assets/images/icons/eyered.svg" alt="view"></span>
-                      <span class="" (click)="downloadImage('/assets/images/dashboard/profileimg.png')"><img
+                      <span class="" (click)="downloadImage(ugMarksheet.id)"><img
                           src="/assets/images/icons/import-red.svg" alt="Download"></span>
                     </div>
                   </div>
@@ -487,11 +523,12 @@
                 <div class="info-item">
                   <label class="text-label">Postgraduate</label>
                   <div class="img-box">
-                    <p class="text-label-data">Marksheet.png</p>
+                     <p class="text-label-data">Marksheet.png</p>
+                    <!-- <p class="text-label-data">{{ pgMarksheet.documentSubcategory?'Marksheet.png':"-" }}</p> -->
                     <div class="icons">
                       <span class="" (click)="viewImage('/assets/images/dashboard/profileimg.png')"><img
                           src="/assets/images/icons/eyered.svg" alt="view"></span>
-                      <span class="" (click)="downloadImage('/assets/images/dashboard/profileimg.png')"><img
+                      <span class="" (click)="downloadImage(pgMarksheet.id)"><img
                           src="/assets/images/icons/import-red.svg" alt="Download"></span>
                     </div>
                   </div>
@@ -505,18 +542,19 @@
             </div>
 
             <!-- Foreign Course Details -->
-            <div class="section">
-              <h3 class="section-title text-dp-1-medium">Foreign Course Details</h3>
+            <div class="section mt-4">
+              <h3 class="section-title text-dp-2-bold">Foreign Course Details</h3>
               <hr _ngcontent-ng-c3098784094="" class="divider">
               <div class="info-grid-img">
                 <div class="info-item">
                   <label class="text-label">IELTS / PTE</label>
                   <div class="img-box">
-                    <p class="text-label-data">IELTS.png</p>
+                     <p class="text-label-data">IELTS.png</p>
+                    <!-- <p class="text-label-data">{{ scorecard.documentSubcategory?'IELTS.png':"-" }}</p> -->
                     <div class="icons">
                       <span class="" (click)="viewImage('/assets/images/dashboard/profileimg.png')"><img
                           src="/assets/images/icons/eyered.svg" alt="view"></span>
-                      <span class="" (click)="downloadImage('/assets/images/dashboard/profileimg.png')"><img
+                      <span class="" (click)="downloadImage(scorecard.id)"><img
                           src="/assets/images/icons/import-red.svg" alt="Download"></span>
                     </div>
                   </div>
@@ -540,11 +578,12 @@
                 <div class="info-item">
                   <label class="text-label">University Offer Letter</label>
                   <div class="img-box">
-                    <p class="text-label-data">Offer_Letter.png</p>
+                     <p class="text-label-data">Offer_Letter.png</p>
+                    <!-- <p class="text-label-data">{{ uniofferletter.documentSubcategory?'Offer_Letter.png':"-" }}</p> -->
                     <div class="icons">
                       <span class="" (click)="viewImage('/assets/images/dashboard/profileimg.png')"><img
                           src="/assets/images/icons/eyered.svg" alt="view"></span>
-                      <span class="" (click)="downloadImage('/assets/images/dashboard/profileimg.png')"><img
+                      <span class="" (click)="downloadImage(uniofferletter.id)"><img
                           src="/assets/images/icons/import-red.svg" alt="Download"></span>
                     </div>
                   </div>
@@ -561,7 +600,7 @@
           <div class="tab-content">
             <!-- Occupation Details salaried --> <!-- conditionedbased -->
             <div class="section" *ngIf="!issalaried">
-              <h3 class="section-title text-dp-1-medium">Occupation Details</h3>
+              <h3 class="section-title text-dp-2-bold">Occupation Details</h3>
               <hr _ngcontent-ng-c3098784094="" class="divider">
               <div class="info-grid-img">
                 <div class="info-item">
@@ -599,7 +638,7 @@
                     <div class="icons">
                       <span class="" (click)="viewImage('/assets/images/dashboard/profileimg.png')"><img
                           src="/assets/images/icons/eyered.svg" alt="view"></span>
-                      <span class="" (click)="downloadImage('/assets/images/dashboard/profileimg.png')"><img
+                      <span class="" (click)="downloadImage(salaryslip1.id)"><img
                           src="/assets/images/icons/import-red.svg" alt="Download"></span>
                     </div>
                   </div>
@@ -611,7 +650,7 @@
                     <div class="icons">
                       <span class="" (click)="viewImage('/assets/images/dashboard/profileimg.png')"><img
                           src="/assets/images/icons/eyered.svg" alt="view"></span>
-                      <span class="" (click)="downloadImage('/assets/images/dashboard/profileimg.png')"><img
+                      <span class="" (click)="downloadImage(form16.id)"><img
                           src="/assets/images/icons/import-red.svg" alt="Download"></span>
                     </div>
                   </div>
@@ -623,7 +662,7 @@
                     <div class="icons">
                       <span class="" (click)="viewImage('/assets/images/dashboard/profileimg.png')"><img
                           src="/assets/images/icons/eyered.svg" alt="view"></span>
-                      <span class="" (click)="downloadImage('/assets/images/dashboard/profileimg.png')"><img
+                      <span class="" (click)="downloadImage(itr1.id)"><img
                           src="/assets/images/icons/import-red.svg" alt="Download"></span>
                     </div>
                   </div>
@@ -635,7 +674,7 @@
                     <div class="icons">
                       <span class="" (click)="viewImage('/assets/images/dashboard/profileimg.png')"><img
                           src="/assets/images/icons/eyered.svg" alt="view"></span>
-                      <span class="" (click)="downloadImage('/assets/images/dashboard/profileimg.png')"><img
+                      <span class="" (click)="downloadImage(bankstatement.id)"><img
                           src="/assets/images/icons/import-red.svg" alt="Download"></span>
                     </div>
                   </div>
@@ -650,7 +689,7 @@
 
             <!-- Occupation Details Self Employed (Business)-->
             <div class="section" *ngIf="issalaried">
-              <h3 class="section-title text-dp-1-medium">Occupation Details</h3>
+              <h3 class="section-title text-dp-2-bold">Occupation Details</h3>
               <hr _ngcontent-ng-c3098784094="" class="divider">
               <div class="info-grid">
                 <div class="info-item">
@@ -698,7 +737,7 @@
 
             <!-- Loans -->
             <div class="section">
-              <h3 class="section-title text-dp-1-medium">Loans</h3>
+              <h3 class="section-title text-dp-2-bold">Loans</h3>
               <hr class="divider">
 
               <!-- Loans -->
@@ -719,7 +758,7 @@
                     <tr>
                       <td class="text-dp-3-regular table-data">Education</td>
                       <td class="text-dp-3-regular table-data">abc1234</td>
-                      <td class="text-dp-3-regular table-data">Active</td>
+                      <td class="text-dp-3-regular table-data"><span class="status activestatus" >Active</span> </td>
                       <td class="text-dp-3-regular table-data">₹5,00,000</td>
                       <td class="text-dp-3-regular table-data">Co-Applicant</td>
                       <td class="text-dp-3-regular table-data">₹2,00,000</td>
@@ -735,7 +774,7 @@
             <!-- Payments -->
 
             <div class="section">
-              <h3 class="section-title text-dp-1-medium">Payments</h3>
+              <h3 class="section-title text-dp-2-bold">Payments</h3>
               <hr class="divider">
               <div class="table-container">
                 <table class="responsive-table ">
@@ -770,7 +809,7 @@
             <!-- Accounts -->
             <div class="section">
 
-              <h3 class="section-title text-dp-1-medium">Accounts</h3>
+              <h3 class="section-title text-dp-2-bold">Accounts</h3>
               <hr _ngcontent-ng-c3098784094="" class="divider">
 
               <div class="table-container">
@@ -806,7 +845,7 @@
           <div class="tab-content">
             <div class="section">
 
-              <h3 class="section-title text-dp-1-medium">Bank Accounts</h3>
+              <h3 class="section-title text-dp-2-bold">Bank Accounts</h3>
               <hr _ngcontent-ng-c3098784094="" class="divider">
 
               <div class="table-container">
@@ -825,14 +864,14 @@
                       <td class="text-dp-3-regular table-data">xxxx2345</td>
                       <td class="text-dp-3-regular table-data">State Bank of India, MG Road, Bengaluru.</td>
                       <td class="text-dp-3-regular table-data">SBIN0004576</td>
-                      <td class="text-dp-3-regular table-data">Active</td>
+                      <td class="text-dp-3-regular table-data"><span class="status activestatus" >Active</span></td>
                     </tr>
 
                     <tr>
                       <td class="text-dp-3-regular table-data">xxxx2345</td>
                       <td class="text-dp-3-regular table-data">HDFC Bank, Connaught Place, Delhi.</td>
                       <td class="text-dp-3-regular table-data">HDFC0006272</td>
-                      <td class="text-dp-3-regular table-data">In-Active</td>
+                      <td class="text-dp-3-regular table-data"><span class="status inactive" >In Active</span></td>
                     </tr>
 
                   </tbody>
@@ -844,11 +883,11 @@
           </div>
         </mat-tab>
 
- <!-- Credit Score -->
+        <!-- Credit Score -->
         <mat-tab label="Credit Score">
           <div class="tab-content">
             <div class="section">
-              <h3 class="section-title text-dp-1-medium">Credit Score</h3>
+              <h3 class="section-title text-dp-2-bold">Credit Score</h3>
               <hr class="divider">
               <div class="containerdata">
 
@@ -861,25 +900,25 @@
                         <canvas #gaugeCanvas></canvas>
 
 
-                      <div class="gauge-labels text-common">
-                        <div class="gauge-label">
-                          <span class="gauge-label-value">POOR</span>
-                          <span>300-550</span>
+                        <div class="gauge-labels text-common">
+                          <div class="gauge-label">
+                            <span class="gauge-label-value">POOR</span>
+                            <span>300-550</span>
+                          </div>
+                          <div class="gauge-label">
+                            <span class="gauge-label-value">AVERAGE</span>
+                            <span>550-650</span>
+                          </div>
+                          <div class="gauge-label">
+                            <span class="gauge-label-value">GOOD</span>
+                            <span>650-750</span>
+                          </div>
+                          <div class="gauge-label">
+                            <span class="gauge-label-value">EXCELLENT</span>
+                            <span>750-900</span>
+                          </div>
                         </div>
-                        <div class="gauge-label">
-                          <span class="gauge-label-value">AVERAGE</span>
-                          <span>550-650</span>
-                        </div>
-                        <div class="gauge-label">
-                          <span class="gauge-label-value">GOOD</span>
-                          <span>650-750</span>
-                        </div>
-                        <div class="gauge-label">
-                          <span class="gauge-label-value">EXCELLENT</span>
-                          <span>750-900</span>
-                        </div>
-                      </div> 
-                      </div> 
+                      </div>
                       <div class="report-date">
                         Date of Report : {{ reportDate }} • Source : {{ source }}
                       </div>
@@ -1014,13 +1053,26 @@
           </div>
 
         </mat-tab>
-     
+
+        <!-- Sanction Letter -->
+        <mat-tab label="Sanction Letter">
+          <div class="tab-content">
+            <div class="section">
+              <h3 class="section-title text-dp-2-bold">Sanction Letter </h3>
+              <hr _ngcontent-ng-c3098784094="" class="divider">
+
+              <app-sanctionletter></app-sanctionletter>
+            </div>
+
+
+          </div>
+        </mat-tab>
 
       </mat-tab-group>
     </div>
 
     <!-- footer buttons  -->
-    <div class="d-flex justify-content-start gap-2 footer-btn" *ngIf="selectedTabIndex >= 2">
+    <div class="d-flex justify-content-start gap-2 footer-btn" >
       <app-buttons label="Edit" class="btn primary btn-icon btncustomClass btn-label">
         <img src="/assets/images/icons/add.svg" alt="edit">
 
@@ -1033,4 +1085,8 @@
     </div>
   </div>
 
+  <app-quicklinks 
+    [selectedTabIndex]="selectedTabIndex"
+    (tabChange)="onQuickLinkTabChange($event)">
+  </app-quicklinks>
 </div>

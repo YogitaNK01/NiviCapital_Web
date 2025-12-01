@@ -363,9 +363,17 @@ flex-shrink: 0;
   .content {
     padding: 20px;
   }
+  
+ 
 }
 
-
+@media (max-width: 900px) {
+   ::ng-deep .dropdown-container .label-container .profilelabel ,
+  ::ng-deep .dropdown-container .label-container .subtext{
+       display: none;
+    
+  }
+}
 
 //-------------------------------------------Buttons-------------------------------------
 .btncustomClass {
@@ -436,25 +444,64 @@ flex-shrink: 0;
     flex-direction: column;
   }
 
-  .sidebar {
-    position: fixed;
-    left: 0;
-    top: 0;
-    height: 100%;
-    transform: translateX(-100%);
-    width: 240px;
-    transition: transform 0.3s ease;
+  .main-content {
+    padding: 16px;
+  }
+}
 
-    &.closed {
-      transform: translateX(0);
+/* ===== Sidebar Overlay (for mobile) ===== */
+.sidebar-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s ease;
+  z-index: 998;
+
+  &.show {
+    // opacity: 1;
+    visibility: visible;
+  }
+}
+
+/* ===== Sidebar Mobile Behavior ===== */
+@media (max-width: 768px) {
+  .sidebar {
+    // position: fixed;
+    left: -272px;
+    top: 0;
+    height: 100vh;
+    width: 255px;
+    z-index: 999;
+    transition: left 0.3s ease;
+
+    &.mobile-open {
+      left: 0; // slide in
     }
 
-    .sidebar-header .toggle-btn {
-      display: block;
+    .sidebar-header {
+      // display: none; //  hide logo
     }
   }
 
   .main-content {
-    padding: 16px;
+    flex: 1;
+  }
+
+  .menu-toggle {
+    display: flex; // show hamburger always
+  }
+  .sidebar-footer{
+    padding: 0;
+  }
+  .sidebar-footer-btn{
+    width: 175px;
+  }
+  .header-actions-icons, .header-divider{
+    display: none;
+  }
+  .header-actions {
+    padding: 0;
   }
 }

@@ -25,30 +25,7 @@
 
     <!-- Bars -->
     <g *ngFor="let bar of bars">
-     <!-- <path
-  *ngIf="bar.width > 0"
-  [attr.d]="
-    'M' + bar.x + ',' + bar.y +                
-    ' h' + (bar.width - 10) +                 
-    ' a10,10 0 0 1 10,10' +                    
-    ' v' + (bar.height - 20) +                
-    ' a10,10 0 0 1 -10,10' +                   
-    ' h' + (-bar.width + 10) +                 
-    ' z'
-  "
-  [attr.fill]="bar.color"
-/>
-      <path
-  *ngIf="bar.height > 0"
-  [attr.d]="
-    'M' + bar.x + ',' + (bar.y + bar.height) +
-    ' v' + (-bar.height + 10) +
-    ' a10,10 0 0 1 10,-10 h' + (bar.width - 20) +
-    ' a10,10 0 0 1 10,10 v' + (bar.height - 10) + ' z'
-  "
-  [attr.fill]="bar.color"
-/> -->
-
+    
 <path
   *ngIf="(bar.width > 0 && bar.orientation === 'horizontal') || (bar.height > 0 && bar.orientation === 'vertical')"
   [attr.d]="
