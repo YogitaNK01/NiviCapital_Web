@@ -6,6 +6,7 @@ import { Customerdetails } from './customerdetails/customerdetails';
 import { Sanctionletter } from './sanctionletter/sanctionletter';
 import { LosOperation } from './los-operation/los-operation';
 import { LosDetails } from './los-details/los-details';
+import { Table } from './table/table';
 
 const routes: Routes = [
   
@@ -16,6 +17,8 @@ const routes: Routes = [
         { path: 'sanctionletter', component: Sanctionletter},
         { path: 'losoperation', component: LosOperation},
         { path: 'losdetails', component: LosDetails},
+        { path: 'sharedtable', component: Table},
+
         { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
       
       

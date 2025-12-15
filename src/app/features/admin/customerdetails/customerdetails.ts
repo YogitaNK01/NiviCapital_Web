@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, ElementRef, Input, ViewChild } from '@angular/core';
+import { Component, ElementRef, input, Input, ViewChild } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTabsModule } from '@angular/material/tabs';
 import { Buttons } from '../../systemdesign/buttons/buttons';
@@ -8,6 +8,9 @@ import { Aesutil } from '../../../utils/aesutil';
 import { Sanctionletter } from '../sanctionletter/sanctionletter';
 import { Main } from '../../../core/service/main';
 import { Quicklinks } from '../quicklinks/quicklinks';
+import { FormsModule } from '@angular/forms';
+import { Dropdown, DropdownOption } from '../../systemdesign/dropdown/dropdown';
+import { Inputfield } from '../../systemdesign/inputfield/inputfield';
 
 interface CreditStats {
   totalCredit: string;
@@ -32,10 +35,18 @@ interface CibilHistory {
   creditScore: number;
 }
 
+export interface AuditTrail {
+  date: Date;
+  time: string;
+  action: string;
+  reference: string;
+  status: 'Pending' | 'Submitted' | 'Approved' | 'Rejected';
+}
+
 @Component({
   selector: 'app-customerdetails',
   standalone: true,
-  imports: [CommonModule, MatTabsModule, MatIconModule, Buttons, Sanctionletter,Quicklinks],
+  imports: [CommonModule, MatTabsModule, MatIconModule, Buttons, FormsModule, Inputfield, Dropdown, Sanctionletter],
   templateUrl: './customerdetails.html',
   styleUrl: './customerdetails.scss'
 })
@@ -73,8 +84,14 @@ export class Customerdetails {
   bankstatement: any;
   ielts: any
 
-  @ViewChild('gaugeCanvas', { static: false }) gaugeCanvas!: ElementRef<HTMLCanvasElement>;
+  searchQuery: string = '';
+  selectedFilter: string = 'all';
+  auditTrails: AuditTrail[] = [];
+  filteredAuditTrails: AuditTrail[] = [];
 
+
+  @ViewChild('gaugeCanvas', { static: false }) gaugeCanvas!: ElementRef<HTMLCanvasElement>;
+   
   @Input() creditScore = 780;
 
   gaugeLabels = [
@@ -83,6 +100,8 @@ export class Customerdetails {
     { title: 'GOOD', range: '650–750' },
     { title: 'EXCELLENT', range: '750–900' }
   ];
+
+
 
 
   // creditScore: number = 780;
@@ -112,13 +131,13 @@ export class Customerdetails {
     const kyc = sessionStorage.getItem('kycs');
     this.kycData = kyc ? JSON.parse(kyc) : null;
     console.log('kycData user data:', this.kycData);
-     this.kyc_documents = this.kycData[0].documents;
-         console.log('kycData.documents data:', this.kyc_documents);
+    this.kyc_documents = this.kycData[0].documents;
+    console.log('kycData.documents data:', this.kyc_documents);
     // this.encryptAadhar();
     // this.decryptAadhar()
-// this. getAllDocumnets();
-   
+    // this. getAllDocumnets();
 
+    this.loadAuditTrails()
 
   }
 
@@ -130,7 +149,7 @@ export class Customerdetails {
         this.edu_documents = response.documents;
         console.log('all Documents:', this.edu_documents);
 
-      //10th
+        //10th
         this.tenthMarksheet = this.edu_documents.find(
           d => d.documentSubcategory === '10th' && d.type === 'MARKSHEET'
         );
@@ -140,7 +159,7 @@ export class Customerdetails {
           d => d.documentSubcategory === '10th' && d.type === 'LC'
         );
 
-         //12th
+        //12th
         this.twelthMarksheet = this.edu_documents.find(
           d => d.documentSubcategory === '12th' && d.type === 'MARKSHEET'
         );
@@ -181,7 +200,7 @@ export class Customerdetails {
         this.salaryslip2 = this.edu_documents.find(
           d => d.documentSubcategory === 'firstMonthSalary' && d.type === 'SalarySlip2'
         );
-         this.salaryslip3 = this.edu_documents.find(
+        this.salaryslip3 = this.edu_documents.find(
           d => d.documentSubcategory === 'firstMonthSalary' && d.type === 'SalarySlip3'
         );
 
@@ -192,7 +211,7 @@ export class Customerdetails {
         this.itr2 = this.edu_documents.find(
           d => d.documentSubcategory === 'itr' && d.type === 'Itr2'
         );
-         this.itr3 = this.edu_documents.find(
+        this.itr3 = this.edu_documents.find(
           d => d.documentSubcategory === 'itr' && d.type === 'Itr3'
         );
 
@@ -223,8 +242,8 @@ export class Customerdetails {
 
   downloadImage(data: any) {
 
-     this.service.downloadDocs(this.service.docofselectedUser.id, data);
-   
+    this.service.downloadDocs(this.service.docofselectedUser.id, data);
+
   }
 
   async encryptAadhar() {
@@ -396,6 +415,7 @@ export class Customerdetails {
 
 
 
+
   /****************   customer detail tabs ****************/
 
   // Download CIF
@@ -410,10 +430,137 @@ export class Customerdetails {
     console.log('Editing customer:');
   }
 
+
+
+  /******************************* Audit Trails************************/
+
+  selectedOption2: string = '';
+  myOptions2: DropdownOption[] = [
+    { label: 'Loan', value: 'pdf', icon: '/assets/images/icons/note.svg' },
+    { label: 'Forex', value: 'excel', icon: '/assets/images/icons/note.svg' },
+    { label: 'Insurance', value: 'json', icon: '/assets/images/icons/note.svg' },
+    { label: 'Others', value: 'others', icon: '/assets/images/icons/note.svg' }
+  ];
+  onSelectionChange2(value: string) {
+    console.log('Selected:2', value);
+  }
+
+  loadAuditTrails() {
+    // Sample data - replace with actual API call
+    this.auditTrails = [
+      {
+        date: new Date(),
+        time: '2:30 PM',
+        action: 'Aadhaar Card Requested',
+        reference: 'Ref 28789 ABC 67455',
+        status: 'Pending'
+      },
+      {
+        date: new Date(),
+        time: '2:30 PM',
+        action: 'Aadhaar Card Requested',
+        reference: 'Ref 28789 ABC 67455',
+        status: 'Submitted'
+      },
+      {
+        date: new Date(new Date().setDate(new Date().getDate() - 1)),
+        time: '2:30 PM',
+        action: 'Aadhaar Card Requested',
+        reference: 'Ref 28789 ABC 67455',
+        status: 'Pending'
+      },
+      {
+        date: new Date(new Date().setDate(new Date().getDate() - 1)),
+        time: '2:30 PM',
+        action: 'Aadhaar Card Requested',
+        reference: 'Ref 28789 ABC 67455',
+        status: 'Submitted'
+      },
+      {
+        date: new Date(new Date().setDate(new Date().getDate() - 5)),
+        time: '2:30 PM',
+        action: 'PAN Card Verified',
+        reference: 'Ref 28789 ABC 67455',
+        status: 'Approved'
+      },
+      {
+        date: new Date(new Date().setDate(new Date().getDate() - 7)),
+        time: '11:45 AM',
+        action: 'Document Upload',
+        reference: 'Ref 28789 ABC 67455',
+        status: 'Submitted'
+      }
+    ];
+
+    this.filteredAuditTrails = [...this.auditTrails];
+  }
+
+  filterAuditTrail() {
+    let filtered = [...this.auditTrails];
+
+    // Filter by search query
+    if (this.searchQuery) {
+      const query = this.searchQuery.toLowerCase();
+      filtered = filtered.filter(trail =>
+        trail.action.toLowerCase().includes(query) ||
+        trail.reference.toLowerCase().includes(query)
+      );
+    }
+
+    // Filter by status
+    if (this.selectedFilter !== 'all') {
+      filtered = filtered.filter(trail =>
+        trail.status.toLowerCase() === this.selectedFilter.toLowerCase()
+      );
+    }
+
+    this.filteredAuditTrails = filtered;
+  }
+
+  getTodayTrails(): AuditTrail[] {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    return this.filteredAuditTrails.filter(trail => {
+      const trailDate = new Date(trail.date);
+      trailDate.setHours(0, 0, 0, 0);
+      return trailDate.getTime() === today.getTime();
+    });
+  }
+
+  getYesterdayTrails(): AuditTrail[] {
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+    yesterday.setHours(0, 0, 0, 0);
+
+    return this.filteredAuditTrails.filter(trail => {
+      const trailDate = new Date(trail.date);
+      trailDate.setHours(0, 0, 0, 0);
+      return trailDate.getTime() === yesterday.getTime();
+    });
+  }
+
+  getEarlierTrails(): AuditTrail[] {
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+    yesterday.setHours(0, 0, 0, 0);
+
+    return this.filteredAuditTrails.filter(trail => {
+      const trailDate = new Date(trail.date);
+      trailDate.setHours(0, 0, 0, 0);
+      return trailDate.getTime() < yesterday.getTime();
+    });
+  }
+
+  getStatusClass(status: string): string {
+    const statusLower = status.toLowerCase();
+    return `status-${statusLower}`;
+  }
+
   /****************  Quick links ****************/
- onQuickLinkTabChange(tabIndex: number) {
+  onQuickLinkTabChange(tabIndex: number) {
     this.selectedTabIndex = tabIndex;
-    
+
     // Smooth scroll to top of content
     const tabContent = document.querySelector('.tab-content');
     if (tabContent) {

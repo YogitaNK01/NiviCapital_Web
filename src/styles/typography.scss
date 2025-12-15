@@ -89,6 +89,12 @@ $font-style-italic: italic;
     font-size: $font-size-h3;
     
   }
+
+  @media ( max-width:480px){
+    
+    font-size: $font-size-body_md;
+    
+  }
 }
 
 .text-dp-3-bold {
@@ -113,6 +119,7 @@ $font-style-italic: italic;
   font-size: $font-size-body_md; // 16px
   font-weight: 400;
   line-height: $spacing_11; // 24px;
+  letter-spacing: 0.16px;
 }
 
 .text-body-2 {
@@ -137,7 +144,6 @@ $font-style-italic: italic;
  font-family:$font-family-base;
   font-style: $font-weight-regular;
   color: $neutral-text-primary;
-   letter-spacing: 0.32px;
   font-style: normal;
   font-size: $font-size-body_lg; //18px
   font-weight: 400;
@@ -167,4 +173,13 @@ $font-style-italic: italic;
   font-size: $font-size-dp_2; //48px
   line-height: $spacing_21; //52px
   letter-spacing: 0.48px;
+}
+
+ .text-label-data-head {
+  @extend .text-label;
+  font-size: $font-size-xl; //28px
+  font-weight: $font-weight-medium; //500
+  line-height: $spacing_16; //34px
+  letter-spacing: 0.28px;
+
 }

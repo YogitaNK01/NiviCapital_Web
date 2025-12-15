@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, Input } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
 import { Inputfield } from '../../systemdesign/inputfield/inputfield';
 import { Dropdown, DropdownOption } from '../../systemdesign/dropdown/dropdown';
 import { Buttons } from '../../systemdesign/buttons/buttons';
@@ -10,14 +10,24 @@ import { Areacharts, AreaDataset } from '../../systemdesign/areacharts/areachart
 
 @Component({
   selector: 'app-dashboard',
-  imports: [CommonModule,Inputfield,Dropdown,Buttons,Charts,Barcharts,Areacharts],
-  standalone:true,
+  imports: [CommonModule, Inputfield, Dropdown, Buttons, Charts, Barcharts, Areacharts],
+  standalone: true,
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.scss'
 })
-export class Dashboard {
+export class Dashboard implements OnInit {
+  chartWidth = window.innerWidth < 480 ? 250 : window.innerWidth < 550 ? 400 : window.innerWidth < 1450 ? 300: 500;
+  chartheight = window.innerWidth < 480 ? 300 : window.innerWidth < 550 ? 350: 400;
 
- 
+  ngOnInit() {
+    this.setChartWidth();
+    window.addEventListener('resize', () => this.setChartWidth());
+  }
+
+  setChartWidth() {
+    this.chartWidth = window.innerWidth < 480 ? 250 : window.innerWidth < 550 ? 400: window.innerWidth < 1450 ? 300: 500;
+    this.chartheight = window.innerWidth < 480 ? 300 : window.innerWidth < 550 ? 350: 400;
+  }
 
   alerts = [
     {
@@ -42,19 +52,19 @@ export class Dashboard {
 
   // @Input() avatarUrl='https://i.pravatar.cc/40?img=12';
   // @Input() hasAvatar = true;
-  
-   selectedOption2: string = '';
-    myOptions2: DropdownOption[] = [
-      { label: 'Loan', value: 'pdf', icon: '/assets/images/icons/note.svg' },
-      { label: 'Forex', value: 'excel', icon: '/assets/images/icons/note.svg' },
-      { label: 'Insurance', value: 'json', icon: '/assets/images/icons/note.svg' },
-      { label: 'Others', value: 'others', icon: '/assets/images/icons/note.svg' }
-    ];
-    onSelectionChange2(value: string) {
+
+  selectedOption2: string = '';
+  myOptions2: DropdownOption[] = [
+    { label: 'Loan', value: 'pdf', icon: '/assets/images/icons/note.svg' },
+    { label: 'Forex', value: 'excel', icon: '/assets/images/icons/note.svg' },
+    { label: 'Insurance', value: 'json', icon: '/assets/images/icons/note.svg' },
+    { label: 'Others', value: 'others', icon: '/assets/images/icons/note.svg' }
+  ];
+  onSelectionChange2(value: string) {
     console.log('Selected:2', value);
   }
-  
-    //key metrics data
+
+  //key metrics data
   keyMetrics = [
     { label: 'Active Applications', value: '1,247', change: '12% from last month' },
     { label: 'Total Disbursements', value: '₹2.4 Cr', change: '8% from last month' },
@@ -63,7 +73,7 @@ export class Dashboard {
 
   // Chart 1 Data
   chartData1 = [
-    { label: 'Approved', value: 60, color: '#3B8439'},
+    { label: 'Approved', value: 60, color: '#3B8439' },
     { label: 'Pending', value: 10, color: '#FA0' },
     { label: 'Under Review', value: 10, color: '#0476BC' },
     { label: 'Rejected', value: 20, color: '#CA0001' },
@@ -72,7 +82,7 @@ export class Dashboard {
   //bar chart
 
   monthLabels = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'];
-  
+
   barDatasets = [
     { values: [78, 60, 118, 50, 78, 42], color: '#F33B48' },
     { values: [48, 80, 75, 40, 35, 100], color: '#0D4472' }
@@ -81,19 +91,19 @@ export class Dashboard {
   //area chart
 
   weekLabelsarea = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10'];
-    
-    areaDatasetsarea: AreaDataset[] = [
-      {
-        data: [65, 45, 35, 75, 25, 90, 60, 65, 55, 100],
-        fillColor: '#e8b4b8',
-        strokeColor: '#d63447',
-      },
-      {
-        data: [20, 40, 30, 40, 90, 70, 80, 70, 60, 50],
-        fillColor: '#b8d4e8',
-        strokeColor: '#4a90d9',
-      }
-    ];
-    // Adjust tension for smoother/sharper curves
-tension = 0.4; // Try values between 0.2-0.5
+
+  areaDatasetsarea: AreaDataset[] = [
+    {
+      data: [65, 45, 35, 75, 25, 90, 60, 65, 55, 100],
+      fillColor: '#e8b4b8',
+      strokeColor: '#d63447',
+    },
+    {
+      data: [20, 40, 30, 40, 90, 70, 80, 70, 60, 50],
+      fillColor: '#b8d4e8',
+      strokeColor: '#4a90d9',
+    }
+  ];
+  // Adjust tension for smoother/sharper curves
+  tension = 0.4; // Try values between 0.2-0.5
 }

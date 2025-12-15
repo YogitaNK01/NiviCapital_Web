@@ -205,9 +205,16 @@ letter-spacing: 0.16px;
   flex: 1;
   display: flex;
   flex-direction: column;
-  // height: 100vh;
-  // box-sizing: border-box;
-  overflow: hidden; 
+ 
+  // overflow: hidden; 
+  overflow: scroll;
+height: calc(100vh - headerHeight);
+ @media (max-width: 480px) {
+    
+  // overflow: hidden; 
+  // overflow-y: scroll;
+  }
+
 }
 
 /* Header Styles */
@@ -222,6 +229,10 @@ letter-spacing: 0.16px;
   align-items: center;
   align-self: stretch;
 
+  @media (max-width: 768px) {
+   padding: $spacing_4 $spacing_9 ;
+    height: 70px;
+  }
 }
 
 .menu-toggle {
@@ -325,6 +336,10 @@ background-color: $neutral-300;
 .user-profile ::ng-deep .dropdown-list {
  margin-left: -16px;
   width: auto;
+
+  @media (max-width: 480px) {
+    margin-left: -110px;
+  }
 }
 
 /* Content Area */
@@ -334,8 +349,9 @@ padding: $spacing_9;
 flex-direction: column;
 flex-shrink: 0;
   background: $bg;
-   height: 100vh;       /* full screen height */
+   height: 100vh;      
   overflow-y: auto;
+
 }
 
 /* Responsive Design */
@@ -361,7 +377,7 @@ flex-shrink: 0;
   }
 
   .content {
-    padding: 20px;
+    padding: $spacing_4 $spacing_7 ;
   }
   
  
@@ -445,7 +461,7 @@ flex-shrink: 0;
   }
 
   .main-content {
-    padding: 16px;
+    padding: 1px;
   }
 }
 
@@ -477,11 +493,11 @@ flex-shrink: 0;
     transition: left 0.3s ease;
 
     &.mobile-open {
-      left: 0; // slide in
+      left: 0; 
     }
 
     .sidebar-header {
-      // display: none; //  hide logo
+      // display: none; 
     }
   }
 
@@ -504,4 +520,5 @@ flex-shrink: 0;
   .header-actions {
     padding: 0;
   }
+
 }

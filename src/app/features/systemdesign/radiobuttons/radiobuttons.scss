@@ -24,3 +24,15 @@
 }
 
 
+
+  @media (max-width: 480px) {
+  
+   
+   .form-check-label{
+      font-size: 16px;
+  }
+   .form-check-input {
+    width: $spacing_9;
+    height:$spacing_9;
+}
+  }

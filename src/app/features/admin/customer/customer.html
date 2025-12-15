@@ -58,22 +58,22 @@
       <div class="db-title text-dp-2-bold">Customer Database</div>
       <div class="section-controls">
         <div class="search-box">
-          <app-inputfield label="Input Label" placeholder="Search for result" helpText="Help text" [showSearch]="true"
-            [showLabel]="false" [showHelpText]="false">
+          <app-inputfield label="Input Label" type="text" placeholder="Search for result" helpText="Help text" [showSearch]="true"
+            [showLabel]="false" [showHelpText]="false" (valueChange)="onSearchChange($event)"> >
           </app-inputfield>
         </div>
 
 
 
 
-        <div class="search-dropdown">
-          <app-dropdown class="menu-dropdown" [options]="Kycstatus" [(selectedValue)]="selectedOption2" [customStyle]="true"
+        <div class="search-dropdown search-dropdown-status">
+          <app-dropdown class="menu-dropdown" [options]="Kycstatus" [(selectedValue)]="selectedstatus" [customStyle]="true"
             placeholder="All KYC Status" (selectedValueChange)="getkycstatus($event)">
           </app-dropdown>
         </div>
 
-        <div class="search-dropdown">
-          <app-dropdown class="menu-dropdown" [options]="kyctype" [(selectedValue)]="selectedOption2" placeholder="All Types"
+        <div class="search-dropdown search-dropdown-type">
+          <app-dropdown class="menu-dropdown" [options]="kyctype" [(selectedValue)]="selectedOptiontype" placeholder="All Types"
             [customStyle]="true" (selectedValueChange)="getkyc_type($event)">
           </app-dropdown>
         </div>
@@ -113,7 +113,7 @@
         <!-- CIF ID Column -->
         <ng-container matColumnDef="CIFID">
           <th mat-header-cell *matHeaderCellDef class="mat-header-label">CIF ID </th>
-          <td mat-cell *matCellDef="let element" class="mat-content-td" (click)="getkyc(element.Id)"> {{element.CIFID}} </td>
+          <td mat-cell *matCellDef="let element" class="mat-content-td cifstyle" (click)="getkyc(element.Id)"> {{element.CIFID}} </td>
         </ng-container>
 
         <!-- Customer Name Column -->
@@ -187,9 +187,6 @@
     </div>
   </div>
 
-  <!-- Footer -->
-  <div class="content-footer">
-    <p>Copyright © 2025 Nivi Capital. All rights reserved</p>
-  </div>
+  
   
 </div>

@@ -34,6 +34,7 @@
       
       .text-dp-3-bold {
         font-size: 1.5rem;
+        text-align: left;
       }
       .user-info-breadcrumb {
         display: none;
@@ -42,11 +43,26 @@
 
 .content-footer {
   display: flex;
-  height: 75vh;
+  height: 5vh;
   flex-direction: column;
   align-items: center;
   color: $neutral-text-primary;
   padding: $spacing_7 ;
+
+  p {
+     font-size: 18px ;
+  }
+
+  @media (max-width: 768px){
+     p {
+    font-size: 16px !important;
+  }
+}
+  @media (max-width: 480px){
+     p {
+    font-size: 10px !important;
+  }
+  }
 }
 
 //breadcrum
@@ -112,6 +128,12 @@
   padding: $spacing_8;
   border-radius: $spacing_23;
   background: $secondary-50;
+
+  @media (max-width: 540px) {
+   width: $spacing_21;
+  height: $spacing_21;
+    
+  }
 }
 
 .divider {
@@ -201,4 +223,334 @@
   background-color:$warning-container;
   color: $warning-text-dark; /* brownish text */
 }
+
+
+/* Audit Trail Styles */
+.audit-trail-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: $spacing_9;
+  gap: $spacing_6!important;
+  @media (max-width: 768x) {
+    
+    gap: $spacing_6!important;
+  }
+
+   @media (max-width: 480px) {
+    flex-direction: column;
+    gap: $spacing_6;
+  }
+}
+
+.audit-search-input {
+  width: 50%;
+   min-width: 350px;
+  padding: $spacing_3, $spacing_12, $spacing_3, $spacing_4;
+  border: $border_1 solid $neutral-300;
+  border-radius: $spacing_2;
+  font-size:  22px;
+  outline: none;
+  transition: border-color 0.2s;
+
+  &:focus {
+    border-color: $primary-500;
+  }
+
+  &::placeholder {
+    color: #999;
+  }
+
+   @media (max-width: 950px) {
+     min-width: 200px;
+    width: 100%;
+  }
+}
+
+
+.audit-action-dropdow {
+  min-width: 350px;
+
+   @media (max-width: 950px) {
+     min-width: 20px;
+    width: 100%;
+  }
+  @media (max-width: 480px) {
+    width: 100%;
+  }
+}
+
+
+/* Timeline Styles */
+.audit-trail-timeline {
+  margin-top: $spacing_12;
+   display: grid;
+        grid-template-columns: 3fr 1fr;
+        gap: 1rem;
+        flex-direction: column;
+}
+
+.audit-timeline-section {
+ display: flex;
+flex-direction: column;
+gap: $spacing_7;
+align-self: stretch;
+}
+
+.audit-timeline-section-header {
+  // margin-bottom: $spacing_9;
+}
+
+.audit-timeline-section-title {
+  color: $secondary-700;
+  font-size: 20px;
+}
+
+.audit-timeline-item {
+  display: flex;
+  gap: $spacing_7;
+ 
+  
+}
+
+.audit-timeline-date {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+ gap:$spacing;
+align-self: stretch;
+}
+
+
+/* Timeline Styles */
+.audit-trail-timeline {
+  margin-top: $spacing_12;
+   display: grid;
+        grid-template-columns: 3fr 1fr;
+        gap: 1rem;
+        flex-direction: column;
+}
+
+.audit-timeline-section {
+ display: flex;
+flex-direction: column;
+gap: $spacing_7;
+align-self: stretch;
+}
+
+.audit-timeline-section-header {
+  // margin-bottom: $spacing_9;
+}
+
+.audit-timeline-section-title {
+  color: $secondary-700;
+  font-size: 20px;
+}
+
+.audit-timeline-item {
+  display: flex;
+  gap: $spacing_7;
+ 
+  
+}
+
+.audit-timeline-date {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+ gap:$spacing;
+align-self: stretch;
+}
+
+.audit-date-badge {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: $secondary-700;
+  border-radius: $spacing_11;
+  color: $neutral-text-tertiary;
+width: 40px;
+height: 40px;
+padding: 5px 6px;
+gap: 10px;
+aspect-ratio: 1/1;
+}
+
+
+.audit-timeline-line {
+  width: 5px; 
+  flex: 1;
+  background: $secondary-700;
+  border-radius: $spacing_3;
+}
+
+.audit-timeline-line-hr {
+  width: 15px;
+  height: 5px;
+  background: $secondary-700;
+   flex-shrink: 0;
+  align-self: center;
+  position: relative;
+  top: -28px;
+ border-radius: $spacing_3;
+}
+.audit-timeline-content {
+  flex: 1;
+  // padding-bottom: $spacing_4;
+}
+
+.audit-timeline-card {
+  background: $bg;
+  border: $border_1 solid $neutral-300;
+  border-radius: $spacing_3;
+  padding: $spacing_9;
+  transition: box-shadow 0.2s;
+
+  &:hover {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
+}
+
+.audit-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: $spacing_3;
+  gap: $spacing_4;
+
+  @media (max-width: 480px) {
+    flex-direction: row;
+    align-items: center;
+  }
+}
+
+.audit-card-time {
+ letter-spacing: 0.16px;
+ color: $neutral-600;
+}
+
+.audit-status-badge {
+  font-weight: 500;
+ 
+}
+
+.status-pending {
+ border-radius: $spacing_15;
+background: $warning-container;
+display: flex;
+padding:$spacing $spacing_7;
+align-items: center;
+color: $warning-text-dark;
+}
+
+.status-submitted {
+  background: $success-container;
+  color: $success-text-dark;
+  border-radius: $spacing_15;
+  padding:$spacing $spacing_7;
+}
+
+.status-approved {
+  background: #DBEAFE;
+  color: #1E40AF;
+  border-radius: $spacing_15;
+  padding:$spacing $spacing_7;
+}
+
+.status-rejected {
+  background: #FEE2E2;
+  color: #991B1B;
+  border-radius: $spacing_15;
+  padding:$spacing $spacing_7;
+}
+
+.audit-card-body {
+  display: flex;
+  flex-direction: column;
+  gap:  $spacing_5;
+}
+
+.audit-card-title {
+  color: $neutral-text-primary;
+  font-weight: 500;
+}
+
+.audit-card-subtitle {
+  color: $neutral-600;
+  
+}
+
+.audit-no-results {
+  text-align: center;
+  padding: $spacing_16;
+  color: #999;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .date-badge {
+    width: 48px;
+    height: 48px;
+  }
+
+  .date-day {
+    font-size: 18px;
+  }
+
+  .timeline-card {
+    padding: $spacing_4;
+  }
+  .doctype-data{
+    font-size: $font-size-body_md;
+  }
+}
+
+@media (max-width: 480px) {
+  .date-badge {
+    width: 40px;
+    height: 40px;
+  }
+
+  .date-month {
+    font-size: 8px;
+  }
+
+  .date-day {
+    font-size: 16px;
+  }
+  .search-input ,.action-dropdow {
+  width: 100%!important;
+  min-width: 0;
+}
+
+.timeline-item{
+  gap: $spacing_4;
+}
+
+.timeline-line-hr {
+  width: 10px;
+  height: 3px;
+}
+.timeline-line {
+  width: 3px; 
+}
+ .timeline-card {
+    padding: $spacing_6;
+  }
+.text-body-1{
+  font-size: $font-size-body_xs;
+}
+.status-badge {
+  font-size: $font-size-body_sm;
+ 
+}
+.text-label-data {
+   font-size: $font-size-body_md;
+   line-height: 1.25rem;
+    letter-spacing: 0.16px;
+}
+}
+
+
 

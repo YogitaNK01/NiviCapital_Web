@@ -203,7 +203,7 @@ export class Sanctionletter implements OnInit {
 
     let docY = currentY;
     doc.setFont('Arial', 'normal');
-    doc.setFontSize(9);
+    doc.setFontSize(10);
     documents.forEach(docItem => {
       doc.setDrawColor(200, 200, 200);
       doc.rect(10, currentY, 190, 10);

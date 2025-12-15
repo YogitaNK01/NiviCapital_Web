@@ -18,165 +18,40 @@
     </div>
   </div>
 
- <!-- search -->
+  <!-- search -->
 
-   <div class="search-bar commonbox">
-                <div class="search-title text-common text-dp-2-bold">Search</div>
-                 <div class="search-data text-common">
-                    <div class="search-dropdown"><app-dropdown [options]="Kycstatus"
-                            [(selectedValue)]="selectedOption1" placeholder="All"
-                            (selectedValueChange)="onSelectionChange2($event)">
-                        </app-dropdown></div>
-                    <div class="search-input"> <app-inputfield label="Input Label" placeholder="Search..."
-                            helpText="Help text" [showSearch]="true" [showLabel]="false" [showHelpText]="false">
-                        </app-inputfield></div>
-                    <div class="search-btn">
-                        <app-buttons label="Search" color="primary" class="btncustomClass "></app-buttons>
-                    </div>
+  <div class="search-bar commonbox">
+    <div class="search-title text-common text-dp-2-bold">Search</div>
+    <div class="search-data ">
 
-                </div> 
-            </div>
+      <div class="search-dropdown">
+        <app-dropdown class="menu-dropdown" [options]="Kycstatus" [(selectedValue)]="selectedOption2"
+          [customStyle]="true" placeholder="All" (selectedValueChange)="getkycstatuslos($event)">
+        </app-dropdown>
+      </div>
+      <div class="search-input"> 
+        <app-inputfield label="Input Label" placeholder="Search..." helpText="Help text"
+          [showSearch]="true" [showLabel]="false" [showHelpText]="false" (valueChange)="onSearchChange($event)">
+        </app-inputfield></div>
+      <div class="search-btn">
+        <app-buttons label="Search" color="primary" class="btncustomClass "></app-buttons>
+      </div>
+
+    </div>
+  </div>
 
 
   <!-- Customer Database Section -->
   <div class="database-section">
-    <!-- header  -->
-    <div class="section-header">
-   
-      <div class="section-controls">
-        <div class="search-box">
-          <app-inputfield label="Input Label" placeholder="Search for result" helpText="Help text" [showSearch]="true"
-            [showLabel]="false" [showHelpText]="false">
-          </app-inputfield>
-        </div>
 
 
+    <app-tables
+  [columns]="columns"
+  [data]="filteredData"
+  [pageSize]="6">
+</app-tables>
 
-
-        <div class="search-dropdown">
-          <app-dropdown class="menu-dropdown" [options]="Kycstatus" [(selectedValue)]="selectedOption2" [customStyle]="true"
-            placeholder="All KYC Status" (selectedValueChange)="getkycstatus($event)">
-          </app-dropdown>
-        </div>
-
-        <div class="search-dropdown">
-          <app-dropdown class="menu-dropdown" [options]="kyctype" [(selectedValue)]="selectedOption2" placeholder="All Types"
-            [customStyle]="true" (selectedValueChange)="getkyc_type($event)">
-          </app-dropdown>
-        </div>
-
-
-        <div class="add-button">
-          <app-buttons label="Add Customer" class="btn btn-icon Add btncustomClass" [outline]="true">
-            <img src="/assets/images/icons/addred.svg" alt="Add">
-
-          </app-buttons>
-        </div>
-      </div>
-    </div>
-
-    <!-- Table -->
-    <div class="table-container">
-
-      <table mat-table [dataSource]="dataSource" class="mat-elevation-z8">
-
-        <!-- Checkbox Column -->
-        <ng-container matColumnDef="select">
-          <th mat-header-cell *matHeaderCellDef>
-            <app-checkbox [checked]="isAllSelected()" [disabled]="false" [indeterminate]="isSomeSelected()" label=""
-              (checkedChange)="toggleAllRows($event)">
-            </app-checkbox>
-
-          </th>
-          <td mat-cell *matCellDef="let element">
-            <app-checkbox [checked]="selection.includes(element)" [disabled]="false" label=""
-              (checkedChange)="toggleRow(element)" (click)="$event.stopPropagation()">
-            </app-checkbox>
-
-
-          </td>
-        </ng-container>
-
-        <!-- CIF ID Column -->
-        <ng-container matColumnDef="CIFID">
-          <th mat-header-cell *matHeaderCellDef class="mat-header-label">CIF ID </th>
-          <td mat-cell *matCellDef="let element" class="mat-content-td" (click)="getkyc(element.Id)"> {{element.CIFID}} </td>
-        </ng-container>
-
-        <!-- Customer Name Column -->
-        <ng-container matColumnDef="customerName">
-          <th mat-header-cell *matHeaderCellDef class="mat-header-label"> Customer Name </th>
-          <td mat-cell *matCellDef="let element" class="mat-content-td"> {{element.CustomerName}} </td>
-        </ng-container>
-
-        <!-- Mobile Column -->
-        <ng-container matColumnDef="mobile">
-          <th mat-header-cell *matHeaderCellDef class="mat-header-label"> Mobile </th>
-          <td mat-cell *matCellDef="let element" class="mat-content-td"> {{element.mobile}} </td>
-        </ng-container>
-
-        <!-- Email Column -->
-        <ng-container matColumnDef="email">
-          <th mat-header-cell *matHeaderCellDef class="mat-header-label"> Email </th>
-          <td mat-cell *matCellDef="let element" class="mat-content-td"> {{element.email}} </td>
-        </ng-container>
-
-        <!-- Status Column -->
-        <ng-container matColumnDef="status">
-          <th mat-header-cell *matHeaderCellDef class="mat-header-label"> Status </th>
-          <td mat-cell *matCellDef="let element" class="mat-content-td"> <span class="status" [ngClass]="getStatusClass(element.status)">{{ getStatusClass(element.status)}}</span> </td>
-        </ng-container>
-
-        <!-- Loan Status Column -->
-        <ng-container matColumnDef="loanStatus">
-          <th mat-header-cell *matHeaderCellDef class="mat-header-label"> Loan Status </th>
-          <td mat-cell *matCellDef="let element" class="mat-content-td"> <span class="status" [ngClass]="getStatusClass(element.status)">{{ getStatusClass(element.status)}}</span> </td>
-        </ng-container>
-
-        <!-- Registration Date Column -->
-        <ng-container matColumnDef="registrationDate">
-          <th mat-header-cell *matHeaderCellDef class="mat-header-label"> Registration Date </th>
-          <td mat-cell *matCellDef="let element" class="mat-content-td"> {{element.registrationDate}} </td>
-        </ng-container>
-
-        <!-- Actions Column -->
-        <!-- <ng-container matColumnDef="symbol">
-    <th mat-header-cell *matHeaderCellDef> Actions </th>
-    <td mat-cell *matCellDef="let element"> {{element.symbol}} </td>
-  </ng-container> -->
-
-
-
-
-        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-
-        <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
-      </table>
-    </div>
-
-    <!-- Pagination -->
-
-
-
-    <div class="pagination">
-      <button class="pagination-btn" [disabled]="currentPage === 1" (click)="onPageChange(currentPage - 1)">
-        <img class="arrow-icon" src="/assets/images/icons/arrow-left-pg.svg" alt="Previous" height="20" width="20" />
-      </button>
-      <button *ngFor="let page of totalPagesArray" class="pagination-btn" [class.active]="page === currentPage"
-        (click)="onPageChange(page)" [disabled]="page === '...'">
-        <span class="pagecount text-body-2">{{ page }}</span>
-      </button>
-
-      <button class="pagination-btn" [disabled]="currentPage === totalPages" (click)="onPageChange(currentPage + 1)">
-        <img src="/assets/images/icons/arrow-right-pg.svg" height="20" width="20" alt="Previous" />
-      </button>
-
-    </div>
   </div>
 
-  <!-- Footer -->
-  <div class="content-footer">
-    <p>Copyright © 2025 Nivi Capital. All rights reserved</p>
-  </div>
-  
+
 </div>

@@ -10,7 +10,9 @@
     gap: 1rem;
     color: #1e293b;
 
-
+ @media (max-width: 768px) {
+   gap: 0 ;
+  }
 
     //alerts 
     .alerts {
@@ -144,6 +146,8 @@
                     align-items: center;
                     gap: $spacing_7;
                     flex: 1;
+
+                   
                 }
 
                 .card-text {
@@ -161,6 +165,11 @@
 
                     border-radius: $border_radius_s;
                     background: $bg;
+
+                     @media (max-width: 480px) {
+                         width: 35px;
+                    height: 35px;
+                      }
                 }
 
                 .card-title {
@@ -184,7 +193,7 @@
 
             @media (max-width: 768px) {
                 .clickable-card {
-                    flex-direction: column;
+                    // flex-direction: column;
                     align-items: flex-start;
                     gap: $spacing_5;
                 }
@@ -273,4 +282,6 @@
     .dashboard-grid2 {
         padding: 0;
     }
+
+    
 }

@@ -15,6 +15,7 @@
   border: none;
   // color: #fff;
   box-sizing: border-box;
+  justify-content: center;
 
 
   &.primary {
@@ -128,3 +129,12 @@ svg {
   white-space: nowrap; // Keep text on one line
   color: #fff;
 }
+
+ @media (max-width: 480px) {
+   .text-dp-3-regular {
+    font-size: 14px;
+   }
+   .btn{
+    gap: 0;
+   }
+  }

@@ -1,0 +1,165 @@
+@use 'variables' as *;
+@use 'typography' as *;
+@use 'common' as *;
+
+.table-container {
+  width: 100%;
+  overflow-x: auto;
+  padding-bottom: $spacing_14;
+}
+
+// Material Table Overrides
+::ng-deep {
+
+
+  .mat-mdc-table {}
+
+
+  .mat-mdc-header-row {}
+
+
+  .mat-mdc-header-cell {
+    border-bottom: none;
+
+    &:first-child {
+
+      border: none;
+      border-radius: $spacing_5 0 0 $spacing_5;
+    }
+
+    &:last-child {
+
+      border-radius: 0 $spacing_5 $spacing_5 0;
+    }
+  }
+
+  // Body rows
+  .mat-mdc-row {
+
+
+    &:hover {
+      background-color: #F9FAFB;
+    }
+
+    &:last-child {
+      border-bottom: 0.1px solid $neutral_border_2 !important;
+    }
+  }
+
+  // Body cells
+  .mat-mdc-cell {
+    // border-bottom-color: $neutral_border_2 !important;
+
+
+    &:first-child {}
+
+    &:last-child {
+      border-bottom-color: $neutral_border_2 !important;
+    }
+  }
+
+ .cifstyle{
+  cursor: pointer;
+  color: #007bff;
+   text-decoration: underline;
+ }
+}
+
+// --------------------pagination----------------------
+.pagination {
+  display: flex;
+  align-items: center;
+  gap: $spacing_3;
+
+  @media (max-width: 768px) {
+    padding: 10px 0;
+  }
+}
+
+.pagination-btn {
+  width: $spacing_15;
+  height: $spacing_15;
+  opacity: 0.5;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: $spacing;
+
+
+  border-radius: $spacing;
+  border: $border_1 solid $neutral-300;
+  background: $bg;
+
+  &:hover {
+    border-color: $primary-500;
+    opacity: 1;
+  }
+
+
+  &:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+
+  &.active {
+    border-color: $primary-500 !important;
+
+    /* target inner text or number */
+    .pagecount {
+      color: $primary-500 !important;
+    }
+  }
+}
+
+.pagecount {
+  width: $spacing_11;
+  height: $spacing_10;
+  font-size: $font-size-body_sm;
+  text-align: center;
+  color: grey;
+}
+
+.pagination-ellipsis {
+  color: #9ca3af;
+  padding: 0 4px;
+}
+
+/* ✅ Responsive version */
+@media (max-width: 480px) {
+  .pagination-btn:not(:first-child):not(:last-child) {
+    display: none; /* hide middle buttons */
+  }
+
+  .pagination-btn:first-child,
+  .pagination-btn:last-child,
+  .pagination-btn:nth-child(2),
+  .pagination-btn:nth-last-child(2),
+  .pagination-btn.active {
+    display: inline-flex; /* show first, last, and active */
+  }
+}
+//----------------status (penidng/completed)-----------------------
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.5;
+
+  &.status-completed {
+    background-color: #D1FAE5;
+    color: #065F46;
+  }
+
+  &.status-pending {
+    background-color: #FEF3C7;
+    color: #92400E;
+  }
+
+  &.status-document-issue {
+    background-color: #FEE2E2;
+    color: #991B1B;
+  }
+}

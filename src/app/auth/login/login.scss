@@ -46,6 +46,10 @@
         align-items: center;
         gap: 40px;
         align-self: stretch;
+
+        @media (max-width:480px) {
+            gap: 0;
+        }
     }
 
     .msg {
@@ -83,23 +87,29 @@
 
 .form-check {
     padding: $spacing_15 0;
+
+    @media (max-width:480px) {
+        padding: $spacing_7 0;
+    }
 }
 
-::ng-deep app-buttons .btn{
+::ng-deep app-buttons .btn {
     border-radius: $border-radius-rounded;
     background-color: $primary-btn;
     color: #fff;
     height: auto;
 
-    &:hover , &:active{
-    background-color: $primary-btn;
-    // color: #fff;
-  }
+    &:hover,
+    &:active {
+        background-color: $primary-btn;
+        // color: #fff;
+    }
 }
-  ::ng-deep app-buttons .btn{
+
+::ng-deep app-buttons .btn {
     display: flex;
     justify-content: center;
-  }
+}
 
 
 .forgot-pass {
@@ -111,6 +121,10 @@
         color: #000;
     }
 
+    @media (max-width:480px) {
+        display: flex;
+    justify-content: center;
+    }
 }
 
 
@@ -127,14 +141,15 @@
         height: auto;
         padding: 1rem;
         margin: 0;
-     gap: 20px;
+        gap: 10px;
 
-    .companyinfo .logoimg {
-        width: 140px;
-       
+        .companyinfo .logoimg {
+            width: 140px;
+
+        }
     }
-}
-    .text-header1-login{
+
+    .text-header1-login {
         font-size: $font-size-dp_3;
     }
 }

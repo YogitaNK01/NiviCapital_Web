@@ -53,9 +53,11 @@ isMobile = false;
   adminMenu: MenuItem[] = [
     { icon: '/assets/images/sidemenu/dashboard.svg', iconActive: '/assets/images/sidemenu/dashboard-active.svg', label: 'Dashbboard', route: '/admin/dashboard', expanded: false },
     { icon: '/assets/images/sidemenu/user.svg', iconActive: '/assets/images/sidemenu/user-active.svg', label: 'Customer', route: '/admin/customer', expanded: false },
-    { icon: '/assets/images/sidemenu/money-recive.svg', iconActive: '/assets/images/sidemenu/money-recive.svg', label: 'Loan Operations', route: '/admin/losoperation', expanded: false },
-    { icon: '/assets/images/sidemenu/candle.svg', label: 'FX Operations', route: '/admin/sanctionletter', expanded: false },
-    { icon: '/assets/images/sidemenu/wallet-money.svg', label: 'LMS', route: '/admin/dashboard2', expanded: false },
+    { icon: '/assets/images/sidemenu/money-recive.svg', iconActive: '/assets/images/sidemenu/money-recive-active.svg', label: 'Loan Operations', route: '/admin/losoperation', expanded: false },
+    { icon: '/assets/images/sidemenu/candle.svg',iconActive: '/assets/images/sidemenu/money-recive-active.svg', label: 'FX Operations', route: '/admin/losdetails', expanded: false },
+        { icon: '/assets/images/sidemenu/candle.svg',iconActive: '/assets/images/sidemenu/money-recive-active.svg', label: 'Customer', route: '/admin/customerdetails', expanded: false },
+
+    { icon: '/assets/images/sidemenu/wallet-money.svg', label: 'LMS', route: '/admin/sharedtable', expanded: false },
     { icon: '/assets/images/sidemenu/document-upload.svg', label: 'Documents', route: '/admin/customer2', expanded: false },
     { icon: '/assets/images/sidemenu/tag-user.svg', label: 'Communication', route: '/admin/dashboard3', expanded: false },
     { icon: '/assets/images/sidemenu/cpu-setting.svg', label: 'Configuration', route: '/admin/customer3', expanded: false },
@@ -72,7 +74,7 @@ isMobile = false;
 }
 
 checkScreenSize() {
-  this.isMobile = window.innerWidth < 768;
+  this.isMobile = window.innerWidth < 769;
   this.sidebarOpen = !this.isMobile; // default: open on desktop, closed on mobile
 }
 

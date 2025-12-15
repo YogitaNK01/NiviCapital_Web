@@ -20,20 +20,20 @@
 
   <!-- edit download buttons -->
 
-  <div class="d-flex justify-content-end gap-2">
+  <div class="d-flex justify-content-center justify-content-md-end gap-2">
     <app-buttons label="Edit" class="btn btn-icon btn-outline btn-no-padding" [outline]="true">
-      <img src="/assets/images/icons/edit.svg" alt="edit">
+      <img src="/assets/images/icons/edit.svg" alt="edit" height="24" width="24"> <span class="text-body-1 ">Edit</span>
 
     </app-buttons>
     <app-buttons label="Download CIF" class="btn btn-icon btn-outline btn-no-padding" [outline]="true">
-      <img src="/assets/images/icons/import-red.svg" alt="import">
+      <img src="/assets/images/icons/import-red.svg" alt="import" height="24" width="24"> <span class="text-body-1 ">Download CIF</span>
 
     </app-buttons>
   </div>
 
   <!-- Tabs -->
-  <div class="userdetails">
-    <div class="tab-container">
+  <div class="userdetails cif-container">
+    <div class="tab-container tab-header-fixed">
       <mat-tab-group class="tabs" [(selectedIndex)]="selectedTabIndex">
 
 
@@ -47,39 +47,39 @@
               <div class="info-grid">
                 <div class="info-item">
                   <label class="text-label">First Name</label>
-                  <p class="text-label-data">{{userData.firstName??"-"}}</p>
+                  <p class="text-label-data">{{kycData[0].firstName??"-"}}</p>
                 </div>
                 <div class="info-item">
                   <label class="text-label">Middle Name</label>
-                  <p class="text-label-data">{{userData.middleName??"-"}}</p>
+                  <p class="text-label-data">{{kycData[0].middleName??"-"}}</p>
                 </div>
                 <div class="info-item">
                   <label class="text-label">Last Name</label>
-                  <p class="text-label-data">{{userData.lastName??"-"}}</p>
+                  <p class="text-label-data">{{kycData[0].lastName??"-"}}</p>
                 </div>
                 <div class="info-item">
                   <label class="text-label">Date of Birth</label>
-                  <p class="text-label-data">{{userData.firstName??"-"}}</p>
+                  <p class="text-label-data">{{kycData[0].dob??"-"}}</p>
                 </div>
                 <div class="info-item">
                   <label class="text-label">Marital Status</label>
-                  <p class="text-label-data">{{userData.firstName??"-"}}</p>
+                  <p class="text-label-data">{{kycData[0].firstName??"-"}}</p>
                 </div>
                 <div class="info-item">
                   <label class="text-label">Gender</label>
-                  <p class="text-label-data">{{userData.firstName??"-"}}</p>
+                  <p class="text-label-data">{{kycData[0].firstName??"-"}}</p>
                 </div>
                 <div class="info-item">
                   <label class="text-label">Nationality</label>
-                  <p class="text-label-data">{{userData.firstName??"-"}}</p>
+                  <p class="text-label-data">{{kycData[0].firstName??"-"}}</p>
                 </div>
                 <div class="info-item">
                   <label class="text-label">Email ID</label>
-                  <p class="text-label-data">{{userData.emailId??"-"}}</p>
+                  <p class="text-label-data">{{kycData[0].emailId??"-"}}</p>
                 </div>
                 <div class="info-item">
                   <label class="text-label">Mobile Number</label>
-                  <p class="text-label-data">{{userData.phoneNumber??"-"}}</p>
+                  <p class="text-label-data">{{kycData[0].middleName??"-"}}</p>
                 </div>
               </div>
             </div>
@@ -422,17 +422,17 @@
                 <div class="info-item" *ngFor="let doc of kyc_documents">
                   <label class="text-label">{{ doc.docType }}</label>
                   <div class="img-box">
-                    <p class="text-label-data">{{ doc.docType || '-' }}</p>
+                    <p class="text-label-data doctype-data">{{ doc.docType || '-' }}</p>
 
                     <div class="icons">
-                     
+
                       <span>
-                        <img src="/assets/images/icons/eyered.svg" alt="view"  />
+                        <img src="/assets/images/icons/eyered.svg" alt="view" />
                       </span>
 
-                
+
                       <span>
-                        <img src="/assets/images/icons/import-red.svg" alt="download"  />
+                        <img src="/assets/images/icons/import-red.svg" alt="download" />
                       </span>
                     </div>
                   </div>
@@ -464,7 +464,6 @@
         <!-- Education -->
         <mat-tab label="Education">
           <div class="tab-content">
-            <!-- Education Details -->
             <div class="section">
               <h3 class="section-title text-dp-2-bold">Education Details</h3>
               <hr _ngcontent-ng-c3098784094="" class="divider">
@@ -472,8 +471,7 @@
                 <div class="info-item">
                   <label class="text-label">10th</label>
                   <div class="img-box">
-                    <!-- <p class="text-label-data">{{ tenthMarksheet.documentSubcategory?'Marksheet.png':"-" }}</p> -->
-                     <p class="text-label-data">Marksheet.png</p>
+                    <p class="text-label-data">Marksheet.png</p>
                     <div class="icons">
                       <span class="" (click)="viewImage('/assets/images/dashboard/profileimg.png')"><img
                           src="/assets/images/icons/eyered.svg" alt="view"></span>
@@ -489,8 +487,7 @@
                 <div class="info-item">
                   <label class="text-label">12th</label>
                   <div class="img-box">
-                     <p class="text-label-data">Marksheet.png</p>
-                    <!-- <p class="text-label-data">{{ twelfthMarksheet.documentSubcategory?'Marksheet.png':"-" }}</p> -->
+                    <p class="text-label-data">Marksheet.png</p>
                     <div class="icons">
                       <span class="" (click)="viewImage('/assets/images/dashboard/profileimg.png')"><img
                           src="/assets/images/icons/eyered.svg" alt="view"></span>
@@ -506,8 +503,7 @@
                 <div class="info-item">
                   <label class="text-label">Undergraduate</label>
                   <div class="img-box">
-                     <p class="text-label-data">Marksheet.png</p>
-                    <!-- <p class="text-label-data">{{ ugMarksheet.documentSubcategory?'Marksheet.png':"-" }}</p> -->
+                    <p class="text-label-data">Marksheet.png</p>
                     <div class="icons">
                       <span class="" (click)="viewImage('/assets/images/dashboard/profileimg.png')"><img
                           src="/assets/images/icons/eyered.svg" alt="view"></span>
@@ -523,8 +519,7 @@
                 <div class="info-item">
                   <label class="text-label">Postgraduate</label>
                   <div class="img-box">
-                     <p class="text-label-data">Marksheet.png</p>
-                    <!-- <p class="text-label-data">{{ pgMarksheet.documentSubcategory?'Marksheet.png':"-" }}</p> -->
+                    <p class="text-label-data">Marksheet.png</p>
                     <div class="icons">
                       <span class="" (click)="viewImage('/assets/images/dashboard/profileimg.png')"><img
                           src="/assets/images/icons/eyered.svg" alt="view"></span>
@@ -541,7 +536,7 @@
               </div>
             </div>
 
-            <!-- Foreign Course Details -->
+
             <div class="section mt-4">
               <h3 class="section-title text-dp-2-bold">Foreign Course Details</h3>
               <hr _ngcontent-ng-c3098784094="" class="divider">
@@ -549,8 +544,7 @@
                 <div class="info-item">
                   <label class="text-label">IELTS / PTE</label>
                   <div class="img-box">
-                     <p class="text-label-data">IELTS.png</p>
-                    <!-- <p class="text-label-data">{{ scorecard.documentSubcategory?'IELTS.png':"-" }}</p> -->
+                    <p class="text-label-data">IELTS.png</p>
                     <div class="icons">
                       <span class="" (click)="viewImage('/assets/images/dashboard/profileimg.png')"><img
                           src="/assets/images/icons/eyered.svg" alt="view"></span>
@@ -578,8 +572,7 @@
                 <div class="info-item">
                   <label class="text-label">University Offer Letter</label>
                   <div class="img-box">
-                     <p class="text-label-data">Offer_Letter.png</p>
-                    <!-- <p class="text-label-data">{{ uniofferletter.documentSubcategory?'Offer_Letter.png':"-" }}</p> -->
+                    <p class="text-label-data">Offer_Letter.png</p>
                     <div class="icons">
                       <span class="" (click)="viewImage('/assets/images/dashboard/profileimg.png')"><img
                           src="/assets/images/icons/eyered.svg" alt="view"></span>
@@ -596,9 +589,8 @@
         </mat-tab>
 
         <!-- Occupation -->
-        <mat-tab label="Occupation">
+        <!-- <mat-tab label="Occupation">
           <div class="tab-content">
-            <!-- Occupation Details salaried --> <!-- conditionedbased -->
             <div class="section" *ngIf="!issalaried">
               <h3 class="section-title text-dp-2-bold">Occupation Details</h3>
               <hr _ngcontent-ng-c3098784094="" class="divider">
@@ -687,7 +679,6 @@
               </div>
             </div>
 
-            <!-- Occupation Details Self Employed (Business)-->
             <div class="section" *ngIf="issalaried">
               <h3 class="section-title text-dp-2-bold">Occupation Details</h3>
               <hr _ngcontent-ng-c3098784094="" class="divider">
@@ -729,7 +720,7 @@
               </div>
             </div>
           </div>
-        </mat-tab>
+        </mat-tab> -->
 
         <!-- Products -->
         <mat-tab label="Products">
@@ -758,7 +749,7 @@
                     <tr>
                       <td class="text-dp-3-regular table-data">Education</td>
                       <td class="text-dp-3-regular table-data">abc1234</td>
-                      <td class="text-dp-3-regular table-data"><span class="status activestatus" >Active</span> </td>
+                      <td class="text-dp-3-regular table-data"><span class="status activestatus">Active</span> </td>
                       <td class="text-dp-3-regular table-data">₹5,00,000</td>
                       <td class="text-dp-3-regular table-data">Co-Applicant</td>
                       <td class="text-dp-3-regular table-data">₹2,00,000</td>
@@ -840,8 +831,150 @@
           </div>
         </mat-tab>
 
-        <!-- Bank Accounts -->
-        <mat-tab label="Bank Accounts">
+
+        <!-- Audit Trail -->
+        <mat-tab label="Audit Trail">
+          <div class="tab-content">
+
+            <div class="section">
+              <!-- Search and Filter Row -->
+              <div class="audit-trail-header">
+                <div class="audit-search-input"> <app-inputfield label="Input Label" placeholder="Search..."
+                    helpText="Help text" [showSearch]="true" [showLabel]="false" [showHelpText]="false">
+                  </app-inputfield></div>
+
+                <div class="audit-action-dropdow"><app-dropdown [options]="myOptions2"
+                    [(selectedValue)]="selectedOption2" placeholder="All Actions"
+                    (selectedValueChange)="onSelectionChange2($event)">
+                  </app-dropdown></div>
+              </div>
+              <hr class="divider">
+
+              <!-- Audit Trail Timeline -->
+              <div class="audit-trail-timeline">
+                <div class="audit-trail d-flex flex-column">
+
+                  <!-- Today Section -->
+                  <div class="audit-timeline-section" *ngIf="getTodayTrails().length > 0">
+                    <div class="audit-timeline-section-header">
+                      <span class="audit-timeline-section-title text-dp-3-regular">Today ({{ getTodayTrails().length
+                        }})</span>
+                    </div>
+
+                    <div class="audit-timeline-item" *ngFor="let trail of getTodayTrails()">
+                      <div class="audit-timeline-date"> <span class="text-body-1 text-capitalize">{{ trail.date | date:
+                          'MMM'
+                          | uppercase }}</span>
+
+                        <div class="audit-date-badge">
+                          <span class="date-day">{{ trail.date | date: 'd' }}</span>
+
+                        </div>
+                        <div class="audit-timeline-line"></div>
+                      </div>
+                      <div class="audit-timeline-line-hr"></div>
+                      <div class="audit-timeline-content">
+                        <div class="audit-timeline-card">
+                          <div class="audit-card-header">
+                            <span class="audit-card-time text-body-1">{{ trail.time }}</span>
+                            <span class="saudit-tatus-badge text-label-data" [ngClass]="getStatusClass(trail.status)">
+                              {{ trail.status }}
+                            </span>
+                          </div>
+                          <div class="audit-card-body">
+                            <h4 class="audit-card-title text-label-data">{{ trail.action }}</h4>
+                            <p class="audit-card-subtitle text-body-1">{{ trail.reference }}</p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Yesterday Section -->
+                  <div class="audit-timeline-section" *ngIf="getYesterdayTrails().length > 0">
+                    <div class="audit-timeline-section-header">
+                      <span class="audit-timeline-section-title text-dp-3-regular">Yesterday ({{
+                        getYesterdayTrails().length
+                        }})</span>
+                    </div>
+
+                    <div class="audit-timeline-item" *ngFor="let trail of getYesterdayTrails()">
+                      <div class="audit-timeline-date"> <span class="text-body-1 text-capitalize">{{ trail.date | date:
+                          'MMM'
+                          | uppercase }}</span>
+
+                        <div class="audit-date-badge">
+                          <span class="date-day">{{ trail.date | date: 'd' }}</span>
+
+                        </div>
+                        <div class="audit-timeline-line"></div>
+                      </div>
+                      <div class="audit-timeline-line-hr"></div>
+                      <div class="audit-timeline-content">
+                        <div class="audit-timeline-card">
+                          <div class="audit-card-header">
+                            <span class="audit-card-time text-body-1">{{ trail.time }}</span>
+                            <span class="saudit-tatus-badge text-label-data" [ngClass]="getStatusClass(trail.status)">
+                              {{ trail.status }}
+                            </span>
+                          </div>
+                          <div class="audit-card-body">
+                            <h4 class="audit-card-title text-label-data">{{ trail.action }}</h4>
+                            <p class="audit-card-subtitle text-body-1">{{ trail.reference }}</p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Earlier Section -->
+                  <div class="audit-timeline-section" *ngIf="getEarlierTrails().length > 0">
+                    <div class="audit-timeline-section-header">
+                      <span class="audit-timeline-section-title text-dp-3-regular">Earlier ({{ getEarlierTrails().length
+                        }})</span>
+                    </div>
+
+                    < <div class="audit-timeline-item" *ngFor="let trail of getEarlierTrails()">
+                      <div class="audit-timeline-date"> <span class="text-body-1 text-capitalize">{{ trail.date | date:
+                          'MMM'
+                          | uppercase }}</span>
+
+                        <div class="audit-date-badge">
+                          <span class="date-day">{{ trail.date | date: 'd' }}</span>
+
+                        </div>
+                        <div class="audit-timeline-line"></div>
+                      </div>
+                      <div class="audit-timeline-line-hr"></div>
+                      <div class="audit-timeline-content">
+                        <div class="audit-timeline-card">
+                          <div class="audit-card-header">
+                            <span class="audit-card-time text-body-1">{{ trail.time }}</span>
+                            <span class="saudit-tatus-badge text-label-data" [ngClass]="getStatusClass(trail.status)">
+                              {{ trail.status }}
+                            </span>
+                          </div>
+                          <div class="audit-card-body">
+                            <h4 class="audit-card-title text-label-data">{{ trail.action }}</h4>
+                            <p class="audit-card-subtitle text-body-1">{{ trail.reference }}</p>
+                          </div>
+                        </div>
+                      </div>
+                  </div>
+                </div>
+
+                <!-- No Results -->
+                <div class="audit-no-results" *ngIf="filteredAuditTrails.length === 0">
+                  <p class="text-common">No audit trails found</p>
+                </div>
+              </div>
+            </div>
+
+          </div>
+    </div>
+    </mat-tab>
+    <!-- Bank Accounts -->
+    <!-- <mat-tab label="Bank Accounts">
           <div class="tab-content">
             <div class="section">
 
@@ -881,17 +1014,16 @@
 
             </div>
           </div>
-        </mat-tab>
+        </mat-tab> -->
 
-        <!-- Credit Score -->
-        <mat-tab label="Credit Score">
+    <!-- Credit Score -->
+     <mat-tab label="Credit Score">
           <div class="tab-content">
             <div class="section">
               <h3 class="section-title text-dp-2-bold">Credit Score</h3>
               <hr class="divider">
               <div class="containerdata">
 
-                <!-- Credit Score Section -->
                 <div class="credit-score-section">
                   <div class="stats-container-main">
                     <div class="score-chart">
@@ -969,13 +1101,13 @@
                         </app-buttons>
                       </div>
                     </div>
-                    <!-- <div class="vertical-divider-main"></div> -->
+                   
                     <div class="empty"></div>
                   </div>
                 </div>
               </div>
             </div>
-            <!-- Latest Know Address Section -->
+           
             <div class="section">
               <h3 class="section-title text-dp-1-medium">Latest Know Address as per CIBIL</h3>
               <hr class="divider">
@@ -1009,7 +1141,7 @@
               </div>
             </div>
 
-            <!-- CIBIL History Table -->
+            
             <div class="section">
               <h3 class="section-title text-dp-1-medium">CIBIL History</h3>
               <hr class="divider">
@@ -1052,41 +1184,51 @@
             </div>
           </div>
 
-        </mat-tab>
+        </mat-tab>  
 
-        <!-- Sanction Letter -->
-        <mat-tab label="Sanction Letter">
-          <div class="tab-content">
-            <div class="section">
-              <h3 class="section-title text-dp-2-bold">Sanction Letter </h3>
-              <hr _ngcontent-ng-c3098784094="" class="divider">
+    <!-- Sanction Letter -->
+    <mat-tab label="Sanction Letter">
+      <div class="tab-content">
+        <div class="section">
+          <h3 class="section-title text-dp-2-bold">Sanction Letter </h3>
+          <hr _ngcontent-ng-c3098784094="" class="divider">
 
-              <app-sanctionletter></app-sanctionletter>
-            </div>
+          <app-sanctionletter></app-sanctionletter>
+        </div>
 
 
-          </div>
-        </mat-tab>
+      </div>
+    </mat-tab>
 
-      </mat-tab-group>
-    </div>
-
-    <!-- footer buttons  -->
-    <div class="d-flex justify-content-start gap-2 footer-btn" >
-      <app-buttons label="Edit" class="btn primary btn-icon btncustomClass btn-label">
-        <img src="/assets/images/icons/add.svg" alt="edit">
-
-      </app-buttons>
-      <app-buttons label="Download CIF" class="btn primary btn-icon btncustomClass btn-label">
-        <img src="/assets/images/icons/import.svg" alt="Download">
-
-      </app-buttons>
-
-    </div>
+    </mat-tab-group>
   </div>
 
-  <app-quicklinks 
-    [selectedTabIndex]="selectedTabIndex"
-    (tabChange)="onQuickLinkTabChange($event)">
-  </app-quicklinks>
+  <!-- footer buttons  -->
+  <div class="d-flex justify-content-start gap-2 footer-btn">
+    <app-buttons label="Edit" class="btn primary btn-icon btncustomClass btn-label-text">
+      <!-- <img src="/assets/images/icons/add.svg" alt="edit"> -->
+      <span class="text-body-1 primarycolor">Edit</span>
+
+    </app-buttons>
+    <app-buttons label="Download CIF" class="btn primary btn-icon btncustomClass btn-label-text">
+      <!-- <img src="/assets/images/icons/import.svg" alt="Download"> -->
+      <span class="text-body-1 primarycolor">Download CIF</span>
+
+    </app-buttons>
+
+     <!-- <app-buttons label="Edit" class="btn primary btn-icon btncustomClass btn-label">
+      <img src="/assets/images/icons/add.svg" alt="edit">
+
+    </app-buttons>
+    <app-buttons label="Download CIF" class="btn primary btn-icon btncustomClass btn-label">
+      <img src="/assets/images/icons/import.svg" alt="Download">
+
+    </app-buttons> -->
+  </div>
+
+
+</div>
+
+<!-- <app-quicklinks [selectedTabIndex]="selectedTabIndex" (tabChange)="onQuickLinkTabChange($event)">
+  </app-quicklinks> -->
 </div>

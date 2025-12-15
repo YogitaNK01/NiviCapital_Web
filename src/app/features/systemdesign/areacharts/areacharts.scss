@@ -1,10 +1,13 @@
 .chart-wrapper {
-  background: white;
+  // background: white;
   border-radius: 8px;
   // box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   display: inline-block;
 padding: 20px;
 
+@media (max-width:480px){
+    padding: 0;
+  }
 
   .chart-title {
     font-size: 16px;

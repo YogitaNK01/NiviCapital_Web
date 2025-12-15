@@ -41,9 +41,9 @@ export interface Customerstable {
 })
 export class Customer implements OnInit {
 
-  
+
   customerGrowth = '12% from last month';
-  kycCompleted : any;
+  kycCompleted: any;
   kycGrowth = '8% from last month';
 
   searchQuery = '';
@@ -51,10 +51,10 @@ export class Customer implements OnInit {
   selectedType = 'All Types';
 
   selection: Customerstable[] = [];
-  selectedUser:any;
+  selectedUser: any;
   //mat table
   displayedColumns: string[] = ['select', 'CIFID', 'customerName', 'mobile', 'email', 'status', 'loanStatus', 'registrationDate'];
-  // dataSource = ELEMENT_DATA;
+  
   dataSource = new MatTableDataSource<any>([]);
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
@@ -76,9 +76,8 @@ export class Customer implements OnInit {
   // @Input() avatarUrl='https://i.pravatar.cc/40?img=12';
   // @Input() hasAvatar = false;
 
-  selectedOption1: string = '';
-  selectedOption2: string = '';
-  selectedOption3: string = '';
+  selectedstatus: string = '';
+  selectedOptiontype: string = '';
 
 
   Kycstatus: DropdownOption[] = [
@@ -88,25 +87,25 @@ export class Customer implements OnInit {
     { label: 'Document Issue', value: 'Document Issue' }
   ];
 
- allApplicants: any[] = [];
+  allApplicants: any[] = [];
   selecteduser: any;
-  constructor(public http: HttpClient, public router: Router,private service:Main) { }
+
+  filteredData: any[] = [];
+
+  searchText: string = "";
+
+
+  constructor(public http: HttpClient, public router: Router, private service: Main) { }
   // 
   ngOnInit(): void {
     this.loadallusers();
     this.updateVisiblePages();
-    // this.getkyc();
-
-     //los/applications
+   
     this.service.getAllApplicants().subscribe({
       next: (response) => {
 
         this.allApplicants = response.applications;
         // console.log('All applicants--:', this.allApplicants);
-
-       
-
-
       },
       error: (error) => {
         console.error('Error fetching users:', error);
@@ -115,13 +114,13 @@ export class Customer implements OnInit {
 
   }
   //-----------get table data from api----------------------------
- 
-  loadallusers(){
+
+  loadallusers() {
     this.service.getAllUsers().subscribe({
       next: (response) => {
         // console.log('Users:', response);
-        
-       this.AlluserData = response
+
+        this.AlluserData = response
         this.fullData = (response as any[]).map((item, index) => ({
           id_data: index + 1,
           CIFID: item.cif ?? "-",
@@ -135,9 +134,10 @@ export class Customer implements OnInit {
           Id: item.id ?? "-"
         }));
 
+        this.filteredData = this.fullData;
         this.totalItems = this.fullData.length;
-        const kycCompletedcount= (response as any[]).filter(item=> item.kycStatus === 'VERIFIED').length;
-        this.kycCompleted = Math.round((kycCompletedcount/this.totalItems)*100);
+        const kycCompletedcount = (response as any[]).filter(item => item.kycStatus === 'VERIFIED').length;
+        this.kycCompleted = Math.round((kycCompletedcount / this.totalItems) * 100);
         this.dataSource.sort = this.sort;
         this.updatePagedData();
       },
@@ -148,76 +148,61 @@ export class Customer implements OnInit {
   }
 
   getStatusClass(status: string): string {
-  switch (status?.toLowerCase()) {
-    case 'completed':
-    case 'verified':
-      return 'Completed';
-    case 'pending':
-      return 'Pending';
-    case 'document issue':
-      return 'Document-Issue';
-    default:
-      return '';
+    switch (status?.toLowerCase()) {
+      case 'completed':
+      case 'verified':
+        return 'Completed';
+      case 'pending':
+        return 'Pending';
+      case 'document issue':
+        return 'Document-Issue';
+      default:
+        return '';
+    }
   }
-}
 
 
-  getkyc(id:any) {
-    console.log("id-----",id);
-    this.service.selectedUserId=id;
-     this.service.getKycDeatils(id).subscribe({
+  getkyc(id: any) {
+    console.log("id-----", id);
+    this.service.selectedUserId = id;
+    this.service.getKycDeatils(id).subscribe({
       next: (response) => {
         console.log('getKycDeatils:', response);
-       this.userKYCData =response;
-       sessionStorage.setItem("kycs",JSON.stringify(this.userKYCData.kycs))
-      //  console.log('kyc response 2',this.userKYCData.kycs);
-       this.router.navigate(['/admin/customerdetails']);
+        this.userKYCData = response;
+        sessionStorage.setItem("kycs", JSON.stringify(this.userKYCData.kycs))
+        //  console.log('kyc response 2',this.userKYCData.kycs);
+        this.router.navigate(['/admin/customerdetails']);
       },
       error: (error) => {
         console.error('Error fetching users:', error);
       }
     });
 
-     this.selecteduser = this.allApplicants.find(
-          item => item.userId === this.service.selectedUserId
-        );
-        if (this.selecteduser) {
-          this.service.docofselectedUser=this.selecteduser
-          localStorage.setItem('selecteduserDetails', JSON.stringify(this.selecteduser));
-          console.log('Found user:', this.selecteduser);
-        } else {
-          console.warn('User not found!');
-        }
-
+    this.selecteduser = this.allApplicants.find(
+      item => item.userId === this.service.selectedUserId
+    );
+    if (this.selecteduser) {
+      this.service.docofselectedUser = this.selecteduser
+      localStorage.setItem('selecteduserDetails', JSON.stringify(this.selecteduser));
+      console.log('Found user:', this.selecteduser);
+    } else {
+      console.warn('User not found!');
     }
- //---------------------redirect to user details tabs---------------------------------
 
-  // goToUserDetails(data: string) {
-  //   console.log(data)
-    
-  //   const fullUser = this.AlluserData.find(item => item.userId === data);
-    
-
-  //   if (fullUser) {
-  //     localStorage.setItem('selecteduserDetails', JSON.stringify(fullUser));
-      
-  //   } else {
-  //     console.warn('User not found in fullData for CIFID:', data);
-  //   }
-  // }
-
-getUploadedDocumnets(){
-
-
-}
+  }
+ 
   //-----------------pagination------------------------------------
   ngAfterViewInit() {
     this.dataSource.paginator = this.paginator;
-    this.updateVisiblePages();
+    setTimeout(() => {
+      this.updateVisiblePages();
+    }, 100);
+    
   }
   get totalPages() {
     const total = Math.ceil(this.totalItems / this.pageSize);
     return isNaN(total) || total < 1 ? 1 : total;
+     
   }
 
 
@@ -234,7 +219,7 @@ getUploadedDocumnets(){
   updatePagedData() {
     const startIndex = (this.currentPage - 1) * this.pageSize;
     const endIndex = startIndex + this.pageSize;
-    this.dataSource.data = this.fullData.slice(startIndex, endIndex);
+    this.dataSource.data = this.filteredData.slice(startIndex, endIndex);
   }
 
   updateVisiblePages() {
@@ -270,12 +255,74 @@ getUploadedDocumnets(){
     this.totalPagesArray = pages;
   }
 
+//---------------------search data --------------------------
+
+onSearchChange(value: string) {
+  this.searchText = value.toLowerCase();
+
+
+  this.filteredData = this.fullData.filter(item =>
+    item.CIFID?.toString().toLowerCase().includes(this.searchText) ||
+    item.CustomerName?.toLowerCase().includes(this.searchText) ||
+    item.mobile?.toString().toLowerCase().includes(this.searchText) ||
+    item.email?.toLowerCase().includes(this.searchText) ||
+    item.status?.toLowerCase().includes(this.searchText)
+  );
+
  
-//------------------------kyc status-------------------------
+  this.totalItems = this.filteredData.length;
+  this.currentPage = 1;
+  this.updateVisiblePages();
+  this.updatePagedData();
+}
+
+  //------------------------kyc status-------------------------
 
   getkycstatus(value: string) {
     console.log('Selected:2', value);
+    const filterValue = value.toLowerCase();
+
+    const statusMap: any = {
+      "completed": "verified",
+      "pending": "pending",
+      "document issue": "document issue"
+    };
+
+    const apiStatus = statusMap[filterValue];
+
+
+    if (value === "All") {
+      this.filteredData = this.fullData;
+    } else if (value === "Completed") {
+
+      this.filteredData = this.fullData.filter(
+        item => item.status.toLowerCase() === apiStatus
+      );
+    }
+    else if (value === "Pending") {
+
+      let pendingdata = this.fullData.filter(
+        item => item.status.toLowerCase() === apiStatus
+      );
+
+      this.filteredData = pendingdata;
+    }
+    else if (value === "Document Issue") {
+
+      this.filteredData = this.fullData.filter(
+        item => item.status.toLowerCase() === apiStatus
+      );
+    } else {
+      this.filteredData = this.fullData;
+    }
+
+  this.totalItems = this.filteredData.length;
+  this.currentPage = 1;
+  this.updateVisiblePages();
+  this.updatePagedData();
+
   }
+
 
   kyctype: DropdownOption[] = [
     { label: 'Type 1', value: 'Type 1' },

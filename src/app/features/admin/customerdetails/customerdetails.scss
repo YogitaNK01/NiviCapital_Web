@@ -4,7 +4,7 @@
 
 /* -------------edit download buttons------------------*/
 
-::ng-deep app-buttons .btn.btn-outline {
+::ng-deep app-buttons .btn .btn-outline {
   width: 170px;
   padding: $spacing_3 $spacing_5;
   justify-content: center;
@@ -12,34 +12,35 @@
 
 }
 
-@media(max-width:700px) {
-  ::ng-deep app-buttons .btn.btn-outline {
-    padding: 0.4rem;
-    width: auto;
-  }
 
-}
 
-::ng-deep app-buttons .btn.btn-outline .btn-label {
+// ::ng-deep app-buttons .btn.btn-outline .btn-label {
 
-  color: $primary-500 !important;
-}
+//   color: $primary-500 !important;
+// }
+
+// ::ng-deep app-buttons .btn.primary .btn-label {
+
+//   color: #fff !important;
+// }
 
 .btn-no-padding {
   --bs-btn-padding-x: 0 !important;
   --bs-btn-padding-y: 0 !important;
   padding: 0 !important;
+   min-width: 170px;
+   border: 1px solid $primary-500;
   /* just in case */
 }
 
 .primary {
-  background-color: $primary-btn;
+  background-color: $primary-btn!important;
   color: #fff;
 
 }
 
 .secondary {
-  background-color: $secondary-btn;
+  background-color: $secondary-btn!important;
   color: #fff;
   width: 312px;
 }
@@ -59,18 +60,29 @@
 
 .footer-btn {
   flex-shrink: 0;
-  // padding: $spacing_9;
-  // border-top: $border_1 solid $neutral-300;
-  // background: $surface;
   margin-top: $spacing_8;
 
   @media (max-width: 768px) {
-    padding: 16px;
+    // padding: 16px;
   }
 
   @media (max-width: 480px) {
-    padding: 12px;
+
+    // padding: 12px;
+
+    ::ng-deep app-buttons .btn {
+
+  padding: 5px 0;
+}
   }
+  .primarycolor{
+    color: white;
+  }
+}
+.btn-label-text{
+  flex-shrink: 0;
+  white-space: nowrap;
+  color: #fff!important;
 }
 
 /* ---------------Tab Content Styles -----------*/
@@ -100,10 +112,9 @@
 }
 
 .userdetails {
-  // display: flex;
-  // flex-direction: column;
-  height: calc(100vh - 230px); // Adjust based on your header/breadcrumb height
-  min-height: 500px; // Minimum height to prevent collapsing
+ 
+  height: 100vh; 
+  min-height: 500px; 
   overflow: auto;
 
   @media (max-width: 768px) {
@@ -195,7 +206,7 @@
 .info-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-  gap: 20px;
+  gap: 24px;
   width: 100%;
 
   @media (max-width: 768px) {
@@ -223,7 +234,7 @@
 
 
     @media (max-width: 480px) {
-      font-size: 11px;
+      font-size: 12px;
     }
   }
 
@@ -265,9 +276,9 @@
 .info-grid-img {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-  column-gap: 20px;
+  column-gap: 24px;
   /* space between columns */
-  row-gap: 34px;
+  row-gap: 24px;
   // padding-bottom: 20px;
 
   @media (max-width: 768px) {
@@ -277,7 +288,7 @@
 
   @media (max-width: 480px) {
     grid-template-columns: 1fr;
-    gap: $spacing_7;
+    gap: $spacing_11;
   }
 
   .info-grid-img.info-item {
@@ -363,6 +374,12 @@
   align-self: stretch;
   background: #E4F0F6;
   min-width: 200px;
+
+  @media (max-width: 480px) {
+    height: $spacing_11;
+  padding: $spacing_7;
+  gap: $spacing_2;
+  }
 }
 
 .table-data {
@@ -373,9 +390,15 @@
   gap: $spacing_4;
   flex-shrink: 0;
   align-self: stretch;
+
+    @media (max-width: 480px) {
+    height: $spacing_11;
+  padding: $spacing_7;
+  gap: $spacing_2;
+  }
 }
 
-///----------------------------last credit score tab-------
+///---------------------------- credit score tab-------
 
 // Credit score containerdata
 .containerdata {
@@ -424,7 +447,7 @@
 }
 
 .score-number {
-  font-size: $font-size-dp_1;
+  font-size: 26px;
   font-weight: 700;
   line-height: $spacing_24;
   letter-spacing: 0.64px;
@@ -524,7 +547,7 @@ canvas {
 
 .gauge-label-value {
   display: block;
-  font-size: $font-size-body_xs;
+  font-size:16px;
   letter-spacing: 0.12px;
   color: #25262F;
 
@@ -743,6 +766,18 @@ canvas {
 }
 
 
-//////////////////////////////////////////////////////////////////////
+//----------------/////////-----------////////-----------///////---------------------------------------//
+
+
+// AuditTrails
+
+/* Audit Trail Styles */
+
+
+
+
+
+
+
 
 

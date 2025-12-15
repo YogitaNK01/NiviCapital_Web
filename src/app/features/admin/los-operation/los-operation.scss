@@ -2,225 +2,61 @@
 @use 'typography' as *;
 @use 'common' as *;
 
-.dashboard-container {
-  // min-height: 100vh;
-}
 
 
-
-/*----------------------- Stats Cards ------------------*/
-.stats-container {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: $spacing_9;
-
-}
-
-.stat-card {
-  padding: $spacing_7;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-}
-
-/*-------------stat font-------------------*/
-.stat-label {
-  margin-top: $spacing_4;
-  color: $secondary-900;
-  margin-bottom: $spacing_9;
-
-}
-
-.greentext {
-  color: $success-text;
-}
-
-/*------------------ Database Section -------------------*/
-
-.db-title {
-  // flex: 0 0 45%;
-}
-
-.section-header {
+/*----------------------- search ------------------*/
+.search-bar {
+  padding: $spacing_9;
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding-bottom: $spacing_14;
-
-  @media (max-width: 768px) {
-    display: block;
-  }
-}
-
-
-.section-controls {
-  // flex: 0 0 56%;
-  display: flex;
+  flex-direction: column;
   gap: $spacing_7;
-  flex-wrap: wrap;
-
-  @media (max-width: 420px) {
-    display: flex;
-    flex-direction: column;
-    padding: 10px 0;
-  }
 }
 
-/*-----------------kyc status and type dropdown----------*/
+.search-data {
+ display: flex;
+align-items: flex-start;
+gap:$spacing_7;
+align-self: stretch;
 
-::ng-deep app-inputfield .input-field {
-  height: 42px !important;
-  width: 333px !important;
+@media (max-width:540px)
+{
+ display: contents;
+}
 }
 
-::ng-deep app-dropdown .dropdown-container {}
+.search-dropdown {
+  min-width: 250px;
 
-::ng-deep app-dropdown .dropdown-container.custom-style {
-  height: 42px !important;
-  padding: $spacing_4 !important;
+  @media (max-width:480px)
+{
+ min-width: 200px;
+}
 }
 
-::ng-deep app-dropdown .dropdown-list {
-  width: auto;
+.search-input {
+  flex: 1;
 }
 
+.search-btn {
+  min-width: 135px;
+ 
+
+}
 
 
 /*--------------- Add Button ---------------------*/
 
-@media (max-width:768px) {
 
-  .add-button {
-    display: flex;
-    justify-content: end;
-  }
-}
 
 .btncustomClass {
 
   width: auto !important;
   min-width: 178px;
   max-width: 200px;
-  padding: 2px 3px;
+  // padding: 2px 3px;
   height: 42px;
 }
 
-::ng-deep app-buttons .btn-label {
-  color: $primary_text;
-}
-
-::ng-deep app-buttons .btn-outline {
-  padding: 5px !important;
-}
-
-::ng-deep app-buttons .btn.btn-outline .btn-label {
-
-  color: $primary-500 !important;
-}
-
-/*------------------------ Table ------------------------------*/
-
-// Table Container
-.table-container {
-  width: 100%;
-  overflow-x: auto;
-  padding-bottom: $spacing_14;
-}
-
-// Material Table Overrides
-::ng-deep {
-
-
-  .mat-mdc-table {}
-
-
-  .mat-mdc-header-row {}
-
-
-  .mat-mdc-header-cell {
-    border-bottom: none;
-
-    &:first-child {
-
-      border: none;
-      border-radius: $spacing_5 0 0 $spacing_5;
-    }
-
-    &:last-child {
-
-      border-radius: 0 $spacing_5 $spacing_5 0;
-    }
-  }
-
-  // Body rows
-  .mat-mdc-row {
-
-
-    &:hover {
-      background-color: #F9FAFB;
-    }
-
-    &:last-child {
-      border-bottom: 0.1px solid $neutral_border_2 !important;
-    }
-  }
-
-  // Body cells
-  .mat-mdc-cell {
-    // border-bottom-color: $neutral_border_2 !important;
-
-
-    &:first-child {}
-
-    &:last-child {
-      border-bottom-color: $neutral_border_2 !important;
-    }
-  }
-
- 
-
-  /*------------------------- Checkbox styling---------------------*/
-  .mat-mdc-checkbox {
-    .mdc-checkbox__background {
-      border-color: #D1D5DB;
-      border-radius: 4px;
-    }
-
-    &.mat-mdc-checkbox-checked .mdc-checkbox__background {
-      background-color: #3B82F6;
-      border-color: #3B82F6;
-    }
-  }
-
-  // Remove Material ripple effect (optional)
-  .mat-mdc-checkbox .mat-ripple-element {
-    display: none;
-  }
-}
-
-/*-------------------- Status Badges-------------------------- */
-.status-badge {
-  display: inline-flex;
-  align-items: center;
-  padding: 4px 12px;
-  border-radius: 12px;
-  font-size: 12px;
-  font-weight: 500;
-  line-height: 1.5;
-
-  &.status-completed {
-    background-color: #D1FAE5;
-    color: #065F46;
-  }
-
-  &.status-pending {
-    background-color: #FEF3C7;
-    color: #92400E;
-  }
-
-  &.status-document-issue {
-    background-color: #FEE2E2;
-    color: #991B1B;
-  }
-}
 
 /*---------------- Action button styling -----------*/
 .action-button {
@@ -238,104 +74,4 @@
   }
 }
 
-/*------------------ Responsive table------------------*/
-@media (max-width: 768px) {
-  .table-container {
-    border-radius: 8px;
 
-    ::ng-deep {
-
-      .mat-mdc-header-cell,
-      .mat-mdc-cell {
-        padding: 12px 8px;
-
-        &:first-child {
-          padding-left: 16px;
-        }
-
-        &:last-child {
-          padding-right: 16px;
-        }
-      }
-
-      .mat-mdc-row {
-        height: auto;
-        min-height: 56px;
-      }
-    }
-  }
-}
-
-/*------------------ Pagination---------------------------*/
-.pagination {
-  display: flex;
-  align-items: center;
-  gap: $spacing_3;
-
-  @media (max-width: 768px) {
-    padding: 10px 0;
-  }
-}
-
-.pagination-btn {
-  width: $spacing_15;
-  height: $spacing_15;
-  opacity: 0.5;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: $spacing;
-
-
-  border-radius: $spacing;
-  border: $border_1 solid $neutral-300;
-  background: $bg;
-
-  &:hover {
-    border-color: $primary-500;
-    opacity: 1;
-  }
-
-
-  &:disabled {
-    opacity: 0.4;
-    cursor: not-allowed;
-  }
-
-  &.active {
-    border-color: $primary-500 !important;
-
-    /* target inner text or number */
-    .pagecount {
-      color: $primary-500 !important;
-    }
-  }
-}
-
-.pagecount {
-  width: $spacing_11;
-  height: $spacing_10;
-  font-size: $font-size-body_sm;
-  text-align: center;
-  color: grey;
-}
-
-.pagination-ellipsis {
-  color: #9ca3af;
-  padding: 0 4px;
-}
-
-/* ✅ Responsive version */
-@media (max-width: 480px) {
-  .pagination-btn:not(:first-child):not(:last-child) {
-    display: none; /* hide middle buttons */
-  }
-
-  .pagination-btn:first-child,
-  .pagination-btn:last-child,
-  .pagination-btn:nth-child(2),
-  .pagination-btn:nth-last-child(2),
-  .pagination-btn.active {
-    display: inline-flex; /* show first, last, and active */
-  }
-}
