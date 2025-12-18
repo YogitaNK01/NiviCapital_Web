@@ -1,0 +1,76 @@
+<div class="msgbox-backdrop">
+  <div class="msgbox-container">
+
+    <!-- Close Icon -->
+    <button class="close-btn" (click)="onCancel()">
+      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
+        <path d="M3 3L15 15L3 3Z" fill="#F4F6FF" />
+        <path d="M3 3L15 15" stroke="#F4F6FF" stroke-width="1.125" stroke-linecap="round" stroke-linejoin="round" />
+        <path d="M3 15L15 3" stroke="#F4F6FF" stroke-width="1.125" stroke-linecap="round" stroke-linejoin="round" />
+      </svg></button>
+
+    <!-- Header -->
+    <div class="msgbox-header text-label-data">
+      {{ title }}
+    </div>
+
+    <!-- Body -->
+    <div class="msgbox-body text-body-1">
+      {{ message }}
+    </div>
+
+    <!-- Footer -->
+    <div class="msgbox-footer">
+      <!-- <button
+        *ngIf="showCancel"
+        class="btn btn-outline"
+        (click)="onCancel()">
+        {{ cancelText }}
+      </button>
+
+      <button
+        class="btn btn-primary"
+        (click)="onOk()">
+        {{ okText }}
+      </button> -->
+
+
+      <app-buttons label="Cancel" *ngIf="showCancel" class=" btn btn-outline btncustomClass btn-no-padding btn-label"
+        [outline]="true" (click)="onCancel()">
+      </app-buttons>
+
+      <app-buttons label="Ok" class="btn primary btncustomClass btn-no-padding btn-label" (click)="onOk()">
+      </app-buttons>
+    </div>
+
+  </div>
+</div>
+
+<!-- ok btn -->
+<!-- <app-Messagebox
+  [visible]="showMsgBox"
+  message="Operation successful"
+  [showCancel]="false">
+</app-Messagebox> -->
+
+<!-- confirmation -->
+<!-- <app-Messagebox
+  title="Confirm Delete"
+  message="Are you sure you want to delete this record?"
+  okText="Yes"
+  cancelText="No"
+  (ok)="deleteRecord()">
+</app-Messagebox> -->
+
+<!-- all -->
+<!-- <app-Messagebox
+  [visible]="showMsgBox"
+  title="Modal Window"
+  message="Application EDU12456 has been successfully activated."
+  [showCancel]="true"
+  okText="OK"
+  cancelText="Cancel"
+  (ok)="onConfirm()"
+  (cancel)="onCancel()"
+  (close)="showMsgBox = false">
+</app-Messagebox> -->

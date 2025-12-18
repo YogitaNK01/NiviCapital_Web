@@ -16,6 +16,7 @@
   // color: #fff;
   box-sizing: border-box;
   justify-content: center;
+  align-items: center;
 
 
   &.primary {
@@ -124,10 +125,15 @@ svg {
 
 }
 
-.btn-label {
+.btn .btn-label {
   flex-shrink: 0; // Don't let text shrink
   white-space: nowrap; // Keep text on one line
   color: #fff;
+}
+.btn.btn-outline .btn-label {
+  flex-shrink: 0; // Don't let text shrink
+  white-space: nowrap; // Keep text on one line
+  color:  $primary-500;
 }
 
  @media (max-width: 480px) {

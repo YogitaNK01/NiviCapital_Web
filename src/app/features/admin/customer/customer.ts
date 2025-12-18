@@ -15,6 +15,8 @@ import { MatIconModule } from '@angular/material/icon';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { Router, RouterModule } from '@angular/router';
 import { Main } from '../../../core/service/main';
+import { Messagebox } from '../../systemdesign/messagebox/messagebox';
+import { Msgboxservice } from '../../../core/service/msgboxservice';
 
 export interface Customerstable {
   id: number;
@@ -54,7 +56,7 @@ export class Customer implements OnInit {
   selectedUser: any;
   //mat table
   displayedColumns: string[] = ['select', 'CIFID', 'customerName', 'mobile', 'email', 'status', 'loanStatus', 'registrationDate'];
-  
+
   dataSource = new MatTableDataSource<any>([]);
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
@@ -64,7 +66,7 @@ export class Customer implements OnInit {
   totalItems: any;
   totalPagesArray: (number | string)[] = [];
   fullData: any[] = [];
-  AlluserData: any[] = [];
+  AlluserData: any;
   userData: any;
   userKYCData: any;
 
@@ -95,38 +97,40 @@ export class Customer implements OnInit {
   searchText: string = "";
 
 
-  constructor(public http: HttpClient, public router: Router, private service: Main) { }
+  constructor(public http: HttpClient, public router: Router, private service: Main,private msgBox: Msgboxservice) { }
   // 
   ngOnInit(): void {
     this.loadallusers();
     this.updateVisiblePages();
-   
-    this.service.getAllApplicants().subscribe({
-      next: (response) => {
 
-        this.allApplicants = response.applications;
-        // console.log('All applicants--:', this.allApplicants);
-      },
-      error: (error) => {
-        console.error('Error fetching users:', error);
-      }
-    });
+      
+
+    // this.service.getAllApplicants().subscribe({
+    //   next: (response) => {
+
+    //     this.allApplicants = response.applications;
+    //   },
+    //   error: (error) => {
+    //     console.error('Error fetching users:', error);
+    //   }
+    // });
 
   }
   //-----------get table data from api----------------------------
 
   loadallusers() {
+
     this.service.getAllUsers().subscribe({
       next: (response) => {
-        // console.log('Users:', response);
-
-        this.AlluserData = response
-        this.fullData = (response as any[]).map((item, index) => ({
+        console.log('Users:', response.data);
+      
+        this.AlluserData = response.data
+        this.fullData = (response.data as any[]).map((item, index) => ({
           id_data: index + 1,
           CIFID: item.cif ?? "-",
           CustomerName: `${item.firstName ?? ''} ${item.lastName ?? ''}`.trim() ?? "-",
           mobile: item.phoneNumber ?? "-",
-          email: item.emailId ?? '',
+          email: item.email ?? '',
           status: item.kycStatus ?? "-",
           loanStatus: item.kycStatus ?? "-",
           registrationDate: item.createdDateTime ?? "-",
@@ -136,7 +140,7 @@ export class Customer implements OnInit {
 
         this.filteredData = this.fullData;
         this.totalItems = this.fullData.length;
-        const kycCompletedcount = (response as any[]).filter(item => item.kycStatus === 'VERIFIED').length;
+        const kycCompletedcount = (response.data as any[]).filter(item => item.kycStatus === 'VERIFIED').length;
         this.kycCompleted = Math.round((kycCompletedcount / this.totalItems) * 100);
         this.dataSource.sort = this.sort;
         this.updatePagedData();
@@ -190,19 +194,19 @@ export class Customer implements OnInit {
     }
 
   }
- 
+
   //-----------------pagination------------------------------------
   ngAfterViewInit() {
     this.dataSource.paginator = this.paginator;
     setTimeout(() => {
       this.updateVisiblePages();
     }, 100);
-    
+
   }
   get totalPages() {
     const total = Math.ceil(this.totalItems / this.pageSize);
     return isNaN(total) || total < 1 ? 1 : total;
-     
+
   }
 
 
@@ -255,26 +259,26 @@ export class Customer implements OnInit {
     this.totalPagesArray = pages;
   }
 
-//---------------------search data --------------------------
+  //---------------------search data --------------------------
 
-onSearchChange(value: string) {
-  this.searchText = value.toLowerCase();
+  onSearchChange(value: string) {
+    this.searchText = value.toLowerCase();
 
 
-  this.filteredData = this.fullData.filter(item =>
-    item.CIFID?.toString().toLowerCase().includes(this.searchText) ||
-    item.CustomerName?.toLowerCase().includes(this.searchText) ||
-    item.mobile?.toString().toLowerCase().includes(this.searchText) ||
-    item.email?.toLowerCase().includes(this.searchText) ||
-    item.status?.toLowerCase().includes(this.searchText)
-  );
+    this.filteredData = this.fullData.filter(item =>
+      item.CIFID?.toString().toLowerCase().includes(this.searchText) ||
+      item.CustomerName?.toLowerCase().includes(this.searchText) ||
+      item.mobile?.toString().toLowerCase().includes(this.searchText) ||
+      item.email?.toLowerCase().includes(this.searchText) ||
+      item.status?.toLowerCase().includes(this.searchText)
+    );
 
- 
-  this.totalItems = this.filteredData.length;
-  this.currentPage = 1;
-  this.updateVisiblePages();
-  this.updatePagedData();
-}
+
+    this.totalItems = this.filteredData.length;
+    this.currentPage = 1;
+    this.updateVisiblePages();
+    this.updatePagedData();
+  }
 
   //------------------------kyc status-------------------------
 
@@ -316,10 +320,10 @@ onSearchChange(value: string) {
       this.filteredData = this.fullData;
     }
 
-  this.totalItems = this.filteredData.length;
-  this.currentPage = 1;
-  this.updateVisiblePages();
-  this.updatePagedData();
+    this.totalItems = this.filteredData.length;
+    this.currentPage = 1;
+    this.updateVisiblePages();
+    this.updatePagedData();
 
   }
 

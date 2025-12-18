@@ -1,10 +1,15 @@
 @use './variables' as *;
-@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap');
 
 //----------------------Typeface----------------------------
 
+@font-face {
+  font-family: 'DM Sans';
+  src: url('/assets/fonts/DM_Sans/DMSans-VariableFont_opsz,wght.ttf');
+}
+
+
 body {
-  font-family: $font-family-base;
+  font-family: 'DM Sans';
 
 }
 

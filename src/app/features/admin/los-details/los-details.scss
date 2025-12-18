@@ -86,6 +86,29 @@
 }
 
 /*----------------Tab horizontal scroll--------------*/
+::ng-deep .scrollable-tabs .mdc-tab.mat-mdc-tab {
+  flex: 0 0 auto;         
+  min-width: 220px;        
+  padding: $spacing_11 $spacing_9;
+  white-space: nowrap;
+
+   @media (max-width: 768px) {
+     min-width: 150px;
+  }
+  @media (max-width: 480px) {
+     min-width: 100px;
+  }
+}
+::ng-deep .scrollable-tabs .mat-mdc-tab-header {
+  overflow-x: auto;        // horizontal scroll
+  overflow-y: hidden;
+ 
+}
+
+::ng-deep .scrollable-tabs .mat-mdc-tab-body-wrapper {
+  overflow: hidden;        // page content NOT scrollable
+}
+
 
 
 
@@ -99,8 +122,6 @@
   justify-content: center;
   align-items: center;
   gap: $spacing_4;
-  flex: 1 0 0;
-  // flex: 0 0 auto;
   border-bottom: $border_1 solid $neutral-300;
   background: $surface;
 
@@ -108,11 +129,11 @@
   font-style: $font-weight-regular;
   color: $neutral-text-secondary;
   font-style: normal;
-  // font-size: $font-size-body_lg; //18px
+  font-size: $font-size-body_lg; 
   font-weight: 400;
-  line-height: $spacing_11; //24px
+  line-height: $spacing_11; 
   letter-spacing: 0.18px;
-  // min-width: 220px;
+ 
 
   &.mdc-tab.mat-mdc-tab.mat-focus-indicator.mdc-tab--active.mdc-tab-indicator--active {
     border-radius: $spacing_5;
@@ -146,73 +167,18 @@
 }
 
 
-.tabs {
-  border: $border_1 solid $neutral-300;
-  border-radius: $spacing_5;
-  flex: 1 1 auto;
-  min-height: 0;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
 
-
-}
-
-.tabs .mat-tab-header {
-  flex-shrink: 0;
-}
-
-.tabs .mat-tab-body-wrapper {
-  flex: 1 1 auto;
-  overflow-y: auto;
-  overflow-x: hidden;
-  min-height: 0
-}
-
-.tab-container {
-  display: flex;
-  flex-direction: column;
-  // flex: 1 1 auto;
-  min-height: 0;
-  overflow: hidden;
-
-}
-
-.tab-content {
+.tab-content1 {
   display: block;
   // min-height: 100%;
   // height: auto;
   padding: 0 $spacing_9;
   // padding-bottom: $spacing_15;
 
-  @media (max-width: 768px) {
-    padding: 16px;
-    padding-bottom: $spacing_11;
-  }
-
-  @media (max-width: 480px) {
-    padding: 12px;
-    padding-bottom: 20px;
-  }
+ 
 }
 
-.section {
-  // display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: flex-start;
-  gap: $spacing_10;
-  align-self: stretch;
 
-  &:last-child {
-    margin-bottom: 0;
-  }
-
-  @media (max-width: 800px) {
-    margin-bottom: $spacing_11;
-    // padding-top: $spacing_7;
-  }
-}
 
 .section-title {
   display: flex;
@@ -240,50 +206,7 @@
   letter-spacing: 0.16px;
 }
 
-.info-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-  gap: $spacing_11;
-  width: 100%;
 
-  @media (max-width: 768px) {
-    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-    gap: 16px;
-  }
-
-  @media (max-width: 480px) {
-    grid-template-columns: 1fr;
-    // gap: 12px;
-  }
-}
-
-.info-item {
-  display: flex;
-  height: $spacing_25;
-  flex-direction: column;
-  gap: $spacing_2;
-
-  @media (max-width: 480px) {
-    height: $spacing_20;
-
-  }
-
-  label {
-
-
-    @media (max-width: 480px) {
-      font-size: 11px;
-    }
-  }
-
-  p {
-    margin-bottom: 0;
-
-    @media (max-width: 480px) {
-      font-size: 14px;
-    }
-  }
-}
 
 .info-item-img {
 
@@ -355,15 +278,7 @@
   padding-top: 0 !important;
 }
 
-.reference {
-  color: $neutral-text-primary;
-  background-color: $neutral-200;
-  display: flex;
-  height: $spacing_21;
-  padding: $spacing_11;
-  flex-direction: column;
-  justify-content: center;
-}
+
 
 ::ng-deep .mat-mdc-tab-labels {
   flex-wrap: nowrap;
@@ -381,49 +296,9 @@
   white-space: nowrap;
 }
 
-.info-grid-img {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-  column-gap: $spacing_11;
-  row-gap: $spacing_11;
-  padding: 24px 0;
 
-  @media (max-width: 768px) {
-    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-    gap: $spacing_7;
-  }
 
-  @media (max-width: 480px) {
 
-    grid-template-columns: 1fr;
-    // gap: $spacing_2;
-
-    .text-label {
-      font-size: 14px;
-      line-height: 1rem;
-    }
-  }
-
-  .info-grid-img.info-item {
-    height: $spacing_23
-  }
-
-}
-
-.img-box {
-  display: flex;
-  padding: $spacing_7;
-  justify-content: space-between;
-  align-items: baseline;
-  align-self: stretch;
-  border-radius: 0.625rem;
-  background: #F5F5F5;
-
-  @media (max-width: 480px) {
-    padding: $spacing_3;
-
-  }
-}
 
 .icons {
   display: flex;
@@ -437,78 +312,7 @@
   cursor: pointer;
 }
 
-//-----------------table--------------------
-.table-container {
-  width: 100%;
-  overflow-x: auto;
-  border: $border_1 solid $neutral-300;
-  border-radius: $spacing_5;
-  margin: $spacing_9 0 $spacing_9 0;
 
-  &:last-child {
-    margin-bottom: 0;
-  }
-
-  table {
-    width: 100%;
-    min-width: 600px; // Prevent table from getting too narrow
-  }
-}
-
-.responsive-table {
-  width: 100%;
-  border-collapse: collapse;
-  min-width: 600px;
-  /* keeps columns readable */
-}
-
-
-.info-grid-table {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  // gap: 20px;
-  border: $border_1 solid $neutral-300;
-  border-radius: $spacing_5;
-}
-
-.info-item-table {
-  display: flex;
-  flex-direction: column;
-  gap: $spacing;
-
-}
-
-.table-header {
-  // display: flex;
-  height: $spacing_20;
-  padding: $spacing_11 $spacing_9;
-  align-items: center;
-  gap: $spacing_4;
-  flex-shrink: 0;
-  align-self: stretch;
-  background: #E4F0F6;
-  min-width: 200px;
-
-  @media (max-width: 480px) {
-    padding: $spacing_5;
-    min-width: 150px;
-  }
-}
-
-.table-data {
-  // display: flex;
-  height: $spacing_23;
-  padding: $spacing_11 $spacing_9;
-  align-items: center;
-  gap: $spacing_4;
-  flex-shrink: 0;
-  align-self: stretch;
-
-  @media (max-width: 480px) {
-    padding: $spacing_5;
-
-  }
-}
 
 ///---------------------------- credit score tab-------
 

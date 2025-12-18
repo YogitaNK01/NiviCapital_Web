@@ -6,7 +6,25 @@
 // custom components at https://material.angular.dev/guide/theming
 @use '@angular/material' as mat;
 @use './indexstyle' as *;
-@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap');
+
+@font-face {
+  font-family: 'DM Sans';
+  src: url('/assets/fonts/DM_Sans/DMSans-VariableFont_opsz,wght.ttf')
+       format('truetype');
+  font-weight: 100 1000;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'DM Sans';
+  src: url('/assets/fonts/DM_Sans/DMSans-Italic-VariableFont_opsz,wght.ttf')
+       format('truetype');
+  font-weight: 100 1000;
+  font-style: italic;
+  font-display: swap;
+}
+
 
 
 html {
@@ -15,47 +33,27 @@ html {
       primary: mat.$azure-palette,
       tertiary: mat.$blue-palette,
     ),
-    typography: Roboto,
+    typography: 'DM Sans',
     density: 0,
   ));
 }
 
 body {
-  // Default the application to a light color theme. This can be changed to
-  // `dark` to enable the dark color theme, or to `light dark` to defer to the
-  // user's system settings.
   color-scheme: light;
-
-  // Set a default background, font and text colors for the application using
-  // Angular Material's system-level CSS variables. Learn more about these
-  // variables at https://material.angular.dev/guide/system-variables
   background-color: var(--mat-sys-surface);
   color: var(--mat-sys-on-surface);
   font: var(--mat-sys-body-medium);
-
-  // Reset the user agent margin.
   margin: 0;
 }
 
 
 html, body {
-  font-family: $font-family-base;
+  font-family: 'DM Sans', sans-serif;
   font-weight: $font-weight-regular;
    height: 100%;
   margin: 0;
   padding: 0;
 }
-// :root {
-//     --color-primary: #4f46e5;
-//     --color-secondary: #9333ea;
-//     --font-weight-bold: 600;
-//     --color-primary-dark: #4338ca;
-//     --color-background: #f9fafb;
-//     --color-surface: #ffffff;
-//     --color-text: #111827;
-//     --color-muted: #6b7280;
-
-// }
 
 
 /* styles.css - Global Styles */

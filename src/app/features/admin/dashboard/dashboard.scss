@@ -79,8 +79,8 @@
 
         }
 
-        ::ng-deep app-buttons .btn-label {
-            color: white;
+        .dashboard-search-btn ::ng-deep .btn-label {
+            
             width: 100px;
         }
 
@@ -130,7 +130,6 @@
                 border-radius: $border_radius_m;
                 background: $secondary-50;
                 flex-direction: row;
-                padding: 1rem;
                 cursor: pointer;
 
                 gap: 0.5rem;
@@ -220,6 +219,10 @@
             box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
             height: 100%;
         }
+        .bar-chart{
+            display: flex;
+            justify-content: center;
+        }
 
         .key-title,
         .donutchart-title {
@@ -259,7 +262,7 @@
 
 
 
-        @media (max-width: 1024px) {
+        @media (max-width: 1280px) {
             grid-template-columns: 1fr;
         }
 

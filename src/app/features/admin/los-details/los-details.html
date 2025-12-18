@@ -33,8 +33,9 @@
 
   <!-- Tabs -->
   <div class="userdetails">
-    <div class="tab-container">
-      <mat-tab-group [(selectedIndex)]="selectedTabIndex" class="tabs ">
+    <div class="tab-container"> 
+      <mat-tab-group [(selectedIndex)]="selectedTabIndex" class="tabs scrollable-tabs"  mat-align-tabs="start"
+  mat-stretch-tabs="false">
 
 
         <!-- Loan Details -->
@@ -277,9 +278,6 @@
             </div>
           </div>
         </mat-tab>
-
-
-
 
         <!-- Education -->
         <mat-tab label="Education" class="text-label">
@@ -2594,8 +2592,8 @@
     </div>
   </div>
 
-  <!-- <app-quicklinks 
-    [selectedTabIndex]="selectedTabIndex"
-    (tabChange)="onQuickLinkTabChange($event)">
-  </app-quicklinks> -->
+  <app-quicklinks 
+   currentPage="losdetails"
+    >
+  </app-quicklinks>
 </div>

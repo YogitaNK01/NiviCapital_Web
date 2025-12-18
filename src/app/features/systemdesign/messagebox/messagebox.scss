@@ -1,0 +1,85 @@
+@use 'variables' as *;
+@use 'typography' as *;
+@use 'common' as *;
+
+
+
+
+.msgbox-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  z-index: 10000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.msgbox-container {
+  background: #fff;
+  width: 520px;
+  border-radius: 12px;
+  padding: 24px;
+  position: relative;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  display: flex;
+  flex-direction: column;
+  gap:$spacing_3;
+}
+
+.close-btn {
+  position: absolute;
+  top: -10px;
+  right: -10px;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #F33B48;
+  color: #fff;
+  border: none;
+  font-size: 18px;
+  cursor: pointer;
+}
+
+.msgbox-header {
+  font-weight: 500;
+}
+
+.msgbox-body {
+  color: #757575;
+}
+
+.msgbox-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: $spacing_6;
+}
+
+
+/*---------buttons----------*/
+.btncustomClass {
+  display: flex;
+width: 147px;
+padding:$spacing_3 $spacing_5 ;
+justify-content: center;
+align-items: center;
+gap: $spacing_3;
+border-radius: $border_radius_rounded!important;
+}
+
+::ng-deep app-buttons .btn.btn-outline {
+  border-radius: 999px !important;
+}
+
+
+.btn-no-padding {
+   padding: 0 !important;
+   min-width: 147px;
+  
+}
+
+.primary {
+  background-color: $primary-btn!important;
+  color: #fff;
+
+}

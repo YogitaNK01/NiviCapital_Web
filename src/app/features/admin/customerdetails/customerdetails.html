@@ -20,1215 +20,536 @@
 
   <!-- edit download buttons -->
 
-  <div class="d-flex justify-content-center justify-content-md-end gap-2">
+   <div class="d-flex justify-content-center justify-content-md-end gap-2">
     <app-buttons label="Edit" class="btn btn-icon btn-outline btn-no-padding" [outline]="true">
-      <img src="/assets/images/icons/edit.svg" alt="edit" height="24" width="24"> <span class="text-body-1 ">Edit</span>
+      <img src="/assets/images/icons/edit.svg" alt="edit" height="24" width="24"> 
 
     </app-buttons>
     <app-buttons label="Download CIF" class="btn btn-icon btn-outline btn-no-padding" [outline]="true">
-      <img src="/assets/images/icons/import-red.svg" alt="import" height="24" width="24"> <span class="text-body-1 ">Download CIF</span>
+      <img src="/assets/images/icons/import-red.svg" alt="import" height="24" width="24"> 
 
     </app-buttons>
   </div>
 
   <!-- Tabs -->
-  <div class="userdetails cif-container">
-    <div class="tab-container tab-header-fixed">
-      <mat-tab-group class="tabs" [(selectedIndex)]="selectedTabIndex">
+  <mat-tab-group [(selectedIndex)]="selectedTabIndex" class="tabs scrollable-tabs">
 
-
-        <!-- PI -->
-        <mat-tab label="PI">
-          <div class="tab-content">
-            <!-- Basic Information -->
-            <div class="section">
-              <h3 class="section-title text-dp-2-bold">Basic Information</h3>
-              <hr _ngcontent-ng-c3098784094="" class="divider">
-              <div class="info-grid">
-                <div class="info-item">
-                  <label class="text-label">First Name</label>
-                  <p class="text-label-data">{{kycData[0].firstName??"-"}}</p>
-                </div>
-                <div class="info-item">
-                  <label class="text-label">Middle Name</label>
-                  <p class="text-label-data">{{kycData[0].middleName??"-"}}</p>
-                </div>
-                <div class="info-item">
-                  <label class="text-label">Last Name</label>
-                  <p class="text-label-data">{{kycData[0].lastName??"-"}}</p>
-                </div>
-                <div class="info-item">
-                  <label class="text-label">Date of Birth</label>
-                  <p class="text-label-data">{{kycData[0].dob??"-"}}</p>
-                </div>
-                <div class="info-item">
-                  <label class="text-label">Marital Status</label>
-                  <p class="text-label-data">{{kycData[0].firstName??"-"}}</p>
-                </div>
-                <div class="info-item">
-                  <label class="text-label">Gender</label>
-                  <p class="text-label-data">{{kycData[0].firstName??"-"}}</p>
-                </div>
-                <div class="info-item">
-                  <label class="text-label">Nationality</label>
-                  <p class="text-label-data">{{kycData[0].firstName??"-"}}</p>
-                </div>
-                <div class="info-item">
-                  <label class="text-label">Email ID</label>
-                  <p class="text-label-data">{{kycData[0].emailId??"-"}}</p>
-                </div>
-                <div class="info-item">
-                  <label class="text-label">Mobile Number</label>
-                  <p class="text-label-data">{{kycData[0].middleName??"-"}}</p>
-                </div>
-              </div>
-            </div>
-
-            <!-- Spouse Details -->
-            <div class="section">
-              <h3 class="section-title text-dp-2-bold ">Spouse Details</h3>
-              <hr _ngcontent-ng-c3098784094="" class="divider">
-              <div class="info-grid">
-                <div class="info-item">
-                  <label class="text-label">First Name</label>
-                  <p class="text-label-data">Rajesh</p>
-                </div>
-                <div class="info-item">
-                  <label class="text-label">Middle Name</label>
-                  <p class="text-label-data">-</p>
-                </div>
-                <div class="info-item">
-                  <label class="text-label">Last Name</label>
-                  <p class="text-label-data">Doe</p>
-                </div>
-              </div>
-            </div>
-
-            <!-- Father's Details -->
-            <div class="section">
-              <h3 class="section-title text-dp-2-bold">Father's Details</h3>
-              <hr _ngcontent-ng-c3098784094="" class="divider">
-              <div class="info-grid">
-                <div class="info-item">
-                  <label class="text-label">First Name</label>
-                  <p class="text-label-data">Rajesh</p>
-                </div>
-                <div class="info-item">
-                  <label class="text-label">Middle Name</label>
-                  <p class="text-label-data">-</p>
-                </div>
-                <div class="info-item">
-                  <label class="text-label">Last Name</label>
-                  <p class="text-label-data">Doe</p>
-                </div>
-              </div>
-            </div>
-
-            <!-- Mother's Details -->
-            <div class="section">
-              <h3 class="section-title text-dp-2-bold">Mother's Details</h3>
-              <hr _ngcontent-ng-c3098784094="" class="divider">
-              <div class="info-grid">
-                <div class="info-item">
-                  <label class="text-label">First Name</label>
-                  <p class="text-label-data">Jenny</p>
-                </div>
-                <div class="info-item">
-                  <label class="text-label">Middle Name</label>
-                  <p class="text-label-data">-</p>
-                </div>
-                <div class="info-item">
-                  <label class="text-label">Last Name</label>
-                  <p class="text-label-data">Doe</p>
-                </div>
-              </div>
-            </div>
-
-            <!-- <div class="section"><h3 class=""></h3></div> -->
-          </div>
-        </mat-tab>
-
-        <!-- PII -->
-        <mat-tab label="PII">
-          <div class="tab-content">
-            <!-- Identity & Residency Details -->
-            <div class="section">
-              <h3 class="section-title text-dp-2-bold ">Identity & Residency</h3>
-              <hr _ngcontent-ng-c3098784094="" class="divider">
-              <div class="info-grid">
-                <div class="info-item">
-                  <label class="text-label">Aadhaar Number</label>
-                  <p class="text-label-data">{{kycData[0].aadhaarNumber??"-"}} </p>
-                </div>
-                <div class="info-item">
-                  <label class="text-label">PAN Number</label>
-                  <p class="text-label-data">{{kycData[0].panNumber??"-"}}</p>
-                </div>
-                <div class="info-item">
-                  <label class="text-label">Passport</label>
-                  <p class="text-label-data">{{kycData[0].passportNo??"-"}}</p>
-                </div>
-              </div>
-            </div>
-
-            <!-- Permanent Address -->
-            <div class="section">
-              <h3 class="section-title text-dp-2-bold">Permanent Address</h3>
-              <hr _ngcontent-ng-c3098784094="" class="divider">
-              <div class="info-grid">
-                <div class="info-item">
-                  <label class="text-label">Address Line 1</label>
-                  <p class="text-label-data">{{kycData[0].addresses[0].line1??"-"}}</p>
-                </div>
-                <div class="info-item">
-                  <label class="text-label">Address Line 2</label>
-                  <p class="text-label-data">{{kycData[0].addresses[0].line1??"-"}}</p>
-                </div>
-                <div class="info-item">
-                  <label class="text-label">Country</label>
-                  <p class="text-label-data">{{kycData[0].addresses[0].country??"-"}}</p>
-                </div>
-                <div class="info-item">
-                  <label class="text-label">State</label>
-                  <p class="text-label-data">{{kycData[0].addresses[0].state??"-"}}</p>
-                </div>
-                <div class="info-item">
-                  <label class="text-label">City</label>
-                  <p class="text-label-data"> {{kycData[0].addresses[0].city??"-"}}</p>
-                </div>
-                <div class="info-item">
-                  <label class="text-label">Zipcode</label>
-                  <p class="text-label-data">{{kycData[0].addresses[0].zipCode??"-"}}</p>
-                </div>
-
-
-              </div>
-            </div>
-
-            <!-- Current Address -->
-            <div class="section">
-              <h3 class="section-title text-dp-2-bold">Current Address</h3>
-              <hr _ngcontent-ng-c3098784094="" class="divider">
-              <div class="info-grid">
-                <div class="info-item">
-                  <label class="text-label">Address Line 1</label>
-                  <p class="text-label-data">{{kycData[0].addresses[1].line1??"-"}}</p>
-                </div>
-                <div class="info-item">
-                  <label class="text-label">Address Line 2</label>
-                  <p class="text-label-data">{{kycData[0].addresses[1].line1??"-"}}</p>
-                </div>
-                <div class="info-item">
-                  <label class="text-label">Country</label>
-                  <p class="text-label-data">{{kycData[0].addresses[1].country??"-"}}</p>
-                </div>
-                <div class="info-item">
-                  <label class="text-label">State</label>
-                  <p class="text-label-data">{{kycData[0].addresses[1].state??"-"}}</p>
-                </div>
-                <div class="info-item">
-                  <label class="text-label">City</label>
-                  <p class="text-label-data"> {{kycData[0].addresses[1].city??"-"}}</p>
-                </div>
-                <div class="info-item">
-                  <label class="text-label">Zipcode</label>
-                  <p class="text-label-data">{{kycData[0].addresses[1].zipCode??"-"}}</p>
-                </div>
-
-
-              </div>
-            </div>
-
-            <h3 class="reference text-dp-2-bold">Reference Details</h3>
-
-            <!-- Reference 1 -->
-            <div class="section">
-              <h3 class="section-title text-dp-1-medium">Reference 1</h3>
-              <hr _ngcontent-ng-c3098784094="" class="divider">
-              <div class="info-grid">
-                <div class="info-item">
-                  <label class="text-label">First Name</label>
-                  <p class="text-label-data">Rajesh</p>
-                </div>
-                <div class="info-item">
-                  <label class="text-label">Middle Name</label>
-                  <p class="text-label-data">-</p>
-                </div>
-                <div class="info-item">
-                  <label class="text-label">Last Name</label>
-                  <p class="text-label-data">Doe</p>
-                </div>
-                <div class="info-item">
-                  <label class="text-label">Email</label>
-                  <p class="text-label-data">vignesh121@gmail.com</p>
-                </div>
-                <div class="info-item">
-                  <label class="text-label">Phone Number</label>
-                  <p class="text-label-data"> +91 9987116247</p>
-                </div>
-                <div class="info-item">
-                  <label class="text-label">Address Line 1</label>
-                  <p class="text-label-data">House No. 25</p>
-                </div>
-                <div class="info-item">
-                  <label class="text-label">Address Line 2</label>
-                  <p class="text-label-data">Gandhi Nagar</p>
-                </div>
-                <div class="info-item">
-                  <label class="text-label">Country</label>
-                  <p class="text-label-data">India</p>
-                </div>
-                <div class="info-item">
-                  <label class="text-label">State</label>
-                  <p class="text-label-data">Maharashtra</p>
-                </div>
-                <div class="info-item">
-                  <label class="text-label">City</label>
-                  <p class="text-label-data"> Mumbai</p>
-                </div>
-                <div class="info-item">
-                  <label class="text-label">Zipcode</label>
-                  <p class="text-label-data">400001</p>
-                </div>
-              </div>
-            </div>
-
-            <!-- Reference 2 -->
-            <div class="section">
-              <h3 class="section-title text-dp-1-medium">Reference 2</h3>
-              <hr _ngcontent-ng-c3098784094="" class="divider">
-              <div class="info-grid">
-                <div class="info-item">
-                  <label class="text-label">First Name</label>
-                  <p class="text-label-data">Rajesh</p>
-                </div>
-                <div class="info-item">
-                  <label class="text-label">Middle Name</label>
-                  <p class="text-label-data">-</p>
-                </div>
-                <div class="info-item">
-                  <label class="text-label">Last Name</label>
-                  <p class="text-label-data">Doe</p>
-                </div>
-                <div class="info-item">
-                  <label class="text-label">Email</label>
-                  <p class="text-label-data">vignesh121@gmail.com</p>
-                </div>
-                <div class="info-item">
-                  <label class="text-label">Phone Number</label>
-                  <p class="text-label-data"> +91 9987116247</p>
-                </div>
-                <div class="info-item">
-                  <label class="text-label">Address Line 1</label>
-                  <p class="text-label-data">House No. 25</p>
-                </div>
-                <div class="info-item">
-                  <label class="text-label">Address Line 2</label>
-                  <p class="text-label-data">Gandhi Nagar</p>
-                </div>
-                <div class="info-item">
-                  <label class="text-label">Country</label>
-                  <p class="text-label-data">India</p>
-                </div>
-                <div class="info-item">
-                  <label class="text-label">State</label>
-                  <p class="text-label-data">Maharashtra</p>
-                </div>
-                <div class="info-item">
-                  <label class="text-label">City</label>
-                  <p class="text-label-data"> Mumbai</p>
-                </div>
-                <div class="info-item">
-                  <label class="text-label">Zipcode</label>
-                  <p class="text-label-data">400001</p>
-                </div>
-              </div>
-            </div>
-
-            <!-- Spouse Details -->
-            <div class="section">
-              <h3 class="section-title text-dp-2-bold ">Spouse Details</h3>
-              <hr _ngcontent-ng-c3098784094="" class="divider">
-              <div class="info-grid">
-                <div class="info-item">
-                  <label class="text-label">First Name</label>
-                  <p class="text-label-data">Rajesh</p>
-                </div>
-                <div class="info-item">
-                  <label class="text-label">Middle Name</label>
-                  <p class="text-label-data">-</p>
-                </div>
-                <div class="info-item">
-                  <label class="text-label">Last Name</label>
-                  <p class="text-label-data">Doe</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </mat-tab>
-
-        <!-- KYC Details -->
-        <mat-tab label="KYC Details">
-          <div class="tab-content">
-            <!-- Applicant KYC -->
-            <div class="section">
-              <h3 class="section-title text-dp-2-bold">Applicant KYC</h3>
-              <hr _ngcontent-ng-c3098784094="" class="divider">
-              <div class="info-grid-img">
-                <!-- <div class="info-item">
-                  <label class="text-label">Photo</label>
-                  <div class="img-box">
-                    <p class="text-label-data">{{kycData[0].documents[0].fileName?"-"}}</p>
-                    <div class="icons">
-                      <span class=""><img src="/assets/images/icons/eyered.svg" (click)="fetchDocuments()" alt="view"></span>
-                      <span class=""><img src="/assets/images/icons/import-red.svg" alt="Download"></span>
-                    </div>
-                  </div>
-
-                </div>
-                <div class="info-item">
-                  <label class="text-label">Aadhaar Number</label>
-                  <div class="img-box">
-                    <p class="text-label-data">Aadhaar.png</p>
-                    <div class="icons">
-                      <span class="" (click)="viewImage('/assets/images/dashboard/profileimg.png')"><img
-                          src="/assets/images/icons/eyered.svg" alt="view"></span>
-                      <span class="" (click)="downloadImage('/assets/images/dashboard/profileimg.png')"><img
-                          src="/assets/images/icons/import-red.svg" alt="Download"></span>
-                    </div>
-                  </div>
-                </div>
-                <div class="info-item">
-                  <label class="text-label">PAN</label>
-                  <div class="img-box">
-                    <p class="text-label-data">PAN_Card.png</p>
-                    <div class="icons">
-                      <span class=""><img src="/assets/images/icons/eyered.svg" alt="view"></span>
-                      <span class=""><img src="/assets/images/icons/import-red.svg" alt="Download"></span>
-                    </div>
-                  </div>
-                </div>
-                <div class="info-item">
-                  <label class="text-label">Passport</label>
-                  <div class="img-box">
-                    <p class="text-label-data">Passport.png</p>
-                    <div class="icons">
-                      <span class=""><img src="/assets/images/icons/eyered.svg" alt="view"></span>
-                      <span class=""><img src="/assets/images/icons/import-red.svg" alt="Download"></span>
-                    </div>
-                  </div>
-                </div> -->
-
-                <div class="info-item" *ngFor="let doc of kyc_documents">
-                  <label class="text-label">{{ doc.docType }}</label>
-                  <div class="img-box">
-                    <p class="text-label-data doctype-data">{{ doc.docType || '-' }}</p>
-
-                    <div class="icons">
-
-                      <span>
-                        <img src="/assets/images/icons/eyered.svg" alt="view" />
-                      </span>
-
-
-                      <span>
-                        <img src="/assets/images/icons/import-red.svg" alt="download" />
-                      </span>
-                    </div>
-                  </div>
-                </div>
-
-                <!-- Optional: Image/PDF preview modal -->
-                <div class="preview-modal" *ngIf="selectedDoc">
-                  <div class="modal-content">
-                    <span class="close" (click)="selectedDoc = null">&times;</span>
-                    <img *ngIf="selectedDoc.previewUrl.includes('image')" [src]="selectedDoc.previewUrl" />
-                    <iframe *ngIf="selectedDoc.previewUrl.includes('pdf')" [src]="selectedDoc.previewUrl"></iframe>
-                  </div>
-                </div>
-
-
-                <div class="info-item">
-                  <label class="text-label">E-KYC Status</label>
-                  <p class="text-label-data"> {{kycData[0].status??"-"}}</p>
-                </div>
-
-              </div>
-            </div>
-
-
-
-          </div>
-        </mat-tab>
-
-        <!-- Education -->
-        <mat-tab label="Education">
-          <div class="tab-content">
-            <div class="section">
-              <h3 class="section-title text-dp-2-bold">Education Details</h3>
-              <hr _ngcontent-ng-c3098784094="" class="divider">
-              <div class="info-grid-img">
-                <div class="info-item">
-                  <label class="text-label">10th</label>
-                  <div class="img-box">
-                    <p class="text-label-data">Marksheet.png</p>
-                    <div class="icons">
-                      <span class="" (click)="viewImage('/assets/images/dashboard/profileimg.png')"><img
-                          src="/assets/images/icons/eyered.svg" alt="view"></span>
-                      <span class="" (click)="downloadImage(tenthMarksheet.id)"><img
-                          src="/assets/images/icons/import-red.svg" alt="Download"></span>
-                    </div>
-                  </div>
-                </div>
-                <div class="info-item">
-                  <label class="text-label">CGPA / Percentage / Grade</label>
-                  <p class="text-label-data">86.1%</p>
-                </div>
-                <div class="info-item">
-                  <label class="text-label">12th</label>
-                  <div class="img-box">
-                    <p class="text-label-data">Marksheet.png</p>
-                    <div class="icons">
-                      <span class="" (click)="viewImage('/assets/images/dashboard/profileimg.png')"><img
-                          src="/assets/images/icons/eyered.svg" alt="view"></span>
-                      <span class="" (click)="downloadImage(twelthMarksheet.id)"><img
-                          src="/assets/images/icons/import-red.svg" alt="Download"></span>
-                    </div>
-                  </div>
-                </div>
-                <div class="info-item">
-                  <label class="text-label">CGPA / Percentage / Grade</label>
-                  <p class="text-label-data">86.1%</p>
-                </div>
-                <div class="info-item">
-                  <label class="text-label">Undergraduate</label>
-                  <div class="img-box">
-                    <p class="text-label-data">Marksheet.png</p>
-                    <div class="icons">
-                      <span class="" (click)="viewImage('/assets/images/dashboard/profileimg.png')"><img
-                          src="/assets/images/icons/eyered.svg" alt="view"></span>
-                      <span class="" (click)="downloadImage(ugMarksheet.id)"><img
-                          src="/assets/images/icons/import-red.svg" alt="Download"></span>
-                    </div>
-                  </div>
-                </div>
-                <div class="info-item">
-                  <label class="text-label">CGPA / Percentage / Grade</label>
-                  <p class="text-label-data">86.1%</p>
-                </div>
-                <div class="info-item">
-                  <label class="text-label">Postgraduate</label>
-                  <div class="img-box">
-                    <p class="text-label-data">Marksheet.png</p>
-                    <div class="icons">
-                      <span class="" (click)="viewImage('/assets/images/dashboard/profileimg.png')"><img
-                          src="/assets/images/icons/eyered.svg" alt="view"></span>
-                      <span class="" (click)="downloadImage(pgMarksheet.id)"><img
-                          src="/assets/images/icons/import-red.svg" alt="Download"></span>
-                    </div>
-                  </div>
-                </div>
-                <div class="info-item">
-                  <label class="text-label">CGPA / Percentage / Grade</label>
-                  <p class="text-label-data">86.1%</p>
-                </div>
-
-              </div>
-            </div>
-
-
-            <div class="section mt-4">
-              <h3 class="section-title text-dp-2-bold">Foreign Course Details</h3>
-              <hr _ngcontent-ng-c3098784094="" class="divider">
-              <div class="info-grid-img">
-                <div class="info-item">
-                  <label class="text-label">IELTS / PTE</label>
-                  <div class="img-box">
-                    <p class="text-label-data">IELTS.png</p>
-                    <div class="icons">
-                      <span class="" (click)="viewImage('/assets/images/dashboard/profileimg.png')"><img
-                          src="/assets/images/icons/eyered.svg" alt="view"></span>
-                      <span class="" (click)="downloadImage(scorecard.id)"><img
-                          src="/assets/images/icons/import-red.svg" alt="Download"></span>
-                    </div>
-                  </div>
-                </div>
-                <div class="info-item">
-                  <label class="text-label">CGPA / Percentage / Grade</label>
-                  <p class="text-label-data">86.1%</p>
-                </div>
-                <div class="info-item">
-                  <label class="text-label">State</label>
-                  <p class="text-label-data">Queensland</p>
-                </div>
-                <div class="info-item">
-                  <label class="text-label">University Name</label>
-                  <p class="text-label-data">ABC University </p>
-                </div>
-                <div class="info-item">
-                  <label class="text-label">Course Name</label>
-                  <p class="text-label-data">MBA</p>
-                </div>
-                <div class="info-item">
-                  <label class="text-label">University Offer Letter</label>
-                  <div class="img-box">
-                    <p class="text-label-data">Offer_Letter.png</p>
-                    <div class="icons">
-                      <span class="" (click)="viewImage('/assets/images/dashboard/profileimg.png')"><img
-                          src="/assets/images/icons/eyered.svg" alt="view"></span>
-                      <span class="" (click)="downloadImage(uniofferletter.id)"><img
-                          src="/assets/images/icons/import-red.svg" alt="Download"></span>
-                    </div>
-                  </div>
-                </div>
-
-
-              </div>
-            </div>
-          </div>
-        </mat-tab>
-
-        <!-- Occupation -->
-        <!-- <mat-tab label="Occupation">
-          <div class="tab-content">
-            <div class="section" *ngIf="!issalaried">
-              <h3 class="section-title text-dp-2-bold">Occupation Details</h3>
-              <hr _ngcontent-ng-c3098784094="" class="divider">
-              <div class="info-grid-img">
-                <div class="info-item">
-                  <label class="text-label">Source of Income</label>
-                  <p class="text-label-data">Salaried</p>
-                </div>
-                <div class="info-item">
-                  <label class="text-label">Office Name</label>
-                  <p class="text-label-data">XYZ</p>
-                </div>
-                <div class="info-item">
-                  <label class="text-label">Office Address</label>
-                  <p class="text-label-data"></p>
-                </div>
-                <div class="info-item">
-                  <label class="text-label">Salaried Bank Name</label>
-                  <p class="text-label-data">XYZ</p>
-                </div>
-                <div class="info-item">
-                  <label class="text-label">Account Number</label>
-                  <p class="text-label-data">123456789112</p>
-                </div>
-                <div class="info-item">
-                  <label class="text-label">IFSC Code</label>
-                  <p class="text-label-data">AAAA0000000</p>
-                </div>
-                <div class="info-item">
-                  <label class="text-label">Bank Branch Address</label>
-                  <p class="text-label-data">Mumbai</p>
-                </div>
-                <div class="info-item">
-                  <label class="text-label">Recent 3 Months Salary Slips</label>
-                  <div class="img-box">
-                    <p class="text-label-data">Salary Slip.png</p>
-                    <div class="icons">
-                      <span class="" (click)="viewImage('/assets/images/dashboard/profileimg.png')"><img
-                          src="/assets/images/icons/eyered.svg" alt="view"></span>
-                      <span class="" (click)="downloadImage(salaryslip1.id)"><img
-                          src="/assets/images/icons/import-red.svg" alt="Download"></span>
-                    </div>
-                  </div>
-                </div>
-                <div class="info-item">
-                  <label class="text-label">Form 16</label>
-                  <div class="img-box">
-                    <p class="text-label-data">FORM16.png</p>
-                    <div class="icons">
-                      <span class="" (click)="viewImage('/assets/images/dashboard/profileimg.png')"><img
-                          src="/assets/images/icons/eyered.svg" alt="view"></span>
-                      <span class="" (click)="downloadImage(form16.id)"><img
-                          src="/assets/images/icons/import-red.svg" alt="Download"></span>
-                    </div>
-                  </div>
-                </div>
-                <div class="info-item">
-                  <label class="text-label">Latest 3 Year ITR</label>
-                  <div class="img-box">
-                    <p class="text-label-data">ITR.png</p>
-                    <div class="icons">
-                      <span class="" (click)="viewImage('/assets/images/dashboard/profileimg.png')"><img
-                          src="/assets/images/icons/eyered.svg" alt="view"></span>
-                      <span class="" (click)="downloadImage(itr1.id)"><img
-                          src="/assets/images/icons/import-red.svg" alt="Download"></span>
-                    </div>
-                  </div>
-                </div>
-                <div class="info-item">
-                  <label class="text-label">1 Year Salaried Bank Account Statement</label>
-                  <div class="img-box">
-                    <p class="text-label-data">Statement.png</p>
-                    <div class="icons">
-                      <span class="" (click)="viewImage('/assets/images/dashboard/profileimg.png')"><img
-                          src="/assets/images/icons/eyered.svg" alt="view"></span>
-                      <span class="" (click)="downloadImage(bankstatement.id)"><img
-                          src="/assets/images/icons/import-red.svg" alt="Download"></span>
-                    </div>
-                  </div>
-                </div>
-                <div class="info-item">
-                  <label class="text-label">Existing Outstanding Loan Amount & EMI Obligation (If any)</label>
-                  <p class="text-label-data">Lorem ipsum dummy textLorem</p>
-                </div>
-
-              </div>
-            </div>
-
-            <div class="section" *ngIf="issalaried">
-              <h3 class="section-title text-dp-2-bold">Occupation Details</h3>
-              <hr _ngcontent-ng-c3098784094="" class="divider">
-              <div class="info-grid">
-                <div class="info-item">
-                  <label class="text-label">Source of Income</label>
-                  <p class="text-label-data">Self Employed (Business)</p>
-                </div>
-                <div class="info-item">
-                  <label class="text-label">Office Name</label>
-                  <p class="text-label-data">XYZ</p>
-                </div>
-                <div class="info-item">
-                  <label class="text-label">Office Address</label>
-                  <p class="text-label-data"></p>
-                </div>
-                <div class="info-item">
-                  <label class="text-label">Latest 3 Years Financials of Business</label>
-                  <p class="text-label-data"></p>
-                </div>
-                <div class="info-item">
-                  <label class="text-label">Latest 3 Year ITR</label>
-                  <p class="text-label-data"></p>
-                </div>
-                <div class="info-item">
-                  <label class="text-label">1 Year GST Return</label>
-                  <p class="text-label-data"></p>
-                </div>
-                <div class="info-item">
-                  <label class="text-label">1 Year Personal Bank Account Statement</label>
-                  <p class="text-label-data"></p>
-                </div>
-                <div class="info-item">
-                  <label class="text-label">Existing Outstanding Loan Amount & EMI Obligation (If any)</label>
-                  <p class="text-label-data">Lorem ipsum dummy text</p>
-                </div>
-
-
-              </div>
-            </div>
-          </div>
-        </mat-tab> -->
-
-        <!-- Products -->
-        <mat-tab label="Products">
-          <div class="tab-content">
-
-            <!-- Loans -->
-            <div class="section">
-              <h3 class="section-title text-dp-2-bold">Loans</h3>
-              <hr class="divider">
-
-              <!-- Loans -->
-              <div class="table-container">
-                <table class="responsive-table ">
-                  <thead>
-                    <tr>
-                      <th class="table-head table-header">Loan Type</th>
-                      <th class="table-head table-header">Loan Number</th>
-                      <th class="table-head table-header">Status</th>
-                      <th class="table-head table-header">Loan Amount</th>
-                      <th class="table-head table-header">Applicant Type</th>
-                      <th class="table-head table-header">Disbursed Amount</th>
-                      <th class="table-head table-header">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr>
-                      <td class="text-dp-3-regular table-data">Education</td>
-                      <td class="text-dp-3-regular table-data">abc1234</td>
-                      <td class="text-dp-3-regular table-data"><span class="status activestatus">Active</span> </td>
-                      <td class="text-dp-3-regular table-data">₹5,00,000</td>
-                      <td class="text-dp-3-regular table-data">Co-Applicant</td>
-                      <td class="text-dp-3-regular table-data">₹2,00,000</td>
-                      <td class="text-dp-3-regular table-data">View Details</td>
-                    </tr>
-
-                  </tbody>
-                </table>
-              </div>
-
-            </div>
-
-            <!-- Payments -->
-
-            <div class="section">
-              <h3 class="section-title text-dp-2-bold">Payments</h3>
-              <hr class="divider">
-              <div class="table-container">
-                <table class="responsive-table ">
-                  <thead>
-                    <tr>
-                      <th class="table-head table-header">Date & Time</th>
-                      <th class="table-head table-header">Payment Type</th>
-                      <th class="table-head table-header">Reference No</th>
-                      <th class="table-head table-header">Payment INR</th>
-                      <th class="table-head table-header">Payment AUD</th>
-                      <th class="table-head table-header">Fees Paid</th>
-                      <th class="table-head table-header">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr>
-                      <td class="text-dp-3-regular table-data">dd/mm/yyyy hh:mm</td>
-                      <td class="text-dp-3-regular table-data">Fx_Fees</td>
-                      <td class="text-dp-3-regular table-data">abc1234</td>
-                      <td class="text-dp-3-regular table-data">₹5,00,000</td>
-                      <td class="text-dp-3-regular table-data">$9,000</td>
-                      <td class="text-dp-3-regular table-data">₹2,00,000</td>
-                      <td class="text-dp-3-regular table-data">View Details</td>
-                    </tr>
-
-                  </tbody>
-                </table>
-              </div>
-
-            </div>
-
-            <!-- Accounts -->
-            <div class="section">
-
-              <h3 class="section-title text-dp-2-bold">Accounts</h3>
-              <hr _ngcontent-ng-c3098784094="" class="divider">
-
-              <div class="table-container">
-                <table class="responsive-table ">
-                  <thead>
-                    <tr>
-                      <th class="table-head table-header">Account Number</th>
-                      <th class="table-head table-header">Account Name</th>
-                      <th class="table-head table-header">Account Balance</th>
-                      <th class="table-head table-header">Actions</th>
-
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr>
-                      <td class="text-dp-3-regular table-data">1001001234</td>
-                      <td class="text-dp-3-regular table-data">Vighnesh</td>
-                      <td class="text-dp-3-regular table-data">₹5,00,000</td>
-                      <td class="text-dp-3-regular table-data">View Details</td>
-                    </tr>
-
-                  </tbody>
-                </table>
-              </div>
-
-
-            </div>
-          </div>
-        </mat-tab>
-
-
-        <!-- Audit Trail -->
-        <mat-tab label="Audit Trail">
-          <div class="tab-content">
-
-            <div class="section">
-              <!-- Search and Filter Row -->
-              <div class="audit-trail-header">
-                <div class="audit-search-input"> <app-inputfield label="Input Label" placeholder="Search..."
-                    helpText="Help text" [showSearch]="true" [showLabel]="false" [showHelpText]="false">
-                  </app-inputfield></div>
-
-                <div class="audit-action-dropdow"><app-dropdown [options]="myOptions2"
-                    [(selectedValue)]="selectedOption2" placeholder="All Actions"
-                    (selectedValueChange)="onSelectionChange2($event)">
-                  </app-dropdown></div>
-              </div>
-              <hr class="divider">
-
-              <!-- Audit Trail Timeline -->
-              <div class="audit-trail-timeline">
-                <div class="audit-trail d-flex flex-column">
-
-                  <!-- Today Section -->
-                  <div class="audit-timeline-section" *ngIf="getTodayTrails().length > 0">
-                    <div class="audit-timeline-section-header">
-                      <span class="audit-timeline-section-title text-dp-3-regular">Today ({{ getTodayTrails().length
-                        }})</span>
-                    </div>
-
-                    <div class="audit-timeline-item" *ngFor="let trail of getTodayTrails()">
-                      <div class="audit-timeline-date"> <span class="text-body-1 text-capitalize">{{ trail.date | date:
-                          'MMM'
-                          | uppercase }}</span>
-
-                        <div class="audit-date-badge">
-                          <span class="date-day">{{ trail.date | date: 'd' }}</span>
-
-                        </div>
-                        <div class="audit-timeline-line"></div>
-                      </div>
-                      <div class="audit-timeline-line-hr"></div>
-                      <div class="audit-timeline-content">
-                        <div class="audit-timeline-card">
-                          <div class="audit-card-header">
-                            <span class="audit-card-time text-body-1">{{ trail.time }}</span>
-                            <span class="saudit-tatus-badge text-label-data" [ngClass]="getStatusClass(trail.status)">
-                              {{ trail.status }}
-                            </span>
-                          </div>
-                          <div class="audit-card-body">
-                            <h4 class="audit-card-title text-label-data">{{ trail.action }}</h4>
-                            <p class="audit-card-subtitle text-body-1">{{ trail.reference }}</p>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <!-- Yesterday Section -->
-                  <div class="audit-timeline-section" *ngIf="getYesterdayTrails().length > 0">
-                    <div class="audit-timeline-section-header">
-                      <span class="audit-timeline-section-title text-dp-3-regular">Yesterday ({{
-                        getYesterdayTrails().length
-                        }})</span>
-                    </div>
-
-                    <div class="audit-timeline-item" *ngFor="let trail of getYesterdayTrails()">
-                      <div class="audit-timeline-date"> <span class="text-body-1 text-capitalize">{{ trail.date | date:
-                          'MMM'
-                          | uppercase }}</span>
-
-                        <div class="audit-date-badge">
-                          <span class="date-day">{{ trail.date | date: 'd' }}</span>
-
-                        </div>
-                        <div class="audit-timeline-line"></div>
-                      </div>
-                      <div class="audit-timeline-line-hr"></div>
-                      <div class="audit-timeline-content">
-                        <div class="audit-timeline-card">
-                          <div class="audit-card-header">
-                            <span class="audit-card-time text-body-1">{{ trail.time }}</span>
-                            <span class="saudit-tatus-badge text-label-data" [ngClass]="getStatusClass(trail.status)">
-                              {{ trail.status }}
-                            </span>
-                          </div>
-                          <div class="audit-card-body">
-                            <h4 class="audit-card-title text-label-data">{{ trail.action }}</h4>
-                            <p class="audit-card-subtitle text-body-1">{{ trail.reference }}</p>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <!-- Earlier Section -->
-                  <div class="audit-timeline-section" *ngIf="getEarlierTrails().length > 0">
-                    <div class="audit-timeline-section-header">
-                      <span class="audit-timeline-section-title text-dp-3-regular">Earlier ({{ getEarlierTrails().length
-                        }})</span>
-                    </div>
-
-                    < <div class="audit-timeline-item" *ngFor="let trail of getEarlierTrails()">
-                      <div class="audit-timeline-date"> <span class="text-body-1 text-capitalize">{{ trail.date | date:
-                          'MMM'
-                          | uppercase }}</span>
-
-                        <div class="audit-date-badge">
-                          <span class="date-day">{{ trail.date | date: 'd' }}</span>
-
-                        </div>
-                        <div class="audit-timeline-line"></div>
-                      </div>
-                      <div class="audit-timeline-line-hr"></div>
-                      <div class="audit-timeline-content">
-                        <div class="audit-timeline-card">
-                          <div class="audit-card-header">
-                            <span class="audit-card-time text-body-1">{{ trail.time }}</span>
-                            <span class="saudit-tatus-badge text-label-data" [ngClass]="getStatusClass(trail.status)">
-                              {{ trail.status }}
-                            </span>
-                          </div>
-                          <div class="audit-card-body">
-                            <h4 class="audit-card-title text-label-data">{{ trail.action }}</h4>
-                            <p class="audit-card-subtitle text-body-1">{{ trail.reference }}</p>
-                          </div>
-                        </div>
-                      </div>
-                  </div>
-                </div>
-
-                <!-- No Results -->
-                <div class="audit-no-results" *ngIf="filteredAuditTrails.length === 0">
-                  <p class="text-common">No audit trails found</p>
-                </div>
-              </div>
-            </div>
-
-          </div>
-    </div>
-    </mat-tab>
-    <!-- Bank Accounts -->
-    <!-- <mat-tab label="Bank Accounts">
-          <div class="tab-content">
-            <div class="section">
-
-              <h3 class="section-title text-dp-2-bold">Bank Accounts</h3>
-              <hr _ngcontent-ng-c3098784094="" class="divider">
-
-              <div class="table-container">
-                <table class="responsive-table ">
-                  <thead>
-                    <tr>
-                      <th class="table-head table-header">Account Number</th>
-                      <th class="table-head table-header">Bank & Branch</th>
-                      <th class="table-head table-header">IFSC Code</th>
-                      <th class="table-head table-header">Status</th>
-
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr>
-                      <td class="text-dp-3-regular table-data">xxxx2345</td>
-                      <td class="text-dp-3-regular table-data">State Bank of India, MG Road, Bengaluru.</td>
-                      <td class="text-dp-3-regular table-data">SBIN0004576</td>
-                      <td class="text-dp-3-regular table-data"><span class="status activestatus" >Active</span></td>
-                    </tr>
-
-                    <tr>
-                      <td class="text-dp-3-regular table-data">xxxx2345</td>
-                      <td class="text-dp-3-regular table-data">HDFC Bank, Connaught Place, Delhi.</td>
-                      <td class="text-dp-3-regular table-data">HDFC0006272</td>
-                      <td class="text-dp-3-regular table-data"><span class="status inactive" >In Active</span></td>
-                    </tr>
-
-                  </tbody>
-                </table>
-              </div>
-
-
-            </div>
-          </div>
-        </mat-tab> -->
-
-    <!-- Credit Score -->
-     <mat-tab label="Credit Score">
-          <div class="tab-content">
-            <div class="section">
-              <h3 class="section-title text-dp-2-bold">Credit Score</h3>
-              <hr class="divider">
-              <div class="containerdata">
-
-                <div class="credit-score-section">
-                  <div class="stats-container-main">
-                    <div class="score-chart">
-                      <div class="score-number text-common">{{ creditScore }}</div>
-                      <div class="gauge-container">
-                        <canvas #gaugeCanvas></canvas>
-
-
-                        <div class="gauge-labels text-common">
-                          <div class="gauge-label">
-                            <span class="gauge-label-value">POOR</span>
-                            <span>300-550</span>
-                          </div>
-                          <div class="gauge-label">
-                            <span class="gauge-label-value">AVERAGE</span>
-                            <span>550-650</span>
-                          </div>
-                          <div class="gauge-label">
-                            <span class="gauge-label-value">GOOD</span>
-                            <span>650-750</span>
-                          </div>
-                          <div class="gauge-label">
-                            <span class="gauge-label-value">EXCELLENT</span>
-                            <span>750-900</span>
-                          </div>
-                        </div>
-                      </div>
-                      <div class="report-date">
-                        Date of Report : {{ reportDate }} • Source : {{ source }}
-                      </div>
-                    </div>
-
-                    <div class="creditscore-data ">
-                      <div class="stats-container">
-                        <div class="row">
-                          <div class="col ">
-                            <div class="stat-card">
-                              <div class="stat-value text-dp-3-bold">{{ creditStats.totalCredit }}</div>
-                              <div class="stat-label text-label-data">Total Credit</div>
-                            </div>
-                          </div>
-
-                          <div class="col ">
-                            <div class="stat-card">
-                              <div class="stat-value text-dp-3-bold">{{ creditStats.totalAccounts }}</div>
-                              <div class="stat-label text-label-data">Total Number of Accounts</div>
-                            </div>
-                          </div>
-                        </div>
-
-                        <div class="row">
-                          <div class="col">
-                            <div class="stat-card">
-                              <div class="stat-value text-dp-3-bold">{{ creditStats.numberOfLoans }}</div>
-                              <div class="stat-label text-label-data">Number of Loans</div>
-                            </div>
-                          </div>
-
-                          <div class="col">
-                            <div class="stat-card">
-                              <div class="stat-value text-dp-3-bold">{{ creditStats.outstandingAmount }}</div>
-                              <div class="stat-label text-label-data">outstandingAmount Credit Accounts</div>
-                            </div>
-                          </div>
-                        </div>
-
-                        <div class="vertical-divider"></div>
-                      </div>
-
-                      <div class="downloadbtn">
-                        <app-buttons label="Download Latest Report" class="btn btn-icon secondary btn-label "
-                          (click)="downloadReport()">
-                          <img src="/assets/images/icons/import.svg" alt="Download">
-
-                        </app-buttons>
-                      </div>
-                    </div>
-                   
-                    <div class="empty"></div>
-                  </div>
-                </div>
-              </div>
-            </div>
-           
-            <div class="section">
-              <h3 class="section-title text-dp-1-medium">Latest Know Address as per CIBIL</h3>
-              <hr class="divider">
-
-
-              <div class="info-grid">
-                <div class="info-item">
-                  <label class="text-label">Address line 1</label>
-                  <p class="text-label-data">123, Main Street, Anytown</p>
-                </div>
-                <div class="info-item">
-                  <label class="text-label">Address line 2</label>
-                  <p class="text-label-data">Lorem ipsum dummy text</p>
-                </div>
-                <div class="info-item">
-                  <label class="text-label">Country</label>
-                  <p class="text-label-data">India</p>
-                </div>
-                <div class="info-item">
-                  <label class="text-label">State</label>
-                  <p class="text-label-data">Maharashtra</p>
-                </div>
-                <div class="info-item">
-                  <label class="text-label">City</label>
-                  <p class="text-label-data">Mumbai</p>
-                </div>
-                <div class="info-item">
-                  <label class="text-label">Zipcode</label>
-                  <p class="text-label-data">400001</p>
-                </div>
-              </div>
-            </div>
-
-            
-            <div class="section">
-              <h3 class="section-title text-dp-1-medium">CIBIL History</h3>
-              <hr class="divider">
-              <div class="table-container">
-                <table class="responsive-table">
-                  <thead>
-                    <tr>
-                      <th class="table-head table-header">Date Generated</th>
-                      <th class="table-head table-header">Name</th>
-                      <th class="table-head table-header">Generated By</th>
-                      <th class="table-head table-header">Credit Score</th>
-                      <th class="table-head table-header">Action</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr>
-                      <td class="text-dp-3-regular table-data">25/07/2025</td>
-                      <td class="text-dp-3-regular table-data">Vighnesh</td>
-                      <td class="text-dp-3-regular table-data">Sandeep</td>
-                      <td class="text-dp-3-regular table-data">780</td>
-                      <td class="text-dp-3-regular table-data">👁️</td>
-                    </tr>
-                    <tr>
-                      <td class="text-dp-3-regular table-data">22/11/2024</td>
-                      <td class="text-dp-3-regular table-data">Vighnesh</td>
-                      <td class="text-dp-3-regular table-data">Aarti</td>
-                      <td class="text-dp-3-regular table-data">820</td>
-                      <td class="text-dp-3-regular table-data">👁️</td>
-                    </tr>
-                    <tr>
-                      <td class="text-dp-3-regular table-data">04/05/2024</td>
-                      <td class="text-dp-3-regular table-data">Vighnesh</td>
-                      <td class="text-dp-3-regular table-data">Priya</td>
-                      <td class="text-dp-3-regular table-data">690</td>
-                      <td class="text-dp-3-regular table-data">👁️</td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </div>
-
-        </mat-tab>  
-
-    <!-- Sanction Letter -->
-    <mat-tab label="Sanction Letter">
+   <!-- PI -->
+    <mat-tab label="PI">
       <div class="tab-content">
+        <!-- Basic Information -->
         <div class="section">
-          <h3 class="section-title text-dp-2-bold">Sanction Letter </h3>
+          <h3 class="section-title text-dp-2-bold">Basic Information</h3>
           <hr _ngcontent-ng-c3098784094="" class="divider">
+          <div class="info-grid">
+            <div class="info-item">
+              <label class="text-label">First Name</label>
+              <p class="text-label-data">Rajesh</p>
+            </div>
+            <div class="info-item">
+              <label class="text-label">Middle Name</label>
+              <p class="text-label-data">Richard</p>
+            </div>
+            <div class="info-item">
+              <label class="text-label">Last Name</label>
+              <p class="text-label-data">Doe</p>
+            </div>
+            <div class="info-item">
+              <label class="text-label">Date of Birth</label>
+              <p class="text-label-data">15-01-2000</p>
+            </div>
+            <div class="info-item">
+              <label class="text-label">Marital Status</label>
+              <p class="text-label-data">Single</p>
+            </div>
+            <div class="info-item">
+              <label class="text-label">Gender</label>
+              <p class="text-label-data">Male</p>
+            </div>
+            <div class="info-item">
+              <label class="text-label">Nationality</label>
+              <p class="text-label-data">Indian</p>
+            </div>
+            <div class="info-item">
+              <label class="text-label">Email ID</label>
+              <p class="text-label-data">abc@gmail.com</p>
+            </div>
+            <div class="info-item">
+              <label class="text-label">Mobile Number</label>
+              <p class="text-label-data">8844112255</p>
+            </div>
+          </div>
+        </div>
 
-          <app-sanctionletter></app-sanctionletter>
+        <!-- Spouse Details -->
+        <div class="section">
+          <h3 class="section-title text-dp-2-bold ">Spouse Details</h3>
+          <hr _ngcontent-ng-c3098784094="" class="divider">
+          <div class="info-grid">
+            <div class="info-item">
+              <label class="text-label">First Name</label>
+              <p class="text-label-data">Rajesh</p>
+            </div>
+            <div class="info-item">
+              <label class="text-label">Middle Name</label>
+              <p class="text-label-data">-</p>
+            </div>
+            <div class="info-item">
+              <label class="text-label">Last Name</label>
+              <p class="text-label-data">Doe</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Father's Details -->
+        <div class="section">
+          <h3 class="section-title text-dp-2-bold">Father's Details</h3>
+          <hr _ngcontent-ng-c3098784094="" class="divider">
+          <div class="info-grid">
+            <div class="info-item">
+              <label class="text-label">First Name</label>
+              <p class="text-label-data">Rajesh</p>
+            </div>
+            <div class="info-item">
+              <label class="text-label">Middle Name</label>
+              <p class="text-label-data">-</p>
+            </div>
+            <div class="info-item">
+              <label class="text-label">Last Name</label>
+              <p class="text-label-data">Doe</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Mother's Details -->
+        <div class="section">
+          <h3 class="section-title text-dp-2-bold">Mother's Details</h3>
+          <hr _ngcontent-ng-c3098784094="" class="divider">
+          <div class="info-grid">
+            <div class="info-item">
+              <label class="text-label">First Name</label>
+              <p class="text-label-data">Jenny</p>
+            </div>
+            <div class="info-item">
+              <label class="text-label">Middle Name</label>
+              <p class="text-label-data">-</p>
+            </div>
+            <div class="info-item">
+              <label class="text-label">Last Name</label>
+              <p class="text-label-data">Doe</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- <div class="section"><h3 class=""></h3></div> -->
+      </div>
+    </mat-tab>
+
+    <!-- PII -->
+    <mat-tab label="PII">
+      <div class="tab-content">
+        <!-- Identity & Residency Details -->
+        <div class="section">
+          <h3 class="section-title text-dp-2-bold ">Identity & Residency</h3>
+          <hr _ngcontent-ng-c3098784094="" class="divider">
+          <div class="info-grid">
+            <div class="info-item">
+              <label class="text-label">Aadhaar Number</label>
+              <p class="text-label-data">XXXX XXXX 3210</p>
+            </div>
+            <div class="info-item">
+              <label class="text-label">PAN Number</label>
+              <p class="text-label-data">ABCDE****H</p>
+            </div>
+            <div class="info-item">
+              <label class="text-label">Passport</label>
+              <p class="text-label-data">A1234567</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Permanent Address -->
+        <div class="section">
+          <h3 class="section-title text-dp-2-bold">Permanent Address</h3>
+          <hr _ngcontent-ng-c3098784094="" class="divider">
+          <div class="info-grid">
+            <div class="info-item">
+              <label class="text-label">Address Line 1</label>
+              <p class="text-label-data">House No. 25</p>
+            </div>
+            <div class="info-item">
+              <label class="text-label">Address Line 2</label>
+              <p class="text-label-data">Gandhi Nagar</p>
+            </div>
+            <div class="info-item">
+              <label class="text-label">Country</label>
+              <p class="text-label-data">India</p>
+            </div>
+            <div class="info-item">
+              <label class="text-label">State</label>
+              <p class="text-label-data">Maharashtra</p>
+            </div>
+            <div class="info-item">
+              <label class="text-label">City</label>
+              <p class="text-label-data"> Mumbai</p>
+            </div>
+            <div class="info-item">
+              <label class="text-label">Zipcode</label>
+              <p class="text-label-data">400001</p>
+            </div>
+
+
+          </div>
+        </div>
+
+        <!-- Current Address -->
+        <div class="section">
+          <h3 class="section-title text-dp-2-bold">Current Address</h3>
+          <hr _ngcontent-ng-c3098784094="" class="divider">
+          <div class="info-grid">
+            <div class="info-item">
+              <label class="text-label">Address Line 1</label>
+              <p class="text-label-data">House No. 25</p>
+            </div>
+            <div class="info-item">
+              <label class="text-label">Address Line 2</label>
+              <p class="text-label-data">Gandhi Nagar</p>
+            </div>
+            <div class="info-item">
+              <label class="text-label">Country</label>
+              <p class="text-label-data">India</p>
+            </div>
+            <div class="info-item">
+              <label class="text-label">State</label>
+              <p class="text-label-data">Maharashtra</p>
+            </div>
+            <div class="info-item">
+              <label class="text-label">City</label>
+              <p class="text-label-data"> Mumbai</p>
+            </div>
+            <div class="info-item">
+              <label class="text-label">Zipcode</label>
+              <p class="text-label-data">400001</p>
+            </div>
+          </div>
+        </div>
+
+        <h3 class="reference text-dp-2-bold">Reference Details</h3>
+
+        <!-- Reference 1 -->
+        <div class="section">
+          <h3 class="section-title text-dp-1-medium">Reference 1</h3>
+          <hr _ngcontent-ng-c3098784094="" class="divider">
+          <div class="info-grid">
+            <div class="info-item">
+              <label class="text-label">First Name</label>
+              <p class="text-label-data">Rajesh</p>
+            </div>
+            <div class="info-item">
+              <label class="text-label">Middle Name</label>
+              <p class="text-label-data">-</p>
+            </div>
+            <div class="info-item">
+              <label class="text-label">Last Name</label>
+              <p class="text-label-data">Doe</p>
+            </div>
+            <div class="info-item">
+              <label class="text-label">Email</label>
+              <p class="text-label-data">vignesh121@gmail.com</p>
+            </div>
+            <div class="info-item">
+              <label class="text-label">Phone Number</label>
+              <p class="text-label-data"> +91 9987116247</p>
+            </div>
+            <div class="info-item">
+              <label class="text-label">Address Line 1</label>
+              <p class="text-label-data">House No. 25</p>
+            </div>
+            <div class="info-item">
+              <label class="text-label">Address Line 2</label>
+              <p class="text-label-data">Gandhi Nagar</p>
+            </div>
+            <div class="info-item">
+              <label class="text-label">Country</label>
+              <p class="text-label-data">India</p>
+            </div>
+            <div class="info-item">
+              <label class="text-label">State</label>
+              <p class="text-label-data">Maharashtra</p>
+            </div>
+            <div class="info-item">
+              <label class="text-label">City</label>
+              <p class="text-label-data"> Mumbai</p>
+            </div>
+            <div class="info-item">
+              <label class="text-label">Zipcode</label>
+              <p class="text-label-data">400001</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Reference 2 -->
+        <div class="section">
+          <h3 class="section-title text-dp-1-medium">Reference 2</h3>
+          <hr _ngcontent-ng-c3098784094="" class="divider">
+          <div class="info-grid">
+            <div class="info-item">
+              <label class="text-label">First Name</label>
+              <p class="text-label-data">Rajesh</p>
+            </div>
+            <div class="info-item">
+              <label class="text-label">Middle Name</label>
+              <p class="text-label-data">-</p>
+            </div>
+            <div class="info-item">
+              <label class="text-label">Last Name</label>
+              <p class="text-label-data">Doe</p>
+            </div>
+            <div class="info-item">
+              <label class="text-label">Email</label>
+              <p class="text-label-data">vignesh121@gmail.com</p>
+            </div>
+            <div class="info-item">
+              <label class="text-label">Phone Number</label>
+              <p class="text-label-data"> +91 9987116247</p>
+            </div>
+            <div class="info-item">
+              <label class="text-label">Address Line 1</label>
+              <p class="text-label-data">House No. 25</p>
+            </div>
+            <div class="info-item">
+              <label class="text-label">Address Line 2</label>
+              <p class="text-label-data">Gandhi Nagar</p>
+            </div>
+            <div class="info-item">
+              <label class="text-label">Country</label>
+              <p class="text-label-data">India</p>
+            </div>
+            <div class="info-item">
+              <label class="text-label">State</label>
+              <p class="text-label-data">Maharashtra</p>
+            </div>
+            <div class="info-item">
+              <label class="text-label">City</label>
+              <p class="text-label-data"> Mumbai</p>
+            </div>
+            <div class="info-item">
+              <label class="text-label">Zipcode</label>
+              <p class="text-label-data">400001</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Spouse Details -->
+        <div class="section">
+          <h3 class="section-title text-dp-2-bold ">Spouse Details</h3>
+          <hr _ngcontent-ng-c3098784094="" class="divider">
+          <div class="info-grid">
+            <div class="info-item">
+              <label class="text-label">First Name</label>
+              <p class="text-label-data">Rajesh</p>
+            </div>
+            <div class="info-item">
+              <label class="text-label">Middle Name</label>
+              <p class="text-label-data">-</p>
+            </div>
+            <div class="info-item">
+              <label class="text-label">Last Name</label>
+              <p class="text-label-data">Doe</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </mat-tab>
+
+    <!-- KYC Details -->
+    <mat-tab label="KYC Details">
+      <div class="tab-content">
+        <!-- Applicant KYC -->
+        <div class="section">
+          <h3 class="section-title text-dp-2-bold">Applicant KYC</h3>
+          <hr _ngcontent-ng-c3098784094="" class="divider">
+          <div class="info-grid-img">
+            <div class="info-item">
+              <label class="text-label">Photo</label>
+              <div class="img-box">
+                <p class="text-label-data">Rajesh.png</p>
+                <div class="icons">
+                  <span class=""><img src="/assets/images/icons/eyered.svg" alt="view"></span>
+                  <span class=""><img src="/assets/images/icons/import-red.svg" alt="Download"></span>
+                </div>
+              </div>
+              
+            </div>
+            <div class="info-item">
+              <label class="text-label">Aadhaar Number</label>
+              <div class="img-box">
+                <p class="text-label-data">Aadhaar.png</p>
+                <div class="icons">
+                  <span class="" (click)="viewImage('/assets/images/dashboard/profileimg.png')"><img src="/assets/images/icons/eyered.svg" alt="view"></span>
+                  <span class="" (click)="downloadImage('/assets/images/dashboard/profileimg.png')"><img src="/assets/images/icons/import-red.svg" alt="Download"></span>
+                </div>
+              </div>
+            </div>
+            <div class="info-item">
+              <label class="text-label">PAN</label>
+              <div class="img-box">
+                <p class="text-label-data">PAN_Card.png</p>
+                <div class="icons">
+                  <span class=""><img src="/assets/images/icons/eyered.svg" alt="view"></span>
+                  <span class=""><img src="/assets/images/icons/import-red.svg" alt="Download"></span>
+                </div>
+              </div>
+            </div>
+            <div class="info-item">
+              <label class="text-label">Passport</label>
+              <div class="img-box">
+                <p class="text-label-data">Passport.png</p>
+                <div class="icons">
+                  <span class=""><img src="/assets/images/icons/eyered.svg" alt="view"></span>
+                  <span class=""><img src="/assets/images/icons/import-red.svg" alt="Download"></span>
+                </div>
+              </div>
+            </div>
+            <div class="info-item">
+              <label class="text-label">E-KYC Status</label>
+              <p class="text-label-data"> Verified</p>
+            </div>
+
+          </div>
         </div>
 
 
       </div>
     </mat-tab>
 
-    </mat-tab-group>
-  </div>
+    <!-- Products -->
+    <mat-tab label="Products">
+      <div class="tab-content">
+
+        <!-- Loans -->
+        <div class="section">
+          <h3 class="section-title text-dp-1-medium">Loans</h3>
+          <hr class="divider">
+          
+          <!-- Loans -->
+          <div class="table-container">
+            <table class="responsive-table ">
+              <thead>
+                <tr>
+                  <th class="table-head table-header">Loan Type</th>
+                  <th class="table-head table-header">Loan Number</th>
+                  <th class="table-head table-header">Status</th>
+                  <th class="table-head table-header">Loan Amount</th>
+                  <th class="table-head table-header">Applicant Type</th>
+                  <th class="table-head table-header">Disbursed Amount</th>
+                  <th class="table-head table-header">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td class="text-dp-3-regular table-data">Education</td>
+                  <td class="text-dp-3-regular table-data">abc1234</td>
+                  <td class="text-dp-3-regular table-data">Active</td>
+                  <td class="text-dp-3-regular table-data">₹5,00,000</td>
+                  <td class="text-dp-3-regular table-data">Co-Applicant</td>
+                  <td class="text-dp-3-regular table-data">₹2,00,000</td>
+                  <td class="text-dp-3-regular table-data">View Details</td>
+                </tr>
+
+              </tbody>
+            </table>
+          </div>
+
+        </div>
+
+        <!-- Payments -->
+
+        <div class="section">
+          <h3 class="section-title text-dp-1-medium">Payments</h3>
+          <hr class="divider">
+          <div class="table-container">
+            <table class="responsive-table ">
+              <thead>
+                <tr>
+                  <th class="table-head table-header">Date & Time</th>
+                  <th class="table-head table-header">Payment Type</th>
+                  <th class="table-head table-header">Reference No</th>
+                  <th class="table-head table-header">Payment INR</th>
+                  <th class="table-head table-header">Payment AUD</th>
+                  <th class="table-head table-header">Fees Paid</th>
+                  <th class="table-head table-header">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td class="text-dp-3-regular table-data">dd/mm/yyyy hh:mm</td>
+                  <td class="text-dp-3-regular table-data">Fx_Fees</td>
+                  <td class="text-dp-3-regular table-data">abc1234</td>
+                  <td class="text-dp-3-regular table-data">₹5,00,000</td>
+                  <td class="text-dp-3-regular table-data">$9,000</td>
+                  <td class="text-dp-3-regular table-data">₹2,00,000</td>
+                  <td class="text-dp-3-regular table-data">View Details</td>
+                </tr>
+
+              </tbody>
+            </table>
+          </div>
+
+        </div>
+
+        <!-- Accounts -->
+        <div class="section">
+
+          <h3 class="section-title text-dp-1-medium">Accounts</h3>
+          <hr _ngcontent-ng-c3098784094="" class="divider">
+
+          <div class="table-container">
+            <table class="responsive-table ">
+              <thead>
+                <tr>
+                  <th class="table-head table-header">Account Number</th>
+                  <th class="table-head table-header">Account Name</th>
+                  <th class="table-head table-header">Account Balance</th>
+                  <th class="table-head table-header">Actions</th>
+
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td class="text-dp-3-regular table-data">1001001234</td>
+                  <td class="text-dp-3-regular table-data">Vighnesh</td>
+                  <td class="text-dp-3-regular table-data">₹5,00,000</td>
+                  <td class="text-dp-3-regular table-data">View Details</td>
+                </tr>
+
+              </tbody>
+            </table>
+          </div>
+
+
+        </div>
+      </div>
+    </mat-tab>
+     
+
+  </mat-tab-group>
 
   <!-- footer buttons  -->
-  <div class="d-flex justify-content-start gap-2 footer-btn">
-    <app-buttons label="Edit" class="btn primary btn-icon btncustomClass btn-label-text">
-      <!-- <img src="/assets/images/icons/add.svg" alt="edit"> -->
-      <span class="text-body-1 primarycolor">Edit</span>
-
-    </app-buttons>
-    <app-buttons label="Download CIF" class="btn primary btn-icon btncustomClass btn-label-text">
-      <!-- <img src="/assets/images/icons/import.svg" alt="Download"> -->
-      <span class="text-body-1 primarycolor">Download CIF</span>
-
-    </app-buttons>
-
-     <!-- <app-buttons label="Edit" class="btn primary btn-icon btncustomClass btn-label">
+  <div class="d-flex justify-content-start gap-2">
+    <app-buttons label="Edit" class="btn primary btn-icon btncustomClass btn-label">
       <img src="/assets/images/icons/add.svg" alt="edit">
 
     </app-buttons>
     <app-buttons label="Download CIF" class="btn primary btn-icon btncustomClass btn-label">
       <img src="/assets/images/icons/import.svg" alt="Download">
 
-    </app-buttons> -->
+    </app-buttons>
+
+ 
   </div>
 
-
-</div>
-
-<!-- <app-quicklinks [selectedTabIndex]="selectedTabIndex" (tabChange)="onQuickLinkTabChange($event)">
-  </app-quicklinks> -->
+  <app-quicklinks 
+    currentPage="customerdetails">
+  </app-quicklinks>
 </div>

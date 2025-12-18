@@ -1,11 +1,11 @@
 import { CommonModule } from '@angular/common';
-import { Component, ElementRef, Input, ViewChild } from '@angular/core';
+import { Component, ElementRef, Input, OnInit, ViewChild } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTabsModule } from '@angular/material/tabs';
 import { Buttons } from '../../systemdesign/buttons/buttons';
 import { Quicklinks } from '../quicklinks/quicklinks';
 import { Sanctionletter } from '../sanctionletter/sanctionletter';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { Main } from '../../../core/service/main';
 import { Aesutil } from '../../../utils/aesutil';
 import { Inputfield } from '../../systemdesign/inputfield/inputfield';
@@ -40,14 +40,28 @@ interface CibilHistory {
 
 @Component({
   selector: 'app-los-details',
-  imports: [CommonModule, MatTabsModule, MatIconModule, Buttons, Inputfield, Dropdown, Checkbox, Radiobuttons],
+  imports: [CommonModule, MatTabsModule, MatIconModule, Buttons, Inputfield, Dropdown, Checkbox, Radiobuttons, Quicklinks],
   standalone: true,
   templateUrl: './los-details.html',
   styleUrl: './los-details.scss'
 })
-export class LosDetails {
+export class LosDetails implements OnInit {
 
   selectedTabIndex = 0;
+  tabIndexMap: { [key: string]: number } = {
+    loan: 0,
+    education: 1,
+    occupation: 2,
+    assets: 3,
+    expenditure: 4,
+    estimate: 5,
+    products: 6,
+    credit: 7,
+    coapplicant: 8,
+    summary: 9,
+    audit: 10
+  };
+
   userData: any;
   kycData: any;
   issalaried: Boolean = false;
@@ -201,14 +215,23 @@ export class LosDetails {
   ];
 
 
-  constructor(public router: Router, private aes: Aesutil, private service: Main) { }
+  constructor(public router: Router,public route: ActivatedRoute, private aes: Aesutil, private service: Main) { }
 
   async ngOnInit(): Promise<void> {
+
+    this.route.queryParams.subscribe(params => {
+      const tabKey = params['tab'];
+      if (tabKey && this.tabIndexMap[tabKey] !== undefined) {
+        this.selectedTabIndex = this.tabIndexMap[tabKey];
+      }
+    });
+   this.loadAuditTrails();
+
     console.log("loaded data")
     const saved = localStorage.getItem('selecteduserDetails');
     this.userData = saved ? JSON.parse(saved) : null;
     this.getAllDocumnets();
-    this.loadAuditTrails();
+   
 
 
   }
@@ -527,7 +550,7 @@ export class LosDetails {
     const needleAngle = startAngle + (scoreRatio * Math.PI);
 
     // Draw needle (black indicator) - starting outside the center dot
-    
+
     const centerDotRadius = 14;
     const needleGap = 3;
     const needleEndRadius = innerRadius - 15; // End before inner circle edge
@@ -577,7 +600,7 @@ export class LosDetails {
     window.open(imagePath, '_blank');
   }
 
-  getStatusClass(status: string): string {
+  getStatusClass1(status: string): string {
     switch (status?.toLowerCase()) {
       case 'completed':
       case 'verified':
@@ -603,8 +626,8 @@ export class LosDetails {
     console.log('Selected:2', value);
   }
 
-  loadAuditTrails() {
-    // Sample data - replace with actual API call
+    loadAuditTrails() {
+   
     this.auditTrails = [
       {
         date: new Date(),
@@ -710,17 +733,9 @@ export class LosDetails {
     });
   }
 
-
-
-  /****************  Quick links ****************/
-  onQuickLinkTabChange(tabIndex: number) {
-    this.selectedTabIndex = tabIndex;
-
-    // Smooth scroll to top of content
-    const tabContent = document.querySelector('.tab-content');
-    if (tabContent) {
-      tabContent.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
+  getStatusClass(status: string): string {
+    const statusLower = status.toLowerCase();
+    return `status-${statusLower}`;
   }
 
   // **********************checkbox*****************************

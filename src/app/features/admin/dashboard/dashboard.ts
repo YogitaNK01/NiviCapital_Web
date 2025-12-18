@@ -18,16 +18,39 @@ import { Areacharts, AreaDataset } from '../../systemdesign/areacharts/areachart
 export class Dashboard implements OnInit {
   chartWidth = window.innerWidth < 480 ? 250 : window.innerWidth < 550 ? 400 : window.innerWidth < 1450 ? 300: 500;
   chartheight = window.innerWidth < 480 ? 300 : window.innerWidth < 550 ? 350: 400;
+private resizeHandler = () => this.setChartWidth();
 
   ngOnInit() {
     this.setChartWidth();
-    window.addEventListener('resize', () => this.setChartWidth());
+    window.addEventListener('resize', () => this.resizeHandler());
   }
 
-  setChartWidth() {
+  setChartWidth1() {
     this.chartWidth = window.innerWidth < 480 ? 250 : window.innerWidth < 550 ? 400: window.innerWidth < 1450 ? 300: 500;
     this.chartheight = window.innerWidth < 480 ? 300 : window.innerWidth < 550 ? 350: 400;
   }
+
+  setChartWidth() {
+  const w = window.innerWidth;
+
+  if (w < 480) {
+    this.chartWidth = 250;
+    this.chartheight = 300;
+  } else if (w < 550) {
+    this.chartWidth = 400;
+    this.chartheight = 350;
+  } else if (w < 780) {
+    this.chartWidth = 500;
+    this.chartheight = 400;
+  } else if (w < 1450) {
+    this.chartWidth = 300;
+    this.chartheight = 400;
+  } else {
+    this.chartWidth = 500;
+    this.chartheight = 400;
+  }
+}
+
 
   alerts = [
     {
@@ -106,4 +129,8 @@ export class Dashboard implements OnInit {
   ];
   // Adjust tension for smoother/sharper curves
   tension = 0.4; // Try values between 0.2-0.5
+
+  ngOnDestroy() {
+  window.removeEventListener('resize', this.resizeHandler);
+}
 }

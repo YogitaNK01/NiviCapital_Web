@@ -7,6 +7,7 @@ import { Sanctionletter } from './sanctionletter/sanctionletter';
 import { LosOperation } from './los-operation/los-operation';
 import { LosDetails } from './los-details/los-details';
 import { Table } from './table/table';
+import { Commontabs } from '../systemdesign/commontabs/commontabs';
 
 const routes: Routes = [
   
@@ -18,6 +19,7 @@ const routes: Routes = [
         { path: 'losoperation', component: LosOperation},
         { path: 'losdetails', component: LosDetails},
         { path: 'sharedtable', component: Table},
+         { path: 'commontabs', component: Commontabs},
 
         { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
       

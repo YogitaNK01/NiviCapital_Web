@@ -57,7 +57,7 @@ isMobile = false;
     { icon: '/assets/images/sidemenu/candle.svg',iconActive: '/assets/images/sidemenu/money-recive-active.svg', label: 'FX Operations', route: '/admin/losdetails', expanded: false },
         { icon: '/assets/images/sidemenu/candle.svg',iconActive: '/assets/images/sidemenu/money-recive-active.svg', label: 'Customer', route: '/admin/customerdetails', expanded: false },
 
-    { icon: '/assets/images/sidemenu/wallet-money.svg', label: 'LMS', route: '/admin/sharedtable', expanded: false },
+    { icon: '/assets/images/sidemenu/wallet-money.svg', label: 'LMS', route: '/admin/commontabs1', expanded: false },
     { icon: '/assets/images/sidemenu/document-upload.svg', label: 'Documents', route: '/admin/customer2', expanded: false },
     { icon: '/assets/images/sidemenu/tag-user.svg', label: 'Communication', route: '/admin/dashboard3', expanded: false },
     { icon: '/assets/images/sidemenu/cpu-setting.svg', label: 'Configuration', route: '/admin/customer3', expanded: false },

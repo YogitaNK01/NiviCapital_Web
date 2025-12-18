@@ -1,0 +1,9 @@
+<mat-tab-group
+  [(selectedIndex)]="selectedIndex"
+  (selectedIndexChange)="tabChange.emit(tabs[$event])"
+  class="tabs scrollable-tabs"
+  mat-align-tabs="start"
+  mat-stretch-tabs="false"
+>
+  <mat-tab *ngFor="let tab of tabs" [label]="tab.label"></mat-tab>
+</mat-tab-group>
