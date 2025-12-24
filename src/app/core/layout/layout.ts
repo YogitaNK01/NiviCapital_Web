@@ -3,6 +3,7 @@ import { Component, Input } from '@angular/core';
 import { NavigationEnd, Router, RouterModule } from '@angular/router';
 import { filter } from 'rxjs';
 import { Dropdown, DropdownOption } from '../../features/systemdesign/dropdown/dropdown';
+import { Main } from '../service/main';
 
 
 interface MenuItem {
@@ -24,7 +25,7 @@ interface MenuItem {
 })
 export class Layout {
 
-  constructor(private router: Router) {
+  constructor(private router: Router,private service:Main) {
     // Listen to route changes
     this.router.events
       .pipe(filter(event => event instanceof NavigationEnd))
@@ -57,7 +58,7 @@ isMobile = false;
     { icon: '/assets/images/sidemenu/candle.svg',iconActive: '/assets/images/sidemenu/money-recive-active.svg', label: 'FX Operations', route: '/admin/losdetails', expanded: false },
         { icon: '/assets/images/sidemenu/candle.svg',iconActive: '/assets/images/sidemenu/money-recive-active.svg', label: 'Customer', route: '/admin/customerdetails', expanded: false },
 
-    { icon: '/assets/images/sidemenu/wallet-money.svg', label: 'LMS', route: '/admin/commontabs1', expanded: false },
+    { icon: '/assets/images/sidemenu/wallet-money.svg', label: 'LMS', route: '/admin/commontabs', expanded: false },
     { icon: '/assets/images/sidemenu/document-upload.svg', label: 'Documents', route: '/admin/customer2', expanded: false },
     { icon: '/assets/images/sidemenu/tag-user.svg', label: 'Communication', route: '/admin/dashboard3', expanded: false },
     { icon: '/assets/images/sidemenu/cpu-setting.svg', label: 'Configuration', route: '/admin/customer3', expanded: false },
@@ -114,6 +115,11 @@ checkScreenSize() {
   }
 
   logout() {
+ this.service.Logout().subscribe({
+      next: (res) => {
+        console.log("logout--",res)
     this.router.navigate(['/login'])
+  }
+})
   }
 }

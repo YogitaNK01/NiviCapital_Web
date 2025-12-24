@@ -103,19 +103,12 @@ export class Customer implements OnInit {
     this.loadallusers();
     this.updateVisiblePages();
 
-      
-
-    // this.service.getAllApplicants().subscribe({
-    //   next: (response) => {
-
-    //     this.allApplicants = response.applications;
-    //   },
-    //   error: (error) => {
-    //     console.error('Error fetching users:', error);
-    //   }
-    // });
 
   }
+//no data msg
+           hasData(data:any): boolean {
+  return Array.isArray(data) && data.length > 0;
+}
   //-----------get table data from api----------------------------
 
   loadallusers() {
@@ -123,17 +116,20 @@ export class Customer implements OnInit {
     this.service.getAllUsers().subscribe({
       next: (response) => {
         console.log('Users:', response.data);
-      
+       this.hasData(response.data);
+
         this.AlluserData = response.data
         this.fullData = (response.data as any[]).map((item, index) => ({
+
+          
           id_data: index + 1,
           CIFID: item.cif ?? "-",
           CustomerName: `${item.firstName ?? ''} ${item.lastName ?? ''}`.trim() ?? "-",
           mobile: item.phoneNumber ?? "-",
           email: item.email ?? '',
-          status: item.kycStatus ?? "-",
+          kycStatus: item.kycStatus ?? "-",
           loanStatus: item.kycStatus ?? "-",
-          registrationDate: item.createdDateTime ?? "-",
+          registrationDate: this.formatDateOnly(item.createdDateTime) ?? "-",
           userId: item.userId ?? "-",
           Id: item.id ?? "-"
         }));
@@ -146,10 +142,11 @@ export class Customer implements OnInit {
         this.updatePagedData();
       },
       error: (error) => {
-        console.error('Error fetching users:', error);
+        console.error('Error fetching users:---------', error);
       }
     });
   }
+  
 
   getStatusClass(status: string): string {
     switch (status?.toLowerCase()) {
@@ -160,21 +157,24 @@ export class Customer implements OnInit {
         return 'Pending';
       case 'document issue':
         return 'Document-Issue';
+      case 'not_started':
+        return 'Not-Started';  
       default:
         return '';
     }
   }
 
 
-  getkyc(id: any) {
+  getpidata(id: any) {
     console.log("id-----", id);
     this.service.selectedUserId = id;
     this.service.getKycDeatils(id).subscribe({
       next: (response) => {
         console.log('getKycDeatils:', response);
         this.userKYCData = response;
-        sessionStorage.setItem("kycs", JSON.stringify(this.userKYCData.kycs))
-        //  console.log('kyc response 2',this.userKYCData.kycs);
+         this.service.set_pi_KycData(this.userKYCData.data);
+        // sessionStorage.setItem("kycs", JSON.stringify(this.userKYCData.data))
+       
         this.router.navigate(['/admin/customerdetails']);
       },
       error: (error) => {
@@ -194,6 +194,14 @@ export class Customer implements OnInit {
     }
 
   }
+
+  formatDateOnly(dateArr: number[] | null | undefined): string {
+  if (!dateArr || dateArr.length < 3) return '-';
+
+  const [y, m, d] = dateArr;
+  return `${y}-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+}
+
 
   //-----------------pagination------------------------------------
   ngAfterViewInit() {

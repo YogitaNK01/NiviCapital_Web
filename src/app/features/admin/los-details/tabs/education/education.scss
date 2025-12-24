@@ -1,0 +1,12 @@
+@use 'variables' as *;
+@use 'typography' as *;
+@use 'common' as *;
+
+.lable-padding {
+  padding-top: $spacing_9;
+
+  @media (max-width: 480px) {
+    padding-top: 0;
+  }
+
+}

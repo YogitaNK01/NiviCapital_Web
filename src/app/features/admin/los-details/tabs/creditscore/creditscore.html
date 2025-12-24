@@ -1,0 +1,167 @@
+ <div class="tab-content">
+            <div class="section">
+              <h3 class="section-title text-dp-3-bold">Credit Score</h3>
+              <hr class="divider">
+              <div class="containerdata">
+
+                <!-- Credit Score Section -->
+                <div class="credit-score-section">
+                  <div class="stats-container-main">
+                    <div class="score-chart">
+                      <div class="score-number text-common">{{ creditScore }}</div>
+                      <div class="gauge-container">
+                        <canvas #gaugeCanvas></canvas>
+
+
+                        <div class="gauge-labels text-common">
+                          <div class="gauge-label">
+                            <span class="gauge-label-value">POOR</span>
+                            <span>300-550</span>
+                          </div>
+                          <div class="gauge-label">
+                            <span class="gauge-label-value">AVERAGE</span>
+                            <span>550-650</span>
+                          </div>
+                          <div class="gauge-label">
+                            <span class="gauge-label-value">GOOD</span>
+                            <span>650-750</span>
+                          </div>
+                          <div class="gauge-label">
+                            <span class="gauge-label-value">EXCELLENT</span>
+                            <span>750-900</span>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="report-date">
+                        Date of Report : {{ reportDate }} • Source : {{ source }}
+                      </div>
+                    </div>
+
+                    <div class="creditscore-data ">
+                      <div class="stats-container-cs">
+                        <div class="row">
+                          <div class="col ">
+                            <div class="stat-card">
+                              <div class="stat-value text-dp-3-bold">{{ creditStats.totalCredit }}</div>
+                              <div class="stat-label text-label-data">Total Credit</div>
+                            </div>
+                          </div>
+
+                          <div class="col ">
+                            <div class="stat-card">
+                              <div class="stat-value text-dp-3-bold">{{ creditStats.totalAccounts }}</div>
+                              <div class="stat-label text-label-data">Total Number of Accounts</div>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div class="row">
+                          <div class="col">
+                            <div class="stat-card">
+                              <div class="stat-value text-dp-3-bold">{{ creditStats.numberOfLoans }}</div>
+                              <div class="stat-label text-label-data">Number of Loans</div>
+                            </div>
+                          </div>
+
+                          <div class="col">
+                            <div class="stat-card">
+                              <div class="stat-value text-dp-3-bold">{{ creditStats.outstandingAmount }}</div>
+                              <div class="stat-label text-label-data">outstandingAmount Credit Accounts</div>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div class="vertical-divider"></div>
+                      </div>
+
+                      <div class="downloadbtn">
+                        <app-buttons label="Download Latest Report"
+                          class="btn btn-icon secondary btn-label btncustomClass" (click)="downloadReport()">
+                          <img src="/assets/images/icons/import.svg" alt="Download">
+
+                        </app-buttons>
+                      </div>
+                    </div>
+                    <!-- <div class="vertical-divider-main"></div> -->
+                    <div class="empty"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <!-- Latest Know Address Section -->
+            <div class="section">
+              <h3 class="text-dp-2-bold edu-label">Latest Know Address as per CIBIL</h3>
+              <hr class="divider">
+
+
+              <div class="info-grid-img no-padding table-margin-top">
+                <div class="info-item d-flex flex-column">
+                  <label class="text-label">Address line 1</label>
+                  <p class="text-label-data">123, Main Street, Anytown</p>
+                </div>
+                <div class="info-item d-flex flex-column">
+                  <label class="text-label">Address line 2</label>
+                  <p class="text-label-data">Lorem ipsum dummy text</p>
+                </div>
+                <div class="info-item d-flex flex-column">
+                  <label class="text-label">Country</label>
+                  <p class="text-label-data">India</p>
+                </div>
+                <div class="info-item d-flex flex-column">
+                  <label class="text-label">State</label>
+                  <p class="text-label-data">Maharashtra</p>
+                </div>
+                <div class="info-item d-flex flex-column">
+                  <label class="text-label">City</label>
+                  <p class="text-label-data">Mumbai</p>
+                </div>
+                <div class="info-item d-flex flex-column">
+                  <label class="text-label">Zipcode</label>
+                  <p class="text-label-data">400001</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- CIBIL History Table -->
+            <div class="section">
+              <h3 class="text-dp-2-bold edu-label">CIBIL History</h3>
+              <hr class="divider">
+              <div class="table-container table-margin-top no-padding">
+                <table class="responsive-table">
+                  <thead>
+                    <tr>
+                      <th class="table-head table-header">Date Generated</th>
+                      <th class="table-head table-header">Name</th>
+                      <th class="table-head table-header">Generated By</th>
+                      <th class="table-head table-header">Credit Score</th>
+                      <th class="table-head table-header">Action</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr class="bottom-border">
+                      <td class="text-dp-3-regular table-data">25/07/2025</td>
+                      <td class="text-dp-3-regular table-data">Vighnesh</td>
+                      <td class="text-dp-3-regular table-data">Sandeep</td>
+                      <td class="text-dp-3-regular table-data">780</td>
+                      <td class="text-dp-3-regular table-data">👁️</td>
+                    </tr>
+                    <tr class="bottom-border">
+                      <td class="text-dp-3-regular table-data">22/11/2024</td>
+                      <td class="text-dp-3-regular table-data">Vighnesh</td>
+                      <td class="text-dp-3-regular table-data">Aarti</td>
+                      <td class="text-dp-3-regular table-data">820</td>
+                      <td class="text-dp-3-regular table-data">👁️</td>
+                    </tr>
+                    <tr>
+                      <td class="text-dp-3-regular table-data">04/05/2024</td>
+                      <td class="text-dp-3-regular table-data">Vighnesh</td>
+                      <td class="text-dp-3-regular table-data">Priya</td>
+                      <td class="text-dp-3-regular table-data">690</td>
+                      <td class="text-dp-3-regular table-data">👁️</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+

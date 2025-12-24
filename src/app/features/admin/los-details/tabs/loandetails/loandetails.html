@@ -1,0 +1,240 @@
+
+          <div class="tab-content">
+            <!-- Loan Details -->
+            <div class="section">
+              <h3 class="section-title text-dp-3-bold">Loan Details <span class="section-status text-body-1">Pending
+                  Verification</span></h3>
+
+              <div class="loan-dashboard  min-vh-100 mb-4">
+
+                <!-- Main Grid -->
+                <div class="row g-3 g-lg-4">
+                  <!-- Application Details -->
+                  <div class="col-12 col-lg-4">
+                    <div class="card loan-card shadow-sm h-100">
+                      <div class="loan-card-body">
+                        <p class="text-head text-dp-2-bold">Application Details</p>
+
+                        <div class="application-details">
+                          <div class="detail-row">
+                            <span class="text-body-1 text-mute">Loan Amount</span>
+                            <div class="text-end d-flex flex-column gap-1 ">
+                              <div class="text-body-1 ">{{ loanDetails.loanAmount.inr }}</div>
+                              <small class="text-mute text-body-1 ">{{ loanDetails.loanAmount.usd }}</small>
+                            </div>
+                          </div>
+
+                          <div class="detail-row">
+                            <span class="text-body-1 text-mute">Rate Of Interest</span>
+                            <span class="text-body-1 ">{{ loanDetails.rateOfInterest }}</span>
+                          </div>
+
+                          <div class="detail-row">
+                            <span class="text-body-1 text-mute">Tenure</span>
+                            <div class="text-end d-flex flex-column gap-1">
+                              <div class="text-body-1 ">{{ loanDetails.tenure.years }}</div>
+                              <small class="text-mute text-body-1 ">{{ loanDetails.tenure.months }}</small>
+                            </div>
+                          </div>
+
+                          <div class="detail-row">
+                            <span class="text-body-1 text-mute">Monthly EMI</span>
+                            <div class="text-end d-flex flex-column gap-1">
+                              <div class="text-body-1 ">{{ loanDetails.monthlyEmi.inr }}</div>
+                              <small class="text-mute text-body-1 ">{{ loanDetails.monthlyEmi.usd }}</small>
+                            </div>
+                          </div>
+
+                          <div class="detail-row">
+                            <span class="text-body-1 text-mute">Total Payable</span>
+                            <div class="text-end d-flex flex-column gap-1">
+                              <div class="text-body-1 ">{{ loanDetails.totalPayable.inr }}</div>
+                              <small class="text-mute text-body-1 ">{{ loanDetails.totalPayable.usd }}</small>
+                            </div>
+                          </div>
+
+                          <div class="detail-row">
+                            <span class="text-body-1 text-mute">Charges</span>
+                            <div class="text-end d-flex flex-column gap-1">
+                              <div class="text-body-1 ">{{ loanDetails.charges.inr }}</div>
+                              <small class="text-mute text-body-1 ">{{ loanDetails.charges.usd }}</small>
+                            </div>
+                          </div>
+
+                          <div class="detail-row border-0 pb-0">
+                            <span class="text-body-1 text-mute">Category</span>
+                            <span class="text-body-1 category-border badge border border-warning px-3">
+                              {{ loanDetails.category }}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Risk Analysis -->
+                  <div class="col-12 col-lg-8">
+                    <div class="card loan-card shadow-sm h-100">
+                      <div class="loan-card-body">
+
+                        <p class="text-head text-dp-2-bold">Risk Analysis</p>
+                        <div class="cibilscore row">
+                          <div class="col d-flex align-items-center flex-column flex-lg-row">
+
+                            <div class="score-chart">
+
+                              <div class="gauge-container">
+                                <canvas #gaugeCanvasrisk></canvas>
+
+
+                                <div class="gauge-labels text-common">
+                                  <div class="gauge-label-risk">
+                                    <span class="gauge-label-risk-value">LOW</span>
+
+                                  </div>
+                                  <div class="gauge-label-risk">
+                                    <span class="gauge-label-risk-value">MEDIUM</span>
+
+                                  </div>
+                                  <div class="gauge-label-risk">
+                                    <span class="gauge-label-risk-value">HIGH</span>
+
+                                  </div>
+                                </div>
+                              </div>
+
+                            </div>
+                          </div>
+                          <div class="col">
+                            <!-- Risk Factors -->
+                            <div class="">
+                              <h3 class="text-body-1 ">Risk Factors</h3>
+
+
+                              <div class=" risk-factors d-flex flex-column">
+                                <div *ngFor="let factor of riskFactors" class="risk-factor-item d-flex  commonbox">
+                                  <div class="d-flex align-items-center gap-2 flex-column">
+
+                                    <div class="row d-flex gap-2">
+                                      <div class="col-lg-1 d-flex flex-column">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                                          viewBox="0 0 24 24" fill="none">
+                                          <path d="M2 2V19C2 20.66 3.34 22 5 22H22" stroke="#3B8439" stroke-width="1.5"
+                                            stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round" />
+                                          <path
+                                            d="M5 17L9.59 11.64C10.35 10.76 11.7 10.7 12.52 11.53L13.47 12.48C14.29 13.3 15.64 13.25 16.4 12.37L21 7"
+                                            stroke="#3B8439" stroke-width="1.5" stroke-miterlimit="10"
+                                            stroke-linecap="round" stroke-linejoin="round" />
+                                        </svg>
+                                      </div>
+                                      <div class="col d-flex flex-column">
+                                        <small class="text-body-1">{{ factor.label }}</small>
+                                        <small class="text-body-1">{{ factor.value }}</small>
+                                      </div>
+                                    </div>
+
+                                  </div>
+
+                                </div>
+
+
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+
+
+
+                        <!-- Alerts -->
+                        <div>
+                          <h3 class="text-body-1 table-margin-top">Alerts & Red Flags</h3>
+                          <div class="alertsgap">
+                            <div *ngFor="let alert of loanalerts" class=" d-flex align-items-start loan-alert-msg ">
+                              <span class="nav-icon">
+                                <img [src]="alert.icon" alt="{{ alert.icon }}" class="menu-icon">
+                              </span>
+                              <small class="text-body-2 ">{{ alert.message }}</small>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Credit Score -->
+                  <div class="col-12 col-lg-4">
+                    <div class="card loan-card shadow-sm h-100">
+                      <div class="card-body loan-card-body">
+
+                        <p class="text-head text-dp-2-bold">Credit Score</p>
+                        <!-- Score Circle -->
+                        <div class="credit-score-data d-flex flex-column">
+                          <div class="credit-score-circle ">
+
+                            <div class="score-overlay">
+                              <div class="text-dp-2-bold creditscore-text">{{ loancreditScore.score }}</div>
+                              <small class="text-body-1 creditscore-text">{{ loancreditScore.rating }}</small>
+                            </div>
+                          </div>
+
+                          <div class="text-center mb-4">
+                            <small class="text-body-1 text-muted">Date of generation: {{ loancreditScore.date }}</small>
+                          </div>
+                        </div>
+                        <hr class="cr-divider">
+                        <!-- Credit Details -->
+                        <div class="credit-details">
+                          <div *ngFor="let detail of loancreditScore.details; " class="credit-detail-row">
+                            <span class="text-muted text-body-1">{{ detail.label }}</span>
+                            <span class="text-body-1">{{ detail.value }}</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Recommendations -->
+                  <div class="col-12 col-lg-8">
+                    <div class="card loan-card shadow-sm h-100">
+                      <div class="loan-card-body">
+
+                        <p class="text-head text-dp-2-bold">Recommendations</p>
+                        <div class="recommendations table-margin-top">
+                          <!-- <div *ngFor="let rec of recommendations"
+                            class="recommendation-card-border" [ngClass]="rec.borderClass"
+                            > -->
+                          <div *ngFor="let rec of recommendations"
+                          
+                          [ngClass]="{
+                                        'recommendation-card-border': true,
+                                        'success': rec.borderClass === 'success',
+                                        'info': rec.borderClass === 'info',
+                                        'warning': rec.borderClass === 'warning'
+                            }">
+                            <div class="d-flex align-items-start gap-3 ">
+                              <img [src]="rec.icon" alt="{{ rec.icon }}" height="24" width="24" class="menu-icon1">
+                              <div class="flex-grow-1 recdata">
+                                <p class="text-body-1">{{ rec.title }}</p>
+                                <p class="text-muted text-body-1">
+                                  Current: {{ rec.current }} <span><img src="/assets/images/icons/arrow-right.svg"
+                                      alt="arrow"></span>
+                                  <span class=" text-body-1" [ngClass]="rec.textcolor"> Recommended: {{ rec.recommended
+                                    }}</span>
+
+                                </p>
+                                <p class="text-body-1 text-muted">
+                                  {{ rec.description }}
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+          </div>

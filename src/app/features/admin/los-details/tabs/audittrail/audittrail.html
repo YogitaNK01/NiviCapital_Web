@@ -1,0 +1,142 @@
+  <div class="tab-content">
+
+            <div class="section">
+              <!-- Search and Filter Row -->
+              <h3 class="section-title text-dp-3-bold">Product Details<span class="section-status text-body-1">Pending
+                  Verification</span></h3>
+
+
+              <div class="audit-trail-header">
+                <div class="audit-search-input"> <app-inputfield label="Input Label" placeholder="Search..."
+                    helpText="Help text" [showSearch]="true" [showLabel]="false" [showHelpText]="false">
+                  </app-inputfield></div>
+
+                <div class="audit-action-dropdow"><app-dropdown [options]="myOptions2"
+                    [(selectedValue)]="selectedOption2" placeholder="All Actions"
+                    (selectedValueChange)="onSelectionChange2($event)">
+                  </app-dropdown></div>
+              </div>
+              <hr class="divider">
+
+              <!-- Audit Trail Timeline -->
+              <div class="audit-trail-timeline">
+                <div class="audit-trail d-flex flex-column">
+
+                  <!-- Today Section -->
+                  <div class="audit-timeline-section" *ngIf="getTodayTrails().length > 0">
+                    <div class="audit-timeline-section-header">
+                      <span class="audit-timeline-section-title text-dp-3-regular">Today ({{ getTodayTrails().length
+                        }})</span>
+                    </div>
+
+                    <div class="audit-timeline-item" *ngFor="let trail of getTodayTrails()">
+                      <div class="audit-timeline-date"> <span class="text-body-1 text-capitalize">{{ trail.date | date:
+                          'MMM'
+                          | uppercase }}</span>
+
+                        <div class="audit-date-badge">
+                          <span class="date-day">{{ trail.date | date: 'd' }}</span>
+
+                        </div>
+                        <div class="audit-timeline-line"></div>
+                      </div>
+                      <div class="audit-timeline-line-hr"></div>
+                      <div class="audit-timeline-content">
+                        <div class="audit-timeline-card">
+                          <div class="audit-card-header">
+                            <span class="audit-card-time text-body-1">{{ trail.time }}</span>
+                            <span class="saudit-tatus-badge text-label-data" [ngClass]="getStatusClass(trail.status)">
+                              {{ trail.status }}
+                            </span>
+                          </div>
+                          <div class="audit-card-body">
+                            <h4 class="audit-card-title text-label-data">{{ trail.action }}</h4>
+                            <p class="audit-card-subtitle text-body-1">{{ trail.reference }}</p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Yesterday Section -->
+                  <div class="audit-timeline-section" *ngIf="getYesterdayTrails().length > 0">
+                    <div class="audit-timeline-section-header">
+                      <span class="audit-timeline-section-title text-dp-3-regular">Yesterday ({{
+                        getYesterdayTrails().length
+                        }})</span>
+                    </div>
+
+                    <div class="audit-timeline-item" *ngFor="let trail of getYesterdayTrails()">
+                      <div class="audit-timeline-date"> <span class="text-body-1 text-capitalize">{{ trail.date | date:
+                          'MMM'
+                          | uppercase }}</span>
+
+                        <div class="audit-date-badge">
+                          <span class="date-day">{{ trail.date | date: 'd' }}</span>
+
+                        </div>
+                        <div class="audit-timeline-line"></div>
+                      </div>
+                      <div class="audit-timeline-line-hr"></div>
+                      <div class="audit-timeline-content">
+                        <div class="audit-timeline-card">
+                          <div class="audit-card-header">
+                            <span class="audit-card-time text-body-1">{{ trail.time }}</span>
+                            <span class="saudit-tatus-badge text-label-data" [ngClass]="getStatusClass(trail.status)">
+                              {{ trail.status }}
+                            </span>
+                          </div>
+                          <div class="audit-card-body">
+                            <h4 class="audit-card-title text-label-data">{{ trail.action }}</h4>
+                            <p class="audit-card-subtitle text-body-1">{{ trail.reference }}</p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Earlier Section -->
+                  <div class="audit-timeline-section" *ngIf="getEarlierTrails().length > 0">
+                    <div class="audit-timeline-section-header">
+                      <span class="audit-timeline-section-title text-dp-3-regular">Earlier ({{ getEarlierTrails().length
+                        }})</span>
+                    </div>
+
+                    <div class="audit-timeline-item" *ngFor="let trail of getEarlierTrails()">
+                      <div class="audit-timeline-date"> <span class="text-body-1 text-capitalize">{{ trail.date | date:
+                          'MMM'
+                          | uppercase }}</span>
+
+                        <div class="audit-date-badge">
+                          <span class="date-day">{{ trail.date | date: 'd' }}</span>
+
+                        </div>
+                        <div class="audit-timeline-line"></div>
+                      </div>
+                      <div class="audit-timeline-line-hr"></div>
+                      <div class="audit-timeline-content">
+                        <div class="audit-timeline-card">
+                          <div class="audit-card-header">
+                            <span class="audit-card-time text-body-1">{{ trail.time }}</span>
+                            <span class="saudit-tatus-badge text-label-data" [ngClass]="getStatusClass(trail.status)">
+                              {{ trail.status }}
+                            </span>
+                          </div>
+                          <div class="audit-card-body">
+                            <h4 class="audit-card-title text-label-data">{{ trail.action }}</h4>
+                            <p class="audit-card-subtitle text-body-1">{{ trail.reference }}</p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- No Results -->
+                  <div class="audit-no-results" *ngIf="filteredAuditTrails.length === 0">
+                    <p class="text-common">No audit trails found</p>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </div>

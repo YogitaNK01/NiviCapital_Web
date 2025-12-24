@@ -7,7 +7,7 @@
   <aside class="sidebar" [class.closed]="!sidebarOpen" [class.mobile-open]="isMobile && sidebarOpen">
     <!-- Header -->
     <div class="sidebar-header">
-      <img [src]="sidebarOpen ? '/assets/images/login/sidemenulogo.png' : '/assets/images/login/logo.svg'" alt="Logo"
+      <img [src]="sidebarOpen ? '/assets/images/login/sidemenulogo.webp' : '/assets/images/login/logo.svg'" alt="Logo"
         routerLink="/admin/dashboard" class="sidebar-logo" />
       <img src="/assets/images/icons/arrow-right.svg" *ngIf="isMobile" (click)="toggleSidebar()" alt="Arrow"
         class="card-arrow">

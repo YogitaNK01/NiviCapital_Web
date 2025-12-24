@@ -96,21 +96,16 @@
 
 /* ---------------Tab Content Styles -----------*/
 
-
-
-
-
-
-
-.reference {
-  color: $neutral-text-primary;
-  background-color: $neutral-200;
-  display: flex;
-  height: $spacing_21;
-  padding: $spacing_11;
-  flex-direction: column;
-  justify-content: center;
+.customer-details{
+  border: $border_1 solid $neutral-300;
+  border-radius: $spacing_5;
+  flex: 1 1 auto;
+  min-height: 0;
+  // display: flex;
+  // flex-direction: column;
+  // overflow: hidden;
 }
+
 
 ::ng-deep .mat-mdc-tab-labels {
   flex-wrap: nowrap;
@@ -129,8 +124,6 @@
 }
 
 
-
-
 .icons {
   display: flex;
   align-items: center;
@@ -143,7 +136,4 @@
   cursor: pointer;
 }
 
-//-----------------table--------------------
 
-
-///-----------------------------------

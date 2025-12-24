@@ -1,0 +1,53 @@
+@use 'variables' as *;
+@use 'typography' as *;
+@use 'common' as *;
+
+.country {
+  display: flex;
+  align-items: center;
+  gap: $spacing_11;
+  font-weight: 400;
+  margin: 2rem 0;
+  border-radius: var(--border-radius-border-radius-s, 8px);
+  background: var(--system-background-surface, #F5F5F5);
+  width: 368px;
+  justify-content: center;
+  gap: $spacing_4;
+
+  @media (max-width: 480px) {
+    width: 100%;
+    margin: 1rem 0;
+    gap: 0;
+  }
+}
+
+.flag {
+  display: flex;
+  padding: $spacing_7 $spacing_4;
+  align-items: center;
+  gap: $spacing_4;
+  flex: 1 0 0;
+
+  @media (max-width: 480px) {
+    padding: $spacing_5
+  }
+
+}
+
+.line {
+  width: 30px;
+  height: 1px;
+  transform: rotate(-90deg);
+  flex-shrink: 0;
+  background: $neutral_border_2;
+
+  @media (max-width: 480px) {
+    display: none;
+
+  }
+}
+
+.bottom-border {
+  border-bottom: 1px solid $neutral_border_2;
+  background: $bg;
+}

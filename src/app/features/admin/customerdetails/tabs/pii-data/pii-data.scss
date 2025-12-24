@@ -1,0 +1,22 @@
+@use 'variables' as *;
+@use 'typography' as *;
+@use 'common' as *;
+
+.info-grid-img{
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    column-gap: 1.5rem;
+    row-gap: 1.5rem;
+    padding: 24px 0 0 0;
+}
+
+.reference {
+  color: $neutral-text-primary;
+  background-color: $neutral-200;
+  display: flex;
+  height: $spacing_21;
+  padding: $spacing_11;
+  flex-direction: column;
+  justify-content: center;
+  margin-bottom:$spacing_9;
+}

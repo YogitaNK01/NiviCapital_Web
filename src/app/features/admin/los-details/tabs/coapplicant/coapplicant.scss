@@ -1,0 +1,59 @@
+@use 'variables' as *;
+@use 'typography' as *;
+@use 'common' as *;
+
+
+.stats-container-coapp {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: $spacing_7;
+  padding: $spacing_5;
+
+   @media (max-width: 480px) {
+    padding: $spacing_3 0;
+
+  }
+}
+
+.key-data-coapp {
+  display: flex;
+  padding: $spacing_9;
+  align-items: center;
+  gap: 10px;
+  align-self: stretch;
+}
+
+.stat-card-app {
+  padding: 0;
+}
+
+.co-app-data {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing_3;
+  width: 100%;
+  align-items: start;
+}
+
+.co-app-name {
+  font-weight: 500;
+  color: $neutral-text-primary;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+
+  @media (max-width: 540px) {
+    gap: 0;
+    flex-direction: column;
+    align-items: start;
+
+  }
+
+}
+
+.co-app-id {
+  font-weight: 400;
+  color: $neutral-text-secondary;
+
+}

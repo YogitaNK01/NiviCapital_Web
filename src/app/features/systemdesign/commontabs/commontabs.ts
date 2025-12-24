@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, Input, Output, TemplateRef, ViewChild } from '@angular/core';
 import { MatTabsModule } from '@angular/material/tabs';
+import { MatTabGroup } from '@angular/material/tabs';
 
 
 export interface AppTab {
@@ -9,18 +10,26 @@ export interface AppTab {
 }
 
 export const ALL_TABS: AppTab[] = [
-  // Customer details
+  //kyc
   { id: 'pi', label: 'PI' },
   { id: 'pii', label: 'PII' },
   { id: 'kyc', label: 'KYC Details' },
-  { id: 'products', label: 'Products' },
+  { id: 'kyc-products', label: 'Products' },
 
-  // LOS details
+  // LOS
   { id: 'loan', label: 'Loan Details' },
   { id: 'education', label: 'Education' },
   { id: 'occupation', label: 'Occupation' },
-  { id: 'assets', label: 'Assets' }
+  { id: 'assets', label: 'Assets & Liabilities' },
+   { id: 'expenditure', label: 'Monthly Expenditure' },
+  { id: 'estimate', label: 'Estimated Expense' },
+  { id: 'los-products', label: 'Products' },
+  { id: 'credit', label: 'Credit Score' },
+  { id: 'coapplicant', label: 'Co-applicant' },
+  { id: 'summary', label: 'Summary' },
+  { id: 'audit', label: 'Audit Trail' }
 ];
+
 
 @Component({
   selector: 'app-commontabs',
@@ -30,6 +39,7 @@ export const ALL_TABS: AppTab[] = [
   styleUrl: './commontabs.scss'
 })
 export class Commontabs {
+@ViewChild(MatTabGroup) tabGroup!: MatTabGroup;
 
   @Input() tabs: AppTab[] = [];
   @Input() selectedIndex = 0;

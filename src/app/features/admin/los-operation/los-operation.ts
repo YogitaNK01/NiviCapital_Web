@@ -76,15 +76,8 @@ export class LosOperation {
   constructor(public http: HttpClient, public router: Router, private service: Main) { }
   // 
   ngOnInit(): void {
-    // this.loadallusers();
-    this.service.getAllApplicants().subscribe({
-      next: (response) => {
-        this.allApplicants = response.applications;
-      },
-      error: (error) => {
-        console.error('Error fetching users:', error);
-      }
-    });
+    this.loadallusers();
+   
 
   }
 
@@ -93,25 +86,25 @@ export class LosOperation {
   }
   //-----------get table data from api----------------------------
 
-  // loadallusers() {
-  //   this.service.getAllUsers().subscribe(res => {
-  //     this.tableData = res.map((item, index) => ({
-  //       id_data: index + 1,
-  //       CIFID: item.cif ?? "-",
-  //       CustomerName: `${item.firstName ?? ''} ${item.lastName ?? ''}`.trim() ?? "-",
-  //       mobile: item.phoneNumber ?? "-",
-  //       email: item.emailId ?? '',
-  //       status: item.kycStatus ?? "-",
-  //       loanStatus: item.kycStatus ?? "-",
-  //       registrationDate: (item.createdDateTime).split(" ")[0] ?? "-",
-  //       userId: item.userId ?? "-",
-  //       Id: item.id ?? "-"
-  //     }));
+  loadallusers() {
+    this.service.getAllUsers().subscribe(res => {
+      this.tableData =   (res.data as any[]).map((item, index) => ({
+       id_data: index + 1,
+          CIFID: item.cif ?? "-",
+          CustomerName: `${item.firstName ?? ''} ${item.lastName ?? ''}`.trim() ?? "-",
+          mobile: item.phoneNumber ?? "-",
+          email: item.email ?? '',
+          status: item.kycStatus ?? "-",
+          loanStatus: item.kycStatus ?? "-",
+          registrationDate: item.createdDateTime ?? "-",
+          userId: item.userId ?? "-",
+          Id: item.id ?? "-"
+      }));
 
-  // this.filteredData = this.tableData;
-  //   });
+  this.filteredData = this.tableData;
+    });
     
-  // }
+  }
 
   getStatusClass(status: string) {
   switch (status?.toLowerCase()) {

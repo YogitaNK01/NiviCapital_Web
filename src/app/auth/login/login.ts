@@ -17,7 +17,7 @@ import { Messagebox } from '../../features/systemdesign/messagebox/messagebox';
   styleUrl: './login.scss'
 })
 export class Login {
-  isloginChecked = false;
+  isloginChecked: boolean =false;
 
   constructor(public router: Router, private main: Main, private msgBox: Msgboxservice,) { }
 
@@ -28,7 +28,7 @@ export class Login {
   };
 
   onCheckboxChange(value: boolean, label: string) {
-    console.log(label, value);
+    this.isloginChecked= value
   }
 
   onSubmit(form: any) {
@@ -62,7 +62,18 @@ export class Login {
         //   },
         // })
       },
-      error: err => console.error(err)
+      error: err => {
+         console.error(err)
+         this.msgBox.open({
+        title: '',
+        message: err.error.message, 
+        showCancel: false,
+        onOk: () => {
+         
+        }
+      });
+      }
+
     });
 
 

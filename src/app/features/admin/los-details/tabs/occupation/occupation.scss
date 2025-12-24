@@ -1,0 +1,40 @@
+@use 'variables' as *;
+@use 'typography' as *;
+@use 'common' as *;
+
+
+.income-label {
+  margin-top: $spacing_13;
+
+  @media (max-width: 480px) {
+    margin-top: $spacing_9;
+  }
+}
+
+.income-check {
+  margin: $spacing_13 0;
+
+  @media (max-width: 480px) {
+    margin: $spacing_3 0;
+  }
+
+  @media (max-width: 360px) {
+    margin: $spacing_7 0;
+  }
+}
+
+
+
+.income-rb-check {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing_7;
+
+  @media (max-width: 480px) {
+    gap: $spacing_3;
+  }
+}
+
+.no-padding {
+  padding-top: 0 !important;
+}

@@ -1,0 +1,201 @@
+  <div class="tab-content">
+            <!-- Summary -->
+            <div class="section">
+              <h3 class="section-title text-dp-3-bold">Loan Summary<span class="section-status text-body-1">Pending
+                  Verification</span></h3>
+
+              <!--Applicant Information -->
+              <div class="">
+                <label class="text-dp-2-bold edu-label">Applicant Information</label>
+                <hr _ngcontent-ng-c3098784094="" class="divider">
+                <div class="info-grid-img">
+                  <div class="info-item d-flex flex-column">
+                    <label class="text-label ">Applicant Name</label>
+
+                    <p class="text-label-data">Rajesh Kumar Sharma</p>
+
+                  </div>
+
+                  <div class="info-item d-flex flex-column">
+                    <label class="text-label ">Father’s Name</label>
+
+                    <p class="text-label-data">Suresh Kumar Sharma</p>
+
+                  </div>
+
+                  <div class="info-item d-flex flex-column">
+                    <label class="text-label ">Address</label>
+
+                    <p class="text-label-data">R/O 123, Green valley apartments, Sector 15, Noida, UP-201301</p>
+
+                  </div>
+                </div>
+              </div>
+
+              <!--Co-applicant Information -->
+              <div class="">
+                <label class="text-dp-2-bold edu-label">Co-applicant Information</label>
+                <hr _ngcontent-ng-c3098784094="" class="divider">
+                <div class="info-grid-img">
+                  <div class="info-item d-flex flex-column">
+                    <label class="text-label ">Co-applicant Name</label>
+
+                    <p class="text-label-data">Rajesh Kumar Sharma</p>
+
+                  </div>
+
+
+
+                  <div class="info-item d-flex flex-column">
+                    <label class="text-label ">Address</label>
+
+                    <p class="text-label-data">R/O 123, Green valley apartments, Sector 15, Noida, UP-201301</p>
+
+                  </div>
+                </div>
+              </div>
+
+              <!-- Course Information -->
+              <div class="">
+                <label class="text-dp-2-bold edu-label">Course Information</label>
+                <hr _ngcontent-ng-c3098784094="" class="divider">
+                <div class="info-grid-img">
+                  <div class="info-item d-flex flex-column">
+                    <label class="text-label ">Course</label>
+
+                    <p class="text-label-data">Masters of Science in Computer Science</p>
+
+                  </div>
+                  <div class="info-item d-flex flex-column">
+                    <label class="text-label ">University</label>
+
+                    <p class="text-label-data">Stanford university</p>
+
+                  </div>
+
+                  <div class="info-item d-flex flex-column">
+                    <label class="text-label ">Country</label>
+
+                    <p class="text-label-data">Australia</p>
+
+                  </div>
+                  <div class="info-item d-flex flex-column">
+                    <label class="text-label ">Duration</label>
+
+                    <p class="text-label-data">2 Years</p>
+
+                  </div>
+                  <div class="info-item d-flex flex-column">
+                    <label class="text-label ">Commencement Date</label>
+
+                    <p class="text-label-data">1/9/2024</p>
+
+                  </div>
+
+                </div>
+              </div>
+
+              <!-- Loan Terms -->
+              <div class="">
+                <label class="text-dp-2-bold edu-label">Loan Terms</label>
+                <hr _ngcontent-ng-c3098784094="" class="divider">
+                <div class="info-grid-img">
+                  <div class="info-item d-flex flex-column">
+                    <label class="text-label ">Loan Amount</label>
+
+                    <p class="text-label-data">₹1,00,00,000</p>
+
+                  </div>
+                  <div class="info-item d-flex flex-column">
+                    <label class="text-label ">Rate of Interest</label>
+
+                    <p class="text-label-data">10.5% p.a</p>
+
+                  </div>
+
+                  <div class="info-item d-flex flex-column">
+                    <label class="text-label ">Type of Interest</label>
+
+                    <p class="text-label-data">Floating</p>
+
+                  </div>
+                  <div class="info-item d-flex flex-column">
+                    <label class="text-label ">Payable in</label>
+
+                    <p class="text-label-data">180 EMIs</p>
+
+                  </div>
+                  <div class="info-item d-flex flex-column">
+                    <label class="text-label ">Disbursement</label>
+
+                    <p class="text-label-data">Loan disburses to institution after visa and conditions met.</p>
+
+                  </div>
+
+                </div>
+              </div>
+
+
+              <!--Reference Information -->
+              <div class="">
+                <label class="text-dp-2-bold edu-label">Reference Information</label>
+                <hr _ngcontent-ng-c3098784094="" class="divider">
+                <div class="info-grid-img">
+                  <div class="info-item d-flex flex-column">
+                    <label class="text-label ">Reference No.</label>
+
+                    <p class="text-label-data">EU/2024/12345</p>
+
+                  </div>
+
+                  <div class="info-item d-flex flex-column">
+                    <label class="text-label ">Date</label>
+
+                    <p class="text-label-data">28/9/2024</p>
+
+                  </div>
+
+                  <div class="info-item d-flex flex-column">
+                    <label class="text-label ">Branch Code</label>
+
+                    <p class="text-label-data">NIVI001234</p>
+
+                  </div>
+                </div>
+              </div>
+
+              <!-- Action Required -->
+              <div class="">
+                <label class="text-dp-2-bold edu-label">Action Required</label>
+                <hr _ngcontent-ng-c3098784094="" class="divider">
+                <div class="info-grid-img pb-2">
+                  <div class="info-item d-flex flex-column">
+                    <label class="text-label ">Select Action</label>
+
+                    <app-dropdown [options]="myOptions2" [(selectedValue)]="selectedOption2" placeholder="All Actions"
+                      (selectedValueChange)="onSelectionChange2($event)">
+                    </app-dropdown>
+                  </div>
+                </div>
+                <div class="income-check  ">
+                  <app-checkbox [checked]="isChecked" [disabled]="false" [indeterminate]="false" class="text-label"
+                    label="I have reviewed all the details and authorize to issue/proceed with the sanction letter."
+                    (checkedChange)="onCheckboxChange($event, 'Default')">
+                  </app-checkbox>
+
+                </div>
+
+                <div class="d-flex justify-content-start gap-2 footer-submit-btn">
+                  <app-buttons label="Submit" class="btn primary btn-icon btncustomClass btn-label">
+
+                  </app-buttons>
+                  <app-buttons label="View Santion Letter" class="btn primary btn-icon btncustomClass btn-label">
+
+                  </app-buttons>
+
+                </div>
+
+              </div>
+
+            </div>
+          </div>

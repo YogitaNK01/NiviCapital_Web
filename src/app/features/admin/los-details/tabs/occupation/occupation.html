@@ -1,0 +1,264 @@
+
+          <div class="tab-content">
+            <!-- Occupation Details salaried --> <!-- conditionedbased -->
+            <div class="section" *ngIf="!issalaried">
+              <h3 class="section-title text-dp-3-bold">Occupation Details <span
+                  class="section-status text-body-1">Pending Verification</span></h3>
+
+              <div class="info-grid-img no-padding">
+                <div class="info-item d-flex flex-column">
+                  <label class="text-label">Current Occupation</label>
+                  <p class="text-label-data">Salaried</p>
+                </div>
+                <div class="info-item d-flex flex-column">
+                  <label class="text-label">Office Name</label>
+                  <p class="text-label-data">XYZ</p>
+                </div>
+                <div class="info-item d-flex flex-column">
+                  <label class="text-label">Office Address</label>
+                  <p class="text-label-data">Mumbai</p>
+                </div>
+                <div class="info-item d-flex flex-column">
+                  <label class="text-label">Salaried Bank Name</label>
+                  <p class="text-label-data">HDFC Bank</p>
+                </div>
+                <div class="info-item d-flex flex-column">
+                  <label class="text-label">IFSC Code</label>
+                  <p class="text-label-data">AAAA0000000</p>
+                </div>
+                <div class="info-item d-flex flex-column">
+                  <label class="text-label">Bank Branch Address</label>
+                  <p class="text-label-data">Mumbai</p>
+                </div>
+                <div class="info-item d-flex flex-column">
+                  <label class="text-label">Account Number</label>
+                  <p class="text-label-data">123456789112</p>
+                </div>
+                <div class="info-item d-flex flex-column">
+                  <label class="text-label">Existing Outstanding Loan Amount & EMI Obligation (If any)</label>
+                  <p class="text-label-data">Lorem ipsum dummy textLorem</p>
+                </div>
+
+
+                <!-- Recent 3 Months Salary Slips -->
+                <div class="info-item-img d-flex flex-column ">
+                  <label class="text-label">Recent 3 Months Salary Slips</label>
+                  <div class="img-box">
+                    <p class="text-label-data">Salary Slip.png</p>
+                    <div class="icons">
+                      <span class="" (click)="viewImage('/assets/images/dashboard/profileimg.webp')"><img
+                          src="/assets/images/icons/eyered.svg" alt="view"></span>
+                      <span class="" (click)="downloadImage()"><img
+                          src="/assets/images/icons/import-red.svg" alt="Download"></span>
+                    </div>
+                  </div>
+
+
+                </div>
+                <div class="info-item-img d-flex flex-column ">
+                  <label class="text-label" style="visibility: hidden;"> Recent 3 Months Salary Slips</label>
+                  <div class="img-box">
+                    <p class="text-label-data">Salary Slip.png</p>
+                    <div class="icons">
+                      <span class="" (click)="viewImage('/assets/images/dashboard/profileimg.webp')"><img
+                          src="/assets/images/icons/eyered.svg" alt="view"></span>
+                      <span class="" (click)="downloadImage()"><img
+                          src="/assets/images/icons/import-red.svg" alt="Download"></span>
+                    </div>
+                  </div>
+
+
+                </div>
+                <div class="info-item-img d-flex flex-column ">
+                  <label class="text-label" style="visibility: hidden;"> Recent 3 Months Salary Slips</label>
+                  <div class="img-box">
+                    <p class="text-label-data">Salary Slip.png</p>
+                    <div class="icons">
+                      <span class="" (click)="viewImage('/assets/images/dashboard/profileimg.webp')"><img
+                          src="/assets/images/icons/eyered.svg" alt="view"></span>
+                      <span class="" (click)="downloadImage()"><img
+                          src="/assets/images/icons/import-red.svg" alt="Download"></span>
+                    </div>
+                  </div>
+
+
+                </div>
+
+                <div class="info-item-img d-flex flex-column ">
+                  <label class="text-label">Latest 3 Year ITR</label>
+                  <div class="img-box">
+                    <p class="text-label-data">ITR.png</p>
+                    <div class="icons">
+                      <span class="" (click)="viewImage('/assets/images/dashboard/profileimg.webp')"><img
+                          src="/assets/images/icons/eyered.svg" alt="view"></span>
+                      <span class="" (click)="downloadImage()"><img src="/assets/images/icons/import-red.svg"
+                          alt="Download"></span>
+                    </div>
+                  </div>
+                </div>
+                <div class="info-item-img d-flex flex-column ">
+                  <label class="text-label">1 Year Salaried Bank Account Statement</label>
+                  <div class="img-box">
+                    <p class="text-label-data">Statement.png</p>
+                    <div class="icons">
+                      <span class="" (click)="viewImage('/assets/images/dashboard/profileimg.webp')"><img
+                          src="/assets/images/icons/eyered.svg" alt="view"></span>
+                      <span class="" (click)="downloadImage()"><img
+                          src="/assets/images/icons/import-red.svg" alt="Download"></span>
+                    </div>
+                  </div>
+                </div>
+
+
+              </div>
+
+              <div class="income-label"> <label class="text-dp-2-bold edu-label">Additional Income</label>
+                <hr _ngcontent-ng-c3098784094="" class="divider">
+
+                <div class="income-check ">
+                  <app-checkbox [checked]="isChecked" [disabled]="false" [indeterminate]="false" class="text-label"
+                    label="Do you have any additional income?" (checkedChange)="onCheckboxChange($event, 'Default')">
+                  </app-checkbox>
+
+                </div>
+                <div class="info-grid-img p-0">
+                  <div class="info-item d-flex flex-column">
+                    <label class="text-label">Status</label>
+                    <p class="text-label-data">Employed</p>
+                  </div>
+                  <div class="info-item d-flex flex-column">
+                    <label class="text-label">Office Name</label>
+                    <p class="text-label-data">XYZ</p>
+                  </div>
+                  <div class="info-item d-flex flex-column">
+                    <label class="text-label">Office Address</label>
+                    <p class="text-label-data">Mumbai</p>
+                  </div>
+                  <div class="info-item d-flex flex-column">
+                    <label class="text-label">Total Years of Experience</label>
+                    <p class="text-label-data">8</p>
+                  </div>
+                </div>
+                <div class="income-check text-label-data">Is your salaried bank same as the above?</div>
+                <div class="income-check income-rb-check">
+
+                  <app-radiobuttons name="optionsGroup1" [checked]="checkselectedOption_rb === 'option1'"
+                    (checkedChange)="checkselectedOption_rb = 'option1'" label="Yes, same as above">
+                  </app-radiobuttons>
+
+                  <app-radiobuttons name="optionsGroup2" [checked]="checkselectedOption_rb === 'option2'"
+                    (checkedChange)="checkselectedOption_rb = 'option2'" label="No, different bank account">
+                  </app-radiobuttons>
+
+                </div>
+                <div class="info-grid-img">
+                  <div class="info-item d-flex flex-column">
+                    <label class="text-label">Salaried Bank name</label>
+                    <p class="text-label-data">XYZ</p>
+                  </div>
+                  <div class="info-item d-flex flex-column">
+                    <label class="text-label">IFSC Code</label>
+                    <p class="text-label-data">AAAA0000000</p>
+                  </div>
+                  <div class="info-item d-flex flex-column">
+                    <label class="text-label">Bank Branch Address</label>
+                    <p class="text-label-data">Mumbai</p>
+                  </div>
+                  <div class="info-item d-flex flex-column">
+                    <label class="text-label">Account Number</label>
+                    <p class="text-label-data">123456789112</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Occupation Details Self Employed (Business)-->
+            <div class="section" *ngIf="issalaried">
+              <h3 class="section-title text-dp-3-bold">Occupation Details <span
+                  class="section-status text-body-1">Pending Verification</span></h3>
+              <div class="info-grid-img">
+                <div class="info-item d-flex flex-column">
+                  <label class="text-label">Current Occupation</label>
+                  <p class="text-label-data">Business</p>
+                </div>
+                <div class="info-item d-flex flex-column">
+                  <label class="text-label">Office Name</label>
+                  <p class="text-label-data">XYZ</p>
+                </div>
+                <div class="info-item d-flex flex-column">
+                  <label class="text-label">Office Address</label>
+                  <p class="text-label-data">Mumbai</p>
+                </div>
+                <div class="info-item d-flex flex-column">
+                  <label class="text-label">Salaried Bank Name</label>
+                  <p class="text-label-data">HDFC Bank</p>
+                </div>
+                <div class="info-item d-flex flex-column">
+                  <label class="text-label">IFSC Code</label>
+                  <p class="text-label-data">AAAA0000000</p>
+                </div>
+                <div class="info-item d-flex flex-column">
+                  <label class="text-label">Bank Branch Address</label>
+                  <p class="text-label-data">Mumbai</p>
+                </div>
+                <div class="info-item d-flex flex-column">
+                  <label class="text-label">Account Number</label>
+                  <p class="text-label-data">123456789112</p>
+                </div>
+                <div class="info-item d-flex flex-column">
+                  <label class="text-label">Existing Outstanding Loan Amount & EMI Obligation (If any)</label>
+                  <p class="text-label-data">Lorem ipsum dummy textLorem</p>
+                </div>
+                <div class="info-item-img d-flex flex-column">
+                  <label class="text-label">Last 3 years Financials of Business</label>
+                  <div class="img-box">
+                    <p class="text-label-data">Financials.pdf</p>
+                    <div class="icons">
+                      <span class="" (click)="viewImage('/assets/images/dashboard/profileimg.webp')"><img
+                          src="/assets/images/icons/eyered.svg" alt="view"></span>
+                      <span class="" (click)="downloadImage()"><img src="/assets/images/icons/import-red.svg"
+                          alt="Download"></span>
+                    </div>
+                  </div>
+                </div>
+                <div class="info-item-img d-flex flex-column">
+                  <label class="text-label">Latest 3 Year ITR</label>
+                  <div class="img-box">
+                    <p class="text-label-data">ITR.png</p>
+                    <div class="icons">
+                      <span class="" (click)="viewImage('/assets/images/dashboard/profileimg.webp')"><img
+                          src="/assets/images/icons/eyered.svg" alt="view"></span>
+                      <span class="" (click)="downloadImage()"><img src="/assets/images/icons/import-red.svg"
+                          alt="Download"></span>
+                    </div>
+                  </div>
+                </div>
+                <div class="info-item-img d-flex flex-column">
+                  <label class="text-label">1 Year GST Return</label>
+                  <div class="img-box">
+                    <p class="text-label-data">GST_Return.pdf</p>
+                    <div class="icons">
+                      <span class="" (click)="viewImage('/assets/images/dashboard/profileimg.webp')"><img
+                          src="/assets/images/icons/eyered.svg" alt="view"></span>
+                      <span class="" (click)="downloadImage()"><img src="/assets/images/icons/import-red.svg"
+                          alt="Download"></span>
+                    </div>
+                  </div>
+                </div>
+                <div class="info-item-img d-flex flex-column">
+                  <label class="text-label">1 Year Salaried Bank Account Statement</label>
+                  <div class="img-box">
+                    <p class="text-label-data">Statement.png</p>
+                    <div class="icons">
+                      <span class="" (click)="viewImage('/assets/images/dashboard/profileimg.webp')"><img
+                          src="/assets/images/icons/eyered.svg" alt="view"></span>
+                      <span class="" (click)="downloadImage()"><img
+                          src="/assets/images/icons/import-red.svg" alt="Download"></span>
+                    </div>
+                  </div>
+                </div>
+
+
+              </div>
+            </div>
+          </div>

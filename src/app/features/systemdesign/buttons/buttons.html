@@ -1,10 +1,12 @@
 <button 
   class="btn"
+   [disabled]="disabled"
   [ngClass]="[
     outline ? 'btn-outline' : '', 
     borderradius ? 'border-radius':'',
     color,
-    btncustomClass
+    btncustomClass,
+    
   ]"
   [ngStyle]="{
     'background-color': !outline && color ? color : '',

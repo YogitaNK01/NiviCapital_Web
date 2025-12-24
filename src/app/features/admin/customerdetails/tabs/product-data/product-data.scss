@@ -1,0 +1,9 @@
+@use 'variables' as *;
+@use 'typography' as *;
+@use 'common' as *;
+
+
+.table-margin-top-bottom {
+
+  margin: $spacing_15 0;
+}

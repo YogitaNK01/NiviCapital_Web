@@ -13,6 +13,18 @@ import { Dropdown, DropdownOption } from '../../systemdesign/dropdown/dropdown';
 import { AuditTrail } from '../customerdetails/customerdetails';
 import { Checkbox } from '../../systemdesign/checkbox/checkbox';
 import { Radiobuttons } from '../../systemdesign/radiobuttons/radiobuttons';
+import { ALL_TABS, AppTab, Commontabs } from '../../systemdesign/commontabs/commontabs';
+import { Loandetails } from './tabs/loandetails/loandetails';
+import { Education } from './tabs/education/education';
+import { Occupation } from './tabs/occupation/occupation';
+import { Assets } from './tabs/assets/assets';
+import { Monthlyexp } from './tabs/monthlyexp/monthlyexp';
+import { EstExpense } from './tabs/est-expense/est-expense';
+import { Losproduct } from './tabs/losproduct/losproduct';
+import { Creditscore } from './tabs/creditscore/creditscore';
+import { Coapplicant } from './tabs/coapplicant/coapplicant';
+import { Summary } from './tabs/summary/summary';
+import { Audittrail } from './tabs/audittrail/audittrail';
 
 
 interface CreditStats {
@@ -40,7 +52,9 @@ interface CibilHistory {
 
 @Component({
   selector: 'app-los-details',
-  imports: [CommonModule, MatTabsModule, MatIconModule, Buttons, Inputfield, Dropdown, Checkbox, Radiobuttons, Quicklinks],
+  imports: [CommonModule, MatTabsModule, MatIconModule,  Quicklinks,Commontabs,
+    Loandetails,Education,Occupation,Assets,Monthlyexp,EstExpense,Losproduct,Creditscore,Coapplicant,Summary,Audittrail
+  ],
   standalone: true,
   templateUrl: './los-details.html',
   styleUrl: './los-details.scss'
@@ -61,6 +75,13 @@ export class LosDetails implements OnInit {
     summary: 9,
     audit: 10
   };
+
+  tabs = ALL_TABS.filter(tab =>
+    ['loan', 'education', 'occupation', 'assets','expenditure', 'estimate', 'los-products', 'credit','coapplicant', 'summary', 'audit'].includes(tab.id)
+  );
+  
+  activeTabId = 'loan';
+  
 
   userData: any;
   kycData: any;
@@ -139,80 +160,8 @@ export class LosDetails implements OnInit {
     { dateGenerated: '04/05/2024', name: 'Vighnesh', generatedBy: 'Priya', creditScore: 690 }
   ];
 
-  //loan details--------------
+ 
 
-  loanDetails = {
-    loanAmount: { inr: '₹15,00,000', usd: '$25829' },
-    rateOfInterest: '8.5% p.a.',
-    tenure: { years: '5 years', months: '(60 months)' },
-    monthlyEmi: { inr: '₹30,891', usd: '$537' },
-    totalPayable: { inr: '₹23,53,460', usd: '$6037' },
-    charges: { inr: '₹15,000', usd: '$256' },
-    category: 'Gold'
-  };
-
-  riskFactors = [
-    { icon: 'trending-up', label: 'CIBIL Score', value: '735 (Good)', status: 'success' },
-    { icon: 'square', label: 'Repayment Capacity', value: '735 (Good)', status: 'success' },
-    { icon: 'warning', label: 'Co-applicant Dependency', value: '40% reliance', status: 'warning' },
-    { icon: 'check', label: 'Payment History', value: 'No defaults', status: 'success' }
-  ];
-
-  loanalerts = [
-    {
-      icon: '/assets/images/icons/danger.svg',
-      type: 'danger',
-      message: 'High debt-to-income ratio detected (65%). Recommended maximum is 50%.'
-    },
-    {
-      icon: '/assets/images/icons/clock.svg',
-      type: 'warning',
-      message: "Co-applicant's income verification pending for final approval."
-    }
-  ];
-
-  loancreditScore = {
-    score: 780,
-    rating: 'Excellent',
-    date: '25-06-25',
-    details: [
-      { label: 'Total Credit', value: '₹12,50,000' },
-      { label: 'Total Accounts', value: '3' },
-      { label: 'Number of Loans', value: '4' },
-      { label: 'Outstanding Credit Amount', value: '₹6,75,000' }
-    ]
-  };
-
-  recommendations = [
-    {
-      icon: '/assets/images/icons/money-send.svg',
-      title: 'Loan Amount Optimization',
-      current: '₹15,00,000',
-      recommended: '₹13,26,000',
-      description: 'Reducing loan amount by 14.7% can improve approval chances and reduce repayment burden significantly.',
-      borderClass: 'success',
-      textcolor: 'text-success'
-    },
-    {
-      icon: '/assets/images/icons/group.svg',
-      title: 'Interest Rate Adjustment',
-      current: '8.5% p.a.',
-      recommended: '7.8% p.a.',
-      description: 'Based on credit profile, the applicant qualifies for a lower interest rate, saving ₹30k overall.',
-      borderClass: 'info',
-      textcolor: 'text-info'
-    },
-
-    {
-      icon: '/assets/images/icons/calendar.svg',
-      title: 'Tenure Extension',
-      current: '5 years',
-      recommended: '7 years',
-      description: 'Extending tenure reduces monthly EMI burden from ₹30,891 to ₹23,434, improving repayment capacity by 24%.',
-      borderClass: 'warning',
-      textcolor: 'text-warning'
-    }
-  ];
 
 
   constructor(public router: Router,public route: ActivatedRoute, private aes: Aesutil, private service: Main) { }
@@ -225,7 +174,7 @@ export class LosDetails implements OnInit {
         this.selectedTabIndex = this.tabIndexMap[tabKey];
       }
     });
-   this.loadAuditTrails();
+  //  this.loadAuditTrails();
 
     console.log("loaded data")
     const saved = localStorage.getItem('selecteduserDetails');
@@ -235,7 +184,10 @@ export class LosDetails implements OnInit {
 
 
   }
-
+//individual tabs change
+  onTabChange(tab: AppTab) {
+    this.activeTabId = tab.id;
+  }
 
   getAllDocumnets() {
     this.service.getUserDocuments(this.service.docofselectedUser.id).subscribe({
@@ -335,12 +287,7 @@ export class LosDetails implements OnInit {
 
   }
 
-  downloadImage(data: any) {
-
-    this.service.downloadDocs(this.service.docofselectedUser.id, data);
-
-  }
-
+  
 
 
 
@@ -595,11 +542,6 @@ export class LosDetails implements OnInit {
     // Implement download logic here
   }
 
-  viewImage(imagePath: string): void {
-    // ✅ Opens image in a new browser tab
-    window.open(imagePath, '_blank');
-  }
-
   getStatusClass1(status: string): string {
     switch (status?.toLowerCase()) {
       case 'completed':
@@ -615,150 +557,10 @@ export class LosDetails implements OnInit {
   }
   // ************************los audit trail********************************
 
-  selectedOption2: string = '';
-  myOptions2: DropdownOption[] = [
-    { label: 'Loan', value: 'pdf', icon: '/assets/images/icons/note.svg' },
-    { label: 'Forex', value: 'excel', icon: '/assets/images/icons/note.svg' },
-    { label: 'Insurance', value: 'json', icon: '/assets/images/icons/note.svg' },
-    { label: 'Others', value: 'others', icon: '/assets/images/icons/note.svg' }
-  ];
-  onSelectionChange2(value: string) {
-    console.log('Selected:2', value);
-  }
 
-    loadAuditTrails() {
-   
-    this.auditTrails = [
-      {
-        date: new Date(),
-        time: '2:30 PM',
-        action: 'Aadhaar Card Requested',
-        reference: 'Ref 28789 ABC 67455',
-        status: 'Pending'
-      },
-      {
-        date: new Date(),
-        time: '2:30 PM',
-        action: 'Aadhaar Card Requested',
-        reference: 'Ref 28789 ABC 67455',
-        status: 'Submitted'
-      },
-      {
-        date: new Date(new Date().setDate(new Date().getDate() - 1)),
-        time: '2:30 PM',
-        action: 'Aadhaar Card Requested',
-        reference: 'Ref 28789 ABC 67455',
-        status: 'Pending'
-      },
-      {
-        date: new Date(new Date().setDate(new Date().getDate() - 1)),
-        time: '2:30 PM',
-        action: 'Aadhaar Card Requested',
-        reference: 'Ref 28789 ABC 67455',
-        status: 'Submitted'
-      },
-      {
-        date: new Date(new Date().setDate(new Date().getDate() - 5)),
-        time: '2:30 PM',
-        action: 'PAN Card Verified',
-        reference: 'Ref 28789 ABC 67455',
-        status: 'Approved'
-      },
-      {
-        date: new Date(new Date().setDate(new Date().getDate() - 7)),
-        time: '11:45 AM',
-        action: 'Document Upload',
-        reference: 'Ref 28789 ABC 67455',
-        status: 'Submitted'
-      }
-    ];
-
-    this.filteredAuditTrails = [...this.auditTrails];
-  }
-
-  filterAuditTrail() {
-    let filtered = [...this.auditTrails];
-
-    // Filter by search query
-    if (this.searchQuery) {
-      const query = this.searchQuery.toLowerCase();
-      filtered = filtered.filter(trail =>
-        trail.action.toLowerCase().includes(query) ||
-        trail.reference.toLowerCase().includes(query)
-      );
-    }
-
-    // Filter by status
-    if (this.selectedFilter !== 'all') {
-      filtered = filtered.filter(trail =>
-        trail.status.toLowerCase() === this.selectedFilter.toLowerCase()
-      );
-    }
-
-    this.filteredAuditTrails = filtered;
-  }
-
-  getTodayTrails(): AuditTrail[] {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-
-    return this.filteredAuditTrails.filter(trail => {
-      const trailDate = new Date(trail.date);
-      trailDate.setHours(0, 0, 0, 0);
-      return trailDate.getTime() === today.getTime();
-    });
-  }
-
-  getYesterdayTrails(): AuditTrail[] {
-    const yesterday = new Date();
-    yesterday.setDate(yesterday.getDate() - 1);
-    yesterday.setHours(0, 0, 0, 0);
-
-    return this.filteredAuditTrails.filter(trail => {
-      const trailDate = new Date(trail.date);
-      trailDate.setHours(0, 0, 0, 0);
-      return trailDate.getTime() === yesterday.getTime();
-    });
-  }
-
-  getEarlierTrails(): AuditTrail[] {
-    const yesterday = new Date();
-    yesterday.setDate(yesterday.getDate() - 1);
-    yesterday.setHours(0, 0, 0, 0);
-
-    return this.filteredAuditTrails.filter(trail => {
-      const trailDate = new Date(trail.date);
-      trailDate.setHours(0, 0, 0, 0);
-      return trailDate.getTime() < yesterday.getTime();
-    });
-  }
-
-  getStatusClass(status: string): string {
-    const statusLower = status.toLowerCase();
-    return `status-${statusLower}`;
-  }
-
-  // **********************checkbox*****************************
-
-  onCheckboxChange(value: boolean, label: string) {
-    console.log(label, value);
-  }
-
-  //******************radio buttons*************************** */
+ 
 
 
-  isCheckedDefault = false;
-  isCheckedChecked = true;
-
-  onCheckboxChange1(value: boolean, label: string) {
-    console.log(label, value);
-    // Update local state if you want two-way binding
-    if (label === 'Default') this.isCheckedDefault = value;
-    if (label === 'Checked') this.isCheckedChecked = value;
-  }
-
-
-  checkselectedOption = 'option2';
 
   getIconColor(icon: string): string {
     const colorMap: { [key: string]: string } = {

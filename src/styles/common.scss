@@ -533,8 +533,8 @@ color: $warning-text-dark;
 
 
 .tabs {
-  border: $border_1 solid $neutral-300;
-  border-radius: $spacing_5;
+  // border: $border_1 solid $neutral-300;
+  border-radius: $spacing_5 0;
   flex: 1 1 auto;
   min-height: 0;
   display: flex;
@@ -566,7 +566,7 @@ color: $warning-text-dark;
   display: block;
   min-height: 100%;
   height: auto;
-  padding: $spacing_9;
+  padding: 0 $spacing_9;
   // padding-bottom: $spacing_15;
 
   @media (max-width: 768px) {
@@ -590,7 +590,7 @@ color: $warning-text-dark;
   align-self: stretch;
   
   &:last-child {
-    margin-bottom: 0;
+    // margin-bottom: 0;
   }
 
   @media (max-width: 800px) {
@@ -599,13 +599,69 @@ color: $warning-text-dark;
   }
 }
 
+
 .section-title {
-  color: $secondary-700;
+  display: flex;
+  align-items: center;
+  gap: $spacing_11;
+  font-weight: 400;
+  margin: $spacing_15 0;
 
   @media (max-width: 480px) {
-    font-size: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    font-size: $spacing_12;
+    margin: 0.5rem 0;
   }
 }
+
+.section-status {
+  color: #9B4800;
+  border-radius: 32px;
+  background: $warning-container;
+  padding: $spacing $spacing_7;
+  font-weight: 500;
+  line-height: 22px;
+  letter-spacing: 0.16px;
+}
+
+
+
+.info-item-img {
+
+  display: flex;
+  height: $spacing_25;
+  flex-direction: column;
+  gap: $spacing_2;
+
+  @media (max-width: 480px) {
+    // height: 4rem;
+
+  }
+
+}
+p {
+    margin-bottom: 0;
+}
+.edu-label {
+  color: $secondary-text;
+  margin-bottom: 10px;
+}
+
+.edu-label-black {
+  color: $neutral-text-primary;
+}
+
+.divider {
+  margin: 0.1rem 0;
+}
+
+
+.no-padding {
+  padding-top: 0 !important;
+}
+
 
 .info-grid {
   display: grid;
@@ -689,7 +745,7 @@ color: $warning-text-dark;
   margin: $spacing_9 0 $spacing_9 0;
 
   &:last-child {
-    margin-bottom: 0;
+    // margin-bottom: 0;
   }
 
   table {
@@ -736,6 +792,37 @@ color: $warning-text-dark;
     padding: $spacing_5;
     min-width: 150px;
   }
+}
+.table-card-header {
+  border-radius: var(--border-radius-border-radius-s, 8px) var(--border-radius-border-radius-s, 8px) 0 0;
+  background: var(--system-background-onAccent, #F4F6FF);
+  border-radius: 0 0 var(--border-radius-border-radius-s, 8px) var(--border-radius-border-radius-s, 8px);
+  margin: 0 -20px;
+  padding: 12px 16px;
+  font-weight: 600;
+}
+.table-card {
+  border-radius: $border-radius-s;
+  border-right: 1px solid var(--system-border-neutral-neutral_2, #E4E6F1);
+  border-bottom: 1px solid var(--system-border-neutral-neutral_2, #E4E6F1);
+  border-top: 1px solid var(--system-border-neutral-neutral_2, #E4E6F1);
+  border-left: 1px solid var(--system-border-neutral-neutral_2, #E4E6F1);
+  padding: 0 20px;
+}
+
+.table-margin {
+
+  margin: $spacing_15 0;
+}
+
+.table-margin-top {
+
+  margin-top: $spacing_15;
+}
+
+.bottom-border {
+  border-bottom: 1px solid $neutral_border_2;
+  background: $bg;
 }
 
 .table-data {

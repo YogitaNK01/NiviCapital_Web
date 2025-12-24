@@ -19,6 +19,7 @@ export class Buttons {
   @Input() type: 'button' | 'submit' | 'reset' = 'button';
   @Input() borderradius: boolean = false;
   @Input() bgcolor: 'primary' | 'secondary' | 'blue' = 'primary';
+  @Input() disabled = false;
 
 
 }

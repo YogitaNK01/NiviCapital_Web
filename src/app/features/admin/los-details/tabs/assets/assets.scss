@@ -1,0 +1,61 @@
+@use 'variables' as *;
+@use 'typography' as *;
+@use 'common' as *;
+
+p {
+  margin-bottom: 0;
+}
+
+.asset-bg-amt {
+  min-width: 339px;
+  min-height: 46px;
+  padding: $spacing_3;
+  gap: 10px;
+  border-radius: $border_radius_s;
+  background: $onAccent;
+  box-shadow: 0 4px 4px 0 rgba(239, 239, 239, 0.12);
+}
+
+
+
+.table-margin {
+
+  margin: $spacing_15 0;
+}
+
+.table-margin-top {
+
+  margin-top: $spacing_15;
+}
+
+
+
+
+@media (max-width: 480px) {
+  .asset-bg-amt {
+    min-width: 100%;
+
+  }
+
+  .text-label-data-head {
+    font-size: $spacing_10;
+  }
+
+  .text-dp-1-medium {
+    font-size: $spacing_7;
+  }
+
+  .table-margin {
+
+    margin: $spacing_7 0;
+  }
+
+  .text-label {
+    font-size: 16px;
+  }
+
+  .table-margin-top {
+
+    margin-top: $spacing_9;
+  }
+}

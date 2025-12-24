@@ -1,0 +1,29 @@
+@use 'variables' as *;
+@use 'typography' as *;
+@use 'common' as *;
+
+.monthly-ex-bg-amt {
+  width: 50%;
+  padding: $spacing_3;
+  gap: 10px;
+  border-radius: $border_radius_s;
+  background: $onAccent;
+  box-shadow: 0 4px 4px 0 rgba(239, 239, 239, 0.12);
+
+  @media (max-width: 480px) {
+    width: 100%;
+    padding: 0;
+  }
+
+
+}
+
+.monthly-exp-header {
+  color: $secondary-text-dark;
+  font-weight: 400;
+  padding: $spacing_7;
+}
+.table-margin-top {
+
+  margin-top: $spacing_15;
+}
