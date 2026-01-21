@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { Route, Router } from '@angular/router';
+import { TabConfig, TAB_CONFIG } from '../../../shared/config/tab.config';
 
 
 export interface QuickLink {
@@ -21,49 +22,49 @@ export class Quicklinks implements OnInit {
   
 
   @Input() currentPage!: 'customerdetails' | 'losdetails';
-  links: any[] = [];
+  // links: any[] = [];
+  links: Array<{
+    label: string;
+    route: string;
+    tab: string;
+    icon: string;
+  }> = [];
 
   isExpanded = false;
 
+  private PAGE_ROUTES = {
+    losdetails: '/admin/losdetails',
+    customerdetails: '/admin/customerdetails'
+  } as const;
 
-  quickLinks = [
-    // LOS details
-    { label: 'Loan Details', icon: '/assets/images/sidemenu/user.svg', route: '/admin/losdetails', tab: 'loan', page: 'losdetails' },
-    { label: 'Education', icon: '/assets/images/sidemenu/user.svg', route: '/admin/losdetails', tab: 'education', page: 'losdetails' },
-    { label: 'Occupation', icon: '/assets/images/sidemenu/user.svg', route: '/admin/losdetails', tab: 'occupation', page: 'losdetails' },
-    { label: 'Assets and Liabilities', icon: '/assets/images/sidemenu/user.svg', route: '/admin/losdetails', tab: 'assets', page: 'losdetails' },
-    { label: 'Monthly Expenditure', icon: '/assets/images/sidemenu/user.svg', route: '/admin/losdetails', tab: 'expenditure', page: 'losdetails' },
-    { label: 'Estimated Expense', icon: '/assets/images/sidemenu/user.svg', route: '/admin/losdetails', tab: 'estimate', page: 'losdetails' },
-    { label: 'Products', icon: '/assets/images/sidemenu/user.svg', route: '/admin/losdetails', tab: 'products', page: 'losdetails' },
-    { label: 'Credit Score', icon: '/assets/images/sidemenu/user.svg', route: '/admin/losdetails', tab: 'credit', page: 'losdetails' },
-    { label: 'Co-Applicant Details', icon: '/assets/images/sidemenu/user.svg', route: '/admin/losdetails', tab: 'coapplicant', page: 'losdetails' },
-    { label: 'Summary', icon: '/assets/images/sidemenu/user.svg', route: '/admin/losdetails', tab: 'summary', page: 'losdetails' },
-    { label: 'Audit Trail', icon: '/assets/images/sidemenu/user.svg', route: '/admin/losdetails', tab: 'audit', page: 'losdetails' },
 
-    // Customer details
-    { label: 'PI', icon: '/assets/images/sidemenu/user.svg', route: '/admin/customerdetails', tab: 'pi', page: 'customerdetails' },
-    { label: 'PII', icon: '/assets/images/sidemenu/user.svg', route: '/admin/customerdetails', tab: 'pii', page: 'customerdetails' },
-    { label: 'KYC Details', icon: '/assets/images/sidemenu/user.svg', route: '/admin/customerdetails', tab: 'kyc', page: 'customerdetails' },
-    { label: 'Products', icon: '/assets/images/sidemenu/user.svg', route: '/admin/customerdetails', tab: 'products', page: 'customerdetails' },
-  ];
   constructor(private router: Router) { }
 
 
   ngOnInit() {
     // show opposite page tabs
-    this.links = this.quickLinks.filter(
-      link => link.page !== this.currentPage
-    );
+    // this.links = this.quickLinks.filter(
+    //   link => link.page !== this.currentPage
+    // );
+
+     this.links = TAB_CONFIG
+      .filter(tab => !tab.page.includes(this.currentPage))
+      .map(tab => {
+        const targetPage = tab.page.find(p => p !== this.currentPage)!;
+        return {
+          label: tab.label,
+          icon: tab.icon,
+          tab: tab.routeKey,
+          route: this.PAGE_ROUTES[targetPage]
+        };
+      });
   }
 
-  onLinkClick(link: any) {
+  onLinkClick(link: { route: string; tab: string }) {
     this.router.navigate([link.route], {
       queryParams: { tab: link.tab }
     });
   }
-
-
-
 
   toggleQuickLinks() {
     this.isExpanded = !this.isExpanded;

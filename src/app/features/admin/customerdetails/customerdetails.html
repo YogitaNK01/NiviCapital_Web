@@ -35,16 +35,13 @@
    <div class="customer-details">
  <app-commontabs
   [tabs]="tabs"
+  [selectedIndex]="selectedTabIndex"
   (tabChange)="onTabChange($event)">
 </app-commontabs>
 
-<ng-container [ngSwitch]="activeTabId">
 
-  <app-pi-data *ngSwitchCase="'pi'"></app-pi-data>
-  <app-pii-data *ngSwitchCase="'pii'"></app-pii-data>
-  <app-kyc-data *ngSwitchCase="'kyc'"></app-kyc-data>
-  <app-product-data *ngSwitchCase="'kyc-products'"></app-product-data>
-
+<ng-container *ngIf="activeTabComponent">
+  <ng-container *ngComponentOutlet="activeTabComponent"></ng-container>
 </ng-container>
 </div>
 

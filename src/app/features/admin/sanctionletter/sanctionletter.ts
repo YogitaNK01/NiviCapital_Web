@@ -64,10 +64,8 @@ export class Sanctionletter implements OnInit {
    
     const kyc = sessionStorage.getItem('kycs');
     const kyc1 = kyc ? JSON.parse(kyc) : null;
-    this.allDetails = kyc1[0]
-   console.log("details--kyc--",this.allDetails);
-   
-    this.generateSanctionLetter()
+    this.allDetails = kyc1[0];
+    this.generateSanctionLetter();
   }
   generateSanctionLetter() {
     const doc = new jsPDF({ unit: "mm", format: "a4" });

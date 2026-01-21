@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, ElementRef, ViewChild } from '@angular/core';
-import { Buttons } from '../../../../systemdesign/buttons/buttons';
+import { Buttons } from '../../../systemdesign/buttons/buttons';
 
 interface CreditStats {
   totalCredit: string;

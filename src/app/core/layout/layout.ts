@@ -1,19 +1,18 @@
 import { CommonModule } from '@angular/common';
-import { Component, Input } from '@angular/core';
+import { Component, Input, OnInit, OnDestroy, ChangeDetectionStrategy } from '@angular/core';
 import { NavigationEnd, Router, RouterModule } from '@angular/router';
 import { filter } from 'rxjs';
+import { Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 import { Dropdown, DropdownOption } from '../../features/systemdesign/dropdown/dropdown';
 import { Main } from '../service/main';
-
 
 interface MenuItem {
   icon: string;
   label: string;
   route: string;
   expanded?: boolean;
-  iconActive?: string; // make it optional
-
-
+  iconActive?: string;
 }
 
 @Component({
@@ -22,23 +21,20 @@ interface MenuItem {
   templateUrl: './layout.html',
   styleUrl: './layout.scss',
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class Layout {
-
-  constructor(private router: Router,private service:Main) {
-    // Listen to route changes
-    this.router.events
-      .pipe(filter(event => event instanceof NavigationEnd))
-      .subscribe((event: NavigationEnd) => {
-        this.updateMenu(event.urlAfterRedirects);
-      });
-  }
-
-  //================================sidemenu for system design===============================================
+export class Layout implements OnInit, OnDestroy {
+  private destroy$ = new Subject<void>();
+  private resizeObserver: ResizeObserver | null = null;
 
   sidebarOpen = true;
-isMobile = false;
+  isMobile = false;
   menuItems: MenuItem[] = [];
+
+  @Input() avatarUrl = 'https://i.pravatar.cc/40?img=12';
+  @Input() hasAvatar = true;
+
+  selectedOption: string = '';
 
   systemdesignMenu: MenuItem[] = [
     { icon: '/assets/images/sidemenu/dashboard.svg', label: 'Buttons', iconActive: '/assets/images/sidemenu/dashboard-active.svg', route: '/systemdesign/buttons', expanded: false },
@@ -48,17 +44,16 @@ isMobile = false;
     { icon: '/assets/images/sidemenu/dashboard.svg', label: 'Checkbox', iconActive: '/assets/images/sidemenu/dashboard-active.svg', route: '/systemdesign/checkbox', expanded: false },
     { icon: '/assets/images/sidemenu/dashboard.svg', label: 'Radio Buttons', iconActive: '/assets/images/sidemenu/dashboard-active.svg', route: '/systemdesign/radiobuttons', expanded: false },
     { icon: '/assets/images/sidemenu/dashboard.svg', label: 'Upload Buttons', iconActive: '/assets/images/sidemenu/dashboard-active.svg', route: '/systemdesign/uploadbuttons', expanded: false },
-
   ];
 
   adminMenu: MenuItem[] = [
-    { icon: '/assets/images/sidemenu/dashboard.svg', iconActive: '/assets/images/sidemenu/dashboard-active.svg', label: 'Dashbboard', route: '/admin/dashboard', expanded: false },
+    { icon: '/assets/images/sidemenu/dashboard.svg', iconActive: '/assets/images/sidemenu/dashboard-active.svg', label: 'Dashboard', route: '/admin/dashboard', expanded: false },
     { icon: '/assets/images/sidemenu/user.svg', iconActive: '/assets/images/sidemenu/user-active.svg', label: 'Customer', route: '/admin/customer', expanded: false },
     { icon: '/assets/images/sidemenu/money-recive.svg', iconActive: '/assets/images/sidemenu/money-recive-active.svg', label: 'Loan Operations', route: '/admin/losoperation', expanded: false },
-    { icon: '/assets/images/sidemenu/candle.svg',iconActive: '/assets/images/sidemenu/money-recive-active.svg', label: 'FX Operations', route: '/admin/losdetails', expanded: false },
-        { icon: '/assets/images/sidemenu/candle.svg',iconActive: '/assets/images/sidemenu/money-recive-active.svg', label: 'Customer', route: '/admin/customerdetails', expanded: false },
-
-    { icon: '/assets/images/sidemenu/wallet-money.svg', label: 'LMS', route: '/admin/commontabs', expanded: false },
+    // { icon: '/assets/images/sidemenu/user.svg', iconActive: '/assets/images/sidemenu/user-active.svg', label: 'Customer Details', route: '/admin/customerdetails', expanded: false },
+    // { icon: '/assets/images/sidemenu/money-recive.svg', iconActive: '/assets/images/sidemenu/money-recive-active.svg', label: 'Loan Details', route: '/admin/losdetails', expanded: false },
+    { icon: '/assets/images/sidemenu/candle.svg', iconActive: '/assets/images/sidemenu/money-recive-active.svg', label: 'FX Operations', route: '/admin/customer2', expanded: false },
+    { icon: '/assets/images/sidemenu/wallet-money.svg', label: 'LMS', route: '/admin/customer2', expanded: false },
     { icon: '/assets/images/sidemenu/document-upload.svg', label: 'Documents', route: '/admin/customer2', expanded: false },
     { icon: '/assets/images/sidemenu/tag-user.svg', label: 'Communication', route: '/admin/dashboard3', expanded: false },
     { icon: '/assets/images/sidemenu/cpu-setting.svg', label: 'Configuration', route: '/admin/customer3', expanded: false },
@@ -66,40 +61,8 @@ isMobile = false;
     { icon: '/assets/images/sidemenu/note.svg', label: 'Analytics', route: '/admin/customer4', expanded: false },
     { icon: '/assets/images/sidemenu/note.svg', label: 'Products', route: '/admin/customer5', expanded: false },
     { icon: '/assets/images/sidemenu/note.svg', label: 'System Design', route: 'systemdesign/buttons', expanded: false },
-
   ];
 
-  ngOnInit() {
-  this.checkScreenSize();
-  window.addEventListener('resize', this.checkScreenSize.bind(this));
-}
-
-checkScreenSize() {
-  this.isMobile = window.innerWidth < 769;
-  this.sidebarOpen = !this.isMobile; // default: open on desktop, closed on mobile
-}
-
-  toggleSidebar() {
-    this.sidebarOpen = !this.sidebarOpen;
-  }
-
-
-  updateMenu(url: string) {
-    if (url.startsWith('/systemdesign')) {
-      this.menuItems = this.systemdesignMenu;
-    } else if (url.startsWith('/admin')) {
-      this.menuItems = this.adminMenu;
-    } else {
-      this.menuItems = []; // fallback
-    }
-  }
-
-  //dropdown
-
-  @Input() avatarUrl = 'https://i.pravatar.cc/40?img=12';
-  @Input() hasAvatar = true;
-
-  selectedOption: string = '';
   myOptions: DropdownOption[] = [
     { label: 'Manage Account', value: 'manageaccount', icon: '/assets/images/sidemenu/user.svg' },
     { label: 'Change Password', value: 'changepassword', icon: '/assets/images/icons/lock.svg' },
@@ -107,19 +70,64 @@ checkScreenSize() {
     { label: 'Logout', value: 'logout', icon: '/assets/images/icons/logout-icon.svg' }
   ];
 
-  onSelectionChange(value: any) {
-    console.log('Selected:1', value);
-   if(value == 'logout'){
-    this.logout()
-   }
+  constructor(private router: Router, private service: Main) {
+    this.router.events
+      .pipe(
+        filter(event => event instanceof NavigationEnd),
+        takeUntil(this.destroy$)
+      )
+      .subscribe((event: NavigationEnd) => {
+        this.updateMenu(event.urlAfterRedirects);
+      });
   }
 
-  logout() {
- this.service.Logout().subscribe({
-      next: (res) => {
-        console.log("logout--",res)
-    this.router.navigate(['/login'])
+  ngOnInit(): void {
+    this.checkScreenSize();
+    window.addEventListener('resize', this.checkScreenSize.bind(this));
   }
-})
+
+  private checkScreenSize(): void {
+    this.isMobile = window.innerWidth < 769;
+    this.sidebarOpen = !this.isMobile;
+  }
+
+  toggleSidebar(): void {
+    this.sidebarOpen = !this.sidebarOpen;
+  }
+
+  private updateMenu(url: string): void {
+    if (url.startsWith('/systemdesign')) {
+      this.menuItems = this.systemdesignMenu;
+    } else if (url.startsWith('/admin')) {
+      this.menuItems = this.adminMenu;
+    } else {
+      this.menuItems = [];
+    }
+  }
+
+  onSelectionChange(value: string): void {
+    if (value === 'logout') {
+      this.logout();
+    }
+  }
+
+   logout(): void {
+    this.service.Logout()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: () => {
+          this.router.navigate(['/login']);
+        },
+        error: (err) => {
+          console.error('Logout error:', err);
+          this.router.navigate(['/login']);
+        }
+      });
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+    window.removeEventListener('resize', this.checkScreenSize.bind(this));
   }
 }

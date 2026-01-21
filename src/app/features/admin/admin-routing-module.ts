@@ -8,10 +8,10 @@ import { LosOperation } from './los-operation/los-operation';
 import { LosDetails } from './los-details/los-details';
 import { Table } from './table/table';
 import { Commontabs } from '../systemdesign/commontabs/commontabs';
-import { PiData } from './customerdetails/tabs/pi-data/pi-data';
-import { PiiData } from './customerdetails/tabs/pii-data/pii-data';
-import { KycData } from './customerdetails/tabs/kyc-data/kyc-data';
-import { ProductData } from './customerdetails/tabs/product-data/product-data';
+import { PiData } from '../admin/tabs/pi-data/pi-data';
+import { PiiData } from '../admin/tabs/pii-data/pii-data';
+import { KycData } from '../admin/tabs/kyc-data/kyc-data';
+import { ProductData } from '../admin/tabs/product-data/product-data';
 
 const routes: Routes = [
   

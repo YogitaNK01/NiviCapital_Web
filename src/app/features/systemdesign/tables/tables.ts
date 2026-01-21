@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, Input, Output, OnChanges, SimpleChanges } from '@angular/core';
 import { MatPaginatorModule } from '@angular/material/paginator';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { Checkbox } from '../checkbox/checkbox';
@@ -25,7 +25,7 @@ export interface TableColumn {
   templateUrl: './tables.html',
   styleUrl: './tables.scss'
 })
-export class Tables {
+export class Tables implements OnChanges {
 
   //  @Input() apiUrl!: string;               
   @Input() columns: TableColumn[] = [];
@@ -48,18 +48,24 @@ export class Tables {
   constructor(private http: HttpClient) { }
 
   ngOnInit() {
-    this.dataSource.data = this.data;
-    this.updatePagination();
     this.displayedColumnKeys = ['select', ...this.columns.map(c => c.key)];
-    // this.loadData(0, this.pageSize);
+    if (this.data && this.data.length > 0) {
+      this.updatePagedData();
+    }
   }
 
   //*********************** pagination ***************************** 
-  ngOnChanges() {
-    // if (this.data) {
-      this.dataSource.data = this.data;
-      this.updatePagination();
-    // }
+  ngOnChanges(changes: SimpleChanges) {
+    if (changes['data']) {
+      this.currentPage = 1;
+      if (this.data && this.data.length > 0) {
+        this.updatePagination();
+        this.updatePagedData();
+      } else {
+        this.pagedData = [];
+        this.totalPagesArray = [];
+      }
+    }
   }
 
   get totalPages() {

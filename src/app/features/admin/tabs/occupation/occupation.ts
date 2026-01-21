@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
-import { Checkbox } from '../../../../systemdesign/checkbox/checkbox';
-import { Radiobuttons } from '../../../../systemdesign/radiobuttons/radiobuttons';
+import { Checkbox } from '../../../systemdesign/checkbox/checkbox';
+import { Radiobuttons } from '../../../systemdesign/radiobuttons/radiobuttons';
 
 @Component({
   selector: 'app-occupation',

@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, ElementRef, input, Input, TemplateRef, ViewChild } from '@angular/core';
+import { Component, ElementRef, input, Input, TemplateRef, Type, ViewChild } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTabsModule } from '@angular/material/tabs';
 import { Buttons } from '../../systemdesign/buttons/buttons';
@@ -9,14 +9,10 @@ import { Sanctionletter } from '../sanctionletter/sanctionletter';
 import { Main } from '../../../core/service/main';
 import { Quicklinks } from '../quicklinks/quicklinks';
 import { FormsModule } from '@angular/forms';
-import { Dropdown, DropdownOption } from '../../systemdesign/dropdown/dropdown';
-import { Inputfield } from '../../systemdesign/inputfield/inputfield';
+import {  DropdownOption } from '../../systemdesign/dropdown/dropdown';
 import { ALL_TABS, AppTab, Commontabs } from '../../systemdesign/commontabs/commontabs';
-import { PiData } from './tabs/pi-data/pi-data';
-import { PiiData } from './tabs/pii-data/pii-data';
-import { KycData } from './tabs/kyc-data/kyc-data';
-import { ProductData } from './tabs/product-data/product-data';
 import { MatTabGroup } from '@angular/material/tabs';
+import { TAB_CONFIG } from '../../../shared/config/tab.config';
 
 
 
@@ -31,7 +27,7 @@ export interface AuditTrail {
 @Component({
   selector: 'app-customerdetails',
   standalone: true,
-  imports: [CommonModule, MatTabsModule, MatIconModule, Buttons, FormsModule, Quicklinks,Commontabs,PiData,PiiData,KycData,ProductData],
+  imports: [CommonModule, MatTabsModule, MatIconModule, Buttons, FormsModule, Quicklinks, Commontabs],
   templateUrl: './customerdetails.html',
   styleUrl: './customerdetails.scss'
 })
@@ -40,19 +36,11 @@ export class Customerdetails {
   //quicklink connectivity
   @ViewChild(MatTabGroup) tabGroup!: MatTabGroup;
 
-  selectedTabIndex = 0;
-  tabIndexMap: { [key: string]: number } = {
-    pi: 0,
-    pii: 1,
-    kyc: 2,
-    products: 3,
-    
-  };
-  tabs = ALL_TABS.filter(tab =>
-  ['pi', 'pii', 'kyc', 'kyc-products'].includes(tab.id)
-);
 
-activeTabId = 'pi';
+  selectedTabIndex = 0;
+  tabs: AppTab[] = [];
+  activeTabComponent!: Type<any>;
+  activeTabId = 'pi';
 
 
   userData: any;
@@ -92,7 +80,7 @@ activeTabId = 'pi';
   filteredAuditTrails: AuditTrail[] = [];
 
 
-   
+
   @Input() creditScore = 780;
 
   gaugeLabels = [
@@ -107,44 +95,51 @@ activeTabId = 'pi';
   reportDate: string = '20-06-2025';
   source: string = 'TransUnion CIBIL';
 
-  
 
 
 
 
-  constructor(public router: Router,public route: ActivatedRoute, private aes: Aesutil, private service: Main) { }
+
+  constructor(public router: Router, public route: ActivatedRoute, private aes: Aesutil, private service: Main) { }
 
   async ngOnInit(): Promise<void> {
-//quicklink connectivity
-     this.route.queryParams.subscribe(params => {
-      const tabKey = params['tab'];
-      if (tabKey && this.tabIndexMap[tabKey] !== undefined) {
-        // this.selectedTabIndex = this.tabIndexMap[tabKey];
-        setTimeout(() => {
-        this.tabGroup.selectedIndex = this.tabIndexMap[tabKey];
-      });
-      }
+    //quicklink connectivity
+    const page = 'customerdetails';
+
+    const pageTabs = TAB_CONFIG.filter(t => t.page.includes(page));
+    this.tabs = pageTabs.map(t => ({
+      id: t.id,
+      label: t.label
+    }));
+
+    this.route.queryParams.subscribe(params => {
+      const key = params['tab'];
+      const active =
+        pageTabs.find(t => t.routeKey === key) || pageTabs[0];
+      
+      this.selectedTabIndex = pageTabs.findIndex(t => t.routeKey === active.routeKey );
+      console.log("Selected Tab Index:", this.selectedTabIndex);
+      this.activeTabComponent = active.component;
+        
     });
 
-    
-
     console.log("loaded data")
-
-    // const kyc = sessionStorage.getItem('kycs');
-    // this.kycData = kyc ? JSON.parse(kyc) : null;
-    // console.log('kycData user data:', this.kycData);
-    // this.kyc_documents = this.kycData[0].documents;
-    // console.log('kycData.documents data:', this.kyc_documents);
-    // this.encryptAadhar();
-    // this.decryptAadhar()
-    // this. getAllDocumnets();
-
     this.loadAuditTrails()
 
   }
 
+  //individual tabs change
+  onTabChange(tab: AppTab) {
+    const config = TAB_CONFIG.find(t => t.id === tab.id)!;
 
-  
+    this.activeTabComponent = config.component;
+
+    this.router.navigate([], {
+      queryParams: { tab: config.routeKey },
+      queryParamsHandling: 'merge'
+    });
+  }
+
 
   downloadImage(data: any) {
 
@@ -182,13 +177,10 @@ activeTabId = 'pi';
   }
 
 
- //individual tabs change
-onTabChange(tab: AppTab) {
-  this.activeTabId = tab.id;
-}
- 
-ngAfterViewInit() {
-}
+
+
+  ngAfterViewInit() {
+  }
 
   ngOnDestroy() {
   }
@@ -236,7 +228,7 @@ ngAfterViewInit() {
   }
 
   loadAuditTrails() {
-   
+
     this.auditTrails = [
       {
         date: new Date(),
@@ -347,5 +339,5 @@ ngAfterViewInit() {
     return `status-${statusLower}`;
   }
 
- 
+
 }

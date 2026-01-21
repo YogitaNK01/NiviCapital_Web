@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, ElementRef, Input, OnInit, ViewChild } from '@angular/core';
+import { Component, ElementRef, Input, OnInit, OnDestroy, Type, ViewChild } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTabsModule } from '@angular/material/tabs';
 import { Buttons } from '../../systemdesign/buttons/buttons';
@@ -8,23 +8,11 @@ import { Sanctionletter } from '../sanctionletter/sanctionletter';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Main } from '../../../core/service/main';
 import { Aesutil } from '../../../utils/aesutil';
-import { Inputfield } from '../../systemdesign/inputfield/inputfield';
-import { Dropdown, DropdownOption } from '../../systemdesign/dropdown/dropdown';
 import { AuditTrail } from '../customerdetails/customerdetails';
-import { Checkbox } from '../../systemdesign/checkbox/checkbox';
-import { Radiobuttons } from '../../systemdesign/radiobuttons/radiobuttons';
-import { ALL_TABS, AppTab, Commontabs } from '../../systemdesign/commontabs/commontabs';
-import { Loandetails } from './tabs/loandetails/loandetails';
-import { Education } from './tabs/education/education';
-import { Occupation } from './tabs/occupation/occupation';
-import { Assets } from './tabs/assets/assets';
-import { Monthlyexp } from './tabs/monthlyexp/monthlyexp';
-import { EstExpense } from './tabs/est-expense/est-expense';
-import { Losproduct } from './tabs/losproduct/losproduct';
-import { Creditscore } from './tabs/creditscore/creditscore';
-import { Coapplicant } from './tabs/coapplicant/coapplicant';
-import { Summary } from './tabs/summary/summary';
-import { Audittrail } from './tabs/audittrail/audittrail';
+import { AppTab, Commontabs } from '../../systemdesign/commontabs/commontabs';
+import { TAB_CONFIG } from '../../../shared/config/tab.config';
+import { Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 
 
 interface CreditStats {
@@ -52,36 +40,24 @@ interface CibilHistory {
 
 @Component({
   selector: 'app-los-details',
-  imports: [CommonModule, MatTabsModule, MatIconModule,  Quicklinks,Commontabs,
-    Loandetails,Education,Occupation,Assets,Monthlyexp,EstExpense,Losproduct,Creditscore,Coapplicant,Summary,Audittrail
-  ],
+  imports: [CommonModule, MatTabsModule, MatIconModule, Quicklinks, Commontabs],
   standalone: true,
   templateUrl: './los-details.html',
   styleUrl: './los-details.scss'
 })
-export class LosDetails implements OnInit {
+export class LosDetails implements OnInit, OnDestroy {
 
+  private destroy$ = new Subject<void>();
+  
   selectedTabIndex = 0;
-  tabIndexMap: { [key: string]: number } = {
-    loan: 0,
-    education: 1,
-    occupation: 2,
-    assets: 3,
-    expenditure: 4,
-    estimate: 5,
-    products: 6,
-    credit: 7,
-    coapplicant: 8,
-    summary: 9,
-    audit: 10
+  tabs: AppTab[] = [];
+  activeTabComponent!: Type<any>;
+  private onWindowResize = () => {
+    this.drawGauge();
+    this.drawGaugerisk();
   };
 
-  tabs = ALL_TABS.filter(tab =>
-    ['loan', 'education', 'occupation', 'assets','expenditure', 'estimate', 'los-products', 'credit','coapplicant', 'summary', 'audit'].includes(tab.id)
-  );
-  
-  activeTabId = 'loan';
-  
+
 
   userData: any;
   kycData: any;
@@ -93,26 +69,6 @@ export class LosDetails implements OnInit {
   selecteduser: any;
   selectedDoc: any = null;
 
-  tenthMarksheet: any;
-  tenthLC: any;
-  twelthMarksheet: any;
-  twelfthLC: any;
-  ugMarksheet: any;
-  ugLC: any;
-  pgMarksheet: any;
-  pgLC: any;
-  pgCert: any;
-  scorecard: any;
-  uniofferletter: any;
-  salaryslip1: any;
-  salaryslip2: any;
-  salaryslip3: any;
-  form16: any;
-  itr1: any
-  itr2: any;
-  itr3: any;
-  bankstatement: any;
-  ielts: any
 
 
   auditTrails: AuditTrail[] = [];
@@ -153,144 +109,48 @@ export class LosDetails implements OnInit {
   };
 
 
-
   cibilHistory: CibilHistory[] = [
     { dateGenerated: '25/07/2025', name: 'Vighnesh', generatedBy: 'Sandeep', creditScore: 780 },
     { dateGenerated: '22/11/2024', name: 'Vighnesh', generatedBy: 'Aarti', creditScore: 820 },
     { dateGenerated: '04/05/2024', name: 'Vighnesh', generatedBy: 'Priya', creditScore: 690 }
   ];
 
- 
 
 
 
-  constructor(public router: Router,public route: ActivatedRoute, private aes: Aesutil, private service: Main) { }
+
+  constructor(public router: Router, public route: ActivatedRoute, private aes: Aesutil, private service: Main) { }
 
   async ngOnInit(): Promise<void> {
+    const page = 'losdetails';
+    const pageTabs = TAB_CONFIG.filter(t => t.page.includes(page));
 
-    this.route.queryParams.subscribe(params => {
-      const tabKey = params['tab'];
-      if (tabKey && this.tabIndexMap[tabKey] !== undefined) {
-        this.selectedTabIndex = this.tabIndexMap[tabKey];
-      }
+    this.tabs = pageTabs.map(t => ({
+      id: t.id,
+      label: t.label
+    }));
+
+    this.route.queryParams.pipe(takeUntil(this.destroy$)).subscribe(params => {
+      const key = params['tab'];
+      const active = pageTabs.find(t => t.routeKey === key) || pageTabs[0];
+      this.selectedTabIndex = pageTabs.findIndex(t => t.routeKey === active.routeKey);
+      console.log("Selected Tab Index:", this.selectedTabIndex);
+      this.activeTabComponent = active.component;
     });
-  //  this.loadAuditTrails();
-
-    console.log("loaded data")
-    const saved = localStorage.getItem('selecteduserDetails');
-    this.userData = saved ? JSON.parse(saved) : null;
-    this.getAllDocumnets();
-   
-
-
   }
-//individual tabs change
+  //individual tabs change
   onTabChange(tab: AppTab) {
-    this.activeTabId = tab.id;
+     const config = TAB_CONFIG.find(t => t.id === tab.id)!;
+
+  this.activeTabComponent = config.component;
+
+  this.router.navigate([], {
+    queryParams: { tab: config.routeKey },
+    queryParamsHandling: 'merge'
+  });
   }
 
-  getAllDocumnets() {
-    this.service.getUserDocuments(this.service.docofselectedUser.id).subscribe({
-      next: (response) => {
-
-        this.edu_documents = response.documents;
-        console.log('all Documents:', this.edu_documents);
-
-        //10th
-        this.tenthMarksheet = this.edu_documents.find(
-          d => d.documentSubcategory === '10th' && d.type === 'MARKSHEET'
-        );
-        console.log('all tenthMarksheet:', this.tenthMarksheet);
-
-        this.tenthLC = this.edu_documents.find(
-          d => d.documentSubcategory === '10th' && d.type === 'LC'
-        );
-
-        //12th
-        this.twelthMarksheet = this.edu_documents.find(
-          d => d.documentSubcategory === '12th' && d.type === 'MARKSHEET'
-        );
-        this.twelfthLC = this.edu_documents.find(
-          d => d.documentSubcategory === '12th' && d.type === 'LC'
-        );
-
-        //UG
-        this.ugMarksheet = this.edu_documents.find(
-          d => d.documentSubcategory === 'undergrad' && d.type === 'MARKSHEET'
-        );
-
-        this.ugLC = this.edu_documents.find(
-          d => d.documentSubcategory === 'undergrad' && d.type === 'MARKSHEET'
-        );
-
-        //PG
-        this.pgMarksheet = this.edu_documents.find(
-          d => d.documentSubcategory === 'postgrad' && d.type === 'MARKSHEET'
-        );
-        this.pgCert = this.edu_documents.find(
-          d => d.documentSubcategory === 'postgrad' && d.type === 'CERTIFICATE'
-        );
-
-        //scorecard 
-        this.scorecard = this.edu_documents.find(
-          d => d.documentSubcategory === 'ielts' && d.type === 'SCOREREPORT'
-        );
-        //offer letter
-        this.uniofferletter = this.edu_documents.find(
-          d => d.documentSubcategory === 'universityOffer' && d.type === 'UNIVERSITYOFFERLETTER'
-        );
-
-        //salaryslips
-        this.salaryslip1 = this.edu_documents.find(
-          d => d.documentSubcategory === 'firstMonthSalary' && d.type === 'SalarySlip1'
-        );
-        this.salaryslip2 = this.edu_documents.find(
-          d => d.documentSubcategory === 'firstMonthSalary' && d.type === 'SalarySlip2'
-        );
-        this.salaryslip3 = this.edu_documents.find(
-          d => d.documentSubcategory === 'firstMonthSalary' && d.type === 'SalarySlip3'
-        );
-
-        //itr
-        this.itr1 = this.edu_documents.find(
-          d => d.documentSubcategory === 'itr' && d.type === 'Itr1'
-        );
-        this.itr2 = this.edu_documents.find(
-          d => d.documentSubcategory === 'itr' && d.type === 'Itr2'
-        );
-        this.itr3 = this.edu_documents.find(
-          d => d.documentSubcategory === 'itr' && d.type === 'Itr3'
-        );
-
-        //form16
-        this.form16 = this.edu_documents.find(
-          d => d.documentSubcategory === 'form16' && d.type === 'Form16'
-        );
-
-        //bankstatement
-        this.bankstatement = this.edu_documents.find(
-          d => d.documentSubcategory === 'statement' && d.type === 'BankStatement'
-        );
-
-        //ielts
-        //  this.ielts = this.edu_documents.find(
-        //   d => d.documentSubcategory === 'firstMonthSalary' && d.type === 'SalarySlip3'
-        // );
-
-
-
-      },
-      error: (error) => {
-        console.error('Error fetching users:', error);
-      }
-    });
-
-  }
-
-  
-
-
-
+  //credit score gauge
   drawGauge(): void {
     const canvas = this.gaugeCanvas.nativeElement;
     const ctx = canvas.getContext('2d');
@@ -406,12 +266,7 @@ export class LosDetails implements OnInit {
   ngAfterViewInit() {
     this.drawGauge();
     this.drawGaugerisk();
-
-    // Redraw on window resize
-    window.addEventListener('resize', () => {
-      this.drawGauge();
-      this.drawGaugerisk();
-    });
+    window.addEventListener('resize', this.onWindowResize);
   }
 
   //loan details - risk analysis
@@ -531,35 +386,18 @@ export class LosDetails implements OnInit {
   }
 
 
-  ngOnDestroy() {
-    window.removeEventListener('resize', () => {
-      this.drawGauge();
-      this.drawGaugerisk();
-    });
-  }
   downloadReport(): void {
     console.log('Downloading latest report...');
     // Implement download logic here
   }
 
-  getStatusClass1(status: string): string {
-    switch (status?.toLowerCase()) {
-      case 'completed':
-      case 'verified':
-        return 'Completed';
-      case 'pending':
-        return 'Pending';
-      case 'document issue':
-        return 'Document-Issue';
-      default:
-        return '';
-    }
+
+
+  ngOnDestroy() {
+    window.removeEventListener('resize', this.onWindowResize);
+    this.destroy$.next();
+    this.destroy$.complete();
   }
-  // ************************los audit trail********************************
-
-
- 
-
 
 
   getIconColor(icon: string): string {

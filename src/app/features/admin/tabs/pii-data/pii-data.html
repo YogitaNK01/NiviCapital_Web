@@ -30,27 +30,27 @@
           <div class="info-grid-img">
             <div class="info-item d-flex flex-column">
               <label class="text-label">Address Line 1</label>
-              <p class="text-label-data">House No. 25</p>
+              <p class="text-label-data">{{allpiikycdata.permanentAddress.line1??"-"}}</p>
             </div>
             <div class="info-item d-flex flex-column">
               <label class="text-label">Address Line 2</label>
-              <p class="text-label-data">Gandhi Nagar</p>
+              <p class="text-label-data">{{allpiikycdata.permanentAddress.line2??"-"}}</p>
             </div>
             <div class="info-item d-flex flex-column">
               <label class="text-label">Country</label>
-              <p class="text-label-data">India</p>
+              <p class="text-label-data">{{allpiikycdata.permanentAddress.country??"-"}}</p>
             </div>
             <div class="info-item d-flex flex-column">
               <label class="text-label">State</label>
-              <p class="text-label-data">Maharashtra</p>
+              <p class="text-label-data">{{allpiikycdata.permanentAddress.state??"-"}}</p>
             </div>
             <div class="info-item d-flex flex-column">
               <label class="text-label">City</label>
-              <p class="text-label-data"> Mumbai</p>
+              <p class="text-label-data"> {{allpiikycdata.permanentAddress.city??"-"}}</p>
             </div>
             <div class="info-item d-flex flex-column">
               <label class="text-label">Zipcode</label>
-              <p class="text-label-data">400001</p>
+              <p class="text-label-data">{{allpiikycdata.permanentAddress.zipCode??"-"}}</p>
             </div>
 
 
@@ -64,27 +64,41 @@
           <div class="info-grid-img">
             <div class="info-item d-flex flex-column">
               <label class="text-label">Address Line 1</label>
-              <p class="text-label-data">House No. 25</p>
+              <p class="text-label-data">{{allpiikycdata?.correspondenceAddress?.line1 
+    ?? allpiikycdata?.permanentAddress?.line1 
+    ?? '-'}}</p>
             </div>
             <div class="info-item d-flex flex-column">
               <label class="text-label">Address Line 2</label>
-              <p class="text-label-data">Gandhi Nagar</p>
+              <p class="text-label-data">{{allpiikycdata?.correspondenceAddress?.line2 
+    ?? allpiikycdata?.permanentAddress?.line2 
+    ?? '-'}}</p>
             </div>
             <div class="info-item d-flex flex-column">
               <label class="text-label">Country</label>
-              <p class="text-label-data">India</p>
+              <p class="text-label-data">{{allpiikycdata?.correspondenceAddress?.country 
+    ?? allpiikycdata?.permanentAddress?.country 
+    ?? '-'}}</p>
             </div>
             <div class="info-item d-flex flex-column">
               <label class="text-label">State</label>
-              <p class="text-label-data">Maharashtra</p>
+              <p class="text-label-data">{{allpiikycdata?.correspondenceAddress?.state 
+    ?? allpiikycdata?.permanentAddress?.state 
+    ?? '-'}}</p>
             </div>
+           
+            
             <div class="info-item d-flex flex-column">
               <label class="text-label">City</label>
-              <p class="text-label-data"> Mumbai</p>
+              <p class="text-label-data"> {{allpiikycdata?.correspondenceAddress?.city 
+    ?? allpiikycdata?.permanentAddress?.city 
+    ?? '-'}}</p>
             </div>
             <div class="info-item d-flex flex-column">
               <label class="text-label">Zipcode</label>
-              <p class="text-label-data">400001</p>
+              <p class="text-label-data">{{allpiikycdata?.correspondenceAddress?.zipCode 
+    ?? allpiikycdata?.permanentAddress?.zipCode 
+    ?? '-'}}</p>
             </div>
           </div>
         </div>

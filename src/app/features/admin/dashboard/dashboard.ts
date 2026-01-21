@@ -25,11 +25,6 @@ private resizeHandler = () => this.setChartWidth();
     window.addEventListener('resize', () => this.resizeHandler());
   }
 
-  setChartWidth1() {
-    this.chartWidth = window.innerWidth < 480 ? 250 : window.innerWidth < 550 ? 400: window.innerWidth < 1450 ? 300: 500;
-    this.chartheight = window.innerWidth < 480 ? 300 : window.innerWidth < 550 ? 350: 400;
-  }
-
   setChartWidth() {
   const w = window.innerWidth;
 
@@ -84,7 +79,7 @@ private resizeHandler = () => this.setChartWidth();
     { label: 'Others', value: 'others', icon: '/assets/images/icons/note.svg' }
   ];
   onSelectionChange2(value: string) {
-    console.log('Selected:2', value);
+    // Dropdown selection logic here
   }
 
   //key metrics data

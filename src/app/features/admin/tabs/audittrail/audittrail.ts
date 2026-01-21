@@ -1,8 +1,8 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
-import { Inputfield } from '../../../../systemdesign/inputfield/inputfield';
-import { Dropdown, DropdownOption } from '../../../../systemdesign/dropdown/dropdown';
-import { AuditTrail } from '../../../customerdetails/customerdetails';
+import { Inputfield } from '../../../systemdesign/inputfield/inputfield';
+import { Dropdown, DropdownOption } from '../../../systemdesign/dropdown/dropdown';
+import { AuditTrail } from '../../customerdetails/customerdetails';
 
 @Component({
   selector: 'app-audittrail',

@@ -1,8 +1,8 @@
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
-import { Dropdown, DropdownOption } from '../../../../systemdesign/dropdown/dropdown';
-import { Checkbox } from '../../../../systemdesign/checkbox/checkbox';
-import { Buttons } from '../../../../systemdesign/buttons/buttons';
+import { Dropdown, DropdownOption } from '../../../systemdesign/dropdown/dropdown';
+import { Checkbox } from '../../../systemdesign/checkbox/checkbox';
+import { Buttons } from '../../../systemdesign/buttons/buttons';
 
 @Component({
   selector: 'app-summary',

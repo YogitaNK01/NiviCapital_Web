@@ -1,25 +1,23 @@
-import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { Buttons } from '../../features/systemdesign/buttons/buttons';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, NgForm } from '@angular/forms';
 import { Checkbox } from '../../features/systemdesign/checkbox/checkbox';
 import { Router } from '@angular/router';
-import { routes } from '../../app.routes';
 import { Main } from '../../core/service/main';
 import { Msgboxservice } from '../../core/service/msgboxservice';
-import { Messagebox } from '../../features/systemdesign/messagebox/messagebox';
 
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [CommonModule, Buttons, FormsModule, Checkbox],
+  imports: [Buttons, FormsModule, Checkbox],
   templateUrl: './login.html',
   styleUrl: './login.scss'
 })
 export class Login {
-  isloginChecked: boolean =false;
+  isloginChecked: boolean = false;
+  isLoading: boolean = false;
 
-  constructor(public router: Router, private main: Main, private msgBox: Msgboxservice,) { }
+  constructor(private router: Router, private main: Main, private msgBox: Msgboxservice) { }
 
   loginData = {
     username: 'yogita@nivicap.com',
@@ -27,57 +25,55 @@ export class Login {
     isloginChecked: true
   };
 
-  onCheckboxChange(value: boolean, label: string) {
-    this.isloginChecked= value
+  onCheckboxChange(value: boolean): void {
+    this.isloginChecked = value;
   }
 
-  onSubmit(form: any) {
-    // if (form.valid) {
-    console.log('Form Data:', form.value);
+  onSubmit(form: NgForm): void {
+    // Validate form before submission
+    if (!form.valid) {
+      this.msgBox.open({
+        title: 'Validation Error',
+        message: 'Please fill in all required fields',
+        showCancel: false,
+        onOk: () => { }
+      });
+      return;
+    }
+
+    // Prevent duplicate submissions
+    if (this.isLoading) {
+      return;
+    }
+
+    this.isLoading = true;
 
     const inputobj = {
-      "username": form.value.username,
-      "password":form.value.password,
-      
+      username: form.value.username,
+      password: form.value.password
+    };
 
-    }
     this.main.getLogin(inputobj).subscribe({
       next: (res) => {
-        console.log(res.message)
-
-        this.router.navigate(['admin/dashboard'])
-
+        this.isLoading = false;
         this.msgBox.open({
-        title: '',
-        message: res.message, 
-        showCancel: false,
-        onOk: () => {
-         
-        }
-      });
-
-        // this.main.getAllUsers().subscribe({
-        //   next: (response) => {
-        //     console.log('Users:', response);
-        //   },
-        // })
+          title: 'Success',
+          message: res.message || 'Login successful',
+          showCancel: false,
+          onOk: () => {
+            this.router.navigate(['admin/dashboard']);
+          }
+        });
       },
-      error: err => {
-         console.error(err)
-         this.msgBox.open({
-        title: '',
-        message: err.error.message, 
-        showCancel: false,
-        onOk: () => {
-         
-        }
-      });
+      error: (err) => {
+        this.isLoading = false;
+        this.msgBox.open({
+          title: 'Login Error',
+          message: err.error?.message || 'Invalid credentials. Please try again.',
+          showCancel: false,
+          onOk: () => { }
+        });
       }
-
     });
-
-
-    
-    // }
   }
 }

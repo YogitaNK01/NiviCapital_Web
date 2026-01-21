@@ -1,5 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, ElementRef, Input, ViewChild } from '@angular/core';
+import { Main } from '../../../../core/service/main';
 
 @Component({
   selector: 'app-loandetails',
@@ -12,8 +13,8 @@ export class Loandetails {
   @Input() creditScore = 780;
     @ViewChild('gaugeCanvasrisk', { static: false }) gaugeCanvasrisk!: ElementRef<HTMLCanvasElement>;
 
-  
-  loanDetails = {
+  loanDetails: any;
+  loanDetails1 = {
     loanAmount: { inr: '₹15,00,000', usd: '$25829' },
     rateOfInterest: '8.5% p.a.',
     tenure: { years: '5 years', months: '(60 months)' },
@@ -86,6 +87,12 @@ export class Loandetails {
     }
   ];
 
+  constructor(public service: Main) {}
+
+ngOnInit() {
+   this.loanDetails = this.service.get_los_Data();
+    console.log("los data---",this.loanDetails);
+}
 
    getIconColor(icon: string): string {
     const colorMap: { [key: string]: string } = {

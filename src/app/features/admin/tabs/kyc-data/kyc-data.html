@@ -7,7 +7,7 @@
          <label class="text-dp-2-bold edu-label">Applicant KYC</label>
           <hr _ngcontent-ng-c3098784094="" class="divider">
           <div class="info-grid-img">
-            <div class="info-item d-flex flex-column">
+            <!-- <div class="info-item d-flex flex-column">
               <label class="text-label">Photo</label>
               <div class="img-box">
                 <p class="text-label-data">Rajesh.png</p>
@@ -51,8 +51,30 @@
             <div class="info-item d-flex flex-column">
               <label class="text-label">E-KYC Status</label>
               <p class="text-label-data"> Verified</p>
-            </div>
+            </div> -->
 
+         <div class="info-item d-flex flex-column" *ngFor="let doc of kycDocs">
+        <label class="text-label">{{ doc.label }}</label>
+
+        <div class="img-box">
+          <p class="text-label-data">{{ doc.fileName }}</p>
+
+          <div class="icons">
+            <span (click)="viewImage(doc.viewUrl)">
+              <img src="/assets/images/icons/eyered.svg" alt="view">
+            </span>
+
+            <span (click)="downloadImage(doc.viewUrl)">
+              <img src="/assets/images/icons/import-red.svg" alt="Download">
+            </span>
+          </div>
+        </div>
+      </div>
+      <div class="info-item d-flex flex-column">
+              <label class="text-label">E-KYC Status</label>
+              <p class="text-label-data"> {{allkycdata.kycStatus}}</p>
+            </div>
+        
           </div>
         </div>
 

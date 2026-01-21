@@ -1,5 +1,4 @@
-import { Component, Input, OnInit, ViewChild } from '@angular/core';
-
+import { Component, Input, OnInit, ViewChild, OnDestroy, ChangeDetectionStrategy,ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Inputfield } from '../../systemdesign/inputfield/inputfield';
@@ -17,70 +16,127 @@ import { Router, RouterModule } from '@angular/router';
 import { Main } from '../../../core/service/main';
 import { Messagebox } from '../../systemdesign/messagebox/messagebox';
 import { Msgboxservice } from '../../../core/service/msgboxservice';
+import { Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
+import { Tables } from '../../systemdesign/tables/tables';
+import { TableData } from '../../../core/service/table-data';
 
-export interface Customerstable {
-  id: number;
+// Types & Interfaces for type safety
+interface UserData {
+  id: string;
   cif: string;
-  firstName: string | null;
-  lastName: string | null;
+  firstName: string;
+  lastName: string;
   phoneNumber: string;
-  emailId: string | null;
+  email: string;
   kycStatus: string;
-  productType?: string;
-  planToStart?: string;
-
-
+  createdDateTime: number[];
+  userId: string;
 }
 
+interface TransformedUserData {
+  id_data: number;
+  CIFID: string;
+  CustomerName: string;
+  mobile: string;
+  email: string;
+  kycStatus: string;
+  loanStatus: string;
+  registrationDate: string;
+  userId: string;
+  Id: string;
+}
+
+// Configuration Constants
+const CONFIG = {
+  PAGE_SIZE: 6,
+  MAX_VISIBLE_PAGES: 5,
+  DEBOUNCE_TIME: 300
+};
+
+const STATUS_MAP: { [key: string]: string } = {
+  'completed': 'verified',
+  'pending': 'pending',
+  'document issue': 'document issue'
+};
+
+const SEARCH_FIELDS = ['CIFID', 'CustomerName', 'mobile', 'email'];
 
 @Component({
   selector: 'app-customer',
   imports: [CommonModule, FormsModule, MatTableModule, MatCheckboxModule, MatTabsModule, MatPaginatorModule,
-    MatSortModule, MatIconModule, RouterModule, HttpClientModule, Inputfield, Dropdown, Buttons, Checkbox],
+    MatSortModule, MatIconModule, RouterModule, HttpClientModule, Inputfield, Dropdown, Buttons,Tables],
   standalone: true,
   templateUrl: './customer.html',
-  styleUrl: './customer.scss'
+  styleUrl: './customer.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class Customer implements OnInit {
+export class Customer implements OnInit, OnDestroy {
 
+    columns = [
+    {
+      key: 'CIFID',
+      label: 'CIF ID',
+      class: 'cifstyle',
+      clickable: true,
+      onClick: (row: { Id: any; }) => this.getpidata(row.Id)
+    },
+    { key: 'CustomerName', label: 'Customer Name' },
+    { key: 'mobile', label: 'Mobile' },
+    { key: 'email', label: 'Eamil' },
+    {
+      key: 'status',
+      label: 'Status',
+      class: 'status',
+      classFn: (row: any) => this.getStatusClass(row.status).class,
+      transform: (row: any) => this.getStatusClass(row.status).text
+    },
+
+    {
+      key: 'loanStatus',
+      label: 'Loan Status',
+      class: 'status',
+      classFn: (row: any) => this.getStatusClass(row.loanStatus).class,
+      transform: (row: any) => this.getStatusClass(row.loanStatus).text
+    },
+    { key: 'registrationDate', label: 'Registration Date' },
+
+  ];
+
+
+  private destroy$ = new Subject<void>();
 
   customerGrowth = '12% from last month';
-  kycCompleted: any;
+  kycCompleted: number | null = null;
   kycGrowth = '8% from last month';
 
   searchQuery = '';
   selectedKycStatus = 'All KYC Status';
   selectedType = 'All Types';
 
-  selection: Customerstable[] = [];
+  selection: any[] = [];
   selectedUser: any;
-  //mat table
   displayedColumns: string[] = ['select', 'CIFID', 'customerName', 'mobile', 'email', 'status', 'loanStatus', 'registrationDate'];
 
   dataSource = new MatTableDataSource<any>([]);
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
 
-  pageSize = 6;
+  pageSize = CONFIG.PAGE_SIZE;
   currentPage = 1;
-  totalItems: any;
+  totalItems: number = 0;
   totalPagesArray: (number | string)[] = [];
-  fullData: any[] = [];
-  AlluserData: any;
+  fullData: TransformedUserData[] = [];
+  AlluserData: any[] = [];
   userData: any;
   userKYCData: any;
-
-  // View control
+  tableData: any[] = [];
   showTable = true;
-  selectedCustomer: Customerstable | null = null;
-
-  //dropdown data
-  // @Input() avatarUrl='https://i.pravatar.cc/40?img=12';
-  // @Input() hasAvatar = false;
+  selectedCustomer: any = null;
 
   selectedstatus: string = '';
   selectedOptiontype: string = '';
-
+  searchText: string = '';
 
   Kycstatus: DropdownOption[] = [
     { label: 'All', value: 'All' },
@@ -91,250 +147,7 @@ export class Customer implements OnInit {
 
   allApplicants: any[] = [];
   selecteduser: any;
-
-  filteredData: any[] = [];
-
-  searchText: string = "";
-
-
-  constructor(public http: HttpClient, public router: Router, private service: Main,private msgBox: Msgboxservice) { }
-  // 
-  ngOnInit(): void {
-    this.loadallusers();
-    this.updateVisiblePages();
-
-
-  }
-//no data msg
-           hasData(data:any): boolean {
-  return Array.isArray(data) && data.length > 0;
-}
-  //-----------get table data from api----------------------------
-
-  loadallusers() {
-
-    this.service.getAllUsers().subscribe({
-      next: (response) => {
-        console.log('Users:', response.data);
-       this.hasData(response.data);
-
-        this.AlluserData = response.data
-        this.fullData = (response.data as any[]).map((item, index) => ({
-
-          
-          id_data: index + 1,
-          CIFID: item.cif ?? "-",
-          CustomerName: `${item.firstName ?? ''} ${item.lastName ?? ''}`.trim() ?? "-",
-          mobile: item.phoneNumber ?? "-",
-          email: item.email ?? '',
-          kycStatus: item.kycStatus ?? "-",
-          loanStatus: item.kycStatus ?? "-",
-          registrationDate: this.formatDateOnly(item.createdDateTime) ?? "-",
-          userId: item.userId ?? "-",
-          Id: item.id ?? "-"
-        }));
-
-        this.filteredData = this.fullData;
-        this.totalItems = this.fullData.length;
-        const kycCompletedcount = (response.data as any[]).filter(item => item.kycStatus === 'VERIFIED').length;
-        this.kycCompleted = Math.round((kycCompletedcount / this.totalItems) * 100);
-        this.dataSource.sort = this.sort;
-        this.updatePagedData();
-      },
-      error: (error) => {
-        console.error('Error fetching users:---------', error);
-      }
-    });
-  }
-  
-
-  getStatusClass(status: string): string {
-    switch (status?.toLowerCase()) {
-      case 'completed':
-      case 'verified':
-        return 'Completed';
-      case 'pending':
-        return 'Pending';
-      case 'document issue':
-        return 'Document-Issue';
-      case 'not_started':
-        return 'Not-Started';  
-      default:
-        return '';
-    }
-  }
-
-
-  getpidata(id: any) {
-    console.log("id-----", id);
-    this.service.selectedUserId = id;
-    this.service.getKycDeatils(id).subscribe({
-      next: (response) => {
-        console.log('getKycDeatils:', response);
-        this.userKYCData = response;
-         this.service.set_pi_KycData(this.userKYCData.data);
-        // sessionStorage.setItem("kycs", JSON.stringify(this.userKYCData.data))
-       
-        this.router.navigate(['/admin/customerdetails']);
-      },
-      error: (error) => {
-        console.error('Error fetching users:', error);
-      }
-    });
-
-    this.selecteduser = this.allApplicants.find(
-      item => item.userId === this.service.selectedUserId
-    );
-    if (this.selecteduser) {
-      this.service.docofselectedUser = this.selecteduser
-      localStorage.setItem('selecteduserDetails', JSON.stringify(this.selecteduser));
-      console.log('Found user:', this.selecteduser);
-    } else {
-      console.warn('User not found!');
-    }
-
-  }
-
-  formatDateOnly(dateArr: number[] | null | undefined): string {
-  if (!dateArr || dateArr.length < 3) return '-';
-
-  const [y, m, d] = dateArr;
-  return `${y}-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
-}
-
-
-  //-----------------pagination------------------------------------
-  ngAfterViewInit() {
-    this.dataSource.paginator = this.paginator;
-    setTimeout(() => {
-      this.updateVisiblePages();
-    }, 100);
-
-  }
-  get totalPages() {
-    const total = Math.ceil(this.totalItems / this.pageSize);
-    return isNaN(total) || total < 1 ? 1 : total;
-
-  }
-
-
-  onPageChange(page: any) {
-
-    if (page === '...') return; // ignore ellipsis clicks
-    if (page < 1 || page > this.totalPages) return;
-
-    this.currentPage = page as number;
-    this.updateVisiblePages();
-    this.updatePagedData();
-  }
-
-  updatePagedData() {
-    const startIndex = (this.currentPage - 1) * this.pageSize;
-    const endIndex = startIndex + this.pageSize;
-    this.dataSource.data = this.filteredData.slice(startIndex, endIndex);
-  }
-
-  updateVisiblePages() {
-    const total = this.totalPages;
-    const current = this.currentPage;
-    const pages: (number | string)[] = [];
-
-    if (total <= 5) {
-      for (let i = 1; i <= total; i++) pages.push(i);
-    } else {
-      // Always show first two pages
-      pages.push(1);
-      pages.push(2);
-
-      // Show left ellipsis
-      if (current > 4) pages.push('...');
-
-      // Middle range (around current)
-      const start = Math.max(3, current - 1);
-      const end = Math.min(total - 2, current + 1);
-
-      for (let i = start; i <= end; i++) {
-        if (!pages.includes(i)) pages.push(i);
-      }
-
-      // Show right ellipsis
-      if (current < total - 3) pages.push('...');
-
-      // Always show last page
-      if (!pages.includes(total)) pages.push(total);
-    }
-
-    this.totalPagesArray = pages;
-  }
-
-  //---------------------search data --------------------------
-
-  onSearchChange(value: string) {
-    this.searchText = value.toLowerCase();
-
-
-    this.filteredData = this.fullData.filter(item =>
-      item.CIFID?.toString().toLowerCase().includes(this.searchText) ||
-      item.CustomerName?.toLowerCase().includes(this.searchText) ||
-      item.mobile?.toString().toLowerCase().includes(this.searchText) ||
-      item.email?.toLowerCase().includes(this.searchText) ||
-      item.status?.toLowerCase().includes(this.searchText)
-    );
-
-
-    this.totalItems = this.filteredData.length;
-    this.currentPage = 1;
-    this.updateVisiblePages();
-    this.updatePagedData();
-  }
-
-  //------------------------kyc status-------------------------
-
-  getkycstatus(value: string) {
-    console.log('Selected:2', value);
-    const filterValue = value.toLowerCase();
-
-    const statusMap: any = {
-      "completed": "verified",
-      "pending": "pending",
-      "document issue": "document issue"
-    };
-
-    const apiStatus = statusMap[filterValue];
-
-
-    if (value === "All") {
-      this.filteredData = this.fullData;
-    } else if (value === "Completed") {
-
-      this.filteredData = this.fullData.filter(
-        item => item.status.toLowerCase() === apiStatus
-      );
-    }
-    else if (value === "Pending") {
-
-      let pendingdata = this.fullData.filter(
-        item => item.status.toLowerCase() === apiStatus
-      );
-
-      this.filteredData = pendingdata;
-    }
-    else if (value === "Document Issue") {
-
-      this.filteredData = this.fullData.filter(
-        item => item.status.toLowerCase() === apiStatus
-      );
-    } else {
-      this.filteredData = this.fullData;
-    }
-
-    this.totalItems = this.filteredData.length;
-    this.currentPage = 1;
-    this.updateVisiblePages();
-    this.updatePagedData();
-
-  }
-
+  filteredData: TransformedUserData[] = [];
 
   kyctype: DropdownOption[] = [
     { label: 'Type 1', value: 'Type 1' },
@@ -342,23 +155,145 @@ export class Customer implements OnInit {
     { label: 'Type 3', value: 'Type 3' },
   ];
 
-  getkyc_type(value: string) {
-    console.log('Selected:2', value);
+  constructor(private http: HttpClient, private router: Router, private service: Main, private msgBox: Msgboxservice,private cdr: ChangeDetectorRef, private tableDataService: TableData) { }
+  ngOnInit(): void {
+    this.loadallusers();
+    this.updateVisiblePages();
   }
 
-  onSearch() {
-    console.log('Searching:', this.searchQuery);
+  ngAfterViewInit(): void {
+    this.dataSource.paginator = this.paginator;
+    setTimeout(() => {
+      this.updateVisiblePages();
+    }, 100);
   }
 
-  addCustomer() {
-    console.log('Add customer clicked');
+  private loadallusers(): void {
+    this.service.getAllUsers()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (response) => {
+          this.AlluserData = response.data;
+          this.fullData = this.tableDataService.transformUserData(response.data);
+          this.filteredData = this.fullData;
+          this.totalItems = this.fullData.length;
+          this.kycCompleted = this.tableDataService.calculateKycMetrics(response.data, this.totalItems);
+          this.dataSource.sort = this.sort;
+          this.updatePagedData();
+
+          this.tableData = this.fullData; // Initialize tableData for filters
+          this.cdr.detectChanges();
+        },
+        error: (error) => {
+          console.error('Error fetching users:', error);
+        }
+      });
+  }
+  
+
+  getStatusClass(status: string) {
+    return this.tableDataService.getStatus_Class(status);
+  }
+
+  private hasData(data: any): boolean {
+    return this.tableDataService.hasData(data);
   }
 
 
-  /*****************  table checkbox *******************/
+  getpidata(id: string): void {
+    this.service.selectedUserId = id;
+    this.service.getKycDetails(id)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (response) => {
+          this.userKYCData = response;
+          this.service.set_pi_KycData(this.userKYCData.data);
+          this.router.navigate(['/admin/customerdetails']);
+        },
+        error: (error) => {
+          console.error('Error fetching KYC details:', error);
+        }
+      });
 
-  /** Toggle a single row */
-  toggleRow(row: Customerstable) {
+    this.selecteduser = this.allApplicants.find(
+      item => item.userId === this.service.selectedUserId
+    );
+    if (this.selecteduser) {
+      this.service.docofselectedUser = this.selecteduser;
+      localStorage.setItem('selecteduserDetails', JSON.stringify(this.selecteduser));
+    }
+  }
+
+  formatDateOnly(dateArr: number[] | null | undefined): string {
+    return this.tableDataService.formatDateOnly(dateArr);
+  }
+//pagination methods
+  get totalPages(): number {
+    const total = Math.ceil(this.totalItems / this.pageSize);
+    return isNaN(total) || total < 1 ? 1 : total;
+  }
+
+  onPageChange(page: any): void {
+    if (page === '...') return;
+    if (page < 1 || page > this.totalPages) return;
+
+    this.currentPage = page as number;
+    this.updateVisiblePages();
+    this.updatePagedData();
+  }
+
+  updatePagedData(): void {
+    const startIndex = (this.currentPage - 1) * this.pageSize;
+    const endIndex = startIndex + this.pageSize;
+    this.dataSource.data = this.filteredData.slice(startIndex, endIndex);
+  }
+
+  updateVisiblePages(): void {
+    const total = this.totalPages;
+    this.totalPagesArray = this.tableDataService.getVisiblePages(this.currentPage, total);
+  }
+
+  //search and filter methods
+  onSearchChange(value: string): void {
+    this.searchText = value.toLowerCase();
+    this.filteredData = this.tableDataService.filterBySearch(
+      this.fullData,
+      value, SEARCH_FIELDS
+    );
+
+    this.totalItems = this.filteredData.length;
+    this.currentPage = 1;
+    this.updateVisiblePages();
+    this.updatePagedData();
+  }
+
+  getkycstatus(value: string): void {
+    const statusMap: { [key: string]: string } = {
+      'completed': 'verified',
+      'pending': 'pending',
+      'document issue': 'document issue'
+    };
+
+    this.filteredData = this.tableDataService.filterByStatus(this.fullData, value, statusMap);
+    this.totalItems = this.filteredData.length;
+    this.currentPage = 1;
+    this.updateVisiblePages();
+    this.updatePagedData();
+  }
+
+  getkyc_type(value: string): void {
+    // Implement type filtering logic
+  }
+
+  onSearch(): void {
+    // Implement search logic
+  }
+
+  addCustomer(): void {
+    // Implement add customer logic
+  }
+
+  toggleRow(row: any): void {
     const index = this.selection.indexOf(row);
     if (index === -1) {
       this.selection.push(row);
@@ -367,8 +302,7 @@ export class Customer implements OnInit {
     }
   }
 
-  /** Select all rows */
-  toggleAllRows(checked: boolean) {
+  toggleAllRows(checked: boolean): void {
     if (checked) {
       this.selection = [...this.dataSource.data];
     } else {
@@ -376,14 +310,16 @@ export class Customer implements OnInit {
     }
   }
 
-
-  /** Check if all rows selected */
-  isAllSelected() {
+  isAllSelected(): boolean {
     return this.selection.length === this.dataSource.data.length && this.selection.length > 0;
   }
 
-  /** Check if some rows selected */
-  isSomeSelected() {
+  isSomeSelected(): boolean {
     return this.selection.length > 0 && this.selection.length < this.dataSource.data.length;
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 }

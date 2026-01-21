@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { Main } from '../../../../../core/service/main';
+import { Main } from '../../../../core/service/main';
 
 @Component({
   selector: 'app-pi-data',
@@ -15,6 +15,14 @@ constructor(private service:Main){}
 ngOnInit(): void {
   
     this.allpikycdata = this.service.get_pi_KycData();
-    console.log("allpikycdata---",this.allpikycdata)
+    console.log("allpikycdata---",this.allpikycdata);
+    
 }
+get formattedDob(): string {
+  return Array.isArray(this.allpikycdata?.dob)
+    ? this.allpikycdata.dob.join('-')
+    : '-';
+}
+
+
 }

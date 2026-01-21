@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { Main } from '../../../../../core/service/main';
+import { Main } from '../../../../core/service/main';
 
 @Component({
   selector: 'app-pii-data',
@@ -15,6 +15,6 @@ constructor(private service:Main){}
 ngOnInit(): void {
   
     this.allpiikycdata = this.service.get_pi_KycData();
-    console.log("allpikycdata---",this.allpiikycdata)
+    console.log("allpii-kycdata---",this.allpiikycdata)
 }
 }

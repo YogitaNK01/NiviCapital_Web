@@ -1,4 +1,5 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
+import { Main } from '../../../../core/service/main';
 
 @Component({
   selector: 'app-education',
@@ -6,7 +7,7 @@ import { Component } from '@angular/core';
   templateUrl: './education.html',
   styleUrl: './education.scss'
 })
-export class Education {
+export class Education implements OnInit {
   tenthMarksheet: any;
   tenthLC: any;
   twelthMarksheet: any;
@@ -27,6 +28,15 @@ export class Education {
   itr3: any;
   bankstatement: any;
   ielts: any
+
+  loanDetails: any;
+
+constructor( private service: Main) { }
+  ngOnInit(): void {
+   this.loanDetails = this.service.get_los_Data();
+    console.log(" data---",this.loanDetails);
+  }
+
 
   viewImage(imagePath: string): void {
     // ✅ Opens image in a new browser tab

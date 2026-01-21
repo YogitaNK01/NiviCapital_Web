@@ -1,5 +1,5 @@
 import { HttpClient, HttpClientModule } from '@angular/common/http';
-import { Component, EventEmitter, Input, Output, ViewChild } from '@angular/core';
+import { Component, EventEmitter, Input, Output, ViewChild, ChangeDetectorRef } from '@angular/core';
 import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
 import { MatSort, MatSortModule } from '@angular/material/sort';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
@@ -15,7 +15,10 @@ import { Buttons } from '../../systemdesign/buttons/buttons';
 import { Checkbox } from '../../systemdesign/checkbox/checkbox';
 import { Inputfield } from '../../systemdesign/inputfield/inputfield';
 import { TableColumn, Tables } from '../../systemdesign/tables/tables';
+import { takeUntil } from 'rxjs';
+import { TableData } from '../../../core/service/table-data';
 
+const SEARCH_FIELDS = ['CIFID', 'CustomerName', 'mobile', 'email'];
 
 @Component({
   selector: 'app-los-operation',
@@ -32,25 +35,43 @@ export class LosOperation {
       label: 'CIF ID',
       class: 'cifstyle',
       clickable: true,
-      onClick: (row: { Id: any; }) => this.getkyc(row.Id)
+      onClick: (row: { Id: any; }) => this.getloandetails(row.Id)
     },
     { key: 'CustomerName', label: 'Customer Name' },
     { key: 'mobile', label: 'Mobile' },
     { key: 'email', label: 'Eamil' },
-    { key: 'status', 
-      label: 'Status', 
-      class:'status', 
+    {
+      key: 'status',
+      label: 'Status',
+      class: 'status',
       classFn: (row: any) => this.getStatusClass(row.status).class,
-     transform: (row: any) => this.getStatusClass(row.status).text },
+      transform: (row: any) => this.getStatusClass(row.status).text
+    },
 
-    { key: 'loanStatus',
-       label: 'Loan Status',
-       class:'status',
-       classFn: (row: any) => this.getStatusClass(row.loanStatus).class,
-       transform: (row: any) => this.getStatusClass(row.loanStatus).text  },
+    {
+      key: 'loanStatus',
+      label: 'Loan Status',
+      class: 'status',
+      classFn: (row: any) => this.getStatusClass(row.loanStatus).class,
+      transform: (row: any) => this.getStatusClass(row.loanStatus).text
+    },
     { key: 'registrationDate', label: 'Registration Date' },
 
   ];
+
+  pageSize = 6;
+  currentPage = 1;
+  totalItems: number = 0;
+  totalPagesArray: (number | string)[] = [];
+  fullData: any[] = [];
+  AlluserData: any[] = [];
+
+  allLosData: any;
+  destroy$ = new EventEmitter<void>();
+  dataSource = new MatTableDataSource<any>([]);
+  @ViewChild(MatPaginator) paginator!: MatPaginator;
+  @ViewChild(MatSort) sort!: MatSort;
+
 
   tableData: any[] = [];
   allApplicants: any[] = [];
@@ -72,67 +93,88 @@ export class LosOperation {
     { label: 'Document Issue', value: 'Document Issue' }
   ];
 
+  kycCompleted: number | null = null;
+  totalPages: any;
 
-  constructor(public http: HttpClient, public router: Router, private service: Main) { }
+
+  constructor(public http: HttpClient, public router: Router, private service: Main, private cdr: ChangeDetectorRef,private tableDataService: TableData) { }
   // 
   ngOnInit(): void {
     this.loadallusers();
-   
+    this.updateVisiblePages();
 
   }
 
-  getlosdetails() {
-    this.router.navigate(['/admin/losdetails']);
+  ngAfterViewInit(): void {
+    this.dataSource.paginator = this.paginator;
+    setTimeout(() => {
+      this.updateVisiblePages();
+    }, 100);
   }
+
+ private hasData(data: any): boolean {
+    return this.tableDataService.hasData(data);
+  }
+
+
+  
   //-----------get table data from api----------------------------
 
-  loadallusers() {
-    this.service.getAllUsers().subscribe(res => {
-      this.tableData =   (res.data as any[]).map((item, index) => ({
-       id_data: index + 1,
-          CIFID: item.cif ?? "-",
-          CustomerName: `${item.firstName ?? ''} ${item.lastName ?? ''}`.trim() ?? "-",
-          mobile: item.phoneNumber ?? "-",
-          email: item.email ?? '',
-          status: item.kycStatus ?? "-",
-          loanStatus: item.kycStatus ?? "-",
-          registrationDate: item.createdDateTime ?? "-",
-          userId: item.userId ?? "-",
-          Id: item.id ?? "-"
-      }));
+private loadallusers(): void {
+    this.service.getAllUsers()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (response) => {
+          this.AlluserData = response.data;
+          this.fullData = this.tableDataService.transformUserData(response.data);
+          this.filteredData = this.fullData;
+          this.totalItems = this.fullData.length;
+          this.kycCompleted = this.tableDataService.calculateKycMetrics(response.data, this.totalItems);
+          this.dataSource.sort = this.sort;
+          this.updatePagedData();
 
-  this.filteredData = this.tableData;
-    });
-    
+          this.tableData = this.fullData; // Initialize tableData for filters
+          this.cdr.detectChanges();
+        },
+        error: (error) => {
+          console.error('Error fetching users:', error);
+        }
+      });
   }
+  
 
   getStatusClass(status: string) {
-  switch (status?.toLowerCase()) {
-    case 'completed':
-    case 'verified':
-      return { text: 'Completed', class: 'Completed' };
-    case 'pending':
-      return { text: 'Pending', class: 'Pending' };
-    case 'document issue':
-      return { text: 'Document Issue', class: 'Document-Issue' };
-    default:
-      return { text: '-', class: '' };
+    return this.tableDataService.getStatus_Class(status);
   }
-}
 
+ 
+
+  
+
+  formatDateOnly(dateArr: number[] | null | undefined): string {
+    return this.tableDataService.formatDateOnly(dateArr);
+  }
+  
+
+  updatePagedData(): void {
+    const startIndex = (this.currentPage - 1) * this.pageSize;
+    const endIndex = startIndex + this.pageSize;
+    this.dataSource.data = this.filteredData.slice(startIndex, endIndex);
+  }
+
+  updateVisiblePages(): void {
+    const total = this.totalPages;
+    this.totalPagesArray = this.tableDataService.getVisiblePages(this.currentPage, total);
+  }
 
   getkyc(id: any) {
-    console.log("id-----", id);
     this.service.selectedUserId = id;
-    this.service.getKycDeatils(id).subscribe({
+    this.service.getKycDetails(id).subscribe({
       next: (response) => {
-        // console.log('getKycDeatils:', response);
-        //  this.userKYCData =response;
-        //  sessionStorage.setItem("kycs",JSON.stringify(this.userKYCData.kycs))
-         this.router.navigate(['/admin/losdetails']);
+        this.router.navigate(['/admin/losdetails']);
       },
       error: (error) => {
-        console.error('Error fetching users:', error);
+        console.error('Error fetching kyc details:', error);
       }
     });
 
@@ -140,18 +182,13 @@ export class LosOperation {
       item => item.userId === this.service.selectedUserId
     );
     if (this.selecteduser) {
-      this.service.docofselectedUser = this.selecteduser
+      this.service.docofselectedUser = this.selecteduser;
       localStorage.setItem('los--selecteduserDetails', JSON.stringify(this.selecteduser));
-      console.log('Found user:', this.selecteduser);
-    } else {
-      console.warn('User not found!');
     }
-
   }
 
   //dropdown filter
   getkycstatuslos(value: string) {
-    console.log('Selected:2', value);
     const filterValue = value.toLowerCase();
 
     const statusMap: any = {
@@ -187,17 +224,47 @@ export class LosOperation {
     } else {
       this.filteredData = this.tableData;
     }
+    this.cdr.detectChanges(); // Trigger change detection for filter
   }
 
   //search from table
   onSearchChange(value: string) {
-  this.searchText = value.toLowerCase();
-  this.filteredData = this.tableData.filter(item =>
-    item.CIFID?.toString().toLowerCase().includes(this.searchText) ||
-    item.CustomerName?.toLowerCase().includes(this.searchText) ||
-    item.mobile?.toString().toLowerCase().includes(this.searchText) ||
-    item.email?.toLowerCase().includes(this.searchText) ||
-    item.status?.toLowerCase().includes(this.searchText)
-  );
-}
+     this.searchText = value.toLowerCase();
+    this.filteredData = this.tableDataService.filterBySearch(
+      this.fullData,
+      value,SEARCH_FIELDS
+      
+    );
+
+    this.totalItems = this.filteredData.length;
+    this.currentPage = 1;
+    this.updateVisiblePages();
+    this.updatePagedData();
+  }
+
+  //redirection to loan details page
+   getloandetails(id: string): void {
+    this.service.selectedUserId = id;
+    this.service.getLosDetails(id)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (response) => {
+          console.log('getLosDetails:', response);
+          this.allLosData = response.applications;
+          this.service.set_los_Data(this.allLosData);
+          this.router.navigate(['/admin/losdetails']);
+        },
+        error: (error) => {
+          console.error('Error fetching KYC details:', error);
+        }
+      });
+
+    this.selecteduser = this.allApplicants.find(
+      item => item.userId === this.service.selectedUserId
+    );
+    if (this.selecteduser) {
+      this.service.docofselectedUser = this.selecteduser;
+      localStorage.setItem('selecteduserDetails', JSON.stringify(this.selecteduser));
+    }
+  }
 }

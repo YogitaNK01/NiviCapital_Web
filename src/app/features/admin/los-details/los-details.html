@@ -36,26 +36,13 @@
    <div class="customer-details">
  <app-commontabs
   [tabs]="tabs"
+  [selectedIndex]="selectedTabIndex"
   (tabChange)="onTabChange($event)">
 </app-commontabs>
 
-<ng-container [ngSwitch]="activeTabId">
 
-  <app-loandetails *ngSwitchCase="'loan'"></app-loandetails>
-  <app-education *ngSwitchCase="'education'"></app-education>
-  <app-occupation *ngSwitchCase="'occupation'"></app-occupation>
-  <app-assets *ngSwitchCase="'assets'"></app-assets>
-  <app-monthlyexp *ngSwitchCase="'expenditure'"></app-monthlyexp>
-  <app-est-expense *ngSwitchCase="'estimate'"></app-est-expense>
-  <app-losproduct *ngSwitchCase="'los-products'"></app-losproduct>
-  <app-creditscore *ngSwitchCase="'credit'"></app-creditscore>
-  <app-coapplicant *ngSwitchCase="'coapplicant'"></app-coapplicant>
-  <app-summary *ngSwitchCase="'summary'"></app-summary>
-  <app-audittrail *ngSwitchCase="'audit'"></app-audittrail>
- 
-
-  
-
+<ng-container *ngIf="activeTabComponent">
+  <ng-container *ngComponentOutlet="activeTabComponent"></ng-container>
 </ng-container>
 </div>
 
