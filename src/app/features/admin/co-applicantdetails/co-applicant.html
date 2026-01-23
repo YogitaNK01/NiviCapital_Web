@@ -1,0 +1,34 @@
+<!-- <div *ngIf="!showTable && selectedCustomer" class="customer-detail-view"> -->
+<div class="customer-detail-view main-content-feature">
+
+  <!-- Header -->
+  <div class="content-header">
+    <div class="content-title text-dp-3-bold">
+      Customer Information File
+    </div>
+    
+  </div>
+
+  
+
+
+  <!-- Tabs -->
+   <div class="customer-details">
+ <app-commontabs
+  [tabs]="tabs"
+  [selectedIndex]="selectedTabIndex"
+  (tabChange)="onTabChange($event)">
+</app-commontabs>
+
+
+<ng-container *ngIf="activeTabComponent">
+  <ng-container *ngComponentOutlet="activeTabComponent"></ng-container>
+</ng-container>
+</div>
+
+ 
+
+  <!-- <app-quicklinks 
+    currentPage="customerdetails">
+  </app-quicklinks> -->
+</div>

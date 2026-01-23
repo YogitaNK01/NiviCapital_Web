@@ -3,15 +3,7 @@
 @use 'common' as *;
 
 
-// 
 
-.customer-details{
-  border: $border_1 solid $neutral-300;
-  border-radius: $spacing_5;
-  flex: 1 1 auto;
-  min-height: 0;
- 
-}
 /* -------------edit download buttons------------------*/
 
 ::ng-deep app-buttons .btn.btn-outline {

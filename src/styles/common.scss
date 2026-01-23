@@ -506,6 +506,17 @@ color: $warning-text-dark;
 
 /* ---------------Tab Content Styles -----------*/
 
+
+/* ---------------Tab Content Styles -----------*/
+
+.customer-details{
+  border: $border_1 solid $neutral-300;
+  border-radius: $spacing_5;
+  flex: 1 1 auto;
+  min-height: 0;
+  
+}
+
  ::ng-deep .mdc-tab.mat-mdc-tab {
   display: flex;
   padding: $spacing_11 $spacing_9;

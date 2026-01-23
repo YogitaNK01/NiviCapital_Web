@@ -18,18 +18,44 @@ export class TabConfig {
   id!: string;
   label!: string;
   routeKey!: string;
-  page!: Array<'losdetails' | 'customerdetails'>;
+  page!: Array<'losdetails' | 'customerdetails' | 'coapplicantdetails'>;
   icon!: string;
   component!: Type<any>;
 }
 
 export const TAB_CONFIG: TabConfig[] = [
+// Customer details
+  {
+    label: 'PI', icon: '/assets/images/sidemenu/user.svg',
+    id: 'pi', page: ['customerdetails','coapplicantdetails'],
+    routeKey: "pi",
+    component: PiData
+  },
+  {
+    label: 'PII', icon: '/assets/images/sidemenu/user.svg',
+    id: 'pii', page: ['customerdetails','coapplicantdetails'],
+    routeKey: "pii",
+    component: PiiData
+  },
+  {
+    label: 'KYC Details', icon: '/assets/images/sidemenu/user.svg',
+    id: 'kyc', page: ['customerdetails','coapplicantdetails'],
+    routeKey: "kyc",
+    component: KycData
+  },
+  {
+    label: 'Products', icon: '/assets/images/sidemenu/user.svg',
+    id: 'products', page: ['customerdetails'],
+    routeKey: "products",
+    component: ProductData
+  },
 
+  //los details
   {
     label: 'Loan Details', icon: '/assets/images/sidemenu/user.svg',
     id: 'loan', page: ['losdetails'],
     routeKey: "loan",
-    component: Loandetails
+    component: Loandetails 
   },
   {
     label: 'Education', icon: '/assets/images/sidemenu/user.svg',
@@ -39,19 +65,19 @@ export const TAB_CONFIG: TabConfig[] = [
   },
   {
     label: 'Occupation', icon: '/assets/images/sidemenu/user.svg',
-    id: 'occupation', page: ['losdetails'],
+    id: 'occupation', page: ['losdetails','coapplicantdetails'],
     routeKey: "occupation",
     component: Occupation
   },
   {
     label: 'Assets and Liabilities', icon: '/assets/images/sidemenu/user.svg',
-    id: 'assets', page: ['losdetails'],
+    id: 'assets', page: ['losdetails','coapplicantdetails'],
     routeKey: "assets",
     component: Assets
   },
   {
     label: 'Monthly Expenditure', icon: '/assets/images/sidemenu/user.svg',
-    id: 'expenditure', page: ['losdetails'],
+    id: 'expenditure', page: ['losdetails','coapplicantdetails'],
     routeKey: "expenditure",
     component: Monthlyexp
   },
@@ -63,13 +89,13 @@ export const TAB_CONFIG: TabConfig[] = [
   },
   {
     label: 'Products', icon: '/assets/images/sidemenu/user.svg',
-    id: 'products', page: ['losdetails'],
+    id: 'products', page: ['losdetails','coapplicantdetails'],
     routeKey: "products",
     component: ProductData
   },
   {
     label: 'Credit Score', icon: '/assets/images/sidemenu/user.svg',
-    id: 'credit', page: ['losdetails'],
+    id: 'credit', page: ['losdetails','coapplicantdetails'],
     routeKey: "credit",
     component: Creditscore
   },
@@ -92,30 +118,6 @@ export const TAB_CONFIG: TabConfig[] = [
     component: Audittrail
   },
 
-  // Customer details
-  {
-    label: 'PI', icon: '/assets/images/sidemenu/user.svg',
-    id: 'pi', page: ['customerdetails'],
-    routeKey: "pi",
-    component: PiData
-  },
-  {
-    label: 'PII', icon: '/assets/images/sidemenu/user.svg',
-    id: 'pii', page: ['customerdetails'],
-    routeKey: "pii",
-    component: PiiData
-  },
-  {
-    label: 'KYC Details', icon: '/assets/images/sidemenu/user.svg',
-    id: 'kyc', page: ['customerdetails'],
-    routeKey: "kyc",
-    component: KycData
-  },
-  {
-    label: 'Products', icon: '/assets/images/sidemenu/user.svg',
-    id: 'products', page: ['customerdetails'],
-    routeKey: "products",
-    component: ProductData
-  },
+  
 
 ];

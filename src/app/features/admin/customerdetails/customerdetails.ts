@@ -53,27 +53,6 @@ export class Customerdetails {
   selecteduser: any;
   selectedDoc: any = null;
 
-  tenthMarksheet: any;
-  tenthLC: any;
-  twelthMarksheet: any;
-  twelfthLC: any;
-  ugMarksheet: any;
-  ugLC: any;
-  pgMarksheet: any;
-  pgLC: any;
-  pgCert: any;
-  scorecard: any;
-  uniofferletter: any;
-  salaryslip1: any;
-  salaryslip2: any;
-  salaryslip3: any;
-  form16: any;
-  itr1: any
-  itr2: any;
-  itr3: any;
-  bankstatement: any;
-  ielts: any
-
   searchQuery: string = '';
   selectedFilter: string = 'all';
   auditTrails: AuditTrail[] = [];

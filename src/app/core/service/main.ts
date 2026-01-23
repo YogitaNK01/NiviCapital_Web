@@ -48,22 +48,19 @@ export class Main {
   getLogin(payload: LoginPayload): Observable<ApiResponse<any>> {
     return this.http.post<ApiResponse<any>>(
       `${this.baseUrl}/admin/auth/login`,
-      payload,
-      { withCredentials: true }
+      payload
     );
   }
 
   getAllUsers(): Observable<ApiResponse<UserData[]>> {
     return this.http.get<ApiResponse<UserData[]>>(
       `${this.baseUrl}/admin/users`,
-      { withCredentials: true }
     );
   }
 
   getKycDetails(id: string): Observable<any> {
     return this.http.get<any>(
       `${this.baseUrl}/v1/profile/${id}`,
-      { withCredentials: true }
     );
   }
 
@@ -97,16 +94,14 @@ export class Main {
     return this.http.post<ApiResponse<any>>(
       `${this.baseUrl}/auth/logout`,
       {},
-      { withCredentials: true }
-    );
+         );
   }
 
    // LOS api  
   getLosDetails(id: string): Observable<any> {
     return this.http.get<any>(
       `${this.baseUrl}/v1/los/applications`,
-      { withCredentials: true }
-    );
+         );
   }
 
  set_los_Data(data: any): void {
@@ -120,8 +115,7 @@ export class Main {
   getUserDocuments(id: string): Observable<any> {
     return this.http.get<any>(
       `${this.baseUrl}/v1/los/applications/${id}/documents`,
-      { withCredentials: true }
-    );
+       );
   }
 
   downloadDocs(userid: string, id: string): Observable<Blob> {
@@ -129,7 +123,7 @@ export class Main {
       `${this.baseUrl}/v1/los/applications/${userid}/documents/${id}/download`,
       {
         responseType: 'blob' as 'json',
-        withCredentials: true
+        
       }
     );
   }
