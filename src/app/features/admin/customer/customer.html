@@ -81,7 +81,8 @@
 
         <div class="add-button">
           <app-buttons label="Add Customer" class="btn btn-icon Add btncustomClass" [outline]="true">
-            <img src="/assets/images/icons/addred.svg" alt="Add">
+            <img src="/assets/images/icons/addred.svg" alt="Add" [routerLink]="['/customer/details']"
+              [queryParams]="{ mode: 'add' }">
 
           </app-buttons>
         </div>

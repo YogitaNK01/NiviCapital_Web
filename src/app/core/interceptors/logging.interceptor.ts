@@ -22,9 +22,9 @@ export class LoggingInterceptor implements HttpInterceptor {
 
     const startTime = Date.now();
 
-    console.log(`[HTTP Request] ${request.method} ${request.url}`);
+    // console.log(`[HTTP Request] ${request.method} ${request.url}`);
     if (request.body) {
-      console.log('Request Body:', request.body);
+      // console.log('Request Body:', request.body);
     }
 
     return next.handle(request).pipe(
@@ -32,20 +32,20 @@ export class LoggingInterceptor implements HttpInterceptor {
         (event: HttpEvent<any>) => {
           if (event instanceof HttpResponse) {
             const elapsedTime = Date.now() - startTime;
-            console.log(
-              `[HTTP Response] ${request.method} ${request.url} - Status: ${event.status} (${elapsedTime}ms)`
-            );
+            // console.log(
+            //   `[HTTP Response] ${request.method} ${request.url} - Status: ${event.status} (${elapsedTime}ms)`
+            // );
             if (event.body) {
-              console.log('Response Body:', event.body);
+              // console.log('Response Body:', event.body);
             }
           }
         },
         (error: any) => {
           const elapsedTime = Date.now() - startTime;
-          console.error(
-            `[HTTP Error] ${request.method} ${request.url} - Status: ${error.status} (${elapsedTime}ms)`
-          );
-          console.error('Error:', error);
+          // console.error(
+          //   `[HTTP Error] ${request.method} ${request.url} - Status: ${error.status} (${elapsedTime}ms)`
+          // );
+          // console.error('Error:', error);
         }
       )
     );

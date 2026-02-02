@@ -50,11 +50,11 @@ export class CachingInterceptor implements HttpInterceptor {
     // Check if we have a valid cached response
     const cachedResponse = this.getCachedResponse(request.url);
     if (cachedResponse) {
-      console.log(`[Cache HIT] ${request.url}`);
+      // console.log(`[Cache HIT] ${request.url}`);
       return of(cachedResponse.clone());
     }
 
-    console.log(`[Cache MISS] ${request.url}`);
+    // console.log(`[Cache MISS] ${request.url}`);
 
     // Make the actual request and cache the response
     return next.handle(request).pipe(

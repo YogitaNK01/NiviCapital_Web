@@ -1,111 +1,95 @@
 <div class="dropdown-container" [class.custom-style]="customStyle">
+
   <!-- Dropdown Input -->
   <div class="dropdown-input" (click)="toggleDropdown()">
-    <!-- ✅ Avatar support -->
-    <ng-container *ngIf="hasAvatar; else noAvatar">
+
+    <!-- Avatar -->
+    @if (hasAvatar) {
       <img [src]="avatarUrl" alt="User Avatar" class="avatar" />
-    </ng-container>
+    }
 
-    <!-- Placeholder if no avatar -->
-    <ng-template #noAvatar>
-    </ng-template>
-
-    <div class="label-container" *ngIf="showSubtext && subtext">
-      <div class="label text-common  profilelabel">{{ selectedLabel }}</div>
-
-      <div  class="subtext text-secondary">
-        {{ subtext }}
+    <!-- Label + Subtext -->
+    @if (showSubtext && subtext) {
+      <div class="label-container">
+        <div class="label text-common profilelabel">
+          {{ selectedLabeldata }}
+        </div>
+        <div class="subtext text-secondary">
+          {{ subtext }}
+        </div>
       </div>
-    </div>
-     <div class="label-container" *ngIf="!showSubtext && !subtext">
-      <div class="label text-common Showtext ">{{ selectedLabel }}</div>
-     </div>
+    } @else {
+      <div class="label-container">
+        <div class="label text-common Showtext">
+          {{ selectedLabeldata }}
+        </div>
+      </div>
+    }
 
+    <!-- Arrow -->
     <div class="arrow">
-      <img [src]="isOpen ? '/assets/images/icons/arrow-up.svg' : '/assets/images/icons/arrow-down.svg'" alt="Arrow"
-        class="dropdown-arrow" width="20" height="20" />
+      <img
+        [src]="isOpen
+          ? '/assets/images/icons/arrow-up.svg'
+          : '/assets/images/icons/arrow-down.svg'"
+        alt="Arrow"
+        class="dropdown-arrow"
+        width="20"
+        height="20" />
     </div>
   </div>
-
-
 
   <!-- Dropdown List -->
-  <div class="dropdown-list dropdown-listdata" *ngIf="isOpen">
-    <!-- Search box (if enabled) -->
-    <div *ngIf="searchable" class="search-box">
-      <img src="/assets/images/icons/search-normal.svg" alt="Search" class="search-icon" />
-      <input type="text" [(ngModel)]="searchTerm" placeholder="Search..." class="search-input" />
+  @if (isOpen) {
+    <div class="dropdown-list dropdown-listdata">
 
-      <!-- Clear button -->
-      <img *ngIf="searchTerm" src="/assets/images/icons/close.svg" alt="Clear" class="clear-icon"
-        (click)="searchTerm=''" />
+      <!-- Search -->
+      @if (searchable) {
+        <div class="search-box">
+          <img
+            src="/assets/images/icons/search-normal.svg"
+            alt="Search"
+            class="search-icon" />
+
+          <input
+            type="text"
+            [(ngModel)]="searchTerm"
+            placeholder="Search..."
+            class="search-input" />
+
+          @if (searchTerm) {
+            <img
+              src="/assets/images/icons/close.svg"
+              alt="Clear"
+              class="clear-icon"
+              (click)="searchTerm = ''" />
+          }
+        </div>
+      }
+
+      <!-- Options -->
+      @for (option of filteredOptions; track option.value; let last = $last) {
+        <div
+          class="dropdown-item"
+          (click)="selectOption(option.value); $event.stopPropagation()"
+          [class.no-border]="last">
+
+          @if (option.icon && option.icon.trim() !== '') {
+            <img
+              [src]="option.icon"
+              class="item-icon" />
+          }
+
+          <span>{{ option.label }}</span>
+        </div>
+      }
+
+      <!-- No Results -->
+      @if (filteredOptions.length === 0) {
+        <div class="no-results">
+          No matching results
+        </div>
+      }
     </div>
-    <div class="dropdown-item" *ngFor="let option of filteredOptions; let last = last" (click)="selectOption(option)"
-      [class.no-border]="last">
-      <!-- <img *ngIf="option.icon" [src]="option.icon" class="item-icon" /> -->
-      <img *ngIf="option.icon && option.icon.trim() !== ''" [src]="option.icon" class="item-icon" />
-      <span>{{ option.label }}</span>
-    </div>
-  </div>
+  }
 </div>
-
-<!-- dropdown with search as input /Search Input replaces label when dropdown is open -->
-
-<!-- <div class="dropdown-container">
-  <div class="dropdown-input" (click)="toggleDropdown()" *ngIf="!isOpen">
-    <div class="label">{{ selectedLabel }}</div>
-    <div class="arrow">
-      <img
-        [src]="isOpen ? '/assets/images/icons/arrow-up.svg' : '/assets/images/icons/arrow-down.svg'"
-        alt="Arrow"
-        class="dropdown-arrow"
-        width="20"
-        height="20"
-      />
-    </div>
-  </div>
-
-  <div class="dropdown-input search-open" *ngIf="isOpen && searchable">
-    <div class="search-wrapper">
-      <img src="/assets/images/icons/search-normal.svg" alt="Search" class="search-icon" />
-      <input
-        type="text"
-        [(ngModel)]="searchTerm"
-        placeholder="Search..."
-        class="search-input"
-        autofocus
-      />
-      <img
-        *ngIf="searchTerm"
-        src="/assets/images/icons/close.svg"
-        alt="Clear"
-        class="clear-icon"
-        (click)="searchTerm=''"
-      />
-    </div>
-    <div class="arrow">
-      <img
-        [src]="isOpen ? '/assets/images/icons/arrow-up.svg' : '/assets/images/icons/arrow-down.svg'"
-        alt="Arrow"
-        class="dropdown-arrow"
-        width="20"
-        height="20"
-      />
-    </div>
-  </div>
-
-  <div class="dropdown-list" *ngIf="isOpen">
-    <div
-      class="dropdown-item"
-      *ngFor="let option of filteredOptions; let last = last"
-      (click)="selectOption(option)"
-      [class.no-border]="last"
-    >
-      <img *ngIf="option.icon" [src]="option.icon" class="item-icon" />
-      <span>{{ option.label }}</span>
-    </div>
-    <div *ngIf="filteredOptions.length === 0" class="no-results">
-      No matching results
-    </div>
-  </div>
-</div> -->

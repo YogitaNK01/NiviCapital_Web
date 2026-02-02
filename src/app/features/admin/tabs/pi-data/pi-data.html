@@ -3,10 +3,12 @@
   <div class="section">
     <h3 class="section-title text-dp-3-bold">Personal Information <span class="section-status text-body-1">Pending
         Verification</span></h3>
-    <!-- <div class=""> -->
-      <label class="text-dp-2-bold edu-label">Basic Information</label>
-      <hr _ngcontent-ng-c3098784094="" class="divider">
-      <div class="info-grid-img ">
+
+    <label class="text-dp-2-bold edu-label">Basic Information</label>
+    <hr _ngcontent-ng-c3098784094="" class="divider">
+
+
+    <!-- <div class="info-grid-img ">
         <div class="info-item d-flex flex-column">
           <label class="text-label">First Name</label>
            <p class="text-label-data">{{allpikycdata.firstName??"-"}}</p>
@@ -43,9 +45,61 @@
           <label class="text-label">Mobile Number</label>
           <p class="text-label-data">{{allpikycdata.phoneNumber??"-"}}</p>
         </div>
-      </div>
+      </div> -->
 
-    <!-- </div> -->
+    <form [formGroup]="form">
+      <div class="info-grid-img">
+        <div class="info-item d-flex flex-column" *ngFor="let field of piFields; trackBy: trackByKey">
+
+          <label class="text-label">{{ field.label }}</label>
+
+          @if (!isEditable) {
+          <p class="text-label-data">
+            {{ form.get(field.key)?.value || '-' }}
+          </p>
+          } @else {
+          <!-- <input [type]="field.type" class="form-control" [formControlName]="field.key"
+            [placeholder]="'Enter ' + field.label" /> -->
+
+
+           <!-- TEXT / EMAIL / TEL INPUT -->
+    @if (field.controlType === 'input') {
+      <app-inputfield
+        [attr.type]="field.type"
+        [placeholder]="'Enter ' + field.label"
+        [formControlName]="field.key">
+      </app-inputfield>
+    }
+
+    <!-- DATE PICKER -->
+    @if (field.controlType === 'date') {
+      <input
+        type="date"
+        class="form-control"
+        [formControlName]="field.key" />
+    }
+
+    <!-- DROPDOWN -->
+    @if (field.controlType === 'select') {
+      
+      <app-dropdown
+    [options]="toDropdownOptions(field.options)"
+    [formControlName]="field.key"
+    [placeholder]="field.label"
+    (selectedValueChange)="onSelectionChange($event)"
+    [hasAvatar]="false">
+  </app-dropdown>
+    }
+
+          }
+
+
+        </div>
+      </div>
+    </form>
+
+
+
   </div>
 
   <!-- Spouse Details -->

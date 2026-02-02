@@ -10,18 +10,21 @@ import { Uploadbtn, UploadConfig, UploadResult } from '../uploadbtn/uploadbtn';
 import { Areacharts, AreaDataset } from '../areacharts/areacharts';
 import { Barcharts } from '../barcharts/barcharts'
 import { ActivatedRoute } from '@angular/router';
+import { Datepicker } from "../datepicker/datepicker";
+import { FormsModule } from '@angular/forms';
 
 
 
 @Component({
   selector: 'app-design',
   standalone: true,
-  imports: [CommonModule,Buttons,Checkbox,Charts,Dropdown,Inputfield,Radiobuttons,Uploadbtn,Areacharts,Barcharts],
+  imports: [CommonModule, Buttons, Checkbox, Charts, Dropdown, Inputfield, Radiobuttons, Uploadbtn, Areacharts, Barcharts, Datepicker,FormsModule],
   templateUrl: './design.html',
   styleUrls: ['./design.scss']
 })
 export class Design {
 activeSection: string = 'buttons';
+myDate: Date | null = null;
 
  constructor(private route: ActivatedRoute) {
   this.route.data.subscribe(data => {

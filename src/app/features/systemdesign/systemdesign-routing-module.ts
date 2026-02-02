@@ -23,6 +23,7 @@ const routes: Routes = [
       { path: 'inputfield', component: Design, data: { section: 'inputfield' } },
       { path: 'radiobuttons', component: Design, data: { section: 'radiobuttons' } },
       { path: 'uploadbuttons', component: Design, data: { section: 'uploadbuttons' } },
+      { path: 'datepicker', component: Design, data: { section: 'datepicker' } },
       { path: '', redirectTo: 'buttons', pathMatch: 'full' } // default child route
     ],
   },

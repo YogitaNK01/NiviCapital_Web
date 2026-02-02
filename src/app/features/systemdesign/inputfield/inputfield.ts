@@ -1,12 +1,20 @@
 import { CommonModule } from '@angular/common';
-import { Component, EventEmitter, Input, Output } from '@angular/core';
-import { FormsModule } from '@angular/forms';
+import { Component, EventEmitter, forwardRef, Input, Output } from '@angular/core';
+import { FormsModule,NG_VALUE_ACCESSOR, ControlValueAccessor  } from '@angular/forms';
 
 @Component({
   selector: 'app-inputfield',
+   standalone: true,
   imports: [CommonModule, FormsModule],
   templateUrl: './inputfield.html',
-  styleUrls: ['./inputfield.scss']
+  styleUrls: ['./inputfield.scss'],
+  providers: [
+    {
+      provide: NG_VALUE_ACCESSOR,
+      useExisting: forwardRef(() => Inputfield),
+      multi: true
+    }
+  ]
 })
 export class Inputfield {
    // ✅ Text inputs

@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, ElementRef, input, Input, TemplateRef, Type, ViewChild } from '@angular/core';
+import { Component, Input, TemplateRef, Type, ViewChild, ChangeDetectorRef } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTabsModule } from '@angular/material/tabs';
 import { Buttons } from '../../systemdesign/buttons/buttons';
@@ -9,10 +9,11 @@ import { Sanctionletter } from '../sanctionletter/sanctionletter';
 import { Main } from '../../../core/service/main';
 import { Quicklinks } from '../quicklinks/quicklinks';
 import { FormsModule } from '@angular/forms';
-import {  DropdownOption } from '../../systemdesign/dropdown/dropdown';
+import { DropdownOption } from '../../systemdesign/dropdown/dropdown';
 import { ALL_TABS, AppTab, Commontabs } from '../../systemdesign/commontabs/commontabs';
 import { MatTabGroup } from '@angular/material/tabs';
 import { TAB_CONFIG } from '../../../shared/config/tab.config';
+import { EditMode } from '../../../core/service/edit-mode';
 
 
 
@@ -58,6 +59,7 @@ export class Customerdetails {
   auditTrails: AuditTrail[] = [];
   filteredAuditTrails: AuditTrail[] = [];
 
+  // isEditMode: boolean = false;
 
 
   @Input() creditScore = 780;
@@ -75,11 +77,13 @@ export class Customerdetails {
   source: string = 'TransUnion CIBIL';
 
 
+  mode: 'view' | 'edit' | 'add' = 'view';
+  isEditable = false;
 
 
 
 
-  constructor(public router: Router, public route: ActivatedRoute, private aes: Aesutil, private service: Main) { }
+  constructor(public router: Router, public route: ActivatedRoute, private aes: Aesutil, private service: Main, private editModeService: EditMode) { }
 
   async ngOnInit(): Promise<void> {
     //quicklink connectivity
@@ -95,14 +99,13 @@ export class Customerdetails {
       const key = params['tab'];
       const active =
         pageTabs.find(t => t.routeKey === key) || pageTabs[0];
-      
-      this.selectedTabIndex = pageTabs.findIndex(t => t.routeKey === active.routeKey );
+
+      this.selectedTabIndex = pageTabs.findIndex(t => t.routeKey === active.routeKey);
       console.log("Selected Tab Index:", this.selectedTabIndex);
       this.activeTabComponent = active.component;
-        
+
     });
 
-    console.log("loaded data")
     this.loadAuditTrails()
 
   }
@@ -117,6 +120,12 @@ export class Customerdetails {
       queryParams: { tab: config.routeKey },
       queryParamsHandling: 'merge'
     });
+  }
+
+  onEditClick() {
+    
+   this.editModeService.toggle();
+
   }
 
 
