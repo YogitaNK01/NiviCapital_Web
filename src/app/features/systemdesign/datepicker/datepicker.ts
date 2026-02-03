@@ -94,7 +94,8 @@ new: any;
     const options: Intl.DateTimeFormatOptions = { 
       weekday: 'short', 
       month: 'short', 
-      day: 'numeric' 
+      day: 'numeric',
+      year: 'numeric' 
     };
     this.displayDate = this.selectedDate.toLocaleDateString('en-US', options);
   }

@@ -14,7 +14,6 @@ const piFields11  = [
   { label: 'First Name', key: 'firstName', type: 'text', controlType: 'input' },
   { label: 'Middle Name', key: 'middleName', type: 'text', controlType: 'input' },
   { label: 'Last Name', key: 'lastName', type: 'text', controlType: 'input' },
-
   { label: 'Date of Birth', key: 'dob', type: 'date', controlType: 'date' },
 
   {

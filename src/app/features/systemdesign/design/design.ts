@@ -12,13 +12,14 @@ import { Barcharts } from '../barcharts/barcharts'
 import { ActivatedRoute } from '@angular/router';
 import { Datepicker } from "../datepicker/datepicker";
 import { FormsModule } from '@angular/forms';
+import { Datepickernew } from '../datepickernew/datepickernew';
 
 
 
 @Component({
   selector: 'app-design',
   standalone: true,
-  imports: [CommonModule, Buttons, Checkbox, Charts, Dropdown, Inputfield, Radiobuttons, Uploadbtn, Areacharts, Barcharts, Datepicker,FormsModule],
+  imports: [CommonModule, Buttons, Checkbox, Charts, Dropdown, Inputfield, Radiobuttons, Uploadbtn, Areacharts, Barcharts, Datepicker,FormsModule,Datepickernew],
   templateUrl: './design.html',
   styleUrls: ['./design.scss']
 })

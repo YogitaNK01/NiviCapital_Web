@@ -1,11 +1,40 @@
+@use '@angular/material' as mat;
+@use './indexstyle' as *;
+
+html {
+  @include mat.theme((
+    color: (
+      primary: mat.$rose-palette,
+      tertiary: mat.$red-palette,
+    ),
+    typography: Roboto,
+    density: 0,
+  ));
+}
+
+body {
+  // Default the application to a light color theme. This can be changed to
+  // `dark` to enable the dark color theme, or to `light dark` to defer to the
+  // user's system settings.
+  color-scheme: light;
+
+  // Set a default background, font and text colors for the application using
+  // Angular Material's system-level CSS variables. Learn more about these
+  // variables at https://material.angular.dev/guide/system-variables
+  background-color: var(--mat-sys-surface);
+  color: var(--mat-sys-on-surface);
+  font: var(--mat-sys-body-medium);
+
+  // Reset the user agent margin.
+  margin: 0;
+}
 
 // Include theming for Angular Material with `mat.theme()`.
 // This Sass mixin will define CSS variables that are used for styling Angular Material
 // components according to the Material 3 design spec.
 // Learn more about theming and how to use it for your application's
 // custom components at https://material.angular.dev/guide/theming
-@use '@angular/material' as mat;
-@use './indexstyle' as *;
+
 
 @font-face {
   font-family: 'DM Sans';
@@ -97,3 +126,131 @@ html, body {
 
 html, body { height: 100%; }
 body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
+
+html, body { height: 100%; }
+body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
+
+
+/* ===== MATERIAL DATEPICKER CUSTOM THEME ===== */
+.mat-datepicker-content.mat-datepicker-content-animations-enabled{
+  background: #ffffff !important;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  border-radius: 0;
+}
+.datepicker-header {
+  padding: 10px 4px 14px;
+  border-bottom: 1px solid #e6e9f0;
+  margin-bottom: 10px;
+}
+
+.datepicker-header .label {
+  font-size: 13px;
+  color: #6b7280;
+}
+
+.datepicker-header .selected-date {
+  font-size: 22px;
+  font-weight: 600;
+  color: #111827;
+}
+
+
+/* Main Card */
+.mat-mdc-calendar {
+  background: #ffffff!important;
+  
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
+  padding: 16px;
+}
+
+/* Header Section */
+.mat-mdc-calendar-header {
+  padding-bottom: 8px;
+  border-bottom: 1px solid #e6e9f0;
+}
+
+/* Month / Year Title */
+.mat-mdc-calendar-period-button {
+  font-weight: 600;
+  font-size: 14px;
+  color: #1f2937;
+}
+
+/* Navigation Arrows */
+.mat-mdc-calendar-arrow {
+  color: #6b7280;
+}
+
+/* Week Days */
+.mat-mdc-calendar-table-header {
+  color: #9ca3af;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+/* Calendar Cells */
+.mat-mdc-calendar-body-cell {
+  border-radius: 50%;
+}
+
+/* Normal Day */
+.mat-mdc-calendar-body-cell-content {
+  font-size: 14px;
+  color: #1f2937;
+}
+
+/* Hover Day */
+.mat-mdc-calendar-body-cell:hover
+  .mat-mdc-calendar-body-cell-content {
+  background-color: rgba(239, 68, 68, 0.15);
+}
+
+/* Selected Day */
+.mat-mdc-calendar-body-selected
+  .mat-mdc-calendar-body-cell-content {
+  background-color: #ef4444 !important;
+  color: #ffffff !important;
+  font-weight: 600;
+}
+
+/* Today Border */
+.mat-mdc-calendar-body-today
+  .mat-mdc-calendar-body-cell-content {
+  border: 2px solid #ef4444;
+}
+
+/* Year View */
+.mat-mdc-calendar-body-year {
+  border-radius: 999px;
+}
+
+/* Selected Year */
+.mat-mdc-calendar-body-selected.mat-mdc-calendar-body-year {
+  background-color: #ef4444 !important;
+  color: white !important;
+}
+
+/* Footer Buttons Container */
+.mat-mdc-datepicker-actions {
+  display: flex;
+  justify-content: flex-end;
+  padding-top: 12px;
+  border-top: 1px solid #e6e9f0;
+}
+
+/* Cancel Button */
+.mat-mdc-button {
+  color: #ef4444 !important;
+  font-weight: 500;
+}
+
+/* OK Button */
+.mat-mdc-raised-button,
+.mat-mdc-unelevated-button {
+  background-color: #2563eb !important;
+  color: white !important;
+  border-radius: 999px !important;
+  padding: 6px 18px;
+}
+
+/* =====END MATERIAL DATEPICKER CUSTOM THEME ===== */

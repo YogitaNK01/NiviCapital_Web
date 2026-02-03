@@ -32,7 +32,7 @@
 }
 
 .input-wrapper:hover {
-  border-color: #9333ea;
+  border-color: $color-primary ;
 }
 
 .input-wrapper span {
@@ -159,7 +159,7 @@ align-self: stretch;
 
 .nav-button:hover {
   background: #f5f5f5;
-  color: #9333ea;
+  color: $color-primary ;
 }
 
 .month-year-button {
@@ -177,7 +177,7 @@ align-self: stretch;
 
 .month-year-button:hover {
   // background: #f5f5f5;
-  // color: #9333ea;
+  // color: $color-primary ;
 }
 
 .year-range-label {
@@ -234,12 +234,12 @@ align-self: stretch;
 }
 
 .day-cell.today {
-  border: 2px solid #9333ea;
+  border: 2px solid $color-primary ;
   font-weight: 600;
 }
 
 .day-cell.selected {
-  background: #ef4444 !important;
+  background: $color-primary !important;
   color: white;
   font-weight: 600;
 }
@@ -253,7 +253,7 @@ align-self: stretch;
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 8px;
-  margin-bottom: 16px;
+  margin: 8px 0;
 }
 
 .month-cell {
@@ -272,7 +272,7 @@ align-self: stretch;
 }
 
 .month-cell.selected {
-  background: #ef4444;
+  background: $color-primary;
   color: white;
   font-weight: 600;
 }
@@ -307,7 +307,7 @@ align-self: stretch;
 }
 
 .years-grid::-webkit-scrollbar-thumb:hover {
-  background: #9333ea;
+  background: $color-primary ;
 }
 
 .year-cell {
@@ -326,13 +326,13 @@ align-self: stretch;
 }
 
 .year-cell.selected {
-  background: #ef4444;
+  background: $color-primary;
   color: white;
   font-weight: 600;
 }
 
 .year-cell.current {
-  border: 2px solid #9333ea;
+  border: 2px solid $color-primary ;
   font-weight: 600;
 }
 
@@ -366,7 +366,7 @@ align-self: stretch;
 }
 
 .action-button.ok {
-  background: #9333ea;
+  background: $color-primary ;
   color: white;
 }
 

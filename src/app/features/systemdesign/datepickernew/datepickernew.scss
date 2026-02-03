@@ -1,0 +1,80 @@
+@use 'variables' as *;
+@use 'typography' as *;
+
+::ng-deep .cdk-overlay-pane .mat-datepicker-content {
+  padding-top: 52px;
+  /* Space for header */
+  position: relative;
+}
+
+::ng-deep .cdk-overlay-pane .mat-datepicker-content::before {
+  content: "Select date";
+  position: absolute;
+  top: 0px;
+  // left: 0;
+  // right: 0;
+  padding: 16px;
+  font-size: $font-size-body_md;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 22px;
+  letter-spacing: 0.16px;
+  color: $neutral-text-secondary;
+  background: white;
+}
+
+::ng-deep .cdk-overlay-pane .mat-datepicker-content::after {
+  content: attr(data-selected);
+  position: absolute;
+  top: 25px;
+  left: 0;
+  right: 0;
+  padding: 16px 16px 8px 10px;
+  font-size: $font-size-xxl;
+  font-weight: 400;
+  line-height: 36px;
+  letter-spacing: 0.3px;
+  color: $neutral-text-primary;
+  border-bottom: 1px solid #eee;
+}
+
+::ng-deep .cdk-overlay-pane .mat-calendar-header {
+  padding:20px 16px 0px 10px;
+   border-bottom: 1px solid #eee;
+}
+::ng-deep .cdk-overlay-pane .mat-calendar-content{
+padding: 8px;
+}
+
+::ng-deep .cdk-overlay-pane .mat-calendar-body-cell-content.mat-focus-indicator.mat-calendar-body-selected  {
+    background-color: $color-primary;
+    color: #ffffff;
+    box-shadow: inset 0 0 0 1px $color-primary;
+    border-color: $color-primary;
+}
+::ng-deep .cdk-overlay-pane .mat-calendar-body-today:not(.mat-calendar-body-selected):not(.mat-calendar-body-comparison-identical) {
+    border-color: $color-primary;
+}
+::ng-deep .cdk-overlay-pane .mat-calendar-header.mat-calendar-controls .mdc-button.mat-mdc-button-base.mat-calendar-period-button.mat-mdc-button .mat-unthemed {
+    color:#000000 !important;
+}
+
+::ng-deep .cdk-overlay-pane .mat-datepicker-actions{
+padding:8px;
+  display: flex;
+  justify-content: flex-end;
+border-top: 1px solid #eee;
+}
+
+.date-btn{
+     padding: 4px 16px;
+    border-radius: 999px;
+    border: none;
+    background: white;
+    color: red;
+    
+}
+.date-btn-ok{
+  border: 1px solid $secondary-text;
+   color: $secondary-text;
+}

@@ -1,0 +1,28 @@
+
+<div class="form-group">
+  <div class="datepicker-header">
+    <div class="label">Select date</div>
+    <div class="selected-date">
+      <!-- {{ selectedDate  }} -->
+    </div>
+  </div>
+
+  <mat-form-field appearance="outline" class="w-100">
+    <input 
+      matInput
+      [matDatepicker]="picker"
+      [(ngModel)]="selectedDate"
+      name="date" 
+    />
+
+    <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+
+    <mat-datepicker #picker (opened)="onPickerOpen()">
+       
+      <mat-datepicker-actions>
+        <button mat-button matDatepickerCancel class="date-btn">Cancel</button>
+        <button mat-raised-button matDatepickerApply class="date-btn date-btn-ok">Ok</button>
+      </mat-datepicker-actions>
+    </mat-datepicker>
+  </mat-form-field>
+</div>
