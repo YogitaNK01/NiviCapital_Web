@@ -20,7 +20,7 @@ export class Successbox implements OnInit {
 
   @Input() title!: string;
   @Input() description!: string;
-  @Input() boxText!: string;
+  @Input() boxText?: string;
   @Input() id!: string;
 
   @Input() buttons: {

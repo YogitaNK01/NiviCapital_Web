@@ -370,7 +370,7 @@
 
       </div>
       <div class="col-lg-6  col-sm-12">
-        <app-buttons label="Submit" type="submit" color="primary" class="btncustomClass btn" [disabled]="!kycForm.valid || !allRequiredFilesUploaded" ></app-buttons>
+        <app-buttons label="Submit" type="submit" color="primary" class="btncustomClass btn" [disabled]="!kycForm.valid || !allRequiredFilesUploaded || !isPermanentMailingChecked" ></app-buttons>
 
       </div>
 

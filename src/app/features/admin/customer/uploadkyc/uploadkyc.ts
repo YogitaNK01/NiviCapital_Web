@@ -105,7 +105,7 @@ export class Uploadkyc implements OnDestroy {
 
     const editUser = sessionStorage.getItem('editUser');
 
-    if (this.editMode && editUser) {
+    if ( editUser) {
       this.editMode = true;
       this.editUserData = JSON.parse(editUser);
     }

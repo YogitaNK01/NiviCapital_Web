@@ -14,6 +14,9 @@ export class Radiobuttons {
   @Input() disabled: boolean = false;
   @Input() label: string = '';
   @Input() name: string = '';
+ @Input() required: boolean = false;
+  @Input() labeldata: string = '';
+
 
   @Output() checkedChange = new EventEmitter<string>();
 

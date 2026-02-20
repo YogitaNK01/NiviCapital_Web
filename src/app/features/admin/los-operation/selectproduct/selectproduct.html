@@ -1,36 +1,80 @@
-<div class="check-customer  d-flex flex-column">
+@if(!issuccess){
+<div class="check-customer d-flex flex-column gap-30">
     <div class="header ">
 
-        <div class="text-header1-login d-flex flex-column gap-3">Apply New Loan
-            <div class="text-label-data fw-normal">One step closer to your study abroad dream</div>
+        <div class="text-header1-login d-flex flex-column gap-3">Product Selection
+            <div class="text-label-data fw-normal">Your next steps depend on the product you choose.</div>
         </div>
 
     </div>
-    <div class="mobiledetails d-flex w-100 flex-column ">
+    <div class="mobiledetails d-flex w-100 flex-column gap-30">
         <div class="w-100 gap-3">
-            <app-dropdown [options]="selectProduct" [(selectedValue)]="selectedproduct" [placeholder]="product" [required]="true"
-                (selectedValueChange)="onSelectionChange('product',$event)" [avatarUrl]="avatarUrl" [hasAvatar]="hasAvatar" [label]="product" [(ngModel)]="searchedvalue">
+            <app-dropdown [options]="selectProduct" [(selectedValue)]="selectedproduct" [placeholder]="product"
+                [required]="true" (selectedValueChange)="onSelectionChange('product',$event)" [avatarUrl]="avatarUrl"
+                [hasAvatar]="hasAvatar" [label]="product" [(ngModel)]="product_">
             </app-dropdown>
         </div>
 
+        @if(selectedproduct){
         <div class="w-100 gap-3">
-            <app-dropdown [options]="seleactloantype" [(selectedValue)]="selectedloantype" [placeholder]="loantype" [required]="true"
-                (selectedValueChange)="onSelectionChange('loantype',$event)" [avatarUrl]="avatarUrl" [hasAvatar]="hasAvatar" [label]="loantype" [(ngModel)]="searchedvalue">
+            <app-dropdown [options]="seleactloantype" [(selectedValue)]="selectedloantype" [placeholder]="loantype"
+                [required]="true" (selectedValueChange)="onSelectionChange('loantype',$event)" [avatarUrl]="avatarUrl"
+                [hasAvatar]="hasAvatar" [label]="loantype" [(ngModel)]="loantype_">
+            </app-dropdown>
+        </div>}
+@if(selectedloantype){
+        <div class="w-100 gap-3">
+            <app-dropdown [options]="selectSegment" [(selectedValue)]="selectedsegment" [placeholder]="segment"
+                [required]="true" (selectedValueChange)="onSelectionChange('segment',$event)" [avatarUrl]="avatarUrl"
+                [hasAvatar]="hasAvatar" [label]="segment" [(ngModel)]="segment_">
             </app-dropdown>
         </div>
-
-           <div class="w-100 gap-3">
-            <app-dropdown [options]="selectSegment" [(selectedValue)]="selectedsegment" [placeholder]="segment" [required]="true"
-                (selectedValueChange)="onSelectionChange('segment',$event)" [avatarUrl]="avatarUrl" [hasAvatar]="hasAvatar" [label]="segment" [(ngModel)]="searchedvalue">
+    }
+@if(selectedsegment){
+        <div class="w-100 gap-3">
+            <app-dropdown [options]="seleactCategory" [(selectedValue)]="seleactedcategory" [placeholder]="catagory"
+                [required]="true" (selectedValueChange)="onSelectionChange('catagory',$event)" [avatarUrl]="avatarUrl"
+                [hasAvatar]="hasAvatar" [label]="catagory" [(ngModel)]="catagory_">
             </app-dropdown>
         </div>
+    }
+    @if(seleactedcategory){
+        <div class="w-100 gap-3">
+            <div class=" d-flex flex-column">
 
+                <div class="dropdown-label1 all-label ">Select Security Type<span class="text-danger">*</span></div>
+                <div class="d-flex flex-row">
+                    <app-radiobuttons name="optionsGroup1" [checked]="checkselectedOption_rb === 'option1'"
+                        (checkedChange)="checkselectedOption_rb = 'option1'" label="Secured">
+                    </app-radiobuttons>
 
-           <div class="w-100 gap-3">
-            <app-dropdown [options]="seleactCategory" [(selectedValue)]="seleactedcategory" [placeholder]="catagory" [required]="true"
-                (selectedValueChange)="onSelectionChange('catagory',$event)" [avatarUrl]="avatarUrl" [hasAvatar]="hasAvatar" [label]="catagory" [(ngModel)]="searchedvalue">
-            </app-dropdown>
+                    <!-- Checked -->
+                    <app-radiobuttons name="optionsGroup2" [checked]="checkselectedOption_rb === 'option2'"
+                        (checkedChange)="checkselectedOption_rb = 'option2'" label="Unsecured">
+                    </app-radiobuttons>
+                </div>
+            </div>
         </div>
+    }
 
+        <div class="d-flex w-100">
+            <app-buttons label="Back" [outline]="true" class="btncustomClass btn"
+                (click)="goToloanscreen()"></app-buttons>
+
+            <app-buttons label="Next" color="primary" class="btncustomClass btn" (click)="tosuccess()"></app-buttons>
+
+        </div>
     </div>
-    </div>
+</div>
+}
+
+@if(issuccess){
+<div class="success mobiledetails d-flex flex-column center-page">
+
+    <app-successbox title="A new loan application has been initiated." [description]="`Please note your ARN`" [id]="arnid" [buttons]="[
+    { label: 'Let’s Get Started', action: 'letsstart', outline: false, color: 'primary',class: 'btncustomClass'  }
+  ]" (actionClick)="handleSuccessAction($event)">
+    </app-successbox>
+
+</div>
+} 

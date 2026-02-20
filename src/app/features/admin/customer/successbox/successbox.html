@@ -1,4 +1,4 @@
-<div class="success mobiledetails">
+<div class="success mobiledetails ">
   <div class="card  service-card-success border-0 m-auto">
     <div class="card-body d-flex flex-column p-0">
       <div class="service-icon1"><img src="assets/images/icons/tick-circle.svg" alt="product1"
@@ -13,8 +13,10 @@
         </div>
 
         <div class="NC-id-box d-flex align-items-center justify-content-center m-auto ">
-          <div class="text-dp-3-bold nc-id-label">{{boxText}} - {{id}}</div>
-
+          <!-- <div class="text-dp-3-bold nc-id-label">{{boxText}} - {{id}}</div> -->
+          <div class="text-dp-3-bold nc-id-label">
+            {{ boxText ? (boxText + ' - ') : '' }}{{ id }}
+          </div>
         </div>
       </div>
 
@@ -26,8 +28,8 @@
 
             <app-buttons label="Proceed to KYC" color="primary" class="btncustomClass btn" (click)="proceedtoKYC()"></app-buttons> -->
 
-        <app-buttons *ngFor="let btn of buttons" [label]="btn.label" [outline]="btn.outline" [color]="btn.color" [class]="btn.class || ' btn'"
-          (click)="actionClick.emit(btn.action)">
+        <app-buttons *ngFor="let btn of buttons" [label]="btn.label" [outline]="btn.outline" [color]="btn.color"
+          [class]="btn.class || ' btn'" (click)="actionClick.emit(btn.action)">
         </app-buttons>
       </div>
     </div>

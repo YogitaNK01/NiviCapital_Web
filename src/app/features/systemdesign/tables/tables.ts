@@ -187,9 +187,10 @@ export class Tables implements OnChanges {
       {
         queryParams: {
           step: 2,
+          edit:true,
           custId: row.custId,
-          fname: row.fname,
-        lname: row.lname
+          fname: row.firstName,
+        lname: row.lastName
         }
       }
     );

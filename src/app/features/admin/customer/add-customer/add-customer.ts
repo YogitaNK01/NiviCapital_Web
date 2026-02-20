@@ -87,12 +87,13 @@ export class AddCustomer implements OnInit {
       if (params['step']) {
         this.currentStep = +params['step'];
         console.log("currentstep", this.currentStep);
-
-        if (params['custId']) {
+        sessionStorage.removeItem('editUser');
+        if (params['custId'] && params['edit'] == 'true') {
+           this.custname = params['firstName'] + ' ' + params['lastName'];
           sessionStorage.setItem('editUser', JSON.stringify({
             custId: params['custId'],
-            fname: params['fname'],
-            lname: params['lname']
+            fname: params['firstName'],
+            lname: params['lastName']
           }));
 
         }

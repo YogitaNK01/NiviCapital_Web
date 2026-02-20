@@ -34,7 +34,7 @@
     <div class="step-body">
 
 
-      @if (currentStep === 0) {
+      @if (currentStep === 10) {
       <form #registerform="ngForm" (ngSubmit)="createcustId(registerform)" id="registerform"
         class="mobiledetails d-flex flex-column ">
         <div class="row  ">
@@ -221,7 +221,7 @@
       </div>
       }
 
-      @if (currentStep === 3) {
+      @if (currentStep === 0) {
       <div class="success mobiledetails d-flex flex-column">
         <app-successbox [title]="'Success!'" [description]="description2" [boxText]="custname" [id]="kycIdFromApi"
           [buttons]="[

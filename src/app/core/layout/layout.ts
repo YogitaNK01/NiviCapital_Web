@@ -59,7 +59,7 @@ export class Layout implements OnInit, OnDestroy {
          { icon: '/assets/images/sidemenu/money-recive.svg', iconActive: '/assets/images/sidemenu/money-recive-active.svg', label: 'Co-applicant', route: '/admin/coapplicantdetails', expanded: false },
 
     { icon: '/assets/images/sidemenu/candle.svg', iconActive: '/assets/images/sidemenu/money-recive-active.svg', label: 'FX Operations', route: '/admin/customer2', expanded: false },
-    { icon: '/assets/images/sidemenu/wallet-money.svg', label: 'LMS', route: '/admin/customer2', expanded: false },
+    { icon: '/assets/images/sidemenu/wallet-money.svg', label: 'LMS', route: '/admin/customer/addcustomer', expanded: false },
     { icon: '/assets/images/sidemenu/document-upload.svg', label: 'Documents', route: '/admin/customer2', expanded: false },
     { icon: '/assets/images/sidemenu/tag-user.svg', label: 'Communication', route: '/admin/dashboard3', expanded: false },
     { icon: '/assets/images/sidemenu/cpu-setting.svg', label: 'Configuration', route: '/admin/customer3', expanded: false },

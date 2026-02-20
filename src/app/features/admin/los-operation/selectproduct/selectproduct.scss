@@ -1,0 +1,39 @@
+@use 'variables' as *;
+@use 'typography' as *;
+@use 'common' as *;
+
+
+.gap-30{
+    gap: $spacing_14;
+}
+
+.check-customer {
+    display: flex;
+    padding:$spacing_18;
+    flex-direction: column;
+    align-items: flex-start;
+    gap:$spacing_14;
+    align-self: stretch;
+    min-height: auto;
+    border-radius: $border_radius_m;
+  border: $border_1 solid $neutral-300;
+  background: $bg, ;
+  box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.05);
+}
+
+.btncustomClass {
+    width: 50%;
+    display: flex;
+    gap: 20px;
+
+    @media (max-width: 480px) {
+        width: 100%;
+    }
+}
+
+.center-page {
+  min-height: calc(100vh - 120px); /* subtract header height if exists */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
