@@ -87,3 +87,17 @@ p {
     gap: $spacing_9;
 
 }
+
+
+.copy-btn:hover {
+  opacity: 0.7;
+}
+
+.copied-text {
+  font-size: 12px;
+  color: green;
+}
+
+img, svg {
+    vertical-align: top!important;
+}

@@ -22,6 +22,7 @@ export class Successbox implements OnInit {
   @Input() description!: string;
   @Input() boxText?: string;
   @Input() id!: string;
+  @Input() copy?: boolean=false;
 
   @Input() buttons: {
     label: string;
@@ -32,11 +33,11 @@ export class Successbox implements OnInit {
   }[] = [];
 
   @Output() actionClick = new EventEmitter<string>();
-
 @Input() CustomerCIF!: string;
 @Input() CustomerName!: string;
 @Input() CustomerNCID!: string;
 
+copied = false;
 
  ngOnInit(): void {
    
@@ -49,4 +50,14 @@ export class Successbox implements OnInit {
     });
   }
   
+  copyArn() {
+  if (!this.id) return;
+
+  navigator.clipboard.writeText(this.id).then(() => {
+    console.log('ARN copied');
+    this.copied = true;
+
+    setTimeout(() => this.copied = false, 1500);
+  });
+}
 }
