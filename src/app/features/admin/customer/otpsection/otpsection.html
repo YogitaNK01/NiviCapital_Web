@@ -1,0 +1,34 @@
+<div class="otp-section d-flex flex-column">
+
+    <div class="otp-wrapper">
+
+        <div class="otp-boxes">
+            <input *ngFor="let _ of otp; let i = index" [id]="'otp-' + i" class="otp-input" type="text"
+                inputmode="numeric" autocomplete="one-time-code" maxlength="1" [value]="otp[i]"
+                (keydown)="onKeyDown($event, i)" />
+        </div>
+
+
+        <button type="button" class="verify-btn" [disabled]="!isOtpComplete || isCounting"
+            (click)="submitOtp()">Verify OTP
+            
+        </button>
+
+    </div>
+   
+        <!-- <div class="otp-inline">
+  <span class="text-label-data otp-subtext">
+    Resend code in
+    <span class="text-label-data resend">{{ resendSeconds }}</span>
+  </span>
+
+  <span
+    class="resend-link"
+    [class.disabled]="isCounting"
+    (click)="!isCounting && resendOtp()">
+    Resend OTP
+  </span>
+</div> -->
+
+   
+</div>

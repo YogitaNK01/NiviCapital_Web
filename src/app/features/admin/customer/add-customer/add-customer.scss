@@ -1,0 +1,298 @@
+@use 'variables' as *;
+@use 'typography' as *;
+@use 'common' as *;
+
+/* Header */
+.header {
+  padding: $spacing_18 $spacing_18 $spacing_9 $spacing_18;
+  gap: $spacing_9;
+  // display: flex;
+  // justify-content: space-between;
+  // align-items: center;
+  border-bottom: 1px solid #eee;
+
+  .text-dp-3-bold {
+    color: $secondary-text-dark;
+  }
+
+  .text-label-data {
+    font-weight: 400;
+  }
+
+}
+
+/* Progress bar */
+.progress {
+  height: 4px;
+  background: #f0f0f0;
+  padding: $spacing_9 $spacing_18;
+  border-bottom: 1px solid #F3F4F6;
+  background: $surface;
+
+  .fill {
+
+    background: #F33B48;
+    transition: width 0.3s ease;
+    border-radius: 3.5px;
+    height: 5px;
+    flex: 1 0 0;
+  }
+}
+
+
+
+.mobiledetails {
+  
+  padding: $spacing_18;
+  // flex-direction: column;
+  // align-items: flex-start;
+  align-items: center;
+  gap: $spacing_14;
+  align-self: stretch;
+  // max-width: 900px;
+  width: 100%;
+
+  @media (max-width:780px) {
+    align-items: stretch;
+    padding: $spacing_9;
+  }
+  .text-label-data {
+    font-weight: 400;
+  }
+
+  .mob {
+    gap: $spacing_5;
+  }
+
+
+  .country-select {
+
+    padding-right: 5px;
+  }
+
+  .phone-wrapper {
+    display: flex;
+    width: 100%;
+    border-radius: 6px;
+    padding: 0;
+    overflow: hidden;
+    background: #fff;
+  }
+
+  .country-box {
+    padding: $spacing_6 $spacing_7;
+    border-right: 1px solid #A4A5B0;
+    gap: $spacing_4;
+
+  }
+
+  .flag-icon {
+    width: 22px;
+    height: 16px;
+    object-fit: cover;
+    border-radius: 2px;
+  }
+}
+
+/* Inputs */
+input {
+  width: 100%;
+  height: 52px;
+  padding: 0 12px;
+  border: 1px solid #ddd;
+  font-size: 14px;
+
+  &:focus {
+    outline: none;
+    border-color: #e53935;
+  }
+}
+
+.mt-20{
+  margin-top: $spacing_9;
+}
+.mt-40{
+  margin-top: $spacing_18;
+}
+.phone-label {
+  text-align: start;
+  color: #25262F;
+  font-size: 1rem;
+  font-style: normal;
+  font-weight: normal;
+  line-height: 1.375rem;
+  letter-spacing: 0.16px;
+  margin-bottom: 0.5rem;
+}
+
+
+.btncustomClass{
+  padding: 0;
+  width: 100%;
+}
+
+
+
+/* OTP */
+// .otp-boxes {
+//   display: flex;
+ 
+//   margin: 20px 0;
+
+//   input {
+//     width: 44px;
+//     height: 48px;
+//     text-align: center;
+//     font-size: 18px;
+//     font-weight: 600;
+//   }
+// }
+
+
+
+/* Mobile adjustments */
+@media (max-width: 480px) {
+  .modal {
+    width: 100%;
+    height: auto;
+    border-radius: 12px;
+  }
+
+  .header h3 {
+    font-size: 15px;
+  }
+}
+
+
+.stepper {
+  display: flex;
+  border-radius: 12px;
+  border-bottom: 1px solid var(--system-border-neutral-neutral_2, #E4E6F1);
+}
+
+.step {
+  flex: 1;
+ display: flex;
+padding: $spacing_9;
+align-items: center;
+gap: $spacing_4;
+  cursor: pointer;
+  position: relative;
+}
+
+.step.disabled {
+  pointer-events: none;
+  opacity: 0.5;
+}
+
+.step-circle {
+  width: $spacing_21;
+  height: $spacing_21;
+  border-radius: $border_radius_rounded;
+  border: $border_6 solid $accent_sec;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  color: $accent_sec;
+  background: #fff;
+  gap: $spacing_4;
+  padding: $spacing_4;
+}
+
+.step-number {
+  font-size: $font-size-body_lg; 
+  font-weight: $font-weight-bold;
+}
+.step.active .step-circle {
+  background: $accent_sec;
+  color: #fff!important;
+  border-color: $accent_sec;
+}
+
+.step.completed .step-circle {
+  background:  $accent_sec;;
+  color: #fff;
+}
+
+.step-content {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing_2;
+}
+
+.step-title {
+ color: $secondary-text-dark;
+}
+
+.step-desc {
+  font-weight: 400;
+}
+@media (max-width: 768px) {
+  .stepper {
+    flex-direction: column;
+    gap: 12px;
+  }
+}
+
+.phone-wrapper {
+  flex: 1;
+}
+
+.otp-side {
+  min-width: 260px;
+  display: flex;
+  align-items: flex-end;
+}
+.success-phone input {
+  border: 1px solid #28a745 !important;
+  background: #f6fff8;
+ 
+}
+
+
+
+.phone-otp-row {
+  display: flex;
+  gap: 16px;
+  width: 100%;
+}
+
+.phone-col,
+.otp-side {
+  flex: 1;        /* each takes equal width */
+  width: 50%;
+}
+.otp-side {
+  display: flex;
+  gap: 6px;
+  width: 50%;
+}
+
+.resend-timer{
+  font-weight: 700;
+}
+.resend-link{
+  cursor: pointer;
+  color: $primary_text,;
+font-weight: 700;
+text-decoration-line: underline;
+
+}
+.resend-link.disabled {
+  pointer-events: none;
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+@media (max-width: 768px) {
+  .phone-otp-row {
+    flex-direction: column;
+  }
+
+  .phone-col,
+  .otp-side {
+    width: 100%;
+  }
+}
+

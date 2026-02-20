@@ -1,24 +1,38 @@
 import { Injectable, signal } from '@angular/core';
 
+export type FormMode = 'view' | 'edit' | 'add';
+   
 @Injectable({
   providedIn: 'root'
 })
 export class EditMode {
   
-   private _editMode = signal(false);
+   private _mode = signal<FormMode>('view');
+  mode = this._mode.asReadonly();
 
-  editMode = this._editMode.asReadonly();
+  private _isAdd = signal(false);
+  isAdd = this._isAdd.asReadonly();
 
-  enable() {
-    this._editMode.set(true);
-  }
-
-  disable() {
-    this._editMode.set(false);
-  }
-
-  toggle() {
-    this._editMode.set(!this._editMode());
+  setAddMode(isAdd: boolean) {
+    this._isAdd.set(isAdd);
   }
   
+  view() {
+    this._mode.set('view');
+  }
+
+  edit() {
+    this._mode.set('edit');
+  }
+
+  add() {
+    this._mode.set('add');
+  }
+
+  toggleEdit() {
+    this._mode.set(this._mode() === 'edit' ? 'view' : 'edit');
+  }
+  setMode(mode: FormMode) {
+    this._mode.set(mode);
+  }
 }

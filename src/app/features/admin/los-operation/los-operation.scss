@@ -4,57 +4,106 @@
 
 
 
+/*----------------------- Stats Cards ------------------*/
+.stats-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: $spacing_9;
+
+}
+
+.stat-card {
+  padding: $spacing_7;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
 /*----------------------- search ------------------*/
-.search-bar {
-  padding: $spacing_9;
+.section-header {
   display: flex;
-  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: $spacing_14;
+
+  @media (max-width: 768px) {
+    display: block;
+  }
+}
+
+
+.section-controls {
+  // flex: 0 0 56%;
+  display: flex;
   gap: $spacing_7;
+  flex-wrap: wrap;
+  align-items: end;
+
+  @media (max-width: 420px) {
+    display: flex;
+    flex-direction: column;
+    padding: 10px 0;
+     flex-wrap: nowrap;
+     align-items: stretch;
+  }
+}
+.search-dropdown-status,.search-dropdown-type{
+  min-width: 160px;
+}
+/*-----------------kyc status and type dropdown----------*/
+
+::ng-deep app-inputfield .input-field {
+  height: 42px !important;
+  width: 333px !important;
+
+  @media (max-width: 420px) {
+    width: 100% !important;
+  }
 }
 
-.search-data {
- display: flex;
-align-items: flex-start;
-gap:$spacing_7;
-align-self: stretch;
+::ng-deep app-dropdown .dropdown-container {}
 
-@media (max-width:540px)
-{
- display: contents;
-}
+::ng-deep app-dropdown .dropdown-container.custom-style {
+  height: 42px !important;
+  padding: $spacing_4 !important;
 }
 
-.search-dropdown {
-  min-width: 250px;
-
-  @media (max-width:480px)
-{
- min-width: 200px;
-}
+::ng-deep app-dropdown .dropdown-list {
+  width: auto;
 }
 
-.search-input {
-  flex: 1;
-}
-
-.search-btn {
-  min-width: 135px;
- 
-
-}
 
 
 /*--------------- Add Button ---------------------*/
 
 
 
+@media (max-width:768px) {
+
+  .add-button {
+    display: flex;
+    justify-content: end;
+  }
+}
+
 .btncustomClass {
 
   width: auto !important;
   min-width: 178px;
   max-width: 200px;
-  // padding: 2px 3px;
+  padding: 2px 3px;
   height: 42px;
+}
+
+::ng-deep app-buttons .btn-label {
+  color: $primary_text;
+}
+
+::ng-deep app-buttons .btn-outline {
+  padding: 5px !important;
+}
+
+::ng-deep app-buttons .btn.btn-outline .btn-label {
+
+  color: $primary-500 !important;
 }
 
 

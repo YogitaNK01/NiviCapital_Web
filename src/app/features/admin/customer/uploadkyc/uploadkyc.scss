@@ -1,0 +1,83 @@
+@use 'variables' as *;
+@use 'typography' as *;
+@use 'common' as *;
+
+.kyc-form,
+.accordion,
+.accordion-item,
+.accordion-button,
+.accordion-collapse {
+  width: 100%!important;
+}
+.accordion {
+   flex: none;
+  width: 100%;
+}
+
+.accordion-item {
+  width: 100%!important;
+  border: none;
+}
+
+.accordion-header {
+  width: 100%!important;
+}
+
+
+.accordion-item:first-child .accordion-button {
+  min-height: 56px;
+}
+.accordion-button.collapsed {
+  min-height: 56px;
+  padding: 16px 20px;
+}
+
+
+.accordion-button{
+  border-radius: $border-radius-s;
+background: $surface;
+min-height: 56px;     // important
+  padding: 16px 20px;   // restore header spacing
+  display: flex;
+  align-items: center;
+  color: $secondary-text-dark;;
+}
+
+.loan-heading{
+  color:$secondary-text;
+  font-weight: $font-weight-bold;
+}
+.mobiledetails{
+  display: flex;
+padding:  $spacing_18;
+flex-direction: column;
+// align-items: center;
+gap:$spacing_14;
+align-self: stretch;
+// max-width: 900px;
+width: 100%;
+}
+
+.loan-mt-4{
+  margin-top: $spacing_9;
+}
+.btncustomClass{
+  width: 100%;
+  display: flex;
+height: 54px;
+  gap: 20px;
+}
+
+::ng-deep .btn{
+  padding: 0;
+}
+
+.pan-row {
+  --bs-gutter-x: 20px;
+  margin-bottom: 20px;
+}
+.addresscheck {
+padding: $spacing_14 0  0 0;
+}
+
+

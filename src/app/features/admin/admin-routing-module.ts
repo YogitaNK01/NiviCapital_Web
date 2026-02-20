@@ -6,9 +6,9 @@ import { Customerdetails } from './customerdetails/customerdetails';
 import { Sanctionletter } from './sanctionletter/sanctionletter';
 import { LosOperation } from './los-operation/los-operation';
 import { LosDetails } from './los-details/los-details';
-import { Table } from './table/table';
 import { Commontabs } from '../systemdesign/commontabs/commontabs';
 import { CoApplicantDetails } from './co-applicantdetails/co-applicant';
+import { AddCustomer } from './customer/add-customer/add-customer';
 
 const routes: Routes = [
   
@@ -19,11 +19,18 @@ const routes: Routes = [
         { path: 'sanctionletter', component: Sanctionletter},
         { path: 'losoperation', component: LosOperation},
         { path: 'losdetails', component: LosDetails},
-        { path: 'sharedtable', component: Table},
          { path: 'commontabs', component: Commontabs},
          { path: 'coapplicantdetails', component: CoApplicantDetails},
 
-  
+  {
+  path: 'customer',
+  loadChildren: () => import('../admin/customer/customer-module').then(m => m.CustomerModule)
+},
+{
+  path: 'losoperation',
+  loadChildren: () => import('../admin/los-operation/los-operation-module').then(m => m.LosOperationModule)
+},
+
         { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
       
       

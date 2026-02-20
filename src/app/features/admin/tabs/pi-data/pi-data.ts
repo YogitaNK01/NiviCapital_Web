@@ -2,10 +2,12 @@ import { ChangeDetectionStrategy, Component, OnInit, ChangeDetectorRef, effect }
 import { Main } from '../../../../core/service/main';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
-import { piFields } from '../../../../shared/config/custdetails.config';
-import { EditMode } from '../../../../core/service/edit-mode';
+import { piFields, otherFields } from '../../../../shared/config/custdetails.config';
+import { EditMode, FormMode } from '../../../../core/service/edit-mode';
 import { Inputfield } from "../../../systemdesign/inputfield/inputfield";
 import { Dropdown, DropdownOption } from "../../../systemdesign/dropdown/dropdown";
+import { Router, NavigationEnd } from '@angular/router';
+import { filter } from 'rxjs/operators';
 
 
 @Component({
@@ -20,9 +22,12 @@ export class PiData implements OnInit {
 
   form!: FormGroup;
   allpikycdata: any;
-  mode: 'view' | 'edit' | 'add' = 'view';
-  isEditable = false;
+  // mode: 'view' | 'edit' | 'add' = 'view';
+  // isEditable = false;
+  mode: FormMode = 'view';
   piFields = piFields;
+  otherFields = otherFields;
+
 
   myOptions: DropdownOption[] = [
     { label: 'Type 1', value: 'Type 1' },
@@ -38,27 +43,54 @@ export class PiData implements OnInit {
 
   selectedOption: string = '';
 
-  constructor(private service: Main, private cdr: ChangeDetectorRef, private editModeService: EditMode) {
-    effect(() => {
-      this.isEditable = this.editModeService.editMode();
-      console.log(this.isEditable);
-      this.cdr.markForCheck();
+  constructor(private service: Main, private cdr: ChangeDetectorRef, private editModeService: EditMode, private router: Router) {
+     this.router.events
+    .pipe(filter(event => event instanceof NavigationEnd))
+    .subscribe((event: NavigationEnd) => {
 
+      const url = event.urlAfterRedirects;
+
+      if (url.includes('admin/customerdetails')) {
+        this.editModeService.setMode('view');
+      }
+
+      if (url.includes('admin/addcustomer')) {
+        this.editModeService.setMode('add');
+      }
+    });
+
+    effect(() => {
+      this.mode = this.editModeService.mode();
+      console.log("mode----",this.mode);
+      
+      if (this.mode === 'add') {
+        this.initEmptyCustomer();
+      }
+
+      if (this.mode === 'view' || this.mode === 'edit') {
+        this.allpikycdata = this.service.get_pi_KycData();
+        this.buildForm();
+      }
+
+      this.cdr.markForCheck();
     });
   }
 
   ngOnInit(): void {
-
-    this.allpikycdata = this.service.get_pi_KycData();
-    console.log("allpikycdata---", this.allpikycdata);
-    this.buildForm();
+   
+    // this.allpikycdata = this.service.get_pi_KycData();
+    // console.log("allpikycdata---", this.allpikycdata);
+    // this.buildForm();
 
 
   }
 
+  get isEditable() {
+    return this.mode === 'edit' || this.mode === 'add';
+  }
   onSelectionChange(value: string) {
     console.log("dropdown--", value);
-    
+
 
 
   }

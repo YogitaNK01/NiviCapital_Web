@@ -2,6 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { Route, Router } from '@angular/router';
 import { TabConfig, TAB_CONFIG } from '../../../shared/config/tab.config';
+import { AddCustomer } from '../customer/add-customer/add-customer';
 
 
 export interface QuickLink {
@@ -34,7 +35,9 @@ export class Quicklinks implements OnInit {
 
   private PAGE_ROUTES = {
     losdetails: '/admin/losdetails',
-    customerdetails: '/admin/customerdetails'
+    customerdetails: '/admin/customerdetails',
+    coapplicantdetails: '/admin/coapplicantdetails',
+    addcustomers: '/admin/customer/addcustomer'
   } as const;
 
 

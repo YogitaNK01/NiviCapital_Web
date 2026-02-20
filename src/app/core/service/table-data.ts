@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { TableColumn } from '../../features/systemdesign/tables/tables';
+import { Main } from './main';
 
 
 export interface StatusClass {
@@ -12,19 +13,21 @@ export interface StatusClass {
 })
 export class TableData {
 
+  constructor(private mainService: Main) { }
   /**  Transform raw user data to table format **/
   transformUserData(data: any[]): any[] {
     return data.map((item, index) => ({
-      id_data: index + 1,
-      CIFID: item.cif ?? "-",
-      CustomerName: `${item.firstName ?? ''} ${item.lastName ?? ''}`.trim() ?? "-",
-      mobile: item.phoneNumber ?? "-",
-      email: item.email ?? '',
+      // id_data: index + 1,
+      custId: item.custId ?? "-",
+      firstName: item.firstName ?? "-",
+      lastName: item.lastName ?? "-",
+      mobile: (item.mobile) ?? "-",
+      email: (item.email) ?? '-',
       kycStatus: item.kycStatus ?? "-",
-      loanStatus: item.kycStatus ?? "-",
-      registrationDate: this.formatDateOnly(item.createdDateTime) ?? "-",
-      userId: item.userId ?? "-",
-      Id: item.id ?? "-"
+      status: item.status ?? "-",
+      // registrationDate: this.formatDateOnly(item.createdAt) ?? "-",
+      ncId: item.ncId ?? "-",
+      // Id: item.id ?? "-"
     }));
   }
 
@@ -49,12 +52,17 @@ export class TableData {
   getStatus_Class(status: string): StatusClass {
     switch (status?.toLowerCase()) {
       case 'completed':
-      case 'verified':
-        return { text: 'Completed', class: 'Completed' };
+      case 'approved':
+        return { text: 'Verified', class: 'Completed' };
       case 'pending':
         return { text: 'Pending', class: 'Pending' };
+      case 'active':
+        return { text: 'active', class: 'active' };
+
       case 'document issue':
         return { text: 'Document Issue', class: 'Document-Issue' };
+      case 'not_started':
+        return { text: 'Not Started', class: 'Not Started' };
       default:
         return { text: '-', class: '' };
     }

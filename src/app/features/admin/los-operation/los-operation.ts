@@ -29,17 +29,24 @@ const SEARCH_FIELDS = ['CIFID', 'CustomerName', 'mobile', 'email'];
 })
 export class LosOperation {
 
-  columns = [
+   columns = [
     {
-      key: 'CIFID',
-      label: 'CIF ID',
+      key: 'custId',
+      label: 'CUSTID',
       class: 'cifstyle',
       clickable: true,
-      onClick: (row: { Id: any; }) => this.getloandetails(row.Id)
+      // onClick: (row: { Id: any; }) => this.getpidata(row.Id),
+      routerLink: '/admin/customerdetails',
+      queryParams: "{ mode: 'view', id: row.id }"
     },
-    { key: 'CustomerName', label: 'Customer Name' },
+    { key: 'ncId', label: 'NCID' },
+     { key: 'arn', label: 'ARN' },
+     { key: 'arn1', label: 'ARN' },
+
+    { key: 'firstName', label: 'First Name' },
+     { key: 'lastName', label: 'Last Name' },
     { key: 'mobile', label: 'Mobile' },
-    { key: 'email', label: 'Eamil' },
+    { key: 'email', label: 'Email' },
     {
       key: 'status',
       label: 'Status',
@@ -49,13 +56,13 @@ export class LosOperation {
     },
 
     {
-      key: 'loanStatus',
-      label: 'Loan Status',
+      key: 'kycStatus',
+      label: 'KYC Status',
       class: 'status',
-      classFn: (row: any) => this.getStatusClass(row.loanStatus).class,
-      transform: (row: any) => this.getStatusClass(row.loanStatus).text
+      classFn: (row: any) => this.getStatusClass(row.kycStatus).class,
+      transform: (row: any) => this.getStatusClass(row.kycStatus).text
     },
-    { key: 'registrationDate', label: 'Registration Date' },
+    // { key: 'registrationDate', label: 'Registration Date' },
 
   ];
 
@@ -96,6 +103,7 @@ export class LosOperation {
   kycCompleted: number | null = null;
   totalPages: any;
 
+  cards=Array(4)
 
   constructor(public http: HttpClient, public router: Router, private service: Main, private cdr: ChangeDetectorRef,private tableDataService: TableData) { }
   // 
@@ -125,11 +133,12 @@ private loadallusers(): void {
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (response) => {
-          this.AlluserData = response.data;
-          this.fullData = this.tableDataService.transformUserData(response.data);
+           let resdate= response.data.content;
+          this.AlluserData = resdate;
+          this.fullData = this.tableDataService.transformUserData(resdate);
           this.filteredData = this.fullData;
           this.totalItems = this.fullData.length;
-          this.kycCompleted = this.tableDataService.calculateKycMetrics(response.data, this.totalItems);
+          this.kycCompleted = this.tableDataService.calculateKycMetrics(resdate, this.totalItems);
           this.dataSource.sort = this.sort;
           this.updatePagedData();
 
@@ -146,10 +155,6 @@ private loadallusers(): void {
   getStatusClass(status: string) {
     return this.tableDataService.getStatus_Class(status);
   }
-
- 
-
-  
 
   formatDateOnly(dateArr: number[] | null | undefined): string {
     return this.tableDataService.formatDateOnly(dateArr);
@@ -266,5 +271,13 @@ private loadallusers(): void {
       this.service.docofselectedUser = this.selecteduser;
       localStorage.setItem('selecteduserDetails', JSON.stringify(this.selecteduser));
     }
+  }
+
+   getkyc_type(value: string): void {
+    // Implement type filtering logic
+  }
+
+  applyLoan() {
+    this.router.navigate(['/admin/losoperation/newloan']);
   }
 }

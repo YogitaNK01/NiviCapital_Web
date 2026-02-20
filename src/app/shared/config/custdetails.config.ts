@@ -1,15 +1,4 @@
-const piFields11  = [
-    { label: 'First Name', key: 'firstName', type: 'text' },
-  { label: 'Middle Name', key: 'middleName', type: 'text' },
-  { label: 'Last Name', key: 'lastName', type: 'text' },
-  { label: 'Date of Birth', key: 'dob', type: 'date' },
-  { label: 'Marital Status', key: 'maritalStatus', type: 'text' },
-  { label: 'Gender', key: 'gender', type: 'text' },
-  { label: 'Nationality', key: 'nationality', type: 'text' },
-  { label: 'Email ID', key: 'email', type: 'email' },
-  { label: 'Mobile Number', key: 'phoneNumber', type: 'tel' }
-]
-
+//PI data
  const piFields = [
   { label: 'First Name', key: 'firstName', type: 'text', controlType: 'input' },
   { label: 'Middle Name', key: 'middleName', type: 'text', controlType: 'input' },
@@ -39,7 +28,42 @@ const piFields11  = [
   { label: 'Mobile Number', key: 'phoneNumber', type: 'tel', controlType: 'input' }
 ];
 
-  
+const otherFields = [
+  { label: 'First Name', key: 'firstName', type: 'text', controlType: 'input' },
+  { label: 'Middle Name', key: 'middleName', type: 'text', controlType: 'input' },
+  { label: 'Last Name', key: 'lastName', type: 'text', controlType: 'input' }
+];
+  //pii data 
+const identity = [
+  { label: 'Aadhaar Number', key: 'aadhaarNumber', type: 'text', controlType: 'input' },
+  { label: 'Pan Number', key: 'panNumber', type: 'text', controlType: 'input' },
+  { label: 'Passport', key: 'panNumber', type: 'text', controlType: 'input' }
+];
+
+const address = [
+  { label: 'Address Line 1', key: 'firstName', type: 'text', controlType: 'input' },
+  { label: 'Address Line 2', key: 'middleName', type: 'text', controlType: 'input' },
+  {
+    label: 'Country',
+    key: 'country',
+    controlType: 'select',
+    options: ['India']
+  },
+  {
+    label: 'State',
+    key: 'state',
+    controlType: 'select',
+    options: ['A', 'B', 'C']
+  },
+  {
+    label: 'City',
+    key: 'city',
+    controlType: 'select',
+    options: ['A', 'B', 'C']
+  },
+
+  { label: 'ZipCode', key: 'zipCode', type: 'text', controlType: 'input' }
+];
 
 
-export { piFields };
+export { piFields,otherFields,identity,address };

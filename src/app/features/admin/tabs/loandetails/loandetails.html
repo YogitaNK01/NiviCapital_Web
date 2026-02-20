@@ -19,52 +19,64 @@
                           <div class="detail-row">
                             <span class="text-body-1 text-mute">Loan Amount</span>
                             <div class="text-end d-flex flex-column gap-1 ">
-                              <div class="text-body-1 ">{{ loanDetails.loanAmount??"-" }}</div>
-                              <small class="text-mute text-body-1 ">{{ loanDetails.loanAmount??"-" }}</small>
+                              <!-- <div class="text-body-1 ">{{ loanDetails.loanAmount??"-" }}</div>
+                              <small class="text-mute text-body-1 ">{{ loanDetails.loanAmount??"-" }}</small> -->
+                              <div class="text-body-1 ">{{ loanDetails.loanAmount.inr }}</div>
+                              <small class="text-mute text-body-1 ">{{ loanDetails.loanAmount.usd }}</small>
                             </div>
                           </div>
 
                           <div class="detail-row">
                             <span class="text-body-1 text-mute">Rate Of Interest</span>
-                            <span class="text-body-1 ">{{ loanDetails.interestRate??"-" }}</span>
+                            <span class="text-body-1 ">{{ loanDetails.rateOfInterest??"-" }}</span>
                           </div>
 
                           <div class="detail-row">
                             <span class="text-body-1 text-mute">Tenure</span>
                             <div class="text-end d-flex flex-column gap-1">
-                              <div class="text-body-1 ">{{ loanDetails.tenure??"-" }}</div>
-                              <small class="text-mute text-body-1 ">{{ loanDetails.tenure??'-' }}</small>
+                              <!-- <div class="text-body-1 ">{{ loanDetails.tenure??"-" }}</div>
+                              <small class="text-mute text-body-1 ">{{ loanDetails.tenure??'-' }}</small> -->
+                              <div class="text-body-1 ">{{ loanDetails.tenure.years }}</div>
+                              <small class="text-mute text-body-1 ">{{ loanDetails.tenure.months }}</small>
+                            <
                             </div>
                           </div>
 
                           <div class="detail-row">
                             <span class="text-body-1 text-mute">Monthly EMI</span>
                             <div class="text-end d-flex flex-column gap-1">
-                              <div class="text-body-1 ">{{ loanDetails.productCode??"-" }}</div>
-                              <small class="text-mute text-body-1 ">{{ loanDetails.productCode??"-"}}</small>
+                              <!-- <div class="text-body-1 ">{{ loanDetails.productCode??"-" }}</div>
+                              <small class="text-mute text-body-1 ">{{ loanDetails.productCode??"-"}}</small> -->
+                               <div class="text-body-1 ">{{ loanDetails.monthlyEmi.inr }}</div>
+                              <small class="text-mute text-body-1 ">{{ loanDetails.monthlyEmi.usd }}</small>
                             </div>
                           </div>
 
                           <div class="detail-row">
                             <span class="text-body-1 text-mute">Total Payable</span>
                             <div class="text-end d-flex flex-column gap-1">
-                              <div class="text-body-1 ">{{ loanDetails.productCode??"-" }}</div>
-                              <small class="text-mute text-body-1 ">{{ loanDetails.productCode??"-" }}</small>
+                              <!-- <div class="text-body-1 ">{{ loanDetails.productCode??"-" }}</div>
+                              <small class="text-mute text-body-1 ">{{ loanDetails.productCode??"-" }}</small> -->
+                               <div class="text-body-1 ">{{ loanDetails.totalPayable.inr }}</div>
+                              <small class="text-mute text-body-1 ">{{ loanDetails.totalPayable.usd }}</small>
+                            
                             </div>
                           </div>
 
                           <div class="detail-row">
                             <span class="text-body-1 text-mute">Charges</span>
                             <div class="text-end d-flex flex-column gap-1">
-                              <div class="text-body-1 ">{{ loanDetails.productCode??"-" }}</div>
-                              <small class="text-mute text-body-1 ">{{ loanDetails.productCode??"-"}}</small>
+                              <!-- <div class="text-body-1 ">{{ loanDetails.productCode??"-" }}</div>
+                              <small class="text-mute text-body-1 ">{{ loanDetails.productCode??"-"}}</small> -->
+                              <div class="text-body-1 ">{{ loanDetails.charges.inr }}</div>
+                              <small class="text-mute text-body-1 ">{{ loanDetails.charges.usd }}</small>
                             </div>
                           </div>
 
                           <div class="detail-row border-0 pb-0">
                             <span class="text-body-1 text-mute">Category</span>
                             <span class="text-body-1 category-border badge border border-warning px-3">
-                              {{ loanDetails.productCode??"-" }}
+                              {{ loanDetails.category ??"-" }}
                             </span>
                           </div>
                         </div>

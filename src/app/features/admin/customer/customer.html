@@ -1,3 +1,9 @@
+<!-- 
+@if(!showTable ){
+<div class="no-data-container">
+  <img src="/assets/images/no-data.png" alt="No Data" class="no-data-image" />
+  <p class="no-data-text">No customer data available.</p></div>
+} @else { -->
 <div class="dashboard main-content-feature">
   <!-- Header -->
   <div class="content-header">
@@ -80,9 +86,8 @@
 
 
         <div class="add-button">
-          <app-buttons label="Add Customer" class="btn btn-icon Add btncustomClass" [outline]="true">
-            <img src="/assets/images/icons/addred.svg" alt="Add" [routerLink]="['/customer/details']"
-              [queryParams]="{ mode: 'add' }">
+          <app-buttons label="Add Customer" class="btn btn-icon Add btncustomClass" [outline]="true" (click)="addcustomer()">
+            <img src="/assets/images/icons/addred.svg" alt="Add"  >
 
           </app-buttons>
         </div>
@@ -91,13 +96,25 @@
 
     <!-- Table -->
    
-    <app-tables
+    <!-- <app-tables
   [columns]="columns"
   [data]="filteredData"
   [pageSize]="6">
-</app-tables>
-  </div>
+</app-tables> -->
 
-  
+@if (!nodata) {
+  <app-tables
+    [columns]="columns"
+    [data]="filteredData"
+    [pageSize]="6">
+  </app-tables>
+} @else {
+  <div class="text-label text-center mt-4">
+    No Active Customer...
+  </div>
+}
+
+  </div>
     
 </div>
+<!-- } -->

@@ -8,6 +8,9 @@
   padding-bottom: $spacing_14;
 }
 
+.table-container.no-border {
+  border: none;
+}
 // Material Table Overrides
 ::ng-deep {
 
@@ -103,7 +106,7 @@
 
   &.active {
     border-color: $primary-500 !important;
-
+    background-color: none!important;
     /* target inner text or number */
     .pagecount {
       color: $primary-500 !important;
@@ -139,6 +142,16 @@
   }
 }
 //----------------status (penidng/completed)-----------------------
+
+ .active {
+    background-color: $info-100;
+    color: $neutral-900;
+  }
+   .Pending {
+    background-color: $warning-container;
+    color: $warning-text-dark;
+  }
+
 .status-badge {
   display: inline-flex;
   align-items: center;
@@ -148,9 +161,18 @@
   font-weight: 500;
   line-height: 1.5;
 
+  
   &.status-completed {
     background-color: #D1FAE5;
     color: #065F46;
+  }
+   &.status-verified {
+    background-color: $success-100;
+    color: $success-900;
+  }
+   &.status-active {
+    background-color: $info-100;
+    color: #25262F;
   }
 
   &.status-pending {
@@ -163,3 +185,16 @@
     color: #991B1B;
   }
 }
+
+  .completed {
+    background-color: #D1FAE5;
+    color: #065F46;
+  }
+   .status .verified {
+    background-color: $success-100;
+    color: $success-900;
+  }
+   .status-active {
+    background-color: $info-100;
+    color: #25262F;
+  }

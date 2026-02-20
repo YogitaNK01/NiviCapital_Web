@@ -1,29 +1,59 @@
-import { Component, Pipe } from '@angular/core';
+import { Component, Input, forwardRef } from '@angular/core';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
-import { FormsModule } from '@angular/forms';
 import { DatePipe } from '@angular/common';
 import { MAT_DATE_FORMATS } from '@angular/material/core';
 import { MY_DATE_FORMATS } from '../../../shared/config/date-format';
 import { MatMomentDateModule } from '@angular/material-moment-adapter';
+import { ControlValueAccessor, NG_VALUE_ACCESSOR, FormsModule } from '@angular/forms';
 
 
 @Component({
   selector: 'app-datepickernew',
-  imports: [MatFormFieldModule, MatInputModule, MatDatepickerModule,MatMomentDateModule ,FormsModule,DatePipe ],
+  imports: [MatFormFieldModule, MatInputModule, MatDatepickerModule,MatMomentDateModule ,FormsModule ],
   standalone: true,
   templateUrl: './datepickernew.html',
   styleUrl: './datepickernew.scss',
   providers: [
-    { provide: MAT_DATE_FORMATS, useValue: MY_DATE_FORMATS }
-  ],
+  { provide: MAT_DATE_FORMATS, useValue: MY_DATE_FORMATS },
+  {
+    provide: NG_VALUE_ACCESSOR,
+    useExisting: forwardRef(() => Datepickernew),
+    multi: true
+  }
+]
 })
 export class Datepickernew {
-selectedDate = new Date();
+selectedDate :Date | null = null;
+ @Input() label: string = '';
 
-onPickerOpen() {
+ onChange = (_: any) => {};
+  onTouched = () => {};
+
+  writeValue(value: Date | null): void {
+    this.selectedDate = value;
+  }
+
+  registerOnChange(fn: any): void {
+    this.onChange = fn;
+  }
+
+  registerOnTouched(fn: any): void {
+    this.onTouched = fn;
+  }
+
+  setDisabledState(isDisabled: boolean): void {
+    // optional if needed
+  }
+
+  onDateChange(val: Date | null) {
+    this.selectedDate = val;
+    this.onChange(val);
+    this.onTouched();
+  }
+   onPickerOpen() {
   setTimeout(() => {
     const overlay = document.querySelector('.cdk-overlay-pane .mat-datepicker-content');
     if (overlay && this.selectedDate) {
@@ -39,3 +69,5 @@ onPickerOpen() {
 }
 
 }
+
+

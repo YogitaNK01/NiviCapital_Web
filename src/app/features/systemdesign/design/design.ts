@@ -227,17 +227,17 @@ myDate: Date | null = null;
 
 
 basicConfig: UploadConfig = {
-    accept: '.svg, .png, .jpg, .jpeg',
     maxSize: 10,
     label: 'Upload File',
-    helperText: 'SVG, PNG, JPEG (max. 10 MB)'
+    accept: '.svg, .png, .jpg, .jpeg, .pdf, .tiff, .heic',
+    helperText: 'JPG, JPEG, PDF, PNG, TIFF, SVG, HEIC (max. 10 MB)'
   };
 
   customConfig: UploadConfig = {
-    accept: '.png, .jpg',
-    maxSize: 5,
     label: 'School Logo',
-    helperText: 'PNG, JPEG (max. 5 MB)'
+    accept: '.svg, .png, .jpg, .jpeg, .pdf, .tiff, .heic',
+    maxSize: 10,
+    helperText: 'JPG, JPEG, PDF, PNG, TIFF, SVG, HEIC (max. 10 MB)'
   };
 
   pdfConfig: UploadConfig = {

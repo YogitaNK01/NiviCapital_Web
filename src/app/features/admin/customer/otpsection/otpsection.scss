@@ -1,0 +1,72 @@
+@use 'variables' as *;
+@use 'typography' as *;
+@use 'common' as *;
+
+.otp-section{
+  
+    gap: $spacing_14;
+}
+.otp-label{
+  color:$secondary-text;
+  font-weight: 500;
+}
+.otp-subtext{
+  color: $neutral-text-secondary;
+  font-weight: 400;
+}
+.otp-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+   
+}
+
+.otp-boxes {
+  display: flex;
+  gap: 10px;
+   justify-content: flex-start; 
+}
+
+.otp-input {
+  max-width: 160px;
+  width: 100%;
+  height: 52px;
+  border: 1.5px solid #2e7d32;
+  border-radius: 6px;
+  text-align: center;
+  font-size: 18px;
+  font-weight: 500;
+  outline: none;
+}
+
+.otp-input:focus {
+  border-color: #1b5e20;
+}
+
+.verify-btn ,.resend-btn {
+  height: 52px;
+  padding: 0 20px;
+  border-radius: 6px;
+  border: none;
+  background-color: $primary-400-main;
+  color: $bg;
+  font-size: 14px;
+  cursor: pointer;
+  white-space: nowrap;
+
+    &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    background-color: $primary-100;
+    color: $primary-200;
+  }
+}
+.resend{
+  color:$secondary-text;
+}
+.otp-inline {
+  display: inline-flex;
+  gap: 6px;
+  font-size: 14px;
+  align-items: center;
+}

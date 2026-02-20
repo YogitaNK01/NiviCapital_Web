@@ -1,5 +1,6 @@
 @use 'variables' as *;
 @use 'typography' as *;
+@use 'common' as *;
 
 .dropdown-container {
   width: 100%;
@@ -63,7 +64,7 @@
   box-shadow: 0 $spacing_4 $spacing_18 0 rgba(0, 0, 0, 0.10);
   padding: $spacing_5;
   height: auto;
-  overflow: hidden;
+  // overflow: hidden;
 }
 
 

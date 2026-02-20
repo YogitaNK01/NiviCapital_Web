@@ -1,7 +1,7 @@
 
 <div class="form-group">
-  <div class="datepicker-header">
-    <div class="label">Select date</div>
+  <div class="datepicker-header_">
+    <div class="label datrpicker-label">{{label}}<span class="text-danger">*</span></div>
     <div class="selected-date">
       <!-- {{ selectedDate  }} -->
     </div>
@@ -12,7 +12,9 @@
       matInput
       [matDatepicker]="picker"
       [(ngModel)]="selectedDate"
-      name="date" 
+      (ngModelChange)="onDateChange($event)"
+      placeholder="DD/MM/YYYY"
+      
     />
 
     <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>

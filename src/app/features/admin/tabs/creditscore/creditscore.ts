@@ -41,7 +41,7 @@ export class Creditscore {
 
   @ViewChild('gaugeCanvas', { static: false }) gaugeCanvas!: ElementRef<HTMLCanvasElement>;
 
-  creditScore:any;
+  creditScore=780;
  reportDate: string = '20-06-2025';
   source: string = 'TransUnion CIBIL';
 

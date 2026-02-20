@@ -25,11 +25,38 @@
   position: relative;
   display: flex;
   align-items: center;
+  
 
   &.disabled {
     opacity: 0.6;
     cursor: not-allowed;
   }
+}
+
+.input-prefix {
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+  width: 72px;                 // 👈 fixed width
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border-right: 1px solid #d6d6d6;
+  z-index: 2;
+ padding: 14px 16px;
+}
+
+.input-prefix img {
+  width: 22px;
+  height: 16px;
+}
+.input-field.has-prefix {
+  padding-left: 84px;  
+  // border: none;
+  // border-radius: 0;
+          
 }
 
 .input-field {
@@ -43,6 +70,7 @@
   border-radius: $border_radius_s;
   border: $border_2 solid $input-default;
   font-size: $spacing_7;
+  box-sizing: border-box;
 
   &:focus {
     border-color: $input-focus;
@@ -57,8 +85,12 @@
   }
 
   &:disabled {
-    background-color: #f9fafb;
+    background-color: #F5F5F5;
     cursor: not-allowed;
+    &::placeholder {
+    color: black;
+  }
+  
   }
 
   &.has-left-icon {
@@ -160,4 +192,34 @@
   &.success {
     color: $success-text-dark;
   }
+
+
+ 
+
 }
+ .right-btn {
+  position: absolute;
+  right: $spacing_7;
+  top: 50%;
+  transform: translateY(-50%);
+  border-radius: 6px;
+ 
+  @media (max-width:480px) {
+    right: 1px;
+  }
+
+  .btncustomClass {
+  width: 95px;
+  }
+}
+::ng-deep app-buttons .btn-outline {
+  padding: 4px 8px !important;
+}
+ 
+ 
+ 
+.right-btn:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+ 

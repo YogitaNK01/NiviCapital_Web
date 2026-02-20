@@ -1,0 +1,37 @@
+<div class="success mobiledetails">
+  <div class="card  service-card-success border-0 m-auto">
+    <div class="card-body d-flex flex-column p-0">
+      <div class="service-icon1"><img src="assets/images/icons/tick-circle.svg" alt="product1"
+          class="success-tick-icon">
+      </div>
+
+      <div class="msg_data d-flex flex-column">
+        <div class="product-info d-flex flex-column gap-3">
+          <div class="text-dp-3-bold successmsg text-center">{{title}}</div>
+          <p class="text-label-data-head desc" [innerHTML]="description">
+          </p>
+        </div>
+
+        <div class="NC-id-box d-flex align-items-center justify-content-center m-auto ">
+          <div class="text-dp-3-bold nc-id-label">{{boxText}} - {{id}}</div>
+
+        </div>
+      </div>
+
+
+
+      <div class="footer-btns  d-flex justify-content-center space-evenly align-items-center flex-column flex-lg-row ">
+
+        <!-- <app-buttons label="Back to dashboard" [outline]="true" class="btncustomClass primary" (click)="goToDashboard()"></app-buttons>
+
+            <app-buttons label="Proceed to KYC" color="primary" class="btncustomClass btn" (click)="proceedtoKYC()"></app-buttons> -->
+
+        <app-buttons *ngFor="let btn of buttons" [label]="btn.label" [outline]="btn.outline" [color]="btn.color" [class]="btn.class || ' btn'"
+          (click)="actionClick.emit(btn.action)">
+        </app-buttons>
+      </div>
+    </div>
+
+
+  </div>
+</div>

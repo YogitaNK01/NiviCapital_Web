@@ -4,6 +4,9 @@ import { Component, EventEmitter, Input, Output, OnChanges, SimpleChanges } from
 import { MatPaginatorModule } from '@angular/material/paginator';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { Checkbox } from '../checkbox/checkbox';
+import { MatMenuModule } from '@angular/material/menu';
+import { MatButtonModule } from '@angular/material/button';
+import { Router } from '@angular/router';
 
 
 export interface TableColumn {
@@ -20,7 +23,7 @@ export interface TableColumn {
 
 @Component({
   selector: 'app-tables',
-  imports: [CommonModule, HttpClientModule, MatTableModule, MatPaginatorModule, Checkbox],
+  imports: [CommonModule, MatMenuModule,MatButtonModule, MatTableModule, MatPaginatorModule, Checkbox],
   standalone: true,
   templateUrl: './tables.html',
   styleUrl: './tables.scss'
@@ -45,10 +48,10 @@ export class Tables implements OnChanges {
   selection: any[] = [];
 
 
-  constructor(private http: HttpClient) { }
+  constructor(private http: HttpClient,private router: Router) { }
 
   ngOnInit() {
-    this.displayedColumnKeys = ['select', ...this.columns.map(c => c.key)];
+    this.displayedColumnKeys = ['select', ...this.columns.map(c => c.key) , 'actions'];
     if (this.data && this.data.length > 0) {
       this.updatePagedData();
     }
@@ -162,15 +165,42 @@ export class Tables implements OnChanges {
     switch (status?.toLowerCase()) {
       case 'completed':
       case 'verified':
-        return { text: 'Completed', class: 'Completed' };
+        return { text: 'Completed', class: 'status-completed' };
       case 'pending':
         return { text: 'Pending', class: 'Pending' };
+         case 'active':
+        return { text: 'Active', class: 'activebtn' };
+        
       case 'document issue':
         return { text: 'Document Issue', class: 'Document-Issue' };
       default:
         return { text: '-', class: '' };
     }
   }
+
+
+  onEdit(row: any) {
+  console.log("Edit", row);
+  if(row.kycStatus == "PENDING"){
+     this.router.navigate(
+      ['/admin/customer/addcustomer'],
+      {
+        queryParams: {
+          step: 2,
+          custId: row.custId,
+          fname: row.fname,
+        lname: row.lname
+        }
+      }
+    );
+  }
+  
+}
+
+onDelete(row: any) {
+  console.log("Delete", row);
+  
+}
 
   
   

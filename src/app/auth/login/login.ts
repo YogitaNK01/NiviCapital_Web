@@ -30,6 +30,7 @@ export class Login {
   }
 
   onSubmit(form: NgForm): void {
+      //  this.router.navigate(['admin/dashboard']);
     // Validate form before submission
     if (!form.valid) {
       this.msgBox.open({
@@ -56,14 +57,15 @@ export class Login {
     this.main.getLogin(inputobj).subscribe({
       next: (res) => {
         this.isLoading = false;
-        this.msgBox.open({
-          title: 'Success',
-          message: res.message || 'Login successful',
-          showCancel: false,
-          onOk: () => {
-            this.router.navigate(['admin/dashboard']);
-          }
-        });
+        this.router.navigate(['admin/dashboard']);
+        // this.msgBox.open({
+        //   title: 'Success',
+        //   message: res.message || 'Login successful',
+        //   showCancel: false,
+        //   onOk: () => {
+        //     this.router.navigate(['admin/dashboard']);
+        //   }
+        // });
       },
       error: (err) => {
         this.isLoading = false;

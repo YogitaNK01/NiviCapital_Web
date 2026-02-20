@@ -13,12 +13,13 @@ import { Audittrail } from '../../features/admin/tabs/audittrail/audittrail';
 import { PiData } from '../../features/admin/tabs/pi-data/pi-data';
 import { PiiData } from '../../features/admin/tabs/pii-data/pii-data';
 import { KycData } from '../../features/admin/tabs/kyc-data/kyc-data';
+import { Losproduct } from '../../features/admin/tabs/losproduct/losproduct';
 
 export class TabConfig {
   id!: string;
   label!: string;
   routeKey!: string;
-  page!: Array<'losdetails' | 'customerdetails'>;
+  page!: Array<'losdetails' | 'customerdetails' | 'coapplicantdetails' | 'addcustomers'>;
   icon!: string;
   component!: Type<any>;
 }
@@ -26,32 +27,58 @@ export class TabConfig {
 export const TAB_CONFIG: TabConfig[] = [
 
   {
+    label: 'PI', icon: '/assets/images/sidemenu/user.svg',
+    id: 'pi', page: ['customerdetails','coapplicantdetails','addcustomers'],
+    routeKey: "pi",
+    component: PiData
+  },
+  {
+    label: 'PII', icon: '/assets/images/sidemenu/user.svg',
+    id: 'pii', page: ['customerdetails','coapplicantdetails','addcustomers'],
+    routeKey: "pii",
+    component: PiiData
+  },
+  {
+    label: 'KYC Details', icon: '/assets/images/sidemenu/user.svg',
+    id: 'kyc', page: ['customerdetails','coapplicantdetails','addcustomers'],
+    routeKey: "kyc",
+    component: KycData
+  },
+  {
+    label: 'Products', icon: '/assets/images/sidemenu/user.svg',
+    id: 'products', page: ['customerdetails'],
+    routeKey: "products",
+    component: ProductData
+  },
+
+  //los details
+  {
     label: 'Loan Details', icon: '/assets/images/sidemenu/user.svg',
     id: 'loan', page: ['losdetails'],
     routeKey: "loan",
-    component: Loandetails
+    component: Loandetails 
   },
   {
     label: 'Education', icon: '/assets/images/sidemenu/user.svg',
-    id: 'education', page: ['losdetails'],
+    id: 'education', page: ['losdetails','addcustomers'],
     routeKey: "education",
     component: Education
   },
   {
     label: 'Occupation', icon: '/assets/images/sidemenu/user.svg',
-    id: 'occupation', page: ['losdetails'],
+    id: 'occupation', page: ['losdetails','coapplicantdetails','addcustomers'],
     routeKey: "occupation",
     component: Occupation
   },
   {
     label: 'Assets and Liabilities', icon: '/assets/images/sidemenu/user.svg',
-    id: 'assets', page: ['losdetails'],
+    id: 'assets', page: ['losdetails','coapplicantdetails','addcustomers'],
     routeKey: "assets",
     component: Assets
   },
   {
     label: 'Monthly Expenditure', icon: '/assets/images/sidemenu/user.svg',
-    id: 'expenditure', page: ['losdetails'],
+    id: 'expenditure', page: ['losdetails','coapplicantdetails','addcustomers'],
     routeKey: "expenditure",
     component: Monthlyexp
   },
@@ -63,13 +90,13 @@ export const TAB_CONFIG: TabConfig[] = [
   },
   {
     label: 'Products', icon: '/assets/images/sidemenu/user.svg',
-    id: 'products', page: ['losdetails'],
+    id: 'products', page: ['losdetails','coapplicantdetails'],
     routeKey: "products",
-    component: ProductData
+    component: Losproduct
   },
   {
     label: 'Credit Score', icon: '/assets/images/sidemenu/user.svg',
-    id: 'credit', page: ['losdetails'],
+    id: 'credit', page: ['losdetails','coapplicantdetails'],
     routeKey: "credit",
     component: Creditscore
   },
@@ -92,30 +119,5 @@ export const TAB_CONFIG: TabConfig[] = [
     component: Audittrail
   },
 
-  // Customer details
-  {
-    label: 'PI', icon: '/assets/images/sidemenu/user.svg',
-    id: 'pi', page: ['customerdetails'],
-    routeKey: "pi",
-    component: PiData
-  },
-  {
-    label: 'PII', icon: '/assets/images/sidemenu/user.svg',
-    id: 'pii', page: ['customerdetails'],
-    routeKey: "pii",
-    component: PiiData
-  },
-  {
-    label: 'KYC Details', icon: '/assets/images/sidemenu/user.svg',
-    id: 'kyc', page: ['customerdetails'],
-    routeKey: "kyc",
-    component: KycData
-  },
-  {
-    label: 'Products', icon: '/assets/images/sidemenu/user.svg',
-    id: 'products', page: ['customerdetails'],
-    routeKey: "products",
-    component: ProductData
-  },
-
+  
 ];

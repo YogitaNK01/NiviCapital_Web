@@ -40,7 +40,7 @@ interface CibilHistory {
 
 @Component({
   selector: 'app-los-details',
-  imports: [CommonModule, MatTabsModule, MatIconModule, Quicklinks, Commontabs],
+  imports: [CommonModule, MatTabsModule, MatIconModule, Quicklinks, Commontabs, Buttons],
   standalone: true,
   templateUrl: './los-details.html',
   styleUrl: './los-details.scss'

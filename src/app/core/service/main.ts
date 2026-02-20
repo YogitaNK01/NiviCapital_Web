@@ -15,24 +15,30 @@ export interface LoginPayload {
   username: string;
   password: string;
 }
+export interface PageResponse<T> {
+  content: T[];
+  pageable: any;   // you can type later if needed
+}
 
 export interface UserData {
-  cif: string;
+ id: string;
+  custId:string;
+  ncId:string
   firstName: string;
   lastName: string;
-  phoneNumber: string;
+  mobile: string;
   email: string;
+  status: string;
   kycStatus: string;
-  userId: string;
-  id: string;
-  createdDateTime: string;
+  createdAt: number[];
 }
 
 @Injectable({
   providedIn: 'root'
 })
 export class Main {
-  private baseUrl = environment.apiBaseUrl;
+  // private baseUrl = environment.apiBaseUrl;
+  private baseUrl = "/nivicapstage/api";
   private kycSubject = new BehaviorSubject<any>(this.getFromSession());
   kyc$ = this.kycSubject.asObservable();
 
@@ -52,11 +58,13 @@ export class Main {
     );
   }
 
-  getAllUsers(): Observable<ApiResponse<UserData[]>> {
-    return this.http.get<ApiResponse<UserData[]>>(
-      `${this.baseUrl}/admin/users`,
-    );
-  }
+ 
+  getAllUsers(): Observable<ApiResponse<PageResponse<UserData>>> {
+  return this.http.get<ApiResponse<PageResponse<UserData>>>(
+    `${this.baseUrl}/v1/customers/my-customers`
+  );
+}
+
 
   getKycDetails(id: string): Observable<any> {
     return this.http.get<any>(
@@ -129,4 +137,76 @@ export class Main {
   }
 
  
+//mask the mobile and email address
+  maskValue(value: string): string {
+  if (!value) return '';
+
+  // EMAIL
+  if (value.includes('@')) {
+    const [username, domain] = value.split('@');
+
+    if (username.length <= 2) {
+      return username[0] + '*@' + domain;
+    }
+
+    const visibleChars = 2;
+    const maskedPart = '*'.repeat(username.length - visibleChars);
+
+    return username.slice(0, visibleChars) + maskedPart + '@' + domain;
+  }
+
+  // MOBILE NUMBER
+  const visibleDigits = 7;
+  const cleanNumber = value.replace(/\D/g, ''); // remove spaces/dashes
+
+  if (cleanNumber.length <= visibleDigits) return cleanNumber;
+
+  const maskedLength = cleanNumber.length - visibleDigits;
+  return  cleanNumber.slice(-visibleDigits) +'*'.repeat(maskedLength) ;
 }
+
+// input validations 
+restrictInput(event: Event, type: 'text' | 'number') {
+    const input = event.target as HTMLInputElement;
+    let value = input.value;
+
+    if (type === 'text') {
+      // Keep only letters and spaces
+      value = value.replace(/[^A-Za-z ]+/g, '');
+
+      // Prevent multiple spaces in a row
+      value = value.replace(/\s{2,}/g, ' ');
+
+      // Prevent leading space
+      value = value.replace(/^\s+/, '');
+    }
+
+    if (type === 'number') {
+      // Keep only digits
+      value = value.replace(/[^0-9]+/g, '');
+    }
+
+    // Update only if changed (prevents cursor jumping)
+    if (value !== input.value) {
+      input.value = value;
+      input.dispatchEvent(new Event('input'));
+    }
+  }
+
+  // states and cities api
+
+   getIndianstates(): Observable<ApiResponse<UserData[]>> {
+    return this.http.get<ApiResponse<UserData[]>>(
+      `http://192.168.5.42:8085/nivicapstage/api/v1/states`,
+    );
+  }
+
+  
+   getIndianstatescities(id: string): Observable<ApiResponse<UserData[]>> {
+    return this.http.get<ApiResponse<UserData[]>>(
+      `http://192.168.5.42:8085/nivicapstage/api/v1/${id}/cities`,
+    );
+  }
+}
+
+

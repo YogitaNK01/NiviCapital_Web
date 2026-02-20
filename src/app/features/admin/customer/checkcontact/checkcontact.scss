@@ -1,0 +1,44 @@
+@use 'variables' as *;
+@use 'typography' as *;
+@use 'common' as *;
+
+.check-customer{
+    display: flex;
+    flex-direction: column;
+    gap: $spacing_14;
+}
+.header {
+    padding: $spacing_18;
+    gap: $spacing_14;
+    align-self: stretch;
+    box-shadow: none;
+}
+
+.text-header1-login {
+    color: #1E2939;
+
+    @media(max-width:480px) {
+        font-size: $font-size-dp_3; //32px
+        line-height: $spacing_18; //40px
+        letter-spacing: 0.32px;
+    }
+}
+
+.text-label-data {
+    font-weight: 400;
+}
+
+.searchbtn {
+    // min-width: 200px !important;
+    height: 52px;
+
+     @media(max-width:480px) {
+      flex-grow: 1;
+         min-width: 150px !important;
+     }
+}
+
+.btncustomClass {
+    min-width: 200px !important;
+    // height: 52px;
+}

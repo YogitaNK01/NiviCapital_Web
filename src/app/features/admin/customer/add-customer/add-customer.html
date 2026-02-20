@@ -1,0 +1,238 @@
+<div class="dashboard main-content-feature">
+  <div class="content-header">
+    <div class="content-title text-dp-3-bold">
+      Add Customer
+    </div>
+    <div class="user-info-breadcrumb">
+
+      <div>
+        <nav aria-label="breadcrumb" class="breadcrumb">
+          <ol class="breadcrumb-list">
+            <li class="breadcrumb-item text-common "><a routerLink="/home">Home</a></li>
+            <li class="breadcrumb-item active text-common " aria-current="page">Customer</li>
+          </ol>
+        </nav>
+
+      </div>
+    </div>
+  </div>
+  <div class="commonbox">
+    <div class="stepper">
+      <div class="step" *ngFor="let step of steps; index as i" [class.active]="currentStep === i"
+        [class.completed]="i < currentStep" [class.disabled]="i > maxAllowedStep" (click)="goToStep(i)">
+        <div class="step-circle">
+          <span class="step-number">{{ i + 1 | number: '2.0' }}</span>
+        </div>
+
+        <div class="step-content">
+          <div class="step-title table-head">{{ step.title }}</div>
+          <div class="step-desc text-body-2">{{ step.desc }}</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="step-body">
+
+
+      @if (currentStep === 0) {
+      <form #registerform="ngForm" (ngSubmit)="createcustId(registerform)" id="registerform"
+        class="mobiledetails d-flex flex-column ">
+        <div class="row  ">
+          <div class="col-lg-4 col-sm-12 ">
+
+            <app-inputfield type="text" name="fname" ngModel [required]="true" #fname="ngModel" label="First Name"
+              placeholder="Your First Name" helpText="Help text" pattern="^[A-Za-z ]+$" minlength="2" [maxlength]="25"
+              (input)="main.restrictInput($event, 'text')">
+            </app-inputfield>
+
+
+            <div class="text-danger mt-1" *ngIf="fname.invalid && fname.touched">
+              <small *ngIf="fname.errors?.['required']">First name is required</small>
+              <small *ngIf="fname.errors?.['pattern']">Only letters & spaces allowed</small>
+              <small *ngIf="fname.errors?.['minlength']">
+                Please enter a valid name
+              </small>
+
+              <small *ngIf="fname.errors?.['maxlength']">
+                Please enter a valid name
+              </small>
+            </div>
+          </div>
+          <div class="col-lg-4 col-sm-12 ">
+
+            <app-inputfield type="text" name="mname" ngModel [required]="false" #mname="ngModel" label="Middle Name"
+              placeholder="Your Middle Name" helpText="Help text" pattern="^[A-Za-z ]+$" minlength="2" [maxlength]="25"
+              (input)="main.restrictInput($event, 'text')" [disabled]="ismiddlename">
+            </app-inputfield>
+
+            <div class="text-danger mt-1" *ngIf="mname.invalid && mname.touched">
+              <small *ngIf="mname.errors?.['required']">Middle name is required</small>
+              <small *ngIf="mname.errors?.['pattern']">Only letters & spaces allowed</small>
+              <small *ngIf="mname.errors?.['minlength']">
+                Please enter a valid name
+              </small>
+
+              <small *ngIf="mname.errors?.['maxlength']">
+                Please enter a valid name
+              </small>
+            </div>
+            <div class="form-check p-0 ">
+              <app-checkbox [checked]="ismiddlename" [disabled]="false" [indeterminate]="false"
+                label="I don’t have middle name" (checkedChange)="onCheckboxChange($event)">
+              </app-checkbox>
+
+
+            </div>
+          </div>
+
+          <div class="col-lg-4 col-sm-12  ">
+
+            <app-inputfield type="text" name="lname" ngModel [required]="true" #lname="ngModel" label="Last Name"
+              placeholder="Your Last Name" helpText="Help text" pattern="^[A-Za-z ]+$" minlength="2" [maxlength]="25"
+              (input)="main.restrictInput($event, 'text')">
+            </app-inputfield>
+
+            <div class="text-danger mt-1" *ngIf="lname.invalid && lname.touched">
+              <small *ngIf="lname.errors?.['required']">Last name is required</small>
+              <small *ngIf="lname.errors?.['pattern']">Only letters & spaces allowed</small>
+              <small *ngIf="lname.errors?.['minlength']">
+                Please enter a valid name
+              </small>
+
+              <small *ngIf="lname.errors?.['maxlength']">
+                Please enter a valid name
+              </small>
+            </div>
+          </div>
+
+          <!--  mob-email  -->
+
+
+          <div class="d-flex flex-column"
+            [ngClass]="otpsent ? 'col-lg-12 col-sm-12 d-flex gap-3' : 'col-lg-12 col-sm-12'">
+            <div class="d-flex gap-3">
+              <div class="phone-wrapper d-flex align-items-center gap-3" [ngClass]="{
+       'w-50': otpsent,
+       'w-100': !otpsent,
+       'success-phone': otpVerifiedOk
+     }">
+                <app-inputfield type="tel" name="phone" [(ngModel)]="prefillPhone" [required]="true"
+                  pattern="^[6-9][0-9]{9}$" label="Mobile Number" placeholder="Enter Mobile Number" helpText="Help text"
+                  class="w-100" [readonly]="otpVerifiedOk" [maxlength]="10" #phone="ngModel"
+                  (input)="main.restrictInput($event, 'number')" [showPhonePrefix]="true"
+                  [rightButtonText]="!otpsent && !otpVerifiedOk ? 'Send OTP' : ''" (rightButtonClick)="sendOtp()"
+                  [state]="otpState">
+
+                </app-inputfield>
+              </div>
+
+              @if (otpsent && !otpVerifiedOk) {
+              <div class="col-lg-6 col-sm-12 d-flex align-items-end justify-content-center ">
+                <app-otpsection [length]="6" (otpSubmit)="onOtpSubmit($event)" (timer)="onTimer($event)"
+                  (otpVerifiedSuccess)="onOtpVerifiedSuccess($event)" required></app-otpsection>
+
+
+
+              </div>
+              }
+            </div>
+
+            <div class="text-danger mt-1" *ngIf="phone.invalid && phone.touched">
+              <small *ngIf="phone.errors?.['required']">Phone number is required</small>
+              <small *ngIf="phone.errors?.['pattern']">Please enter a valid 10-digit phone number</small>
+            </div>
+          </div>
+
+          @if (otpsent && !otpVerifiedOk) {
+          <div class="row">
+            <div class="col-6"></div>
+
+            <div class="col-6">
+              <div class="text-danger mt-1 text-start">
+                <small *ngIf="otpmsg">{{otpmsg}}</small>
+              </div>
+              <div class="text-label-data otp-inline d-flex align-items-center">
+                <span class="text-label-data">Resend code in</span>
+                <span class="text-label-data resend-timer mx-2"> {{ resendSeconds | number:'2.0' }}</span>
+                <span class="resend-link text-dp-3-regular" (click)="resendOtp()" [class.disabled]=" isCounting">
+                  Resend OTP
+                </span>
+              </div>
+            </div>
+          </div>}
+
+
+
+          <div class="col-lg-12 mt-20 col-sm-12">
+
+
+            <app-inputfield type="text" name="email" ngModel [required]="false" #email="ngModel" label="Email Id"
+              placeholder="Enter Your Email ID " helpText="Help text"
+              pattern="[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}" minlength="10" [maxlength]="40">
+            </app-inputfield>
+
+            <div class="text-danger mt-1" *ngIf="email.invalid && email.touched">
+              <small *ngIf="email.errors?.['required']">Email address is required</small>
+              <small *ngIf="email.errors?.['pattern' ] && !email.errors?.['minlength']">Please enter a valid
+                email address</small>
+              <small *ngIf="email.errors?.['minlength']">
+                Please enter a valid email address between 10 and 40 characters
+              </small>
+              <small *ngIf="email.errors?.['maxlength']">
+                Please enter a valid email address
+              </small>
+            </div>
+
+          </div>
+
+
+
+
+          <div class="col-lg-4 col-sm-12 mt-40 ">
+            <app-buttons type="submit" class="btn btncustomClass" [disabled]="!registerform.valid || !otpVerifiedOk"
+              color="primary" label="Create Customer ID"></app-buttons>
+
+          </div>
+        </div>
+
+
+      </form>
+      }
+
+
+
+      @if (currentStep === 1) {
+      <div class="success mobiledetails d-flex flex-column">
+
+        <app-successbox title="Customer Created Successfully!" [description]="description1" [boxText]="custname"
+          [id]="custid" [buttons]="[
+    { label: 'Back to Dashboard', action: 'ToDashboard', outline: true, color: '',class: 'btncustomClass'  },
+    { label: 'Proceed to KYC', action: 'proceedToKYC', outline: false, color: 'primary',class: 'btncustomClass'  }
+  ]" (actionClick)="handleSuccessAction($event)">
+        </app-successbox>
+
+      </div>
+
+      }
+
+      @if (currentStep === 2) {
+      <div class="mobiledetails">
+        <app-uploadkyc (nextStep)="goToStep(3)" (prevstep)="back()" (kycid)="setKycId($event)"></app-uploadkyc>
+      </div>
+      }
+
+      @if (currentStep === 3) {
+      <div class="success mobiledetails d-flex flex-column">
+        <app-successbox [title]="'Success!'" [description]="description2" [boxText]="custname" [id]="kycIdFromApi"
+          [buttons]="[
+    { label: 'Go to Dashboard', action: 'ToDashboard', outline: false, color: 'primary' , class: 'btncustomClass'  }
+  ]" (actionClick)="handleSuccessAction($event)"></app-successbox>
+      </div>
+      }
+
+    </div>
+
+  </div>
+
+
+</div>

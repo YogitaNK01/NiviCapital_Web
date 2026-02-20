@@ -24,27 +24,30 @@ import { TableData } from '../../../core/service/table-data';
 // Types & Interfaces for type safety
 interface UserData {
   id: string;
-  cif: string;
+  custId:string;
+  ncId:string
   firstName: string;
   lastName: string;
-  phoneNumber: string;
+  mobile: string;
   email: string;
+  status: string;
   kycStatus: string;
-  createdDateTime: number[];
-  userId: string;
+  createdAt: number[];
+  
 }
 
 interface TransformedUserData {
-  id_data: number;
-  CIFID: string;
-  CustomerName: string;
+  // id: string;
+  custId:string;
+  ncId:string
+  firstName: string;
+  lastName: string;
   mobile: string;
   email: string;
+  status: string;
   kycStatus: string;
-  loanStatus: string;
-  registrationDate: string;
-  userId: string;
-  Id: string;
+  createdAt: number[];
+  // Id: string;
 }
 
 // Configuration Constants
@@ -75,17 +78,19 @@ export class Customer implements OnInit, OnDestroy {
 
     columns = [
     {
-      key: 'CIFID',
-      label: 'CIF ID',
+      key: 'custId',
+      label: 'CUSTID',
       class: 'cifstyle',
       clickable: true,
       onClick: (row: { Id: any; }) => this.getpidata(row.Id),
       routerLink: '/admin/customerdetails',
       queryParams: "{ mode: 'view', id: row.id }"
     },
-    { key: 'CustomerName', label: 'Customer Name' },
+    { key: 'ncId', label: 'NCID' },
+    { key: 'firstName', label: 'First Name' },
+     { key: 'lastName', label: 'Last Name' },
     { key: 'mobile', label: 'Mobile' },
-    { key: 'email', label: 'Eamil' },
+    { key: 'email', label: 'Email' },
     {
       key: 'status',
       label: 'Status',
@@ -95,17 +100,18 @@ export class Customer implements OnInit, OnDestroy {
     },
 
     {
-      key: 'loanStatus',
-      label: 'Loan Status',
+      key: 'kycStatus',
+      label: 'KYC Status',
       class: 'status',
-      classFn: (row: any) => this.getStatusClass(row.loanStatus).class,
-      transform: (row: any) => this.getStatusClass(row.loanStatus).text
+      classFn: (row: any) => this.getStatusClass(row.kycStatus).class,
+      transform: (row: any) => this.getStatusClass(row.kycStatus).text
     },
-    { key: 'registrationDate', label: 'Registration Date' },
+    // { key: 'registrationDate', label: 'Registration Date' },
 
   ];
 
-
+showtable:boolean = true;
+nodata:boolean = false;
   private destroy$ = new Subject<void>();
 
   customerGrowth = '12% from last month';
@@ -175,16 +181,21 @@ export class Customer implements OnInit, OnDestroy {
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (response) => {
-          this.AlluserData = response.data;
-          this.fullData = this.tableDataService.transformUserData(response.data);
+          let resdate= response.data.content;
+          if(resdate.length == 0){
+            this.nodata = true;
+          } else {
+          this.AlluserData = resdate;
+          this.fullData = this.tableDataService.transformUserData(resdate);
           this.filteredData = this.fullData;
           this.totalItems = this.fullData.length;
-          this.kycCompleted = this.tableDataService.calculateKycMetrics(response.data, this.totalItems);
+          this.kycCompleted = this.tableDataService.calculateKycMetrics(resdate, this.totalItems);
           this.dataSource.sort = this.sort;
           this.updatePagedData();
 
           this.tableData = this.fullData; // Initialize tableData for filters
           this.cdr.detectChanges();
+          }
         },
         error: (error) => {
           console.error('Error fetching users:', error);
@@ -320,6 +331,18 @@ export class Customer implements OnInit, OnDestroy {
     return this.selection.length > 0 && this.selection.length < this.dataSource.data.length;
   }
 
+  addcustomer(){
+    console.log("add");
+    
+    this.router.navigate(['admin/customer/checkcontact']);
+  }
+
+  onEdit(data: any){
+    console.log(data);
+    
+  }
+  
+  
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();

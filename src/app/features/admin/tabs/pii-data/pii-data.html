@@ -6,7 +6,7 @@
         Verification</span></h3>
          <label class="text-dp-2-bold edu-label">Identity & Residency</label>
       <hr _ngcontent-ng-c3098784094="" class="divider">
-          <div class="info-grid-img">
+          <!-- <div class="info-grid-img">
             <div class="info-item d-flex flex-column">
               <label class="text-label">Aadhaar Number</label>
               <p class="text-label-data">{{allpiikycdata.aadhaarNumber??"-"}}</p>
@@ -19,7 +19,31 @@
               <label class="text-label">Passport</label>
                 <p class="text-label-data">{{allpiikycdata.passportNumber??"-"}}</p>
             </div>
-          </div>
+          </div> -->
+          <form [formGroup]="form">
+      <div class="info-grid-img">
+        <div class="info-item d-flex flex-column" *ngFor="let field of identity; trackBy: trackByKey">
+
+          <label class="text-label">{{ field.label }}</label>
+
+          @if (mode === 'view') {
+          <p class="text-label-data">
+            {{ form.get(field.key)?.value || '-' }}
+          </p>
+          } @else {
+       
+
+           <!-- TEXT / EMAIL / TEL INPUT -->
+    @if (field.controlType === 'input') {
+      <div class="margin-bottom">
+      <app-inputfield
+        [attr.type]="field.type"
+        [placeholder]="'Enter ' + field.label"
+        [formControlName]="field.key">
+      </app-inputfield></div>
+    }
+  }
+  </div></div></form>
         </div>
 
         <!-- Permanent Address -->
@@ -27,41 +51,76 @@
         
           <label class="text-dp-2-bold edu-label">Permanent Address</label>
       <hr _ngcontent-ng-c3098784094="" class="divider">
-          <div class="info-grid-img">
+          <!-- <div class="info-grid-img">
             <div class="info-item d-flex flex-column">
               <label class="text-label">Address Line 1</label>
-              <p class="text-label-data">{{allpiikycdata.permanentAddress.line1??"-"}}</p>
+              <p class="text-label-data">{{allpiikycdata.permanentAddress??"-"}}</p>
             </div>
             <div class="info-item d-flex flex-column">
               <label class="text-label">Address Line 2</label>
-              <p class="text-label-data">{{allpiikycdata.permanentAddress.line2??"-"}}</p>
+              <p class="text-label-data">{{allpiikycdata.permanentAddress??"-"}}</p>
             </div>
             <div class="info-item d-flex flex-column">
               <label class="text-label">Country</label>
-              <p class="text-label-data">{{allpiikycdata.permanentAddress.country??"-"}}</p>
+              <p class="text-label-data">{{allpiikycdata.permanentAddress??"-"}}</p>
             </div>
             <div class="info-item d-flex flex-column">
               <label class="text-label">State</label>
-              <p class="text-label-data">{{allpiikycdata.permanentAddress.state??"-"}}</p>
+              <p class="text-label-data">{{allpiikycdata.permanentAddress??"-"}}</p>
             </div>
             <div class="info-item d-flex flex-column">
               <label class="text-label">City</label>
-              <p class="text-label-data"> {{allpiikycdata.permanentAddress.city??"-"}}</p>
+              <p class="text-label-data"> {{allpiikycdata.permanentAddress??"-"}}</p>
             </div>
             <div class="info-item d-flex flex-column">
               <label class="text-label">Zipcode</label>
-              <p class="text-label-data">{{allpiikycdata.permanentAddress.zipCode??"-"}}</p>
+              <p class="text-label-data">{{allpiikycdata.permanentAddress??"-"}}</p>
             </div>
 
 
-          </div>
+          </div> -->
+           <form [formGroup]="form">
+      <div class="info-grid-img">
+        <div class="info-item d-flex flex-column" *ngFor="let field of address; trackBy: trackByKey">
+
+          <label class="text-label">{{ field.label }}</label>
+
+          @if (mode === 'view') {
+          <p class="text-label-data">
+            {{ form.get(field.key)?.value || '-' }}
+          </p>
+          } @else {
+       
+
+           <!-- TEXT / EMAIL / TEL INPUT -->
+    @if (field.controlType === 'input') {
+      <div class="margin-bottom">
+      <app-inputfield
+        [attr.type]="field.type"
+        [placeholder]="'Enter ' + field.label"
+        [formControlName]="field.key">
+      </app-inputfield></div>
+    }
+    <!-- DROPDOWN -->
+    @if (field.controlType === 'select') {
+      
+      <app-dropdown
+    [options]="toDropdownOptions(field.options)"
+    [formControlName]="field.key"
+    [placeholder]="field.label"
+    (selectedValueChange)="onSelectionChange($event)"
+    [hasAvatar]="false">
+  </app-dropdown>
+    }
+  }
+  </div></div></form>
         </div>
 
         <!-- Current Address -->
         <div class="section">
           <h3 class="text-dp-2-bold edu-label">Current Address</h3>
           <hr _ngcontent-ng-c3098784094="" class="divider">
-          <div class="info-grid-img">
+          <!-- <div class="info-grid-img">
             <div class="info-item d-flex flex-column">
               <label class="text-label">Address Line 1</label>
               <p class="text-label-data">{{allpiikycdata?.correspondenceAddress?.line1 
@@ -100,13 +159,48 @@
     ?? allpiikycdata?.permanentAddress?.zipCode 
     ?? '-'}}</p>
             </div>
-          </div>
+          </div> -->
+           <form [formGroup]="form">
+      <div class="info-grid-img">
+        <div class="info-item d-flex flex-column" *ngFor="let field of address; trackBy: trackByKey">
+
+          <label class="text-label">{{ field.label }}</label>
+
+          @if (mode === 'view') {
+          <p class="text-label-data">
+            {{ form.get(field.key)?.value || '-' }}
+          </p>
+          } @else {
+       
+
+           <!-- TEXT / EMAIL / TEL INPUT -->
+    @if (field.controlType === 'input') {
+      <div class="margin-bottom">
+      <app-inputfield
+        [attr.type]="field.type"
+        [placeholder]="'Enter ' + field.label"
+        [formControlName]="field.key">
+      </app-inputfield></div>
+    }
+    <!-- DROPDOWN -->
+    @if (field.controlType === 'select') {
+      
+      <app-dropdown
+    [options]="toDropdownOptions(field.options)"
+    [formControlName]="field.key"
+    [placeholder]="field.label"
+    (selectedValueChange)=" ($event)"
+    [hasAvatar]="false">
+  </app-dropdown>
+    }
+  }
+  </div></div></form>
         </div>
 
-        <h3 class="reference text-dp-2-bold">Reference Details</h3>
+        <!-- <h3 class="reference text-dp-2-bold">Reference Details</h3> -->
 
         <!-- Reference 1 -->
-        <div class="section">
+        <!-- <div class="section">
           <h3 class="text-dp-2-bold edu-label">Reference 1</h3>
           <hr _ngcontent-ng-c3098784094="" class="divider">
           <div class="info-grid-img">
@@ -155,10 +249,10 @@
               <p class="text-label-data">400001</p>
             </div>
           </div>
-        </div>
+        </div> -->
 
         <!-- Reference 2 -->
-        <div class="section">
+        <!-- <div class="section">
           <h3 class="text-dp-2-bold edu-label">Reference 2</h3>
           <hr _ngcontent-ng-c3098784094="" class="divider">
           <div class="info-grid-img">
@@ -207,7 +301,7 @@
               <p class="text-label-data">400001</p>
             </div>
           </div>
-        </div>
+        </div> -->
 
         
       </div>

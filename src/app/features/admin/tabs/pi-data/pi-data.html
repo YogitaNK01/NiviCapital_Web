@@ -53,14 +53,12 @@
 
           <label class="text-label">{{ field.label }}</label>
 
-          @if (!isEditable) {
+          @if (mode == 'view') {
           <p class="text-label-data">
             {{ form.get(field.key)?.value || '-' }}
           </p>
           } @else {
-          <!-- <input [type]="field.type" class="form-control" [formControlName]="field.key"
-            [placeholder]="'Enter ' + field.label" /> -->
-
+       
 
            <!-- TEXT / EMAIL / TEL INPUT -->
     @if (field.controlType === 'input') {
@@ -106,7 +104,7 @@
   <div class="section">
     <h3 class="text-dp-2-bold edu-label">Spouse Details</h3>
     <hr _ngcontent-ng-c3098784094="" class="divider">
-    <div class="info-grid-img ">
+    <!-- <div class="info-grid-img ">
       <div class="info-item d-flex flex-column">
         <label class="text-label">First Name</label>
         <p class="text-label-data">Rajesh</p>
@@ -119,14 +117,38 @@
         <label class="text-label">Last Name</label>
         <p class="text-label-data">Doe</p>
       </div>
-    </div>
+    </div> -->
+
+    <form [formGroup]="form">
+      <div class="info-grid-img">
+        <div class="info-item d-flex flex-column" *ngFor="let field of otherFields; trackBy: trackByKey">
+
+          <label class="text-label">{{ field.label }}</label>
+
+          @if (mode === 'view') {
+          <p class="text-label-data">
+            {{ form.get(field.key)?.value || '-' }}
+          </p>
+          } @else {
+       
+
+           <!-- TEXT / EMAIL / TEL INPUT -->
+    @if (field.controlType === 'input') {
+      <app-inputfield
+        [attr.type]="field.type"
+        [placeholder]="'Enter ' + field.label"
+        [formControlName]="field.key">
+      </app-inputfield>
+    }
+  }
+  </div></div></form>
   </div>
 
   <!-- Father's Details -->
   <div class="section">
     <h3 class="text-dp-2-bold edu-label">Father's Details</h3>
     <hr _ngcontent-ng-c3098784094="" class="divider">
-    <div class="info-grid-img ">
+    <!-- <div class="info-grid-img ">
       <div class="info-item d-flex flex-column">
         <label class="text-label">First Name</label>
         <p class="text-label-data">Rajesh</p>
@@ -139,14 +161,37 @@
         <label class="text-label">Last Name</label>
         <p class="text-label-data">Doe</p>
       </div>
-    </div>
+    </div> -->
+    <form [formGroup]="form">
+      <div class="info-grid-img">
+        <div class="info-item d-flex flex-column" *ngFor="let field of otherFields; trackBy: trackByKey">
+
+          <label class="text-label">{{ field.label }}</label>
+
+          @if (mode === 'view') {
+          <p class="text-label-data">
+            {{ form.get(field.key)?.value || '-' }}
+          </p>
+          } @else {
+       
+
+           <!-- TEXT / EMAIL / TEL INPUT -->
+    @if (field.controlType === 'input') {
+      <app-inputfield
+        [attr.type]="field.type"
+        [placeholder]="'Enter ' + field.label"
+        [formControlName]="field.key">
+      </app-inputfield>
+    }
+  }
+  </div></div></form>
   </div>
 
   <!-- Mother's Details -->
   <div class="section">
     <h3 class="text-dp-2-bold edu-label">Mother's Details</h3>
     <hr _ngcontent-ng-c3098784094="" class="divider">
-    <div class="info-grid-img ">
+    <!-- <div class="info-grid-img ">
       <div class="info-item d-flex flex-column">
         <label class="text-label">First Name</label>
         <p class="text-label-data">Jenny</p>
@@ -159,7 +204,30 @@
         <label class="text-label">Last Name</label>
         <p class="text-label-data">Doe</p>
       </div>
-    </div>
+    </div> -->
+    <form [formGroup]="form">
+      <div class="info-grid-img">
+        <div class="info-item d-flex flex-column" *ngFor="let field of otherFields; trackBy: trackByKey">
+
+          <label class="text-label">{{ field.label }}</label>
+
+          @if (mode === 'view') {
+          <p class="text-label-data">
+            {{ form.get(field.key)?.value || '-' }}
+          </p>
+          } @else {
+       
+
+           <!-- TEXT / EMAIL / TEL INPUT -->
+    @if (field.controlType === 'input') {
+      <app-inputfield
+        [attr.type]="field.type"
+        [placeholder]="'Enter ' + field.label"
+        [formControlName]="field.key">
+      </app-inputfield>
+    }
+  }
+  </div></div></form>
   </div>
 
   <!-- <div class="section"><h3 class=""></h3></div> -->

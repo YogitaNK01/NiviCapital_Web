@@ -2,7 +2,7 @@
 
 
 <div class="input-container">
-  <label *ngIf="label && showLabel " class="input-label">{{ label }}</label>
+  <label *ngIf="label && showLabel " class="input-label">{{ label }}<span class="text-danger" *ngIf="required">*</span></label>
   
   <div class="input-wrapper" [ngClass]="{
     'error': state === 'error',
@@ -14,8 +14,13 @@
       <circle cx="11" cy="11" r="8"></circle>
       <path d="m21 21-4.35-4.35"></path>
     </svg> -->
+    <div *ngIf="showPhonePrefix" class="input-prefix">
+    <img src="https://flagcdn.com/w20/in.webp" class="flag-icon" alt="flag">
+    <span>+91</span>
+  </div>
 
     <input
+      [attr.maxlength]="maxlength"
        [attr.type]="currentType"
       [placeholder]="placeholder"
       [(ngModel)]="value"
@@ -23,15 +28,21 @@
       (blur)="onBlur()"
       [disabled]="disabled"
       class="input-field"
+      [readonly]="readonly"
       [ngClass]="{
         'has-left-icon': showSearch,
         'has-right-icon': showPasswordToggle || showStateIcon || showInfo || showSearch,
          'input-default': state === 'default',
         'input-error': state === 'error',
-        'input-success': state === 'success'
-      }"
+        'input-success': state === 'success',
+         'has-prefix': type === 'tel',
+      'has-right-btn': rightButtonText
+      }" 
+      
     />
-
+    <app-buttons  *ngIf="rightButtonText" label="" class="btncustomClass primary right-btn" [outline]="true" (click)="onRightButtonClick()">{{ rightButtonText }}</app-buttons>
+    
+   
     <!-- Right Icons Container -->
     <div class="icon-right-container">
      

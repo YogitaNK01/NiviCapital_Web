@@ -56,12 +56,14 @@
   display: flex;
   gap: $spacing_7;
   flex-wrap: wrap;
+  align-items: end;
 
   @media (max-width: 420px) {
     display: flex;
     flex-direction: column;
     padding: 10px 0;
      flex-wrap: nowrap;
+     align-items: stretch;
   }
 }
 .search-dropdown-status,.search-dropdown-type{
@@ -72,6 +74,10 @@
 ::ng-deep app-inputfield .input-field {
   height: 42px !important;
   width: 333px !important;
+
+  @media (max-width: 420px) {
+    width: 100% !important;
+  }
 }
 
 ::ng-deep app-dropdown .dropdown-container {}
@@ -217,7 +223,14 @@
     background-color: #D1FAE5;
     color: #065F46;
   }
-
+  &.status-verified {
+    background-color: $success-100;
+    color: $success-900;
+  }
+   &.status-active {
+    background-color: $info-100;
+    color: #25262F;
+  }
   &.status-pending {
     background-color: #FEF3C7;
     color: #92400E;
@@ -345,4 +358,16 @@
   .pagination-btn.active {
     display: inline-flex; /* show first, last, and active */
   }
+}
+
+
+.no-data-container{
+  display: flex;
+width: 740px;
+padding: var(--spacing-spacing_23, 60px);
+flex-direction: column;
+align-items: center;
+gap: 41px;
+border-radius: var(--border-radius-border-radius-m, 12px);
+background: var(--system-background-bg, #FFF);
 }

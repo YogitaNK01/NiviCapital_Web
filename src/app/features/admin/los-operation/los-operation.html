@@ -18,13 +18,48 @@
     </div>
   </div>
 
+  <!-- Stats Cards -->
+  <div class="stats-container">
+    @for(item of cards; track $index) {
+    <div class="stat-card commonbox">
+      <div class="metrics ">
+        <div class="key-data">
+          <div class="key-data1">
+            <p class=" text-common">Total Customers</p>
+            <h2 class=" text-dp-3-bold stat-label">45</h2>
+            <p class=" text-body-2 greentext">1213</p>
+          </div>
+          <img src="/assets/images/sidemenu/note.svg" alt="Message" class="key-card-image" />
+
+        </div>
+
+      </div>
+    </div>
+    }
+
+
+    <!-- <div class="stat-card commonbox">
+      <div class="metrics ">
+        <div class="key-data">
+          <div class="key-data1">
+            <p class=" text-common">KYC Completed</p>
+            <h2 class=" text-dp-3-bold">123</h2>
+            <p class=" text-body-2 greentext">1213</p>
+          </div>
+          <img src="/assets/images/sidemenu/note.svg" alt="Message" class="key-card-image" />
+
+        </div>
+
+      </div>
+    </div> -->
+  </div>
   <!-- search -->
 
-  <div class="search-bar commonbox">
+  <!-- <div class="search-bar commonbox">
     <div class="search-title text-common text-dp-2-bold">Search</div>
     <div class="search-data ">
 
-      <div class="search-dropdown">
+      <div class="search-dropdown ">
         <app-dropdown class="menu-dropdown" [options]="Kycstatus" [(selectedValue)]="selectedOption2"
           [customStyle]="true" placeholder="All" (selectedValueChange)="getkycstatuslos($event)">
         </app-dropdown>
@@ -38,18 +73,49 @@
       </div>
 
     </div>
-  </div>
+  </div> -->
 
 
   <!-- Customer Database Section -->
   <div class="database-section">
+    <!-- header  -->
+    <div class="section-header">
+      <div class="db-title text-dp-2-bold">Customer Database</div>
+      <div class="section-controls">
+        <div class="search-box">
+          <app-inputfield label="Input Label" type="text" placeholder="Search for result" helpText="Help text"
+            [showSearch]="true" [showLabel]="false" [showHelpText]="false" (valueChange)="onSearchChange($event)"> >
+          </app-inputfield>
+        </div>
 
 
-    <app-tables
-  [columns]="columns"
-  [data]="filteredData"
-  [pageSize]="6">
-</app-tables>
+        <div class="search-dropdown search-dropdown-type">
+          <app-dropdown class="menu-dropdown" [options]="Kycstatus" [(selectedValue)]="selectedOption1"
+            placeholder="All Types" [customStyle]="true" (selectedValueChange)="getkyc_type($event)">
+          </app-dropdown>
+        </div>
+
+
+        <div class="add-button">
+          <app-buttons label="Add Customer" class="btn btn-icon Add btncustomClass" [outline]="true"
+            (click)="applyLoan()">
+            <img src="/assets/images/icons/addred.svg" alt="Add">
+
+          </app-buttons>
+        </div>
+      </div>
+    </div>
+
+    <!-- Table -->
+     
+    <!-- @if (!nodata) { -->
+    <app-tables [columns]="columns" [data]="filteredData" [pageSize]="6">
+    </app-tables>
+    <!-- } @else {
+  <div class="text-label text-center mt-4">
+    No Active Customer...
+  </div>
+} -->
 
   </div>
 

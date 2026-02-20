@@ -1,0 +1,62 @@
+<div class="check-customer  d-flex flex-column">
+    <div class="header ">
+
+        <div class="text-header1-login d-flex flex-column gap-3">Apply New Loan
+            <div class="text-label-data fw-normal">One step closer to your study abroad dream</div>
+        </div>
+
+    </div>
+    <div class="mobiledetails d-flex w-100 flex-column ">
+        <div class="w-100 gap-3">
+            <app-dropdown [options]="searchOptions" [(selectedValue)]="selectedOption" [placeholder]="searchby" [required]="true"
+                (selectedValueChange)="onSelectionChange($event)" [avatarUrl]="avatarUrl" [hasAvatar]="hasAvatar" [label]="searchby" [(ngModel)]="searchedvalue"
+       (ngModelChange)="onValueChange($event)">
+            </app-dropdown>
+        </div>
+    </div>
+
+    @if(selectedOption == 'Mobile'){
+         <div class="mobiledetails d-flex w-100 flex-column ">
+        <div class="w-100   gap-3">
+           <app-inputfield type="tel" name="phone" [required]="true" pattern="^[6-9][0-9]{9}$"
+                        label="Mobile Number" placeholder="Enter Mobile Number" helpText="Help text" class="w-100"
+                        minlength="10" [maxlength]="10" (input)="service.restrictInput($event, 'number')"
+                        [showPhonePrefix]="true"></app-inputfield>
+        </div>
+    </div>
+    }
+    
+     @if(selectedOption == 'NCID'){
+         <div class="mobiledetails d-flex w-100 flex-column ">
+        <div class="w-100   gap-3">
+           <app-inputfield type="text" name="NCID" ngModel [required]="true" label="NCID"
+          placeholder="NCID" helpText="Help text" >
+        </app-inputfield>
+        </div>
+    </div>
+    }
+
+
+    <!-- table -->
+
+     <div class="w-100  ">
+<!-- @if (!nodata) { -->
+  <app-tables
+    [columns]="columns"
+    [data]="filteredData"
+    [pageSize]="6">
+  </app-tables>
+<!-- } @else {
+  <div class="text-label text-center mt-4">
+    No Active Customer...
+  </div>
+} -->
+
+  <div class="d-flex justify-content-end">
+    <app-buttons type="submit" label="Next" color="primary" class="btn w-50 b-0" (click)="toProductscreen()"></app-buttons>
+
+</div>
+</div>
+
+
+</div>

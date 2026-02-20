@@ -1,15 +1,15 @@
-<div class="upload-wrapper" [ngClass]="getStateClass()">
-  <!-- <div class="upload-label">{{ config.label }}</div> -->
+<div class="upload-wrapper1" [ngClass]="getStateClass()">
+  <div class="upload-label">{{ label}}<span class="text-danger" *ngIf="required">*</span></div>
 
-  <div class="upload-label" [class.error-text]="state === 'error'" [class.success-text]="state === 'success'">
+  <!-- <div class="upload-label" [class.error-text]="state === 'error'" [class.success-text]="state === 'success'">
     <span *ngIf="state === 'error'">{{ config.label }}</span>
     <span *ngIf="state === 'success'">{{ config.label }}</span>
     <span *ngIf="state !== 'error' && state !== 'success' &&  config.label">{{ config.label}}</span>
-  </div>
+  </div> -->
 
 
   <!-- Upload Area -->
-  <div class="upload-area" (click)="triggerFileInput()" (drop)="onDrop($event)" (dragover)="onDragOver($event)"
+  <div class="upload-area upload-wrapper" (click)="triggerFileInput()" (drop)="onDrop($event)" (dragover)="onDragOver($event)" 
     (dragleave)="onDragLeave($event)" [class.disabled]="disabled" [class.has-file]="state === 'success'">
 
     <!-- Idle/Focus State -->
@@ -77,9 +77,10 @@
   </div>
 
   <!-- Helper Text -->
-  <div class="helper-text" [class.error-text]="state === 'error'" [class.success-text]="state === 'success'">
+  <div *ngIf="showHelperMessage" class="helper-text  " [class.error-text]="state === 'error'" [class.success-text]="state === 'success'">
     <span *ngIf="state === 'error'">{{ errorMessage }}</span>
     <span *ngIf="state === 'success'">File uploaded successfully</span>
-    <span *ngIf="state !== 'error' && state !== 'success' && config.helperText">{{ config.helperText }}</span>
+    <span *ngIf="state !== 'error' && state !== 'success' && config.helperText" style="font-style: italic; color: #666771;">{{ config.helperText }}</span>
+     
   </div>
 </div>

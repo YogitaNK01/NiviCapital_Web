@@ -13,8 +13,8 @@ export class Loandetails {
   @Input() creditScore = 780;
     @ViewChild('gaugeCanvasrisk', { static: false }) gaugeCanvasrisk!: ElementRef<HTMLCanvasElement>;
 
-  loanDetails: any;
-  loanDetails1 = {
+  loanDetails1: any;
+  loanDetails = {
     loanAmount: { inr: '₹15,00,000', usd: '$25829' },
     rateOfInterest: '8.5% p.a.',
     tenure: { years: '5 years', months: '(60 months)' },
@@ -90,8 +90,8 @@ export class Loandetails {
   constructor(public service: Main) {}
 
 ngOnInit() {
-   this.loanDetails = this.service.get_los_Data();
-    console.log("los data---",this.loanDetails);
+  //  this.loanDetails = this.service.get_los_Data();
+  //   console.log("los data---",this.loanDetails);
 }
 
    getIconColor(icon: string): string {

@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, Input, Output, EventEmitter, OnInit } from '@angular/core';
+import { Component, Input, Output, EventEmitter, OnInit, input } from '@angular/core';
 
 export type UploadState = 'idle' | 'focus' | 'uploading' | 'success' | 'error' | 'disabled';
 
@@ -25,16 +25,17 @@ export interface UploadResult {
 })
 export class Uploadbtn {
 @Input() config: UploadConfig = {
-    accept: '.svg, .png, .jpg, .jpeg',
+    accept: '.svg, .png, .jpg, .jpeg, .pdf, .tiff, .heic',
     maxSize: 10,
-    label: 'Upload File',
-    helperText: 'SVG, PNG, JPEG (max. 10 MB)'
+    helperText: 'JPG, JPEG, PDF, PNG, TIFF, SVG, HEIC (max. 10 MB)'
   };
   
   @Input() disabled: boolean = false;
   @Input() value: File | null = null;
   @Input() previewUrl: string = '';
-  
+  @Input() label: string = '';
+  @Input() required: boolean = false;
+
   @Output() fileChange = new EventEmitter<UploadResult>();
   @Output() fileRemove = new EventEmitter<void>();
   
@@ -44,6 +45,10 @@ export class Uploadbtn {
   errorMessage: string = '';
   preview: string = '';
   private fileInput: HTMLInputElement | null = null;
+
+  showHelperMessage = true;
+private helperTimer?: number;
+
 
   ngOnInit() {
     if (this.disabled) {
@@ -140,12 +145,16 @@ export class Uploadbtn {
       if (this.progress >= 100) {
         clearInterval(interval);
         this.state = 'success';
+        this.showHelperMessage = true;
         this.fileChange.emit({
           file: file,
           preview: this.preview
         });
+         this.hideHelperMessageAfterDelay(); 
       }
+
     }, 200);
+   
 
     // For real upload, replace above with actual HTTP request:
     /*
@@ -171,10 +180,12 @@ export class Uploadbtn {
   setError(message: string) {
     this.state = 'error';
     this.errorMessage = message;
+    this.showHelperMessage = true;
     this.fileChange.emit({
       file: null,
       error: message
     });
+    this.hideHelperMessageAfterDelay(); 
   }
 
   removeFile() {
@@ -183,6 +194,7 @@ export class Uploadbtn {
     this.preview = '';
     this.progress = 0;
     this.errorMessage = '';
+    
     if (this.fileInput) {
       this.fileInput.value = '';
     }
@@ -203,4 +215,19 @@ export class Uploadbtn {
   getStateClass(): string {
     return `upload-${this.state}`;
   }
+
+ 
+
+private hideHelperMessageAfterDelay(delay = 5000) {
+  if (this.helperTimer) {
+    clearTimeout(this.helperTimer);
+  }
+
+  this.helperTimer = window.setTimeout(() => {
+    this.showHelperMessage = false;
+  }, delay);
+}
+
+
+
 }

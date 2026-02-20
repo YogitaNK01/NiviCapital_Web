@@ -6,6 +6,7 @@ import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { Dropdown, DropdownOption } from '../../features/systemdesign/dropdown/dropdown';
 import { Main } from '../service/main';
+import { AddCustomer } from "../../features/admin/customer/add-customer/add-customer";
 
 interface MenuItem {
   icon: string;
@@ -17,7 +18,7 @@ interface MenuItem {
 
 @Component({
   selector: 'app-layout',
-  imports: [RouterModule, CommonModule, Dropdown],
+  imports: [RouterModule, CommonModule, Dropdown, AddCustomer],
   templateUrl: './layout.html',
   styleUrl: './layout.scss',
   standalone: true,
@@ -50,10 +51,12 @@ export class Layout implements OnInit, OnDestroy {
   adminMenu: MenuItem[] = [
     { icon: '/assets/images/sidemenu/dashboard.svg', iconActive: '/assets/images/sidemenu/dashboard-active.svg', label: 'Dashboard', route: '/admin/dashboard', expanded: false },
     { icon: '/assets/images/sidemenu/user.svg', iconActive: '/assets/images/sidemenu/user-active.svg', label: 'Customer', route: '/admin/customer', expanded: false },
+    { icon: '/assets/images/sidemenu/user.svg', iconActive: '/assets/images/sidemenu/user-active.svg', label: 'Add loan', route: '/admin/losoperation/newloan', expanded: false },
+
     { icon: '/assets/images/sidemenu/money-recive.svg', iconActive: '/assets/images/sidemenu/money-recive-active.svg', label: 'Loan Operations', route: '/admin/losoperation', expanded: false },
-    // { icon: '/assets/images/sidemenu/user.svg', iconActive: '/assets/images/sidemenu/user-active.svg', label: 'Customer Details', route: '/admin/customerdetails', expanded: false },
-    // { icon: '/assets/images/sidemenu/money-recive.svg', iconActive: '/assets/images/sidemenu/money-recive-active.svg', label: 'Loan Details', route: '/admin/losdetails', expanded: false },
-        //  { icon: '/assets/images/sidemenu/money-recive.svg', iconActive: '/assets/images/sidemenu/money-recive-active.svg', label: 'Co-applicant', route: '/admin/coapplicantdetails', expanded: false },
+    { icon: '/assets/images/sidemenu/user.svg', iconActive: '/assets/images/sidemenu/user-active.svg', label: 'Customer Details', route: '/admin/customerdetails', expanded: false },
+    { icon: '/assets/images/sidemenu/money-recive.svg', iconActive: '/assets/images/sidemenu/money-recive-active.svg', label: 'Loan Details', route: '/admin/losdetails', expanded: false },
+         { icon: '/assets/images/sidemenu/money-recive.svg', iconActive: '/assets/images/sidemenu/money-recive-active.svg', label: 'Co-applicant', route: '/admin/coapplicantdetails', expanded: false },
 
     { icon: '/assets/images/sidemenu/candle.svg', iconActive: '/assets/images/sidemenu/money-recive-active.svg', label: 'FX Operations', route: '/admin/customer2', expanded: false },
     { icon: '/assets/images/sidemenu/wallet-money.svg', label: 'LMS', route: '/admin/customer2', expanded: false },
@@ -72,6 +75,8 @@ export class Layout implements OnInit, OnDestroy {
     { label: 'Activity Log', value: 'activitylog', icon: '/assets/images/icons/lock.svg' },
     { label: 'Logout', value: 'logout', icon: '/assets/images/icons/logout-icon.svg' }
   ];
+
+
 
   constructor(private router: Router, private service: Main) {
     this.router.events
@@ -127,6 +132,7 @@ export class Layout implements OnInit, OnDestroy {
         }
       });
   }
+
 
   ngOnDestroy(): void {
     this.destroy$.next();

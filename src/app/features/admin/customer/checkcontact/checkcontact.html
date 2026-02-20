@@ -1,0 +1,54 @@
+<div class="check-customer">
+    <div class="header commonbox d-flex flex-column align-items-start">
+
+        <div class="text-header1-login d-flex flex-column gap-3">Find Customer
+            <div class="text-label-data">Find existing customer quickly. Use their mobile number to search our customer
+                list.</div>
+        </div>
+
+
+
+        <form #registerform="ngForm" (ngSubmit)="searchnumber(registerform)" id="registerform"
+            class="mobiledetails d-flex w-100 flex-column ">
+            <div class="w-100 d-flex align-items-end  gap-3">
+                <div class="flex-grow-1">
+                    <app-inputfield type="tel" name="phone" ngModel [required]="true" pattern="^[6-9][0-9]{9}$"
+                        label="Mobile Number" placeholder="Enter Mobile Number" helpText="Help text" class="w-100"
+                        minlength="10" [maxlength]="10" #phone="ngModel" (input)="service.restrictInput($event, 'number')"
+                        [showPhonePrefix]="true"></app-inputfield>
+                </div>
+                <div class="searchbtn">
+                    <app-buttons label="Next" color="primary" type="submit"
+                        class="btncustomClass primary"  ></app-buttons>
+                </div>
+            </div>
+
+            <div class="text-danger mt-1" *ngIf="phone.invalid && phone.touched">
+                <small *ngIf="phone.errors?.['required']">Phone number is required</small>
+                <small *ngIf="phone.errors?.['pattern']">Please enter a valid 10-digit phone number</small>
+            </div>
+            <div class="text-danger mt-1" *ngIf="norecordfound && phone.valid">
+                <small>No Record Found</small>
+            </div>
+            
+        </form>
+
+
+    </div>
+
+    @if(norecordfound){
+    <div class="w-100 d-flex flex-wrap align-items-center justify-content-center gap-3 mt-40">
+        <div class="addbtn">
+            <app-buttons label="Add Customer" class="btn btn-icon Add " [outline]="true" (click)="addcustomer()">
+                <img src="/assets/images/icons/addred.svg" alt="Add">
+
+            </app-buttons>
+        </div>
+    </div>
+    }
+    @else if(isexistinguser) {
+    <app-tables [columns]="columns" [data]="filteredData" [pageSize]="6">
+    </app-tables>
+    }
+
+</div>

@@ -30,16 +30,28 @@
 
 }
 
- @media (max-width: 768px) {
-      
-      .text-dp-3-bold {
-        font-size: 1.5rem;
-        text-align: left;
-      }
-      .user-info-breadcrumb {
-        display: none;
-      }
-    }
+@media (max-width: 768px) {
+
+  .text-dp-3-bold {
+    font-size: 1.5rem;
+    text-align: left;
+    line-height: $spacing_14 ;
+  }
+
+  .user-info-breadcrumb {
+    display: none;
+
+  }
+}
+
+@media (max-width: 480px) {
+
+  .text-dp-3-bold {
+    font-size: $font-size-body_lg;
+    line-height: $spacing_11 ;
+  }
+
+}
 
 .content-footer {
   display: flex;
@@ -50,18 +62,19 @@
   padding: $spacing_7 ;
 
   p {
-     font-size: 18px ;
+    font-size: 18px;
   }
 
-  @media (max-width: 768px){
-     p {
-    font-size: 16px !important;
+  @media (max-width: 768px) {
+    p {
+      font-size: 16px !important;
+    }
   }
-}
-  @media (max-width: 480px){
-     p {
-    font-size: 10px !important;
-  }
+
+  @media (max-width: 480px) {
+    p {
+      font-size: 10px !important;
+    }
   }
 }
 
@@ -130,9 +143,9 @@
   background: $secondary-50;
 
   @media (max-width: 540px) {
-   width: $spacing_21;
-  height: $spacing_21;
-    
+    width: $spacing_21;
+    height: $spacing_21;
+
   }
 }
 
@@ -191,37 +204,47 @@
 
 
 ///btns colors by their status
- .status {
+.status {
   display: inline-block;
   padding: 4px 12px;
   border-radius: 16px;
   font-weight: 500;
   text-align: center;
   min-width: 100px;
-}
-
-/* Completed / Verified / active */
-.Completed, .activestatus {
-  background-color: $success-100;
-  color: $success-text-dark
-}
-
-/* Pending */
-.Pending {
-  background-color:$warning-container;
-  color: #9B4800; /* brownish text */
-}
-/* Document Issue */
-.document-Issue {
-  background-color:$error-container;
-  color: $error-text-dark;
-}
 
 
-/* in active */
-.inactive {
-  background-color:$warning-container;
-  color: $warning-text-dark; /* brownish text */
+  /* Completed / Verified / active */
+  &.Completed {
+    background-color: $success-100;
+    color: $success-text-dark
+  }
+
+  &.verified {
+    background-color: $success-100;
+    color: $success-900;
+  }
+
+ 
+
+  /* Pending */
+  &.Pending {
+    background-color: $warning-container;
+    color: $warning-text-dark;
+  }
+
+  /* Document Issue */
+  .document-Issue {
+    background-color: $error-container;
+    color: $error-text-dark;
+  }
+
+
+  /* in active */
+  &.inactive {
+    background-color: $warning-container;
+    color: $warning-text-dark;
+    /* brownish text */
+  }
 }
 
 
@@ -231,13 +254,14 @@
   justify-content: space-between;
   align-items: center;
   margin-bottom: $spacing_9;
-  gap: $spacing_6!important;
+  gap: $spacing_6 !important;
+
   @media (max-width: 768x) {
-    
-    gap: $spacing_6!important;
+
+    gap: $spacing_6 !important;
   }
 
-   @media (max-width: 480px) {
+  @media (max-width: 480px) {
     flex-direction: column;
     gap: $spacing_6;
   }
@@ -245,11 +269,11 @@
 
 .audit-search-input {
   width: 50%;
-   min-width: 350px;
+  min-width: 350px;
   padding: $spacing_3, $spacing_12, $spacing_3, $spacing_4;
   border: $border_1 solid $neutral-300;
   border-radius: $spacing_2;
-  font-size:  22px;
+  font-size: 22px;
   outline: none;
   transition: border-color 0.2s;
 
@@ -261,8 +285,8 @@
     color: #999;
   }
 
-   @media (max-width: 950px) {
-     min-width: 200px;
+  @media (max-width: 950px) {
+    min-width: 200px;
     width: 100%;
   }
 }
@@ -271,10 +295,11 @@
 .audit-action-dropdow {
   min-width: 350px;
 
-   @media (max-width: 950px) {
-     min-width: 20px;
+  @media (max-width: 950px) {
+    min-width: 20px;
     width: 100%;
   }
+
   @media (max-width: 480px) {
     width: 100%;
   }
@@ -284,17 +309,17 @@
 /* Timeline Styles */
 .audit-trail-timeline {
   margin-top: $spacing_12;
-   display: grid;
-        grid-template-columns: 3fr 1fr;
-        gap: 1rem;
-        flex-direction: column;
+  display: grid;
+  grid-template-columns: 3fr 1fr;
+  gap: 1rem;
+  flex-direction: column;
 }
 
 .audit-timeline-section {
- display: flex;
-flex-direction: column;
-gap: $spacing_7;
-align-self: stretch;
+  display: flex;
+  flex-direction: column;
+  gap: $spacing_7;
+  align-self: stretch;
 }
 
 .audit-timeline-section-header {
@@ -309,33 +334,33 @@ align-self: stretch;
 .audit-timeline-item {
   display: flex;
   gap: $spacing_7;
- 
-  
+
+
 }
 
 .audit-timeline-date {
   display: flex;
   flex-direction: column;
   align-items: center;
- gap:$spacing;
-align-self: stretch;
+  gap: $spacing;
+  align-self: stretch;
 }
 
 
 /* Timeline Styles */
 .audit-trail-timeline {
   margin-top: $spacing_12;
-   display: grid;
-        grid-template-columns: 3fr 1fr;
-        gap: 1rem;
-        flex-direction: column;
+  display: grid;
+  grid-template-columns: 3fr 1fr;
+  gap: 1rem;
+  flex-direction: column;
 }
 
 .audit-timeline-section {
- display: flex;
-flex-direction: column;
-gap: $spacing_7;
-align-self: stretch;
+  display: flex;
+  flex-direction: column;
+  gap: $spacing_7;
+  align-self: stretch;
 }
 
 .audit-timeline-section-header {
@@ -350,16 +375,16 @@ align-self: stretch;
 .audit-timeline-item {
   display: flex;
   gap: $spacing_7;
- 
-  
+
+
 }
 
 .audit-timeline-date {
   display: flex;
   flex-direction: column;
   align-items: center;
- gap:$spacing;
-align-self: stretch;
+  gap: $spacing;
+  align-self: stretch;
 }
 
 .audit-date-badge {
@@ -370,16 +395,16 @@ align-self: stretch;
   background: $secondary-700;
   border-radius: $spacing_11;
   color: $neutral-text-tertiary;
-width: 40px;
-height: 40px;
-padding: 5px 6px;
-gap: 10px;
-aspect-ratio: 1/1;
+  width: 40px;
+  height: 40px;
+  padding: 5px 6px;
+  gap: 10px;
+  aspect-ratio: 1/1;
 }
 
 
 .audit-timeline-line {
-  width: 5px; 
+  width: 5px;
   flex: 1;
   background: $secondary-700;
   border-radius: $spacing_3;
@@ -389,12 +414,13 @@ aspect-ratio: 1/1;
   width: 15px;
   height: 5px;
   background: $secondary-700;
-   flex-shrink: 0;
+  flex-shrink: 0;
   align-self: center;
   position: relative;
   top: -28px;
- border-radius: $spacing_3;
+  border-radius: $spacing_3;
 }
+
 .audit-timeline-content {
   flex: 1;
   // padding-bottom: $spacing_4;
@@ -426,49 +452,49 @@ aspect-ratio: 1/1;
 }
 
 .audit-card-time {
- letter-spacing: 0.16px;
- color: $neutral-600;
+  letter-spacing: 0.16px;
+  color: $neutral-600;
 }
 
 .audit-status-badge {
   font-weight: 500;
- 
+
 }
 
 .status-pending {
- border-radius: $spacing_15;
-background: $warning-container;
-display: flex;
-padding:$spacing $spacing_7;
-align-items: center;
-color: $warning-text-dark;
+  border-radius: $spacing_15;
+  background: $warning-container;
+  display: flex;
+  padding: $spacing $spacing_7;
+  align-items: center;
+  color: $warning-text-dark;
 }
 
 .status-submitted {
   background: $success-container;
   color: $success-text-dark;
   border-radius: $spacing_15;
-  padding:$spacing $spacing_7;
+  padding: $spacing $spacing_7;
 }
 
 .status-approved {
   background: #DBEAFE;
   color: #1E40AF;
   border-radius: $spacing_15;
-  padding:$spacing $spacing_7;
+  padding: $spacing $spacing_7;
 }
 
 .status-rejected {
   background: #FEE2E2;
   color: #991B1B;
   border-radius: $spacing_15;
-  padding:$spacing $spacing_7;
+  padding: $spacing $spacing_7;
 }
 
 .audit-card-body {
   display: flex;
   flex-direction: column;
-  gap:  $spacing_5;
+  gap: $spacing_5;
 }
 
 .audit-card-title {
@@ -478,7 +504,7 @@ color: $warning-text-dark;
 
 .audit-card-subtitle {
   color: $neutral-600;
-  
+
 }
 
 .audit-no-results {
@@ -486,6 +512,7 @@ color: $warning-text-dark;
   padding: $spacing_16;
   color: #999;
 }
+
 //kyc details png img box
 .img-box {
   display: flex;
@@ -501,6 +528,7 @@ color: $warning-text-dark;
 
   }
 }
+
 //tabs customers and los details
 
 
@@ -509,15 +537,15 @@ color: $warning-text-dark;
 
 /* ---------------Tab Content Styles -----------*/
 
-.customer-details{
+.customer-details {
   border: $border_1 solid $neutral-300;
   border-radius: $spacing_5;
   flex: 1 1 auto;
   min-height: 0;
-  
+
 }
 
- ::ng-deep .mdc-tab.mat-mdc-tab {
+::ng-deep .mdc-tab.mat-mdc-tab {
   display: flex;
   padding: $spacing_11 $spacing_9;
   justify-content: center;
@@ -599,7 +627,7 @@ color: $warning-text-dark;
   align-items: flex-start;
   gap: $spacing_10;
   align-self: stretch;
-  
+
   &:last-child {
     // margin-bottom: 0;
   }
@@ -652,9 +680,11 @@ color: $warning-text-dark;
   }
 
 }
+
 p {
-    margin-bottom: 0;
+  margin-bottom: 0;
 }
+
 .edu-label {
   color: $secondary-text;
   margin-bottom: 10px;
@@ -804,6 +834,7 @@ p {
     min-width: 150px;
   }
 }
+
 .table-card-header {
   border-radius: var(--border-radius-border-radius-s, 8px) var(--border-radius-border-radius-s, 8px) 0 0;
   background: var(--system-background-onAccent, #F4F6FF);
@@ -812,6 +843,7 @@ p {
   padding: 12px 16px;
   font-weight: 600;
 }
+
 .table-card {
   border-radius: $border-radius-s;
   border-right: 1px solid var(--system-border-neutral-neutral_2, #E4E6F1);
@@ -865,7 +897,8 @@ p {
   .timeline-card {
     padding: $spacing_4;
   }
-  .doctype-data{
+
+  .doctype-data {
     font-size: $font-size-body_md;
   }
 }
@@ -883,38 +916,58 @@ p {
   .date-day {
     font-size: 16px;
   }
-  .search-input ,.action-dropdow {
-  width: 100%!important;
-  min-width: 0;
-}
 
-.timeline-item{
-  gap: $spacing_4;
-}
+  .search-input,
+  .action-dropdow {
+    width: 100% !important;
+    min-width: 0;
+  }
 
-.timeline-line-hr {
-  width: 10px;
-  height: 3px;
-}
-.timeline-line {
-  width: 3px; 
-}
- .timeline-card {
+  .timeline-item {
+    gap: $spacing_4;
+  }
+
+  .timeline-line-hr {
+    width: 10px;
+    height: 3px;
+  }
+
+  .timeline-line {
+    width: 3px;
+  }
+
+  .timeline-card {
     padding: $spacing_6;
   }
-.text-body-1{
-  font-size: $font-size-body_xs;
-}
-.status-badge {
-  font-size: $font-size-body_sm;
- 
-}
-.text-label-data {
-   font-size: $font-size-body_md;
-   line-height: 1.25rem;
+
+  .text-body-1 {
+    font-size: $font-size-body_xs;
+  }
+
+  .status-badge {
+    font-size: $font-size-body_sm;
+
+  }
+
+  .text-label-data {
+    font-size: $font-size-body_md;
+    line-height: 1.25rem;
     letter-spacing: 0.16px;
+  }
 }
+
+
+
+//css for all labels (input date upload etc)
+
+.all-label {
+  text-align: start;
+
+  color: $neutral-text-primary;
+  font-size: $font-size-body_md;
+  font-style: $font-weight-regular;
+  font-weight: $font-weight-regular;
+  line-height: $spacing_10;
+  letter-spacing: 0.16px;
+  margin-bottom: 0.5rem;
 }
-
-
-

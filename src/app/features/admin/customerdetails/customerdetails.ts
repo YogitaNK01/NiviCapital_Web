@@ -3,7 +3,7 @@ import { Component, Input, TemplateRef, Type, ViewChild, ChangeDetectorRef } fro
 import { MatIconModule } from '@angular/material/icon';
 import { MatTabsModule } from '@angular/material/tabs';
 import { Buttons } from '../../systemdesign/buttons/buttons';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router,NavigationEnd } from '@angular/router';
 import { Aesutil } from '../../../utils/aesutil';
 import { Sanctionletter } from '../sanctionletter/sanctionletter';
 import { Main } from '../../../core/service/main';
@@ -14,6 +14,7 @@ import { ALL_TABS, AppTab, Commontabs } from '../../systemdesign/commontabs/comm
 import { MatTabGroup } from '@angular/material/tabs';
 import { TAB_CONFIG } from '../../../shared/config/tab.config';
 import { EditMode } from '../../../core/service/edit-mode';
+import { filter } from 'rxjs/operators';
 
 
 
@@ -83,7 +84,18 @@ export class Customerdetails {
 
 
 
-  constructor(public router: Router, public route: ActivatedRoute, private aes: Aesutil, private service: Main, private editModeService: EditMode) { }
+  constructor(public router: Router, public route: ActivatedRoute, private aes: Aesutil, private service: Main, private editModeService: EditMode) { 
+     this.router.events
+    .pipe(filter(e => e instanceof NavigationEnd))
+    .subscribe((e: NavigationEnd) => {
+
+      const url = e.urlAfterRedirects;
+
+      this.editModeService.setAddMode(
+        url.includes('admin/addcustomer')
+      );
+    });
+  }
 
   async ngOnInit(): Promise<void> {
     //quicklink connectivity
@@ -124,9 +136,16 @@ export class Customerdetails {
 
   onEditClick() {
     
-   this.editModeService.toggle();
+  //  this.editModeService.edit();
+  //  this.editModeService.setMode('edit');
+   
+ this.editModeService.toggleEdit(); // to toggle both view- edit
 
   }
+
+
+
+  
 
 
   downloadImage(data: any) {

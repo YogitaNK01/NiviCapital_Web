@@ -1,0 +1,17 @@
+@use 'variables' as *;
+@use 'typography' as *;
+@use 'common' as *;
+
+.check-customer {
+    display: flex;
+    padding:$spacing_18;
+    flex-direction: column;
+    align-items: flex-start;
+    gap:$spacing_14;
+    align-self: stretch;
+    min-height: auto;
+    border-radius: $border_radius_m;
+  border: $border_1 solid $neutral-300;
+  background: $bg, ;
+  box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.05);
+}

@@ -1,8 +1,18 @@
 {
   "/nivicap": {
-    "target": "http://192.168.5.46:8081",
+    "target": "http://192.168.5.42:8085",
     "secure": false,
     "changeOrigin": true,
     "logLevel": "debug"
+  },
+
+  
+  "/api": {
+    "target": "http://192.168.5.42:8085",
+    "secure": false,
+    "changeOrigin": true,
+    "logLevel": "debug",
+    "pathRewrite": { "^/api": "" }
   }
+
 }

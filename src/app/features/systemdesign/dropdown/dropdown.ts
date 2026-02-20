@@ -47,6 +47,7 @@ export class Dropdown {
   @Input() searchable: boolean = false;
   @Input() showIcons: boolean = false;
   @Input() disabled: boolean = false;
+  @Input() required: boolean = false;
 
   @Output() selectionChange = new EventEmitter<any>();
 
@@ -58,7 +59,7 @@ export class Dropdown {
   @Input() customStyle: boolean = false;
   
    value: any = null;
-selectedLabeldata = 'Select';
+selectedLabeldata = '';
 
    private onChange = (value: string) => {};
    private onTouched = () => {};
@@ -68,8 +69,6 @@ selectedLabeldata = 'Select';
     this.isOpen = !this.isOpen;
 
   }
-
-
 
   // selectOption(option: DropdownOption) {
   //   this.selectedValue = option.value;

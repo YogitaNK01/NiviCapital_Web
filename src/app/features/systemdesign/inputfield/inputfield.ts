@@ -1,11 +1,12 @@
 import { CommonModule } from '@angular/common';
 import { Component, EventEmitter, forwardRef, Input, Output } from '@angular/core';
 import { FormsModule,NG_VALUE_ACCESSOR, ControlValueAccessor  } from '@angular/forms';
+import { Buttons } from "../buttons/buttons";
 
 @Component({
   selector: 'app-inputfield',
    standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, Buttons],
   templateUrl: './inputfield.html',
   styleUrls: ['./inputfield.scss'],
   providers: [
@@ -28,13 +29,25 @@ export class Inputfield {
 //  @Input() label: string = '';
   @Input() placeholder: string = '';
   @Input() helpText: string = '';
-  @Input() type: 'text' | 'password' | 'email' | 'search' = 'text';
+  @Input() type: 'text' | 'password' | 'email' | 'search' | 'tel' = 'text';
   @Input() state: 'default' | 'error' | 'success' = 'default';
   @Input() showSearch: boolean = false;
   @Input() showInfo: boolean = false;
   @Input() disabled: boolean = false;
-
   @Output() valueChange = new EventEmitter<string>();
+@Input() required: boolean = false;
+  // NEW inputs add customer 
+  @Input() maxlength!: number;
+
+  @Input() showPhonePrefix: boolean = false;  //+91
+@Input() rightButtonText: string = '';  //sendotp btn
+@Input() rightButtonDisabled: boolean = false;
+  @Input() readonly: boolean = false;  
+
+// NEW output
+@Output() rightButtonClick = new EventEmitter<void>();
+
+   
 
   value: string = '';
    passwordVisible: boolean = false;
@@ -90,4 +103,11 @@ export class Inputfield {
   setDisabledState(isDisabled: boolean): void {
     this.disabled = isDisabled;
   }
+
+  onRightButtonClick(): void {
+  if (!this.rightButtonDisabled) {
+    this.rightButtonClick.emit();
+  }
+}
+
 }

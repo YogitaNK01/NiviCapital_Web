@@ -407,3 +407,18 @@ canvas {
     font-size: 16px;
   }
 }
+
+.secondary {
+  background-color: $secondary-btn;
+  color: #fff;
+  min-width: 312px;
+
+  @media (max-width: 480px) {
+
+    min-width: 220px;
+    padding: 0 !important;
+
+  }
+
+}
+
