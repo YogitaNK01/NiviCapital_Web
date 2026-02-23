@@ -269,7 +269,7 @@
     <div class="row d-flex " *ngIf="isDifferentAddress">
 
       <div class="col-lg-6  col-sm-12 ">
-        <app-dropdown [options]="secondaryaddproof" [required]="true" [(selectedValue)]="selectedOption" placeholder=""
+        <app-dropdown [options]="secondaryaddproof" [required]="true" [(selectedValue)]="selectedOption" placeholder="" name="secondary_address_prrof"
           [searchable]="true" (selectedValueChange)="onSelectionChange($event)" [(ngModel)]="selectedSecondaryProof"
           label="Secondary Address Proof"></app-dropdown>
       </div>
@@ -323,8 +323,8 @@
         </div>
       </div>
     </div>
-<!-- curr stet city -->
-    <div class="row d-flex justify-content-center align-items-end" [class.d-none]="!isDifferentAddress">
+<!-- curr stAte city -->
+    <div class="row d-flex justify-content-center align-items-end" *ngIf="isDifferentAddress">
       <div class="col-lg-6  col-sm-12 loan-mt-4">
         <app-inputfield type="text" ngModel [required]="true" label="Country" [required]="true" placeholder="India"
           helpText="Help text" [disabled]="true" name="country">
@@ -381,7 +381,7 @@
       </div>
       <div class="col-lg-6  col-sm-12">
         <app-buttons label="Submit" type="submit" color="primary" class="btncustomClass btn"
-          [disabled]="!kycForm.valid || !allRequiredFilesUploaded || !selectedSecondaryProof || !(isPermanentMailingChecked || isCurrentMailingChecked )"></app-buttons>
+          [disabled]="!kycForm.valid || !allRequiredFilesUploaded  || !(isPermanentMailingChecked || isCurrentMailingChecked )"></app-buttons>
 
       </div>
 

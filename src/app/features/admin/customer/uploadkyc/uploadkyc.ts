@@ -154,8 +154,7 @@ export class Uploadkyc implements OnDestroy {
 selectSameAddress() {
   this.addressType = 'same';
   this.isDifferentAddress = false;
-
-  // ✅ Reset mailing logic
+this.selectedSecondaryProof = null;
   this.isCurrentMailingChecked = true;
   this.isPermanentMailingChecked = false;
 }
@@ -285,16 +284,16 @@ selectDifferentAddress() {
 
   }
 
-  get allRequiredFilesUploaded(): boolean {
-     let docsToCheck = [...this.requiredDocs];
-      if (this.addressType === 'different') {
-    docsToCheck.push('bill');
+ get allRequiredFilesUploaded(): boolean {
+
+  let docsToCheck = [...this.requiredDocs];
+
+  if (this.addressType === 'different') {
+    docsToCheck.push('secaddress');
   }
 
-    let req = this.requiredDocs.every(k => !!this.uploadedFiles[k]);
-    return (req )
-   
-  }
+  return docsToCheck.every(k => !!this.uploadedFiles[k]);
+}
 
   permailcheck(event: any) {
     console.log("--permant", event);
@@ -385,7 +384,7 @@ selectDifferentAddress() {
 
       this.currCitySelectedOption = null;
   this.currselectedCityId = '';
-  this.currselectedStateLabel = '';
+  this.currselectedCityLabel = '';
 
   this.currcityOptions = [];
 

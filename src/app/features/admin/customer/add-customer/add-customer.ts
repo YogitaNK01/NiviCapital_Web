@@ -95,11 +95,11 @@ export class AddCustomer implements OnInit {
         this.maxAllowedStep = this.currentStep;
       }
         if (params['custId'] && params['edit'] == 'true') {
-           this.custname = params['firstName'] + ' ' + params['lastName'];
+           this.custname = params['fname'] + ' ' + params['lname'];
           sessionStorage.setItem('editUser', JSON.stringify({
             custId: params['custId'],
-            fname: params['firstName'],
-            lname: params['lastName']
+            fname: params['fname'],
+            lname: params['lname']
           }));
 
         }
