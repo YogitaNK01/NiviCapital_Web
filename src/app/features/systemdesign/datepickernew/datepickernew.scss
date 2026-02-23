@@ -49,7 +49,7 @@
 }
 
 ::ng-deep .cdk-overlay-pane .mat-datepicker-content::after {
-  content: attr(data-selected);
+  // content: attr(data-selected);
   position: absolute;
   top: 25px;
   left: 0;

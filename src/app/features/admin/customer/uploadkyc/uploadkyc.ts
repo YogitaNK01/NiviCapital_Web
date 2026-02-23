@@ -232,17 +232,7 @@ selectDifferentAddress() {
       addresses: this.isDifferentAddress
         ? [permanentAddress, currentAddress, otherAddress]
         : [permanentAddress, currentAddress]
-      // addresses: [{
-      //   addressType: this.isDifferentAddress == false ? 'PERMANENT' : 'CURRENT',
-      //   addressLine: this.isDifferentAddress == false ? form.value.addressline1 : form.value.currentaddressline1,
-      //   addressLine1: this.isDifferentAddress == false ? form.value.addressline2 : form.value.currentaddressline2,
-      //   city: this.isDifferentAddress == false ? this.perselectedStateLabel : this.currselectedStateLabel,
-      //   state:  this.isDifferentAddress == false ? this.perselectedCityLabel : this.currselectedCityLabel,
-      //   isPreferredAddress: this.isDifferentAddress == false ? 1 : 0,
-      //   isMailingAddress: this.isDifferentAddress == false ? 1 : 0,
-      //   zipCode: this.isDifferentAddress == false ? form.value.perpincode : form.value.currpincode,
-      //   country: "India"
-      // }]
+    
 
     };
     console.log("fd-------", kycPayload)
@@ -286,18 +276,19 @@ selectDifferentAddress() {
   onFileChange(result: UploadResult, key: string) {
 
     if (!result.file) {
-      console.log("upload error:", result.error);
+       this.uploadedFiles[key] = null;
       return;
     }
 
     this.files[key] = result.file;
-    this.uploadedFiles[key] = result.file || null;
+    this.uploadedFiles[key] = result.file ;
+
   }
 
   get allRequiredFilesUploaded(): boolean {
     let req = this.requiredDocs.every(k => !!this.uploadedFiles[k]);
     let optional = this.optionalDocs.every(k => !!this.uploadedFiles[k]);
-    return (req || optional)
+    return (req )
   }
 
   permailcheck(event: any) {

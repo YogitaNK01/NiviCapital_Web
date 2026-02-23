@@ -224,7 +224,7 @@ export class AddCustomer implements OnInit {
       this.resendSeconds--;
       this.cd.detectChanges();
 
-      console.log(this.resendSeconds);
+      // console.log(this.resendSeconds);
 
       if (this.resendSeconds <= 0) {
         this.isCounting = false;

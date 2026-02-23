@@ -285,7 +285,7 @@
 
       <div class="col-lg-12  col-sm-12 loan-mt-4">
         <app-inputfield type="text" name="currentaddressline1" ngModel [required]="true" #currentaddressline1="ngModel"
-          label="Address Line 1" placeholder="Address Line 1" helpText="Help text" [maxlength]="12">
+          label="Address Line 1" placeholder="Address Line 1" helpText="Help text" [minlength]="2" [maxlength]="255">
         </app-inputfield>
 
 
@@ -298,7 +298,7 @@
       </div>
       <div class="col-lg-12  col-sm-12 loan-mt-4">
         <app-inputfield type="text" name="currentaddressline2" ngModel [required]="true" #currentaddressline2="ngModel"
-          label="Address Line 2" placeholder="Address Line 2" helpText="Help text" [maxlength]="12">
+          label="Address Line 2" placeholder="Address Line 2" helpText="Help text" [minlength]="2" [maxlength]="255">
         </app-inputfield>
 
 
@@ -311,7 +311,7 @@
       </div>
       <div class="col-lg-12  col-sm-12 loan-mt-4">
         <app-inputfield type="text" name="currentaddressline3" ngModel #currentaddressline3="ngModel"
-          label="Address Line 3" placeholder="Address Line 3" helpText="Help text" [maxlength]="12">
+          label="Address Line 3" placeholder="Address Line 3" helpText="Help text" [minlength]="2" [maxlength]="255">
         </app-inputfield>
 
 
@@ -324,7 +324,7 @@
       </div>
     </div>
 
-    <div class="row d-flex justify-content-center align-items-end" *ngIf="isDifferentAddress">
+    <div class="row d-flex justify-content-center align-items-end" [class.d-none]="!isDifferentAddress">
       <div class="col-lg-6  col-sm-12 loan-mt-4">
         <app-inputfield type="text" ngModel [required]="true" label="Country" [required]="true" placeholder="India"
           helpText="Help text" [disabled]="true" name="country">
@@ -332,13 +332,13 @@
       </div>
       <div class="col-lg-6  col-sm-12 loan-mt-4">
         <app-dropdown [options]="currstateOptions" [required]="true" [(selectedValue)]="currStateSelectedOption"
-          placeholder="" [searchable]="true" (selectedValueChange)="selectCurrState($event)" label="State" name="state"
+          placeholder="" [searchable]="true" (selectedValueChange)="selectCurrState($event)" label="State" name="curstate"
           [(ngModel)]="currselectedStateId">
         </app-dropdown>
       </div>
       <div class="col-lg-6 loan-mt-4 col-sm-12 ">
         <app-dropdown [options]="currcityOptions" [required]="true" [(selectedValue)]="currCitySelectedOption"
-          placeholder="" [searchable]="true" (selectedValueChange)="selectCurrCity($event)" label="City" name="city"
+          placeholder="" [searchable]="true" (selectedValueChange)="selectCurrCity($event)" label="City" name="curcity"
           [(ngModel)]="currselectedCityId">
         </app-dropdown>
       </div>

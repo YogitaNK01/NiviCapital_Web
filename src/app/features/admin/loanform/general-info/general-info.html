@@ -155,12 +155,12 @@
 
                 <div class="col-lg-4 mt-4">
                     <img src="../assets/images/icons/save.svg">
-                    Save and Exit
+                    <span class="mx-2"> Save and Exit</span>
                 </div>
-                <div class="col-lg-4 mt-4">
-                    <app-buttons type="button" label="Back">
+                <div class="col-lg-4 mt-4 d-flex justify-content-end">
+                    <app-buttons type="button" label="Back" class="btn btncustomClass" [outline]="true" >
                     </app-buttons>
-                    <app-buttons type="button" label="Next">
+                    <app-buttons type="button" label="Next" class="btn btncustomClass" color="primary">
                     </app-buttons>
                     <!-- <app-buttons type="submit" label="Back" [disabled]="registerForm.invalid">
                     </app-buttons>

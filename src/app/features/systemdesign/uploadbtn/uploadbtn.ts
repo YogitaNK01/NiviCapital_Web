@@ -159,26 +159,6 @@ export class Uploadbtn implements OnInit {
 
     }, 200);
 
-
-    // For real upload, replace above with actual HTTP request:
-    /*
-    this.uploadService.upload(file).subscribe({
-      next: (event) => {
-        if (event.type === HttpEventType.UploadProgress) {
-          this.progress = Math.round(100 * event.loaded / event.total!);
-        } else if (event.type === HttpEventType.Response) {
-          this.state = 'success';
-          this.fileChange.emit({
-            file: file,
-            preview: this.preview
-          });
-        }
-      },
-      error: (err) => {
-        this.setError('Upload failed. Please try again.');
-      }
-    });
-    */
   }
 
   setError(message: string) {
@@ -208,6 +188,7 @@ export class Uploadbtn implements OnInit {
           this.fileInput.value = '';
         }
         this.fileRemove.emit();
+        this.fileChange.emit({ file: null }); 
       }
     });
 
