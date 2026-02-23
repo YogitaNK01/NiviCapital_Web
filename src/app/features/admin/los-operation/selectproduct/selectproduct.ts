@@ -74,7 +74,8 @@ export class Selectproduct {
   }
 
   goToloanscreen() {
-    this.router.navigate(['admin/los-operation/newloan']);
+    this.router.navigate(['admin/los-operation/applyloan']);
+    
   }
 
   tosuccess() {
@@ -88,6 +89,12 @@ export class Selectproduct {
    handleSuccessAction(action: string) {
     if (action === 'letsstart') {
 
-      
+       const url = this.router.serializeUrl(
+    this.router.createUrlTree(['/loanform/loaninfo'] )
+  );
+  console.log("url---",url);
+  
+
+  window.open(url, '_blank');
     }}
 }

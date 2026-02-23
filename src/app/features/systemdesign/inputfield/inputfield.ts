@@ -17,7 +17,7 @@ import { Buttons } from "../buttons/buttons";
     }
   ]
 })
-export class Inputfield {
+export class Inputfield implements ControlValueAccessor {
    // ✅ Text inputs
   @Input() label: string = '';
   @Input() helpTextValue: string = '';
@@ -38,6 +38,7 @@ export class Inputfield {
 @Input() required: boolean = false;
   // NEW inputs add customer 
   @Input() maxlength!: number;
+@Input() uppercase: boolean = false;
 
   @Input() showPhonePrefix: boolean = false;  //+91
 @Input() rightButtonText: string = '';  //sendotp btn

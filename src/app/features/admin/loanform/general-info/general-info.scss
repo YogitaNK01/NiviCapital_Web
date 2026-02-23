@@ -1,0 +1,26 @@
+@use 'variables' as *;
+@use 'typography' as *;
+@use 'common' as *;
+
+
+
+.mt-20{
+    margin-top: $spacing_9;;
+}
+.blue-text{
+    color:$secondary_text_dark;
+font-weight: 700;
+}
+
+.hrclass{
+    background: $neutral-300;
+    margin: 30px 0
+}
+
+.accordion{
+    //  min-height: auto;
+    border-radius: $border_radius_m;
+  border: $border_1 solid $neutral-300;
+//   background: $bg, ;
+  box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.05);
+}

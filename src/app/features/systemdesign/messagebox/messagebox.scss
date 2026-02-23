@@ -17,10 +17,10 @@
 
 .msgbox-container {
   background: #fff;
-  max-width: 520px;
+  max-width: 900px;
   width: 100%;
   border-radius: 12px;
-  padding: 24px;
+  padding:$spacing_18;
   position: relative;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
   display: flex;
@@ -51,37 +51,41 @@
     height: 25px;
   }
 }
-
+.msg-box-content{
+  gap: $spacing_9;
+}
 .msgbox-header {
-  font-weight: 500;
+  color: $secondary-text-dark;
 }
 
 .msgbox-body {
-  color: #757575;
+  color: $neutral-text-secondary;
 }
 
 .msgbox-footer {
   display: flex;
-  justify-content: flex-end;
-  gap: $spacing_6;
+  justify-content: center;
+  gap: $spacing_9;
+  padding-top: 29px;
 }
 
 
 /*---------buttons----------*/
 .btncustomClass {
   display: flex;
-  width: 147px;
+  width: 100%;
+  // width: 147px;
   padding: $spacing_3 $spacing_5 ;
   justify-content: center;
   align-items: center;
   gap: $spacing_3;
-  border-radius: $border_radius_rounded !important;
+  // border-radius: $border_radius_rounded !important;
 
 
 }
 
 ::ng-deep app-buttons .btn.btn-outline {
-  border-radius: 999px !important;
+  // border-radius: 999px !important;
 }
 
 

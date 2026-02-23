@@ -1,0 +1,22 @@
+<div class="stepper">
+<div class="d-flex flex-column gap-3">
+  <div class="text-label-data-head">Apply Loan</div>
+  <p class="text-body-1">Share your basic details, upload required documents, and verify your information.</p>
+</div>
+<div class="stepcls">
+  <div
+    *ngFor="let s of steps; let i = index"
+    class="step"
+    [class.active]="isActive(s.route)"
+    [routerLink]="['/loanform', s.route]"
+  >
+
+    <div class="circle">{{ i + 1 }}</div>
+
+    <div class="text">
+      <div class="title">{{ s.label }}</div>
+    </div>
+
+  </div>
+</div>
+</div>

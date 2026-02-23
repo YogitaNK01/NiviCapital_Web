@@ -129,6 +129,11 @@
     }
   }
 
+  .error-text {
+  color: $error-text !important;
+  font-size: $spacing_7;
+}
+
   .file-info {
     display: flex;
     justify-content: center;
@@ -213,22 +218,7 @@
   }
 
 
-  .helper-text {
-    color: $neutral-text-secondary;
-    font-style: italic !important;
-    font-weight: $font-weight-regular;
-
-
-
-    &.error-text {
-      color: $error-text;
-    }
-
-    &.success-text {
-      color: $success-text;
-    }
-
-  }
+  
 
   
 
@@ -264,6 +254,23 @@
   }
 }
 
+.helper-text {
+    color: $neutral-text-secondary;
+    font-style: italic !important;
+    font-weight: $font-weight-regular;
+
+
+
+    &.error-text {
+      color: $error-text!important;
+    }
+
+    &.success-text {
+      color: $success-text!important;
+    }
+
+  }
+  
 // Responsive adjustments
 @media (max-width: 640px) {
   .upload-wrapper {

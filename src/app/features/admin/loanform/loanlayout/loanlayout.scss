@@ -1,0 +1,47 @@
+@use 'variables' as *;
+@use 'typography' as *;
+@use 'common' as *;
+
+.loan-shell {
+  display: flex;
+  height: 100vh;
+  background: #f6f8fb;
+}
+
+.stepper-panel {
+  // width: 260px;
+  background: #eaf2f8;
+  border-right: 1px solid #dbe3ea;
+  overflow-y: auto;
+}
+
+.content-panel {
+  flex: 1;
+  padding: 24px;
+  overflow-y: auto;
+}
+
+.header {
+  display: flex;
+  height: 100px;
+  justify-content: flex-end;
+  background: $bg;
+  flex-shrink: 0;
+  padding: $spacing_9 ;
+  justify-content: space-between;
+  align-items: center;
+  align-self: stretch;
+
+  @media (max-width: 768px) {
+   padding: $spacing_4 $spacing_9 ;
+    height: 70px;
+  }
+}
+.content{
+   background: $bg;
+
+}
+.main-content{
+      flex: 1;
+    overflow: scroll;
+}

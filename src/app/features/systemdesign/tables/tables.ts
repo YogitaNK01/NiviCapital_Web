@@ -181,7 +181,20 @@ export class Tables implements OnChanges {
 
   onEdit(row: any) {
   console.log("Edit", row);
-  if(row.kycStatus == "PENDING"){
+    if(row.custId == "-" || row.custId == null ){
+     this.router.navigate(
+      ['/admin/customer/addcustomer'],
+      {
+        queryParams: {
+          step: 0,
+          edit:true,
+          phone: row.mobile
+          
+        }
+      }
+    );
+  }
+  else if(row.kycStatus == "PENDING"){
      this.router.navigate(
       ['/admin/customer/addcustomer'],
       {

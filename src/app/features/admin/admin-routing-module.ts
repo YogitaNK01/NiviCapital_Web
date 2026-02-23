@@ -9,6 +9,7 @@ import { LosDetails } from './los-details/los-details';
 import { Commontabs } from '../systemdesign/commontabs/commontabs';
 import { CoApplicantDetails } from './co-applicantdetails/co-applicant';
 import { AddCustomer } from './customer/add-customer/add-customer';
+import { LoanformModule } from '../admin/loanform/loanform-module';
 
 const routes: Routes = [
   
@@ -21,6 +22,7 @@ const routes: Routes = [
         { path: 'losdetails', component: LosDetails},
          { path: 'commontabs', component: Commontabs},
          { path: 'coapplicantdetails', component: CoApplicantDetails},
+       
 
   {
   path: 'customer',
@@ -30,6 +32,7 @@ const routes: Routes = [
   path: 'losoperation',
   loadChildren: () => import('../admin/los-operation/los-operation-module').then(m => m.LosOperationModule)
 },
+
 
         { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
       

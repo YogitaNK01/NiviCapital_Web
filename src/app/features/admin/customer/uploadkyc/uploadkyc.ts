@@ -35,7 +35,7 @@ export class Uploadkyc implements OnDestroy {
 
   permanentMailingFlag = 0;
   currentMailingFlag = 0;
-  isPermanentMailingChecked = false;
+  isPermanentMailingChecked = true;
   isCurrentMailingChecked = false;
   files: any = {};
 
@@ -151,6 +151,22 @@ export class Uploadkyc implements OnDestroy {
     return age >= 18;
   }
 
+selectSameAddress() {
+  this.addressType = 'same';
+  this.isDifferentAddress = false;
+
+  // ✅ Reset mailing logic
+  this.isCurrentMailingChecked = true;
+  this.isPermanentMailingChecked = false;
+}
+
+selectDifferentAddress() {
+  this.addressType = 'different';
+  this.isDifferentAddress = true;
+
+  this.isCurrentMailingChecked = true;
+  this.isPermanentMailingChecked = false;
+}
 
   checkDob(value: any) {
     this.dobTouched = true;
@@ -322,57 +338,7 @@ export class Uploadkyc implements OnDestroy {
     console.log('Selected:1', value);
   }
 
-  //get states and cities
-  // states() {
-  //   this.main.getIndianstates().subscribe((res: any) => {
-  //     this.stateOptions = res.map((state: any) => ({ value: state.id, label: state.name }));
-
-
-  //   });
-  //   if (this.isDifferentAddress) {
-  //     this.main.getIndianstates().subscribe((res: any) => {
-  //       this.currstateOptions = res.map((state: any) => ({ value: state.id, label: state.name }));
-  //     });
-  //   }
-
-  // }
-  // selectstate(id: string) {
-  //   const found = this.stateOptions.find(s => s.value === id);
-  //   this.perselectedStateLabel = found?.label ?? '';
-  //   this.cities(id);
-
-  //   if (this.isDifferentAddress) {
-  //     const found = this.currstateOptions.find(s => s.value === id);
-  //     this.currselectedStateLabel = found?.label ?? '';
-  //     this.cities(id);
-  //   }
-  // }
-
-
-  // cities(id: string) {
-  //   this.main.getIndianstatescities(id).subscribe((res: any) => {
-  //     console.log('Cities:', res);
-  //     this.cityOptions = res.map((city: any) => ({ value: city.id, label: city.name }));
-  //     console.log('Cities cityOptions:', this.cityOptions);
-  //   });
-
-  //     if (this.isDifferentAddress) {
-  //         this.main.getIndianstatescities(id).subscribe((res: any) => {
-  //     console.log('Cities:', res);
-  //     this.currcityOptions = res.map((city: any) => ({ value: city.id, label: city.name }));
-  //     console.log('Cities cityOptions:', this.currcityOptions);
-  //   });
-  //     }
-  // }
-  // selectcity(id: string) {
-  //   const found = this.cityOptions.find(c => c.value === id);
-  //   this.perselectedCityId = found?.label ?? '';
-
-  //   if (this.isDifferentAddress) {
-  //     const found = this.currcityOptions.find(c => c.value === id);
-  //     this.currselectedCityId = found?.label ?? '';
-  //   }
-  // }
+ 
 
   states() {
     this.main.getIndianstates().subscribe((res: any) => {
@@ -388,8 +354,15 @@ export class Uploadkyc implements OnDestroy {
   }
 
   selectPerState(id: string) {
+  
     const found = this.stateOptions.find(s => s.value === id);
     this.perselectedStateLabel = found?.label ?? '';
+    
+    this.perCitySelectedOption = null;
+  this.perselectedCityId = '';
+  this.perselectedCityLabel = '';
+
+  this.cityOptions = [];  
     this.loadPerCities(id);
   }
 
@@ -405,6 +378,7 @@ export class Uploadkyc implements OnDestroy {
   }
 
   selectPerCity(id: string) {
+
     const found = this.cityOptions.find(c => c.value === id);
     this.perselectedCityLabel = found?.label ?? '';
   }
@@ -412,6 +386,13 @@ export class Uploadkyc implements OnDestroy {
   selectCurrState(id: string) {
     const found = this.currstateOptions.find(s => s.value === id);
     this.currselectedStateLabel = found?.label ?? '';
+
+      this.currCitySelectedOption = null;
+  this.currselectedCityId = '';
+  this.currselectedStateLabel = '';
+
+  this.currcityOptions = [];
+
     this.loadCurrCities(id);
   }
 

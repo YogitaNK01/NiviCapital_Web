@@ -65,7 +65,7 @@ export class Checkcontact implements OnInit {
     { key: 'firstName', label: 'First Name' },
     { key: 'lastName', label: 'Last Name' },
     { key: 'mobile', label: 'Mobile' },
-    { key: 'email', label: 'Eamil' },
+    { key: 'email', label: 'Email' },
     {
       key: 'status',
       label: 'Status',

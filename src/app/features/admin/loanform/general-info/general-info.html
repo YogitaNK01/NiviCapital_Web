@@ -1,0 +1,177 @@
+<div class="base-layout">
+
+
+
+    <div class="accordion d-flex flex-column gap-4 mb-4">
+
+        <div class="accordion-item b-0" *ngFor="let acc of accordions; let i = index">
+
+            <h2 class="accordion-header">
+                <button class="accordion-button table-head" [class.collapsed]="openIndex !== i" type="button"
+                    (click)="toggle(i)">
+                    {{ acc.title }}
+                </button>
+            </h2>
+
+            <div class="accordion-collapse collapse" [class.show]="openIndex === i">
+
+                <div class="accordion-body p-0" *ngIf="openIndex === i">
+
+                    <ng-container *ngIf="i === 0">
+                        <ng-container *ngTemplateOutlet="identityTemplate; context:{index:i}">
+                        </ng-container>
+                    </ng-container>
+
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+    <ng-template #identityTemplate let-i="index">
+
+        <form [formGroup]="registerForm" (ngSubmit)="submit()" class="common-details-box d-flex flex-column">
+
+            <div class="row">
+
+                <div class="text-label font-weight-bold blue-text">Last Qualification Details</div>
+                <div class="col-lg-4 col-sm-12 mt-20">
+                    <app-dropdown [options]="selectoccupation" [placeholder]="occupation" [required]="true"
+                        (selectedValueChange)="registerForm.get('occupation')?.setValue($event)" [avatarUrl]="avatarUrl"
+                        formControlName="occupation" [hasAvatar]="hasAvatar" [label]="occupation">
+                    </app-dropdown>
+
+                </div>
+                <div class="col-lg-4 col-sm-12 mt-20">
+                    <app-dropdown [options]="seleactqualification" [placeholder]="qualification"
+                        formControlName="qualification" [required]="true"
+                        (selectedValueChange)="registerForm.get('qualification')?.setValue($event)"
+                        [avatarUrl]="avatarUrl" [hasAvatar]="hasAvatar" [label]="qualification">
+                    </app-dropdown>
+
+                </div>
+                <div class="col-lg-4 col-sm-12 mt-20">
+                    <app-inputfield formControlName="institutionName" label="Last Institution Name*"
+                        placeholder="Enter Institution Name">
+                    </app-inputfield>
+
+                </div>
+
+                <hr class="hrclass">
+
+
+                <div class="text-label font-weight-bold blue-text">Course Datails</div>
+                <!-- Country NAME -->
+                <div class="col-lg-4 col-sm-12 mt-20">
+                    <app-inputfield type="text" [required]="true" label="Country" [required]="true"
+                        placeholder="Australia" helpText="Help text" [disabled]="true" name="country">
+                    </app-inputfield>
+
+                </div>
+
+                <!-- State NAME -->
+                <div class="col-lg-4 col-sm-12 mt-20">
+                    <app-dropdown [options]="selectostate" [placeholder]="state" [required]="true"
+                        (selectedValueChange)="registerForm.get('state')?.setValue($event)" [avatarUrl]="avatarUrl"
+                        formControlName="state" [hasAvatar]="hasAvatar" [label]="state">
+                    </app-dropdown>
+                </div>
+
+                <!-- University NAME -->
+                <div class="col-lg-4 col-sm-12 mt-20">
+                    <app-dropdown [options]="selectuniversity" [placeholder]="university" [required]="true"
+                        (selectedValueChange)="registerForm.get('university')?.setValue($event)" [avatarUrl]="avatarUrl"
+                        formControlName="university" [hasAvatar]="hasAvatar" [label]="university">
+                    </app-dropdown>
+                </div>
+
+                <!-- course type -->
+                <div class="col-lg-6 col-sm-12 mt-20">
+                    <app-dropdown [options]="selectcoursetype" [placeholder]="coursetype" [required]="true"
+                        (selectedValueChange)="registerForm.get('coursetype')?.setValue($event)" [avatarUrl]="avatarUrl"
+                        formControlName="coursetype" [hasAvatar]="hasAvatar" [label]="coursetype">
+                    </app-dropdown>
+                </div>
+                <!-- course name -->
+                <div class="col-lg-6 col-sm-12 mt-20">
+                    <app-dropdown [options]="selectcoursename" [placeholder]="coursename" [required]="true"
+                        (selectedValueChange)="registerForm.get('coursename')?.setValue($event)" [avatarUrl]="avatarUrl"
+                        formControlName="coursename" [hasAvatar]="hasAvatar" [label]="coursename">
+                    </app-dropdown>
+                </div>
+                <!-- Course Duration -->
+                <div class="col-lg-4 col-sm-12 mt-20">
+                    <app-dropdown [options]="selectcourseduration" [placeholder]="courseduration" [required]="true"
+                        (selectedValueChange)="registerForm.get('courseduration')?.setValue($event)"
+                        [avatarUrl]="avatarUrl" formControlName="courseduration" [hasAvatar]="hasAvatar"
+                        [label]="courseduration">
+                    </app-dropdown>
+                </div>
+
+
+
+                <!-- Course Start Date* -->
+                <div class="col-lg-4 col-sm-12 mt-20">
+                    <app-datepickernew formControlName="coursestartdate" label="Course Start Date*">
+                    </app-datepickernew>
+                </div>
+                <!-- Course End Date* -->
+                <div class="col-lg-4 col-sm-12 mt-20">
+                    <app-datepickernew formControlName="courseenddate" label="Course End Date*">
+                    </app-datepickernew>
+                </div>
+
+                <!-- Do you have Assets? -->
+                <div class="col-lg-12 mt-20">
+                    <div class=" d-flex flex-column">
+
+                        <div class="dropdown-label1 all-label ">Do you have Assets?<span class="text-danger">*</span>
+                        </div>
+                        <div class="d-flex flex-row">
+                            <app-radiobuttons name="optionsGroup1" [checked]="checkyes_rb === 'option1'"
+                                (checkedChange)="checkyes_rb = 'option1'" label="Yes">
+                            </app-radiobuttons>
+
+
+                            <app-radiobuttons name="optionsGroup2" [checked]="checkyes_rb === 'option2'"
+                                (checkedChange)="checkyes_rb = 'option2'" label="No">
+                            </app-radiobuttons>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Lending Partner -->
+                <div class="col-lg-12 col-sm-12 mt-20">
+                    <app-dropdown [options]="selectlendingpartner" [placeholder]="lendingpartner" [required]="true"
+                        (selectedValueChange)="registerForm.get('lendingpartner')?.setValue($event)"
+                        [avatarUrl]="avatarUrl" formControlName="lendingpartner" [hasAvatar]="hasAvatar"
+                        [label]="lendingpartner">
+                    </app-dropdown>
+                </div>
+            </div>
+            <!-- SUBMIT -->
+            <div class="col-lg-12 mt-4 d-flex justify-content-between">
+
+                <div class="col-lg-4 mt-4">
+                    <img src="../assets/images/icons/save.svg">
+                    Save and Exit
+                </div>
+                <div class="col-lg-4 mt-4">
+                    <app-buttons type="button" label="Back">
+                    </app-buttons>
+                    <app-buttons type="button" label="Next">
+                    </app-buttons>
+                    <!-- <app-buttons type="submit" label="Back" [disabled]="registerForm.invalid">
+                    </app-buttons>
+                    <app-buttons type="submit" label="Next" [disabled]="registerForm.invalid">
+                    </app-buttons> -->
+                </div>
+            </div>
+
+
+        </form>
+
+    </ng-template>
+
+</div>

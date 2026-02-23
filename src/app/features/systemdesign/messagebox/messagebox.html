@@ -1,5 +1,5 @@
 <div class="msgbox-backdrop">
-  <div class="msgbox-container">
+  <div class="msgbox-container text-center">
 
     <!-- Close Icon -->
     <button class="close-btn" (click)="onCancel()">
@@ -9,18 +9,19 @@
         <path d="M3 15L15 3" stroke="#F4F6FF" stroke-width="1.125" stroke-linecap="round" stroke-linejoin="round" />
       </svg></button>
 
+      <div class="d-flex flex-column msg-box-content">
     <!-- Header -->
-    <div class="msgbox-header text-label-data">
+    <div class="msgbox-header text-dp-3-bold ">
       {{ title }}
     </div>
 
     <!-- Body -->
-    <div class="msgbox-body text-body-1">
+    <div class="msgbox-body text-label-data">
       {{ message }}
     </div>
-
+</div>
     <!-- Footer -->
-    <div class="msgbox-footer">
+    <div class="msgbox-footer w-100">
       <!-- <button
         *ngIf="showCancel"
         class="btn btn-outline"
@@ -35,11 +36,11 @@
       </button> -->
 
 
-      <app-buttons label="Cancel" *ngIf="showCancel" class=" btn btn-outline btncustomClass btn-no-padding btn-label"
+      <app-buttons label="No" *ngIf="showCancel" class=" btn btn-outline btncustomClass btn-no-padding btn-label"
         [outline]="true" (click)="onCancel()">
       </app-buttons>
 
-      <app-buttons label="Ok" class="btn primary btncustomClass btn-no-padding btn-label" (click)="onOk()">
+      <app-buttons label="Yes" class="btn primary btncustomClass btn-no-padding btn-label" (click)="onOk()">
       </app-buttons>
     </div>
 

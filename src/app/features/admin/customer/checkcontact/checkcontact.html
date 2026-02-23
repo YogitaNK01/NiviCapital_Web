@@ -19,7 +19,7 @@
                 </div>
                 <div class="searchbtn">
                     <app-buttons label="Next" color="primary" type="submit"
-                        class="btncustomClass primary"  ></app-buttons>
+                        class="btncustomClass primary" [disabled]="!registerform.valid"  ></app-buttons>
                 </div>
             </div>
 

@@ -8,7 +8,8 @@
       <div class="accordion-item b-0" *ngFor="let acc of accordions; let i = index">
 
         <h2 class="accordion-header">
-          <button class="accordion-button table-head" [class.collapsed]="!openIndex.includes(i)" type="button" (click)="toggle(i)">
+          <button class="accordion-button table-head" [class.collapsed]="!openIndex.includes(i)" type="button"
+            (click)="toggle(i)">
 
             {{ acc.title }}
           </button>
@@ -50,29 +51,27 @@
       <div class="row  d-flex  align-items-start pt-4">
         <div class="col-lg-6 col-sm-12">
 
-          <app-inputfield type="text" name="aadharnum" ngModel [required]="true" #aadharnum="ngModel" label="Aadhaar Number"
-            placeholder="Enter your 12 digit Aadhar number" helpText="Help text" pattern="^[0-9]{12}$" [maxlength]="12"
-            (input)="main.restrictInput($event, 'number')">
+          <app-inputfield type="text" name="aadharnum" ngModel [required]="true" #aadharnum="ngModel"
+            label="Aadhaar Number" placeholder="Enter your 12 digit Aadhar number" helpText="Help text"
+            pattern="^[0-9]*$" [minlength]="12" [maxlength]="12"  (input)="main.restrictInput($event, 'number')">
           </app-inputfield>
 
 
           <div class="text-danger mt-1" *ngIf="aadharnum.invalid && aadharnum.touched">
             <small *ngIf="aadharnum.errors?.['required']">Aadhaar number is required</small>
-            <small *ngIf="aadharnum.errors?.['pattern']">Only numbers allowed</small>
-            <small *ngIf="aadharnum.errors?.['minlength']">
+            <small *ngIf="aadharnum.errors?.['pattern'] ">Only numbers allowed</small>
+            <small *ngIf="aadharnum.errors?.['minlength'] || aadharnum.errors?.['maxlength']">
               Please enter a valid Aadhaar number
             </small>
 
-            <small *ngIf="aadharnum.errors?.['maxlength']">
-              Please enter a valid Aadhaar number
-            </small>
+
           </div>
         </div>
         <div class="col-lg-6 col-sm-12 "></div>
 
         <div class="col-lg-6 col-sm-12 loan-mt-4">
 
-          <app-uploadbtn [config]="basicConfig" [required]="true"  (fileChange)="onFileChange($event, 'aadharfront')"
+          <app-uploadbtn [config]="basicConfig" [required]="true" (fileChange)="onFileChange($event, 'aadharfront')"
             label="Aadhaar Card Front">
           </app-uploadbtn>
         </div>
@@ -90,15 +89,15 @@
 
           <app-inputfield type="text" name="pan" ngModel [required]="true" #pan="ngModel" label="PAN Number"
             placeholder="Enter your 10 digit Pan number" helpText="Help text" pattern="^[A-Za-z]{5}[0-9]{4}[A-Za-z]{1}$"
-            [maxlength]="10" >
+            [maxlength]="10" [uppercase]="true">
           </app-inputfield>
 
           <div class="text-danger mt-1" *ngIf="pan.invalid && pan.touched">
             <small *ngIf="pan.errors?.['required']">pan number is required</small>
             <small *ngIf="pan.errors?.['pattern']">Please enter a valid pan number</small>
 
-            <small *ngIf="pan.errors?.['maxlength']">
-              Please enter a valid pan number
+           <small *ngIf="pan.errors?.['minlength'] || pan.errors?.['maxlength']">
+              Please enter a valid Pan number
             </small>
           </div>
 
@@ -107,7 +106,8 @@
         <div class="col-lg-6 loan-mt-4 col-sm-12">
 
 
-          <app-uploadbtn [config]="basicConfig" [required]="true"  (fileChange)="onFileChange($event, 'pan')" label="PAN Card">
+          <app-uploadbtn [config]="basicConfig" [required]="true" (fileChange)="onFileChange($event, 'pan')"
+            label="PAN Card">
           </app-uploadbtn>
 
         </div>
@@ -117,7 +117,8 @@
 
 
           <app-inputfield type="text" name="Passport" ngModel [required]="true" #Passport="ngModel" label="Passport"
-            placeholder="Enter your 8 digit passport number" helpText="Help text" pattern="^[A-Za-z0-9]{8}$" [maxlength]="8">
+            placeholder="Enter your 8 digit passport number" helpText="Help text" pattern="^[A-Z][0-9]{7}$"
+            [maxlength]="8" [uppercase]="true">
           </app-inputfield>
 
           <div class="text-danger mt-1" *ngIf="Passport.invalid && Passport.touched">
@@ -145,11 +146,12 @@
       <!-- DOB -->
 
       <div class="col-lg-6 loan-mt-4 col-sm-12">
-        <app-datepickernew name="dob" label="Date of Birth" ngModel [required]="true"  #dob="ngModel" (ngModelChange)="checkDob($event)"></app-datepickernew>
+        <app-datepickernew name="dob" label="Date of Birth" ngModel [required]="true" #dob="ngModel"
+          (ngModelChange)="checkDob($event)"></app-datepickernew>
       </div>
-       <div class="text-danger error" *ngIf="dobTouched && !dobValid">
-    Age must be 18 years or above
-  </div>
+      <div class="text-danger error" *ngIf="dobTouched && !dobValid">
+        Age must be 18 years or above
+      </div>
     </ng-template>
 
     <ng-template #permanentaddressTemplate let-i="index">
@@ -158,82 +160,80 @@
 
       <div class="row d-flex justify-content-center align-items-end loan-mt-4">
 
-        <app-inputfield type="text" name="addressline1" ngModel [required]="true" #addressline1="ngModel" label="Address Line 1"
-          placeholder="Address Line 1" helpText="Help text" [maxlength]="12">
+        <app-inputfield type="text" name="addressline1" ngModel [required]="true" #addressline1="ngModel"
+          label="Address Line 1" placeholder="Address Line 1" helpText="Help text" [minlength]="2" [maxlength]="255">
         </app-inputfield>
 
 
         <div class="text-danger mt-1" *ngIf="addressline1.invalid && addressline1.touched">
           <small *ngIf="addressline1.errors?.['required']">Address Line 1 is required</small>
-
+           <small *ngIf="addressline1.errors?.['minlength'] || addressline1.errors?.['maxlength']">
+              Address must be between 2 to 255 characters
+            </small>
         </div>
       </div>
 
       <div class="row d-flex justify-content-center align-items-end loan-mt-4">
 
-        <app-inputfield type="text" name="addressline2" ngModel [required]="true" #addressline2="ngModel" label="Address Line 2"
-          placeholder="Address Line 2" helpText="Help text">
+        <app-inputfield type="text" name="addressline2" ngModel [required]="true" #addressline2="ngModel"
+          label="Address Line 2" placeholder="Address Line 2" helpText="Help text" [minlength]="2" [maxlength]="255">
         </app-inputfield>
 
 
         <div class="text-danger mt-1" *ngIf="addressline2.invalid && addressline2.touched">
           <small *ngIf="addressline2.errors?.['required']">Address Line 2 is required</small>
-          <small *ngIf="addressline2.errors?.['pattern']">Only numbers allowed</small>
-          <small *ngIf="addressline2.errors?.['minlength']">
-            Please enter a valid Address Line 2
-          </small>
-
-          <small *ngIf="addressline2.errors?.['maxlength']">
-            Please enter a valid Address Line 2
-          </small>
+           <small *ngIf="addressline2.errors?.['minlength'] || addressline2.errors?.['maxlength']">
+               Address must be between 2 to 255 characters
+            </small>
         </div>
       </div>
 
       <div class="row d-flex justify-content-center align-items-end loan-mt-4">
 
         <app-inputfield type="text" name="addressline3" ngModel #addressline3="ngModel" label="Address Line 3"
-          placeholder="Address Line 3" helpText="Help text" [maxlength]="12">
+          placeholder="Address Line 3" helpText="Help text" [minlength]="2" [maxlength]="255" >
         </app-inputfield>
 
 
         <div class="text-danger mt-1" *ngIf="addressline3.invalid && addressline3.touched">
-          <small *ngIf="addressline3.errors?.['required']">Address Line 3 is required</small>
+         <small *ngIf="addressline3.errors?.['required']">Address Line 2 is required</small>
+           <small *ngIf="addressline3.errors?.['minlength'] || addressline3.errors?.['maxlength']">
+               Address must be between 2 to 255 characters
+            </small>
 
         </div>
       </div>
 
       <div class="row d-flex justify-content-center align-items-end loan-mt-4">
         <div class="col-lg-6  col-sm-12">
-          <app-inputfield type="text" ngModel [required]="true" label="Country"
-            placeholder="India" helpText="Help text" [disabled]="true" name="country"
-            >
+          <app-inputfield type="text" ngModel [required]="true" label="Country" placeholder="India" helpText="Help text"
+            [disabled]="true" name="country">
           </app-inputfield>
         </div>
         <div class="col-lg-6  col-sm-12">
-          <app-dropdown [options]="stateOptions" [required]="true"  [(selectedValue)]="perStateSelectedOption" [placeholder]="placeholderstate" [searchable]="true"
-            (selectedValueChange)="selectPerState($event)" label="State"  name="state"
-   [(ngModel)]="perselectedStateId"
-  >
-          </app-dropdown>
-        </div>
-        <div class="col-lg-6 loan-mt-4 col-sm-12" >
-          <app-dropdown [options]="cityOptions" [required]="true"  [(selectedValue)]="perCitySelectedOption" placeholder="" [searchable]="true"
-            (selectedValueChange)="selectPerCity($event)" label="City" name="city"  [(ngModel)]="perselectedCityId"
-  >
+          <app-dropdown [options]="stateOptions" [required]="true" [(selectedValue)]="perStateSelectedOption"
+            [placeholder]="placeholderstate" [searchable]="true" (selectedValueChange)="selectPerState($event)"
+            label="State" name="state" [(ngModel)]="perselectedStateId">
           </app-dropdown>
         </div>
         <div class="col-lg-6 loan-mt-4 col-sm-12">
-          
+          <app-dropdown [options]="cityOptions" [required]="true" [(selectedValue)]="perCitySelectedOption"
+            placeholder="" [searchable]="true" (selectedValueChange)="selectPerCity($event)" label="City" name="city"
+            [(ngModel)]="perselectedCityId">
+          </app-dropdown>
+        </div>
+        <div class="col-lg-6 loan-mt-4 col-sm-12">
+
 
           <app-inputfield type="text" name="perpincode" ngModel [required]="true" #perpincode="ngModel" label="Pin Code"
-            placeholder="Enter Pin Code" helpText="Help text" pattern="^[0-9]{6}$" [maxlength]="6" 
+            placeholder="Enter Pin Code" helpText="Help text" pattern="^[1-9][0-9]{5}$" [maxlength]="6" [minlength]="6"
             (input)="main.restrictInput($event, 'number')">
           </app-inputfield>
 
 
           <div class="text-danger mt-1" *ngIf="perpincode.invalid && perpincode.touched">
             <small *ngIf="perpincode.errors?.['required']">Pin Code is required</small>
-            <small *ngIf="perpincode.errors?.['pattern']">Only numbers allowed</small>
+            <small *ngIf="perpincode.errors?.['pattern'] && !perpincode.errors?.['minlength']">Only numbers allowed</small>
             <small *ngIf="perpincode.errors?.['minlength']">
               Please enter a valid Pin Code
             </small>
@@ -241,14 +241,14 @@
             <small *ngIf="perpincode.errors?.['maxlength']">
               Please enter a valid Pin Code
             </small>
-         
-        </div>
+
+          </div>
         </div>
       </div>
 
       <div class="mailcheck d-flex justify-content-start align-items-center loan-mt-4">
         <app-checkbox label="Is this the mailing address ?" [checked]="isPermanentMailingChecked"
-          (checkedChange)="permailcheck($event)"></app-checkbox>
+          (checkedChange)="permailcheck($event)" [disabled]="isCurrentMailingChecked"></app-checkbox>
       </div>
     </ng-template>
 
@@ -257,11 +257,11 @@
 
       <div class="addresscheck d-flex justify-content-start align-items-center gap-4">
         <app-checkbox label="Same as Permanent Address" [checked]="addressType === 'same'"
-          (checkedChange)="addressType = 'same'; isDifferentAddress = false"></app-checkbox>
+          (checkedChange)="selectSameAddress()"></app-checkbox>
         <label for="sameAddress"></label>
 
         <app-checkbox label="Different Address" [checked]="addressType === 'different'"
-          (checkedChange)="addressType = 'different'; isDifferentAddress = true"></app-checkbox>
+          (checkedChange)="selectDifferentAddress()"></app-checkbox>
         <label for="differentAddress"></label>
       </div>
     </ng-template>
@@ -269,8 +269,9 @@
     <div class="row d-flex " *ngIf="isDifferentAddress">
 
       <div class="col-lg-6  col-sm-12 ">
-        <app-dropdown [options]="secondaryaddproof" [required]="true" [(selectedValue)]="selectedOption" placeholder="" [searchable]="true"
-          (selectedValueChange)="onSelectionChange($event)" label="Secondary Address Proof"></app-dropdown>
+        <app-dropdown [options]="secondaryaddproof" [required]="true" [(selectedValue)]="selectedOption" placeholder=""
+          [searchable]="true" (selectedValueChange)="onSelectionChange($event)"
+          label="Secondary Address Proof"></app-dropdown>
       </div>
       <div class="col-lg-6  col-sm-12 ">
         <app-uploadbtn [config]="basicConfig" [required]="true" (fileChange)="onFileChange($event, 'secaddress')"
@@ -284,12 +285,15 @@
 
       <div class="col-lg-12  col-sm-12 loan-mt-4">
         <app-inputfield type="text" name="currentaddressline1" ngModel [required]="true" #currentaddressline1="ngModel"
-          label="Address Line 1" placeholder="Address Line 1" helpText="Help text" [maxlength]="12" >
+          label="Address Line 1" placeholder="Address Line 1" helpText="Help text" [maxlength]="12">
         </app-inputfield>
 
 
         <div class="text-danger mt-1" *ngIf="currentaddressline1.invalid && currentaddressline1.touched">
           <small *ngIf="currentaddressline1.errors?.['required']">Address Line 1 is required</small>
+           <small *ngIf="currentaddressline1.errors?.['minlength'] || currentaddressline1.errors?.['maxlength']">
+               Address must be between 2 to 255 characters
+            </small>
         </div>
       </div>
       <div class="col-lg-12  col-sm-12 loan-mt-4">
@@ -300,77 +304,84 @@
 
         <div class="text-danger mt-1" *ngIf="currentaddressline2.invalid && currentaddressline2.touched">
           <small *ngIf="currentaddressline2.errors?.['required']">Address Line 2 is required</small>
+           <small *ngIf="currentaddressline2.errors?.['minlength'] || currentaddressline2.errors?.['maxlength']">
+               Address must be between 2 to 255 characters
+            </small>
         </div>
       </div>
       <div class="col-lg-12  col-sm-12 loan-mt-4">
-        <app-inputfield type="text" name="currentaddressline3" ngModel  #currentaddressline3="ngModel"
+        <app-inputfield type="text" name="currentaddressline3" ngModel #currentaddressline3="ngModel"
           label="Address Line 3" placeholder="Address Line 3" helpText="Help text" [maxlength]="12">
         </app-inputfield>
 
 
         <div class="text-danger mt-1" *ngIf="currentaddressline3.invalid && currentaddressline3.touched">
           <small *ngIf="currentaddressline3.errors?.['required']">Address Line 3 is required</small>
+           <small *ngIf="currentaddressline3.errors?.['minlength'] || currentaddressline3.errors?.['maxlength']">
+               Address must be between 2 to 255 characters
+            </small>
         </div>
       </div>
     </div>
 
     <div class="row d-flex justify-content-center align-items-end" *ngIf="isDifferentAddress">
       <div class="col-lg-6  col-sm-12 loan-mt-4">
-          <app-inputfield type="text" ngModel [required]="true" label="Country" [required]="true" 
-            placeholder="India" helpText="Help text" [disabled]="true" name="country"
-            >
-          </app-inputfield>
-        </div>
-        <div class="col-lg-6  col-sm-12 loan-mt-4">
-          <app-dropdown [options]="currstateOptions" [required]="true"  [(selectedValue)]="currStateSelectedOption" placeholder="" [searchable]="true"
-            (selectedValueChange)="selectCurrState($event)" label="State" name="state"
- [(ngModel)]="currselectedStateId">
-          </app-dropdown>
-        </div>
-        <div class="col-lg-6 loan-mt-4 col-sm-12 ">
-          <app-dropdown [options]="currcityOptions" [required]="true"  [(selectedValue)]="currCitySelectedOption" placeholder="" [searchable]="true"
-            (selectedValueChange)="selectCurrCity($event)" label="City" name="city"
-  [(ngModel)]="currselectedCityId">
-          </app-dropdown>
-        </div>
-        <div class="col-lg-6 loan-mt-4 col-sm-12 ">
-          
-
-          <app-inputfield type="text" name="currpincode" ngModel [required]="true" #currpincode="ngModel" label="Pin Code"
-            placeholder="Enter Pin Code" helpText="Help text" pattern="^[0-9]{6}$" [maxlength]="6"
-            (input)="main.restrictInput($event, 'number')">
-          </app-inputfield>
+        <app-inputfield type="text" ngModel [required]="true" label="Country" [required]="true" placeholder="India"
+          helpText="Help text" [disabled]="true" name="country">
+        </app-inputfield>
+      </div>
+      <div class="col-lg-6  col-sm-12 loan-mt-4">
+        <app-dropdown [options]="currstateOptions" [required]="true" [(selectedValue)]="currStateSelectedOption"
+          placeholder="" [searchable]="true" (selectedValueChange)="selectCurrState($event)" label="State" name="state"
+          [(ngModel)]="currselectedStateId">
+        </app-dropdown>
+      </div>
+      <div class="col-lg-6 loan-mt-4 col-sm-12 ">
+        <app-dropdown [options]="currcityOptions" [required]="true" [(selectedValue)]="currCitySelectedOption"
+          placeholder="" [searchable]="true" (selectedValueChange)="selectCurrCity($event)" label="City" name="city"
+          [(ngModel)]="currselectedCityId">
+        </app-dropdown>
+      </div>
+      <div class="col-lg-6 loan-mt-4 col-sm-12 ">
 
 
-          <div class="text-danger mt-1" *ngIf="currpincode.invalid && currpincode.touched">
-            <small *ngIf="currpincode.errors?.['required']">Pin Code is required</small>
-            <small *ngIf="currpincode.errors?.['pattern']">Only numbers allowed</small>
-            <small *ngIf="currpincode.errors?.['minlength']">
-              Please enter a valid Pin Code
-            </small>
+        <app-inputfield type="text" name="currpincode" ngModel [required]="true" #currpincode="ngModel" label="Pin Code"
+          placeholder="Enter Pin Code" helpText="Help text" pattern="^[1-9][0-9]{5}$" [maxlength]="6" [minlength]="6"
+          (input)="main.restrictInput($event, 'number')">
+        </app-inputfield>
 
-            <small *ngIf="currpincode.errors?.['maxlength']">
-              Please enter a valid Pin Code
-            </small>
-         
+
+        <div class="text-danger mt-1" *ngIf="currpincode.invalid && currpincode.touched">
+          <small *ngIf="currpincode.errors?.['required']">Pin Code is required</small>
+          <small *ngIf="currpincode.errors?.['pattern'] && !currpincode.errors?.['minlength']">Only numbers allowed</small>
+          <small *ngIf="currpincode.errors?.['minlength']">
+            Please enter a valid Pin Code
+          </small>
+
+          <small *ngIf="currpincode.errors?.['maxlength']">
+            Please enter a valid Pin Code
+          </small>
+
         </div>
-        </div>
+      </div>
     </div>
 
     <div class="mailcheck d-flex justify-content-start align-items-center gap-4 loan-mt-4 mb-4"
       *ngIf="isDifferentAddress">
       <app-checkbox label="Is this the mailing address ?" [checked]="isCurrentMailingChecked"
-        (checkedChange)="currentmailcheck($event)"></app-checkbox>
+        (checkedChange)="currentmailcheck($event)" [disabled]="isPermanentMailingChecked"></app-checkbox>
     </div>
 
     <!-- footer btns -->
     <div class="row  d-flex justify-content-center space-evenly align-items-center ">
       <div class="col-lg-6  col-sm-12">
-        <app-buttons label="Back to dashboard" [outline]="true" class="btncustomClass primary " (click)="goToDashboard()"></app-buttons>
+        <app-buttons label="Back to dashboard" [outline]="true" class="btncustomClass primary "
+          (click)="goToDashboard()"></app-buttons>
 
       </div>
       <div class="col-lg-6  col-sm-12">
-        <app-buttons label="Submit" type="submit" color="primary" class="btncustomClass btn" [disabled]="!kycForm.valid || !allRequiredFilesUploaded || !isPermanentMailingChecked" ></app-buttons>
+        <app-buttons label="Submit" type="submit" color="primary" class="btncustomClass btn"
+          [disabled]="!kycForm.valid || !allRequiredFilesUploaded || !(isPermanentMailingChecked || isCurrentMailingChecked )"></app-buttons>
 
       </div>
 

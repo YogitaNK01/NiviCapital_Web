@@ -1,0 +1,58 @@
+@use 'variables' as *;
+@use 'typography' as *;
+@use 'common' as *;
+
+
+.stepper {
+  display: flex;
+width: 314px;
+// height: 1080px;
+padding: $spacing_9;
+flex-direction: column;
+align-items: flex-start;
+gap: $spacing_14;
+flex-shrink: 0;
+}
+
+.step {
+  cursor: pointer;
+  display: flex;
+padding: $spacing_5;
+align-items: center;
+gap: $spacing_4;
+align-self: stretch;
+}
+
+
+.circle {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 2px solid #9fb7cc;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 600;
+  background: white;
+}
+
+.title {
+  font-size: 14px;
+  font-weight: 500;
+  color: #3b4a5a;
+}
+
+.step.active {
+  
+}
+
+.step.active .circle {
+  background: #1f4e79;
+  border-color: #1f4e79;
+  color: white;
+}
+
+.step.active .title {
+  font-weight: 600;
+}

@@ -12,6 +12,8 @@ import { Buttons } from "../../../systemdesign/buttons/buttons";
 import { Successbox } from "../successbox/successbox";
 import { Addcustomerservice } from '../../../../core/service/addcustomerservice';
 import { interval, Subscription } from 'rxjs';
+import { Messagebox } from '../../../systemdesign/messagebox/messagebox';
+import { Msgboxservice } from '../../../../core/service/msgboxservice';
 
 
 @Component({
@@ -76,7 +78,8 @@ export class AddCustomer implements OnInit {
   description1 = `Your customer has been added successfully.You can now \ncontinue with KYC and loan processing.`;
 
   description2 = `The customer's KYC details have been submitted and  \nthe profile is now active.`;
-  constructor(private fb: FormBuilder, public main: Main, private route: ActivatedRoute, private addcustomerservice: Addcustomerservice, private cd: ChangeDetectorRef, private router: Router) { }
+  constructor(private fb: FormBuilder, public main: Main, private route: ActivatedRoute, private addcustomerservice: Addcustomerservice, 
+    private cd: ChangeDetectorRef, private router: Router,private msgBox:Msgboxservice) { }
 
   ngOnInit() {
     this.route.queryParams.subscribe(params => {
@@ -84,10 +87,13 @@ export class AddCustomer implements OnInit {
         this.prefillPhone = params['phone'];
         this.sendotpId = params['id'];
       }
-      if (params['step']) {
+      if (params['step'] == 2) {
         this.currentStep = +params['step'];
         console.log("currentstep", this.currentStep);
         sessionStorage.removeItem('editUser');
+        if (params['edit'] === 'true') {
+        this.maxAllowedStep = this.currentStep;
+      }
         if (params['custId'] && params['edit'] == 'true') {
            this.custname = params['firstName'] + ' ' + params['lastName'];
           sessionStorage.setItem('editUser', JSON.stringify({
@@ -97,6 +103,13 @@ export class AddCustomer implements OnInit {
           }));
 
         }
+      }
+       if (params['step'] == 0) {
+        this.currentStep = +params['step'];
+        console.log("currentstep", this.currentStep);
+       this.prefillPhone = params['phone'];
+       this.maxAllowedStep = this.currentStep;
+       
       }
 
 
@@ -204,7 +217,7 @@ export class AddCustomer implements OnInit {
       this.timerSub = undefined;
     }
 
-    this.resendSeconds = 10;
+    this.resendSeconds = 60;
     this.isCounting = true;
 
     this.timerSub = interval(1000).subscribe(() => {
@@ -302,7 +315,16 @@ export class AddCustomer implements OnInit {
     }
 
     if (action === 'ToDashboard') {
-      this.router.navigate(['/admin/customer']);
+       this.msgBox.open({
+      title: 'Are you sure want to go to Dashboard?',
+      message: 'Complete the steps to onboard a new customer',
+      showCancel: true,
+      onOk: () => {
+       this.router.navigate(['/admin/customer']);
+      }
+    });
+
+      
     }
   }
 

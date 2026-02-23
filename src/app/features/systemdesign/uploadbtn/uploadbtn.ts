@@ -1,5 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, Input, Output, EventEmitter, OnInit, input } from '@angular/core';
+import { Msgboxservice } from '../../../core/service/msgboxservice';
+import { Router } from '@angular/router';
 
 export type UploadState = 'idle' | 'focus' | 'uploading' | 'success' | 'error' | 'disabled';
 
@@ -18,18 +20,18 @@ export interface UploadResult {
 
 @Component({
   selector: 'app-uploadbtn',
- standalone: true,
+  standalone: true,
   imports: [CommonModule],
   templateUrl: './uploadbtn.html',
   styleUrl: './uploadbtn.scss'
 })
-export class Uploadbtn {
-@Input() config: UploadConfig = {
+export class Uploadbtn implements OnInit {
+  @Input() config: UploadConfig = {
     accept: '.svg, .png, .jpg, .jpeg, .pdf, .tiff, .heic',
     maxSize: 10,
     helperText: 'JPG, JPEG, PDF, PNG, TIFF, SVG, HEIC (max. 10 MB)'
   };
-  
+
   @Input() disabled: boolean = false;
   @Input() value: File | null = null;
   @Input() previewUrl: string = '';
@@ -38,7 +40,7 @@ export class Uploadbtn {
 
   @Output() fileChange = new EventEmitter<UploadResult>();
   @Output() fileRemove = new EventEmitter<void>();
-  
+
   state: UploadState = 'idle';
   progress: number = 0;
   fileName: string = '';
@@ -47,8 +49,10 @@ export class Uploadbtn {
   private fileInput: HTMLInputElement | null = null;
 
   showHelperMessage = true;
-private helperTimer?: number;
+  private helperTimer?: number;
 
+
+  constructor(private router: Router, private msgBox: Msgboxservice) { }
 
   ngOnInit() {
     if (this.disabled) {
@@ -105,7 +109,7 @@ private helperTimer?: number;
     // Validate file type
     const validTypes = this.config.accept?.split(',').map(t => t.trim()) || [];
     const fileExt = '.' + file.name.split('.').pop()?.toLowerCase();
-    const isValidType = validTypes.some(type => 
+    const isValidType = validTypes.some(type =>
       type === fileExt || type === file.type
     );
 
@@ -150,11 +154,11 @@ private helperTimer?: number;
           file: file,
           preview: this.preview
         });
-         this.hideHelperMessageAfterDelay(); 
+        this.hideHelperMessageAfterDelay();
       }
 
     }, 200);
-   
+
 
     // For real upload, replace above with actual HTTP request:
     /*
@@ -185,20 +189,29 @@ private helperTimer?: number;
       file: null,
       error: message
     });
-    this.hideHelperMessageAfterDelay(); 
+    this.hideHelperMessageAfterDelay();
   }
 
   removeFile() {
-    this.state = 'idle';
-    this.fileName = '';
-    this.preview = '';
-    this.progress = 0;
-    this.errorMessage = '';
-    
-    if (this.fileInput) {
-      this.fileInput.value = '';
-    }
-    this.fileRemove.emit();
+    this.msgBox.open({
+      title: 'Are you sure want to Delete',
+      message: 'Once deleted, this description cannot be recovered.',
+      showCancel: true,
+      onOk: () => {
+        this.state = 'idle';
+        this.fileName = '';
+        this.preview = '';
+        this.progress = 0;
+        this.errorMessage = '';
+
+        if (this.fileInput) {
+          this.fileInput.value = '';
+        }
+        this.fileRemove.emit();
+      }
+    });
+
+
   }
 
   triggerFileInput() {
@@ -216,17 +229,17 @@ private helperTimer?: number;
     return `upload-${this.state}`;
   }
 
- 
 
-private hideHelperMessageAfterDelay(delay = 5000) {
-  if (this.helperTimer) {
-    clearTimeout(this.helperTimer);
+
+  private hideHelperMessageAfterDelay(delay = 5000) {
+    if (this.helperTimer) {
+      clearTimeout(this.helperTimer);
+    }
+
+    this.helperTimer = window.setTimeout(() => {
+      this.showHelperMessage = false;
+    }, delay);
   }
-
-  this.helperTimer = window.setTimeout(() => {
-    this.showHelperMessage = false;
-  }, delay);
-}
 
 
 

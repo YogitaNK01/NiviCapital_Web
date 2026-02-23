@@ -167,7 +167,7 @@ input {
 .stepper {
   display: flex;
   border-radius: 12px;
-  border-bottom: 1px solid var(--system-border-neutral-neutral_2, #E4E6F1);
+  border-bottom: 1px solid $neutral-300;
 }
 
 .step {

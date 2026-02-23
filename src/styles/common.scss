@@ -224,7 +224,7 @@
     color: $success-900;
   }
 
- 
+
 
   /* Pending */
   &.Pending {
@@ -846,10 +846,10 @@ p {
 
 .table-card {
   border-radius: $border-radius-s;
-  border-right: 1px solid var(--system-border-neutral-neutral_2, #E4E6F1);
-  border-bottom: 1px solid var(--system-border-neutral-neutral_2, #E4E6F1);
-  border-top: 1px solid var(--system-border-neutral-neutral_2, #E4E6F1);
-  border-left: 1px solid var(--system-border-neutral-neutral_2, #E4E6F1);
+  border-right: 1px solid $neutral-300;
+  border-bottom: 1px solid $neutral-300;
+  border-top: 1px solid $neutral-300;
+  border-left: 1px solid $neutral-300;
   padding: 0 20px;
 }
 
@@ -972,3 +972,66 @@ p {
   margin-bottom: 0.5rem;
 }
 
+// -----------accordian0------------------
+
+.accordion,
+.accordion-item,
+.accordion-button,
+.accordion-collapse {
+  width: 100% !important;
+}
+
+.accordion {
+  flex: none;
+  width: 100%;
+}
+
+.accordion-item {
+  width: 100% !important;
+  border: none;
+}
+
+.accordion-header {
+  width: 100% !important;
+}
+
+
+.accordion-item:first-child .accordion-button {
+  min-height: 56px;
+}
+
+.accordion-button.collapsed {
+  min-height: 56px;
+  padding: 16px 20px;
+}
+
+
+.accordion-button {
+  border-radius: $border-radius-s;
+  background: $surface;
+  min-height: 56px; // important
+  padding: 16px 20px; // restore header spacing
+  display: flex;
+  align-items: center;
+  color: $secondary-text-dark;
+  ;
+}
+
+
+.base-layout {
+  display: flex;
+  width: 1606px;
+  padding: var(--spacing-spacing_19, 44px) var(--spacing-spacing_18, 40px);
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--spacing-spacing_14, 30px);
+}
+
+.common-details-box {
+  display: flex;
+  padding: $spacing_18;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  gap: $spacing_4;
+}
