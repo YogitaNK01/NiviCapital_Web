@@ -32,7 +32,7 @@ export class Uploadkyc implements OnDestroy {
   addressType: 'same' | 'different' = 'same';
   ismailingaddress: 'same' | 'different' = 'same';
   isDifferentAddress: boolean = false;
-
+  selectedSecondaryProof: string | null = null;
   permanentMailingFlag = 0;
   currentMailingFlag = 0;
   isPermanentMailingChecked = true;
@@ -286,9 +286,14 @@ selectDifferentAddress() {
   }
 
   get allRequiredFilesUploaded(): boolean {
+     let docsToCheck = [...this.requiredDocs];
+      if (this.addressType === 'different') {
+    docsToCheck.push('bill');
+  }
+
     let req = this.requiredDocs.every(k => !!this.uploadedFiles[k]);
-    let optional = this.optionalDocs.every(k => !!this.uploadedFiles[k]);
     return (req )
+   
   }
 
   permailcheck(event: any) {
