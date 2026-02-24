@@ -3,56 +3,114 @@
 @use 'common' as *;
 
 
+
 .stepper {
+  width: 314px;
+  padding: 24px;
   display: flex;
-width: 314px;
-// height: 1080px;
-padding: $spacing_9;
-flex-direction: column;
-align-items: flex-start;
-gap: $spacing_14;
-flex-shrink: 0;
+  flex-direction: column;
+}
+
+.stepcls {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: $spacing_6;
+  align-self: stretch;
 }
 
 .step {
-  cursor: pointer;
+  position: relative;
   display: flex;
-padding: $spacing_5;
-align-items: center;
-gap: $spacing_4;
-align-self: stretch;
+  align-items: center;
+  gap: $spacing_4;
+  padding: 16px 0;
+  cursor: pointer;
 }
 
+/* Vertical Line */
+.step::before {
+  content: '';
+  position: absolute;
+  left: 16px;
+  top: -20px;
+  width: 2px;
+  height: 100%;
+  border-left: 2px dashed $secondary-700;
+  z-index: 0;
+}
 
+.step:first-child::before {
+  display: none;
+}
+
+/* Circle */
 .circle {
-  width: 32px;
-  height: 32px;
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
-  border: 2px solid #9fb7cc;
+  border: 1.462px solid $accent_sec;
+  background: white;
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 13px;
   font-weight: 600;
-  background: white;
+  z-index: 1;
 }
 
+/* Title */
 .title {
-  font-size: 14px;
-  font-weight: 500;
-  color: #3b4a5a;
+ 
+  color: $secondary-900;
 }
 
-.step.active {
-  
-}
-
+/* ACTIVE STEP */
 .step.active .circle {
+  background: $secondary-50;
+  border-color: $secondary-700;
+   color:  $secondary-700;;
+}
+
+.step.active .title {
+  color: $secondary-900;
+  font-weight: 700;
+}
+
+/* COMPLETED STEP */
+.step.completed .circle {
   background: #1f4e79;
   border-color: #1f4e79;
   color: white;
 }
 
-.step.active .title {
-  font-weight: 600;
+.step.completed::before {
+  border-left: 2px solid #1f4e79;
+}
+
+/* UPCOMING STEP */
+.step.upcoming .circle {
+  background: $secondary-50;
+  border-color:  $secondary-700;;
+  color:  $secondary-700;
+  
+}
+
+.step.upcoming .title {
+  color: $secondary-700;;
+}
+
+.step.disabled {
+  pointer-events: none;
+  cursor: not-allowed;
+}
+
+.step.disabled .circle {
+  border-color: #c5d3df;
+  color: #c5d3df;
+}
+
+.step.disabled .title {
+  color: #c5d3df;
 }

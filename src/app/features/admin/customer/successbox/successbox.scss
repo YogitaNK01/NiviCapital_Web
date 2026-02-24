@@ -57,7 +57,7 @@ p {
     align-items: center;
     gap: 10px;
     border-radius: 8px;
-    background: var(--brand-color-secondary-50, #E4F0F6);
+    background: var(--brand-color-secondary-50, $secondary-50);
 }
 
 .nc-id-label {

@@ -1035,3 +1035,11 @@ p {
   align-items: flex-start;
   gap: $spacing_4;
 }
+
+.footer-hr-class{
+  border-top: 1px solid var(--system-border-neutral-neutral_2, #E4E6F1);
+  margin-top: 0;
+}
+.loan-footerbtns{
+  padding: $spacing_10 $spacing_18;
+}

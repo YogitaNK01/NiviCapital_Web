@@ -1,7 +1,8 @@
 import { CommonModule } from '@angular/common';
-import { Component, Input, Output, EventEmitter, OnInit, input } from '@angular/core';
+import { Component, Input, Output, EventEmitter, OnInit, input, forwardRef } from '@angular/core';
 import { Msgboxservice } from '../../../core/service/msgboxservice';
 import { Router } from '@angular/router';
+import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 
 export type UploadState = 'idle' | 'focus' | 'uploading' | 'success' | 'error' | 'disabled';
 
@@ -23,9 +24,16 @@ export interface UploadResult {
   standalone: true,
   imports: [CommonModule],
   templateUrl: './uploadbtn.html',
-  styleUrl: './uploadbtn.scss'
+  styleUrl: './uploadbtn.scss',
+  providers: [
+    {
+      provide: NG_VALUE_ACCESSOR,
+      useExisting: forwardRef(() => Uploadbtn),
+      multi: true
+    }
+  ]
 })
-export class Uploadbtn implements OnInit {
+export class Uploadbtn implements OnInit, ControlValueAccessor {
   @Input() config: UploadConfig = {
     accept: '.svg, .png, .jpg, .jpeg, .pdf, .tiff, .heic',
     maxSize: 10,
@@ -224,4 +232,30 @@ export class Uploadbtn implements OnInit {
 
 
 
+
+  onChange = (value: any) => {};
+  onTouched = () => {};
+
+  writeValue(value: any): void {
+    this.value = value;
+  }
+
+  registerOnChange(fn: any): void {
+    this.onChange = fn;
+  }
+
+  registerOnTouched(fn: any): void {
+    this.onTouched = fn;
+  }
+
+  setDisabledState(isDisabled: boolean): void {
+    this.disabled = isDisabled;
+  }
+
+  fileSelected(event: any) {
+    const file = event.target.files[0];
+    this.value = file;
+    this.onChange(file);
+    this.onTouched();
+  }
 }

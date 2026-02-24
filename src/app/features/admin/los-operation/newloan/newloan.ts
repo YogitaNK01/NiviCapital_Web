@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { ChangeDetectorRef, Component, Input, OnInit } from '@angular/core';
 import { Dropdown, DropdownOption } from "../../../systemdesign/dropdown/dropdown";
 import { CommonModule } from '@angular/common';
 import { Inputfield } from '../../../systemdesign/inputfield/inputfield';
@@ -7,45 +7,62 @@ import { FormsModule } from '@angular/forms';
 import { Tables } from "../../../systemdesign/tables/tables";
 import { Buttons } from "../../../systemdesign/buttons/buttons";
 import { Router } from '@angular/router';
+import { Subject } from 'rxjs';
+import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
+import { Addcustomerservice } from '../../../../core/service/addcustomerservice';
+import { TableData } from '../../../../core/service/table-data';
+import { MatTableDataSource } from '@angular/material/table';
+
+
+interface TransformedUserData {
+  // id: string;
+  custId: string;
+  ncId: string
+  firstName: string;
+  lastName: string;
+  mobile: string;
+  email: string;
+  status: string;
+  kycStatus: string;
+  // createdAt: number[];
+  // Id: string;
+}
 
 @Component({
   selector: 'app-newloan',
-  standalone:true,
+  standalone: true,
   imports: [CommonModule, Dropdown, Inputfield, FormsModule, Tables, Buttons],
   templateUrl: './newloan.html',
   styleUrl: './newloan.scss'
 })
-export class Newloan {
- @Input() avatarUrl='';
+export class Newloan implements OnInit {
+  @Input() avatarUrl = '';
   @Input() hasAvatar = false;
-   selectedOption: string = '';
+  selectedOption: string = '';
   searchOptions: DropdownOption[] = [
-      { label: 'Mobile Number', value: 'Mobile', icon: '' },
-      { label: 'NCID', value: 'NCID', icon: '' },
-      { label: 'CUSTID', value: 'CUSTID', icon: '' },
-      { label: 'PAN Number', value: 'PAN', icon: '' },
-      { label: 'Aadhaar Number', value: 'Aadhaar', icon: '' },
-      { label: 'Email', value: 'Email', icon: '' },
-      { label: 'Passport', value: 'Passport', icon: '' },
-    ];
-  
-    searchby: string = 'Search by';
-    searchedvalue :any;
+    { label: 'Mobile Number', value: 'Mobile', icon: '' },
+    { label: 'NCID', value: 'NCID', icon: '' },
+    { label: 'CUSTID', value: 'CUSTID', icon: '' },
+    { label: 'PAN Number', value: 'PAN', icon: '' },
+    { label: 'Aadhaar Number', value: 'Aadhaar', icon: '' },
+    { label: 'Email', value: 'Email', icon: '' },
+    { label: 'Passport', value: 'Passport', icon: '' },
+  ];
+
+  searchby: string = 'Search by';
+  searchedvalue: any;
 
 
-      columns = [
+  columns = [
     {
       key: 'custId',
       label: 'CUSTID',
       class: 'cifstyle',
       clickable: true,
-      // onClick: (row: { Id: any; }) => this.getpidata(row.Id),
-      routerLink: '/admin/customerdetails',
-      queryParams: "{ mode: 'view', id: row.id }"
     },
     { key: 'ncId', label: 'NCID' },
     { key: 'firstName', label: 'First Name' },
-     { key: 'lastName', label: 'Last Name' },
+    { key: 'lastName', label: 'Last Name' },
     { key: 'mobile', label: 'Mobile' },
     { key: 'email', label: 'Email' },
     {
@@ -66,12 +83,73 @@ export class Newloan {
     // { key: 'registrationDate', label: 'Registration Date' },
 
   ];
-  filteredData: any[] = [];
 
-constructor(public service:Main,private router:Router){}
+  selectedRows: any[] = [];
+  filteredData: TransformedUserData[] = [];
+  dataSource = new MatTableDataSource<any>([]);
+
+  isdata: boolean = false;
+  private mobileSubject = new Subject<string>();
+
+  constructor(public service: Main, private router: Router, private apiService: Addcustomerservice, private cd: ChangeDetectorRef) { }
+  ngOnInit(): void {
+    this.mobileSubject
+      .pipe(
+        debounceTime(100),
+        distinctUntilChanged()
+      )
+      .subscribe(value => {
+        if (value.length === 10) {
+          this.searchMobile(value);
+        }
+      });
+  }
+
+  onMobileInput(event: any) {
+    const value = event.target.value;
+    this.mobileSubject.next(value);
+  }
+
+  searchMobile(mobile: string) {
+    let input = {
+      identifier: mobile,
+      type: "MOBILE"
+
+    }
+
+    this.apiService.customersearch(input).subscribe(res => {
+      if (res.message.includes('Existing customer found')) {
 
 
-    onSelectionChange(value: string) {
+        this.isdata = true;
+        this.cd.detectChanges();
+
+        let fullData: TransformedUserData[] = [{
+          custId: res.data.custId ?? "-",
+          firstName: res.data.firstName ?? "-",
+          lastName: res.data.lastName ?? "-",
+          mobile: res.data.mobile ?? "-",
+          email: res.data.email ?? '-',
+          kycStatus: res.data.kycStatus ?? "-",
+          status: res.data.status ?? "-",
+          ncId: res.data.ncId ?? "-",
+        }]
+        // this.filteredData = [fullData];
+        this.filteredData = [...fullData];
+        console.log('search mobile Result:', fullData);
+      } else {
+        this.isdata = false;
+      }
+    });
+  }
+
+
+
+  onchecboxChange(rows: any[]) {
+    this.selectedRows = rows;
+    console.log('Received in Parent:', rows);
+  }
+  onSelectionChange(value: string) {
     console.log('Selected:1', value);
   }
 
@@ -80,6 +158,15 @@ constructor(public service:Main,private router:Router){}
   }
 
   toProductscreen() {
-    this.router.navigate(["/admin/losoperation/selectproduct"]);
+    this.router.navigate(["/admin/losoperation/selectproduct"],
+      {
+        queryParams: {
+          custId: this.selectedRows[0].custId
+
+        }
+      }
+    );
   }
+
+
 }

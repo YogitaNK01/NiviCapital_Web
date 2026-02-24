@@ -312,3 +312,9 @@ letter-spacing: 0.16px;
 
 
 }
+
+.dropdown-item.disabled {
+  color: #b0b0b0;
+  pointer-events: none;
+  cursor: not-allowed;
+}

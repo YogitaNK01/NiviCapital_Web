@@ -1,0 +1,118 @@
+
+<div class="base-layout">
+      <form [formGroup]="kycdocumentsForm" (ngSubmit)="submit()" id="kycForm" class="w-100">
+
+<div class=" accordion d-flex flex-column gap-4 mb-4">
+
+      <div class="accordion-item b-0" *ngFor="let acc of accordions; let i = index">
+
+        <h2 class="accordion-header">
+          <button class="accordion-button table-head" [class.collapsed]="!openIndex.includes(i)" type="button"
+            (click)="toggle(i)">
+
+            {{ acc.title }}
+          </button>
+        </h2>
+
+
+        <div class="accordion-collapse collapse" [class.show]="openIndex.includes(i)">
+
+          <div class="accordion-body p-0 " >
+
+            <ng-container *ngIf="i === 0">
+              <ng-container *ngTemplateOutlet="identityTemplate; context:{index:i}">
+              </ng-container>
+            </ng-container>
+
+            <ng-container *ngIf="i === 1">
+              <ng-container *ngTemplateOutlet="permanentaddressTemplate; context:{index:i}">
+              </ng-container>
+            </ng-container>
+
+            <ng-container *ngIf="i === 2">
+              <ng-container *ngTemplateOutlet="currentaddressTemplate; context:{index:i}">
+
+              </ng-container>
+            </ng-container>
+
+
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+      <ng-template #identityTemplate let-i="index" >
+      <!-- <div class="loan-heading text-label">Identity & Residency</div> -->
+
+      <div class="row  d-flex  align-items-start pt-4 common-details-box d-flex flex-column">
+        <div class="col-lg-6 col-sm-12">
+          <app-inputfield type="text" formControlName="adhaarnumber" [required]="true" label="Aadhaar Number" 
+            placeholder="Aadhaar Number" helpText="Help text" name="adhaarnumber">
+          </app-inputfield>
+        </div>
+        <div class="col-lg-6 col-sm-12">
+          <div class="col"></div>
+          <div class="col"></div>
+        </div>
+        <div class="col-lg-6 col-sm-12">
+          <app-inputfield type="text" formControlName="pannumber" [required]="true" label="Pan Number" 
+            placeholder="Pan Number" helpText="Help text" name="pannumber">
+          </app-inputfield>
+        </div>
+        <div class="col-lg-6 col-sm-12">
+         
+        </div>
+        <div class="col-lg-6 col-sm-12">
+          <app-inputfield type="text" formControlName="passportnumber" [required]="true" label="Passport" 
+            placeholder="Passport" helpText="Help text" name="passportnumber">
+          </app-inputfield>
+        </div>
+        <div class="col-lg-6 col-sm-12">
+           <app-datepickernew name="dob" label="Date of Birth" [required]="true" formControlName="dob"></app-datepickernew>
+        </div>
+
+        </div>
+        </ng-template>
+
+        <ng-template #permanentaddressTemplate let-i="index">
+    
+      <div class="row  d-flex  align-items-start pt-4 common-details-box d-flex flex-column">
+        <div class="col-lg-6 col-sm-12">
+          <app-inputfield type="text"  [required]="true" label="First Name" 
+            placeholder="First Name" helpText="Help text" name="firstName">
+          </app-inputfield>
+        </div>
+        </div>
+        </ng-template>
+
+        <ng-template #currentaddressTemplate let-i="index">
+      
+      <div class="row  d-flex  align-items-start pt-4 common-details-box d-flex flex-column">
+        <div class="col-lg-6 col-sm-12">
+          <app-inputfield type="text"  [required]="true" label="First Name" 
+            placeholder="First Name" helpText="Help text" name="firstName">
+          </app-inputfield>
+        </div>
+        </div>
+        </ng-template>
+
+        </form>
+        </div>
+
+         <hr class="footer-hr-class">
+      <div class="loan-footerbtns row w-100  d-flex justify-content-between align-items-center">
+
+                <div class="col-lg-4 ">
+                    <img src="../assets/images/icons/save.svg">
+                    <span class="text-dp-3-regular mx-2 blue-text"> Save and Exit</span>
+                </div>
+                <div class="col-lg-4  d-flex justify-content-end">
+                    <app-buttons type="button" label="Back" class="btn btncustomClass" [outline]="true" (click)="back()">
+                    </app-buttons>
+                    <app-buttons type="button" label="Next" class="btn btncustomClass" color="primary" (click)="next()">
+                    </app-buttons>
+                  
+                </div>
+            </div>

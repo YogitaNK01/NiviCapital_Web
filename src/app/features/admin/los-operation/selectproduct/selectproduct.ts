@@ -1,12 +1,13 @@
 import { CommonModule } from '@angular/common';
-import { Component, Input } from '@angular/core';
+import { ChangeDetectorRef, Component, Input, OnInit } from '@angular/core';
 import { Dropdown, DropdownOption } from '../../../systemdesign/dropdown/dropdown';
 import { Buttons } from '../../../systemdesign/buttons/buttons';
 import { FormsModule } from '@angular/forms';
 import { Checkbox } from "../../../systemdesign/checkbox/checkbox";
 import { Radiobuttons } from '../../../systemdesign/radiobuttons/radiobuttons';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { Successbox } from '../../customer/successbox/successbox';
+import { Addcustomerservice } from '../../../../core/service/addcustomerservice';
 
 @Component({
   selector: 'app-selectproduct',
@@ -15,7 +16,7 @@ import { Successbox } from '../../customer/successbox/successbox';
   templateUrl: './selectproduct.html',
   styleUrl: './selectproduct.scss'
 })
-export class Selectproduct {
+export class Selectproduct implements OnInit {
   //dropdown--------------------
   @Input() avatarUrl = '';
   @Input() hasAvatar = false;
@@ -24,7 +25,7 @@ export class Selectproduct {
   selectedproduct: string = '';
   product_: string = '';
   selectProduct: DropdownOption[] = [
-    { label: 'Loan', value: 'Loan', icon: '' },
+    { label: 'Loan', value: '4B8B6F9FD511555BE0635A01A8C03D66', icon: '' },
   ];
 
 
@@ -32,37 +33,46 @@ export class Selectproduct {
   selectedloantype: string = '';
   loantype_: string = '';
   seleactloantype: DropdownOption[] = [
-    { label: 'New Loan', value: 'newLoan', icon: '' },
-    { label: 'Balance Transfer', value: 'balancetransfer', icon: '' },
+    { label: 'New Loan', value: 'NEW_LOAN', icon: '', disabled: false },
+    { label: 'Balance Transfer', value: 'BALANCE_TRANSFER', icon: '', disabled: true },
   ]
 
   selectedsegment: string = '';
   segment: string = 'Select Segment';
   segment_: string = '';
   selectSegment: DropdownOption[] = [
-    { label: 'Retail', value: 'retail', icon: '' },
-    { label: 'Corporate', value: 'corporate', icon: '' },
-    { label: 'MSME', value: 'msme', icon: '' },
+    { label: 'Retail', value: 'RETAIL', icon: '',disabled: false },
+    { label: 'Corporate', value: 'CORPORATE', icon: '',disabled: true },
+    { label: 'MSME', value: 'MSME', icon: '',disabled: true },
   ];
 
   seleactedcategory: string = '';
   catagory: string = 'Select Category';
   catagory_: string = '';
   seleactCategory: DropdownOption[] = [
-    { label: 'Education Loan', value: 'educationloan', icon: '' },
+    { label: 'Education Loan', value: 'EDUCATION', icon: '' },
   ]
   formData: any = {};
-
+  custId: string = '';
   //checkbox-------------------
   isChecked_rb: boolean = false;
-  checkselectedOption_rb = '';
+  SecurityTypechecked: string = '';
 
   //successbox-------------------
 
-  arnid = "ARN2026021100005"
-  issuccess:boolean=false;
+  arnid: string = '';
+  issuccess: boolean = false;
 
-  constructor(private router: Router) { }
+
+  constructor(private router: Router, private apiService: Addcustomerservice, private route: ActivatedRoute, private cd: ChangeDetectorRef) { }
+  ngOnInit(): void {
+    this.route.queryParams.subscribe(params => {
+      if (params['custId']) {
+        this.custId = params['custId'];
+
+      }
+    });
+  }
 
   onSelectionChange(selectedkey: string, value: string) {
     this.formData[selectedkey] = value;
@@ -72,29 +82,59 @@ export class Selectproduct {
   onCheckboxChange(value: boolean, label: string) {
     console.log(label, value);
   }
-
+  ontypechecked(value: string) {
+    this.SecurityTypechecked = value;
+    console.log('Security Typechecked:', this.SecurityTypechecked);
+  }
   goToloanscreen() {
     this.router.navigate(['admin/los-operation/applyloan']);
-    
+
   }
 
   tosuccess() {
-    this.issuccess=true;
+    console.log(this.formData,);
+
+    let input = {
+      "productId": this.formData.product,
+      "module": "LOS",
+      "segment": this.formData.segment,
+      "catagory": this.formData.catagory,
+      "loanType": this.formData.loantype,
+      "isSecured": this.SecurityTypechecked == 'Secured' ? true : false,
+      "selectedCifId": this.custId,
+      "source": "WEB"
+    }
+    this.apiService.selectproduct(input).subscribe({
+      next: (res) => {
+        console.log(res);
+
+        this.arnid = res?.data?.arn ?? '';
+        this.issuccess = true;
+        this.cd.detectChanges();
+      },
+      error: (err) => {
+        this.issuccess = false;
+        console.error(err);
+      }
+    });
+
+
     // this.router.navigate(['admin/customer/successbox']);
- 
+
 
 
   }
 
-   handleSuccessAction(action: string) {
+  handleSuccessAction(action: string) {
     if (action === 'letsstart') {
 
-       const url = this.router.serializeUrl(
-    this.router.createUrlTree(['/loanform/loaninfo'] )
-  );
-  console.log("url---",url);
-  
+      const url = this.router.serializeUrl(
+        this.router.createUrlTree(['/loanform/loaninfo'])
+      );
+      console.log("url---", url);
 
-  window.open(url, '_blank');
-    }}
+
+      window.open(url, '_blank');
+    }
+  }
 }

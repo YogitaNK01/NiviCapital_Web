@@ -1,30 +1,45 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { Router, RouterModule } from '@angular/router';
+import { Loanstepperservice } from '../../../../core/service/loanstepperservice';
 
 @Component({
   selector: 'app-loanstepper',
-  imports: [CommonModule,RouterModule],
-  standalone:true,
+  imports: [CommonModule, RouterModule],
+  standalone: true,
   templateUrl: './loanstepper.html',
   styleUrl: './loanstepper.scss'
 })
-export class Loanstepper {
+export class Loanstepper implements OnInit {
+  steps: any;
 
-    steps = [
-    { label: 'Loan Info', route: 'loaninfo' },
-    { label: 'General Info', route: 'genralinfo' },
-    { label: 'Estimated Expense', route: 'expense' },
-    { label: 'KYC', route: 'kyc' },
-    { label: 'Income Details', route: 'income' },
-    { label: 'Assets', route: 'asset' },
-    { label: 'Liabilities', route: 'liability' },
-    { label: 'Reference', route: 'reference' }
-  ];
+  constructor(public router: Router, public stepservice: Loanstepperservice) {
 
-   constructor(public router: Router) {}
+  }
 
+  ngOnInit() {
+    this.steps = this.stepservice.steps;
+  }
+
+  get currentIndex(): number {
+    const currentRoute = this.router.url.split('/').pop();
+    return this.steps.findIndex((s: { route: string | undefined; }) => s.route === currentRoute);
+  }
   isActive(route: string) {
     return this.router.url.includes(route);
   }
+
+  goToStep(route: string) {
+    this.router.navigate(['/loanform', route]);
+  }
+
+  isCompleted(index: number): boolean {
+    return index < this.currentIndex;
+  }
+
+  isUpcoming(index: number): boolean {
+    return index > this.currentIndex;
+  }
+
+
 }

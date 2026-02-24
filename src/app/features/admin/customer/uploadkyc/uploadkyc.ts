@@ -76,6 +76,8 @@ export class Uploadkyc implements OnDestroy {
 
 
   placeholderstate: string = 'Select State';
+placeholdercity: string = 'Select City';
+
 
   requiredDocs = ['aadharfront', 'aadharback', 'pan'];   // only required ones
   optionalDocs = ['passport', 'bill',];

@@ -7,6 +7,8 @@ import { Buttons } from '../../../systemdesign/buttons/buttons';
 import { Radiobuttons } from '../../../systemdesign/radiobuttons/radiobuttons';
 import { Datepickernew } from '../../../systemdesign/datepickernew/datepickernew';
 import { Dropdown, DropdownOption } from '../../../systemdesign/dropdown/dropdown';
+import { Router } from '@angular/router';
+import { Loanstepperservice } from '../../../../core/service/loanstepperservice';
 
 
 @Component({
@@ -20,7 +22,7 @@ export class GeneralInfo implements OnInit {
 
   openIndex: number | null = 0;
   accordions = [
-    { title: 'Identity & Residency ', alwaysOpen: true },
+    { title: 'General Info ', alwaysOpen: true },
 
   ];
 
@@ -78,7 +80,7 @@ university:string = 'Select university';
 
 
 
-  constructor(private fb: FormBuilder, private formSvc: Loanformservice) { }
+  constructor(private fb: FormBuilder, private formSvc: Loanformservice,private router:Router,private stepperService:Loanstepperservice) { }
   ngOnInit() {
     this.registerForm = this.fb.group({
 
@@ -125,4 +127,13 @@ university:string = 'Select university';
   get f() {
     return this.registerForm.controls;
   }
+
+
+  back(){
+    this.stepperService.previous();
+  }
+     next() {
+  this.stepperService.next();
+}
+  
 }

@@ -47,7 +47,7 @@ export class Tables implements OnChanges {
 
   selection: any[] = [];
 
-
+@Output() selectionChange = new EventEmitter<any[]>();
   constructor(private http: HttpClient,private router: Router) { }
 
   ngOnInit() {
@@ -141,6 +141,7 @@ export class Tables implements OnChanges {
     } else {
       this.selection.push(row);
     }
+    this.selectionChange.emit(this.selection);
   }
 
   toggleAllRows(checked: boolean) {
@@ -149,6 +150,7 @@ export class Tables implements OnChanges {
     } else {
       this.selection = [];
     }
+     this.selectionChange.emit(this.selection);
   }
 
   isAllSelected(): boolean {

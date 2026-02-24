@@ -51,11 +51,11 @@ export class Layout implements OnInit, OnDestroy {
   adminMenu: MenuItem[] = [
     { icon: '/assets/images/sidemenu/dashboard.svg', iconActive: '/assets/images/sidemenu/dashboard-active.svg', label: 'Dashboard', route: '/admin/dashboard', expanded: false },
     { icon: '/assets/images/sidemenu/user.svg', iconActive: '/assets/images/sidemenu/user-active.svg', label: 'Customer', route: '/admin/customer', expanded: false },
-    { icon: '/assets/images/sidemenu/user.svg', iconActive: '/assets/images/sidemenu/user-active.svg', label: 'Add loan', route: '/admin/losoperation/newloan', expanded: false },
+    { icon: '/assets/images/sidemenu/user.svg', iconActive: '/assets/images/sidemenu/user-active.svg', label: 'Add product', route: '/admin/losoperation/selectproduct', expanded: false },
 
     { icon: '/assets/images/sidemenu/money-recive.svg', iconActive: '/assets/images/sidemenu/money-recive-active.svg', label: 'Loan Operations', route: '/admin/losoperation', expanded: false },
-    { icon: '/assets/images/sidemenu/user.svg', iconActive: '/assets/images/sidemenu/user-active.svg', label: 'Customer Details', route: '/admin/customerdetails', expanded: false },
-    { icon: '/assets/images/sidemenu/money-recive.svg', iconActive: '/assets/images/sidemenu/money-recive-active.svg', label: 'Loan Details', route: '/admin/losdetails', expanded: false },
+    // { icon: '/assets/images/sidemenu/user.svg', iconActive: '/assets/images/sidemenu/user-active.svg', label: 'Customer Details', route: '/admin/customerdetails', expanded: false },
+    // { icon: '/assets/images/sidemenu/money-recive.svg', iconActive: '/assets/images/sidemenu/money-recive-active.svg', label: 'Loan Details', route: '/admin/losdetails', expanded: false },
          { icon: '/assets/images/sidemenu/money-recive.svg', iconActive: '/assets/images/sidemenu/money-recive-active.svg', label: 'Co-applicant', route: '/admin/coapplicantdetails', expanded: false },
 
     { icon: '/assets/images/sidemenu/candle.svg', iconActive: '/assets/images/sidemenu/money-recive-active.svg', label: 'FX Operations', route: '/admin/customer2', expanded: false },

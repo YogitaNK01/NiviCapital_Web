@@ -30,7 +30,7 @@ export class Login {
   }
 
   onSubmit(form: NgForm): void {
-      //  this.router.navigate(['admin/dashboard']);
+       this.router.navigate(['admin/dashboard']);
     // Validate form before submission
     if (!form.valid) {
       this.msgBox.open({

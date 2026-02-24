@@ -73,9 +73,9 @@
       @for (option of filteredOptions; track option.value; let last = $last) {
         <div
           class="dropdown-item"
-          (click)="selectOption(option.value); $event.stopPropagation()"
-          [class.no-border]="last">
-
+          (click)="!option.disabled && selectOption(option.value); $event.stopPropagation()"
+          [class.no-border]="last"
+[class.disabled]="option.disabled">
           @if (option.icon && option.icon.trim() !== '') {
             <img
               [src]="option.icon"

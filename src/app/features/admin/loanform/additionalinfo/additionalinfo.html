@@ -1,0 +1,176 @@
+<div class="base-layout">
+
+
+
+    <div class="accordion d-flex flex-column gap-4 mb-4">
+
+        <div class="accordion-item b-0" *ngFor="let acc of accordions; let i = index">
+
+            <h2 class="accordion-header">
+                <button class="accordion-button table-head" [class.collapsed]="openIndex !== i" type="button"
+                    (click)="toggle(i)">
+                    {{ acc.title }}
+                </button>
+            </h2>
+
+            <div class="accordion-collapse collapse" [class.show]="openIndex === i">
+
+                <div class="accordion-body p-0" *ngIf="openIndex === i">
+
+                    <ng-container *ngIf="i === 0">
+                        <ng-container *ngTemplateOutlet="identityTemplate; context:{index:i}">
+                        </ng-container>
+                    </ng-container>
+
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+    <ng-template #identityTemplate let-i="index">
+
+        <form [formGroup]="additionalinfoForm" (ngSubmit)="submit()" class="common-details-box d-flex flex-column">
+
+            <div class="row">
+
+                <div class="col-lg-4 col-sm-12 ">
+                    <app-uploadbtn [config]="basicConfig" [required]="true" formControlName="uploadphoto"
+                        (fileChange)="onFileChange($event, 'applicantphoto')" label="Upload Applicant Photo">
+                    </app-uploadbtn>
+
+                </div>
+                <div class="col-lg-4 col-sm-12 ">
+                    <app-dropdown [options]="marital_status" [placeholder]="maritalstatus"
+                        formControlName="maritalstatus" [required]="true"
+                        (selectedValueChange)="additionalinfoForm.get('maritalstatus')?.setValue($event)"
+                        [avatarUrl]="avatarUrl" [hasAvatar]="hasAvatar" [label]="maritalstatus">
+                    </app-dropdown>
+
+                </div>
+                <div class="col-lg-4 col-sm-12 ">
+                    <div class="dropdown-label1 all-label ">Gender<span class="text-danger">*</span></div>
+                    <div class="d-flex flex-row" >
+                        <app-radiobuttons name="optionsGroup1" [checked]="gendercheck === 'option1'"
+                            (checkedChange)="gendercheck = 'option1'" label="Male" value="Male" formControlName="gender">
+                        </app-radiobuttons>
+
+                       
+                        <app-radiobuttons name="optionsGroup2" [checked]="gendercheck === 'option2'"
+                            (checkedChange)="gendercheck = 'option2'" label="Female" value="Female" formControlName="gender">
+                        </app-radiobuttons>
+
+                         <app-radiobuttons name="optionsGroup2" [checked]="gendercheck === 'option2'"
+                            (checkedChange)="gendercheck = 'option2'" label="Third Gender" value="Third Gender" formControlName="gender">
+                        </app-radiobuttons>
+                    </div>
+
+                </div>
+                <div class="col-lg-4 col-sm-12 mt-20">
+                    <app-dropdown [options]="dependentscount" [placeholder]="dependents" formControlName="dependents"
+                        [required]="true"
+                        (selectedValueChange)="additionalinfoForm.get('dependents')?.setValue($event)"
+                        [avatarUrl]="avatarUrl" [hasAvatar]="hasAvatar" [label]="dependents">
+                    </app-dropdown>
+
+                </div>
+
+
+                <div class="text-label fw-bold mt-20">Spouse Name</div>
+
+                <div class="col-lg-4 col-sm-12 mt-20">
+                    <app-inputfield formControlName="s_fname" label="First Name" [required]="true"
+                        placeholder="First Name">
+                    </app-inputfield>
+
+                </div>
+
+
+                <div class="col-lg-4 col-sm-12 mt-20">
+                    <app-inputfield formControlName="s_mname" label="Middle Name" placeholder="Middle Name">
+                    </app-inputfield>
+                </div>
+
+
+                <div class="col-lg-4 col-sm-12 mt-20">
+                    <app-inputfield formControlName="s_lname" label="Last Name" [required]="true"
+                        placeholder="Last Name">
+                    </app-inputfield>
+                </div>
+
+                <!-- Father  Name -->
+                <div class="text-label fw-bold mt-20">Father Name</div>
+
+                <div class="col-lg-4 col-sm-12 mt-20">
+                    <app-inputfield formControlName="f_fname" label="First Name" [required]="true"
+                        placeholder="First Name">
+                    </app-inputfield>
+
+                </div>
+
+
+                <div class="col-lg-4 col-sm-12 mt-20">
+                    <app-inputfield formControlName="f_mname" label="Middle Name" placeholder="Middle Name">
+                    </app-inputfield>
+                </div>
+
+
+                <div class="col-lg-4 col-sm-12 mt-20">
+                    <app-inputfield formControlName="f_lname" label="Last Name" [required]="true"
+                        placeholder="Last Name">
+                    </app-inputfield>
+                </div>
+
+                <!-- Mother Name -->
+                <div class="text-label fw-bold mt-20">Mother Name</div>
+
+
+                <div class="col-lg-4 col-sm-12 mt-20">
+                    <app-inputfield formControlName="m_fname" label="First Name" [required]="true"
+                        placeholder="First Name">
+                    </app-inputfield>
+
+                </div>
+
+
+                <div class="col-lg-4 col-sm-12 mt-20">
+                    <app-inputfield formControlName="m_mname" label="Middle Name" placeholder="Middle Name">
+                    </app-inputfield>
+                </div>
+
+
+                <div class="col-lg-4 col-sm-12 mt-20">
+                    <app-inputfield formControlName="m_lname" label="Last Name" [required]="true"
+                        placeholder="Last Name">
+                    </app-inputfield>
+                </div>
+
+
+
+
+            </div>
+            
+          
+
+
+        </form>
+
+    </ng-template>
+
+</div>
+ <hr class="footer-hr-class">
+      <div class="loan-footerbtns row w-100  d-flex justify-content-between align-items-center">
+
+                <div class="col-lg-4 ">
+                    <img src="../assets/images/icons/save.svg">
+                    <span class="text-dp-3-regular mx-2 blue-text"> Save and Exit</span>
+                </div>
+                <div class="col-lg-4  d-flex justify-content-end">
+                    <app-buttons type="button" label="Back" class="btn btncustomClass" [outline]="true" (click)="back()">
+                    </app-buttons>
+                    <app-buttons type="button" label="Next" class="btn btncustomClass" color="primary" (click)="next()">
+                    </app-buttons>
+                  
+                </div>
+            </div>

@@ -218,7 +218,7 @@
         </div>
         <div class="col-lg-6 loan-mt-4 col-sm-12">
           <app-dropdown [options]="cityOptions" [required]="true" [(selectedValue)]="perCitySelectedOption"
-            placeholder="" [searchable]="true" (selectedValueChange)="selectPerCity($event)" label="City" name="city"
+            [placeholder]="placeholdercity" [searchable]="true" (selectedValueChange)="selectPerCity($event)" label="City" name="city"
             [(ngModel)]="perselectedCityId">
           </app-dropdown>
         </div>
@@ -332,13 +332,13 @@
       </div>
       <div class="col-lg-6  col-sm-12 loan-mt-4">
         <app-dropdown [options]="currstateOptions" [required]="true" [(selectedValue)]="currStateSelectedOption"
-          placeholder="" [searchable]="true" (selectedValueChange)="selectCurrState($event)" label="State" name="curstate"
+          [placeholder]="placeholderstate" [searchable]="true" (selectedValueChange)="selectCurrState($event)" label="State" name="curstate"
           [(ngModel)]="currselectedStateId">
         </app-dropdown>
       </div>
       <div class="col-lg-6 loan-mt-4 col-sm-12 ">
         <app-dropdown [options]="currcityOptions" [required]="true" [(selectedValue)]="currCitySelectedOption"
-          placeholder="" [searchable]="true" (selectedValueChange)="selectCurrCity($event)" label="City" name="curcity"
+          [placeholder]="placeholdercity" [searchable]="true" (selectedValueChange)="selectCurrCity($event)" label="City" name="curcity"
           [(ngModel)]="currselectedCityId">
         </app-dropdown>
       </div>

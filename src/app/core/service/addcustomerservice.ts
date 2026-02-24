@@ -53,4 +53,18 @@ verifyOTP(data:any): Observable<any> {
       
     );
   }
+
+
+    customersearch(data:any): Observable<any> {
+    return this.http.post<any>(
+      `${this.baseUrl}/v1/customers/search`,data,
+      
+    );
+  }
+   selectproduct(data:any): Observable<any> {
+    return this.http.post<any>(
+      `${this.baseUrl}/v1/los/applications/initiate`,data,
+      
+    );
+  }
 }

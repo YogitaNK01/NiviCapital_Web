@@ -44,19 +44,19 @@
 
                 <div class="dropdown-label1 all-label ">Select Security Type<span class="text-danger">*</span></div>
                 <div class="d-flex flex-row">
-                    <app-radiobuttons name="optionsGroup1" [checked]="checkselectedOption_rb === 'option1'"
-                        (checkedChange)="checkselectedOption_rb = 'option1'" label="Secured">
+                    <app-radiobuttons name="SecurityType" [checked]="SecurityTypechecked === 'Secured'"
+                        (checkedChange)="ontypechecked('Secured') " label="Secured" value="Secured">
                     </app-radiobuttons>
 
                     <!-- Checked -->
-                    <app-radiobuttons name="optionsGroup2" [checked]="checkselectedOption_rb === 'option2'"
-                        (checkedChange)="checkselectedOption_rb = 'option2'" label="Unsecured">
+                    <app-radiobuttons name="SecurityType" [checked]="SecurityTypechecked === 'Unsecured'"
+                        (checkedChange)="ontypechecked('Unsecured')" label="Unsecured" value="Unsecured">
                     </app-radiobuttons>
                 </div>
             </div>
         </div>
         }
- @if(checkselectedOption_rb){
+        @if(SecurityTypechecked){
         <div class="d-flex w-100">
             <app-buttons label="Back" [outline]="true" class="btncustomClass btn"
                 (click)="goToloanscreen()"></app-buttons>
@@ -64,18 +64,18 @@
             <app-buttons label="Next" color="primary" class="btncustomClass btn" (click)="tosuccess()"></app-buttons>
 
         </div>
-    }
+        }
     </div>
 </div>
 }
 
-@if(!issuccess){
+@else {
 <div class="success mobiledetails d-flex flex-column center-page">
 
     <app-successbox title="A new loan application has been initiated." [description]="`Please note your ARN`"
         [id]="arnid" [buttons]="[
     { label: 'Let’s Get Started', action: 'letsstart', outline: false, color: 'primary',class: 'btncustomClass'  }
-  ]" (actionClick)="handleSuccessAction($event)" [copy]="true"]>
+  ]" (actionClick)="handleSuccessAction($event)" [copy]="true" ]>
     </app-successbox>
 
 </div>
