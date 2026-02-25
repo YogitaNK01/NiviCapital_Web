@@ -521,13 +521,16 @@
   align-items: baseline;
   align-self: stretch;
   border-radius: 0.625rem;
-  background: #F5F5F5;
+  background: $secondary-50;
 
   @media (max-width: 480px) {
     padding: $spacing_4;
 
   }
 }
+// .addcustomer img-box 
+
+
 
 //tabs customers and los details
 

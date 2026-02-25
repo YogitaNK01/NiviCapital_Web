@@ -91,13 +91,13 @@
 
         <div class="search-dropdown search-dropdown-type">
           <app-dropdown class="menu-dropdown" [options]="Kycstatus" [(selectedValue)]="selectedOption1"
-            placeholder="All Types" [customStyle]="true" (selectedValueChange)="getkyc_type($event)">
+            [placeholder]="AllTypes" [customStyle]="true" (selectedValueChange)="getkyc_type($event)" >
           </app-dropdown>
         </div>
 
 
         <div class="add-button">
-          <app-buttons label="Add Customer" class="btn btn-icon Add btncustomClass" [outline]="true"
+          <app-buttons label="Apply Loan" class="btn btn-icon Add btncustomClass" [outline]="true"
             (click)="applyLoan()">
             <img src="/assets/images/icons/addred.svg" alt="Add">
 

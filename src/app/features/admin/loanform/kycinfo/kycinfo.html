@@ -1,8 +1,7 @@
-
 <div class="base-layout">
-      <form [formGroup]="kycdocumentsForm" (ngSubmit)="submit()" id="kycForm" class="w-100">
+  <form [formGroup]="kycdocumentsForm" (ngSubmit)="submit()" id="kycForm" class="w-100">
 
-<div class=" accordion d-flex flex-column gap-4 mb-4">
+    <div class=" accordion d-flex flex-column gap-4 mb-4">
 
       <div class="accordion-item b-0" *ngFor="let acc of accordions; let i = index">
 
@@ -17,7 +16,7 @@
 
         <div class="accordion-collapse collapse" [class.show]="openIndex.includes(i)">
 
-          <div class="accordion-body p-0 " >
+          <div class="accordion-body p-0 ">
 
             <ng-container *ngIf="i === 0">
               <ng-container *ngTemplateOutlet="identityTemplate; context:{index:i}">
@@ -29,11 +28,11 @@
               </ng-container>
             </ng-container>
 
-            <ng-container *ngIf="i === 2">
+         <ng-container *ngIf="i === 2">
               <ng-container *ngTemplateOutlet="currentaddressTemplate; context:{index:i}">
 
               </ng-container>
-            </ng-container>
+            </ng-container> 
 
 
           </div>
@@ -43,65 +42,212 @@
 
     </div>
 
-      <ng-template #identityTemplate let-i="index" >
+    <ng-template #identityTemplate let-i="index">
       <!-- <div class="loan-heading text-label">Identity & Residency</div> -->
 
       <div class="row  d-flex  align-items-start pt-4 common-details-box d-flex flex-column">
+        <div class="row mt-20">
         <div class="col-lg-6 col-sm-12">
-          <app-inputfield type="text" formControlName="adhaarnumber" [required]="true" label="Aadhaar Number" 
-            placeholder="Aadhaar Number" helpText="Help text" name="adhaarnumber">
+          <app-inputfield type="text" formControlName="adhaarnumber" [required]="true" label="Aadhaar Number"
+            placeholder="Aadhaar Number" helpText="Help text" name="adhaarnumber" >
           </app-inputfield>
         </div>
-        <div class="col-lg-6 col-sm-12">
-          <div class="col"></div>
-          <div class="col"></div>
+        <div class="col-lg-3 col-sm-12">
+
+          <label class="text-label">Aadhaar_Card_front<span class="text-danger">*</span></label>
+              <div class="addcust-img-box" name="adhaarfront" >
+                <p class="text-label">Aadhaar.png</p>
+                <div class="icons">
+                  <span (click)="viewImage('/assets/images/dashboard/profileimg.webp')"><img src="/assets/images/icons/eyered.svg" alt="view"></span>
+                  <span (click)="downloadImage('/assets/images/dashboard/profileimg.webp')"><img src="/assets/images/icons/import-red.svg" alt="Download"></span>
+                </div>
+              </div>
+
         </div>
-        <div class="col-lg-6 col-sm-12">
-          <app-inputfield type="text" formControlName="pannumber" [required]="true" label="Pan Number" 
+        <div class="col-lg-3 col-sm-12">
+
+          <label class="text-label">Aadhaar_Card_Back<span class="text-danger">*</span></label>
+              <div class="addcust-img-box" name="adhaarback"  >
+                <p class="text-label">Aadhaar.png</p>
+                <div class="icons">
+                  <span (click)="viewImage('/assets/images/dashboard/profileimg.webp')"><img src="/assets/images/icons/eyered.svg" alt="view"></span>
+                  <span (click)="downloadImage('/assets/images/dashboard/profileimg.webp')"><img src="/assets/images/icons/import-red.svg" alt="Download"></span>
+                </div>
+              </div>
+
+        </div></div>
+
+        <div class="row mt-20">
+           <div class="col-lg-6 col-sm-12">
+          <app-inputfield type="text" formControlName="pannumber" [required]="true" label="Pan Number"
             placeholder="Pan Number" helpText="Help text" name="pannumber">
           </app-inputfield>
         </div>
         <div class="col-lg-6 col-sm-12">
-         
+           <label class="text-label">PAN Card<span class="text-danger">*</span></label>
+              <div class="addcust-img-box"  >
+                <p class="text-label">PAN Card.png</p>
+                <div class="icons">
+                  <span (click)="viewImage('/assets/images/dashboard/profileimg.webp')"><img src="/assets/images/icons/eyered.svg" alt="view"></span>
+                  <span (click)="downloadImage('/assets/images/dashboard/profileimg.webp')"><img src="/assets/images/icons/import-red.svg" alt="Download"></span>
+                </div>
+              </div>
         </div>
-        <div class="col-lg-6 col-sm-12">
-          <app-inputfield type="text" formControlName="passportnumber" [required]="true" label="Passport" 
+
+        </div>
+
+       <div class="row mt-20">
+        <div class="col-lg-6 col-sm-12 ">
+          <app-inputfield type="text" formControlName="passportnumber" [required]="true" label="Passport"
             placeholder="Passport" helpText="Help text" name="passportnumber">
           </app-inputfield>
         </div>
-        <div class="col-lg-6 col-sm-12">
-           <app-datepickernew name="dob" label="Date of Birth" [required]="true" formControlName="dob"></app-datepickernew>
+        
+         <div class="col-lg-6 col-sm-12 ">
+          @if(ispassport){
+            <label class="text-label">Passport<span class="text-danger">*</span></label>
+              <div class="addcust-img-box"   >
+                <p class="text-label">Passport.png</p>
+                <div class="icons">
+                  <span (click)="viewImage('/assets/images/dashboard/profileimg.webp')"><img src="/assets/images/icons/eyered.svg" alt="view"></span>
+                  <span (click)="downloadImage('/assets/images/dashboard/profileimg.webp')"><img src="/assets/images/icons/import-red.svg" alt="Download"></span>
+                </div>
+              </div>
+          }
+          @else{
+           <app-uploadbtn [config]="basicConfig" (fileChange)="onFileChange($event, 'passport')" label="Passport">
+          </app-uploadbtn>
+        }
         </div>
 
+        <div class="col-lg-6 col-sm-12 mt-20">
+          <app-datepickernew name="dob" label="Date of Birth" [required]="true"
+            formControlName="dob"></app-datepickernew>
         </div>
-        </ng-template>
+        </div>
+      </div>
+    </ng-template>
 
-        <ng-template #permanentaddressTemplate let-i="index">
-    
+   <ng-template #permanentaddressTemplate let-i="index">
+
       <div class="row  d-flex  align-items-start pt-4 common-details-box d-flex flex-column">
-        <div class="col-lg-6 col-sm-12">
-          <app-inputfield type="text"  [required]="true" label="First Name" 
-            placeholder="First Name" helpText="Help text" name="firstName">
+        <div class="row mt-20">
+          <app-inputfield type="text" formControlName="peraddressline1" [required]="true" label="Address Line 1"
+            placeholder="Address Line" helpText="Help text" name="peraddressline1" >
+          </app-inputfield>
+        </div>
+          <div class="row mt-20">
+          <app-inputfield type="text" formControlName="peraddressline2" [required]="true" label="Address Line 2"
+            placeholder="Address Line" helpText="Help text" name="peraddressline2" >
+          </app-inputfield>
+        </div>
+          <div class="row mt-20">
+          <app-inputfield type="text" formControlName="peraddressline3" [required]="true" label="Address Line 3"
+            placeholder="Address Line" helpText="Help text" name="peraddressline3" >
+          </app-inputfield>
+        </div>
+        <div class="row mt-20">
+        <div class="col-lg-6 col-sm-12 ">
+          <app-inputfield type="text" formControlName="percountry" [required]="true" label="Country"
+            placeholder="India" helpText="Help text" name="percountry">
+          </app-inputfield>
+        </div>
+        
+         <div class="col-lg-6 col-sm-12 ">
+         
+         <app-inputfield type="text" formControlName="perstate" [required]="true" label="State"
+            placeholder="State" helpText="Help text" name="perstate">
+          </app-inputfield>
+       
+        </div>
+
+        <div class="col-lg-6 col-sm-12 mt-20">
+          <app-inputfield type="text" formControlName="percity" [required]="true" label="City"
+            placeholder="City" helpText="Help text" name="percity">
+          </app-inputfield>
+        </div>
+         <div class="col-lg-6 col-sm-12 mt-20">
+          <app-inputfield type="text" formControlName="perpincode" [required]="true" label="Pincode"
+            placeholder="Pincode" helpText="Help text" name="perpincode">
           </app-inputfield>
         </div>
         </div>
-        </ng-template>
+         <div class="mailcheck d-flex justify-content-start align-items-center loan-mt-4">
+        <app-checkbox label="Is this the mailing address ?" [checked]="isPermanentMailingChecked"
+          ></app-checkbox>
+      </div>
 
-        <ng-template #currentaddressTemplate let-i="index">
-      
-      <div class="row  d-flex  align-items-start pt-4 common-details-box d-flex flex-column">
-        <div class="col-lg-6 col-sm-12">
-          <app-inputfield type="text"  [required]="true" label="First Name" 
-            placeholder="First Name" helpText="Help text" name="firstName">
+      </div>
+    </ng-template>
+
+   
+    <ng-template #currentaddressTemplate let-i="index">
+
+       <div class="row  d-flex  align-items-start pt-4 common-details-box d-flex flex-column">
+        <div class="row mt-20">
+           <div class="col-lg-6 col-sm-12 ">
+           <label class="text-label">Supporting Document<span class="text-danger">*</span></label>
+              <div class="addcust-img-box"   >
+                <p class="text-label">Electricity-bill.png</p>
+                <div class="icons">
+                  <span (click)="viewImage('/assets/images/dashboard/profileimg.webp')"><img src="/assets/images/icons/eyered.svg" alt="view"></span>
+                  <span (click)="downloadImage('/assets/images/dashboard/profileimg.webp')"><img src="/assets/images/icons/import-red.svg" alt="Download"></span>
+                </div>
+              </div></div>
+        </div>
+        <div class="row mt-20">
+          <app-inputfield type="text" formControlName="curraddressline1" [required]="true" label="Address Line 1"
+            placeholder="Address Line" helpText="Help text" name="curraddressline1" >
+          </app-inputfield>
+        </div>
+          <div class="row mt-20">
+          <app-inputfield type="text" formControlName="curraddressline2" [required]="true" label="Address Line 2"
+            placeholder="Address Line" helpText="Help text" name="curraddressline2" >
+          </app-inputfield>
+        </div>
+          <div class="row mt-20">
+          <app-inputfield type="text" formControlName="curraddressline3" [required]="true" label="Address Line 3"
+            placeholder="Address Line" helpText="Help text" name="curraddressline3" >
+          </app-inputfield>
+        </div>
+        <div class="row mt-20">
+        <div class="col-lg-6 col-sm-12 ">
+          <app-inputfield type="text" formControlName="currcountry" [required]="true" label="Country"
+            placeholder="India" helpText="Help text" name="currcountry">
+          </app-inputfield>
+        </div>
+        
+         <div class="col-lg-6 col-sm-12 ">
+         
+         <app-inputfield type="text" formControlName="currstate" [required]="true" label="State"
+            placeholder="State" helpText="Help text" name="currstate">
+          </app-inputfield>
+       
+        </div>
+
+        <div class="col-lg-6 col-sm-12 mt-20">
+          <app-inputfield type="text" formControlName="currcity" [required]="true" label="City"
+            placeholder="City" helpText="Help text" name="currcity">
+          </app-inputfield>
+        </div>
+         <div class="col-lg-6 col-sm-12 mt-20">
+          <app-inputfield type="text" formControlName="currpincode" [required]="true" label="Pincode"
+            placeholder="Pincode" helpText="Help text" name="currpincode">
           </app-inputfield>
         </div>
         </div>
-        </ng-template>
+         <div class="mailcheck d-flex justify-content-start align-items-center loan-mt-4">
+        <app-checkbox label="Is this the mailing address ?" [checked]="isCurrentMailingChecked"
+          ></app-checkbox>
+      </div>
 
-        </form>
-        </div>
+      </div>
+    </ng-template> 
 
-         <hr class="footer-hr-class">
+  </form>
+</div>
+
+ <hr class="footer-hr-class">
       <div class="loan-footerbtns row w-100  d-flex justify-content-between align-items-center">
 
                 <div class="col-lg-4 ">

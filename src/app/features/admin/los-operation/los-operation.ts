@@ -92,7 +92,9 @@ export class LosOperation {
   selectedOption2: string = '';
   selectedOption3: string = '';
 
-
+  AllTypes : string ='All';
+  
+  occupation: string = 'Current Occupation';
   Kycstatus: DropdownOption[] = [
     { label: 'All', value: 'All' },
     { label: 'Completed', value: 'Completed' },

@@ -157,6 +157,8 @@ nodata:boolean = false;
   selecteduser: any;
   filteredData: TransformedUserData[] = [];
 
+allkyctype = 'All Types';
+allkycstatus = 'All KYC Status';
   kyctype: DropdownOption[] = [
     { label: 'Type 1', value: 'Type 1' },
     { label: 'Type 2', value: 'Type 2' },

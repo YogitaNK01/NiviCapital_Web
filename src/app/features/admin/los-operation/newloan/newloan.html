@@ -22,6 +22,12 @@
                         label="Mobile Number" placeholder="Enter Mobile Number" helpText="Help text" class="w-100"
                         minlength="10" [maxlength]="10" (input)="service.restrictInput($event, 'number');onMobileInput($event)"
                         [showPhonePrefix]="true"></app-inputfield>
+
+                       @if(isdata) {
+                        <div class=" mt-1 text-start">
+                <small class="text-body-2 fst-italic text-danger" >This is new customer</small>
+              </div>
+                       }
         </div>
     </div>
     }

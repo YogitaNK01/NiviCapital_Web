@@ -90,6 +90,9 @@
                 <div class="col-lg-4 col-sm-12 mt-20">
                     <app-inputfield formControlName="s_mname" label="Middle Name" placeholder="Middle Name">
                     </app-inputfield>
+                     <app-checkbox [checked]="ismiddlename" [disabled]="false" [indeterminate]="false"
+                label="I don’t have middle name" (checkedChange)="onmiddlename($event)">
+              </app-checkbox>
                 </div>
 
 

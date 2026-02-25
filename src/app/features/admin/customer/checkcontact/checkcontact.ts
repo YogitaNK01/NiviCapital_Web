@@ -105,7 +105,7 @@ export class Checkcontact implements OnInit {
       type: "MOBILE"
 
     }
-    this.addcustomerservice.checkcontact(input).subscribe({
+    this.addcustomerservice.customersearch(input).subscribe({
       next: (res) => {
         console.log(res);
         this.number_id = res.data.userInitiateId;

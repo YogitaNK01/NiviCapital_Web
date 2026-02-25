@@ -276,17 +276,21 @@ export class AddCustomer implements OnInit {
 
   }
 
-  onOtpVerifiedSuccess(val: boolean) {
+  onOtpVerifiedSuccess(val: any) {
     console.log("onOtpVerifiedSuccess--", val);
 
-    this.otpVerifiedOk = val;
+    // this.otpVerifiedOk = val;
 
-    if (val == true) {
-      this.otpState = "success";
-    } else {
-      this.otpState = "error";
-      this.otpmsg = "Enter Valid OTP";
-    }
+    if (val.status === "success") {
+    this.otpVerifiedOk = true;
+    this.otpState = "success";
+  } else {
+    this.otpVerifiedOk = false;
+    this.otpState = "error";
+  }
+
+  // ✅ message from API
+  this.otpmsg = val.message;
 
 
     setTimeout(() => {

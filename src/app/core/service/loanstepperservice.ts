@@ -13,7 +13,8 @@ export class Loanstepperservice {
     { label: 'Estimated Expense', route: 'expense' },
     { label: 'Additional Info', route: 'additionalinfo' },
     { label: 'KYC', route: 'kycinfo' },
-    { label: 'Income Details', route: 'income' },
+    { label: 'Education Details', route: 'educationinfo' },
+    { label: 'Income Details', route: 'incomeinfo' },
     { label: 'Assets', route: 'asset' },
     { label: 'Liabilities', route: 'liability' },
     { label: 'Reference', route: 'reference' }

@@ -1,16 +1,231 @@
-<p>eductaioninfo works!</p>
- <hr class="footer-hr-class">
-      <div class="loan-footerbtns row w-100  d-flex justify-content-between align-items-center">
+<div class="base-layout">
+    <form [formGroup]="educationForm" (ngSubmit)="submit()" id="kycForm" class="w-100">
 
-                <div class="col-lg-4 ">
-                    <img src="../assets/images/icons/save.svg">
-                    <span class="text-dp-3-regular mx-2 blue-text"> Save and Exit</span>
+        <div class=" accordion d-flex flex-column gap-4 mb-4">
+
+            <div class="accordion-item b-0" *ngFor="let acc of accordions; let i = index">
+
+                <h2 class="accordion-header">
+                    <button class="accordion-button table-head" [class.collapsed]="!openIndex.includes(i)" type="button"
+                        (click)="toggle(i)">
+
+                        {{ acc.title }}
+                    </button>
+                </h2>
+
+
+                <div class="accordion-collapse collapse" [class.show]="openIndex.includes(i)">
+
+                    <div class="accordion-body p-0 ">
+
+                        <ng-container *ngIf="i === 0">
+                            <ng-container *ngTemplateOutlet="tenthTemplate; context:{index:i}">
+                            </ng-container>
+                        </ng-container>
+                         <ng-container *ngIf="i === 1">
+                            <ng-container *ngTemplateOutlet="twelthTemplate; context:{index:i}">
+                            </ng-container>
+                        </ng-container>
+
+                        <!-- <ng-container *ngIf="i === 1">
+              <ng-container *ngTemplateOutlet="permanentaddressTemplate; context:{index:i}">
+              </ng-container>
+            </ng-container>
+
+         <ng-container *ngIf="i === 2">
+              <ng-container *ngTemplateOutlet="currentaddressTemplate; context:{index:i}">
+
+              </ng-container>
+            </ng-container>  -->
+
+
+                    </div>
                 </div>
-                <div class="col-lg-4  d-flex justify-content-end">
-                    <app-buttons type="button" label="Back" class="btn btncustomClass" [outline]="true" (click)="back()">
-                    </app-buttons>
-                    <app-buttons type="button" label="Next" class="btn btncustomClass" color="primary" (click)="next()">
-                    </app-buttons>
-                  
+
+            </div>
+
+        </div>
+
+        <ng-template #tenthTemplate let-i="index">
+            <div formGroupName="tenth">
+            <div class="row  d-flex  align-items-start pt-4 common-details-box d-flex flex-column">
+                <div class="row mt-20">
+                    <app-inputfield type="text" formControlName="institutename" [required]="true" label="Institute Name"
+                        placeholder="Institute Name" helpText="Help text" name="institutename">
+                    </app-inputfield>
+                </div>
+                <div class="row mt-20">
+                    <div class="col-lg-4 col-sm-12">
+                        <app-dropdown [options]="selectpassingyr" [placeholder]="passingyear" [required]="true"
+                            (selectedValueChange)="educationForm.get('passingyear')?.setValue($event)"
+                            [avatarUrl]="avatarUrl" formControlName="passingyear" [hasAvatar]="hasAvatar"
+                            [label]="passingyear">
+                        </app-dropdown>
+                    </div>
+                    <div class="col-lg-4 col-sm-12">
+                        <app-dropdown [options]="selectpercentage" [placeholder]="per_cgpa" [required]="true"
+                            (selectedValueChange)="educationForm.get('per_cgpa')?.setValue($event)"
+                            [avatarUrl]="avatarUrl" formControlName="per_cgpa" [hasAvatar]="hasAvatar"
+                            [label]="per_cgpa">
+                        </app-dropdown>
+                    </div>
+                    <div class="col-lg-4 col-sm-12">
+                        <app-dropdown [options]="selectlocation" [placeholder]="location" [required]="true"
+                            (selectedValueChange)="educationForm.get('location')?.setValue($event)"
+                            [avatarUrl]="avatarUrl" formControlName="location" [hasAvatar]="hasAvatar"
+                            [label]="location">
+                        </app-dropdown>
+                    </div>
+                </div>
+                <div class=" mt-20 info-box">
+                    <div class="col-lg-4 col-sm-12">
+                        <p class="text-label">Upload the required documents listed below:</p>
+                        <ul class="text-label">
+                            <li class="text-label">Marksheet </li>
+                            <li class="text-label">School Leaving Certificate</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="row ">
+                    <div class="text-label fw-bold mt-20">Marksheet</div>
+
+                    <hr class="hrclass">
+                    <div class="col-lg-4 col-sm-12 mt-20">
+                        <app-uploadbtn [config]="basicConfig" (fileChange)="onFileChange($event, 'tenth','marksheet')"
+                            [required]="true" label="Marksheet">
+                        </app-uploadbtn>
+                    </div>
+                </div>
+
+                <div class="row ">
+                    <div class="text-label fw-bold mt-20">School Leaving Certificate</div>
+
+                     <hr class="hrclass">
+                    <div class="col-lg-4 col-sm-12 mt-20">
+                        <app-uploadbtn [config]="basicConfig" (fileChange)="onFileChange($event,'tenth', 'marksheet')"
+                            [required]="true" label="School Leaving Certificate">
+                        </app-uploadbtn>
+                    </div>
+                </div>
+
+                <div class="row  d-flex flex-column">
+                    <div class="text-label fw-bold mt-20">Other Documents</div>
+
+                     <hr class="hrclass">
+                    <div class="col-lg-4 col-sm-12 mt-20">
+                        <app-uploadbtn [config]="basicConfig" (fileChange)="onFileChange($event, 'tenth', 'marksheet')"
+                            [required]="true" label="Other Documents">
+                        </app-uploadbtn>
+                    </div>
+                    <div class="col-lg-4 col-sm-12 mt-20">
+                        <app-buttons label="Add Other Document" class="btn btn-icon Add btncustomClass" [outline]="true"
+                            (click)="addotherdocuments()">
+                            <img src="/assets/images/icons/addred.svg" alt="Add">
+
+                        </app-buttons>
+                    </div>
                 </div>
             </div>
+</div>
+        </ng-template>
+           <ng-template #twelthTemplate let-i="index">
+            <div formGroupName="twelth">
+            <div class="row  d-flex  align-items-start pt-4 common-details-box d-flex flex-column">
+                <div class="row mt-20">
+                    <app-inputfield type="text" formControlName="institutename" [required]="true" label="Institute Name"
+                        placeholder="Institute Name" helpText="Help text" name="institutename">
+                    </app-inputfield>
+                </div>
+                <div class="row mt-20">
+                    <div class="col-lg-4 col-sm-12">
+                        <app-dropdown [options]="selectpassingyr" [placeholder]="passingyear" [required]="true"
+                            (selectedValueChange)="educationForm.get('passingyear')?.setValue($event)"
+                            [avatarUrl]="avatarUrl" formControlName="passingyear" [hasAvatar]="hasAvatar"
+                            [label]="passingyear">
+                        </app-dropdown>
+                    </div>
+                    <div class="col-lg-4 col-sm-12">
+                        <app-dropdown [options]="selectpercentage" [placeholder]="per_cgpa" [required]="true"
+                            (selectedValueChange)="educationForm.get('per_cgpa')?.setValue($event)"
+                            [avatarUrl]="avatarUrl" formControlName="per_cgpa" [hasAvatar]="hasAvatar"
+                            [label]="per_cgpa">
+                        </app-dropdown>
+                    </div>
+                    <div class="col-lg-4 col-sm-12">
+                        <app-dropdown [options]="selectlocation" [placeholder]="location" [required]="true"
+                            (selectedValueChange)="educationForm.get('location')?.setValue($event)"
+                            [avatarUrl]="avatarUrl" formControlName="location" [hasAvatar]="hasAvatar"
+                            [label]="location">
+                        </app-dropdown>
+                    </div>
+                </div>
+                <div class=" mt-20 info-box">
+                    <div class="col-lg-4 col-sm-12">
+                        <p class="text-label">Upload the required documents listed below:</p>
+                        <ul class="text-label">
+                            <li class="text-label">Marksheet </li>
+                            <li class="text-label">School Leaving Certificate</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="row ">
+                    <div class="text-label fw-bold mt-20">Marksheet</div>
+
+                    <hr class="hrclass">
+                    <div class="col-lg-4 col-sm-12 mt-20">
+                        <app-uploadbtn [config]="basicConfig" (fileChange)="onFileChange($event,'twelth', 'marksheet')"
+                            [required]="true" label="Marksheet">
+                        </app-uploadbtn>
+                    </div>
+                </div>
+
+                <div class="row ">
+                    <div class="text-label fw-bold mt-20">School Leaving Certificate</div>
+
+                     <hr class="hrclass">
+                    <div class="col-lg-4 col-sm-12 mt-20">
+                        <app-uploadbtn [config]="basicConfig" (fileChange)="onFileChange($event,'twelth', 'marksheet')"
+                            [required]="true" label="School Leaving Certificate">
+                        </app-uploadbtn>
+                    </div>
+                </div>
+
+                <div class="row  d-flex flex-column">
+                    <div class="text-label fw-bold mt-20">Other Documents</div>
+
+                     <hr class="hrclass">
+                    <div class="col-lg-4 col-sm-12 mt-20">
+                        <app-uploadbtn [config]="basicConfig" (fileChange)="onFileChange($event,'twelth', 'marksheet')"
+                            [required]="true" label="Other Documents">
+                        </app-uploadbtn>
+                    </div>
+                    <div class="col-lg-4 col-sm-12 mt-20">
+                        <app-buttons label="Add Other Document" class="btn btn-icon Add btncustomClass" [outline]="true"
+                            (click)="addotherdocuments()">
+                            <img src="/assets/images/icons/addred.svg" alt="Add">
+
+                        </app-buttons>
+                    </div>
+                </div>
+            </div>
+</div>
+        </ng-template>
+    </form>
+</div>
+<hr class="footer-hr-class">
+<div class="loan-footerbtns row w-100  d-flex justify-content-between align-items-center">
+
+    <div class="col-lg-4 ">
+        <img src="../assets/images/icons/save.svg">
+        <span class="text-dp-3-regular mx-2 blue-text"> Save and Exit</span>
+    </div>
+    <div class="col-lg-4  d-flex justify-content-end">
+        <app-buttons type="button" label="Back" class="btn btncustomClass" [outline]="true" (click)="back()">
+        </app-buttons>
+        <app-buttons type="button" label="Next" class="btn btncustomClass" color="primary" (click)="next()">
+        </app-buttons>
+
+    </div>
+</div>

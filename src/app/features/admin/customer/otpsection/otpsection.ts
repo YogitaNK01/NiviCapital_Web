@@ -19,7 +19,9 @@ export class Otpsection implements OnInit {
 
   @Input() length: number = 6;
   @Output() otpSubmit = new EventEmitter<string>();
-  @Output() otpVerifiedSuccess = new EventEmitter<boolean>();
+  @Output() otpVerifiedSuccess = new EventEmitter<any>();
+    @Output() otp_Verified = new EventEmitter<string>();
+
 @Output() timer = new EventEmitter<number>();
 @Output() resendbtn = new EventEmitter<number>();
 
@@ -117,18 +119,17 @@ export class Otpsection implements OnInit {
     }
     this.addcustomerservice.verifyOTP(input).subscribe({
       next: (res) => {
-        console.log(res);
+        console.log("verifyotp---",res);
         // this.otpSubmit.emit(res.status);
-        if (res.status == "success") {
-          this.otpVerified = true;
-          this.otpVerifiedSuccess.emit(true);
+        this.otp_Verified.emit(res);
 
+    if (res.status === "success") {
+      this.otpVerified = true;
+    } else {
+      this.otpVerified = false;
+    }
 
-        } else {
-          this.otpVerified = false;
-          this.otpVerifiedSuccess.emit(false);
-
-        }
+    this.otpVerifiedSuccess.emit(res);
 
 
       },

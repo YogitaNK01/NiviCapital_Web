@@ -50,7 +50,7 @@ export class Additionalinfo implements OnInit {
   };
 
   gendercheck = ''
-
+ismiddlename = false
   constructor(private fb: FormBuilder, public main: Main,private stepperService:Loanstepperservice) { }
   ngOnInit(): void {
     this.additionalinfoForm = this.fb.group({
@@ -83,6 +83,9 @@ export class Additionalinfo implements OnInit {
     console.log(this.additionalinfoForm.value);
   }
 
+  onmiddlename(value: boolean): void {
+    this.ismiddlename = value;
+  }
   onFileChange(result: UploadResult, key: string) {
 
     if (!result.file) {
