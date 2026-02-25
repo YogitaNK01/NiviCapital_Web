@@ -49,7 +49,7 @@ export class Newloan implements OnInit {
     { label: 'Passport', value: 'Passport', icon: '' },
   ];
 
-  searchby: string = 'Search by';
+  searchby: string = 'Select by';
   searchedvalue: any;
 
 

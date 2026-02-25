@@ -1,1 +1,199 @@
-<p>incomeinfo works!</p>
+<div class="base-layout">
+    <form [formGroup]="incomeForm" (ngSubmit)="submit()" id="kycForm" class="w-100">
+
+        <div class="accordion d-flex flex-column gap-4 mb-4">
+
+            <div class="accordion-item b-0" *ngFor="let acc of accordions; let i = index">
+
+                <h2 class="accordion-header">
+                    <button class="accordion-button table-head" [class.collapsed]="openIndex !== i" type="button"
+                        (click)="toggle(i)">
+                        {{ acc.title }}
+                    </button>
+                </h2>
+
+                <div class="accordion-collapse collapse" [class.show]="openIndex === i">
+
+                    <div class="accordion-body p-0" *ngIf="openIndex === i">
+
+                        <ng-container *ngIf="i === 0">
+                            <ng-container *ngTemplateOutlet="incomeTemplate; context:{index:i}">
+                            </ng-container>
+                        </ng-container>
+
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+        <ng-template #incomeTemplate let-i="index">
+            <div class="row  d-flex  align-items-start pt-4 common-details-box d-flex flex-column">
+
+                <div class="row ">
+                    <div class="text-label fw-bold mt-20">Salary Slips (Last 3 Months)</div>
+
+                    <hr class="hrclass">
+                    <div class=" mt-20 info-box">
+                        <div class="col-lg-4 col-sm-12">
+                            <p class="text-label">If you are applying in February 2026, please upload salary slips for:</p>
+                            <ul class="text-label">
+                                <li class="text-label">November 2025 </li>
+                                <li class="text-label">December 2025</li>
+                                <li class="text-label">January 2026</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="row mt-20">
+                        <div class="col-lg-4 col-sm-12">
+                            <app-uploadbtn [config]="basicConfig" (fileChange)="onFileChange($event, 'salary1')"
+                                [required]="true" label="Salary Slip 1">
+                            </app-uploadbtn>
+                        </div>
+                        <div class="col-lg-4 col-sm-12">
+                            <app-uploadbtn [config]="basicConfig" (fileChange)="onFileChange($event, 'salary2')"
+                                [required]="true" label="Salary Slip 2">
+                            </app-uploadbtn>
+                        </div>
+                        <div class="col-lg-4 col-sm-12">
+                            <app-uploadbtn [config]="basicConfig" (fileChange)="onFileChange($event, 'salary3')"
+                                [required]="true" label="Salary Slip 3">
+                            </app-uploadbtn>
+                        </div>
+                    </div>
+
+
+
+                </div>
+
+                <div class="row ">
+                    <div class="text-label fw-bold mt-20">Form 16</div>
+
+                    <hr class="hrclass">
+                    <div class=" mt-20 info-box">
+                        <div class="col-lg-4 col-sm-12">
+                            <p class="text-label">If you are applying in February 2026, Most recent available would be:</p>
+                            <ul class="text-label">
+                                <li class="text-label">Financial Year 2024-25 </li>
+                                <li class="text-label">Assessment Year 2025-26</li>
+                            </ul>
+                            <p class="text-label">(Form 16 for FY 2026-26 will only be available after March 2026)</p>
+
+                        </div>
+                    </div>
+                    <div class="row mt-20">
+                        <div class="col-lg-4 col-sm-12">
+                            <app-uploadbtn [config]="basicConfig" (fileChange)="onFileChange($event, 'Form16')"
+                                [required]="true" label="Form 16">
+                            </app-uploadbtn>
+                        </div>
+                       
+                    </div>
+
+
+
+                </div>
+
+                <div class="row ">
+                    <div class="text-label fw-bold mt-20">1 Year bank statement</div>
+
+                    <hr class="hrclass">
+                    <div class=" mt-20 info-box">
+                        <div class="col-lg-4 col-sm-12">
+                            <p class="text-label">If you are applying in February 2026, upload bank statement covering:</p>
+                            <ul class="text-label">
+                                <li class="text-label">01 February 2025 to 31 January 2026 </li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="row mt-20">
+                        <div class="col-lg-4 col-sm-12">
+                            <app-uploadbtn [config]="basicConfig" (fileChange)="onFileChange($event, 'oneyearbankstatement')"
+                                [required]="true" label="1 Year bank statement">
+                            </app-uploadbtn>
+                        </div>
+                       
+                    </div>
+
+
+
+                </div>
+
+                <div class="row ">
+                    <div class="text-label fw-bold mt-20">Latest 3 year ITR</div>
+
+                    <hr class="hrclass">
+                    <div class=" mt-20 info-box">
+                        <div class="col-lg-4 col-sm-12">
+                            <p class="text-label">If you are applying in February 2026, upload ITR for:</p>
+                            <ul class="text-label">
+                                <li class="text-label">AY 2024-25</li>
+                                <li class="text-label">AY 2023-24</li>
+                                <li class="text-label">AY 2022-23</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="row mt-20">
+                        <div class="col-lg-4 col-sm-12">
+                            <app-uploadbtn [config]="basicConfig" (fileChange)="onFileChange($event, 'ay1')"
+                                [required]="true" label="AY 1">
+                            </app-uploadbtn>
+                        </div>
+                         <div class="col-lg-4 col-sm-12">
+                            <app-uploadbtn [config]="basicConfig" (fileChange)="onFileChange($event, 'ay2')"
+                                [required]="true" label="AY 2">
+                            </app-uploadbtn>
+                        </div>
+                         <div class="col-lg-4 col-sm-12">
+                            <app-uploadbtn [config]="basicConfig" (fileChange)="onFileChange($event, 'ay3')"
+                                [required]="true" label="AY 3">
+                            </app-uploadbtn>
+                        </div>
+                       
+                    </div>
+
+
+
+                </div>
+
+
+
+                <div class="row  d-flex flex-column">
+                    <div class="text-label fw-bold mt-20">Other Documents</div>
+
+                    <hr class="hrclass">
+                    <div class="col-lg-4 col-sm-12 mt-20">
+                        <app-uploadbtn [config]="basicConfig" (fileChange)="onFileChange($event,  'marksheet')"
+                            [required]="true" label="Other Documents">
+                        </app-uploadbtn>
+                    </div>
+                    <div class="col-lg-4 col-sm-12 mt-20">
+                        <app-buttons label="Add Other Document" class="btn btn-icon Add btncustomClass" [outline]="true"
+                            (click)="addotherdocuments()">
+                            <img src="/assets/images/icons/addred.svg" alt="Add">
+
+                        </app-buttons>
+                    </div>
+                </div>
+            </div>
+        </ng-template>
+
+
+    </form>
+</div>
+<hr class="footer-hr-class">
+<div class="loan-footerbtns row w-100  d-flex justify-content-between align-items-center">
+
+    <div class="col-lg-4 ">
+        <img src="../assets/images/icons/save.svg">
+        <span class="text-dp-3-regular mx-2 blue-text"> Save and Exit</span>
+    </div>
+    <div class="col-lg-4  d-flex justify-content-end">
+        <app-buttons type="button" label="Back" class="btn btncustomClass" [outline]="true" (click)="back()">
+        </app-buttons>
+        <app-buttons type="button" label="Next" class="btn btncustomClass" color="primary" (click)="next()">
+        </app-buttons>
+
+    </div>
+</div>

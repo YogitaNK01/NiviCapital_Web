@@ -9,16 +9,17 @@ import { Radiobuttons } from '../../../systemdesign/radiobuttons/radiobuttons';
 import { Loanstepperservice } from '../../../../core/service/loanstepperservice';
 import { Main } from '../../../../core/service/main';
 import { Inputfield } from '../../../systemdesign/inputfield/inputfield';
+import { Edusection } from './edusection/edusection';
 
 @Component({
   selector: 'app-educationinfo',
-  imports: [CommonModule, Buttons, Checkbox, Dropdown, ReactiveFormsModule, Uploadbtn, Radiobuttons, Inputfield],
+  imports: [CommonModule, Buttons, Checkbox, Dropdown, ReactiveFormsModule, Uploadbtn, Radiobuttons, Inputfield, Edusection],
   standalone: true,
   templateUrl: './educationinfo.html',
   styleUrl: './educationinfo.scss'
 })
 export class Educationinfo implements OnInit {
-  uploadedFiles= {};
+  uploadedFiles = {};
   files: any = {};
 
   basicConfig: UploadConfig = {
@@ -37,6 +38,13 @@ export class Educationinfo implements OnInit {
     { title: 'University Offer Letter ', alwaysOpen: false },
   ];
   educationForm!: FormGroup
+
+  @Input() group!: FormGroup;
+  @Input() title!: string;
+  @Input() isHigher: boolean = false;
+@Input() sectionType!: 'school' | 'bachelors' | 'postgrad';
+
+
 
   //dropdowns
   @Input() avatarUrl = '';
@@ -61,12 +69,13 @@ export class Educationinfo implements OnInit {
   constructor(private fb: FormBuilder, private stepperService: Loanstepperservice, private cd: ChangeDetectorRef) { }
   ngOnInit(): void {
     this.educationForm = this.fb.group({
-      
-        tenth: this.createSingleEducation(),
-        twelth: this.createSingleEducation(),
-        // bachelors: this.createHigherEducation(6), // 6 semesters
-        // postgrad: this.createHigherEducation(4)
-      
+
+      tenth: this.createSchoolGroup(),
+    twelfth: this.createSchoolGroup(),
+    bachelors: this.createUGGroup(),
+    postgrad: this.createPGGroup(),
+     
+
     });
   }
 
@@ -98,39 +107,54 @@ export class Educationinfo implements OnInit {
   next() {
     this.stepperService.next();
   }
-onFileChange(result: UploadResult,groupName: string,controlName: string) {
-  if (!result?.file) return;
 
-  this.educationForm
-    .get(`${groupName}.${controlName}`)
-    ?.setValue(result.file);
+getEducationGroup(key: string): FormGroup {
+  return this.educationForm.get(key) as FormGroup;
+}
+  onFileChange(result: UploadResult, controlName: string) {
+    if (!result?.file) return;
+
+   
+  }
+
+createSchoolGroup(): FormGroup {
+  return this.fb.group({
+    institutename: [''],
+    passingyear: [''],
+    per_cgpa: [''],
+    location: [''],
+    marksheet: [null],
+    lc: [null]
+  });
 }
 
- 
+createUGGroup(): FormGroup {
+  return this.fb.group({
+    institutename: [''],
+    passingyear: [''],
+    per_cgpa: [''],
+    location: [''],
+    sem1: [null],
+    sem2: [null],
+    sem3: [null],
+    sem4: [null],
+    sem5: [null]
+  });
+}
 
-  createSingleEducation(): FormGroup {
-    return this.fb.group({
-      institutename: ['', Validators.required],
-      passingyear: ['', Validators.required],
-      per_cgpa: ['', Validators.required],
-      location: ['', Validators.required],
-      marksheet: [null, Validators.required],
-      schoolLeavingCertificate: [null]
-    });
-  }
-  createHigherEducation(semCount: number): FormGroup {
-    return this.fb.group({
-      institutename: ['', Validators.required],
-      passingyear: ['', Validators.required],
-      per_cgpa: ['', Validators.required],
-      location: ['', Validators.required],
-      marksheets: this.fb.array(
-        Array.from({ length: semCount }, () =>
-          this.fb.control(null, Validators.required)
-        )
-      )
-    });
-  }
+createPGGroup(): FormGroup {
+  return this.fb.group({
+    institutename: [''],
+    passingyear: [''],
+    per_cgpa: [''],
+    location: [''],
+    sem1: [null],
+    sem2: [null],
+    sem3: [null]
+  });
+}
+
+
 
   get educationDetails(): FormArray {
     return this.educationForm.get('educationDetails') as FormArray;

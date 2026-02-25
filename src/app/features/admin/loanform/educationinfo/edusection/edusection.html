@@ -1,0 +1,79 @@
+<div [formGroup]="group" class="row  d-flex  align-items-start pt-4 common-details-box d-flex flex-column">
+    <div class="row mt-20">
+        <app-inputfield type="text" formControlName="institutename" [required]="true" label="Institute Name"
+            placeholder="Institute Name" helpText="Help text" name="institutename">
+        </app-inputfield>
+    </div>
+    <div class="row mt-20">
+        <div class="col-lg-4 col-sm-12">
+            <app-dropdown [options]="selectpassingyr" [placeholder]="passingyear" [required]="true"
+                (selectedValueChange)="group.get('passingyear')?.setValue($event)" [avatarUrl]="avatarUrl"
+                formControlName="passingyear" [hasAvatar]="hasAvatar" [label]="passingyear">
+            </app-dropdown>
+        </div>
+        <div class="col-lg-4 col-sm-12">
+            <app-dropdown [options]="selectpercentage" [placeholder]="per_cgpa" [required]="true"
+                (selectedValueChange)="group.get('per_cgpa')?.setValue($event)" [avatarUrl]="avatarUrl"
+                formControlName="per_cgpa" [hasAvatar]="hasAvatar" [label]="per_cgpa">
+            </app-dropdown>
+        </div>
+        <div class="col-lg-4 col-sm-12">
+            <app-dropdown [options]="selectlocation" [placeholder]="location" [required]="true"
+                (selectedValueChange)="group.get('location')?.setValue($event)" [avatarUrl]="avatarUrl"
+                formControlName="location" [hasAvatar]="hasAvatar" [label]="location">
+            </app-dropdown>
+        </div>
+    </div>
+    <div class=" mt-20 info-box">
+        <div class="col-lg-4 col-sm-12">
+            <p class="text-label">Upload the required documents listed below:</p>
+           
+                <ul *ngFor="let doc of documentConfig" class="mb-0">
+                    <li class="text-label"> {{ doc.label }} </li>
+                </ul>
+
+          
+
+        </div>
+    </div>
+
+    <div class="row ">
+        <div class="text-label fw-bold mt-20">Marksheet</div>
+
+        <hr class="hrclass">
+        <div class="col-lg-4 col-sm-12 mt-20">
+            <app-uploadbtn [config]="basicConfig" (fileChange)="onFileChange($event, 'marksheet')" [required]="true"
+                label="Marksheet">
+            </app-uploadbtn>
+        </div>
+    </div>
+
+    <div class="row ">
+        <div class="text-label fw-bold mt-20">School Leaving Certificate</div>
+
+        <hr class="hrclass">
+        <div class="col-lg-4 col-sm-12 mt-20">
+            <app-uploadbtn [config]="basicConfig" (fileChange)="onFileChange($event, 'lc')" [required]="true"
+                label="School Leaving Certificate">
+            </app-uploadbtn>
+        </div>
+    </div>
+
+    <div class="row  d-flex flex-column">
+        <div class="text-label fw-bold mt-20">Other Documents</div>
+
+        <hr class="hrclass">
+        <div class="col-lg-4 col-sm-12 mt-20">
+            <app-uploadbtn [config]="basicConfig" (fileChange)="onFileChange($event,  'other')" [required]="true"
+                label="Other Documents">
+            </app-uploadbtn>
+        </div>
+        <div class="col-lg-4 col-sm-12 mt-20">
+            <app-buttons label="Add Other Document" class="btn btn-icon Add btncustomClass" [outline]="true"
+                (click)="addotherdocuments()">
+                <img src="/assets/images/icons/addred.svg" alt="Add">
+
+            </app-buttons>
+        </div>
+    </div>
+</div>

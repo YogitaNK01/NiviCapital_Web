@@ -87,7 +87,7 @@ export class Selectproduct implements OnInit {
     console.log('Security Typechecked:', this.SecurityTypechecked);
   }
   goToloanscreen() {
-    this.router.navigate(['admin/los-operation/applyloan']);
+    this.router.navigate(['admin/losoperation/newloan']);
 
   }
 
@@ -118,8 +118,6 @@ export class Selectproduct implements OnInit {
       }
     });
 
-
-    // this.router.navigate(['admin/customer/successbox']);
 
 
 
