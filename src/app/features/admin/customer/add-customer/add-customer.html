@@ -153,7 +153,7 @@
               </div>
               <div class="text-label-data otp-inline d-flex align-items-center">
                 <span class="text-label-data">Resend code in</span>
-                <span class="text-label-data resend-timer mx-2"> {{ resendSeconds | number:'2.0' }}</span>
+                <span class="text-label-data resend-timer mx-2"> {{ formatTime(resendSeconds)  }}</span>
                 <span class="resend-link text-dp-3-regular" (click)="resendOtp()" [class.disabled]=" isCounting">
                   Resend OTP
                 </span>
@@ -193,7 +193,7 @@
 
           <div class="col-lg-4 col-sm-12 mt-40 ">
             <app-buttons type="submit" class="btn btncustomClass" [disabled]="!registerform.valid || !otpVerifiedOk"
-              color="primary" label="Create Customer ID"></app-buttons>
+              color="primary" label="Next"></app-buttons>
 
           </div>
         </div>

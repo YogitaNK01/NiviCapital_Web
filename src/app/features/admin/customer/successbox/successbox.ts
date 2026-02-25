@@ -7,7 +7,7 @@ import { JsonPipe, NgFor } from '@angular/common';
 @Component({
   selector: 'app-successbox',
   standalone: true,
-  imports: [Buttons, JsonPipe, NgFor],
+  imports: [Buttons, NgFor],
   templateUrl: './successbox.html',
   styleUrl: './successbox.scss'
 })

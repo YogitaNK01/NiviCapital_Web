@@ -14,12 +14,13 @@ import { Addcustomerservice } from '../../../../core/service/addcustomerservice'
 import { interval, Subscription } from 'rxjs';
 import { Messagebox } from '../../../systemdesign/messagebox/messagebox';
 import { Msgboxservice } from '../../../../core/service/msgboxservice';
+import { DecimalPipe } from '@angular/common';
 
 
 @Component({
   selector: 'app-add-customer',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, FormsModule, Inputfield, Checkbox, Otpsection, Uploadkyc, Buttons, Successbox],
+  imports: [CommonModule, ReactiveFormsModule, FormsModule, Inputfield, Checkbox, Otpsection, Uploadkyc, Buttons, Successbox,DecimalPipe],
   templateUrl: './add-customer.html',
   styleUrl: './add-customer.scss'
 })
@@ -235,6 +236,13 @@ export class AddCustomer implements OnInit {
     });
   }
 
+  formatTime(seconds: number): string {
+  const mins = Math.floor(seconds / 60);
+  const secs = seconds % 60;
+  return `${mins.toString().padStart(2, '0')}:${secs
+    .toString()
+    .padStart(2, '0')}`;
+}
   onOtpSubmit(otp: string) {
 
     console.log('OTP submitted:', otp);

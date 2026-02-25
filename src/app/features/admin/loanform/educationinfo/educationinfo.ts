@@ -13,7 +13,7 @@ import { Edusection } from './edusection/edusection';
 
 @Component({
   selector: 'app-educationinfo',
-  imports: [CommonModule, Buttons, Checkbox, Dropdown, ReactiveFormsModule, Uploadbtn, Radiobuttons, Inputfield, Edusection],
+  imports: [CommonModule, Buttons, ReactiveFormsModule, Uploadbtn, Inputfield, Edusection],
   standalone: true,
   templateUrl: './educationinfo.html',
   styleUrl: './educationinfo.scss'

@@ -253,7 +253,8 @@ gap: $spacing_4;
 }
 
 .resend-timer{
-  font-weight: 700;
+  color: $secondary-700;
+  font-weight: 700!important;
 }
 .resend-link{
   cursor: pointer;

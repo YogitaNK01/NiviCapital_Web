@@ -18,7 +18,7 @@ interface MenuItem {
 
 @Component({
   selector: 'app-layout',
-  imports: [RouterModule, CommonModule, Dropdown, AddCustomer],
+  imports: [RouterModule, CommonModule, Dropdown],
   templateUrl: './layout.html',
   styleUrl: './layout.scss',
   standalone: true,
