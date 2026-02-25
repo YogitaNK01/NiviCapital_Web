@@ -25,6 +25,7 @@ export class TableData {
       email: (item.email) ?? '-',
       kycStatus: item.kycStatus ?? "-",
       status: item.status ?? "-",
+      userId: item.userId ?? "-",
       // registrationDate: this.formatDateOnly(item.createdAt) ?? "-",
       ncId: item.ncId ?? "-",
       // Id: item.id ?? "-"

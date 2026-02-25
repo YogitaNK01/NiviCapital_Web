@@ -190,7 +190,9 @@ export class Tables implements OnChanges {
         queryParams: {
           step: 0,
           edit:true,
-          phone: row.mobile
+          phone: row.mobile,
+          id: row.userId
+ 
           
         }
       }

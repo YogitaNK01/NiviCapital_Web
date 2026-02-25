@@ -47,7 +47,7 @@ interface TransformedUserData {
   status: string;
   kycStatus: string;
   createdAt: number[];
-  // Id: string;
+  userId: string;
 }
 
 // Configuration Constants
@@ -340,7 +340,7 @@ allkycstatus = 'All KYC Status';
   }
 
   onEdit(data: any){
-    console.log(data);
+    console.log("edit-------",data);
     
   }
   
