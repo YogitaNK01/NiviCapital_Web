@@ -41,9 +41,9 @@ export class Selectproduct implements OnInit {
   segment: string = 'Select Segment';
   segment_: string = '';
   selectSegment: DropdownOption[] = [
-    { label: 'Retail', value: 'RETAIL', icon: '',disabled: false },
-    { label: 'Corporate', value: 'CORPORATE', icon: '',disabled: true },
-    { label: 'MSME', value: 'MSME', icon: '',disabled: true },
+    { label: 'Retail', value: 'RETAIL', icon: '', disabled: false },
+    { label: 'Corporate', value: 'CORPORATE', icon: '', disabled: true },
+    { label: 'MSME', value: 'MSME', icon: '', disabled: true },
   ];
 
   seleactedcategory: string = '';
@@ -61,6 +61,8 @@ export class Selectproduct implements OnInit {
   //successbox-------------------
 
   arnid: string = '';
+  applicantId: string = '';
+  applicationId: string = '';
   issuccess: boolean = false;
 
 
@@ -86,8 +88,8 @@ export class Selectproduct implements OnInit {
     this.SecurityTypechecked = value;
     console.log('Security Typechecked:', this.SecurityTypechecked);
   }
-  goToloanscreen() {
-    this.router.navigate(['admin/losoperation/newloan']);
+  goToloandashboard() {
+    this.router.navigate(['admin/losoperation']);
 
   }
 
@@ -109,6 +111,8 @@ export class Selectproduct implements OnInit {
         console.log(res);
 
         this.arnid = res?.data?.arn ?? '';
+         this.applicationId = res?.data?.applicationId ?? '';
+          this.applicantId = res?.data?.applicantId ?? '';
         this.issuccess = true;
         this.cd.detectChanges();
       },
@@ -124,15 +128,26 @@ export class Selectproduct implements OnInit {
   }
 
   handleSuccessAction(action: string) {
-    if (action === 'letsstart') {
+      if (action === 'letsstart') {
 
-      const url = this.router.serializeUrl(
-        this.router.createUrlTree(['/loanform/loaninfo'])
-      );
-      console.log("url---", url);
+        const url = this.router.serializeUrl(
+          this.router.createUrlTree(['/loanform/genralinfo'],
+            {
+        queryParams: {
+          step: 2,
+          edit:true,
+          applicationId: this.applicationId,
+          applicantId:this.applicantId,
+        
+        }
+      }
+          )
+        );
+        console.log("url---", url);
 
 
-      window.open(url, '_blank');
+        window.open(window.location.origin + url, '_blank');
+      }
     }
   }
-}
+  

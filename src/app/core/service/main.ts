@@ -193,11 +193,12 @@ restrictInput(event: Event, type: 'text' | 'number') {
     }
   }
 
-  // states and cities api
+  // Indian states and cities api 
 
    getIndianstates(): Observable<ApiResponse<UserData[]>> {
     return this.http.get<ApiResponse<UserData[]>>(
-      `http://192.168.5.42:8085/nivicapstage/api/v1/states`,
+      `http://192.168.5.42:8085/nivicapstage/api/v1/states`, 
+      
     );
   }
 
@@ -207,6 +208,9 @@ restrictInput(event: Event, type: 'text' | 'number') {
       `http://192.168.5.42:8085/nivicapstage/api/v1/${id}/cities`,
     );
   }
+
+
+  
 }
 
 

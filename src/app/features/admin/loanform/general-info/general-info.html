@@ -35,14 +35,14 @@
 
                 <div class="text-label fw-bold ">Last Qualification Details</div>
                 <div class="col-lg-4 col-sm-12 mt-20">
-                    <app-dropdown [options]="selectoccupation" [placeholder]="occupation" [required]="true"
+                    <app-dropdown [options]="selectoccupation" [placeholder]="'Select '+ occupation" [required]="true"
                         (selectedValueChange)="registerForm.get('occupation')?.setValue($event)" [avatarUrl]="avatarUrl"
                         formControlName="occupation" [hasAvatar]="hasAvatar" [label]="occupation">
                     </app-dropdown>
 
                 </div>
                 <div class="col-lg-4 col-sm-12 mt-20">
-                    <app-dropdown [options]="seleactqualification" [placeholder]="qualification"
+                    <app-dropdown [options]="seleactqualification" [placeholder]="'Select '+ qualification"
                         formControlName="qualification" [required]="true"
                         (selectedValueChange)="registerForm.get('qualification')?.setValue($event)"
                         [avatarUrl]="avatarUrl" [hasAvatar]="hasAvatar" [label]="qualification">
@@ -62,45 +62,45 @@
                 <div class="text-label fw-bold ">Course Datails</div>
                 <!-- Country NAME -->
                 <div class="col-lg-4 col-sm-12 mt-20">
-                    <app-inputfield type="text" [required]="true" label="Country" [required]="true"
-                        placeholder="Australia" helpText="Help text" [disabled]="true" name="country">
+                    <app-inputfield type="text" [required]="true" label="Country" [required]="true"  
+                        placeholder="Australia" helpText="Help text" [disabled]="true" name="country" >
                     </app-inputfield>
 
                 </div>
 
                 <!-- State NAME -->
                 <div class="col-lg-4 col-sm-12 mt-20">
-                    <app-dropdown [options]="selectostate" [placeholder]="state" [required]="true"
-                        (selectedValueChange)="registerForm.get('state')?.setValue($event)" [avatarUrl]="avatarUrl"
-                        formControlName="state" [hasAvatar]="hasAvatar" [label]="state">
+                    <app-dropdown [options]="Australianstate" [placeholder]="'Select '+state" [required]="true"
+                        (selectedValueChange)="selectPerState($event)"  [avatarUrl]="avatarUrl"
+                        formControlName="state" [hasAvatar]="hasAvatar" [label]="state" [searchable]="true">
                     </app-dropdown>
                 </div>
 
                 <!-- University NAME -->
                 <div class="col-lg-4 col-sm-12 mt-20">
-                    <app-dropdown [options]="selectuniversity" [placeholder]="university" [required]="true"
-                        (selectedValueChange)="registerForm.get('university')?.setValue($event)" [avatarUrl]="avatarUrl"
-                        formControlName="university" [hasAvatar]="hasAvatar" [label]="university">
+                    <app-dropdown [options]="AustralianUniversities" [placeholder]="'Select '+university" [required]="true"
+                        (selectedValueChange)="selecteduniversity($event)"[avatarUrl]="avatarUrl"
+                        formControlName="university" [hasAvatar]="hasAvatar" [label]="university" [searchable]="true">
                     </app-dropdown>
                 </div>
 
                 <!-- course type -->
                 <div class="col-lg-6 col-sm-12 mt-20">
-                    <app-dropdown [options]="selectcoursetype" [placeholder]="coursetype" [required]="true"
-                        (selectedValueChange)="registerForm.get('coursetype')?.setValue($event)" [avatarUrl]="avatarUrl"
+                    <app-dropdown [options]="selectcourse" [placeholder]="'Select '+coursetype" [required]="true"
+                         (selectedValueChange)="selectedcoursetype($event)"  [avatarUrl]="avatarUrl"
                         formControlName="coursetype" [hasAvatar]="hasAvatar" [label]="coursetype">
                     </app-dropdown>
                 </div>
                 <!-- course name -->
                 <div class="col-lg-6 col-sm-12 mt-20">
-                    <app-dropdown [options]="selectcoursename" [placeholder]="coursename" [required]="true"
+                    <app-dropdown [options]="selectcoursename" [placeholder]="'Select '+coursename" [required]="true"
                         (selectedValueChange)="registerForm.get('coursename')?.setValue($event)" [avatarUrl]="avatarUrl"
                         formControlName="coursename" [hasAvatar]="hasAvatar" [label]="coursename">
                     </app-dropdown>
                 </div>
                 <!-- Course Duration -->
                 <div class="col-lg-4 col-sm-12 mt-20">
-                    <app-dropdown [options]="selectcourseduration" [placeholder]="courseduration" [required]="true"
+                    <app-dropdown [options]="selectcourseduration" [placeholder]="'Select '+courseduration" [required]="true"
                         (selectedValueChange)="registerForm.get('courseduration')?.setValue($event)"
                         [avatarUrl]="avatarUrl" formControlName="courseduration" [hasAvatar]="hasAvatar"
                         [label]="courseduration">
@@ -111,12 +111,12 @@
 
                 <!-- Course Start Date* -->
                 <div class="col-lg-4 col-sm-12 mt-20">
-                    <app-datepickernew formControlName="coursestartdate" label="Course Start Date*">
+                    <app-datepickernew formControlName="coursestartdate" label="Course Start Date" placeholder="DD/MM/YYYY">
                     </app-datepickernew>
                 </div>
                 <!-- Course End Date* -->
                 <div class="col-lg-4 col-sm-12 mt-20">
-                    <app-datepickernew formControlName="courseenddate" label="Course End Date*">
+                    <app-datepickernew formControlName="courseenddate" label="Course End Date"  placeholder="DD/MM/YYYY">
                     </app-datepickernew>
                 </div>
 
@@ -127,13 +127,13 @@
                         <div class="dropdown-label1 all-label ">Do you have Assets?<span class="text-danger">*</span>
                         </div>
                         <div class="d-flex flex-row">
-                            <app-radiobuttons name="optionsGroup1" [checked]="checkyes_rb === 'option1'"
-                                (checkedChange)="checkyes_rb = 'option1'" label="Yes">
+                            <app-radiobuttons name="optionsGroup1" label="Yes" value="Yes" formControlName="checkedasset"
+                            (checkedChange)="checkassetOnChange('Yes')">
                             </app-radiobuttons>
 
 
-                            <app-radiobuttons name="optionsGroup2" [checked]="checkyes_rb === 'option2'"
-                                (checkedChange)="checkyes_rb = 'option2'" label="No">
+                            <app-radiobuttons name="optionsGroup1" 
+                                (checkedChange)="checkassetOnChange('No')" label="No" value="No" formControlName="checkedasset">
                             </app-radiobuttons>
                         </div>
                     </div>
@@ -141,7 +141,7 @@
 
                 <!-- Lending Partner -->
                 <div class="col-lg-12 col-sm-12 mt-20">
-                    <app-dropdown [options]="selectlendingpartner" [placeholder]="lendingpartner" [required]="true"
+                    <app-dropdown [options]="selectlendingpartner" [placeholder]="'Select '+lendingpartner" [required]="true"
                         (selectedValueChange)="registerForm.get('lendingpartner')?.setValue($event)"
                         [avatarUrl]="avatarUrl" formControlName="lendingpartner" [hasAvatar]="hasAvatar"
                         [label]="lendingpartner">
@@ -166,7 +166,7 @@
                 <div class="col-lg-4  d-flex justify-content-end">
                     <app-buttons type="button" label="Back" class="btn btncustomClass" [outline]="true" (click)="back()">
                     </app-buttons>
-                    <app-buttons type="button" label="Next" class="btn btncustomClass" color="primary" (click)="next()">
+                    <app-buttons type="button" label="Next" class="btn btncustomClass" color="primary" (click)="next()" [disabled]="!registerForm.valid">
                     </app-buttons>
                   
                 </div>

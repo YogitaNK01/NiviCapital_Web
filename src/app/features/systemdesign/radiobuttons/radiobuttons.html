@@ -6,7 +6,7 @@
     class="form-check-input"
     type="radio" [value]="value"
     [name]="name"
-    [checked]="checked"
+    [checked]="selectedValue === value"
     [disabled]="disabled"
     (change)="selectRadio()"
     [id]="label">

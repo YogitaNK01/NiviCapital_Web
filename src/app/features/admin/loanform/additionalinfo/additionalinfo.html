@@ -36,7 +36,7 @@
             <div class="row">
 
                 <div class="col-lg-4 col-sm-12 ">
-                    <app-uploadbtn [config]="basicConfig" [required]="true" formControlName="uploadphoto"
+                    <app-uploadbtn [config]="basicConfig" [required]="true" 
                         (fileChange)="onFileChange($event, 'applicantphoto')" label="Upload Applicant Photo">
                     </app-uploadbtn>
 
@@ -48,31 +48,35 @@
                         [avatarUrl]="avatarUrl" [hasAvatar]="hasAvatar" [label]="maritalstatus">
                     </app-dropdown>
 
+
+
                 </div>
                 <div class="col-lg-4 col-sm-12 ">
                     <div class="dropdown-label1 all-label ">Gender<span class="text-danger">*</span></div>
-                    <div class="d-flex flex-row" >
-                        <app-radiobuttons name="optionsGroup1" [checked]="gendercheck === 'option1'"
-                            (checkedChange)="gendercheck = 'option1'" label="Male" value="Male" formControlName="gender">
+                    <div class="d-flex flex-row">
+                        <app-radiobuttons name="optionsGroup" 
+                            (checkedChange)="gendercheck('Male')" label="Male" value="Male" formControlName="gender">
                         </app-radiobuttons>
 
-                       
-                        <app-radiobuttons name="optionsGroup2" [checked]="gendercheck === 'option2'"
-                            (checkedChange)="gendercheck = 'option2'" label="Female" value="Female" formControlName="gender">
+
+                        <app-radiobuttons name="optionsGroup" 
+                            (checkedChange)="gendercheck('Female')" label="Female" value="Female"
+                            formControlName="gender">
                         </app-radiobuttons>
 
-                         <app-radiobuttons name="optionsGroup2" [checked]="gendercheck === 'option2'"
-                            (checkedChange)="gendercheck = 'option2'" label="Third Gender" value="Third Gender" formControlName="gender">
+                        <app-radiobuttons name="optionsGroup" 
+                            (checkedChange)="gendercheck('Third')" label="Third Gender" value="Third Gender"
+                            formControlName="gender">
                         </app-radiobuttons>
                     </div>
 
                 </div>
                 <div class="col-lg-4 col-sm-12 mt-20">
-                    <app-dropdown [options]="dependentscount" [placeholder]="dependents" formControlName="dependents"
-                        [required]="true"
-                        (selectedValueChange)="additionalinfoForm.get('dependents')?.setValue($event)"
-                        [avatarUrl]="avatarUrl" [hasAvatar]="hasAvatar" [label]="dependents">
-                    </app-dropdown>
+
+
+                    <app-inputfield formControlName="dependents" label="Number Of Dependents" [required]="true"
+                        placeholder="Number Of Dependents" (input)="main.restrictInput($event, 'number')">
+                    </app-inputfield>
 
                 </div>
 
@@ -81,24 +85,25 @@
 
                 <div class="col-lg-4 col-sm-12 mt-20">
                     <app-inputfield formControlName="s_fname" label="First Name" [required]="true"
-                        placeholder="First Name">
+                        placeholder="First Name" (input)="main.restrictInput($event, 'text')">
                     </app-inputfield>
 
                 </div>
 
 
                 <div class="col-lg-4 col-sm-12 mt-20">
-                    <app-inputfield formControlName="s_mname" label="Middle Name" placeholder="Middle Name">
+                    <app-inputfield formControlName="s_mname" label="Middle Name"
+                     placeholder="Middle Name" (input)="main.restrictInput($event, 'text')" [disabled]="isspousemiddlename">
                     </app-inputfield>
-                     <app-checkbox [checked]="ismiddlename" [disabled]="false" [indeterminate]="false"
-                label="I don’t have middle name" (checkedChange)="onmiddlename($event)">
-              </app-checkbox>
+                    <app-checkbox [checked]="isspousemiddlename"  [indeterminate]="false"
+                        label="I don’t have middle name" (checkedChange)="onmiddlename($event)">
+                    </app-checkbox>
                 </div>
 
 
                 <div class="col-lg-4 col-sm-12 mt-20">
                     <app-inputfield formControlName="s_lname" label="Last Name" [required]="true"
-                        placeholder="Last Name">
+                        placeholder="Last Name" (input)="main.restrictInput($event, 'text')" >
                     </app-inputfield>
                 </div>
 
@@ -107,21 +112,25 @@
 
                 <div class="col-lg-4 col-sm-12 mt-20">
                     <app-inputfield formControlName="f_fname" label="First Name" [required]="true"
-                        placeholder="First Name">
+                        placeholder="First Name" (input)="main.restrictInput($event, 'text')">
                     </app-inputfield>
 
                 </div>
 
 
                 <div class="col-lg-4 col-sm-12 mt-20">
-                    <app-inputfield formControlName="f_mname" label="Middle Name" placeholder="Middle Name">
-                    </app-inputfield>
+                    <app-inputfield formControlName="f_mname" label="Middle Name" placeholder="Middle Name" 
+                    (input)="main.restrictInput($event, 'text')" [disabled]="isfathermiddlename">
+                    </app-inputfield >
+                    <app-checkbox [checked]="isfathermiddlename"  [indeterminate]="false"
+                        label="I don’t have middle name" (checkedChange)="onfathermiddlename($event)">
+                    </app-checkbox>
                 </div>
 
 
                 <div class="col-lg-4 col-sm-12 mt-20">
                     <app-inputfield formControlName="f_lname" label="Last Name" [required]="true"
-                        placeholder="Last Name">
+                        placeholder="Last Name" (input)="main.restrictInput($event, 'text')">
                     </app-inputfield>
                 </div>
 
@@ -131,21 +140,25 @@
 
                 <div class="col-lg-4 col-sm-12 mt-20">
                     <app-inputfield formControlName="m_fname" label="First Name" [required]="true"
-                        placeholder="First Name">
+                        placeholder="First Name" (input)="main.restrictInput($event, 'text')">
                     </app-inputfield>
 
                 </div>
 
 
                 <div class="col-lg-4 col-sm-12 mt-20">
-                    <app-inputfield formControlName="m_mname" label="Middle Name" placeholder="Middle Name">
+                    <app-inputfield formControlName="m_mname" label="Middle Name" placeholder="Middle Name" 
+                    (input)="main.restrictInput($event, 'text')" [disabled]="ismothermiddlename">
                     </app-inputfield>
+                    <app-checkbox [checked]="ismothermiddlename"  [indeterminate]="false"
+                        label="I don’t have middle name" (checkedChange)="onmothermiddlename($event)">
+                    </app-checkbox>
                 </div>
 
 
                 <div class="col-lg-4 col-sm-12 mt-20">
                     <app-inputfield formControlName="m_lname" label="Last Name" [required]="true"
-                        placeholder="Last Name">
+                        placeholder="Last Name" (input)="main.restrictInput($event, 'text')">
                     </app-inputfield>
                 </div>
 
@@ -153,8 +166,8 @@
 
 
             </div>
-            
-          
+
+
 
 
         </form>
@@ -162,18 +175,18 @@
     </ng-template>
 
 </div>
- <hr class="footer-hr-class">
-      <div class="loan-footerbtns row w-100  d-flex justify-content-between align-items-center">
+<hr class="footer-hr-class">
+<div class="loan-footerbtns row w-100  d-flex justify-content-between align-items-center">
 
-                <div class="col-lg-4 ">
-                    <img src="../assets/images/icons/save.svg">
-                    <span class="text-dp-3-regular mx-2 blue-text"> Save and Exit</span>
-                </div>
-                <div class="col-lg-4  d-flex justify-content-end">
-                    <app-buttons type="button" label="Back" class="btn btncustomClass" [outline]="true" (click)="back()">
-                    </app-buttons>
-                    <app-buttons type="button" label="Next" class="btn btncustomClass" color="primary" (click)="next()">
-                    </app-buttons>
-                  
-                </div>
-            </div>
+    <div class="col-lg-4 ">
+        <img src="../assets/images/icons/save.svg">
+        <span class="text-dp-3-regular mx-2 blue-text"> Save and Exit</span>
+    </div>
+    <div class="col-lg-4  d-flex justify-content-end">
+        <app-buttons type="button" label="Back" class="btn btncustomClass" [outline]="true" (click)="back()">
+        </app-buttons>
+        <app-buttons type="button" label="Next" class="btn btncustomClass" color="primary" (click)="next()" [disabled]="!additionalinfoForm.valid">
+        </app-buttons>
+
+    </div>
+</div>

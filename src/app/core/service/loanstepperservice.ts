@@ -5,7 +5,7 @@ import { Router } from '@angular/router';
   providedIn: 'root'
 })
 export class Loanstepperservice {
-  
+    private applicantId: string | null = null;
 
   steps = [
     { label: 'Loan Info', route: 'loaninfo' },
@@ -23,6 +23,16 @@ export class Loanstepperservice {
 
   constructor(private router: Router) {}
 
+
+  setLoanId(id: string) {
+    this.applicantId = id;
+  }
+
+
+  getLoanId() {
+    return this.applicantId;
+  }
+  
   next() {
     const currentRoute = this.router.url.split('/').pop();
 
@@ -30,7 +40,9 @@ export class Loanstepperservice {
 
     if (index < this.steps.length - 1) {
       const nextRoute = this.steps[index + 1].route;
-      this.router.navigate(['/loanform', nextRoute]);
+      this.router.navigate(['/loanform', nextRoute],{
+          queryParams: { applicantId: this.applicantId } 
+        });
     }
   }
 
@@ -45,4 +57,32 @@ export class Loanstepperservice {
     }
   }
 
+  private formData: any = {};
+
+  setStepData(step: string, data: any) {
+    this.formData[step] = data;
+  }
+
+  getStepData(step: string) {
+    return this.formData[step];
+  }
+
+  getAllData() {
+    return this.formData;
+  }
+
+  clear() {
+    this.formData = {};
+  }
+
 }
+
+// last componet submit
+// submitFinal() {
+
+//   const allData = this.stepperFormService.getAllData();
+
+//   console.log('All Steps Data:', allData);
+
+  
+// }

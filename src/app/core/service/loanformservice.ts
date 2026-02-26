@@ -1,15 +1,96 @@
 import { Injectable } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 
+import { BehaviorSubject, Observable } from 'rxjs';
+import { environment } from '../../../environments/environment';
+import { HttpClient } from '@angular/common/http';
+
+export interface ApiResponse<T> {
+  status: string;
+  code: number;
+  message: string;
+  errors: any;
+  data: T;
+}
+
 @Injectable({
   providedIn: 'root'
 })
 export class Loanformservice {
   form!: FormGroup;
+ // private baseUrl = environment.apiBaseUrl;
+  private baseUrl = "/nivicapstage/api";
 
 
+  constructor(private http: HttpClient) { }
 
-  constructor() { }
+//genral info apis
+  getOccupations(): Observable<ApiResponse<any>> {
+    return this.http.get<ApiResponse<any>>(
+      `${this.baseUrl}/v1/masters/occupations`,
+      
+    );
+  }
+
+   getEducation(): Observable<ApiResponse<any>> {
+    return this.http.get<ApiResponse<any>>(
+      `${this.baseUrl}/v1/masters/qualifications`,
+      
+    );
+  }
+
+  getlendingpartners(): Observable<ApiResponse<any>> {
+    return this.http.get<ApiResponse<any>>(
+      `${this.baseUrl}/v1/masters/lending-partners`,
+      
+    );
+  }
+
+   getCoursetype(id: string): Observable<ApiResponse<any>> {
+    return this.http.get<ApiResponse<any>>(
+      `${this.baseUrl}/v1/masters/course-types/${id}`,
+      
+    );
+  }
+
+   getCourseName(id: string, type: string): Observable<ApiResponse<any>> {
+    return this.http.get<ApiResponse<any>>(
+      `${this.baseUrl}/v1/masters/courses/${id}/${type}`,
+      
+    );
+  }
+
+  // Australian states and cities api 
+
+   getAustralianstates(): Observable<ApiResponse<any>> {
+    return this.http.get<ApiResponse<any>>(
+      `${this.baseUrl}/v1/masters/states`,
+      
+    );
+  }
+
+  
+   getAustralianstatescities(id: string): Observable<ApiResponse<any>> {
+    return this.http.get<ApiResponse<any>>(
+      `${this.baseUrl}/v1/masters/universities/${id}`,
+      
+    );
+  }
+
+
+   submitGenralInfo(payload: any,id: string): Observable<ApiResponse<any>> {
+      return this.http.post<ApiResponse<any>>(
+        `${this.baseUrl}/v1/los/applications/${id}/general-info`,
+        payload
+      );
+    }
+
+       submitAdditionalInfo(payload: any,id: string): Observable<ApiResponse<any>> {
+      return this.http.post<ApiResponse<any>>(
+        `${this.baseUrl}/v1/los/applications/${id}/personal-info`,
+        payload
+      );
+    }
 
 }
 
