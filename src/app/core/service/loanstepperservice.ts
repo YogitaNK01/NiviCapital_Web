@@ -6,6 +6,7 @@ import { Router } from '@angular/router';
 })
 export class Loanstepperservice {
     private applicantId: string | null = null;
+    private applicationId: string | null = null;
 
   steps = [
     { label: 'Loan Info', route: 'loaninfo' },
@@ -24,30 +25,31 @@ export class Loanstepperservice {
   constructor(private router: Router) {}
 
 
-  setLoanId(id: string) {
-    this.applicantId = id;
+  setLoanId(id1: string,id2: string) {
+    this.applicantId = id1;
+     this.applicationId = id2;
   }
 
 
   getLoanId() {
-    return this.applicantId;
+    return [this.applicantId, this.applicationId];
   }
   
   next() {
-    const currentRoute = this.router.url.split('/').pop();
+    const currentRoute = this.router.url.split('?')[0].split('/').pop();;
 
     const index = this.steps.findIndex(s => s.route === currentRoute);
 
-    if (index < this.steps.length - 1) {
+    if (index < this.steps.length - 1  && index !== -1) {
       const nextRoute = this.steps[index + 1].route;
       this.router.navigate(['/loanform', nextRoute],{
-          queryParams: { applicantId: this.applicantId } 
+          queryParams: { applicantId: this.applicantId, applicationId: this.applicationId } 
         });
     }
   }
 
   previous() {
-    const currentRoute = this.router.url.split('/').pop();
+    const currentRoute = this.router.url.split('?')[0].split('/').pop();;
 
     const index = this.steps.findIndex(s => s.route === currentRoute);
 

@@ -58,7 +58,7 @@ export class TableData {
       case 'pending':
         return { text: 'Pending', class: 'Pending' };
       case 'active':
-        return { text: 'active', class: 'active' };
+        return { text: 'Active', class: 'active' };
 
       case 'document issue':
         return { text: 'Document Issue', class: 'Document-Issue' };

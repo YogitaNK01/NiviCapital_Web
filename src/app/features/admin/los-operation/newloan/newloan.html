@@ -21,7 +21,7 @@
            <app-inputfield type="tel" name="phone" [required]="true" pattern="^[6-9][0-9]{9}$"
                         label="Mobile Number" placeholder="Enter Mobile Number" helpText="Help text" class="w-100"
                         minlength="10" [maxlength]="10" (input)="service.restrictInput($event, 'number');onMobileInput($event)"
-                        [showPhonePrefix]="true"></app-inputfield>
+                        [showPhonePrefix]="true" [showPhonePrefixnumber]="true"></app-inputfield>
 
                        @if(isdata) {
                         <div class=" mt-1 text-start">

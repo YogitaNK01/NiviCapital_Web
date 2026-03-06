@@ -201,17 +201,18 @@ myDate: Date | null = null;
     value: `option_${i + 1}`
   }));
 
-  onSelectionChange(value: string) {
+
+  onSelectionChange(value: any) {
     console.log('Selected:1', value);
   }
 
-  onSelectionChange2(value: string) {
+  onSelectionChange2(value: any) {
     console.log('Selected:2', value);
   }
-  onSelectionChange3(value: string) {
+  onSelectionChange3(value: any) {
     console.log('Selected:3', value);
   }
-  onSelectionChange4(value: string) {
+  onSelectionChange4(value: any) {
     console.log('Selected:4', value);
   }
 

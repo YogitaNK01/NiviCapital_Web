@@ -28,7 +28,7 @@ export class Audittrail implements OnInit {
     { label: 'Insurance', value: 'json', icon: '/assets/images/icons/note.svg' },
     { label: 'Others', value: 'others', icon: '/assets/images/icons/note.svg' }
   ];
-  onSelectionChange2(value: string) {
+  onSelectionChange2(value: any) {
     console.log('Selected:2', value);
   }
 

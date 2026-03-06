@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, input, Input, OnInit } from '@angular/core';
 import { ReactiveFormsModule, FormGroup, Validators, FormBuilder, MinLengthValidator, MaxLengthValidator } from '@angular/forms';
 import { Buttons } from '../../../systemdesign/buttons/buttons';
 import { Checkbox } from '../../../systemdesign/checkbox/checkbox';
@@ -10,6 +10,7 @@ import { Main } from '../../../../core/service/main';
 import { Inputfield } from '../../../systemdesign/inputfield/inputfield';
 import { Loanstepperservice } from '../../../../core/service/loanstepperservice';
 import { Loanformservice } from '../../../../core/service/loanformservice';
+import { ActivatedRoute } from '@angular/router';
 
 @Component({
   selector: 'app-additionalinfo',
@@ -59,32 +60,52 @@ export class Additionalinfo implements OnInit {
   ismothermiddlename = false
 
   requiredDocs = ['applicantphoto'];
- applicationId :any;
-  constructor(private fb: FormBuilder, public main: Main, private stepperService: Loanstepperservice, private formSvc: Loanformservice) { }
+  applicationId: any;
+  applicantId: any;
+  profilePhotoUrl: any;
+  objectName: any;
+  constructor(private fb: FormBuilder, public main: Main, private route: ActivatedRoute, private stepperService: Loanstepperservice, private formSvc: Loanformservice) { }
   ngOnInit(): void {
+
+    this.route.queryParams.subscribe(params => {
+
+      const applicantId = params['applicantId'];
+      const applicationId = params['applicationId'];
+
+      // Store in variables if needed
+      this.applicantId = applicantId;
+      this.applicationId = applicationId;
+
+    });
+
     this.additionalinfoForm = this.fb.group({
 
-      // uploadphoto: ['', Validators.required],
+      uploadphoto: ['', Validators.required],
       maritalstatus: ['', Validators.required,],
       gender: ['', Validators.required,],
       dependents: ['', Validators.required,],
       s_fname: ['', [Validators.required, Validators.pattern('^[A-Za-z ]+$'), Validators.minLength(2), Validators.maxLength(25)]],
-      s_mname: ['', [Validators.required, Validators.pattern('^[A-Za-z ]+$'), Validators.minLength(2), Validators.maxLength(25)]],
+      s_mname: ['', [Validators.pattern('^[A-Za-z ]+$'), Validators.minLength(2), Validators.maxLength(25)]],
       s_lname: ['', [Validators.required, Validators.pattern('^[A-Za-z ]+$'), Validators.minLength(2), Validators.maxLength(25)]],
       f_fname: ['', [Validators.required, Validators.pattern('^[A-Za-z ]+$'), Validators.minLength(2), Validators.maxLength(25)]],
-      f_mname: ['', [Validators.required, Validators.pattern('^[A-Za-z ]+$'), Validators.minLength(2), Validators.maxLength(25)]],
+      f_mname: ['', [Validators.pattern('^[A-Za-z ]+$'), Validators.minLength(2), Validators.maxLength(25)]],
       f_lname: ['', [Validators.required, Validators.pattern('^[A-Za-z ]+$'), Validators.minLength(2), Validators.maxLength(25)]],
       m_fname: ['', [Validators.required, Validators.pattern('^[A-Za-z ]+$'), Validators.minLength(2), Validators.maxLength(25)]],
-      m_mname: ['', [Validators.required, Validators.pattern('^[A-Za-z ]+$'), Validators.minLength(2), Validators.maxLength(25)]],
+      m_mname: ['', [Validators.pattern('^[A-Za-z ]+$'), Validators.minLength(2), Validators.maxLength(25)]],
       m_lname: ['', [Validators.required, Validators.pattern('^[A-Za-z ]+$'), Validators.minLength(2), Validators.maxLength(25)]],
 
 
     });
 
-    this.applicationId = this.stepperService.getLoanId();
+    // let ids = this.stepperService.getLoanId();
+    // console.log(ids);
+    // this.applicantId = ids[0];
+    // this.applicationId = ids[1];
 
   }
-
+  get f() {
+    return this.additionalinfoForm.controls;
+  }
   toggle(i: number) {
     this.openIndex = this.openIndex === i ? null : i;
   }
@@ -105,42 +126,68 @@ export class Additionalinfo implements OnInit {
     this.ismothermiddlename = value;
   }
   onFileChange(result: UploadResult, key: string) {
+    console.log(result);
 
-    if (!result.file) {
-      this.uploadedFiles[key] = null;
-      return;
-    }
 
-    this.files[key] = result.file;
-    this.uploadedFiles[key] = result.file;
+    if (!result.file) return;
+    const fd = new FormData();
+
+
+    fd.append('applicantId', this.applicantId);
+    fd.append('file', result.file);
+
+    this.formSvc.uploadPhoto(fd).subscribe({
+      next: (res) => {
+        console.log(res);
+        this.profilePhotoUrl = res.data.publicUrl;
+        this.objectName = res.data.objectName;
+
+        this.additionalinfoForm.patchValue({
+          uploadphoto: this.profilePhotoUrl
+        });
+
+        this.additionalinfoForm.get('uploadphoto')?.updateValueAndValidity();
+
+
+      },
+      error: (error) => {
+        console.log(error);
+      }
+    });
+
 
   }
 
-  get allRequiredFilesUploaded(): boolean {
 
-    let docsToCheck = [...this.requiredDocs];
 
-    return docsToCheck.every(k => !!this.uploadedFiles[k]);
-  }
   gendercheck(value: string): void {
     this.gendercheckvalue = value
+    this.additionalinfoForm.patchValue({
+      gender: value
+    });
+
+    this.additionalinfoForm.get('gender')?.updateValueAndValidity();
+
   }
 
   back() {
     this.stepperService.previous();
   }
 
+
   next() {
+
     console.log("form--", this.additionalinfoForm.value);
     let formdata = this.additionalinfoForm.value;
 
     let input =
-   
-    {
-      "applicantId": this.applicationId,
-      "profilePhotoUrl": "https://example.com/profile/photo.jpg",
 
-      "maritalStatus": formdata.maritalstatus,
+    {
+      "applicantId": this.applicantId,
+      "profilePhotoUrl": this.profilePhotoUrl,
+      "objectName": this.objectName,
+
+      "maritalStatus": formdata.maritalstatus.toUpperCase(),
       "gender": this.gendercheckvalue == "Male" ? "M" : this.gendercheckvalue == "Female" ? "F" : 'T',
 
       "numberOfDependents": formdata.dependents,
@@ -166,8 +213,8 @@ export class Additionalinfo implements OnInit {
       next: (res) => {
         console.log(res);
         if (res.status == "success") {
-          // this.stepperService.setStepData('educationDetails', this.registerForm.value);
-          // this.stepperService.next();
+
+          this.stepperService.next();
         }
 
       },
@@ -180,7 +227,7 @@ export class Additionalinfo implements OnInit {
 
     // this.stepperService.setStepData('educationDetails', this.registerForm.value);
 
-    this.stepperService.next();
+    // this.stepperService.next();
 
   }
 }

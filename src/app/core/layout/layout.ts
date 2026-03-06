@@ -51,6 +51,8 @@ export class Layout implements OnInit, OnDestroy {
   adminMenu: MenuItem[] = [
     { icon: '/assets/images/sidemenu/dashboard.svg', iconActive: '/assets/images/sidemenu/dashboard-active.svg', label: 'Dashboard', route: '/admin/dashboard', expanded: false },
     { icon: '/assets/images/sidemenu/user.svg', iconActive: '/assets/images/sidemenu/user-active.svg', label: 'Customer', route: '/admin/customer', expanded: false },
+    // { icon: '/assets/images/sidemenu/user.svg', iconActive: '/assets/images/sidemenu/user-active.svg', label: 'add Customer', route: '/admin/customer/addcustomer', expanded: false },
+
     // { icon: '/assets/images/sidemenu/user.svg', iconActive: '/assets/images/sidemenu/user-active.svg', label: 'loan form', route: '/loanform/loaninfo', expanded: false },
         // { icon: '/assets/images/sidemenu/user.svg', iconActive: '/assets/images/sidemenu/user-active.svg', label: 'select product', route: '/admin/losoperation/selectproduct', expanded: false },
 
@@ -115,7 +117,7 @@ export class Layout implements OnInit, OnDestroy {
     }
   }
 
-  onSelectionChange(value: string): void {
+  onSelectionChange(value: any): void {
     if (value === 'logout') {
       this.logout();
     }

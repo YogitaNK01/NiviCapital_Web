@@ -314,7 +314,28 @@ letter-spacing: 0.16px;
 }
 
 .dropdown-item.disabled {
-  color: #b0b0b0;
+  color: #b0b0b0!important;
+  background-color: #f4f4f7;
   pointer-events: none;
-  cursor: not-allowed;
+  cursor:none;
+}
+
+.select-all {
+  display: flex;
+  justify-content: space-between;
+  font-weight: 500;
+}
+
+.clear-all {
+  cursor: pointer;
+}
+
+.dropdown-item input[type="checkbox"] {
+  width: $spacing_9;
+    height: $spacing_9;
+}
+
+.hrclass{
+    background: $neutral-300;
+    margin: 10px 0
 }

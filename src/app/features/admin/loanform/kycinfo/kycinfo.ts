@@ -8,16 +8,19 @@ import { Checkbox } from '../../../systemdesign/checkbox/checkbox';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Loanstepperservice } from '../../../../core/service/loanstepperservice';
 import { Buttons } from '../../../systemdesign/buttons/buttons';
+import { Loanformservice } from '../../../../core/service/loanformservice';
+import { Uploadkyc } from "../../customer/uploadkyc/uploadkyc";
+import { ActivatedRoute } from '@angular/router';
 
 @Component({
   selector: 'app-kycinfo',
-  imports: [CommonModule, Uploadbtn, Inputfield, Datepickernew, Checkbox, ReactiveFormsModule, Buttons],
+  imports: [CommonModule, Uploadbtn, Inputfield, Datepickernew, Checkbox, ReactiveFormsModule, Buttons, Uploadkyc],
   standalone: true,
   templateUrl: './kycinfo.html',
   styleUrl: './kycinfo.scss'
 })
 export class Kycinfo {
-
+  kycdetailsID: any;
   openIndex: number[] = [0];
   accordions = [
     { title: 'Identity & Residency ', alwaysOpen: true },
@@ -37,12 +40,49 @@ export class Kycinfo {
   };
 
 
-  isPermanentMailingChecked = true;
+  isPermanentMailingChecked = false;
   isCurrentMailingChecked = false;
 
-  constructor(private fb: FormBuilder, private stepperService: Loanstepperservice, private cd: ChangeDetectorRef) { }
+  aadhaarFrontUrl: string = '';
+  aadhaarFrontFileName: string = '';
+
+  aadhaarBackUrl: string = '';
+  aadhaarBackFileName: string = '';
+
+  panUrl: string = '';
+  panFileName: string = '';
+
+  passportUrl: string = '';
+  passportFileName: string = '';
+
+  otherDocumentUrl: string = '';
+  otherDocumentFileName: string = '';
+  applicantId: any;
+  applicationId: any;
+  kycId: any;
+
+
+
+
+  constructor(private fb: FormBuilder, private stepperService: Loanstepperservice, private cd: ChangeDetectorRef, private loanformservice: Loanformservice, private route: ActivatedRoute) { }
 
   ngOnInit(): void {
+
+    this.route.queryParams.subscribe(params => {
+
+      const applicantId = params['applicantId'];
+      const applicationId = params['applicationId'];
+
+      // Store in variables if needed
+      this.applicantId = applicantId;
+      this.applicationId = applicationId;
+
+    });
+
+    let ids = this.stepperService.getLoanId();
+    this.kycdetailsID = ids[1] ?? this.applicationId;
+
+
     this.kycdocumentsForm = this.fb.group({
 
 
@@ -50,8 +90,10 @@ export class Kycinfo {
       adhaarfront: ['', Validators.required],
       adhaarback: ['', Validators.required],
       pannumber: ['', Validators.required,],
+      panimg: ['', Validators.required],
       passportnumber: ['', Validators.required,],
       dob: ['', Validators.required,],
+
       peraddressline1: ['', Validators.required],
       peraddressline2: ['', Validators.required],
       peraddressline3: ['', Validators.required],
@@ -59,7 +101,9 @@ export class Kycinfo {
       perstate: ['', Validators.required,],
       percity: ['', Validators.required,],
       perpincode: ['', Validators.required,],
-      
+      isperMailingAddress: [false, Validators.required],
+
+      sameAsPermanent: ['', Validators.required],
       curraddressline1: ['', Validators.required],
       curraddressline2: ['', Validators.required],
       curraddressline3: ['', Validators.required],
@@ -67,10 +111,28 @@ export class Kycinfo {
       currstate: ['', Validators.required,],
       currcity: ['', Validators.required,],
       currpincode: ['', Validators.required,],
-
+      iscurrMailingAddress: [false, Validators.required],
 
 
     });
+
+    this.getKycData(this.kycdetailsID);
+    this.kycdocumentsForm.get('isperMailingAddress')
+      ?.valueChanges.subscribe(val => {
+        if (val) {
+          this.kycdocumentsForm.get('iscurrMailingAddress')
+            ?.setValue(false, { emitEvent: false });
+        }
+      });
+
+    this.kycdocumentsForm.get('iscurrMailingAddress')
+      ?.valueChanges.subscribe(val => {
+        if (val) {
+          this.kycdocumentsForm.get('isperMailingAddress')
+            ?.setValue(false, { emitEvent: false });
+        }
+      });
+
   }
 
   toggle(index: number) {
@@ -87,30 +149,135 @@ export class Kycinfo {
   }
 
   viewImage(url: string): void {
-    // ✅ Opens image in a new browser tab
     window.open(url, '_blank');
   }
-  downloadImage(url: string): void {
-    // ✅ Opens image in a new browser tab
-    window.open(url, '_blank');
+  downloadImage(url: string, filename: string): void {
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = filename;
+    link.target = '_blank';
+    link.click();
+    // window.open(url, '_blank');
   }
 
   back() {
     this.stepperService.previous();
   }
   next() {
+    
     this.stepperService.next();
   }
 
-  onFileChange(result: UploadResult, key: string) {
 
-    if (!result.file) {
-      this.uploadedFiles[key] = null;
-      return;
-    }
-
-    this.files[key] = result.file;
-    this.uploadedFiles[key] = result.file;
+  getKycId(event: any) {
+    console.log(event);
 
   }
+
+  setSameAddress(value: boolean) {
+    this.kycdocumentsForm.get('sameAsPermanent')?.setValue(value);
+
+    if (value) {
+      this.copyPermanentToCurrent();
+    }
+  }
+  copyPermanentToCurrent() {
+    this.kycdocumentsForm.patchValue({
+      curraddressline1: this.kycdocumentsForm.get('peraddressline1')?.value,
+      curraddressline2: this.kycdocumentsForm.get('peraddressline2')?.value,
+      curraddressline3: this.kycdocumentsForm.get('peraddressline3')?.value,
+      currcountry: this.kycdocumentsForm.get('percountry')?.value,
+      currstate: this.kycdocumentsForm.get('perstate')?.value,
+      currcity: this.kycdocumentsForm.get('percity')?.value,
+      currpincode: this.kycdocumentsForm.get('perpincode')?.value,
+    });
+  }
+
+  onFileChange(result: UploadResult, key: string) {
+    
+ if (!result.file) return; 
+
+  
+
+ const fd = new FormData();
+
+    // text fields
+    fd.append('docType', 'PASSPORT');
+    fd.append('file', result.file);
+
+    this.loanformservice.uploadpassport(fd, this.kycId).subscribe({
+      next: (data) => {
+        console.log(data);
+      },
+      error: (error) => {
+        console.log(error);
+      }
+    });
+  }
+  getKycData(id: any) {
+    this.loanformservice.getKycDetails(id).subscribe({
+      next: (res) => {
+        let formdata = res.data;
+        this.kycId = res.data.kycId;
+        const documents = formdata.documents;
+
+        const aadhaarFront = documents.find((d: { docType: string; }) => d.docType === 'AADHAAR_FRONT');
+        const aadhaarBack = documents.find((d: { docType: string; }) => d.docType === 'AADHAAR_BACK');
+        const panDoc = documents.find((d: { docType: string; }) => d.docType === 'PAN');
+        const passportDoc = documents.find((d: { docType: string; }) => d.docType === 'PASSPORT');
+        const otherDoc = documents.find((d: { docType: string; }) => d.docType === 'UTILITY_BILL');
+
+
+        this.aadhaarFrontUrl = aadhaarFront?.url || '';
+        this.aadhaarFrontFileName = aadhaarFront?.fileName || '';
+        this.aadhaarBackUrl = aadhaarBack?.url || '';
+        this.aadhaarBackFileName = aadhaarBack?.fileName || '';
+        this.panUrl = panDoc?.url || '';
+        this.panFileName = panDoc?.fileName || '';
+
+        this.passportUrl = passportDoc?.url || '';
+        this.passportFileName = passportDoc?.fileName || '';
+        this.ispassport = !!passportDoc; 
+
+        this.otherDocumentUrl = otherDoc?.url || '';
+        this.otherDocumentFileName = otherDoc?.fileName || '';
+
+        this.kycdocumentsForm.patchValue({
+          adhaarnumber: formdata.aadhaarNumber,
+          adhaarfront: aadhaarFront?.fileName,
+          adhaarback: aadhaarBack?.fileName,
+          pannumber: formdata.panNumber,
+          panimg: panDoc?.fileName,
+          passportnumber: formdata.passportNumber,
+          dob: formdata.dateOfBirth,
+
+          sameAsPermanent: formdata.sameAsPermanent,
+          peraddressline1: formdata.permanentAddress.addressLine,
+          peraddressline2: formdata.permanentAddress.addressLine1,
+          peraddressline3: formdata.permanentAddress.addressLine2,
+          percountry: formdata.permanentAddress.country,
+          perstate: formdata.permanentAddress.state,
+          percity: formdata.permanentAddress.city,
+          perpincode: formdata.permanentAddress.zipCode,
+          isperMailingAddress: formdata.permanentAddress.isMailingAddress == 0 ? false : true,
+
+          curraddressline1: formdata.otherAddress == null ? formdata.currentAddress.addressLine :formdata.otherAddress.addressLine,
+          curraddressline2:formdata.otherAddress == null ? formdata.currentAddress.addressLine1 :formdata.otherAddress.addressLine1,
+          curraddressline3:formdata.otherAddress == null ? formdata.currentAddress.addressLine2:formdata.otherAddress.addressLine2,
+          currcountry:formdata.otherAddress == null ? formdata.currentAddress.country:formdata.otherAddress.country,
+          currstate:formdata.otherAddress == null ? formdata.currentAddress.state:formdata.otherAddress.state,
+          currcity:formdata.otherAddress == null ? formdata.currentAddress.city:formdata.otherAddress.city,
+          currpincode:formdata.otherAddress == null ? formdata.currentAddress.zipCode:formdata.otherAddress.zipCode,
+          iscurrMailingAddress:formdata.sameAsPermanent == 0 ?  formdata.currentAddress.isMailingAddress  : false,
+        });
+        this.kycdocumentsForm.disable();
+        console.log(this.kycdocumentsForm.get('dob')?.disabled);
+      },
+      error: (err) => {
+        console.error("error msg", err);
+      }
+
+    });
+  }
+
 }

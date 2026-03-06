@@ -10,6 +10,7 @@ import { Checkbox } from "../../../systemdesign/checkbox/checkbox";
 import { Buttons } from "../../../systemdesign/buttons/buttons";
 import { Addcustomerservice } from '../../../../core/service/addcustomerservice';
 import { ActivatedRoute } from '@angular/router';
+import { Loanformservice } from '../../../../core/service/loanformservice';
 
 interface OptionItem {
   label: string;
@@ -42,6 +43,7 @@ export class Uploadkyc implements OnDestroy {
   @Output() nextStep = new EventEmitter<void>();
   @Output() prevstep = new EventEmitter<void>();
   @Output() fileChange = new EventEmitter<File>();
+  @Output() ncid = new EventEmitter<string>();
   @Output() kycid = new EventEmitter<string>();
 
   openIndex: number[] = [0, 1];
@@ -76,7 +78,7 @@ export class Uploadkyc implements OnDestroy {
 
 
   placeholderstate: string = 'Select State';
-placeholdercity: string = 'Select City';
+  placeholdercity: string = 'Select City';
 
 
   requiredDocs = ['aadharfront', 'aadharback', 'pan'];   // only required ones
@@ -95,7 +97,7 @@ placeholdercity: string = 'Select City';
   editUserData: any = {};
   dobValid = false;
   dobTouched = false;
-  constructor(public main: Main, private addcustomerservice: Addcustomerservice, private route: ActivatedRoute) { }
+  constructor(public main: Main, private addcustomerservice: Addcustomerservice, private route: ActivatedRoute, private loanservice: Loanformservice) { }
 
   ngOnInit(): void {
     this.states();
@@ -107,7 +109,7 @@ placeholdercity: string = 'Select City';
 
     const editUser = sessionStorage.getItem('editUser');
 
-    if ( editUser) {
+    if (editUser) {
       this.editMode = true;
       this.editUserData = JSON.parse(editUser);
     }
@@ -153,21 +155,21 @@ placeholdercity: string = 'Select City';
     return age >= 18;
   }
 
-selectSameAddress() {
-  this.addressType = 'same';
-  this.isDifferentAddress = false;
-this.selectedSecondaryProof = null;
-  this.isCurrentMailingChecked = true;
-  this.isPermanentMailingChecked = false;
-}
+  selectSameAddress() {
+    this.addressType = 'same';
+    this.isDifferentAddress = false;
+    this.selectedSecondaryProof = null;
+    this.isCurrentMailingChecked = false;
+    this.isPermanentMailingChecked = true;
+  }
 
-selectDifferentAddress() {
-  this.addressType = 'different';
-  this.isDifferentAddress = true;
+  selectDifferentAddress() {
+    this.addressType = 'different';
+    this.isDifferentAddress = true;
 
-  this.isCurrentMailingChecked = true;
-  this.isPermanentMailingChecked = false;
-}
+    this.isCurrentMailingChecked = true;
+    this.isPermanentMailingChecked = false;
+  }
 
   checkDob(value: any) {
     this.dobTouched = true;
@@ -194,7 +196,7 @@ selectDifferentAddress() {
       city: this.perselectedCityLabel,
       state: this.perselectedStateLabel,
       isPreferredAddress: this.isDifferentAddress == false ? 1 : 0,
-      isMailingAddress: this.permanentMailingFlag,
+      isMailingAddress: this.isDifferentAddress == false ? 1 : 0,
       zipCode: form.value.perpincode,
       country: 'India'
     };
@@ -206,7 +208,7 @@ selectDifferentAddress() {
       city: this.perselectedCityLabel,
       state: this.perselectedStateLabel,
       isPreferredAddress: this.isDifferentAddress == false ? 1 : 0,
-      isMailingAddress: this.permanentMailingFlag,
+      isMailingAddress: this.isDifferentAddress == false ? 1 : 0,
       zipCode: form.value.perpincode,
       country: 'India'
     };
@@ -217,7 +219,7 @@ selectDifferentAddress() {
       city: this.currselectedCityLabel,
       state: this.currselectedStateLabel,
       isPreferredAddress: this.isDifferentAddress == true ? 1 : 0,
-      isMailingAddress: this.currentMailingFlag,
+      isMailingAddress: this.isDifferentAddress  == true ? 1 : 0,
       zipCode: form.value.currpincode,
       country: 'India'
     };
@@ -233,7 +235,7 @@ selectDifferentAddress() {
       addresses: this.isDifferentAddress
         ? [permanentAddress, currentAddress, otherAddress]
         : [permanentAddress, currentAddress]
-    
+
 
     };
     console.log("fd-------", kycPayload)
@@ -244,6 +246,9 @@ selectDifferentAddress() {
         dob: kycPayload.dob
       })
     );
+
+    console.log("this.files----",this.files);
+    
     const fd = new FormData();
 
     // text fields
@@ -253,8 +258,8 @@ selectDifferentAddress() {
     if (this.files.aadharback) fd.append('aadharBackFile', this.files.aadharback);
     if (this.files.passport) fd.append('passportFile', this.files.passport);
     fd.append('custId', custid);
-    if (this.files.utility) {
-      fd.append('utilityBillFile', this.files.utility);
+    if (this.files.secaddress) {
+      fd.append('utilityBillFile', this.files.secaddress);
     }
 
 
@@ -262,8 +267,9 @@ selectDifferentAddress() {
     this.addcustomerservice.uploadkycdocuments(fd).subscribe({
       next: res => {
         console.log("KYC uploaded", res);
-
-        this.kycid.emit(res.ncId);
+        this.ncid.emit(res.ncId);
+        this.kycid.emit(res.kycId);
+        this.loanservice.setKycId(res.kycId);
         this.nextStep.emit();
       },
       error: err => {
@@ -277,25 +283,25 @@ selectDifferentAddress() {
   onFileChange(result: UploadResult, key: string) {
 
     if (!result.file) {
-       this.uploadedFiles[key] = null;
+      this.uploadedFiles[key] = null;
       return;
     }
 
     this.files[key] = result.file;
-    this.uploadedFiles[key] = result.file ;
+    this.uploadedFiles[key] = result.file;
 
   }
 
- get allRequiredFilesUploaded(): boolean {
+  get allRequiredFilesUploaded(): boolean {
 
-  let docsToCheck = [...this.requiredDocs];
+    let docsToCheck = [...this.requiredDocs];
 
-  if (this.addressType === 'different') {
-    docsToCheck.push('secaddress');
+    if (this.addressType === 'different') {
+      docsToCheck.push('secaddress');
+    }
+
+    return docsToCheck.every(k => !!this.uploadedFiles[k]);
   }
-
-  return docsToCheck.every(k => !!this.uploadedFiles[k]);
-}
 
   permailcheck(event: any) {
     console.log("--permant", event);
@@ -331,11 +337,11 @@ selectDifferentAddress() {
     { value: 'voterID', label: 'Voter ID' }
   ];
 
-  onSelectionChange(value: string) {
+  onSelectionChange(value: any) {
     console.log('Selected:1', value);
   }
 
- 
+
 
   states() {
     this.main.getIndianstates().subscribe((res: any) => {
@@ -350,20 +356,20 @@ selectDifferentAddress() {
     });
   }
 
-  selectPerState(id: string) {
-  
+  selectPerState(id: any) {
+
     const found = this.stateOptions.find(s => s.value === id);
     this.perselectedStateLabel = found?.label ?? '';
-    
-    this.perCitySelectedOption = null;
-  this.perselectedCityId = '';
-  this.perselectedCityLabel = '';
 
-  this.cityOptions = [];  
+    this.perCitySelectedOption = null;
+    this.perselectedCityId = '';
+    this.perselectedCityLabel = '';
+
+    this.cityOptions = [];
     this.loadPerCities(id);
   }
 
-  loadPerCities(id: string) {
+  loadPerCities(id: any) {
     this.main.getIndianstatescities(id).subscribe((res: any) => {
       const list = res.data ?? res;
 
@@ -374,26 +380,26 @@ selectDifferentAddress() {
     });
   }
 
-  selectPerCity(id: string) {
+  selectPerCity(id: any) {
 
     const found = this.cityOptions.find(c => c.value === id);
     this.perselectedCityLabel = found?.label ?? '';
   }
 
-  selectCurrState(id: string) {
+  selectCurrState(id: any) {
     const found = this.currstateOptions.find(s => s.value === id);
     this.currselectedStateLabel = found?.label ?? '';
 
-      this.currCitySelectedOption = null;
-  this.currselectedCityId = '';
-  this.currselectedCityLabel = '';
+    this.currCitySelectedOption = null;
+    this.currselectedCityId = '';
+    this.currselectedCityLabel = '';
 
-  this.currcityOptions = [];
+    this.currcityOptions = [];
 
     this.loadCurrCities(id);
   }
 
-  loadCurrCities(id: string) {
+  loadCurrCities(id: any) {
     this.main.getIndianstatescities(id).subscribe((res: any) => {
       const list = res.data ?? res;
 
@@ -404,7 +410,7 @@ selectDifferentAddress() {
     });
   }
 
-  selectCurrCity(id: string) {
+  selectCurrCity(id: any) {
     const found = this.currcityOptions.find(c => c.value === id);
     this.currselectedCityLabel = found?.label ?? '';
   }

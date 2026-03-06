@@ -87,14 +87,14 @@
                 <!-- course type -->
                 <div class="col-lg-6 col-sm-12 mt-20">
                     <app-dropdown [options]="selectcourse" [placeholder]="'Select '+coursetype" [required]="true"
-                         (selectedValueChange)="selectedcoursetype($event)"  [avatarUrl]="avatarUrl"
+                         (selectedValueChange)="selectedcoursetype($event)"  [avatarUrl]="avatarUrl" 
                         formControlName="coursetype" [hasAvatar]="hasAvatar" [label]="coursetype">
                     </app-dropdown>
                 </div>
                 <!-- course name -->
                 <div class="col-lg-6 col-sm-12 mt-20">
                     <app-dropdown [options]="selectcoursename" [placeholder]="'Select '+coursename" [required]="true"
-                        (selectedValueChange)="registerForm.get('coursename')?.setValue($event)" [avatarUrl]="avatarUrl"
+                        (selectedValueChange)="selectedCoursename($event)" [avatarUrl]="avatarUrl"
                         formControlName="coursename" [hasAvatar]="hasAvatar" [label]="coursename">
                     </app-dropdown>
                 </div>
@@ -166,8 +166,8 @@
                 <div class="col-lg-4  d-flex justify-content-end">
                     <app-buttons type="button" label="Back" class="btn btncustomClass" [outline]="true" (click)="back()">
                     </app-buttons>
-                    <app-buttons type="button" label="Next" class="btn btncustomClass" color="primary" (click)="next()" [disabled]="!registerForm.valid">
-                    </app-buttons>
+                     <!-- <app-buttons type="button" label="Next" class="btn btncustomClass" color="primary" (click)="next1()" ></app-buttons> -->
+                    <app-buttons type="button" label="Next" class="btn btncustomClass" color="primary" (click)="next()" [disabled]="!registerForm.valid"> </app-buttons>
                   
                 </div>
             </div>

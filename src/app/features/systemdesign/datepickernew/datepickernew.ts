@@ -27,6 +27,7 @@ import { ControlValueAccessor, NG_VALUE_ACCESSOR, FormsModule } from '@angular/f
 export class Datepickernew {
 selectedDate :Date | null = null;
  @Input() label: string = '';
+  @Input() disabled: boolean = false;
 
  onChange = (_: any) => {};
   onTouched = () => {};
@@ -44,7 +45,7 @@ selectedDate :Date | null = null;
   }
 
   setDisabledState(isDisabled: boolean): void {
-    // optional if needed
+    this.disabled = isDisabled; 
   }
 
   onDateChange(val: Date | null) {

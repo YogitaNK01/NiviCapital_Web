@@ -88,7 +88,7 @@ export class PiData implements OnInit {
   get isEditable() {
     return this.mode === 'edit' || this.mode === 'add';
   }
-  onSelectionChange(value: string) {
+  onSelectionChange(value: any) {
     console.log("dropdown--", value);
 
 

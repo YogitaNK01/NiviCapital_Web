@@ -73,7 +73,7 @@ trackByKey(index: number, field: any) {
     return field.key;
   }
 
-   onSelectionChange(value: string) {
+   onSelectionChange(value: any) {
     console.log("dropdown--", value);
 
 

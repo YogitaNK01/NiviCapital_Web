@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { Buttons } from '../../../systemdesign/buttons/buttons';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { Loanstepperservice } from '../../../../core/service/loanstepperservice';
 
 @Component({
@@ -13,9 +13,20 @@ import { Loanstepperservice } from '../../../../core/service/loanstepperservice'
 })
 export class LoanInfo implements OnInit {
 
-  constructor(private router: Router,private stepperService:Loanstepperservice) { }
+  
+  applicantId: string = '';
+  applicationId: string = '';
+
+  constructor(private router: Router,private stepperService:Loanstepperservice,private route: ActivatedRoute) { }
   ngOnInit(): void {
-   
+   this.route.queryParams.subscribe(params => {
+      if (params['applicantId']) {
+        this.applicantId = params['applicantId'];
+        this.applicationId = params['applicationId'];
+
+        this.stepperService.setLoanId(this.applicantId ,this.applicationId);
+      }
+    });
   }
   back(){
     

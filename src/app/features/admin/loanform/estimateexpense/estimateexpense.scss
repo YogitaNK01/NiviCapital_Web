@@ -2,10 +2,23 @@
 @use 'typography' as *;
 @use 'common' as *;
 
+.sectiondata{
+border-radius:$border_radius_s;
+border: 1px solid $neutral-300;
+background:$bg;
 
+height: 69px;
+padding: 0 4px 0 20px;
+align-items: center;
+flex-shrink: 0;
+align-self: stretch;
+}
 
 .mt-20{
-    margin-top: $spacing_9;;
+    margin-top: $spacing_9;
+}
+.mt-40{
+    margin-top: $spacing_18;
 }
 .blue-text{
     color:$secondary-text;
@@ -14,10 +27,10 @@
 
 .hrclass{
     background: $neutral-300;
-    margin: 30px 0
+    margin: 10px 0
 }
 
-.accordion{
+.accordion-item {
     //  min-height: auto;
     border-radius: $border_radius_m;
   border: $border_1 solid $neutral-300;
@@ -31,8 +44,52 @@
 .btncustomClass{
      width: auto !important;
   min-width: 178px;
-  max-width: 200px;
+  // max-width: 300px;
   padding: 2px 3px;
   height: 52px;
 }
 
+.country {
+  display: flex;
+  align-items: center;
+  gap: $spacing_11;
+  font-weight: 400;
+  margin: 2rem 0;
+  border-radius: var(--border-radius-border-radius-s, 8px);
+  background: var(--system-background-surface, #F5F5F5);
+  width: 368px;
+  justify-content: center;
+  gap: $spacing_4;
+
+  @media (max-width: 480px) {
+    width: 100%;
+    margin: 1rem 0;
+    gap: 0;
+  }
+}
+
+.flag {
+  display: flex;
+  padding: $spacing_7 $spacing_4;
+  align-items: center;
+  gap: $spacing_4;
+  flex: 1 0 0;
+
+  @media (max-width: 480px) {
+    padding: $spacing_5
+  }
+
+}
+
+.line {
+  width: 30px;
+  height: 1px;
+  transform: rotate(-90deg);
+  flex-shrink: 0;
+  background: $neutral_border_2;
+
+  @media (max-width: 480px) {
+    display: none;
+
+  }
+}

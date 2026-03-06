@@ -1,4 +1,5 @@
-@if (label) {<div class="dropdown-label1 all-label ">{{ label }}<span class="text-danger" *ngIf="required">*</span></div>}
+@if (label) {<div class="dropdown-label1 all-label ">{{ label }}<span class="text-danger" *ngIf="required">*</span>
+</div>}
 
 <div class="dropdown-container" [class.custom-style]="customStyle">
 
@@ -7,91 +8,89 @@
 
     <!-- Avatar -->
     @if (hasAvatar) {
-      <img [src]="avatarUrl" alt="User Avatar" class="avatar" />
+    <img [src]="avatarUrl" alt="User Avatar" class="avatar" />
     }
 
     <!-- Label + Subtext -->
     @if (showSubtext && subtext) {
-      <div class="label-container">
-        <div class="label text-common profilelabel">
-          {{ selectedLabeldata }}
-        </div>
-        <div class="subtext text-secondary">
-          {{ subtext }}
-        </div>
+    <div class="label-container">
+      <div class="label text-common profilelabel">
+        {{ selectedLabeldata }}
       </div>
+      <div class="subtext text-secondary">
+        {{ subtext }}
+      </div>
+    </div>
     } @else {
-      <div class="label-container">
-        <div class="label text-common Showtext">
-          {{ selectedLabeldata }}
-        </div>
+    <div class="label-container">
+      <div class="label text-common Showtext">
+        {{ selectedLabeldata }}
       </div>
+    </div>
     }
 
     <!-- Arrow -->
     <div class="arrow">
-      <img
-        [src]="isOpen
+      <img [src]="isOpen
           ? '/assets/images/icons/arrow-up.svg'
-          : '/assets/images/icons/arrow-down.svg'"
-        alt="Arrow"
-        class="dropdown-arrow"
-        width="20"
-        height="20" />
+          : '/assets/images/icons/arrow-down.svg'" alt="Arrow" class="dropdown-arrow" width="20" height="20" />
     </div>
   </div>
 
   <!-- Dropdown List -->
   @if (isOpen) {
-    <div class="dropdown-list dropdown-listdata">
+  <div class="dropdown-list dropdown-listdata">
 
-      <!-- Search -->
-      @if (searchable) {
-        <div class="search-box">
-          <img
-            src="/assets/images/icons/search-normal.svg"
-            alt="Search"
-            class="search-icon" />
+    <!-- Search -->
+    @if (searchable) {
+    <div class="search-box">
+      <img src="/assets/images/icons/search-normal.svg" alt="Search" class="search-icon" />
 
-          <input
-            type="text"
-            [(ngModel)]="searchTerm"
-            placeholder="Search..."
-            class="search-input" />
+      <input type="text" [(ngModel)]="searchTerm" placeholder="Search..." class="search-input" />
 
-          @if (searchTerm) {
-            <img
-              src="/assets/images/icons/close.svg"
-              alt="Clear"
-              class="clear-icon"
-              (click)="searchTerm = ''" />
-          }
-        </div>
-      }
-
-      <!-- Options -->
-      @for (option of filteredOptions; track option.value; let last = $last) {
-        <div
-          class="dropdown-item"
-          (click)="!option.disabled && selectOption(option.value); $event.stopPropagation()"
-          [class.no-border]="last"
-[class.disabled]="option.disabled">
-          @if (option.icon && option.icon.trim() !== '') {
-            <img
-              [src]="option.icon"
-              class="item-icon" />
-          }
-
-          <span>{{ option.label }}</span>
-        </div>
-      }
-
-      <!-- No Results -->
-      @if (filteredOptions.length === 0) {
-        <div class="no-results">
-          No matching results
-        </div>
+      @if (searchTerm) {
+      <img src="/assets/images/icons/close.svg" alt="Clear" class="clear-icon" (click)="searchTerm = ''" />
       }
     </div>
+    }
+
+    <!-- Select All -->
+    @if (multiSelect) {
+    <div class="dropdown-item select-all">
+      <div class="mx-2"><input type="checkbox" [checked]="isAllSelected()" (change)="toggleSelectAll($event)" />
+      <span class="text-common mx-2">Select All</span></div>
+    
+ <div class=""><span class="text-common clear-all" (click)="clearAll($event)">Clear All</span></div>
+      
+    </div>
+     <hr class="hrclass">
+    }
+
+
+    <!-- Options -->
+    @for (option of filteredOptions; track option.value; let last = $last) {
+    <div class="dropdown-item" (click)="!option.disabled &&  (multiSelect ? toggleSelection(option,$event) : selectOption(option.value))"
+      [class.no-border]="last" [class.disabled]="option.disabled">
+      
+      @if (option.icon && option.icon.trim() !== '') {
+      <img [src]="option.icon" class="item-icon" />
+      }
+
+      <!-- Checkbox -->
+      @if (multiSelect) {
+      <input type="checkbox" [checked]="selectedValues.includes(option.value)" (click)="toggleSelection(option, $event)" class="text-common mx-2" />
+      }
+
+      <span class="text-body-1">{{ option.label }}</span>
+    </div>
+    }
+
+    <!-- No Results -->
+    @if (filteredOptions.length === 0) {
+    <div class="no-results">
+      No matching results
+    </div>
+    }
+  </div>
   }
 </div>

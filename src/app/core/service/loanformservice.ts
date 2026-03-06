@@ -18,80 +18,117 @@ export interface ApiResponse<T> {
 })
 export class Loanformservice {
   form!: FormGroup;
- // private baseUrl = environment.apiBaseUrl;
+  // private baseUrl = environment.apiBaseUrl;
   private baseUrl = "/nivicapstage/api";
 
+  kycdetailsID: any;
 
   constructor(private http: HttpClient) { }
 
-//genral info apis
+  //genral info apis
   getOccupations(): Observable<ApiResponse<any>> {
     return this.http.get<ApiResponse<any>>(
       `${this.baseUrl}/v1/masters/occupations`,
-      
+
     );
   }
 
-   getEducation(): Observable<ApiResponse<any>> {
+  getEducation(): Observable<ApiResponse<any>> {
     return this.http.get<ApiResponse<any>>(
       `${this.baseUrl}/v1/masters/qualifications`,
-      
+
     );
   }
 
   getlendingpartners(): Observable<ApiResponse<any>> {
     return this.http.get<ApiResponse<any>>(
       `${this.baseUrl}/v1/masters/lending-partners`,
-      
+
     );
   }
 
-   getCoursetype(id: string): Observable<ApiResponse<any>> {
+  getCoursetype(id: string): Observable<ApiResponse<any>> {
     return this.http.get<ApiResponse<any>>(
       `${this.baseUrl}/v1/masters/course-types/${id}`,
-      
+
     );
   }
 
-   getCourseName(id: string, type: string): Observable<ApiResponse<any>> {
+  getCourseName(id: string, type: string): Observable<ApiResponse<any>> {
     return this.http.get<ApiResponse<any>>(
       `${this.baseUrl}/v1/masters/courses/${id}/${type}`,
-      
+
     );
   }
 
   // Australian states and cities api 
 
-   getAustralianstates(): Observable<ApiResponse<any>> {
+  getAustralianstates(): Observable<ApiResponse<any>> {
     return this.http.get<ApiResponse<any>>(
       `${this.baseUrl}/v1/masters/states`,
-      
+
     );
   }
 
-  
-   getAustralianstatescities(id: string): Observable<ApiResponse<any>> {
+
+  getAustralianstatescities(id: string): Observable<ApiResponse<any>> {
     return this.http.get<ApiResponse<any>>(
       `${this.baseUrl}/v1/masters/universities/${id}`,
-      
+
     );
   }
 
+  // save general info api
+  submitGenralInfo(payload: any, id: string): Observable<ApiResponse<any>> {
+    return this.http.post<ApiResponse<any>>(
+      `${this.baseUrl}/v1/los/applications/${id}/general-info`,
+      payload
+    );
+  }
 
-   submitGenralInfo(payload: any,id: string): Observable<ApiResponse<any>> {
-      return this.http.post<ApiResponse<any>>(
-        `${this.baseUrl}/v1/los/applications/${id}/general-info`,
-        payload
-      );
-    }
+  //additional info api
 
-       submitAdditionalInfo(payload: any,id: string): Observable<ApiResponse<any>> {
-      return this.http.post<ApiResponse<any>>(
-        `${this.baseUrl}/v1/los/applications/${id}/personal-info`,
-        payload
-      );
-    }
+  //upload user profile photo
+  uploadPhoto(payload: any): Observable<ApiResponse<any>> {
+    return this.http.post<ApiResponse<any>>(
+      `${this.baseUrl}/v1/files/upload/profile-picture`,
+      payload
+    );
+  }
 
+  submitAdditionalInfo(payload: any, id: string): Observable<ApiResponse<any>> {
+    return this.http.post<ApiResponse<any>>(
+      `${this.baseUrl}/v1/los/applications/${id}/personal-info`,
+      payload
+    );
+  }
+
+  //save kyc info api
+
+  setKycId(id: string) {
+    this.kycdetailsID = id;
+
+  }
+
+
+  getKycId() {
+    return this.kycdetailsID;
+  }
+
+  uploadpassport(data:any,id:string): Observable<ApiResponse<any>> {
+    console.log("service--",data);
+    
+    return this.http.post<ApiResponse<any>>(
+      `${this.baseUrl}/v1/kyc/kyc/${id}/documents`,
+      data
+    );
+  }
+  getKycDetails(id: string): Observable<ApiResponse<any>> {
+    return this.http.get<ApiResponse<any>>(
+      `${this.baseUrl}/v1/los/applications/${id}/kyc`,
+
+    );
+  }
 }
 
 

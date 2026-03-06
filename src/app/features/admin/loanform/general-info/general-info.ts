@@ -80,6 +80,8 @@ export class GeneralInfo implements OnInit {
   selectedStateLabel: string = '';
   selectedUniLabel: string = '';
   selectedcoursetypeLabel: string = '';
+  selectedcourseNameLabel: string = '';
+
 
   applicantId: string = '';
   applicationId: string = '';
@@ -90,7 +92,7 @@ this.route.queryParams.subscribe(params => {
         this.applicantId = params['applicantId'];
         this.applicationId = params['applicationId'];
 
-        this.stepperService.setLoanId(this.applicantId);
+        this.stepperService.setLoanId(this.applicantId ,this.applicationId);
       }
     });
 
@@ -220,7 +222,7 @@ this.route.queryParams.subscribe(params => {
     });
   }
 
-  selectPerState(id: string) {
+  selectPerState(id: any) {
 
     const found = this.Australianstate.find(s => s.value === id);
     this.selectedStateLabel = found?.label ?? '';
@@ -228,7 +230,7 @@ this.route.queryParams.subscribe(params => {
     this.selectuniveristy(id);
   }
 
-  selectuniveristy(id: string) {
+  selectuniveristy(id: any) {
     this.formSvc.getAustralianstatescities(id).subscribe((res: any) => {
       const list = res.data ?? res;
 
@@ -240,7 +242,7 @@ this.route.queryParams.subscribe(params => {
     });
   }
 
-  selecteduniversity(id: string) {
+  selecteduniversity(id: any) {
 
     const found = this.AustralianUniversities.find(s => s.value === id);
     this.selectedUniLabel = found?.label ?? '';
@@ -248,8 +250,9 @@ this.route.queryParams.subscribe(params => {
     this.selectCourseType(id);
   }
 
- selectCourseType(id: string) {
-this.coursetypeId=id;
+
+ selectCourseType(id: any) {
+    this.coursetypeId=id;
     this.formSvc.getCoursetype(id).subscribe((res: any) => {
       const list = res.data ?? res;
 
@@ -259,7 +262,7 @@ this.coursetypeId=id;
   }));
     });
   }
-  selectedcoursetype(id: string) {
+  selectedcoursetype(id: any) {
 
     const found = this.selectcourse.find(s => s.value === id);
     this.selectedcoursetypeLabel = found?.label ?? '';
@@ -278,6 +281,14 @@ this.coursetypeId=id;
         code: c.courseCode
       }));
     });
+  }
+
+    selectedCoursename(id: any) {
+
+    const found = this.selectcoursename.find(s => s.value === id);
+    this.selectedcourseNameLabel = found?.label ?? '';
+    // this.selectcourse = [];
+    // this.selectCourseType(id);
   }
 
  calculateEndDate() {
@@ -325,6 +336,7 @@ formatDate(date: any): string | null {
   back() {
     this.stepperService.previous();
   }
+   next1() { this.stepperService.next();}
   next() {
 
     let formdata = this.registerForm.value;
@@ -339,7 +351,7 @@ formatDate(date: any): string | null {
 
   "stateId": formdata.state,
   "universityId":formdata.university,
-  "course": formdata.coursetype,
+  "courseId": formdata.coursename,
   "courseDuration": formdata.courseduration,
   "courseStartDate": this.formatDate(formdata.coursestartdate),
    
@@ -354,8 +366,7 @@ this.formSvc.submitGenralInfo(input,this.applicationId).pipe().subscribe( {
      next: (res) => {
       console.log("resp---",res);
       if(res.status == "success"){
-     // this.stepperService.setStepData('educationDetails', this.registerForm.value);
-    this.stepperService.next();
+     this.stepperService.next();
       }
        
        },
@@ -366,9 +377,7 @@ this.formSvc.submitGenralInfo(input,this.applicationId).pipe().subscribe( {
 });
       
 
-    // this.stepperService.setStepData('educationDetails', this.registerForm.value);
-
-    // this.stepperService.next();
+  
   }
 
 }

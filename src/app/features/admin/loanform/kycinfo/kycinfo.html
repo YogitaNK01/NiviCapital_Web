@@ -1,4 +1,5 @@
-<div class="base-layout">
+
+<div class="base-layout" >
   <form [formGroup]="kycdocumentsForm" (ngSubmit)="submit()" id="kycForm" class="w-100">
 
     <div class=" accordion d-flex flex-column gap-4 mb-4">
@@ -56,10 +57,10 @@
 
           <label class="text-label">Aadhaar_Card_front<span class="text-danger">*</span></label>
               <div class="addcust-img-box" name="adhaarfront" >
-                <p class="text-label">Aadhaar.png</p>
+                <p class="text-label">{{aadhaarFrontFileName}}</p>
                 <div class="icons">
-                  <span (click)="viewImage('/assets/images/dashboard/profileimg.webp')"><img src="/assets/images/icons/eyered.svg" alt="view"></span>
-                  <span (click)="downloadImage('/assets/images/dashboard/profileimg.webp')"><img src="/assets/images/icons/import-red.svg" alt="Download"></span>
+                  <span (click)="viewImage(aadhaarFrontUrl)"><img src="/assets/images/icons/eyered.svg" alt="view"></span>
+                  <span (click)="downloadImage(aadhaarFrontUrl,aadhaarFrontFileName)"><img src="/assets/images/icons/import-red.svg" alt="Download"></span>
                 </div>
               </div>
 
@@ -68,10 +69,10 @@
 
           <label class="text-label">Aadhaar_Card_Back<span class="text-danger">*</span></label>
               <div class="addcust-img-box" name="adhaarback"  >
-                <p class="text-label">Aadhaar.png</p>
+                <p class="text-label">{{aadhaarBackFileName}}</p>
                 <div class="icons">
-                  <span (click)="viewImage('/assets/images/dashboard/profileimg.webp')"><img src="/assets/images/icons/eyered.svg" alt="view"></span>
-                  <span (click)="downloadImage('/assets/images/dashboard/profileimg.webp')"><img src="/assets/images/icons/import-red.svg" alt="Download"></span>
+                  <span (click)="viewImage(aadhaarBackUrl)"><img src="/assets/images/icons/eyered.svg" alt="view"></span>
+                  <span (click)="downloadImage(aadhaarBackUrl,aadhaarBackFileName)"><img src="/assets/images/icons/import-red.svg" alt="Download"></span>
                 </div>
               </div>
 
@@ -85,11 +86,11 @@
         </div>
         <div class="col-lg-6 col-sm-12">
            <label class="text-label">PAN Card<span class="text-danger">*</span></label>
-              <div class="addcust-img-box"  >
-                <p class="text-label">PAN Card.png</p>
+              <div class="addcust-img-box" name="panimg" >
+                <p class="text-label">{{panFileName}}</p>
                 <div class="icons">
-                  <span (click)="viewImage('/assets/images/dashboard/profileimg.webp')"><img src="/assets/images/icons/eyered.svg" alt="view"></span>
-                  <span (click)="downloadImage('/assets/images/dashboard/profileimg.webp')"><img src="/assets/images/icons/import-red.svg" alt="Download"></span>
+                  <span (click)="viewImage(panUrl)"><img src="/assets/images/icons/eyered.svg" alt="view"></span>
+                  <span (click)="downloadImage(panUrl,panFileName)"><img src="/assets/images/icons/import-red.svg" alt="Download"></span>
                 </div>
               </div>
         </div>
@@ -107,10 +108,10 @@
           @if(ispassport){
             <label class="text-label">Passport<span class="text-danger">*</span></label>
               <div class="addcust-img-box"   >
-                <p class="text-label">Passport.png</p>
+                <p class="text-label">{{passportFileName}}</p>
                 <div class="icons">
-                  <span (click)="viewImage('/assets/images/dashboard/profileimg.webp')"><img src="/assets/images/icons/eyered.svg" alt="view"></span>
-                  <span (click)="downloadImage('/assets/images/dashboard/profileimg.webp')"><img src="/assets/images/icons/import-red.svg" alt="Download"></span>
+                  <span (click)="viewImage(passportUrl)"><img src="/assets/images/icons/eyered.svg" alt="view"></span>
+                  <span (click)="downloadImage(passportUrl,passportFileName)"><img src="/assets/images/icons/import-red.svg" alt="Download"></span>
                 </div>
               </div>
           }
@@ -121,7 +122,7 @@
         </div>
 
         <div class="col-lg-6 col-sm-12 mt-20">
-          <app-datepickernew name="dob" label="Date of Birth" [required]="true"
+          <app-datepickernew name="dob" label="Date of Birth" [required]="true" type="date" [disabled]="true"
             formControlName="dob"></app-datepickernew>
         </div>
         </div>
@@ -173,7 +174,7 @@
         </div>
         </div>
          <div class="mailcheck d-flex justify-content-start align-items-center loan-mt-4">
-        <app-checkbox label="Is this the mailing address ?" [checked]="isPermanentMailingChecked"
+        <app-checkbox label="Is this the mailing address ?" formControlName="isperMailingAddress" [disabled]="true"
           ></app-checkbox>
       </div>
 
@@ -184,16 +185,32 @@
     <ng-template #currentaddressTemplate let-i="index">
 
        <div class="row  d-flex  align-items-start pt-4 common-details-box d-flex flex-column">
+          <div class="row mt-20">
+             <div class="addresscheck d-flex justify-content-start align-items-center gap-3">
+        <app-checkbox label="Same as Permanent Address" [checked]="kycdocumentsForm.get('sameAsPermanent')?.value" [disabled]="true"
+      (change)="setSameAddress(true)"></app-checkbox>
+        <label for="sameAddress"></label>
+
+        <app-checkbox label="Different Address" [checked]="!kycdocumentsForm.get('sameAsPermanent')?.value" [disabled]="true"
+      (change)="setSameAddress(false)" ></app-checkbox>
+        <label for="differentAddress"></label>
+      </div>
+          
+           </div>
         <div class="row mt-20">
-           <div class="col-lg-6 col-sm-12 ">
+          @if(otherDocumentFileName){
+             <div class="col-lg-6 col-sm-12 ">
            <label class="text-label">Supporting Document<span class="text-danger">*</span></label>
               <div class="addcust-img-box"   >
-                <p class="text-label">Electricity-bill.png</p>
+                <p class="text-label">{{otherDocumentFileName}}</p>
                 <div class="icons">
-                  <span (click)="viewImage('/assets/images/dashboard/profileimg.webp')"><img src="/assets/images/icons/eyered.svg" alt="view"></span>
-                  <span (click)="downloadImage('/assets/images/dashboard/profileimg.webp')"><img src="/assets/images/icons/import-red.svg" alt="Download"></span>
+                  <span (click)="viewImage(otherDocumentUrl)"><img src="/assets/images/icons/eyered.svg" alt="view"></span>
+                  <span (click)="downloadImage(otherDocumentUrl,otherDocumentFileName)"><img src="/assets/images/icons/import-red.svg" alt="Download"></span>
                 </div>
               </div></div>
+
+          }
+          
         </div>
         <div class="row mt-20">
           <app-inputfield type="text" formControlName="curraddressline1" [required]="true" label="Address Line 1"
@@ -237,7 +254,7 @@
         </div>
         </div>
          <div class="mailcheck d-flex justify-content-start align-items-center loan-mt-4">
-        <app-checkbox label="Is this the mailing address ?" [checked]="isCurrentMailingChecked"
+        <app-checkbox label="Is this the mailing address ?"   formControlName="iscurrMailingAddress" [disabled]="true"
           ></app-checkbox>
       </div>
 
@@ -257,7 +274,7 @@
                 <div class="col-lg-4  d-flex justify-content-end">
                     <app-buttons type="button" label="Back" class="btn btncustomClass" [outline]="true" (click)="back()">
                     </app-buttons>
-                    <app-buttons type="button" label="Next" class="btn btncustomClass" color="primary" (click)="next()">
+                    <app-buttons type="button" label="Next" class="btn btncustomClass" color="primary" (click)="next()" [disabled]=!ispassport>
                     </app-buttons>
                   
                 </div>

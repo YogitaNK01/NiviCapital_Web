@@ -1,5 +1,6 @@
 import { CommonModule,isPlatformBrowser   } from '@angular/common';
-import { AfterViewInit, Component, ElementRef, EventEmitter, Inject, Input, Output, PLATFORM_ID, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, EventEmitter, forwardRef,Inject, Input, Output, PLATFORM_ID, ViewChild } from '@angular/core';
+import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 
 
 @Component({
@@ -7,7 +8,14 @@ import { AfterViewInit, Component, ElementRef, EventEmitter, Inject, Input, Outp
   imports: [CommonModule ],
   templateUrl: './checkbox.html',
   styleUrl: './checkbox.scss',
-  standalone: true
+  standalone: true,
+   providers: [
+    {
+      provide: NG_VALUE_ACCESSOR,
+      useExisting: forwardRef(() => Checkbox),
+      multi: true
+    }
+  ]
 
 })
 export class Checkbox  implements AfterViewInit {
@@ -23,6 +31,9 @@ export class Checkbox  implements AfterViewInit {
 
   @ViewChild('checkboxInput') checkboxInput!: ElementRef<HTMLInputElement>;
 
+    onChange = (_: any) => {};
+  onTouched = () => {};
+  
   constructor(@Inject(PLATFORM_ID) private platformId: Object) {}
 
   ngAfterViewInit() {
@@ -31,6 +42,19 @@ export class Checkbox  implements AfterViewInit {
     }
   }
 
+  writeValue(value: any): void {
+    this.checked = !!value;   // 👈 THIS UPDATES UI
+  }
+
+  registerOnChange(fn: any): void {
+    this.onChange = fn;
+  }
+
+  registerOnTouched(fn: any): void {
+    this.onTouched = fn;
+  }
+
+  setDisabledState?(isDisabled: boolean): void {}
   toggleCheckbox(event: Event) {
     const input = event.target as HTMLInputElement;
     this.checked = input.checked;

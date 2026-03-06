@@ -119,7 +119,7 @@
                 <app-inputfield type="tel" name="phone" [(ngModel)]="prefillPhone" [required]="true"
                   pattern="^[6-9][0-9]{9}$" label="Mobile Number" placeholder="Enter Mobile Number" helpText="Help text"
                   class="w-100" [readonly]="otpVerifiedOk" [maxlength]="10" #phone="ngModel"
-                  (input)="main.restrictInput($event, 'number')" [showPhonePrefix]="true"
+                  (input)="main.restrictInput($event, 'number')" [showPhonePrefix]="true" [showPhonePrefixnumber]="true"
                   [rightButtonText]="!otpsent && !otpVerifiedOk ? 'Send OTP' : ''" (rightButtonClick)="sendOtp()"
                   [state]="otpState">
 
@@ -220,7 +220,7 @@
 
       @if (currentStep === 2) {
       <div class="mobiledetails">
-        <app-uploadkyc (nextStep)="goToStep(3)" (prevstep)="back()" (kycid)="setKycId($event)"></app-uploadkyc>
+        <app-uploadkyc (nextStep)="goToStep(3)" (prevstep)="back()" (ncid)="setKycId($event)"></app-uploadkyc>
       </div>
       }
 

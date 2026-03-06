@@ -282,7 +282,7 @@ allkycstatus = 'All KYC Status';
     this.updatePagedData();
   }
 
-  getkycstatus(value: string): void {
+  getkycstatus(value: any): void {
     const statusMap: { [key: string]: string } = {
       'completed': 'verified',
       'pending': 'pending',
@@ -296,7 +296,7 @@ allkycstatus = 'All KYC Status';
     this.updatePagedData();
   }
 
-  getkyc_type(value: string): void {
+  getkyc_type(value: any): void {
     // Implement type filtering logic
   }
 

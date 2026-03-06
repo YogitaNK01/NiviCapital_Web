@@ -149,7 +149,7 @@ export class Newloan implements OnInit {
     this.selectedRows = rows;
     console.log('Received in Parent:', rows);
   }
-  onSelectionChange(value: string) {
+  onSelectionChange(value: any) {
     console.log('Selected:1', value);
   }
 

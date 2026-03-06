@@ -275,7 +275,7 @@ private loadallusers(): void {
     }
   }
 
-   getkyc_type(value: string): void {
+   getkyc_type(value: any): void {
     // Implement type filtering logic
   }
 

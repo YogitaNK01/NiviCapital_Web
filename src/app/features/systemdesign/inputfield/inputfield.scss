@@ -49,14 +49,19 @@
 }
 
 .input-prefix img {
-  width: 22px;
-  height: 16px;
+  width: 26px;
+  height: 20px;
 }
 .input-field.has-prefix {
-  padding-left: 84px;  
+  padding-left: 84px !important;  
   // border: none;
   // border-radius: 0;
           
+}
+
+
+.has-prefix{
+  padding-left: 70px !important; 
 }
 
 .input-field {

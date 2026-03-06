@@ -12,6 +12,7 @@ export interface DropdownOption {
   label: string;
   icon?: string;
   disabled?: boolean;
+  checked?: boolean;
 }
 
 @Component({
@@ -52,19 +53,23 @@ export class Dropdown {
 
   @Output() selectionChange = new EventEmitter<any>();
 
+  @Input() multiSelect = false;
+  selectedValues: any[] = [];
 
   // Two-way binding
-  @Input() selectedValue: string = '';
-  @Output() selectedValueChange = new EventEmitter<string>();
+  // @Input() selectedValue: string = '';
+  // @Output() selectedValueChange = new EventEmitter<string>();
+  @Input() selectedValue!: string | string[];
+  @Output() selectedValueChange = new EventEmitter<string | string[]>();
 
   @Input() customStyle: boolean = false;
-  
-   value: any = null;
-selectedLabeldata = '';
 
-   private onChange = (value: string) => {};
-   private onTouched = () => {};
-  
+  value: any = null;
+  selectedLabeldata = '';
+
+ private onChange = (value: any) => {};
+  private onTouched = () => { };
+
   toggleDropdown() {
     // console.log("data---------------")
     this.isOpen = !this.isOpen;
@@ -95,17 +100,19 @@ selectedLabeldata = '';
   }
 
 
-
-  // Called by Angular
-  writeValue(value: string): void {
-    this.value = value || '';
+writeValue(value: string | string[]): void {
+  if (Array.isArray(value)) {
+    this.selectedValues = value;
+  } else {
+    this.value = value;
     this.selectedLabeldata = this.getLabelFromValue(value);
   }
+}
 
   getLabelFromValue(value: any): string {
-  const match = this.options?.find(opt => opt.value === value);
-  return match ? match.label : this.placeholder || '';
-}
+    const match = this.options?.find(opt => opt.value === value);
+    return match ? match.label : this.placeholder || '';
+  }
 
   registerOnChange(fn: any): void {
     this.onChange = fn;
@@ -124,9 +131,62 @@ selectedLabeldata = '';
     this.value = val;
     this.onChange(val);
     this.onTouched();
+
+    const selected = this.options.find(o => o.value === val);
+    this.selectedLabeldata = selected?.label || this.placeholder;
+
     this.selectedValueChange.emit(val);
 
     this.selectedLabeldata = this.getLabelFromValue(val);
     this.isOpen = false;
+  }
+
+
+  toggleSelection(option: any, event: any) {
+    event.stopPropagation();
+
+    const index = this.selectedValues.indexOf(option.value);
+
+    // if (index > -1) {
+    //   this.selectedValues.splice(index, 1);
+    // } else {
+    //   this.selectedValues.push(option.value);
+    // }
+
+     if (index > -1) {
+    this.selectedValues = this.selectedValues.filter(v => v !== option.value);
+  } else {
+    this.selectedValues = [...this.selectedValues, option.value];
+  }
+    // console.log('Selected Values:', this.selectedValues);
+    this.onChange(this.selectedValues);
+    this.selectedValueChange.emit(this.selectedValues);
+   
+
+  }
+
+  toggleSelectAll(event: any) {
+    event.stopPropagation();
+
+    if (event.target.checked) {
+      this.selectedValues = [...this.options.map(o => o.value)];
+    } else {
+      this.selectedValues = [];
+    }
+    this.onChange(this.selectedValues);
+    this.selectedValueChange.emit(this.selectedValues);
+  }
+
+  clearAll(event: any) {
+    event.stopPropagation();
+    this.selectedValues = [];
+    this.onChange(this.selectedValues);
+    this.selectedValueChange.emit(this.selectedValues);
+  }
+
+  isAllSelected() {
+    this.onChange(this.selectedValues);
+    return this.options.length &&
+         this.selectedValues.length === this.options.length;
   }
 }

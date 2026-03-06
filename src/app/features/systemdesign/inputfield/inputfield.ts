@@ -29,7 +29,7 @@ export class Inputfield implements ControlValueAccessor {
 //  @Input() label: string = '';
   @Input() placeholder: string = '';
   @Input() helpText: string = '';
-  @Input() type: 'text' | 'password' | 'email' | 'search' | 'tel' = 'text';
+  @Input() type: 'text' | 'password' | 'email' | 'search' | 'tel' | 'flag' = 'text';
   @Input() state: 'default' | 'error' | 'success' = 'default';
   @Input() showSearch: boolean = false;
   @Input() showInfo: boolean = false;
@@ -40,7 +40,10 @@ export class Inputfield implements ControlValueAccessor {
   @Input() maxlength!: number;
 @Input() uppercase: boolean = false;
 
-  @Input() showPhonePrefix: boolean = false;  //+91
+  @Input() showaustralianflagPrefix: boolean = false;  //flag
+
+  @Input() showPhonePrefix: boolean = false;  //flag
+   @Input() showPhonePrefixnumber: boolean = false;  //+91
 @Input() rightButtonText: string = '';  //sendotp btn
 @Input() rightButtonDisabled: boolean = false;
   @Input() readonly: boolean = false;  

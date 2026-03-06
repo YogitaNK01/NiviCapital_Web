@@ -78,7 +78,7 @@ private resizeHandler = () => this.setChartWidth();
     { label: 'Insurance', value: 'json', icon: '/assets/images/icons/note.svg' },
     { label: 'Others', value: 'others', icon: '/assets/images/icons/note.svg' }
   ];
-  onSelectionChange2(value: string) {
+  onSelectionChange2(value: any) {
     // Dropdown selection logic here
   }
 

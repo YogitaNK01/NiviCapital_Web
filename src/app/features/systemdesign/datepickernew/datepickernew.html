@@ -10,6 +10,7 @@
   <mat-form-field appearance="outline" class="w-100">
     <input 
       matInput
+       [disabled]="disabled"
       [matDatepicker]="picker"
       [(ngModel)]="selectedDate"
       (ngModelChange)="onDateChange($event)"
