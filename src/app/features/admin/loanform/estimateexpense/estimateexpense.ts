@@ -36,6 +36,7 @@ export class Estimateexpense {
 
   @Input() avatarUrl = '';
   @Input() hasAvatar = false;
+  allcatagory= "Select from dropdown"
   placeholderval = "Select from dropdown"
   placeholderfrequcyval = ""
   labelval = "Select Categories"
@@ -79,9 +80,23 @@ export class Estimateexpense {
   searchby: string = 'Select by';
   searchedvalue: any;
 
+  applicantId:any;
+  applicationId:any
   constructor(private fb: FormBuilder, private stepperService: Loanstepperservice, private cd: ChangeDetectorRef, private loanformservice: Loanformservice, private route: ActivatedRoute) { }
 
   ngOnInit(): void {
+
+     this.route.queryParams.subscribe(params => {
+
+      const applicantId = params['applicantId'];
+      const applicationId = params['applicationId'];
+
+      // Store in variables if needed
+      this.applicantId = applicantId;
+      this.applicationId = applicationId;
+
+    });
+
     this.expenseForm = this.fb.group({
 
       tutionfees: ['', Validators.required],
@@ -103,50 +118,6 @@ export class Estimateexpense {
     });
   }
 
-  get livingexpenses(): FormArray {
-  return this.expenseForm.get('livingexpenses') as FormArray;
-}
-
-createExpense(category: string): FormGroup {
-  return this.fb.group({
-    category: [category],
-    securityfrequency: ['', Validators.required],
-    amountINR: ['', Validators.required],
-    amountAUD: ['', Validators.required],
-    description: ['']
-  });
-}
-
-addCategoryExpense(category: string) {
-  this.livingexpenses.push(this.createExpense(category));
-}
-
-addmore(category: string) {
-  this.livingexpenses.push(this.createExpense(category));
-}
-
-
-  get miscexpenses(): FormArray {
-  return this.expenseForm.get('miscexpenses') as FormArray;
-}
-
-createmiscExpense(category: string): FormGroup {
-  return this.fb.group({
-    category: [category],
-    securityfrequency: ['', Validators.required],
-    amountINR: ['', Validators.required],
-    amountAUD: ['', Validators.required],
-    description: ['']
-  });
-}
-
-addmiscCategoryExpense(category: string) {
-  this.livingexpenses.push(this.createmiscExpense(category));
-}
-
-miscaddmore(category: string) {
-  this.livingexpenses.push(this.createmiscExpense(category));
-}
 
   toggle(index: number) {
     if (this.openIndex.includes(index)) {
@@ -158,23 +129,25 @@ miscaddmore(category: string) {
   }
 
   submit() {
-
   }
 
   calculateINRtoAUD() {
     const tutionfeesINR = this.expenseForm.get('tutionfees')?.value;
-    
-    if (!tutionfeesINR) return;
 
-    const tutionfeesAUDValue = tutionfeesINR / 62.5;
-  
+    const cleanINR = Number(tutionfeesINR.toString().replace(/,/g, ''));
+
+    if (!cleanINR) return;
+
+    const tutionfeesAUDValue = cleanINR / 62.5;
+
     this.expenseForm.patchValue(
-    { tutionfeesAUD: tutionfeesAUDValue },
-    { emitEvent: false }
-  );
+      { tutionfeesAUD: tutionfeesAUDValue },
+      { emitEvent: false }
+    );
 
   }
-  livingexp() {
+
+   livingexp() {
     this.loanformservice.getlivingexp().subscribe((res: any) => {
       const list = res.data ?? res;
 
@@ -187,23 +160,8 @@ miscaddmore(category: string) {
     });
   }
 
-  oncatagoryChange(values: string | string[]): void {
-    this.selectedCategories = Array.isArray(values) ? values : [values];
-    console.log("Selected:", this.selectedCategories);
-    if (this.selectedCategories.length === this.searchOptions.length) {
-      this.openIndex = this.accordions.map((_, i) => i);
-    }
 
-  }
-  getCategoryLabel(value: any): string {
-    const found = this.livCatagories.find(c => c.value == value);
-    return found?.label || '';
-  }
 
-  onfrequencyChange(values: any, key: any) {
-    this.selectedCategories = values;
-    console.log("Selected:", values);
-  }
 
   miscgexp() {
     this.loanformservice.getmiscellaneousexp().subscribe((res: any) => {
@@ -218,12 +176,123 @@ miscaddmore(category: string) {
     });
   }
 
+  // =======================================================================================================
+  get livingexpenses(): FormArray {
+    return this.expenseForm.get('livingexpenses') as FormArray;
+  }
+
+  createExpense(category: string): FormGroup {
+    const group = this.fb.group({
+      category: [category],
+      securityfrequency: ['Monthly', Validators.required],
+      amountINR: ['', Validators.required],
+      amountAUD: ['', Validators.required],
+      description: ['']
+    });
+    group.get('amountINR')?.valueChanges.subscribe((val) => {
+      if (!val) return;
+
+      const cleanINR = Number(val.toString().replace(/,/g, ''));
+
+      if (!cleanINR) return;
+
+      const aud = cleanINR / 62.5;
+
+      group.patchValue(
+        { amountAUD: aud.toString() },
+        { emitEvent: false }
+      );
+
+
+    });
+
+    return group;
+
+  }
+
+  addCategoryExpense(category: string) {
+    this.livingexpenses.push(this.createExpense(category));
+  }
+
+  addmore(category: string) {
+    this.livingexpenses.push(this.createExpense(category));
+  }
+  oncatagoryChange(values: string | string[]): void {
+
+    this.selectedCategories = Array.isArray(values) ? values : [values];
+
+    this.handleCategoryChange(
+      values,
+      this.livingexpenses,
+      (category) => this.addCategoryExpense(category)
+    );
+
+  }
+  getCategoryLabel(value: any): string {
+    const found = this.livCatagories.find(c => c.value == value);
+    return found?.label || '';
+  }
+
+  onfrequencyChange(values: any, key: any) {
+    this.selectedCategories = values;
+    // console.log("Selected:", values);
+  }
+
+
+// --------------------------------------------------------------------------------
+
+  get miscexpenses(): FormArray {
+    return this.expenseForm.get('miscexpenses') as FormArray;
+  }
+
+
+  createmiscExpense(category: string): FormGroup {
+    const group = this.fb.group({
+      category: [category],
+      securityfrequency: ['Monthly', Validators.required],
+      amountINR: ['', Validators.required],
+      amountAUD: ['', Validators.required],
+      description: ['']
+    });
+
+    group.get('amountINR')?.valueChanges.subscribe((val) => {
+      if (!val) return;
+
+      const cleanINR = Number(val.toString().replace(/,/g, ''));
+
+      if (!cleanINR) return;
+
+      const aud = cleanINR / 62.5;
+
+      group.patchValue(
+        { amountAUD: aud.toString() },
+        { emitEvent: false }
+      );
+
+
+    });
+
+    return group;
+  }
+
+  addmiscCategoryExpense(category: string) {
+    this.miscexpenses.push(this.createmiscExpense(category));
+  }
+
+  miscaddmore(category: string) {
+    this.miscexpenses.push(this.createmiscExpense(category));
+  }
+
+
   onmiscatagoryChange(values: string | string[]): void {
+
     this.selectedmisCategories = Array.isArray(values) ? values : [values];
-    console.log("Selected:", this.selectedmisCategories);
-    if (this.selectedmisCategories.length === this.searchOptions.length) {
-      this.openIndex = this.accordions.map((_, i) => i);
-    }
+
+    this.handleCategoryChange(
+      values,
+      this.miscexpenses,
+      (category) => this.addmiscCategoryExpense(category)
+    );
 
   }
   getmisCategoryLabel(value: any): string {
@@ -232,8 +301,8 @@ miscaddmore(category: string) {
   }
 
   onfrequencyChange1(values: any, key: any) {
-    this.selectedCategories = values;
-    console.log("Selected:", values);
+    this.selectedmisCategories = values;
+    // console.log("Selected:", values);
   }
 
   isChecked(category: string): boolean {
@@ -241,15 +310,102 @@ miscaddmore(category: string) {
   }
 
   onValueChange(value: string) {
-    console.log('Selected:2', value);
+    // console.log('Selected:2', value);
   }
 
- 
+// =====================================================================================
+  //format amount 2000000 to 20,00,000
+  formatAmount(event: any, controlName: string, index?: number,type?: 'living' | 'misc') {
+
+    let value = event.target.value;
+
+    if (!value) return;
+
+    value = value.replace(/,/g, '');
+    value = value.replace(/\D/g, '');
+
+    const formatted = this.formatIndian(value);
+    if (index !== undefined) {
+       const array = type === 'misc' ? this.miscexpenses : this.livingexpenses;
+
+      const group = array.at(index) as FormGroup;
+      group.get(controlName)?.setValue(formatted, { emitEvent: false });
+      // console.log("Row Updated:", group.value);
+    }
+    else {
+      this.expenseForm.get(controlName)?.setValue(formatted, { emitEvent: false });
+
+      // console.log("Root Updated:", this.expenseForm.get(controlName)?.value);
+    }
+
+  }
+
+  formatIndian(x: string): string {
+    if (!x) return '';
+    let lastThree = x.substring(x.length - 3);
+    let otherNumbers = x.substring(0, x.length - 3);
+    if (otherNumbers !== '') lastThree = ',' + lastThree;
+    return otherNumbers.replace(/\B(?=(\d{2})+(?!\d))/g, ',') + lastThree;
+  }
+
+  handleCategoryChange(values: string | string[], formArray: FormArray, addFn: (category: string) => void) {
+
+    const selected = Array.isArray(values) ? values : [values];
+
+    const existingCategories = formArray.controls.map(
+      (ctrl: any) => ctrl.get('category')?.value
+    );
+
+    selected.forEach(category => {
+
+      if (!existingCategories.includes(category)) {
+        addFn(category);
+      }
+
+    });
+
+  }
+
   back() {
     this.stepperService.previous();
   }
 
   next() {
-    this.stepperService.next();
+   
+    // this.stepperService.next();
+    let formdata= this.expenseForm.value
+  console.log("form data Expenses:", formdata);
+
+  const livingExpenses = this.expenseForm.value.livingexpenses.map((item: any) => ({
+  livingExpenseItemMasterId: item.category,
+  frequency: item.securityfrequency?.toUpperCase(),
+  amountInr: Number(item.amountINR.replace(/,/g, '')),
+  description: item.description || ''
+}));
+
+const miscExpenses = this.expenseForm.value.miscexpenses.map((item: any) => ({
+  miscellaneousExpenseItemMasterId: item.category,
+  frequency: item.securityfrequency?.toUpperCase(),
+  amountInr: Number(item.amountINR.replace(/,/g, '')),
+  description: item.description || ''
+}));
+
+   
+    let input ={
+tuitionFeesInr: Number(formdata.tutionfees.replace(/,/g, '')),
+items:[ ...livingExpenses, ...miscExpenses]
+    }
+
+     this.loanformservice.estimateExpense(input, this.applicationId).pipe().subscribe({
+      next: (res) => {
+        console.log("resp---", res);
+        if (res.status == "success") {
+
+          this.stepperService.next();
+        }
+      }
+  });
+
+
   }
 }

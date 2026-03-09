@@ -1,0 +1,295 @@
+<div class="base-layout">
+
+    <div class="row w-100 d-flex blue-head-box text-center">
+        <p class="text-dp-3-bold">Total Amount : ₹1,16,97,289 </p>
+    </div>
+    <div class="row w-100 ">
+        <div class=" d-flex  ">
+            <div class="w-100 gap-3">
+                <!-- all categories -->
+                <app-dropdown [options]="liabilitiesCatagories" [multiSelect]="true"
+                    [(selectedValue)]="selectedliabilities" [placeholder]="'Select Assets type'" [required]="true"
+                    (selectedValueChange)="onAssetChange($event)" [avatarUrl]="avatarUrl" [hasAvatar]="hasAvatar"
+                    [label]="'Assets'">
+                </app-dropdown>
+            </div>
+        </div>
+
+    </div>
+
+    <form [formGroup]="assetsForm" (ngSubmit)="submit()" id="expenseForm" class="w-100 ">
+
+        <div class=" accordion d-flex flex-column gap-4 mb-4">
+
+            <div class="accordion-item b-0" *ngFor="let acc of accordions; let i = index"
+                [hidden]="!selectedliabilities.includes(acc.key)">
+
+                <h2 class="accordion-header">
+                    <button class="accordion-button table-head" [class.collapsed]="!openIndex.includes(i)" type="button"
+                        (click)="toggle(i)">
+
+                        {{ acc.title }}
+                    </button>
+                </h2>
+
+
+                <div class="accordion-collapse collapse" [class.show]="openIndex.includes(i)">
+
+                    <div class="accordion-body p-0 ">
+
+
+                        <ng-container *ngIf="i === 0">
+                            <ng-container *ngTemplateOutlet="existingloansTemplate; context:{index:i}">
+                            </ng-container>
+                        </ng-container>
+
+                        <ng-container *ngIf="i === 1">
+                            <ng-container *ngTemplateOutlet="creditcardTemplate; context:{index:i}">
+
+                            </ng-container>
+                        </ng-container>
+
+                        <ng-container *ngIf="i === 2">
+                            <ng-container *ngTemplateOutlet="buynowpaylaterTemplate; context:{index:i}">
+
+                            </ng-container>
+                        </ng-container>
+
+                        <ng-container *ngIf="i === 3">
+                            <ng-container *ngTemplateOutlet="otherTemplate; context:{index:i}">
+
+                            </ng-container>
+                        </ng-container>
+
+
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+        <ng-template #existingloansTemplate let-i="index">
+
+            <div class="row common-details-box d-flex flex-row gap-0 pb-0">
+                <div class="col">
+                    <div class="form-group mb-3">
+                        <app-inputfield type="text" [required]="true" label="Value INR" [required]="true"
+                            formControlName="goldvalue" placeholder="Enter Value" helpText="Help text" name="goldvalue">
+                        </app-inputfield>
+
+                    </div>
+                </div>
+            </div>
+            <div class="row common-details-box d-flex flex-row gap-0">
+
+                <div class="text-dp-3-regular"> Home Loan 1</div>
+                <hr class="hrclass">
+
+                <div class="col-lg-12">
+                    <div class="form-group mb-3">
+                        <app-inputfield type="text" [required]="true" label="Bank/ Lender" [required]="true"
+                            formControlName="bankname" placeholder="Enter Bank/ Lender Name" helpText="Help text"
+                            name="bankname">
+                        </app-inputfield>
+
+                    </div>
+                </div>
+                <div class="col-lg-4 mt-20">
+                    <div class="form-group mb-3">
+                        <app-inputfield type="text" [required]="true" label="Outstanding Balance (INR)"
+                            [required]="true" formControlName="bankamt" placeholder="Enter Value" helpText="Help text"
+                            name="bankamt">
+                        </app-inputfield>
+
+
+                    </div>
+                </div>
+                <div class="col-lg-4 mt-20">
+                    <div class="form-group mb-3">
+                        <app-inputfield type="text" [required]="true" label="EMI Amount (INR)" [required]="true"
+                            formControlName="bankamt" placeholder="Enter Value" helpText="Help text" name="bankamt">
+                        </app-inputfield>
+
+
+                    </div>
+                </div>
+                <div class="col-lg-4 mt-20">
+                    <div class="form-group mb-3">
+                        <app-inputfield type="text" [required]="true" label="Remaining Tenure (Months)"
+                            [required]="true" formControlName="bankamt" placeholder="Enter Value" helpText="Help text"
+                            name="bankamt">
+                        </app-inputfield>
+
+
+                    </div>
+                </div>
+
+            </div>
+        </ng-template>
+
+        <ng-template #creditcardTemplate let-i="index">
+            <div class="row common-details-box d-flex flex-row gap-0">
+
+                <div class="text-dp-3-regular"> Credit Card 1</div>
+                <hr class="hrclass">
+
+             
+                <div class="col-lg-4">
+                    <div class="form-group mb-3">
+                        <app-inputfield type="text" [required]="true" label="Bank Name" [required]="true"
+                            formControlName="bankamt" placeholder="Select Bank Name" helpText="Help text"
+                            name="bankamt">
+                        </app-inputfield>
+
+
+                    </div>
+                </div>
+                <div class="col-lg-4">
+                    <div class="form-group mb-3">
+                        <app-inputfield type="text" [required]="true" label="Outstanding Balance (INR)"
+                            [required]="true" formControlName="bankamt" placeholder="Enter Value" helpText="Help text"
+                            name="bankamt">
+                        </app-inputfield>
+
+
+                    </div>
+                </div>
+                <div class="col-lg-4">
+                    <div class="form-group mb-3">
+                        <app-inputfield type="text" [required]="true" label="Credit Limit (INR)" [required]="true"
+                            formControlName="bankamt" placeholder="Enter Value" helpText="Help text" name="bankamt">
+                        </app-inputfield>
+
+
+                    </div>
+                </div>
+                <div class="col-lg-4 mt-20">
+                    <app-buttons label="Add Card" class="btn btn-icon Add btncustomClass" [outline]="true"
+                        (click)="addmore()">
+                        <img src="/assets/images/icons/addred.svg">
+                    </app-buttons>
+                </div>
+            </div>
+
+        </ng-template>
+
+        <ng-template #buynowpaylaterTemplate let-i="index">
+            <div class="row common-details-box d-flex flex-row gap-0">
+
+                <div class="text-dp-3-regular"> BNPL 1</div>
+                <hr class="hrclass">
+
+                <div class="col-lg-6 ">
+                    <div class="form-group mb-3">
+                        <app-dropdown [options]="liabilitiesCatagories" [(selectedValue)]="selectedliabilities"
+                            [placeholder]="'SelectBank Name'" [required]="true"
+                            (selectedValueChange)="onAssetChange($event)" [avatarUrl]="avatarUrl"
+                            [hasAvatar]="hasAvatar" [label]="'Bank Name'">
+                        </app-dropdown>
+
+                    </div>
+                </div>
+                <div class="col-lg-6 ">
+                    <div class="form-group mb-3">
+                        <app-inputfield type="text" [required]="true" label="Outstanding Balance (INR)"
+                            [required]="true" formControlName="bankamt" placeholder="Enter Value" helpText="Help text"
+                            name="bankamt">
+                        </app-inputfield>
+
+
+                    </div>
+                </div>
+                <div class="col-lg-6 mt-20">
+                    <div class="form-group mb-3">
+                        <app-inputfield type="text" [required]="true" label="Credit Limit (INR)" [required]="true"
+                            formControlName="bankamt" placeholder="Enter Value" helpText="Help text" name="bankamt">
+                        </app-inputfield>
+
+
+                    </div>
+                </div>
+                <div class="col-lg-6 mt-20">
+                    <div class="form-group mb-3">
+                        <app-inputfield type="text" [required]="true" label="Monthly EMI (INR)" [required]="true"
+                            formControlName="bankamt" placeholder="Enter Value" helpText="Help text" name="bankamt">
+                        </app-inputfield>
+
+
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <app-buttons label="Add Buy Now Pay Later (BNPL)" class="btn btn-icon Add btncustomClass"
+                        [outline]="true" (click)="addmore()">
+                        <img src="/assets/images/icons/addred.svg">
+                    </app-buttons>
+                </div>
+            </div>
+
+        </ng-template>
+
+        <ng-template #otherTemplate let-i="index">
+
+            <div class="row common-details-box d-flex flex-row gap-0">
+
+                <div class="text-dp-3-regular"> Liability 1</div>
+                <hr class="hrclass">
+
+
+                <div class="col-lg-4">
+                    <div class="form-group mb-3">
+                        <app-inputfield type="text" [required]="true" label="Liability Type" [required]="true"
+                            formControlName="bankamt" placeholder="Enter Liability Type" helpText="Help text"
+                            name="bankamt">
+                        </app-inputfield>
+
+
+                    </div>
+                </div>
+                <div class="col-lg-4">
+                    <div class="form-group mb-3">
+                        <app-inputfield type="text" [required]="true" label="Amount (INR)" [required]="true"
+                            formControlName="bankamt" placeholder="Enter Value" helpText="Help text" name="bankamt">
+                        </app-inputfield>
+
+
+                    </div>
+                </div>
+                <div class="col-lg-4">
+                    <div class="form-group mb-3">
+                        <app-inputfield type="text" [required]="true" label="Monthly Repayment (INR)" [required]="true"
+                            formControlName="bankamt" placeholder="Enter Value" helpText="Help text" name="bankamt">
+                        </app-inputfield>
+
+
+                    </div>
+                </div>
+                <div class="col-lg-4 mt-20">
+                    <app-buttons label="Add Other Liabilities" class="btn btn-icon Add btncustomClass" [outline]="true"
+                        (click)="addmore()">
+                        <img src="/assets/images/icons/addred.svg">
+                    </app-buttons>
+                </div>
+            </div>
+
+        </ng-template>
+    </form>
+
+
+
+</div>
+<hr class="footer-hr-class">
+<div class="loan-footerbtns row w-100  d-flex justify-content-between align-items-center">
+
+    <div class="col-lg-4 ">
+        <img src="../assets/images/icons/save.svg">
+        <span class="text-dp-3-regular mx-2 blue-text"> Save and Exit</span>
+    </div>
+    <div class="col-lg-4  d-flex justify-content-end">
+        <app-buttons type="button" label="Back" class="btn btncustomClass" [outline]="true" (click)="back()">
+        </app-buttons>
+        <app-buttons type="button" label="Next" class="btn btncustomClass" color="primary" (click)="next()">
+        </app-buttons>
+
+    </div>
+</div>

@@ -130,13 +130,13 @@ export class GeneralInfo implements OnInit {
       this.checkassetOnChange(value);
     });
 
-    const savedData = this.stepperService.getStepData('genralinfo');
+    // const savedData = this.stepperService.getStepData('genralinfo');
 
-    if (savedData) {
-      this.registerForm.patchValue(savedData);
+    // if (savedData) {
+    //   this.registerForm.patchValue(savedData);
       // this.restoreDropdownLabels(savedData);
 
-    }
+    // }
   }
 
   get form() {
@@ -207,7 +207,7 @@ export class GeneralInfo implements OnInit {
         label: s.partnerName,
         code: s.partnerCode
       }));
-      this.restoreDropdownLabels(this.registerForm.value);
+      // this.restoreDropdownLabels(this.registerForm.value);
     });
   }
 
@@ -243,7 +243,7 @@ export class GeneralInfo implements OnInit {
         label: s.stateName,
         code: s.stateCode
       }));
-      this.restoreDropdownLabels(this.registerForm.value);
+      // this.restoreDropdownLabels(this.registerForm.value);
     });
   }
 
@@ -264,7 +264,7 @@ export class GeneralInfo implements OnInit {
         label: c.universityName,
         code: c.universityCode
       }));
-      this.restoreDropdownLabels(this.registerForm.value);
+      // this.restoreDropdownLabels(this.registerForm.value);
     });
   }
 
@@ -286,7 +286,7 @@ export class GeneralInfo implements OnInit {
         label: course,
         value: course
       }));
-      this.restoreDropdownLabels(this.registerForm.value);
+      // this.restoreDropdownLabels(this.registerForm.value);
     });
   }
   selectedcoursetype(id: any) {
@@ -307,7 +307,7 @@ export class GeneralInfo implements OnInit {
         label: c.courseName,
         code: c.courseCode
       }));
-      this.restoreDropdownLabels(this.registerForm.value);
+      // this.restoreDropdownLabels(this.registerForm.value);
     });
   }
 

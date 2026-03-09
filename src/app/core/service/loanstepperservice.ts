@@ -10,17 +10,22 @@ export class Loanstepperservice {
 
   steps = [
     { label: 'Loan Info', route: 'loaninfo' },
+     { label: 'Education Details', route: 'educationinfo' },
     { label: 'General Info', route: 'genralinfo' },
     { label: 'Estimated Expense', route: 'expense' },
     { label: 'Additional Info', route: 'additionalinfo' },
     { label: 'KYC', route: 'kycinfo' },
     { label: 'Education Details', route: 'educationinfo' },
     { label: 'Income Details', route: 'incomeinfo' },
-    { label: 'Assets', route: 'asset' },
-    { label: 'Liabilities', route: 'liability' },
-    { label: 'Reference', route: 'reference' }
+    { label: 'Assets', route: 'assetsinfo' },
+    { label: 'Liabilities', route: 'liabilitiesinfo' },
+     { label: 'Monthly Expenditure', route: 'monthlyexpinfo' },
+    { label: 'Reference', route: 'referenceinfo' },
+     { label: 'Co-Applicant', route: 'coapplicantinfo' },
+      { label: 'Summary', route: 'summaryinfo' },
   ];
 
+  
 
   constructor(private router: Router) {}
 

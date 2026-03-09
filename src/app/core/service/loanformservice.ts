@@ -145,6 +145,16 @@ export class Loanformservice {
 
     );
   }
+
+   estimateExpense(data:any,id:string): Observable<ApiResponse<any>> {
+    console.log("service--",data);
+    
+    return this.http.post<ApiResponse<any>>(
+      `${this.baseUrl}/v1/los/applications/${id}/estimated-expenses`,
+      data
+    );
+  }
+
 }
 
 

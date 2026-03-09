@@ -1,0 +1,42 @@
+@use 'variables' as *;
+@use 'typography' as *;
+@use 'common' as *;
+
+.blue-head-box{
+    border-radius:$border_radius_m;
+background: $secondary-50;
+padding: $spacing_16 $spacing_18;
+}
+
+.mt-20{
+    margin-top: $spacing_9;;
+}
+.blue-text{
+    color:$secondary-text;
+// font-weight: 700;
+}
+
+.hrclass{
+    background: $neutral-300;
+    margin: 14px 0 20px 0;
+}
+
+.accordion-item{
+    //  min-height: auto;
+    border-radius: $border_radius_m;
+  border: $border_1 solid $neutral-300;
+//   background: $bg, ;
+  box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.05);
+}
+.table-head{
+  color: $secondary-700;
+}
+
+.btncustomClass{
+     width: auto !important;
+  min-width: 178px;
+//   max-width: 200px;
+  padding: 2px 3px;
+  height: 52px;
+}
+

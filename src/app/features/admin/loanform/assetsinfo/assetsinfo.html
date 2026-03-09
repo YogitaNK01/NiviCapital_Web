@@ -1,0 +1,261 @@
+<div class="base-layout">
+
+    <div class="row w-100 d-flex blue-head-box text-center">
+        <p class="text-dp-3-bold">Total Amount : ₹1,16,97,289 </p>
+    </div>
+    <div class="row w-100 ">
+        <div class=" d-flex  ">
+            <div class="w-100 gap-3">
+                <!-- all categories -->
+                <app-dropdown [options]="assetsCatagories" [multiSelect]="true" [(selectedValue)]="selectedAssets"
+                    [placeholder]="'Select Assets type'" [required]="true" (selectedValueChange)="onAssetChange($event)"
+                    [avatarUrl]="avatarUrl" [hasAvatar]="hasAvatar" [label]="'Assets'">
+                </app-dropdown>
+            </div>
+        </div>
+
+    </div>
+
+    <form [formGroup]="assetsForm" (ngSubmit)="submit()" id="expenseForm" class="w-100 ">
+
+        <div class=" accordion d-flex flex-column gap-4 mb-4">
+
+            <div class="accordion-item b-0" *ngFor="let acc of accordions; let i = index"
+                [hidden]="!selectedAssets.includes(acc.key)">
+
+                <h2 class="accordion-header">
+                    <button class="accordion-button table-head" [class.collapsed]="!openIndex.includes(i)" type="button"
+                        (click)="toggle(i)">
+
+                        {{ acc.title }}
+                    </button>
+                </h2>
+
+
+                <div class="accordion-collapse collapse" [class.show]="openIndex.includes(i)">
+
+                    <div class="accordion-body p-0 ">
+
+                        <ng-container *ngIf="i === 0">
+                            <ng-container *ngTemplateOutlet="goldTemplate; context:{index:i}">
+                            </ng-container>
+                        </ng-container>
+
+                        <ng-container *ngIf="i === 1">
+                            <ng-container *ngTemplateOutlet="liquidassetsTemplate; context:{index:i}">
+                            </ng-container>
+                        </ng-container>
+
+                        <ng-container *ngIf="i === 2">
+                            <ng-container *ngTemplateOutlet="propertylandTemplate; context:{index:i}">
+
+                            </ng-container>
+                        </ng-container>
+
+                        <ng-container *ngIf="i === 3">
+                            <ng-container *ngTemplateOutlet="fdTemplate; context:{index:i}">
+
+                            </ng-container>
+                        </ng-container>
+
+                        <ng-container *ngIf="i === 4">
+                            <ng-container *ngTemplateOutlet="investmentTemplate; context:{index:i}">
+
+                            </ng-container>
+                        </ng-container>
+
+
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+        <ng-template #goldTemplate let-i="index">
+
+            <div class="row common-details-box d-flex flex-row ">
+                <div class="col">
+                    <div class="form-group mb-3">
+                        <app-inputfield type="text" [required]="true" label="Value INR" [required]="true"
+                            formControlName="goldvalue" placeholder="Enter Value" helpText="Help text" name="goldvalue">
+                        </app-inputfield>
+
+                    </div>
+                </div>
+
+            </div>
+        </ng-template>
+
+
+        <ng-template #liquidassetsTemplate let-i="index">
+            <div class="row common-details-box d-flex flex-row ">
+                <div class="col">
+                    <div class="form-group mb-3">
+                        <app-inputfield type="text" [required]="true" label="Cash In Hand (INR)" [required]="true"
+                            formControlName="cashinhand" placeholder="Enter Value" helpText="Help text"
+                            name="cashinhand">
+                        </app-inputfield>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="form-group mb-3">
+                        <app-inputfield type="text" [required]="true" label="Savings Account Balance (INR)"
+                            [required]="true" placeholder="Enter Value" formControlName="savingbalance"
+                            helpText="Help text" name="savingbalance" [readonly]="true">
+                        </app-inputfield>
+                    </div>
+                </div>
+            </div>
+
+        </ng-template>
+        <ng-template #propertylandTemplate let-i="index">
+
+            <div class="row common-details-box d-flex flex-row gap-0">
+                <div class="text-dp-3-regular"> Property 1</div>
+                <hr class="hrclass">
+
+                <div class="col-lg-6">
+                    <div class="form-group mb-3">
+                        <app-dropdown [options]="assetsCatagories" [multiSelect]="true"
+                            [(selectedValue)]="selectedAssets" [placeholder]="'Select Property Type'" [required]="true"
+                            (selectedValueChange)="onAssetChange($event)" [avatarUrl]="avatarUrl"
+                            [hasAvatar]="hasAvatar" [label]="'Assets'">
+                        </app-dropdown>
+
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <div class="form-group mb-3">
+                        <app-dropdown [options]="assetsCatagories" [multiSelect]="true"
+                            [(selectedValue)]="selectedAssets" [placeholder]="'Select Assets type'" [required]="true"
+                            (selectedValueChange)="onAssetChange($event)" [avatarUrl]="avatarUrl"
+                            [hasAvatar]="hasAvatar" [label]="'Ownership Type'">
+                        </app-dropdown>
+
+
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <div class="form-group mb-3">
+                        <app-inputfield type="text" [required]="true" label="Market Value (INR)" [required]="true"
+                            formControlName="marketval" placeholder="Enter Value" helpText="Help text" name="marketval">
+                        </app-inputfield>
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <div class="form-group mb-3">
+                        <app-inputfield type="text" [required]="true" label="Location / Address" [required]="true"
+                            placeholder="Enter Value" formControlName="location" helpText="Help text" name="location"
+                            [readonly]="true">
+                        </app-inputfield>
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <div class="form-group mb-3">
+                        <app-buttons label="Add Property" class="btn btn-icon Add btncustomClass" [outline]="true"
+                            (click)="addmore()">
+                            <img src="/assets/images/icons/addred.svg">
+                        </app-buttons>
+                    </div>
+                </div>
+
+
+            </div>
+
+        </ng-template>
+        <ng-template #fdTemplate let-i="index">
+
+            <div class="row common-details-box d-flex flex-row gap-0">
+                <div class="text-dp-3-regular"> FD 1</div>
+                <hr class="hrclass">
+
+                <div class="col">
+                    <div class="form-group mb-3">
+                        <app-inputfield type="text" [required]="true" label="Bank Name" [required]="true"
+                            formControlName="bankname" placeholder="Enter Bank Name" helpText="Help text"
+                            name="bankname">
+                        </app-inputfield>
+
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="form-group mb-3">
+                        <app-inputfield type="text" [required]="true" label="Amount (INR)" [required]="true"
+                            formControlName="bankamt" placeholder="Enter Value" helpText="Help text" name="bankamt">
+                        </app-inputfield>
+
+
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="form-group mb-3">
+                        <app-datepickernew formControlName="maturitydate" label="Maturity Date"
+                            placeholder="DD/MM/YYYY">
+                        </app-datepickernew>
+
+
+                    </div>
+                </div>
+                <div class="col">
+                    <app-buttons label="Add Fixed Deposit" class="btn btn-icon Add btncustomClass" [outline]="true"
+                        (click)="addmore()">
+                        <img src="/assets/images/icons/addred.svg">
+                    </app-buttons>
+                </div>
+            </div>
+        </ng-template>
+        <ng-template #investmentTemplate let-i="index">
+            <div class="row common-details-box d-flex flex-row ">
+                <div class="col">
+                    <div class="form-group mb-3">
+                        <app-dropdown [options]="assetsCatagories" [multiSelect]="true"
+                            [(selectedValue)]="selectedAssets" [placeholder]="'Select type'" [required]="true"
+                            (selectedValueChange)="onAssetChange($event)" [avatarUrl]="avatarUrl"
+                            [hasAvatar]="hasAvatar" [label]="'Select Type'">
+                        </app-dropdown>
+
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="form-group mb-3">
+                        <app-inputfield type="text" [required]="true" label="Stocks (INR)" [required]="true"
+                            formControlName="stockvalue" placeholder="Enter Value" helpText="Help text"
+                            name="stockvalue">
+                        </app-inputfield>
+
+
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="form-group mb-3">
+                        <app-inputfield type="text" [required]="true" label="Mutual Funds (INR)" [required]="true"
+                            formControlName="mutualfundvalue" placeholder="Enter Value" helpText="Help text"
+                            name="mutualfundvalue">
+                        </app-inputfield>
+
+
+                    </div>
+                </div>
+            </div>
+        </ng-template>
+    </form>
+
+
+
+</div>
+<hr class="footer-hr-class">
+<div class="loan-footerbtns row w-100  d-flex justify-content-between align-items-center">
+
+    <div class="col-lg-4 ">
+        <img src="../assets/images/icons/save.svg">
+        <span class="text-dp-3-regular mx-2 blue-text"> Save and Exit</span>
+    </div>
+    <div class="col-lg-4  d-flex justify-content-end">
+        <app-buttons type="button" label="Back" class="btn btncustomClass" [outline]="true" (click)="back()">
+        </app-buttons>
+        <app-buttons type="button" label="Next" class="btn btncustomClass" color="primary" (click)="next()">
+        </app-buttons>
+
+    </div>
+</div>

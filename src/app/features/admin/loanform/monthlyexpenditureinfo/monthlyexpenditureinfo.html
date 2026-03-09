@@ -1,0 +1,204 @@
+<div class="base-layout">
+
+    <div class="row w-100 d-flex blue-head-box text-center">
+        <p class="text-dp-3-bold">Total Expense : ₹10,00,00 </p>
+    </div>
+    <div class="row w-100 ">
+        <div class=" d-flex  ">
+            <div class="w-100 gap-3">
+                <!-- all categories -->
+                <app-dropdown [options]="monthlyExpenditure" [multiSelect]="true"
+                    [(selectedValue)]="selectedliabilities" [placeholder]="'Select Assets type'" [required]="true"
+                    (selectedValueChange)="onAssetChange($event)" [avatarUrl]="avatarUrl" [hasAvatar]="hasAvatar"
+                    [label]="'Assets'">
+                </app-dropdown>
+            </div>
+        </div>
+
+    </div>
+
+    <form [formGroup]="assetsForm" (ngSubmit)="submit()" id="expenseForm" class="w-100 ">
+
+        <div class=" accordion d-flex flex-column gap-4 mb-4">
+
+            <div class="accordion-item b-0" *ngFor="let acc of accordions; let i = index"
+                [hidden]="!selectedliabilities.includes(acc.key)">
+
+                <h2 class="accordion-header">
+                    <button class="accordion-button table-head" [class.collapsed]="!openIndex.includes(i)" type="button"
+                        (click)="toggle(i)">
+
+                        {{ acc.title }}
+                    </button>
+                </h2>
+
+
+                <div class="accordion-collapse collapse" [class.show]="openIndex.includes(i)">
+
+                    <div class="accordion-body p-0 ">
+
+
+                        <ng-container *ngIf="i === 0">
+                            <ng-container *ngTemplateOutlet="rentmaintenanceTemplate; context:{index:i}">
+                            </ng-container>
+                        </ng-container>
+
+                       <ng-container *ngIf="i === 1">
+                            <ng-container *ngTemplateOutlet="GroceriesandHouseholdTemplate; context:{index:i}">
+
+                            </ng-container>
+                        </ng-container>
+
+                        <ng-container *ngIf="i === 2">
+                            <ng-container *ngTemplateOutlet="UtilitiesTemplate; context:{index:i}">
+
+                            </ng-container>
+                        </ng-container>
+
+                        <ng-container *ngIf="i === 3">
+                            <ng-container *ngTemplateOutlet="TransportationTemplate; context:{index:i}">
+
+                            </ng-container>
+                        </ng-container>
+                        <ng-container *ngIf="i === 4">
+                            <ng-container *ngTemplateOutlet="SchoolTemplate; context:{index:i}">
+
+                            </ng-container>
+                        </ng-container>
+                        <ng-container *ngIf="i === 5">
+                            <ng-container *ngTemplateOutlet="MedicalTemplate; context:{index:i}">
+
+                            </ng-container>
+                        </ng-container>
+                        
+                         <ng-container *ngIf="i === 6">
+                            <ng-container *ngTemplateOutlet="OtherTemplate; context:{index:i}">
+
+                            </ng-container>
+                        </ng-container>  
+
+                        <ng-template #rentmaintenanceTemplate let-i="index">
+                            <div class="row common-details-box d-flex flex-row gap-0 ">
+
+                                <div class="form-group mb-3">
+                                    <app-inputfield type="text" [required]="true" label="Rent/ Home Maintenance"
+                                        [required]="true" formControlName="goldvalue"
+                                        placeholder="Enter Rent/ Home Maintenance" helpText="Help text"
+                                        name="goldvalue">
+                                    </app-inputfield>
+
+
+                                </div>
+                            </div>
+                        </ng-template>
+
+                        <ng-template #GroceriesandHouseholdTemplate let-i="index">
+                            <div class="row common-details-box d-flex flex-row gap-0 ">
+
+                                <div class="form-group mb-3">
+                                    <app-inputfield type="text" [required]="true" label="Groceries and Household"
+                                        [required]="true" formControlName="goldvalue"
+                                        placeholder="Enter Groceries and Household" helpText="Help text"
+                                        name="goldvalue">
+                                    </app-inputfield>
+
+
+                                </div>
+                            </div>
+                        </ng-template>
+
+                        <ng-template #UtilitiesTemplate let-i="index">
+                            <div class="row common-details-box d-flex flex-row gap-0 ">
+                                <div class="col">
+                                    <div class="form-group mb-3">
+                                        <app-inputfield type="text" [required]="true" label="Telephone and Internet bills"
+                                            [required]="true" formControlName="goldvalue"
+                                            placeholder="Enter Telephone and Internet bills" helpText="Help text"
+                                            name="goldvalue">
+                                        </app-inputfield>
+
+
+                                    </div>
+                                </div>
+                                <div class="col">
+                                    <div class="form-group mb-3">
+                                        <app-inputfield type="text" [required]="true" label="Utilities (Electricity, Water, Gas)"
+                                            [required]="true" formControlName="goldvalue"
+                                            placeholder="Enter Utility bills" helpText="Help text"
+                                            name="goldvalue">
+                                        </app-inputfield>
+
+
+                                    </div>
+                                </div>
+
+                            </div>
+                        </ng-template>
+
+                           <ng-template #TransportationTemplate let-i="index">
+                            <div class="row common-details-box d-flex flex-row gap-0 ">
+
+                                <div class="form-group mb-3">
+                                    <app-inputfield type="text" [required]="true" label="Transportation"
+                                        [required]="true" formControlName="goldvalue"
+                                        placeholder="Enter Transportation" helpText="Help text"
+                                        name="goldvalue">
+                                    </app-inputfield>
+
+
+                                </div>
+                            </div>
+                        </ng-template>
+
+                           <ng-template #SchoolTemplate let-i="index">
+                            <div class="row common-details-box d-flex flex-row gap-0 ">
+
+                                <div class="form-group mb-3">
+                                    <app-inputfield type="text" [required]="true" label="School Education Fees"
+                                        [required]="true" formControlName="goldvalue"
+                                        placeholder="Enter School Education Fees" helpText="Help text"
+                                        name="goldvalue">
+                                    </app-inputfield>
+
+
+                                </div>
+                            </div>
+                        </ng-template>
+
+                           <ng-template #MedicalTemplate let-i="index">
+                            <div class="row common-details-box d-flex flex-row gap-0 ">
+
+                                <div class="form-group mb-3">
+                                    <app-inputfield type="text" [required]="true" label="Medical/ Medicines"
+                                        [required]="true" formControlName="goldvalue"
+                                        placeholder="Enter Medical/ Medicines" helpText="Help text"
+                                        name="goldvalue">
+                                    </app-inputfield>
+
+
+                                </div>
+                            </div>
+                        </ng-template>
+
+                        <ng-template #OtherTemplate let-i="index">
+                            <div class="row common-details-box d-flex flex-row gap-0 ">
+
+                                <div class="form-group mb-3">
+                                  <app-buttons label="Add Other Recurring Expense" class="btn btn-icon Add btncustomClass" [outline]="true"
+                        (click)="addmore()">
+                        <img src="/assets/images/icons/addred.svg">
+                    </app-buttons>
+
+
+                                </div>
+                            </div>
+                        </ng-template>
+                        
+                         
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+    </form>

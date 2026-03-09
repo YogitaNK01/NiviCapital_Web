@@ -9,6 +9,12 @@ import { Estimateexpense } from './estimateexpense/estimateexpense';
 import { Kycinfo } from './kycinfo/kycinfo';
 import { Educationinfo } from './educationinfo/educationinfo';
 import { Incomeinfo } from './incomeinfo/incomeinfo';
+import { Assetsinfo } from './assetsinfo/assetsinfo';
+import { Liabilitiesinfo } from './liabilitiesinfo/liabilitiesinfo';
+import { Monthlyexpenditureinfo } from './monthlyexpenditureinfo/monthlyexpenditureinfo';
+import { Referenceinfo } from './referenceinfo/referenceinfo';
+import { Coapplicantinfo } from './coapplicantinfo/coapplicantinfo';
+import { Summaryinfo } from './summaryinfo/summaryinfo';
 
 const routes: Routes = [
   // {
@@ -28,6 +34,12 @@ const routes: Routes = [
       { path: 'kycinfo', component: Kycinfo },
       { path: 'educationinfo', component: Educationinfo },
       { path: 'incomeinfo', component: Incomeinfo },
+      { path: 'assetsinfo', component: Assetsinfo },
+      { path: 'liabilitiesinfo', component: Liabilitiesinfo },
+      { path: 'monthlyexpinfo', component: Monthlyexpenditureinfo },
+      { path: 'referenceinfo', component: Referenceinfo },
+      { path: 'coapplicantinfo', component: Coapplicantinfo },
+      { path: 'summaryinfo', component: Summaryinfo },
     ]
   },
 
