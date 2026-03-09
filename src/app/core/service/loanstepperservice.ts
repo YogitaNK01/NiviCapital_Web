@@ -55,7 +55,9 @@ export class Loanstepperservice {
 
     if (index > 0) {
       const prevRoute = this.steps[index - 1].route;
-      this.router.navigate(['/loanform', prevRoute]);
+      this.router.navigate(['/loanform', prevRoute],{
+          queryParams: { applicantId: this.applicantId, applicationId: this.applicationId } 
+        });
     }
   }
 

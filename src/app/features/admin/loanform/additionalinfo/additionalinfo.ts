@@ -83,7 +83,7 @@ export class Additionalinfo implements OnInit {
       uploadphoto: ['', Validators.required],
       maritalstatus: ['', Validators.required,],
       gender: ['', Validators.required,],
-      dependents: ['', Validators.required,],
+      dependents: ['', Validators.required,Validators.min(0),Validators.max(9),],
       s_fname: ['', [Validators.required, Validators.pattern('^[A-Za-z ]+$'), Validators.minLength(2), Validators.maxLength(25)]],
       s_mname: ['', [Validators.pattern('^[A-Za-z ]+$'), Validators.minLength(2), Validators.maxLength(25)]],
       s_lname: ['', [Validators.required, Validators.pattern('^[A-Za-z ]+$'), Validators.minLength(2), Validators.maxLength(25)]],

@@ -35,9 +35,9 @@
 
                 <div class="text-label fw-bold ">Last Qualification Details</div>
                 <div class="col-lg-4 col-sm-12 mt-20">
-                    <app-dropdown [options]="selectoccupation" [placeholder]="'Select '+ occupation" [required]="true"
+                    <app-dropdown [options]="selectoccupation" [placeholder]="'Select Current Occupation'" [required]="true"
                         (selectedValueChange)="registerForm.get('occupation')?.setValue($event)" [avatarUrl]="avatarUrl"
-                        formControlName="occupation" [hasAvatar]="hasAvatar" [label]="occupation">
+                        formControlName="occupation" [hasAvatar]="hasAvatar" [label]="occupationlabel">
                     </app-dropdown>
 
                 </div>

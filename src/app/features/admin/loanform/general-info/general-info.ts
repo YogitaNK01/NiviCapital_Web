@@ -40,24 +40,24 @@ export class GeneralInfo implements OnInit {
   @Input() hasAvatar = false;
   formData: any = {};
 
-  occupation: string = 'Current Occupation';
+  occupationlabel: string = 'Current Occupation';
   selectoccupation: OptionItem[] = [];
 
 
   qualification: string = 'Last Qualification';
-  seleactqualification: OptionItem[]=  [ ]
+  seleactqualification: OptionItem[] = []
 
   state: string = 'State';
 
   university: string = 'University Name';
-  selectuniversity:  OptionItem[]=  [ ]
+  selectuniversity: OptionItem[] = []
 
   coursetype: string = 'Course Type';
-  selectcourse: OptionItem[]=  [ ]
-  coursetypeId:any;
+  selectcourse: OptionItem[] = []
+  coursetypeId: any;
 
   coursename: string = 'Course Name';
-  selectcoursename: OptionItem[]=  [ ]
+  selectcoursename: OptionItem[] = []
 
 
   courseduration: string = 'Course Duration';
@@ -66,10 +66,10 @@ export class GeneralInfo implements OnInit {
     { label: '2 Years', value: '2 Years', icon: '' },
     { label: '3 Years', value: '3 Years', icon: '' },
     { label: '4 Years', value: '4 Years', icon: '' },
-     { label: '4+ Years', value: '4+ Years', icon: '' },
+    { label: '4+ Years', value: '4+ Years', icon: '' },
   ]
   lendingpartner: string = 'Lending Partner';
-  selectlendingpartner:  OptionItem[]=  [ ]
+  selectlendingpartner: OptionItem[] = []
 
   checkboxasset: any;
 
@@ -85,16 +85,17 @@ export class GeneralInfo implements OnInit {
 
   applicantId: string = '';
   applicationId: string = '';
-  constructor(private fb: FormBuilder, private formSvc: Loanformservice, private router: Router, private stepperService: Loanstepperservice,private route: ActivatedRoute,) { }
+  constructor(private fb: FormBuilder, private formSvc: Loanformservice, private router: Router, private stepperService: Loanstepperservice, private route: ActivatedRoute,) { }
   ngOnInit() {
-this.route.queryParams.subscribe(params => {
+    this.route.queryParams.subscribe(params => {
       if (params['applicantId']) {
         this.applicantId = params['applicantId'];
         this.applicationId = params['applicationId'];
 
-        this.stepperService.setLoanId(this.applicantId ,this.applicationId);
+        this.stepperService.setLoanId(this.applicantId, this.applicationId);
       }
     });
+
 
     this.states();
     this.getOccupationdetails();
@@ -105,34 +106,37 @@ this.route.queryParams.subscribe(params => {
       occupation: ['', Validators.required],
       qualification: ['', Validators.required],
       institutionName: ['', [Validators.required, Validators.pattern('^[A-Za-z ]+$')]],
-       state: ['', Validators.required],
+      state: ['', Validators.required],
       university: ['', Validators.required],
       coursetype: ['', Validators.required],
       coursename: ['', Validators.required],
       courseduration: ['', Validators.required],
       coursestartdate: ['', Validators.required],
       courseenddate: ['', Validators.required],
-      checkedasset: [ false, Validators.required],
+      checkedasset: [false, Validators.required],
       lendingpartner: ['', Validators.required],
 
 
     });
- this.registerForm.get('coursestartdate')?.valueChanges.subscribe(() => {
-    this.calculateEndDate();
-  });
+    this.registerForm.get('coursestartdate')?.valueChanges.subscribe(() => {
+      this.calculateEndDate();
+    });
 
-  this.registerForm.get('courseduration')?.valueChanges.subscribe(() => {
-    this.calculateEndDate();
-  });
-  this.registerForm.get('checkedasset')?.valueChanges.subscribe(value => {
-  console.log('Selected:', value);
-  this.checkassetOnChange(value);
-});
+    this.registerForm.get('courseduration')?.valueChanges.subscribe(() => {
+      this.calculateEndDate();
+    });
+    this.registerForm.get('checkedasset')?.valueChanges.subscribe(value => {
+      console.log('Selected:', value);
+      this.checkassetOnChange(value);
+    });
 
-    // const savedData = this.stepperService.getStepData('educationDetails');
-    // if (savedData) {
-    //   this.registerForm.patchValue(savedData);
-    // }
+    const savedData = this.stepperService.getStepData('genralinfo');
+
+    if (savedData) {
+      this.registerForm.patchValue(savedData);
+      // this.restoreDropdownLabels(savedData);
+
+    }
   }
 
   get form() {
@@ -140,7 +144,7 @@ this.route.queryParams.subscribe(params => {
   }
 
   saveDraft() {
-    
+
   }
   onSelectionChange(selectedkey: string, value: string) {
     this.formData[selectedkey] = value;
@@ -158,23 +162,23 @@ this.route.queryParams.subscribe(params => {
   }
 
   checkassetOnChange(event: any) {
-   this.checkboxasset= event;
-   console.log(event);
+    this.checkboxasset = event;
+    console.log(event);
   }
   get f() {
     return this.registerForm.controls;
   }
 
-   getOccupationdetails() {
+  getOccupationdetails() {
     this.formSvc.getOccupations().subscribe((res: any) => {
       const list = res.data ?? res;
 
       this.selectoccupation = list.map((s: any) => ({
         value: s.occupationId,
         label: s.occupationName,
-       
-      }));
 
+      }));
+      this.restoreDropdownLabels(this.registerForm.value);
     });
   }
 
@@ -185,28 +189,49 @@ this.route.queryParams.subscribe(params => {
       this.seleactqualification = list.map((s: any) => ({
         value: s.qualificationId,
         label: s.qualificationName,
-       
-      }));
 
+      }));
+      this.restoreDropdownLabels(this.registerForm.value);
     });
   }
 
-  
 
 
-   getlendingpartnersdetails() {
+
+  getlendingpartnersdetails() {
     this.formSvc.getlendingpartners().subscribe((res: any) => {
       const list = res.data ?? res;
 
       this.selectlendingpartner = list.map((s: any) => ({
         value: s.partnerId,
         label: s.partnerName,
-       code:s.partnerCode
+        code: s.partnerCode
       }));
-
+      this.restoreDropdownLabels(this.registerForm.value);
     });
   }
 
+  restoreDropdownLabels(data: any) {
+
+    const occ = this.selectoccupation.find(o => o.value == data.occupation);
+    this.occupationlabel = occ?.label || 'Current Occupation';
+
+    const qual = this.seleactqualification.find(q => q.value == data.qualification);
+    this.qualification = qual?.label || 'Last Qualification';
+
+    const state = this.Australianstate.find(s => s.value == data.state);
+    this.selectedStateLabel = state?.label || '';
+
+    const uni = this.AustralianUniversities.find(u => u.value == data.university);
+    this.selectedUniLabel = uni?.label || '';
+
+    const courseType = this.selectcourse.find(c => c.value == data.coursetype);
+    this.selectedcoursetypeLabel = courseType?.label || '';
+
+    const courseName = this.selectcoursename.find(c => c.value == data.coursename);
+    this.selectedcourseNameLabel = courseName?.label || '';
+
+  }
 
   //australian state and universities
   states() {
@@ -218,7 +243,7 @@ this.route.queryParams.subscribe(params => {
         label: s.stateName,
         code: s.stateCode
       }));
-
+      this.restoreDropdownLabels(this.registerForm.value);
     });
   }
 
@@ -239,6 +264,7 @@ this.route.queryParams.subscribe(params => {
         label: c.universityName,
         code: c.universityCode
       }));
+      this.restoreDropdownLabels(this.registerForm.value);
     });
   }
 
@@ -251,15 +277,16 @@ this.route.queryParams.subscribe(params => {
   }
 
 
- selectCourseType(id: any) {
-    this.coursetypeId=id;
+  selectCourseType(id: any) {
+    this.coursetypeId = id;
     this.formSvc.getCoursetype(id).subscribe((res: any) => {
       const list = res.data ?? res;
 
       this.selectcourse = list.map((course: string) => ({
-    label: course,
-    value: course
-  }));
+        label: course,
+        value: course
+      }));
+      this.restoreDropdownLabels(this.registerForm.value);
     });
   }
   selectedcoursetype(id: any) {
@@ -267,12 +294,12 @@ this.route.queryParams.subscribe(params => {
     const found = this.selectcourse.find(s => s.value === id);
     this.selectedcoursetypeLabel = found?.label ?? '';
     this.selectcoursename = [];
-    this.select_CourseName(this.coursetypeId,id);
+    this.select_CourseName(this.coursetypeId, id);
   }
 
 
-   select_CourseName(id: string,name:string) {
-    this.formSvc.getCourseName(id,name).subscribe((res: any) => {
+  select_CourseName(id: string, name: string) {
+    this.formSvc.getCourseName(id, name).subscribe((res: any) => {
       const list = res.data ?? res;
 
       this.selectcoursename = list.map((c: any) => ({
@@ -280,10 +307,11 @@ this.route.queryParams.subscribe(params => {
         label: c.courseName,
         code: c.courseCode
       }));
+      this.restoreDropdownLabels(this.registerForm.value);
     });
   }
 
-    selectedCoursename(id: any) {
+  selectedCoursename(id: any) {
 
     const found = this.selectcoursename.find(s => s.value === id);
     this.selectedcourseNameLabel = found?.label ?? '';
@@ -291,93 +319,97 @@ this.route.queryParams.subscribe(params => {
     // this.selectCourseType(id);
   }
 
- calculateEndDate() {
-  const startDate = this.registerForm.get('coursestartdate')?.value;
-  const duration = this.registerForm.get('courseduration')?.value;
+  calculateEndDate() {
+    const startDate = this.registerForm.get('coursestartdate')?.value;
+    const duration = this.registerForm.get('courseduration')?.value;
 
-  if (!startDate || !duration) return;
+    if (!startDate || !duration) return;
 
-  const years = parseInt(duration);
-  if (isNaN(years)) return;
+    const years = parseInt(duration);
+    if (isNaN(years)) return;
 
-  const start = new Date(startDate);
-  const end = new Date(start);
-  end.setFullYear(start.getFullYear() + years);
+    const start = new Date(startDate);
+    const end = new Date(start);
+    end.setFullYear(start.getFullYear() + years);
 
-  this.registerForm.patchValue(
-    { courseenddate: end },
-    { emitEvent: false }
-  );
+    this.registerForm.patchValue(
+      { courseenddate: end },
+      { emitEvent: false }
+    );
 
-  if (duration.includes('4+')) {
-  this.registerForm.patchValue(
-    { courseenddate: null },
-    { emitEvent: false }
-  );
-  return;
-}
-}
-
-formatDate(date: any): string | null {
-  if (!date) return null;
-
-  // If Moment
-  if (date._isAMomentObject) {
-    return date.format('YYYY-MM-DD');
+    if (duration.includes('4+')) {
+      this.registerForm.patchValue(
+        { courseenddate: null },
+        { emitEvent: false }
+      );
+      return;
+    }
   }
 
-  // If JS Date
-  if (date instanceof Date) {
-    return date.toISOString().split('T')[0];
-  }
+  formatDate(date: any): string | null {
+    if (!date) return null;
 
-  return null;
-}
+    // If Moment
+    if (date._isAMomentObject) {
+      return date.format('YYYY-MM-DD');
+    }
+
+    // If JS Date
+    if (date instanceof Date) {
+      return date.toISOString().split('T')[0];
+    }
+
+    return null;
+  }
   back() {
     this.stepperService.previous();
   }
-   next1() { this.stepperService.next();}
+  next1() { this.stepperService.next(); }
   next() {
 
     let formdata = this.registerForm.value;
 
-    let input ={
-  "applicationId": this.applicationId,
-  "applicantId": this.applicantId,
+    let input = {
+      "applicationId": this.applicationId,
+      "applicantId": this.applicantId,
 
-  "currentOccupationId": formdata.occupation,
-  "lastQualificationId": formdata.qualification,
-  "lastInstitutionName": formdata.institutionName,
+      "currentOccupationId": formdata.occupation,
+      "lastQualificationId": formdata.qualification,
+      "lastInstitutionName": formdata.institutionName,
 
-  "stateId": formdata.state,
-  "universityId":formdata.university,
-  "courseId": formdata.coursename,
-  "courseDuration": formdata.courseduration,
-  "courseStartDate": this.formatDate(formdata.coursestartdate),
-   
-  "courseEndDate": this.formatDate(formdata.courseenddate),
+      "stateId": formdata.state,
+      "universityId": formdata.university,
+      "courseId": formdata.coursename,
+      "courseDuration": formdata.courseduration,
+      "courseStartDate": this.formatDate(formdata.coursestartdate),
 
-  "hasAssets":this.checkboxasset == "Yes" ? true : false,
-  "lendingPartnerId": formdata.occupation,
-}
+      "courseEndDate": this.formatDate(formdata.courseenddate),
 
-console.log(input);
-this.formSvc.submitGenralInfo(input,this.applicationId).pipe().subscribe( {
-     next: (res) => {
-      console.log("resp---",res);
-      if(res.status == "success"){
-     this.stepperService.next();
-      }
+      "hasAssets": this.checkboxasset == "Yes" ? true : false,
+      "lendingPartnerId": formdata.occupation,
+    }
+
+    console.log(input);
+    this.formSvc.submitGenralInfo(input, this.applicationId).pipe().subscribe({
+      next: (res) => {
+        console.log("resp---", res);
+        if (res.status == "success") {
+
+          this.stepperService.next();
+          this.stepperService.setStepData('genralinfo', formdata);
        
-       },
+          console.log("resp---", this.registerForm.value);
+        }
+
+      },
       error: (err) => {
         console.error("error msg", err);
       }
-      
-});
-      
 
-  
+    });
+
+
+
   }
 
 }

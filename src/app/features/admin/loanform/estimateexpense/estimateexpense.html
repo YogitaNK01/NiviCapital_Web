@@ -180,7 +180,7 @@
       <div class="row common-details-box d-flex flex-row ">
         <div class="col">
           <div class="form-group mb-3">
-            <app-inputfield type="flag" [required]="true" label="Tuition Fees (INR)" [required]="true"
+            <app-inputfield type="flag" [required]="true" label="Tuition Fees (INR)" [required]="true" formControlName="tutionfees"
               placeholder="40,20,337" helpText="Help text" name="tutionfees" [showPhonePrefix]="true"
               [showPhonePrefixnumber]="false">
             </app-inputfield>
@@ -188,8 +188,8 @@
         </div>
         <div class="col">
           <div class="form-group mb-3">
-            <app-inputfield type="flag" [required]="true" label="Amount (AUD)" [required]="true" placeholder="$7000"
-              helpText="Help text" name="amount" [showaustralianflagPrefix]="true">
+            <app-inputfield type="flag" [required]="true" label="Amount (AUD)" [required]="true" placeholder="$7000" formControlName="tutionfeesAUD"
+              helpText="Help text" name="amount" [showaustralianflagPrefix]="true" [readonly]="true">
             </app-inputfield>
           </div>
         </div>
@@ -201,9 +201,9 @@
         <div class="mobiledetails d-flex w-100 flex-column ">
           <div class="w-100 gap-3">
             <!-- all categories -->
-            <app-dropdown [options]="searchOptions" [multiSelect]="true" [(selectedValue)]="selectedCategories" [placeholder]="placeholderval"
-              [required]="true" (selectedValueChange)="oncatagoryChange($event)" [avatarUrl]="avatarUrl"
-              [hasAvatar]="hasAvatar" [label]="labelval" >
+            <app-dropdown [options]="livCatagories" [multiSelect]="true" [(selectedValue)]="selectedCategories"
+              [placeholder]="placeholderval" [required]="true" (selectedValueChange)="oncatagoryChange($event)"
+              [avatarUrl]="avatarUrl" [hasAvatar]="hasAvatar" [label]="labelval">
             </app-dropdown>
           </div>
         </div>
@@ -211,22 +211,23 @@
 
         <div class="mobiledetails d-flex w-100 flex-column ">
           <div class="w-100 gap-3">
+<div formArrayName="livingexpenses">
 
-          
             @for (category of selectedCategories; track category) {
 
             <div class="row mt-40">
 
               <div class="text-label fw-bold">
-                 {{ expenseLabels[category] }}
+                {{ getCategoryLabel(category) }}
               </div>
-              
+
 
               <hr class="hrclass">
 
               <!-- Frequency -->
               <div class="col-lg-4 col-sm-12 mt-20">
-                <app-dropdown [options]="searchfrequencyOptions" [(selectedValue)]="selectedOption" [placeholder]="placeholderval" [required]="true"
+                <app-dropdown [options]="searchfrequencyOptions" [(selectedValue)]="selectedOption"
+                  [placeholder]="placeholderval" [required]="true"
                   (selectedValueChange)="onfrequencyChange($event, category)" [avatarUrl]="avatarUrl"
                   formControlName="securityfrequency" [hasAvatar]="hasAvatar" [label]="frequencylabelval">
                 </app-dropdown>
@@ -234,7 +235,7 @@
 
               <!-- INR -->
               <div class="col-lg-4 col-sm-12 mt-20">
-                <app-inputfield type="flag" label="{{ expenseLabels[category] }} (INR)" placeholder="40,20,337"
+                <app-inputfield type="flag" label="getCategoryLabel(category) + (INR)" placeholder="40,20,337"
                   [showPhonePrefix]="true" [showPhonePrefixnumber]="false">
                 </app-inputfield>
               </div>
@@ -264,13 +265,88 @@
             </div>
 
             }
-
+</div>
           </div>
         </div>
       </div>
     </ng-template>
 
-    <ng-template #miscellaneousTemplate let-i="index"></ng-template>
+    <!-- miscellaneousTemplate -->
+    <ng-template #miscellaneousTemplate let-i="index">
+
+      <div class="row common-details-box d-flex flex-row ">
+        <div class="mobiledetails d-flex w-100 flex-column ">
+          <div class="w-100 gap-3">
+            <!-- all categories -->
+            <app-dropdown [options]="misCatagories" [multiSelect]="true" [(selectedValue)]="selectedmisCategories"
+              [placeholder]="placeholderval" [required]="true" (selectedValueChange)="onmiscatagoryChange($event)"
+              [avatarUrl]="avatarUrl" [hasAvatar]="hasAvatar" [label]="labelval">
+            </app-dropdown>
+          </div>
+        </div>
+
+
+        <div class="mobiledetails d-flex w-100 flex-column ">
+          <div class="w-100 gap-3">
+<div formArrayName="miscexpenses">
+
+            @for (category of selectedmisCategories; track category) {
+
+            <div class="row mt-40">
+
+              <div class="text-label fw-bold">
+                {{ getmisCategoryLabel(category) }}
+              </div>
+
+
+              <hr class="hrclass">
+
+              <!-- Frequency -->
+              <div class="col-lg-4 col-sm-12 mt-20">
+                <app-dropdown [options]="searchfrequencyOptions" [(selectedValue)]="selectedOption"
+                  [placeholder]="placeholderval" [required]="true"
+                  (selectedValueChange)="onfrequencyChange($event, category)" [avatarUrl]="avatarUrl"
+                  formControlName="securityfrequency" [hasAvatar]="hasAvatar" [label]="frequencylabelval">
+                </app-dropdown>
+              </div>
+
+              <!-- INR -->
+              <div class="col-lg-4 col-sm-12 mt-20">
+                <app-inputfield type="flag" label="getmisCategoryLabel(category) + (INR)" placeholder="40,20,337"
+                  [showPhonePrefix]="true" [showPhonePrefixnumber]="false">
+                </app-inputfield>
+              </div>
+
+              <!-- AUD -->
+              <div class="col-lg-4 col-sm-12 mt-20">
+                <app-inputfield type="flag" label="Amount (AUD)" placeholder="$7000" [showaustralianflagPrefix]="true">
+                </app-inputfield>
+              </div>
+
+              <!-- Description only for Other Expense -->
+              @if(category === 'OtherExpense') {
+              <div class="col-12 mt-20">
+                <app-inputfield type="text" label="Expense Description" placeholder="Enter Here">
+                </app-inputfield>
+              </div>
+              }
+
+              <!-- Add More Button -->
+              <div class="col-lg-4 col-sm-12 mt-20">
+                <app-buttons label="Add More Expenses" class="btn btn-icon Add btncustomClass" [outline]="true"
+                  (click)="addmore(category)">
+                  <img src="/assets/images/icons/addred.svg">
+                </app-buttons>
+              </div>
+
+            </div>
+
+            }
+</div>
+          </div>
+        </div>
+      </div>
+    </ng-template>
 
 
 

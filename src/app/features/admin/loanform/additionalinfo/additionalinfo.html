@@ -73,9 +73,27 @@
 
 
                     <app-inputfield formControlName="dependents" label="Number Of Dependents" [required]="true"
-                        placeholder="Number Of Dependents" (input)="main.restrictInput($event, 'number')">
+                        placeholder="Number Of Dependents" (input)="main.restrictInput($event, 'number')"  [maxlength]="1" >
                     </app-inputfield>
+                    <div class="text-danger" *ngIf="f['dependents'].touched && f['dependents'].invalid">
 
+                        <div *ngIf="f['dependents'].errors?.['required']">
+                            Dependents is required
+                        </div>
+
+                        <div *ngIf="f['dependents'].errors?.['pattern']">
+                            Only numbers are allowed
+                        </div>
+
+                        <div *ngIf="f['dependents'].errors?.['min']">
+                            Minimum 0 dependent required
+                        </div>
+
+                        <div *ngIf="f['dependents'].errors?.['max']">
+                            Maximum 9 dependents allowed
+                        </div>
+
+                    </div>
                 </div>
 
 

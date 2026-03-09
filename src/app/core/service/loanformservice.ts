@@ -129,6 +129,22 @@ export class Loanformservice {
 
     );
   }
+
+
+  //estimate expense
+ getlivingexp(): Observable<ApiResponse<any>> {
+    return this.http.get<ApiResponse<any>>(
+      `${this.baseUrl}/v1/los/expense-masters/living`,
+
+    );
+  }
+
+  getmiscellaneousexp(): Observable<ApiResponse<any>> {
+    return this.http.get<ApiResponse<any>>(
+      `${this.baseUrl}/v1/los/expense-masters/miscellaneous`,
+
+    );
+  }
 }
 
 
