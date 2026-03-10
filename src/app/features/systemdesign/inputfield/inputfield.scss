@@ -228,3 +228,16 @@
   cursor: not-allowed;
 }
  
+.percent-input::-webkit-inner-spin-button {
+  opacity: 1;
+  background: rgb(245, 26, 26)!important;
+}
+
+.suffix{
+  position: absolute;
+  right: 45px;   /* keeps % before arrows */
+  top: 50%;
+  transform: translateY(-50%);
+  color: #666;
+  pointer-events: none;
+}

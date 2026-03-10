@@ -49,9 +49,10 @@ export class Additionalinfo implements OnInit {
   uploadedFiles: Record<string, File | null> = {};
   files: any = {};
   basicConfig: UploadConfig = {
-    accept: '.svg, .png, .jpg, .jpeg,',
+    accept: '.jpg, .jpeg,',
     maxSize: 2,
-    helperText: 'JPG, JPEG, PDF, PNG, (max. 2 MB)'
+    minSize: 50,
+    helperText: 'JPG, JPEG,(max. 2 MB,min. 50KB)'
   };
   genderchecked: string = '';
   gendercheckvalue = ''
@@ -83,7 +84,7 @@ export class Additionalinfo implements OnInit {
       uploadphoto: ['', Validators.required],
       maritalstatus: ['', Validators.required,],
       gender: ['', Validators.required,],
-      dependents: ['', Validators.required,Validators.min(0),Validators.max(9),],
+      dependents: ['', [Validators.required]],
       s_fname: ['', [Validators.required, Validators.pattern('^[A-Za-z ]+$'), Validators.minLength(2), Validators.maxLength(25)]],
       s_mname: ['', [Validators.pattern('^[A-Za-z ]+$'), Validators.minLength(2), Validators.maxLength(25)]],
       s_lname: ['', [Validators.required, Validators.pattern('^[A-Za-z ]+$'), Validators.minLength(2), Validators.maxLength(25)]],
@@ -97,10 +98,7 @@ export class Additionalinfo implements OnInit {
 
     });
 
-    // let ids = this.stepperService.getLoanId();
-    // console.log(ids);
-    // this.applicantId = ids[0];
-    // this.applicationId = ids[1];
+  
 
   }
   get f() {
@@ -129,7 +127,12 @@ export class Additionalinfo implements OnInit {
     console.log(result);
 
 
-    if (!result.file) return;
+    if (!result.file)  {
+    this.profilePhotoUrl = null;
+    this.objectName = null;
+    this.additionalinfoForm.get('uploadphoto')?.setValue(null);
+    return;
+  }
     const fd = new FormData();
 
 
@@ -145,7 +148,8 @@ export class Additionalinfo implements OnInit {
         this.additionalinfoForm.patchValue({
           uploadphoto: this.profilePhotoUrl
         });
-
+        this.additionalinfoForm.get('uploadphoto')?.setValue(this.profilePhotoUrl);
+  this.additionalinfoForm.get('uploadphoto')?.markAsDirty();
         this.additionalinfoForm.get('uploadphoto')?.updateValueAndValidity();
 
 
@@ -174,7 +178,9 @@ export class Additionalinfo implements OnInit {
     this.stepperService.previous();
   }
 
-
+  next1() {
+    this.stepperService.next();
+  }
   next() {
 
     console.log("form--", this.additionalinfoForm.value);

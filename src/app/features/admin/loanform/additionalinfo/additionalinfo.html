@@ -36,7 +36,7 @@
             <div class="row">
 
                 <div class="col-lg-4 col-sm-12 ">
-                    <app-uploadbtn [config]="basicConfig" [required]="true" formControlName="uploadphoto"
+                    <app-uploadbtn [config]="basicConfig"  formControlName="uploadphoto"
                         (fileChange)="onFileChange($event, 'applicantphoto')" label="Upload Applicant Photo">
                     </app-uploadbtn>
 
@@ -315,6 +315,9 @@
         <app-buttons type="button" label="Next" class="btn btncustomClass" color="primary" (click)="next()"
             [disabled]="!additionalinfoForm.valid">
         </app-buttons>
+         <!-- <app-buttons type="button" label="Next" class="btn btncustomClass" color="primary" (click)="next()"
+            [disabled]="!additionalinfoForm.valid">
+        </app-buttons> -->
 
     </div>
 </div>

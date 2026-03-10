@@ -7,10 +7,11 @@ import { Router } from '@angular/router';
 export class Loanstepperservice {
     private applicantId: string | null = null;
     private applicationId: string | null = null;
+     private custName: string | null = null;
+     private custARN: string | null = null;
 
   steps = [
     { label: 'Loan Info', route: 'loaninfo' },
-     { label: 'Education Details', route: 'educationinfo' },
     { label: 'General Info', route: 'genralinfo' },
     { label: 'Estimated Expense', route: 'expense' },
     { label: 'Additional Info', route: 'additionalinfo' },
@@ -30,14 +31,16 @@ export class Loanstepperservice {
   constructor(private router: Router) {}
 
 
-  setLoanId(id1: string,id2: string) {
+  setLoanId(id1: string,id2: string,name:string,arn:string) {
     this.applicantId = id1;
      this.applicationId = id2;
+     this.custName = name;
+     this.custARN = arn;
   }
 
 
   getLoanId() {
-    return [this.applicantId, this.applicationId];
+    return [this.applicantId, this.applicationId,this.custName,this.custARN];
   }
   
   next() {
@@ -48,7 +51,7 @@ export class Loanstepperservice {
     if (index < this.steps.length - 1  && index !== -1) {
       const nextRoute = this.steps[index + 1].route;
       this.router.navigate(['/loanform', nextRoute],{
-          queryParams: { applicantId: this.applicantId, applicationId: this.applicationId } 
+          queryParams: { applicantId: this.applicantId, applicationId: this.applicationId ,custName: this.custName,custARN: this.custARN} 
         });
     }
   }
@@ -61,7 +64,7 @@ export class Loanstepperservice {
     if (index > 0) {
       const prevRoute = this.steps[index - 1].route;
       this.router.navigate(['/loanform', prevRoute],{
-          queryParams: { applicantId: this.applicantId, applicationId: this.applicationId } 
+          queryParams: { applicantId: this.applicantId, applicationId: this.applicationId,custName: this.custName,custARN: this.custARN} 
         });
     }
   }

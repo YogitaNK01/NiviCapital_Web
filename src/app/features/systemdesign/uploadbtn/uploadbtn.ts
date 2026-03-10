@@ -9,6 +9,7 @@ export type UploadState = 'idle' | 'focus' | 'uploading' | 'success' | 'error' |
 export interface UploadConfig {
   accept?: string;
   maxSize?: number; // in MB
+  minSize?: number; // in MB
   label?: string;
   helperText?: string;
 }
@@ -130,6 +131,12 @@ export class Uploadbtn implements OnInit, ControlValueAccessor {
     const maxSizeBytes = (this.config.maxSize || 10) * 1024 * 1024;
     if (file.size > maxSizeBytes) {
       this.setError(`File size exceeds ${this.config.maxSize} MB`);
+      return;
+    }
+
+     const minSizeBytes = (this.config.minSize || 10) * 1024 * 1024;
+    if (file.size < minSizeBytes) {
+      this.setError(`File size minimum ${this.config.minSize} KB`);
       return;
     }
 

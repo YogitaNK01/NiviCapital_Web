@@ -56,6 +56,7 @@ export class Selectproduct implements OnInit {
   ]
   formData: any = {};
   custId: string = '';
+  custName:string='';
   //checkbox-------------------
   isChecked_rb: boolean = false;
   SecurityTypechecked: string = '';
@@ -73,6 +74,7 @@ export class Selectproduct implements OnInit {
     this.route.queryParams.subscribe(params => {
       if (params['custId']) {
         this.custId = params['custId'];
+         this.custName = params['custName'];
 
       }
     });
@@ -138,6 +140,8 @@ export class Selectproduct implements OnInit {
         queryParams: {
           applicationId: this.applicationId,
           applicantId:this.applicantId,
+          custName:this.custName,
+          custARN:this.arnid
         
         }
       }

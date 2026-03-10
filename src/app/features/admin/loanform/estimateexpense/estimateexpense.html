@@ -218,7 +218,7 @@
               <div class="row mt-40" [formGroupName]="i">
 
                 <div class="text-label fw-bold">
-                  {{ getmisCategoryLabel(expense.get('category')?.value) }}
+                  {{ getCategoryLabel(expense.get('category')?.value) }}
                 </div>
 
 
@@ -370,6 +370,8 @@
     </app-buttons>
     <app-buttons type="button" label="Next" class="btn btncustomClass" color="primary" (click)="next()">
     </app-buttons>
+     <!-- <app-buttons type="button" label="Next" class="btn btncustomClass" color="primary" (click)="next1()">
+    </app-buttons> -->
 
   </div>
 </div>

@@ -4,7 +4,7 @@
 
 .datrpicker-label {
   text-align: start;
-  color: #25262F;
+  color: #25262F !important;
   font-size: 1rem;
   font-style: normal;
   font-weight: normal;
@@ -71,7 +71,7 @@
 
 ::ng-deep .cdk-overlay-pane .mat-calendar-content {
   padding: 8px;
-  
+
 }
 
 ::ng-deep .cdk-overlay-pane .mat-calendar-body-cell-content.mat-focus-indicator.mat-calendar-body-selected {
@@ -108,4 +108,18 @@
 .date-btn-ok {
   border: 1px solid $secondary-text;
   color: $secondary-text;
+}
+
+/* Disabled mat-form-field background */
+::ng-deep .mat-mdc-form-field.mat-form-field-disabled .mdc-notched-outline {
+  background: #F5F5F5;
+  color: #000000 !important;
+  opacity: 0.6;
+  border-color: #131a66;
+}
+
+/* Disabled input background */
+::ng-deep .mat-mdc-form-field.mat-form-field-disabled .mat-mdc-input-element {
+  color: #000000 !important;
+  border-color: #666771;
 }

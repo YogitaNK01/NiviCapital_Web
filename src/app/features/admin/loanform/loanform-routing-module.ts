@@ -34,12 +34,12 @@ const routes: Routes = [
       { path: 'kycinfo', component: Kycinfo },
       { path: 'educationinfo', component: Educationinfo },
       { path: 'incomeinfo', component: Incomeinfo },
-      { path: 'assetsinfo', component: Assetsinfo },
-      { path: 'liabilitiesinfo', component: Liabilitiesinfo },
-      { path: 'monthlyexpinfo', component: Monthlyexpenditureinfo },
-      { path: 'referenceinfo', component: Referenceinfo },
-      { path: 'coapplicantinfo', component: Coapplicantinfo },
-      { path: 'summaryinfo', component: Summaryinfo },
+      // { path: 'assetsinfo', component: Assetsinfo },
+      // { path: 'liabilitiesinfo', component: Liabilitiesinfo },
+      // { path: 'monthlyexpinfo', component: Monthlyexpenditureinfo },
+      // { path: 'referenceinfo', component: Referenceinfo },
+      // { path: 'coapplicantinfo', component: Coapplicantinfo },
+      // { path: 'summaryinfo', component: Summaryinfo },
     ]
   },
 

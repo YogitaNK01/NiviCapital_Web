@@ -10,7 +10,6 @@ import {
 export class AuthInterceptor implements HttpInterceptor {
 
   intercept(req: HttpRequest<any>, next: HttpHandler) {
-    // console.log("AuthInterceptor called");
     return next.handle(
       req.clone({
         withCredentials: true

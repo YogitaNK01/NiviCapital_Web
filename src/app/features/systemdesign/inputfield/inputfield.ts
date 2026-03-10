@@ -1,11 +1,11 @@
 import { CommonModule } from '@angular/common';
 import { Component, EventEmitter, forwardRef, Input, Output } from '@angular/core';
-import { FormsModule,NG_VALUE_ACCESSOR, ControlValueAccessor  } from '@angular/forms';
+import { FormsModule, NG_VALUE_ACCESSOR, ControlValueAccessor } from '@angular/forms';
 import { Buttons } from "../buttons/buttons";
 
 @Component({
   selector: 'app-inputfield',
-   standalone: true,
+  standalone: true,
   imports: [CommonModule, Buttons],
   templateUrl: './inputfield.html',
   styleUrls: ['./inputfield.scss'],
@@ -18,7 +18,7 @@ import { Buttons } from "../buttons/buttons";
   ]
 })
 export class Inputfield implements ControlValueAccessor {
-   // ✅ Text inputs
+  // ✅ Text inputs
   @Input() label: string = '';
   @Input() helpTextValue: string = '';
 
@@ -26,39 +26,41 @@ export class Inputfield implements ControlValueAccessor {
   @Input() showLabel: boolean = true;
   @Input() showHelpText: boolean = true;
 
-//  @Input() label: string = '';
+  //  @Input() label: string = '';
   @Input() placeholder: string = '';
   @Input() helpText: string = '';
-  @Input() type: 'text' | 'password' | 'email' | 'search' | 'tel' | 'flag' = 'text';
+  @Input() type: 'text'  | 'password' | 'email' | 'search' | 'tel' | 'flag' | 'number' = 'text';
   @Input() state: 'default' | 'error' | 'success' = 'default';
   @Input() showSearch: boolean = false;
   @Input() showInfo: boolean = false;
   @Input() disabled: boolean = false;
   @Output() valueChange = new EventEmitter<string>();
-@Input() required: boolean = false;
+  @Input() required: boolean = false;
   // NEW inputs add customer 
   @Input() maxlength!: number;
-@Input() uppercase: boolean = false;
+  @Input() uppercase: boolean = false;
 
   @Input() showaustralianflagPrefix: boolean = false;  //flag
 
   @Input() showPhonePrefix: boolean = false;  //flag
-   @Input() showPhonePrefixnumber: boolean = false;  //+91
-@Input() rightButtonText: string = '';  //sendotp btn
-@Input() rightButtonDisabled: boolean = false;
-  @Input() readonly: boolean = false;  
+  @Input() showPhonePrefixnumber: boolean = false;  //+91
+  @Input() rightButtonText: string = '';  //sendotp btn
+  @Input() rightButtonDisabled: boolean = false;
+  @Input() readonly: boolean = false;
 
-// NEW output
-@Output() rightButtonClick = new EventEmitter<void>();
+  @Input() suffix: string = '';
 
-   
+  // NEW output
+  @Output() rightButtonClick = new EventEmitter<void>();
+
+
 
   value: string = '';
-   passwordVisible: boolean = false;
-  currentType: string= '';
+  passwordVisible: boolean = false;
+  currentType: string = '';
 
-  private onChange: (value: string) => void = () => {};
-  private onTouched: () => void = () => {};
+  private onChange: (value: string) => void = () => { };
+  private onTouched: () => void = () => { };
 
   ngOnInit() {
     // Initialize currentType based on the type input
@@ -79,7 +81,7 @@ export class Inputfield implements ControlValueAccessor {
     this.currentType = this.passwordVisible ? 'text' : 'password';
     console.log('Password toggled:', this.currentType, 'Visible:', this.passwordVisible);
   }
- 
+
   onInputChange(value: string): void {
     this.value = value;
     this.onChange(value);
@@ -109,9 +111,9 @@ export class Inputfield implements ControlValueAccessor {
   }
 
   onRightButtonClick(): void {
-  if (!this.rightButtonDisabled) {
-    this.rightButtonClick.emit();
+    if (!this.rightButtonDisabled) {
+      this.rightButtonClick.emit();
+    }
   }
-}
 
 }

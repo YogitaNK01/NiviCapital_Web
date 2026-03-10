@@ -16,6 +16,8 @@ export class LoanInfo implements OnInit {
   
   applicantId: string = '';
   applicationId: string = '';
+  custName: string = '';
+  custARN: string = '';
 
   constructor(private router: Router,private stepperService:Loanstepperservice,private route: ActivatedRoute) { }
   ngOnInit(): void {
@@ -23,8 +25,9 @@ export class LoanInfo implements OnInit {
       if (params['applicantId']) {
         this.applicantId = params['applicantId'];
         this.applicationId = params['applicationId'];
-
-        this.stepperService.setLoanId(this.applicantId ,this.applicationId);
+         this.custName = params['custName'];
+          this.custARN = params['custARN'];
+        this.stepperService.setLoanId(this.applicantId ,this.applicationId,this.custName,this.custARN);
       }
     });
   }

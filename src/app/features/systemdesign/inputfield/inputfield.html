@@ -32,7 +32,7 @@
      (input)="onInputChange($any($event.target).value)"
       (blur)="onBlur()"
       [disabled]="disabled"
-      class="input-field"
+      class="input-field percent-input"
       [readonly]="readonly"
       [ngClass]="{
         'has-left-icon': showSearch,
@@ -42,10 +42,15 @@
         'input-success': state === 'success',
          'has-prefix': type === 'tel' || type === 'flag',
       'has-right-btn': rightButtonText,
-      'uppercase': uppercase
+      'uppercase': uppercase,
+      'has-suffix': type === 'number',
       }" 
       
     />
+     <span *ngIf="suffix" class="suffix">
+            {{suffix}}
+        </span>
+
     <app-buttons  *ngIf="rightButtonText" label="" class="btncustomClass primary right-btn" [outline]="true" (click)="onRightButtonClick()">{{ rightButtonText }}</app-buttons>
     
    

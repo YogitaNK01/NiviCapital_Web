@@ -15,6 +15,7 @@
       [(ngModel)]="selectedDate"
       (ngModelChange)="onDateChange($event)"
       placeholder="DD/MM/YYYY"
+      [min]="minDate"
       
     />
 

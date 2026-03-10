@@ -161,7 +161,8 @@ export class Newloan implements OnInit {
     this.router.navigate(["/admin/losoperation/selectproduct"],
       {
         queryParams: {
-          custId: this.selectedRows[0].custId
+          custId: this.selectedRows[0].custId,
+          custName: this.selectedRows[0].firstName + ""+this.selectedRows[0].lastName
 
         }
       }

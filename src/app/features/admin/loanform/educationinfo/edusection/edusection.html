@@ -1,24 +1,27 @@
 <div [formGroup]="group" class="row  d-flex  align-items-start pt-4 common-details-box d-flex flex-column">
     <div class="row mt-20">
         <app-inputfield type="text" formControlName="institutename" [required]="true" label="Institute Name"
-            placeholder="Institute Name" helpText="Help text" name="institutename">
+            placeholder="Select Institute Name" helpText="Help text" name="institutename">
         </app-inputfield>
     </div>
     <div class="row mt-20">
         <div class="col-lg-4 col-sm-12">
-            <app-dropdown [options]="selectpassingyr" [placeholder]="passingyear" [required]="true"
+            <app-dropdown [options]="selectpassingyr" [placeholder]="'Select Year'" [required]="true"
                 (selectedValueChange)="group.get('passingyear')?.setValue($event)" [avatarUrl]="avatarUrl"
                 formControlName="passingyear" [hasAvatar]="hasAvatar" [label]="passingyear">
             </app-dropdown>
         </div>
         <div class="col-lg-4 col-sm-12">
-            <app-dropdown [options]="selectpercentage" [placeholder]="per_cgpa" [required]="true"
-                (selectedValueChange)="group.get('per_cgpa')?.setValue($event)" [avatarUrl]="avatarUrl"
-                formControlName="per_cgpa" [hasAvatar]="hasAvatar" [label]="per_cgpa">
-            </app-dropdown>
+             <app-inputfield type="number" formControlName="per_cgpa" [required]="true" label="Percentage / CGPA"
+            placeholder="Enter Percentage" helpText="Help text" name="per_cgpa"  min="0"
+      max="100"
+      step="0.01" suffix="%">
+        </app-inputfield>
+
+            
         </div>
         <div class="col-lg-4 col-sm-12">
-            <app-dropdown [options]="selectlocation" [placeholder]="location" [required]="true"
+            <app-dropdown [options]="selectlocation" [placeholder]="'Select Location'" [required]="true"
                 (selectedValueChange)="group.get('location')?.setValue($event)" [avatarUrl]="avatarUrl"
                 formControlName="location" [hasAvatar]="hasAvatar" [label]="location">
             </app-dropdown>
@@ -41,20 +44,20 @@
         <div class="text-label fw-bold mt-20">Marksheet</div>
 
         <hr class="hrclass">
-        <div class="col-lg-4 col-sm-12 mt-20">
-            <app-uploadbtn [config]="basicConfig" (fileChange)="onFileChange($event, 'marksheet')" [required]="true"
-                label="Marksheet">
+        <div class="col-lg-4 col-sm-12 mt-20" *ngFor="let m of [].constructor(marksheetCount); let i = index">
+            <app-uploadbtn [config]="basicConfig" (fileChange)="onFileChange($event, 'marksheet'+i)" [required]="true"
+                [label]="marksheetCount>2? 'Marksheet ' + (i+1) + ' Year'  : marksheetlabel" formControlName="marksheet">
             </app-uploadbtn>
         </div>
     </div>
 
-    <div class="row ">
+    <div class="row " *ngIf="showLC">
         <div class="text-label fw-bold mt-20">School Leaving Certificate</div>
 
         <hr class="hrclass">
         <div class="col-lg-4 col-sm-12 mt-20">
             <app-uploadbtn [config]="basicConfig" (fileChange)="onFileChange($event, 'lc')" [required]="true"
-                label="School Leaving Certificate">
+                label="School Leaving Certificate" formControlName="lc">
             </app-uploadbtn>
         </div>
     </div>

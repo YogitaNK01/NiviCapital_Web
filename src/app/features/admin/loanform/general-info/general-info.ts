@@ -85,14 +85,18 @@ export class GeneralInfo implements OnInit {
 
   applicantId: string = '';
   applicationId: string = '';
+  custName: string = '';
+  custARN: string = '';
   constructor(private fb: FormBuilder, private formSvc: Loanformservice, private router: Router, private stepperService: Loanstepperservice, private route: ActivatedRoute,) { }
   ngOnInit() {
     this.route.queryParams.subscribe(params => {
       if (params['applicantId']) {
         this.applicantId = params['applicantId'];
         this.applicationId = params['applicationId'];
+       this.custName = params['custName'];
+        this.custARN = params['custARN'];
 
-        this.stepperService.setLoanId(this.applicantId, this.applicationId);
+        this.stepperService.setLoanId(this.applicantId, this.applicationId,this.custName,this.custARN);
       }
     });
 
@@ -178,7 +182,7 @@ export class GeneralInfo implements OnInit {
         label: s.occupationName,
 
       }));
-      this.restoreDropdownLabels(this.registerForm.value);
+      // this.restoreDropdownLabels(this.registerForm.value);
     });
   }
 
@@ -191,7 +195,7 @@ export class GeneralInfo implements OnInit {
         label: s.qualificationName,
 
       }));
-      this.restoreDropdownLabels(this.registerForm.value);
+      // this.restoreDropdownLabels(this.registerForm.value);
     });
   }
 

@@ -268,7 +268,7 @@ export class Kycinfo {
           currstate:formdata.otherAddress == null ? formdata.currentAddress.state:formdata.otherAddress.state,
           currcity:formdata.otherAddress == null ? formdata.currentAddress.city:formdata.otherAddress.city,
           currpincode:formdata.otherAddress == null ? formdata.currentAddress.zipCode:formdata.otherAddress.zipCode,
-          iscurrMailingAddress:formdata.sameAsPermanent == 0 ?  formdata.currentAddress.isMailingAddress  : false,
+          iscurrMailingAddress:formdata.sameAsPermanent == 0 ?  true  : false,
         });
         this.kycdocumentsForm.disable();
         console.log(this.kycdocumentsForm.get('dob')?.disabled);

@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Loanstepper } from "../loanstepper/loanstepper";
-import { RouterOutlet } from "@angular/router";
+import { ActivatedRoute, RouterOutlet } from "@angular/router";
 import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { Loanformservice } from '../../../../core/service/loanformservice';
 
@@ -15,11 +15,33 @@ import { Loanformservice } from '../../../../core/service/loanformservice';
 export class Loanlayout implements OnInit {
 
    masterForm!: FormGroup;
-
+ 
+  applicantId: any;
+  applicationId: any;
+ 
+  applicantName: any;
+  applicationARN: any;
    
-  constructor(private fb: FormBuilder, private formSvc: Loanformservice) {}
+  constructor(private fb: FormBuilder, private formSvc: Loanformservice,private route: ActivatedRoute) {}
 
   ngOnInit() {
+
+     this.route.queryParams.subscribe(params => {
+
+      const applicantId = params['applicantId'];
+      const applicationId = params['applicationId'];
+      const applicantName = params['custName'];
+      const applicationARN = params['custARN'];
+
+
+      this.applicantId = applicantId;
+      this.applicationId = applicationId;
+      this.applicantName = applicantName;
+      this.applicationARN = applicationARN;
+
+    });
+
+
     this.masterForm = this.fb.group({
 
       loanInfo: this.fb.group({

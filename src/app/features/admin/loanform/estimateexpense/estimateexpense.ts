@@ -364,12 +364,22 @@ export class Estimateexpense {
 
     });
 
+    for (let i = formArray.length - 1; i >= 0; i--) {
+    const category = formArray.at(i).get('category')?.value;
+
+    if (!selected.includes(category)) {
+      formArray.removeAt(i);
+    }
+  }
   }
 
   back() {
     this.stepperService.previous();
   }
 
+  next1() {
+   
+    this.stepperService.next();}
   next() {
    
     // this.stepperService.next();
