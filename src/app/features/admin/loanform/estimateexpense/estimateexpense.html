@@ -181,7 +181,7 @@
         <div class="col">
           <div class="form-group mb-3">
             <app-inputfield type="flag" [required]="true" label="Tuition Fees (INR)" [required]="true"
-              formControlName="tutionfees" placeholder="40,20,337" helpText="Help text" name="tutionfees" 
+              formControlName="tutionfees" placeholder="40,20,337" helpText="Help text" name="tutionfees" [maxlength]="9"
               [showPhonePrefix]="true" [showPhonePrefixnumber]="false" (input)="handleAmountInput($event,'tutionfees')">
             </app-inputfield>
           </div>

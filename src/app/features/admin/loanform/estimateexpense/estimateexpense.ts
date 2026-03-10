@@ -25,9 +25,9 @@ export class Estimateexpense {
 
   openIndex: number[] = [0];
   accordions = [
-    { title: 'Education Fees - ₹90,40,437  ', alwaysOpen: true },
-    { title: 'Living Expense - ₹90,40,437 ', alwaysOpen: false },
-    { title: 'Miscellaneous - ₹0', alwaysOpen: false },
+    { title: 'Education Fees   ', alwaysOpen: true },
+    { title: 'Living Expense ', alwaysOpen: false },
+    { title: 'Miscellaneous ', alwaysOpen: false },
   ];
   expenseForm!: FormGroup
 
