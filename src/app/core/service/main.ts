@@ -38,7 +38,7 @@ export interface UserData {
 })
 export class Main {
   // private baseUrl = environment.apiBaseUrl;
-  private baseUrl = "/nivicapstage/api";
+  private baseUrl = "/nivicapsit/api";
   private kycSubject = new BehaviorSubject<any>(this.getFromSession());
   kyc$ = this.kycSubject.asObservable();
 
@@ -197,7 +197,7 @@ restrictInput(event: Event, type: 'text' | 'number') {
 
    getIndianstates(): Observable<ApiResponse<UserData[]>> {
     return this.http.get<ApiResponse<UserData[]>>(
-      `http://192.168.5.42:8085/nivicapstage/api/v1/states`, 
+      `${this.baseUrl}/v1/states`, 
       
     );
   }
@@ -205,7 +205,7 @@ restrictInput(event: Event, type: 'text' | 'number') {
   
    getIndianstatescities(id: string): Observable<ApiResponse<UserData[]>> {
     return this.http.get<ApiResponse<UserData[]>>(
-      `http://192.168.5.42:8085/nivicapstage/api/v1/${id}/cities`,
+      `${this.baseUrl}/v1/${id}/cities`,
     );
   }
 

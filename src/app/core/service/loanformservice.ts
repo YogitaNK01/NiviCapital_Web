@@ -19,7 +19,7 @@ export interface ApiResponse<T> {
 export class Loanformservice {
   form!: FormGroup;
   // private baseUrl = environment.apiBaseUrl;
-  private baseUrl = "/nivicapstage/api";
+  private baseUrl = "/nivicapsit/api";
 
   kycdetailsID: any;
 

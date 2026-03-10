@@ -134,11 +134,11 @@ export class Uploadbtn implements OnInit, ControlValueAccessor {
       return;
     }
 
-     const minSizeBytes = (this.config.minSize || 10) * 1024 * 1024;
-    if (file.size < minSizeBytes) {
-      this.setError(`File size minimum ${this.config.minSize} KB`);
-      return;
-    }
+    //  const minSizeBytes = (this.config.minSize || 10) * 1024 * 1024;
+    // if (file.size < minSizeBytes) {
+    //   this.setError(`File size minimum ${this.config.minSize} KB`);
+    //   return;
+    // }
 
     this.fileName = file.name;
     this.uploadFile(file);

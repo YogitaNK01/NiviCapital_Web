@@ -53,7 +53,7 @@ export class Layout implements OnInit, OnDestroy {
     { icon: '/assets/images/sidemenu/user.svg', iconActive: '/assets/images/sidemenu/user-active.svg', label: 'Customer', route: '/admin/customer', expanded: false },
     // { icon: '/assets/images/sidemenu/user.svg', iconActive: '/assets/images/sidemenu/user-active.svg', label: 'add Customer', route: '/admin/customer/addcustomer', expanded: false },
 
-    { icon: '/assets/images/sidemenu/user.svg', iconActive: '/assets/images/sidemenu/user-active.svg', label: 'loan form', route: '/loanform/loaninfo', expanded: false },
+    // { icon: '/assets/images/sidemenu/user.svg', iconActive: '/assets/images/sidemenu/user-active.svg', label: 'loan form', route: '/loanform/loaninfo', expanded: false },
         // { icon: '/assets/images/sidemenu/user.svg', iconActive: '/assets/images/sidemenu/user-active.svg', label: 'select product', route: '/admin/losoperation/selectproduct', expanded: false },
 
 
@@ -70,7 +70,7 @@ export class Layout implements OnInit, OnDestroy {
     { icon: '/assets/images/sidemenu/profile-circle.svg', label: 'User Management', route: '/admin/dashboard4', expanded: false },
     { icon: '/assets/images/sidemenu/note.svg', label: 'Analytics', route: '/admin/customer4', expanded: false },
     { icon: '/assets/images/sidemenu/note.svg', label: 'Products', route: '/admin/customer5', expanded: false },
-    { icon: '/assets/images/sidemenu/note.svg', label: 'System Design', route: 'systemdesign/buttons', expanded: false },
+    // { icon: '/assets/images/sidemenu/note.svg', label: 'System Design', route: 'systemdesign/buttons', expanded: false },
   ];
 
   myOptions: DropdownOption[] = [

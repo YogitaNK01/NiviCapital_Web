@@ -9,7 +9,7 @@ import { environment } from '../../../environments/environment';
 })
 export class Addcustomerservice {
   
-  private baseUrl = "/nivicapstage/api";
+  private baseUrl = "/nivicapsit/api";
   constructor(private http: HttpClient) { }
 
     checkcontact(data:any): Observable<any> {

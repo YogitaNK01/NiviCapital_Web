@@ -7,6 +7,7 @@ import { FormArray, FormBuilder, FormGroup, ReactiveFormsModule, Validators } fr
 import { Loanformservice } from '../../../../core/service/loanformservice';
 import { Inputfield } from '../../../systemdesign/inputfield/inputfield';
 import { Dropdown, DropdownOption } from '../../../systemdesign/dropdown/dropdown';
+import { Main } from '../../../../core/service/main';
 
 interface OptionItem {
   label: string;
@@ -82,7 +83,7 @@ export class Estimateexpense {
 
   applicantId:any;
   applicationId:any
-  constructor(private fb: FormBuilder, private stepperService: Loanstepperservice, private cd: ChangeDetectorRef, private loanformservice: Loanformservice, private route: ActivatedRoute) { }
+  constructor(private fb: FormBuilder, private stepperService: Loanstepperservice, private cd: ChangeDetectorRef, private loanformservice: Loanformservice, private route: ActivatedRoute, public main: Main) { }
 
   ngOnInit(): void {
 
@@ -314,6 +315,12 @@ export class Estimateexpense {
   }
 
 // =====================================================================================
+
+handleAmountInput(event: any, controlName: string) {
+  this.main.restrictInput(event, 'number');
+  this.formatAmount(event, controlName);
+}
+
   //format amount 2000000 to 20,00,000
   formatAmount(event: any, controlName: string, index?: number,type?: 'living' | 'misc') {
 
