@@ -57,7 +57,7 @@ export class Login {
     this.main.getLogin(inputobj).subscribe({
       next: (res) => {
         this.isLoading = false;
-        // this.router.navigate(['admin/dashboard']);
+        this.router.navigate(['admin/dashboard']);
         // this.msgBox.open({
         //   title: 'Success',
         //   message: res.message || 'Login successful',

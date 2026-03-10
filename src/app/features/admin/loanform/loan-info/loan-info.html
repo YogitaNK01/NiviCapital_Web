@@ -3,47 +3,51 @@
   <div class=" form-area row g-4">
     <!-- Left Form -->
     <div class="col-lg-5">
-      <form class="form-section">
+      <form class="form-section" #basicincomeform="ngForm" (ngSubmit)="submitForm(basicincomeform)" id="basicincomeform" >
 
-        <div class="mb-3">
-          <app-dropdown [options]="selectIncome" [placeholder]="'Enter annual income'" [required]="true" 
-            [avatarUrl]="avatarUrl" [hasAvatar]="hasAvatar" [label]="'What’s your Annual Income?'">
+        <div class="">
+          <app-dropdown [options]="selectIncome" [placeholder]="'Enter annual income'" [required]="true"  [(ngModel)]="annual_Income"
+            [avatarUrl]="avatarUrl" [hasAvatar]="hasAvatar" [label]="'What’s your Annual Income?'" name="annual_Income">
           </app-dropdown>
         </div>
 
-        <div class="mb-4">
-          <div class="d-flex justify-content-between mb-1">
-            <label class="form-label">Rate Of Interest (p.a)</label>
-            <span class="value-box">{{ rateOfInterest }}%</span>
+        <div class="">
+          <div class="d-flex justify-content-between align-items-center">
+            <label class="text-dp-3-regular fw-bold">Rate Of Interest (p.a)</label>
+            <span class="value-box text-dp-1-medium ">{{ rateOfInterest }}%</span>
           </div>
           <input type="range" class="form-range" min="9.5" max="15" step="0.1" [(ngModel)]="rateOfInterest" name="rate">
         </div>
 
-        <div class="mb-4">
-          <label class="form-label">How much money do you need?</label>
-          <div class="input-group">
-            <span class="input-group-text">₹</span>
-            <input type="text" class="form-control text-end" [(ngModel)]="loanAmount" name="loanAmount">
+        <div class="">
+          <div class="d-flex justify-content-between align-items-center">
+            <div class=""><label class="text-dp-3-regular fw-bold">How much money do you need?</label>
+            <div class="text-body-1">Choose the loan amount that fits your needs <br>and financial goals.</div></div>
+            
+            <span class="value-box text-dp-1-medium ">₹{{ loanAmount }}</span>
           </div>
+
           <input type="range" class="form-range mt-2" min="100000" max="4500000" step="10000" [(ngModel)]="loanAmount"
             name="loanSlider">
         </div>
 
-        <div class="mb-4">
-          <label class="form-label">Loan Tenure</label>
-          
-          <app-dropdown [options]="selectTenure"  [required]="true" 
-            [avatarUrl]="avatarUrl" [hasAvatar]="hasAvatar" >
-          </app-dropdown>
+          <div class="">
+          <div class="d-flex justify-content-between align-items-center">
+            <label class="text-dp-3-regular fw-bold">Loan Tenure</label>
+            <span class="value-box text-dp-1-medium ">{{ tenure }}yr</span>
+          </div>
+         <input type="range" class="form-range" min="1" max="7" step="1" [(ngModel)]="tenure" name="rate">
         </div>
 
-        <div class="mb-4">
-          <app-dropdown [options]="selectpaymentmode"  [required]="true" 
+
+        <div class="">
+          <app-dropdown [options]="selectpaymentmode"  [required]="true" [(ngModel)]="paymentmode" name="paymentmode"
             [avatarUrl]="avatarUrl" [hasAvatar]="hasAvatar" [label]="'Mode Of Payment'" >
           </app-dropdown>
         </div>
 
-        <app-buttons type="button" label="Apply loan" class="btn btncustomClass w-100" color="primary" (click)="next()" ></app-buttons>
+        <app-buttons label="Apply loan" class="btn btncustomClass w-100" type="submit" [disabled]="!basicincomeform.valid"
+         color="primary" (click)="next()" ></app-buttons>
       </form>
     </div>
 

@@ -4,7 +4,7 @@ import { Buttons } from '../../../systemdesign/buttons/buttons';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Loanstepperservice } from '../../../../core/service/loanstepperservice';
 import { Dropdown, DropdownOption } from '../../../systemdesign/dropdown/dropdown';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, NgForm } from '@angular/forms';
 import { Charts } from "../../../systemdesign/charts/charts";
 
 @Component({
@@ -67,6 +67,9 @@ selectpaymentmode: DropdownOption[] = [
   totalPrincipalAmount = 1000000;
   totalEmiAmount = 19566;
 
+  annual_Income!: string;
+  paymentmode!:string;
+
   interestPercentage = Math.round((this.totalInterestPayable / (this.totalPrincipalAmount + this.totalInterestPayable)) * 100);
 
   get totalPayable() {
@@ -91,6 +94,10 @@ selectpaymentmode: DropdownOption[] = [
   }
 
 
+    submitForm(data: NgForm) {
+
+
+    }
 
   back() {
 
