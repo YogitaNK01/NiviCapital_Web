@@ -1,37 +1,98 @@
 <div class="page-card">
+  
+  <div class=" form-area row g-4">
+    <!-- Left Form -->
+    <div class="col-lg-5">
+      <form class="form-section">
 
-  <div class="page-header">
-    <h2>Loan Info</h2>
-    <div class="sub">Roshan Paste — ARN2025092400001</div>
-  </div>
+        <div class="mb-3">
+          <app-dropdown [options]="selectIncome" [placeholder]="'Enter annual income'" [required]="true" 
+            [avatarUrl]="avatarUrl" [hasAvatar]="hasAvatar" [label]="'What’s your Annual Income?'">
+          </app-dropdown>
+        </div>
 
-  <div class="grid">
+        <div class="mb-4">
+          <div class="d-flex justify-content-between mb-1">
+            <label class="form-label">Rate Of Interest (p.a)</label>
+            <span class="value-box">{{ rateOfInterest }}%</span>
+          </div>
+          <input type="range" class="form-range" min="9.5" max="15" step="0.1" [(ngModel)]="rateOfInterest" name="rate">
+        </div>
 
-    <!-- LEFT FORM -->
-    <div class="form-area">
-      <!-- your inputs -->
+        <div class="mb-4">
+          <label class="form-label">How much money do you need?</label>
+          <div class="input-group">
+            <span class="input-group-text">₹</span>
+            <input type="text" class="form-control text-end" [(ngModel)]="loanAmount" name="loanAmount">
+          </div>
+          <input type="range" class="form-range mt-2" min="100000" max="4500000" step="10000" [(ngModel)]="loanAmount"
+            name="loanSlider">
+        </div>
+
+        <div class="mb-4">
+          <label class="form-label">Loan Tenure</label>
+          
+          <app-dropdown [options]="selectTenure"  [required]="true" 
+            [avatarUrl]="avatarUrl" [hasAvatar]="hasAvatar" >
+          </app-dropdown>
+        </div>
+
+        <div class="mb-4">
+          <app-dropdown [options]="selectpaymentmode"  [required]="true" 
+            [avatarUrl]="avatarUrl" [hasAvatar]="hasAvatar" [label]="'Mode Of Payment'" >
+          </app-dropdown>
+        </div>
+
+        <app-buttons type="button" label="Apply loan" class="btn btncustomClass w-100" color="primary" (click)="next()" ></app-buttons>
+      </form>
     </div>
 
-    <!-- RIGHT SUMMARY -->
-    <div class="summary-area">
-      <!-- donut chart + summary cards -->
+    <!-- Right Side - Chart + Summary -->
+    <div class="col-lg-4">
+      <div class="chart-container">
+        <!-- Donut Chart using Bootstrap + CSS -->
+        <div class="donut-chart mx-auto">
+          <!-- <app-charts [title]="'Donut Chart'" [data]="chartData1"></app-charts> -->
+          <app-charts [title]="'Large Chart'" [data]="chartData1" [width]="350" [height]="350"
+                                    [radius]="80" [innerRadius]="50" [centerX]="100" [centerY]="100"></app-charts>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-3">
+      <div class="summary-grid mt-4">
+        <div class="summary-card">
+          <div class="label">TOTAL INTEREST PAYABLE</div>
+          <div class="value">₹ {{ totalInterestPayable | number }}</div>
+        </div>
+        <div class="summary-card">
+          <div class="label">TOTAL PRINCIPLE AMOUNT</div>
+          <div class="value">₹ {{ totalPrincipalAmount | number }}</div>
+        </div>
+        <div class="summary-card">
+          <div class="label">TOTAL EMI AMOUNT</div>
+          <div class="value">₹ {{ totalEmiAmount | number }}</div>
+        </div>
+      </div>
+    </div>
+    <div class="text-center mt-3">
+      <a href="#" class="see-amortization">See Amortization</a>
     </div>
 
   </div>
 
 
-    <div class="col-lg-12 mt-4 d-flex justify-content-between">
+  <!-- <div class="col-lg-12 mt-4 d-flex justify-content-between">
 
-                <div class="col-lg-4 mt-4">
-                    <img src="../assets/images/icons/save.svg">
-                    <span class="text-dp-3-regular mx-2 blue-text"> Save and Exit</span>
-                </div>
-                <div class="col-lg-4 mt-4 d-flex justify-content-end">
-                    <app-buttons type="button" label="Back" class="btn btncustomClass" [outline]="true" (click)="back()">
-                    </app-buttons>
-                    <app-buttons type="button" label="Next" class="btn btncustomClass" color="primary" (click)="next()">
-                    </app-buttons>
+    <div class="col-lg-4 mt-4">
+      <img src="../assets/images/icons/save.svg">
+      <span class="text-dp-3-regular mx-2 blue-text"> Save and Exit</span>
+    </div>
+    <div class="col-lg-4 mt-4 d-flex justify-content-end">
+      <app-buttons type="button" label="Back" class="btn btncustomClass" [outline]="true" (click)="back()">
+      </app-buttons>
+      <app-buttons type="button" label="Next" class="btn btncustomClass" color="primary" (click)="next()">
+      </app-buttons>
 
-                </div>
-            </div>
+    </div>
+  </div> -->
 </div>

@@ -390,7 +390,7 @@ export class GeneralInfo implements OnInit {
       "courseEndDate": this.formatDate(formdata.courseenddate),
 
       "hasAssets": this.checkboxasset == "Yes" ? true : false,
-      "lendingPartnerId": formdata.occupation,
+      "lendingPartnerId": formdata.lendingpartner,
     }
 
     console.log(input);

@@ -2,19 +2,20 @@
 @use 'typography' as *;
 @use 'common' as *;
 .page-card {
-  background: white;
-  border-radius: 12px;
-  padding: 22px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-}
+  display: flex;
+width: 1606px;
+padding: var(--spacing-spacing_19, 44px) var(--spacing-spacing_18, 40px);
+flex-direction: column;
+gap: 30px;
 
-.grid {
-  display: grid;
-  grid-template-columns: 1fr 360px;
-  gap: 24px;
 }
 
 
+.form-area{
+padding: $spacing_14 $spacing_18;
+border-radius: var(--border-radius-border-radius-m, 12px);
+border: 1px solid var(--system-border-neutral-neutral_2, #E4E6F1);
+}
 
 
 
@@ -43,9 +44,127 @@
 }
 
 .btncustomClass{
-     width: auto !important;
-  min-width: 178px;
-  max-width: 200px;
+     width: 100% !important;
+  // min-width: 178px;
+  // max-width: 200px;
   padding: 2px 3px;
   height: 52px;
+}
+
+.form-section{
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+}
+
+.loan-calculator {
+  background: white;
+  border-radius: 12px;
+  padding: 2rem;
+  max-width: 1100px;
+  margin: 2rem auto;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+  font-family: system-ui, -apple-system, sans-serif;
+
+  .header {
+    h2 { font-weight: 700; color: #1a1a1a; }
+    .arn { color: #666; font-size: 0.95rem; }
+  }
+
+  .form-label {
+    font-weight: 500;
+    color: #333;
+  }
+
+  .value-box {
+    background: #f8f9fa;
+    border: 1px solid #e9ecef;
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-weight: 600;
+  }
+
+  .form-range {
+    accent-color: #0d6efd;
+  }
+
+  .btn-apply {
+    background: #e63939;
+    border: none;
+    padding: 14px;
+    font-weight: 600;
+    font-size: 1.1rem;
+    border-radius: 8px;
+  }
+
+  /* Donut Chart */
+  .donut-chart {
+    width: 240px;
+    height: 240px;
+    border-radius: 50%;
+    position: relative;
+    background:  #1a365d ;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    &::before {
+      content: '';
+      width: 170px;
+      height: 170px;
+      background: white;
+      border-radius: 50%;
+      position: absolute;
+    }
+
+    .donut-inner {
+      position: relative;
+      z-index: 1;
+      text-align: center;
+      font-size: 0.9rem;
+      color: #333;
+    }
+  }
+
+  .dot {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    margin-right: 6px;
+  }
+  .dot.red  { background: #e63939; }
+  .dot.navy { background: #1a365d; }
+
+  .summary-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1rem;
+  }
+
+  .summary-card {
+    background: #f8f9fa;
+    border-radius: 10px;
+    padding: 1.2rem;
+    text-align: center;
+
+    .label {
+      font-size: 0.85rem;
+      color: #666;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .value {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #1a1a1a;
+    }
+  }
+
+  .see-amortization {
+    color: #0d6efd;
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 0.95rem;
+  }
 }
