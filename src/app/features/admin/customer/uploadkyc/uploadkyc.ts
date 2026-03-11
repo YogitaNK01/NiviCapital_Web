@@ -139,21 +139,7 @@ export class Uploadkyc implements OnDestroy {
     }
   }
 
-  isAdult(date: any): boolean {
-    if (!date) return false;
-
-    const dob = new Date(date);
-    const today = new Date();
-
-    let age = today.getFullYear() - dob.getFullYear();
-    const m = today.getMonth() - dob.getMonth();
-
-    if (m < 0 || (m === 0 && today.getDate() < dob.getDate())) {
-      age--;
-    }
-
-    return age >= 18;
-  }
+  
 
   selectSameAddress() {
     this.addressType = 'same';
@@ -174,6 +160,21 @@ export class Uploadkyc implements OnDestroy {
   checkDob(value: any) {
     this.dobTouched = true;
     this.dobValid = this.isAdult(value);
+  }
+  isAdult(date: any): boolean {
+    if (!date) return false;
+
+    const dob = new Date(date);
+    const today = new Date();
+
+    let age = today.getFullYear() - dob.getFullYear();
+    const m = today.getMonth() - dob.getMonth();
+
+    if (m < 0 || (m === 0 && today.getDate() < dob.getDate())) {
+      age--;
+    }
+
+    return age >= 18;
   }
   kycupload(form: any) {
     console.log(form.value);

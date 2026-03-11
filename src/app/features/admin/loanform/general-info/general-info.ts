@@ -256,6 +256,16 @@ export class GeneralInfo implements OnInit {
     const found = this.Australianstate.find(s => s.value === id);
     this.selectedStateLabel = found?.label ?? '';
     this.AustralianUniversities = [];
+    this.selectedUniLabel = '';
+    this.registerForm.get('university')?.setValue(null);
+
+    this.selectcourse = [];
+    this.selectedcoursetypeLabel='';
+    this.registerForm.get('coursetype')?.setValue(null);
+
+    this.selectcoursename = [];
+    this.selectedcourseNameLabel = '';
+    this.registerForm.get('coursename')?.setValue(null);
     this.selectuniveristy(id);
   }
 
@@ -276,7 +286,15 @@ export class GeneralInfo implements OnInit {
 
     const found = this.AustralianUniversities.find(s => s.value === id);
     this.selectedUniLabel = found?.label ?? '';
+
     this.selectcourse = [];
+    this.selectedcoursetypeLabel='';
+    this.registerForm.get('coursetype')?.setValue(null);
+
+    this.selectcoursename = [];
+    this.selectedcourseNameLabel = '';
+    this.registerForm.get('coursename')?.setValue(null);
+
     this.selectCourseType(id);
   }
 
@@ -298,6 +316,9 @@ export class GeneralInfo implements OnInit {
     const found = this.selectcourse.find(s => s.value === id);
     this.selectedcoursetypeLabel = found?.label ?? '';
     this.selectcoursename = [];
+    this.selectedcourseNameLabel = '';
+    this.registerForm.get('coursename')?.setValue(null);
+
     this.select_CourseName(this.coursetypeId, id);
   }
 

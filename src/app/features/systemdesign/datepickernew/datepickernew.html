@@ -11,6 +11,8 @@
     <input 
       matInput
        [disabled]="disabled"
+        [required]="required"
+        (blur)="onTouched()"
       [matDatepicker]="picker"
       [(ngModel)]="selectedDate"
       (ngModelChange)="onDateChange($event)"

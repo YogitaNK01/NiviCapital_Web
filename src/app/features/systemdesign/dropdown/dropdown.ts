@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, ElementRef, EventEmitter, forwardRef, HostListener, Input, Output } from '@angular/core';
+import { Component, ElementRef, EventEmitter, forwardRef, HostListener, Input, OnChanges, Output,SimpleChanges  } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import {
   ControlValueAccessor,
@@ -32,7 +32,7 @@ export interface DropdownOption {
 
 
 
-export class Dropdown {
+export class Dropdown implements OnChanges, ControlValueAccessor {
   isOpen: boolean = false;
   searchTerm: string = '';
 
@@ -70,17 +70,25 @@ export class Dropdown {
  private onChange = (value: any) => {};
   private onTouched = () => { };
 
+  ngOnChanges(changes: SimpleChanges) {
+  if (changes['selectedValue']) {
+    const value = changes['selectedValue'].currentValue;
+
+    if (Array.isArray(value)) {
+      this.selectedValues = [...value];
+    } else if (value) {
+      this.value = value;
+      this.selectedLabeldata = this.getLabelFromValue(value);
+    } else {
+      this.selectedValues = [];
+    }
+  }
+}
   toggleDropdown() {
     // console.log("data---------------")
     this.isOpen = !this.isOpen;
 
   }
-
-  // selectOption(option: DropdownOption) {
-  //   this.selectedValue = option.value;
-  //   this.selectedValueChange.emit(option.value);
-  //   this.isOpen = false;
-  // }
 
   get selectedLabel(): string {
     if (this.showSubtext && this.subtext) {
@@ -102,7 +110,7 @@ export class Dropdown {
 
 writeValue(value: string | string[]): void {
   if (Array.isArray(value)) {
-    this.selectedValues = value;
+    this.selectedValues = [...value];
   } else {
     this.value = value;
     this.selectedLabeldata = this.getLabelFromValue(value);
@@ -147,11 +155,6 @@ writeValue(value: string | string[]): void {
 
     const index = this.selectedValues.indexOf(option.value);
 
-    // if (index > -1) {
-    //   this.selectedValues.splice(index, 1);
-    // } else {
-    //   this.selectedValues.push(option.value);
-    // }
 
      if (index > -1) {
     this.selectedValues = this.selectedValues.filter(v => v !== option.value);

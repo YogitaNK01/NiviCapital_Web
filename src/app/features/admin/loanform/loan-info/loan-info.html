@@ -24,19 +24,21 @@
             <div class=""><label class="text-dp-3-regular fw-bold">How much money do you need?</label>
             <div class="text-body-1">Choose the loan amount that fits your needs <br>and financial goals.</div></div>
             
-            <span class="value-box text-dp-1-medium ">₹{{ loanAmount }}</span>
+            <!-- <span class="value-box text-dp-1-medium ">₹{{ loanAmount }}</span> -->
+             <input type="number"class="value-box text-dp-1-medium" [(ngModel)]="loanAmount" min="100000"  max="4500000" step="10000" name="loanamt">
           </div>
 
           <input type="range" class="form-range mt-2" min="100000" max="4500000" step="10000" [(ngModel)]="loanAmount"
-            name="loanSlider">
+           name="loanamt">
         </div>
 
           <div class="">
           <div class="d-flex justify-content-between align-items-center">
             <label class="text-dp-3-regular fw-bold">Loan Tenure</label>
-            <span class="value-box text-dp-1-medium ">{{ tenure }}yr</span>
+            <!-- <span class="value-box text-dp-1-medium ">{{ tenure }}yr</span> -->
+             <input type="number" class="value-box text-dp-1-medium" [(ngModel)]="tenure" min="1" max="7" name="tenureInput">
           </div>
-         <input type="range" class="form-range" min="1" max="7" step="1" [(ngModel)]="tenure" name="rate">
+         <input type="range" class="form-range" min="1" max="7" step="1" [(ngModel)]="tenure" name="tenureInput">
         </div>
 
 
@@ -52,35 +54,39 @@
     </div>
 
     <!-- Right Side - Chart + Summary -->
-    <div class="col-lg-4">
+    <div class="col-lg-5">
       <div class="chart-container">
         <!-- Donut Chart using Bootstrap + CSS -->
         <div class="donut-chart mx-auto">
           <!-- <app-charts [title]="'Donut Chart'" [data]="chartData1"></app-charts> -->
-          <app-charts [title]="'Large Chart'" [data]="chartData1" [width]="350" [height]="350"
+          <app-charts [title]="''" [data]="chartData1" [width]="450" [height]="450"
                                     [radius]="80" [innerRadius]="50" [centerX]="100" [centerY]="100"></app-charts>
         </div>
       </div>
     </div>
-    <div class="col-lg-3">
-      <div class="summary-grid mt-4">
-        <div class="summary-card">
-          <div class="label">TOTAL INTEREST PAYABLE</div>
-          <div class="value">₹ {{ totalInterestPayable | number }}</div>
+    <div class="col-lg-2 d-flex flex-column align-items-center justify-content-center">
+      <div class="summary-grid">
+        <div class="summary-card text-center">
+          <div class="text-label-data fw-normal">TOTAL INTEREST PAYABLE</div>
+          <div class="text-dp-3-bold text-nowrap">₹ {{ totalInterestPayable | number }}</div>
         </div>
-        <div class="summary-card">
-          <div class="label">TOTAL PRINCIPLE AMOUNT</div>
-          <div class="value">₹ {{ totalPrincipalAmount | number }}</div>
+        <div class="summary-card text-center">
+          <div class="text-label-data fw-normal">TOTAL PRINCIPLE AMOUNT</div>
+          <div class="text-dp-3-bold text-nowrap">₹ {{ totalPrincipalAmount | number }}</div>
         </div>
-        <div class="summary-card">
-          <div class="label">TOTAL EMI AMOUNT</div>
-          <div class="value">₹ {{ totalEmiAmount | number }}</div>
+        <div class="summary-card text-center">
+          <div class="text-label-data fw-normal">TOTAL EMI AMOUNT</div>
+          <div class="text-dp-3-bold text-nowrap">₹ {{ totalEmiAmount | number }}</div>
         </div>
+         <div class="text-center mt-3">
+      <a href="#" class="see-amortization text-dp-3-regular d-flex gap-2"><span><img src="../assets/images/icons/arrow-square-down.svg"></span>See Amortization</a>
+    </div>
+    
       </div>
+
+      
     </div>
-    <div class="text-center mt-3">
-      <a href="#" class="see-amortization">See Amortization</a>
-    </div>
+   
 
   </div>
 

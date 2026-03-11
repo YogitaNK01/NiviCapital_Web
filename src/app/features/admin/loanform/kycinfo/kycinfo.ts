@@ -254,7 +254,7 @@ export class Kycinfo {
           sameAsPermanent: formdata.sameAsPermanent,
           peraddressline1: formdata.permanentAddress.addressLine,
           peraddressline2: formdata.permanentAddress.addressLine1,
-          peraddressline3: formdata.permanentAddress.addressLine2,
+          peraddressline3: formdata.permanentAddress.addressLine2 == null?'-':formdata.permanentAddress.addressLine2,
           percountry: formdata.permanentAddress.country,
           perstate: formdata.permanentAddress.state,
           percity: formdata.permanentAddress.city,
@@ -263,7 +263,7 @@ export class Kycinfo {
 
           curraddressline1: formdata.otherAddress == null ? formdata.currentAddress.addressLine :formdata.otherAddress.addressLine,
           curraddressline2:formdata.otherAddress == null ? formdata.currentAddress.addressLine1 :formdata.otherAddress.addressLine1,
-          curraddressline3:formdata.otherAddress == null ? formdata.currentAddress.addressLine2:formdata.otherAddress.addressLine2,
+          curraddressline3:formdata.otherAddress == null ? (formdata.currentAddress.addressLine2 == null) ?'-':formdata.currentAddress.addressLine2:(formdata.otherAddress.addressLine2 == null)?'-':formdata.otherAddress.addressLine2,
           currcountry:formdata.otherAddress == null ? formdata.currentAddress.country:formdata.otherAddress.country,
           currstate:formdata.otherAddress == null ? formdata.currentAddress.state:formdata.otherAddress.state,
           currcity:formdata.otherAddress == null ? formdata.currentAddress.city:formdata.otherAddress.city,

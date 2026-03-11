@@ -29,6 +29,8 @@ export class Datepickernew implements OnInit, ControlValueAccessor {
   @Input() label: string = '';
   @Input() disabled: boolean = false;
 
+  @Input() required: boolean = false;
+  
   @Input() disablePastDates: boolean = false;
   minDate: Date | null = null;
 

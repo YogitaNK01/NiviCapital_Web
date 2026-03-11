@@ -8,7 +8,8 @@ import { environment } from '../../../environments/environment';
   providedIn: 'root'
 })
 export class Addcustomerservice {
-  
+    // private baseUrl = environment.apiBaseUrl;
+
   private baseUrl = "/nivicapsit/api";
   constructor(private http: HttpClient) { }
 

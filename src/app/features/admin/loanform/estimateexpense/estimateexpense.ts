@@ -8,6 +8,7 @@ import { Loanformservice } from '../../../../core/service/loanformservice';
 import { Inputfield } from '../../../systemdesign/inputfield/inputfield';
 import { Dropdown, DropdownOption } from '../../../systemdesign/dropdown/dropdown';
 import { Main } from '../../../../core/service/main';
+import { Msgboxservice } from '../../../../core/service/msgboxservice';
 
 interface OptionItem {
   label: string;
@@ -37,39 +38,15 @@ export class Estimateexpense {
 
   @Input() avatarUrl = '';
   @Input() hasAvatar = false;
-  allcatagory= "Select from dropdown"
+  allcatagory = "Select from dropdown"
   placeholderval = "Select from dropdown"
   placeholderfrequcyval = ""
   labelval = "Select Categories"
   selectedOption: string = '';
-  searchOptions: DropdownOption[] = [
-    { label: 'Rent', value: 'Rent', icon: '' },
-    { label: 'Security Deposit', value: 'SecurityDeposit', icon: '' },
-    { label: 'Groceries', value: 'Groceries', icon: '' },
-    { label: 'Utilities', value: 'Utilities', icon: '' },
-    { label: 'Transport', value: 'Transport', icon: '' },
-    { label: 'Accommodation', value: 'Accommodation', icon: '' },
-    { label: 'Health Insurance', value: 'HealthInsurance', icon: '' },
-    { label: 'Personal Expense', value: 'PersonalExpense', icon: '' },
-    { label: 'Other Expense', value: 'OtherExpense', icon: '' },
-  ];
-
-
+ 
   livCatagories: OptionItem[] = [];
   misCatagories: OptionItem[] = [];
 
-
-  expenseLabels: any = {
-    Rent: 'Rent',
-    SecurityDeposit: 'Security Deposit',
-    Groceries: 'Groceries',
-    Utilities: 'Utilities',
-    Transport: 'Transport',
-    Accommodation: 'Accommodation',
-    HealthInsurance: 'Health Insurance',
-    PersonalExpense: 'Personal Expense',
-    OtherExpense: 'Other Expense'
-  };
 
   frequencylabelval = "Select Frequency"
   searchfrequencyOptions: DropdownOption[] = [
@@ -81,13 +58,14 @@ export class Estimateexpense {
   searchby: string = 'Select by';
   searchedvalue: any;
 
-  applicantId:any;
-  applicationId:any
-  constructor(private fb: FormBuilder, private stepperService: Loanstepperservice, private cd: ChangeDetectorRef, private loanformservice: Loanformservice, private route: ActivatedRoute, public main: Main) { }
+  applicantId: any;
+  applicationId: any
+  constructor(private fb: FormBuilder, private stepperService: Loanstepperservice, private cd: ChangeDetectorRef, private loanformservice: Loanformservice, 
+    private router: Router,private route: ActivatedRoute, public main: Main,private msgBox:Msgboxservice) { }
 
   ngOnInit(): void {
 
-     this.route.queryParams.subscribe(params => {
+    this.route.queryParams.subscribe(params => {
 
       const applicantId = params['applicantId'];
       const applicationId = params['applicationId'];
@@ -148,7 +126,7 @@ export class Estimateexpense {
 
   }
 
-   livingexp() {
+  livingexp() {
     this.loanformservice.getlivingexp().subscribe((res: any) => {
       const list = res.data ?? res;
 
@@ -216,11 +194,18 @@ export class Estimateexpense {
   }
 
   addmore(category: string) {
-    this.livingexpenses.push(this.createExpense(category));
+    // this.livingexpenses.push(this.createExpense(category));
+     const index = this.livingexpenses.controls
+    .map((g: any) => g.get('category')?.value)
+    .lastIndexOf(category);
+
+  this.livingexpenses.insert(index + 1, this.createExpense(category));
   }
   oncatagoryChange(values: string | string[]): void {
 
     this.selectedCategories = Array.isArray(values) ? values : [values];
+
+    console.log("check val",this.selectedCategories)
 
     this.handleCategoryChange(
       values,
@@ -240,7 +225,7 @@ export class Estimateexpense {
   }
 
 
-// --------------------------------------------------------------------------------
+  // --------------------------------------------------------------------------------
 
   get miscexpenses(): FormArray {
     return this.expenseForm.get('miscexpenses') as FormArray;
@@ -281,7 +266,13 @@ export class Estimateexpense {
   }
 
   miscaddmore(category: string) {
-    this.miscexpenses.push(this.createmiscExpense(category));
+    // this.miscexpenses.push(this.createmiscExpense(category));
+     const index = this.miscexpenses.controls
+    .map((g: any) => g.get('category')?.value)
+    .lastIndexOf(category);
+
+  this.miscexpenses.insert(index + 1, this.createmiscExpense(category));
+
   }
 
 
@@ -314,15 +305,15 @@ export class Estimateexpense {
     // console.log('Selected:2', value);
   }
 
-// =====================================================================================
+  // =====================================================================================
 
-handleAmountInput(event: any, controlName: string) {
-  this.main.restrictInput(event, 'number');
-  this.formatAmount(event, controlName);
-}
+  handleAmountInput(event: any, controlName: string) {
+    this.main.restrictInput(event, 'number');
+    this.formatAmount(event, controlName);
+  }
 
   //format amount 2000000 to 20,00,000
-  formatAmount(event: any, controlName: string, index?: number,type?: 'living' | 'misc') {
+  formatAmount(event: any, controlName: string, index?: number, type?: 'living' | 'misc') {
 
     let value = event.target.value;
 
@@ -333,7 +324,7 @@ handleAmountInput(event: any, controlName: string) {
 
     const formatted = this.formatIndian(value);
     if (index !== undefined) {
-       const array = type === 'misc' ? this.miscexpenses : this.livingexpenses;
+      const array = type === 'misc' ? this.miscexpenses : this.livingexpenses;
 
       const group = array.at(index) as FormGroup;
       group.get(controlName)?.setValue(formatted, { emitEvent: false });
@@ -372,48 +363,85 @@ handleAmountInput(event: any, controlName: string) {
     });
 
     for (let i = formArray.length - 1; i >= 0; i--) {
-    const category = formArray.at(i).get('category')?.value;
+      const category = formArray.at(i).get('category')?.value;
 
-    if (!selected.includes(category)) {
-      formArray.removeAt(i);
+      if (!selected.includes(category)) {
+        formArray.removeAt(i);
+      }
     }
   }
+
+  removeexpense(index: number, type: 'living' | 'misc') {
+
+    this.msgBox.open({
+      title: 'Are you sure want to Remove',
+      message: '',
+      showCancel: true,
+      onOk: () => {
+    
+    
+
+  if (type === 'living') {
+
+    const livingArray = this.livingexpenses;
+    livingArray.removeAt(index);
+
+    const livcategories = livingArray.controls.map(
+      ctrl => ctrl.get('category')?.value
+    );
+    this.selectedCategories = [...new Set(livcategories)];
+  } 
+  
+  else {
+
+    const miscArray = this.miscexpenses;
+    miscArray.removeAt(index);
+
+   const miscategories = miscArray.controls.map(
+      ctrl => ctrl.get('category')?.value
+    );
+
+    this.selectedmisCategories = [...new Set(miscategories)];
   }
 
+    }
+    });
+}
   back() {
     this.stepperService.previous();
   }
 
   next1() {
-   
-    this.stepperService.next();}
+
+    this.stepperService.next();
+  }
   next() {
-   
+
     // this.stepperService.next();
-    let formdata= this.expenseForm.value
-  console.log("form data Expenses:", formdata);
+    let formdata = this.expenseForm.value
+    console.log("form data Expenses:", formdata);
 
-  const livingExpenses = this.expenseForm.value.livingexpenses.map((item: any) => ({
-  livingExpenseItemMasterId: item.category,
-  frequency: item.securityfrequency?.toUpperCase(),
-  amountInr: Number(item.amountINR.replace(/,/g, '')),
-  description: item.description || ''
-}));
+    const livingExpenses = this.expenseForm.value.livingexpenses.map((item: any) => ({
+      livingExpenseItemMasterId: item.category,
+      frequency: item.securityfrequency?.toUpperCase(),
+      amountInr: Number(item.amountINR.replace(/,/g, '')),
+      description: item.description || ''
+    }));
 
-const miscExpenses = this.expenseForm.value.miscexpenses.map((item: any) => ({
-  miscellaneousExpenseItemMasterId: item.category,
-  frequency: item.securityfrequency?.toUpperCase(),
-  amountInr: Number(item.amountINR.replace(/,/g, '')),
-  description: item.description || ''
-}));
+    const miscExpenses = this.expenseForm.value.miscexpenses.map((item: any) => ({
+      miscellaneousExpenseItemMasterId: item.category,
+      frequency: item.securityfrequency?.toUpperCase(),
+      amountInr: Number(item.amountINR.replace(/,/g, '')),
+      description: item.description || ''
+    }));
 
-   
-    let input ={
-tuitionFeesInr: Number(formdata.tutionfees.replace(/,/g, '')),
-items:[ ...livingExpenses, ...miscExpenses]
+
+    let input = {
+      tuitionFeesInr: Number(formdata.tutionfees.replace(/,/g, '')),
+      items: [...livingExpenses, ...miscExpenses]
     }
 
-     this.loanformservice.estimateExpense(input, this.applicationId).pipe().subscribe({
+    this.loanformservice.estimateExpense(input, this.applicationId).pipe().subscribe({
       next: (res) => {
         console.log("resp---", res);
         if (res.status == "success") {
@@ -421,7 +449,7 @@ items:[ ...livingExpenses, ...miscExpenses]
           this.stepperService.next();
         }
       }
-  });
+    });
 
 
   }

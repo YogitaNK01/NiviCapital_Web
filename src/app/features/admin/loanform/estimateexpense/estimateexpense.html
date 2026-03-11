@@ -181,8 +181,9 @@
         <div class="col">
           <div class="form-group mb-3">
             <app-inputfield type="flag" [required]="true" label="Tuition Fees (INR)" [required]="true"
-              formControlName="tutionfees" placeholder="40,20,337" helpText="Help text" name="tutionfees" [maxlength]="9"
-              [showPhonePrefix]="true" [showPhonePrefixnumber]="false" (input)="handleAmountInput($event,'tutionfees')">
+              formControlName="tutionfees" placeholder="40,20,337" helpText="Help text" name="tutionfees"
+              [maxlength]="9" [showPhonePrefix]="true" [showPhonePrefixnumber]="false"
+              (input)="handleAmountInput($event,'tutionfees')">
             </app-inputfield>
           </div>
         </div>
@@ -214,13 +215,30 @@
           <div class="w-100 gap-3">
             <div formArrayName="livingexpenses">
 
-              @for (expense of livingexpenses.controls; track expense; let i = $index) {
+              @for (expense of livingexpenses.controls; track $index; let i = $index) {
               <div class="row mt-40" [formGroupName]="i">
+                @if(i === 0 || livingexpenses.at(i-1).get('category')?.value !== expense.get('category')?.value) {
 
-                <div class="text-label fw-bold">
+                <div class="text-label fw-bold d-flex align-items-center justify-content-between">
                   {{ getCategoryLabel(expense.get('category')?.value) }}
+                  <span (click)="removeexpense(i,'living')">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
+                      <path
+                        d="M21 5.98047C17.67 5.65047 14.32 5.48047 10.98 5.48047C9 5.48047 7.02 5.58047 5.04 5.78047L3 5.98047"
+                        stroke="#25262F" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                      <path d="M8.5 4.97L8.72 3.66C8.88 2.71 9 2 10.69 2H13.31C15 2 15.13 2.75 15.28 3.67L15.5 4.97"
+                        stroke="#25262F" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                      <path
+                        d="M18.8484 9.14062L18.1984 19.2106C18.0884 20.7806 17.9984 22.0006 15.2084 22.0006H8.78844C5.99844 22.0006 5.90844 20.7806 5.79844 19.2106L5.14844 9.14062"
+                        stroke="#25262F" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                      <path d="M10.3281 16.5H13.6581" stroke="#25262F" stroke-width="1.5" stroke-linecap="round"
+                        stroke-linejoin="round" />
+                      <path d="M9.5 12.5H14.5" stroke="#25262F" stroke-width="1.5" stroke-linecap="round"
+                        stroke-linejoin="round" />
+                    </svg>
+                  </span>
                 </div>
-
+                }
 
                 <hr class="hrclass">
 
@@ -236,7 +254,8 @@
                 <div class="col-lg-4 col-sm-12 mt-20">
                   <app-inputfield type="flag" [label]="getCategoryLabel(expense.get('category')?.value) + ' (INR)'"
                     formControlName="amountINR" placeholder="40,20,337" [showPhonePrefix]="true"
-                    [showPhonePrefixnumber]="false" (input)="formatAmount($event,'amountINR',i,'living')">
+                    [showPhonePrefixnumber]="false"
+                    (input)="formatAmount($event,'amountINR',i,'living');main.restrictInput($event, 'number')">
                   </app-inputfield>
                 </div>
 
@@ -248,9 +267,9 @@
                 </div>
 
                 <!-- Description only for Other Expense -->
-                @if(expense.get('category')?.value === 'OtherExpense') {
+                @if(getCategoryLabel(expense.get('category')?.value) === 'Other Expenses') {
                 <div class="col-12 mt-20">
-                  <app-inputfield type="text" label="Expense Description" placeholder="Enter Here"
+                  <app-inputfield type="text" label="Expense Description" [required]="true" placeholder="Enter Here"
                     formControlName="description">
                   </app-inputfield>
                 </div>
@@ -291,17 +310,35 @@
 
         <div class="mobiledetails d-flex w-100 flex-column ">
           <div class="w-100 gap-3">
-            <div formArrayName="miscexpenses" >
+            <div formArrayName="miscexpenses">
 
               @for (expense of miscexpenses.controls; track expense; let i = $index) {
 
               <div class="row mt-40" [formGroupName]="i">
 
-                <div class="text-label fw-bold">
+
+                @if(i === 0 || miscexpenses.at(i-1).get('category')?.value !== expense.get('category')?.value) {
+                <div class="text-label fw-bold d-flex align-items-center justify-content-between">
                   {{ getmisCategoryLabel(expense.get('category')?.value) }}
+                  <span (click)="removeexpense(i,'misc')">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
+                      <path
+                        d="M21 5.98047C17.67 5.65047 14.32 5.48047 10.98 5.48047C9 5.48047 7.02 5.58047 5.04 5.78047L3 5.98047"
+                        stroke="#25262F" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                      <path d="M8.5 4.97L8.72 3.66C8.88 2.71 9 2 10.69 2H13.31C15 2 15.13 2.75 15.28 3.67L15.5 4.97"
+                        stroke="#25262F" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                      <path
+                        d="M18.8484 9.14062L18.1984 19.2106C18.0884 20.7806 17.9984 22.0006 15.2084 22.0006H8.78844C5.99844 22.0006 5.90844 20.7806 5.79844 19.2106L5.14844 9.14062"
+                        stroke="#25262F" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                      <path d="M10.3281 16.5H13.6581" stroke="#25262F" stroke-width="1.5" stroke-linecap="round"
+                        stroke-linejoin="round" />
+                      <path d="M9.5 12.5H14.5" stroke="#25262F" stroke-width="1.5" stroke-linecap="round"
+                        stroke-linejoin="round" />
+                    </svg>
+                  </span>
                 </div>
 
-
+                }
                 <hr class="hrclass">
 
                 <!-- Frequency -->
@@ -316,7 +353,8 @@
                 <div class="col-lg-4 col-sm-12 mt-20">
                   <app-inputfield type="flag" [label]="getmisCategoryLabel(expense.get('category')?.value) + '(INR)'"
                     placeholder="40,20,337" [showPhonePrefix]="true" [showPhonePrefixnumber]="false"
-                    formControlName="amountINR" (input)="formatAmount($event,'amountINR',i,'misc')">
+                    formControlName="amountINR"
+                    (input)="formatAmount($event,'amountINR',i,'misc');main.restrictInput($event, 'number')">
                   </app-inputfield>
                 </div>
 
@@ -328,9 +366,9 @@
                 </div>
 
                 <!-- Description only for Other Expense -->
-                @if(expense.get('category')?.value === 'OtherExpense') {
+                @if(getmisCategoryLabel(expense.get('category')?.value) === 'Other Expenses') {
                 <div class="col-12 mt-20">
-                  <app-inputfield type="text" label="Expense Description" placeholder="Enter Here">
+                  <app-inputfield type="text" label="Expense Description" [required]="true" placeholder="Enter Here">
                   </app-inputfield>
                 </div>
                 }
@@ -370,7 +408,7 @@
     </app-buttons>
     <app-buttons type="button" label="Next" class="btn btncustomClass" color="primary" (click)="next()">
     </app-buttons>
-     <!-- <app-buttons type="button" label="Next" class="btn btncustomClass" color="primary" (click)="next1()">
+    <!-- <app-buttons type="button" label="Next" class="btn btncustomClass" color="primary" (click)="next1()">
     </app-buttons> -->
 
   </div>

@@ -37,7 +37,7 @@
       @if (currentStep === 0) {
       <form #registerform="ngForm" (ngSubmit)="createcustId(registerform)" id="registerform"
         class="mobiledetails d-flex flex-column ">
-        <div class="row  ">
+        <div class="row w-100 ">
           <div class="col-lg-4 col-sm-12 ">
 
             <app-inputfield type="text" name="fname" ngModel [required]="true" #fname="ngModel" label="First Name"

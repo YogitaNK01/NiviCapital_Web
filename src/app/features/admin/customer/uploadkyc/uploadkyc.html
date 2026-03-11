@@ -53,14 +53,14 @@
 
           <app-inputfield type="text" name="aadharnum" ngModel [required]="true" #aadharnum="ngModel"
             label="Aadhaar Number" placeholder="Enter your 12 digit Aadhar number" helpText="Help text"
-            pattern="^[0-9]*$" [minlength]="12" [maxlength]="12"  (input)="main.restrictInput($event, 'number')">
+            pattern="^(?!([0-9])\1{11}$)[0-9]{12}$" [minlength]="12" [maxlength]="12" (input)="main.restrictInput($event, 'number')">
           </app-inputfield>
 
 
           <div class="text-danger mt-1" *ngIf="aadharnum.invalid && aadharnum.touched">
             <small *ngIf="aadharnum.errors?.['required']">Aadhaar number is required</small>
-            <small *ngIf="aadharnum.errors?.['pattern'] ">Only numbers allowed</small>
-            <small *ngIf="aadharnum.errors?.['minlength'] || aadharnum.errors?.['maxlength']">
+             <small *ngIf="aadharnum.errors?.['pattern']  
+            ||aadharnum.errors?.['minlength'] || aadharnum.errors?.['maxlength']">
               Please enter a valid Aadhaar number
             </small>
 
@@ -96,7 +96,7 @@
             <small *ngIf="pan.errors?.['required']">pan number is required</small>
             <small *ngIf="pan.errors?.['pattern']">Please enter a valid pan number</small>
 
-           <small *ngIf="pan.errors?.['minlength'] || pan.errors?.['maxlength']">
+            <small *ngIf="pan.errors?.['minlength'] || pan.errors?.['maxlength']">
               Please enter a valid Pan number
             </small>
           </div>
@@ -147,10 +147,15 @@
 
       <div class="col-lg-6 loan-mt-4 col-sm-12">
         <app-datepickernew name="dob" label="Date of Birth" ngModel [required]="true" #dob="ngModel"
-          (ngModelChange)="checkDob($event)"></app-datepickernew>
+          (ngModelChange)="checkDob($event)" (click)="dobTouched = true"></app-datepickernew>
       </div>
-      <div class="text-danger error" *ngIf="dobTouched && !dobValid">
-        Age must be 18 years or above
+
+
+      <div class="text-danger error" *ngIf="dob.invalid && dob.touched">
+        <small *ngIf="dob.errors?.['required']">DOB is required</small>
+        <small *ngIf="!dob.errors?.['required'] && !dobValid">
+          Age must be 18 years or above
+        </small>
       </div>
     </ng-template>
 
@@ -167,9 +172,9 @@
 
         <div class="text-danger mt-1" *ngIf="addressline1.invalid && addressline1.touched">
           <small *ngIf="addressline1.errors?.['required']">Address Line 1 is required</small>
-           <small *ngIf="addressline1.errors?.['minlength'] || addressline1.errors?.['maxlength']">
-              Address must be between 2 to 255 characters
-            </small>
+          <small *ngIf="addressline1.errors?.['minlength'] || addressline1.errors?.['maxlength']">
+            Address must be between 2 to 255 characters
+          </small>
         </div>
       </div>
 
@@ -182,9 +187,9 @@
 
         <div class="text-danger mt-1" *ngIf="addressline2.invalid && addressline2.touched">
           <small *ngIf="addressline2.errors?.['required']">Address Line 2 is required</small>
-           <small *ngIf="addressline2.errors?.['minlength'] || addressline2.errors?.['maxlength']">
-               Address must be between 2 to 255 characters
-            </small>
+          <small *ngIf="addressline2.errors?.['minlength'] || addressline2.errors?.['maxlength']">
+            Address must be between 2 to 255 characters
+          </small>
         </div>
       </div>
 
@@ -196,10 +201,10 @@
 
 
         <div class="text-danger mt-1" *ngIf="addressline3.invalid && addressline3.touched">
-         <small *ngIf="addressline3.errors?.['required']">Address Line 2 is required</small>
-           <small *ngIf="addressline3.errors?.['minlength'] || addressline3.errors?.['maxlength']">
-               Address must be between 2 to 255 characters
-            </small>
+          <small *ngIf="addressline3.errors?.['required']">Address Line 2 is required</small>
+          <small *ngIf="addressline3.errors?.['minlength'] || addressline3.errors?.['maxlength']">
+            Address must be between 2 to 255 characters
+          </small>
 
         </div>
       </div>
@@ -218,8 +223,8 @@
         </div>
         <div class="col-lg-6 loan-mt-4 col-sm-12">
           <app-dropdown [options]="cityOptions" [required]="true" [(selectedValue)]="perCitySelectedOption"
-            [placeholder]="placeholdercity" [searchable]="true" (selectedValueChange)="selectPerCity($event)" label="City" name="city"
-            [(ngModel)]="perselectedCityId">
+            [placeholder]="placeholdercity" [searchable]="true" (selectedValueChange)="selectPerCity($event)"
+            label="City" name="city" [(ngModel)]="perselectedCityId">
           </app-dropdown>
         </div>
         <div class="col-lg-6 loan-mt-4 col-sm-12">
@@ -233,7 +238,8 @@
 
           <div class="text-danger mt-1" *ngIf="perpincode.invalid && perpincode.touched">
             <small *ngIf="perpincode.errors?.['required']">Pin Code is required</small>
-            <small *ngIf="perpincode.errors?.['pattern'] && !perpincode.errors?.['minlength']">Only numbers allowed</small>
+            <small *ngIf="perpincode.errors?.['pattern'] && !perpincode.errors?.['minlength']">Only numbers
+              allowed</small>
             <small *ngIf="perpincode.errors?.['minlength']">
               Please enter a valid Pin Code
             </small>
@@ -269,9 +275,9 @@
     <div class="row d-flex " *ngIf="isDifferentAddress">
 
       <div class="col-lg-6  col-sm-12 ">
-        <app-dropdown [options]="secondaryaddproof" [required]="true" [(selectedValue)]="selectedOption" placeholder="" name="secondary_address_prrof"
-          [searchable]="true" (selectedValueChange)="onSelectionChange($event)" [(ngModel)]="selectedSecondaryProof"
-          label="Secondary Address Proof"></app-dropdown>
+        <app-dropdown [options]="secondaryaddproof" [required]="true" [(selectedValue)]="selectedOption" placeholder=""
+          name="secondary_address_prrof" [searchable]="true" (selectedValueChange)="onSelectionChange($event)"
+          [(ngModel)]="selectedSecondaryProof" label="Secondary Address Proof"></app-dropdown>
       </div>
       <div class="col-lg-6  col-sm-12 ">
         <app-uploadbtn [config]="basicConfig" [required]="true" (fileChange)="onFileChange($event, 'secaddress')"
@@ -291,9 +297,9 @@
 
         <div class="text-danger mt-1" *ngIf="currentaddressline1.invalid && currentaddressline1.touched">
           <small *ngIf="currentaddressline1.errors?.['required']">Address Line 1 is required</small>
-           <small *ngIf="currentaddressline1.errors?.['minlength'] || currentaddressline1.errors?.['maxlength']">
-               Address must be between 2 to 255 characters
-            </small>
+          <small *ngIf="currentaddressline1.errors?.['minlength'] || currentaddressline1.errors?.['maxlength']">
+            Address must be between 2 to 255 characters
+          </small>
         </div>
       </div>
       <div class="col-lg-12  col-sm-12 loan-mt-4">
@@ -304,9 +310,9 @@
 
         <div class="text-danger mt-1" *ngIf="currentaddressline2.invalid && currentaddressline2.touched">
           <small *ngIf="currentaddressline2.errors?.['required']">Address Line 2 is required</small>
-           <small *ngIf="currentaddressline2.errors?.['minlength'] || currentaddressline2.errors?.['maxlength']">
-               Address must be between 2 to 255 characters
-            </small>
+          <small *ngIf="currentaddressline2.errors?.['minlength'] || currentaddressline2.errors?.['maxlength']">
+            Address must be between 2 to 255 characters
+          </small>
         </div>
       </div>
       <div class="col-lg-12  col-sm-12 loan-mt-4">
@@ -317,13 +323,13 @@
 
         <div class="text-danger mt-1" *ngIf="currentaddressline3.invalid && currentaddressline3.touched">
           <small *ngIf="currentaddressline3.errors?.['required']">Address Line 3 is required</small>
-           <small *ngIf="currentaddressline3.errors?.['minlength'] || currentaddressline3.errors?.['maxlength']">
-               Address must be between 2 to 255 characters
-            </small>
+          <small *ngIf="currentaddressline3.errors?.['minlength'] || currentaddressline3.errors?.['maxlength']">
+            Address must be between 2 to 255 characters
+          </small>
         </div>
       </div>
     </div>
-<!-- curr stAte city -->
+    <!-- curr stAte city -->
     <div class="row d-flex justify-content-center align-items-end" *ngIf="isDifferentAddress">
       <div class="col-lg-6  col-sm-12 loan-mt-4">
         <app-inputfield type="text" ngModel [required]="true" label="Country" [required]="true" placeholder="India"
@@ -332,14 +338,14 @@
       </div>
       <div class="col-lg-6  col-sm-12 loan-mt-4">
         <app-dropdown [options]="currstateOptions" [required]="true" [(selectedValue)]="currStateSelectedOption"
-          [placeholder]="placeholderstate" [searchable]="true" (selectedValueChange)="selectCurrState($event)" label="State" name="curstate"
-          [(ngModel)]="currselectedStateId">
+          [placeholder]="placeholderstate" [searchable]="true" (selectedValueChange)="selectCurrState($event)"
+          label="State" name="curstate" [(ngModel)]="currselectedStateId">
         </app-dropdown>
       </div>
       <div class="col-lg-6 loan-mt-4 col-sm-12 ">
         <app-dropdown [options]="currcityOptions" [required]="true" [(selectedValue)]="currCitySelectedOption"
-          [placeholder]="placeholdercity" [searchable]="true" (selectedValueChange)="selectCurrCity($event)" label="City" name="curcity"
-          [(ngModel)]="currselectedCityId">
+          [placeholder]="placeholdercity" [searchable]="true" (selectedValueChange)="selectCurrCity($event)"
+          label="City" name="curcity" [(ngModel)]="currselectedCityId">
         </app-dropdown>
       </div>
       <div class="col-lg-6 loan-mt-4 col-sm-12 ">
@@ -353,7 +359,8 @@
 
         <div class="text-danger mt-1" *ngIf="currpincode.invalid && currpincode.touched">
           <small *ngIf="currpincode.errors?.['required']">Pin Code is required</small>
-          <small *ngIf="currpincode.errors?.['pattern'] && !currpincode.errors?.['minlength']">Only numbers allowed</small>
+          <small *ngIf="currpincode.errors?.['pattern'] && !currpincode.errors?.['minlength']">Only numbers
+            allowed</small>
           <small *ngIf="currpincode.errors?.['minlength']">
             Please enter a valid Pin Code
           </small>

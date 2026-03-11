@@ -73,9 +73,43 @@
   border: 1px solid $neutral-500;
   background: $bg;
 }
-.text-body-1{
+
+.text-body-1 {
   color: $neutral-600;
 }
+
+.summary-grid {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: $spacing_9;
+
+
+}
+
+.summary-card {
+  display: flex;
+  padding: var(--spacing-spacing_9, 20px);
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: var(--spacing-spacing_5, 12px);
+  flex: 1 0 0;
+  align-self: stretch;
+  border-radius: 12px;
+  border: 1px solid var(--system-border-neutral-neutral_2, #E4E6F1);
+  background: rgba(255, 255, 255, 0.60);
+  width: 225px;
+  height: 155px;
+
+
+}
+
+.see-amortization{
+color: $secondary-700;
+}
+
 .loan-calculator {
   background: white;
   border-radius: 12px;
@@ -162,44 +196,8 @@
     background: #1a365d;
   }
 
-  .summary-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-    gap: 1rem;
-  }
 
-  
 
-  .see-amortization {
-    color: #0d6efd;
-    text-decoration: none;
-    font-weight: 500;
-    font-size: 0.95rem;
-  }
+
+
 }
-.summary-card {
-    display: flex;
-padding: var(--spacing-spacing_9, 20px);
-flex-direction: column;
-justify-content: center;
-align-items: center;
-gap: var(--spacing-spacing_5, 12px);
-flex: 1 0 0;
-align-self: stretch;
-border-radius: 12px;
-border: 1px solid var(--system-border-neutral-neutral_2, #E4E6F1);
-background: rgba(255, 255, 255, 0.60);
-
-    .label {
-      font-size: 0.85rem;
-      color: #666;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-
-    .value {
-      font-size: 1.5rem;
-      font-weight: 700;
-      color: #1a1a1a;
-    }
-  }

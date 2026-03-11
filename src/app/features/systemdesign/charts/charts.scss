@@ -1,12 +1,17 @@
-/* components/chart/chart.component.css */
+@use 'variables' as *;
+@use 'typography' as *;
+@use 'common' as *;
+
+
 .chart-container {
   background: white;
   border-radius: 8px;
   padding: 20px;
+
   // box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   // display: inline-block;
   // min-width: 300px;
-  @media (max-width:480px){
+  @media (max-width:480px) {
     padding: 0;
   }
 }
@@ -61,15 +66,17 @@ svg {
 .legend-item {
   display: flex;
   align-items: center;
-  gap: 6px;
-  font-size: 13px;
   color: #666;
+  padding: 7.538px 15.077px;
+  gap: 15.077px;
+  border-radius: 7.538px;
+  background: $surface;
 }
 
 .legend-color {
-  width: 12px;
-  height: 12px;
-  border-radius: 2px;
+  width: 22px;
+  height: 22px;
+  border-radius: 3.5px;
   flex-shrink: 0;
 }
 
@@ -82,7 +89,7 @@ svg {
   .chart-legend {
     gap: 12px;
   }
-  
+
   .legend-item {
     font-size: 12px;
   }
