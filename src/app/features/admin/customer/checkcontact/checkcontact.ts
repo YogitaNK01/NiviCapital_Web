@@ -6,7 +6,7 @@ import { FormsModule, NgForm } from '@angular/forms';
 import { Main } from '../../../../core/service/main';
 import { Tables } from "../../../systemdesign/tables/tables";
 import { TableData } from '../../../../core/service/table-data';
-import { Router, RouterModule } from '@angular/router';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { Addcustomerservice } from '../../../../core/service/addcustomerservice';
 import { takeUntil } from 'rxjs/operators';
 import { Subject } from 'rxjs';
@@ -48,6 +48,7 @@ export class Checkcontact implements OnInit {
   filteredData: any[] = [];
   mobilenumber: any;
   number_id: any
+  prefillPhone:any;
 
   fullData: TransformedUserData[] = [];
   AlluserData: any[] = [];
@@ -88,9 +89,15 @@ export class Checkcontact implements OnInit {
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
 
-  constructor(public service: Main, private tableDataService: TableData, private router: Router, private addcustomerservice: Addcustomerservice, private cd: ChangeDetectorRef) { }
+  constructor(public service: Main, private tableDataService: TableData, private router: Router, private addcustomerservice: Addcustomerservice, 
+    private route: ActivatedRoute,private cd: ChangeDetectorRef) { }
   ngOnInit(): void {
-
+      this.route.queryParams.subscribe(params => {
+      if (params['phone']) {
+        this.prefillPhone = params['phone'];
+        
+      }
+    });
   }
 
   searchnumber(data: NgForm) {

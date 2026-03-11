@@ -189,8 +189,8 @@ export class Uploadbtn implements OnInit, ControlValueAccessor {
 
   removeFile() {
     this.msgBox.open({
-      title: 'Are you sure want to Delete',
-      message: 'Once deleted, this description cannot be recovered.',
+      title: 'Are you sure want to Remove',
+      message: '',
       showCancel: true,
       onOk: () => {
         this.state = 'idle';

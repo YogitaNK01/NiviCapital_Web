@@ -14,11 +14,11 @@
                 <div class="flex-grow-1">
                     <app-inputfield type="tel" name="phone" ngModel [required]="true" pattern="^[6-9][0-9]{9}$"
                         label="Mobile Number" placeholder="Enter Mobile Number" helpText="Help text" class="w-100"
-                        minlength="10" [maxlength]="10" #phone="ngModel" (input)="service.restrictInput($event, 'number')"
+                        minlength="10" [maxlength]="10" #phone="ngModel" (input)="service.restrictInput($event, 'number')" [(ngModel)]="prefillPhone"
                         [showPhonePrefix]="true" [showPhonePrefixnumber]="true"></app-inputfield>
                 </div>
                 <div class="searchbtn">
-                    <app-buttons label="Next" color="primary" type="submit"
+                    <app-buttons label="Search" color="primary" type="submit"
                         class="btncustomClass primary" [disabled]="!registerform.valid"  ></app-buttons>
                 </div>
             </div>

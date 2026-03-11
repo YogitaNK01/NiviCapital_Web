@@ -36,7 +36,7 @@
             <div class="row">
 
                 <div class="col-lg-4 col-sm-12 ">
-                    <app-uploadbtn [config]="basicConfig"  formControlName="uploadphoto"
+                    <app-uploadbtn [config]="basicConfig" formControlName="uploadphoto"
                         (fileChange)="onFileChange($event, 'applicantphoto')" label="Upload Applicant Photo">
                     </app-uploadbtn>
 
@@ -73,7 +73,8 @@
 
 
                     <app-inputfield formControlName="dependents" label="Number Of Dependents" [required]="true"
-                        placeholder="Number Of Dependents" (input)="main.restrictInput($event, 'number')"  [maxlength]="1" >
+                        placeholder="Number Of Dependents" (input)="main.restrictInput($event, 'number')"
+                        [maxlength]="1">
                     </app-inputfield>
                     <div class="text-danger" *ngIf="f['dependents'].touched && f['dependents'].invalid">
 
@@ -96,7 +97,7 @@
                     </div>
                 </div>
 
-
+                @if(additionalinfoForm.get('maritalstatus')?.value == 'Married'){
                 <div class="text-label fw-bold mt-20">Spouse Name</div>
 
                 <div class="col-lg-4 col-sm-12 mt-20">
@@ -139,7 +140,7 @@
                     <app-inputfield formControlName="s_lname" label="Last Name" [required]="true"
                         placeholder="Last Name" (input)="main.restrictInput($event, 'text')">
                     </app-inputfield>
-                     <div class="text-danger" *ngIf="f['s_lname'].touched && f['s_lname'].invalid">
+                    <div class="text-danger" *ngIf="f['s_lname'].touched && f['s_lname'].invalid">
 
                         <div *ngIf="f['s_lname'].errors?.['required']">
                             Last name is required
@@ -159,7 +160,7 @@
 
                     </div>
                 </div>
-
+                }
                 <!-- Father  Name -->
                 <div class="text-label fw-bold mt-20">Father Name</div>
 
@@ -203,7 +204,7 @@
                     <app-inputfield formControlName="f_lname" label="Last Name" [required]="true"
                         placeholder="Last Name" (input)="main.restrictInput($event, 'text')">
                     </app-inputfield>
-                     <div class="text-danger" *ngIf="f['f_lname'].touched && f['f_lname'].invalid">
+                    <div class="text-danger" *ngIf="f['f_lname'].touched && f['f_lname'].invalid">
 
                         <div *ngIf="f['f_lname'].errors?.['required']">
                             Last name is required
@@ -232,7 +233,7 @@
                     <app-inputfield formControlName="m_fname" label="First Name" [required]="true"
                         placeholder="First Name" (input)="main.restrictInput($event, 'text')">
                     </app-inputfield>
- <div class="text-danger" *ngIf="f['m_fname'].touched && f['m_fname'].invalid">
+                    <div class="text-danger" *ngIf="f['m_fname'].touched && f['m_fname'].invalid">
 
                         <div *ngIf="f['m_fname'].errors?.['required']">
                             First name is required
@@ -268,7 +269,7 @@
                     <app-inputfield formControlName="m_lname" label="Last Name" [required]="true"
                         placeholder="Last Name" (input)="main.restrictInput($event, 'text')">
                     </app-inputfield>
-                     <div class="text-danger" *ngIf="f['m_lname'].touched && f['m_lname'].invalid">
+                    <div class="text-danger" *ngIf="f['m_lname'].touched && f['m_lname'].invalid">
 
                         <div *ngIf="f['m_lname'].errors?.['required']">
                             First name is required
@@ -315,7 +316,7 @@
         <app-buttons type="button" label="Next" class="btn btncustomClass" color="primary" (click)="next()"
             [disabled]="!additionalinfoForm.valid">
         </app-buttons>
-         <!-- <app-buttons type="button" label="Next" class="btn btncustomClass" color="primary" (click)="next()"
+        <!-- <app-buttons type="button" label="Next" class="btn btncustomClass" color="primary" (click)="next()"
             [disabled]="!additionalinfoForm.valid">
         </app-buttons> -->
 

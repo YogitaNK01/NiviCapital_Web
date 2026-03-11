@@ -52,15 +52,14 @@
         <div class="col-lg-6 col-sm-12">
 
           <app-inputfield type="text" name="aadharnum" ngModel [required]="true" #aadharnum="ngModel"
-            label="Aadhaar Number" placeholder="Enter your 12 digit Aadhar number" helpText="Help text"
+            label="Aadhaar Number" placeholder="Enter your 12 digit Aadhar number" helpText="Help text" (ngModelChange)="checkSequential($event, aadharnum)"
             pattern="^(?!([0-9])\1{11}$)[0-9]{12}$" [minlength]="12" [maxlength]="12" (input)="main.restrictInput($event, 'number')">
           </app-inputfield>
 
 
           <div class="text-danger mt-1" *ngIf="aadharnum.invalid && aadharnum.touched">
             <small *ngIf="aadharnum.errors?.['required']">Aadhaar number is required</small>
-             <small *ngIf="aadharnum.errors?.['pattern']  
-            ||aadharnum.errors?.['minlength'] || aadharnum.errors?.['maxlength']">
+             <small *ngIf="aadharnum.errors?.['pattern']   ||aadharnum.errors?.['minlength'] || aadharnum.errors?.['maxlength'] || aadharnum.errors?.['sequential']">
               Please enter a valid Aadhaar number
             </small>
 
@@ -262,20 +261,20 @@
       <!-- <div class="loan-heading text-label">Current Address</div> -->
 
       <div class="addresscheck d-flex justify-content-start align-items-center gap-4">
-        <app-checkbox label="Same as Permanent Address" [checked]="addressType === 'same'"
-          (checkedChange)="selectSameAddress()"></app-checkbox>
+        <app-checkbox label="Same as Permanent Address" [checked]="addressType === 'same'" [disabled]="addressType === 'same'"
+          (checkedChange)="selectSameAddress($event)"></app-checkbox>
         <label for="sameAddress"></label>
 
-        <app-checkbox label="Different Address" [checked]="addressType === 'different'"
-          (checkedChange)="selectDifferentAddress()"></app-checkbox>
+        <app-checkbox label="Different Address" [checked]="addressType === 'different'" [disabled]="addressType === 'different'"
+          (checkedChange)="selectDifferentAddress($event)"></app-checkbox>
         <label for="differentAddress"></label>
       </div>
     </ng-template>
     <!-- address proofs -->
-    <div class="row d-flex " *ngIf="isDifferentAddress">
+    <div class="row d-flex " *ngIf="isDifferentAddress ">
 
       <div class="col-lg-6  col-sm-12 ">
-        <app-dropdown [options]="secondaryaddproof" [required]="true" [(selectedValue)]="selectedOption" placeholder=""
+        <app-dropdown [options]="secondaryaddproof" [required]="true" [(selectedValue)]="selectedOption" placeholder="Select Secondary Address Proof"
           name="secondary_address_prrof" [searchable]="true" (selectedValueChange)="onSelectionChange($event)"
           [(ngModel)]="selectedSecondaryProof" label="Secondary Address Proof"></app-dropdown>
       </div>

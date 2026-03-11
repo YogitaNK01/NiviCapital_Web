@@ -238,10 +238,10 @@
                     </svg>
                   </span>
                 </div>
-                }
+              
 
                 <hr class="hrclass">
-
+  }
                 <!-- Frequency -->
                 <div class="col-lg-4 col-sm-12 mt-20">
                   <app-dropdown [options]="searchfrequencyOptions" [(selectedValue)]="selectedOption"
@@ -262,6 +262,7 @@
                 <!-- AUD -->
                 <div class="col-lg-4 col-sm-12 mt-20">
                   <app-inputfield type="flag" label="Amount (AUD)" placeholder="$7000" formControlName="amountAUD"
+                   (input)="main.restrictInput($event, 'number')"
                     [showaustralianflagPrefix]="true">
                   </app-inputfield>
                 </div>
@@ -275,6 +276,7 @@
                 </div>
                 }
 
+                  @if(i === 0 || livingexpenses.at(i-1).get('category')?.value !== expense.get('category')?.value) {
                 <!-- Add More Button -->
                 <div class="col-lg-4 col-sm-12 mt-20">
                   <app-buttons label="Add More Expenses" class="btn btn-icon Add btncustomClass" [outline]="true"
@@ -282,7 +284,7 @@
                     <img src="/assets/images/icons/addred.svg">
                   </app-buttons>
                 </div>
-
+              }
               </div>
 
               }
@@ -338,9 +340,9 @@
                   </span>
                 </div>
 
-                }
+                
                 <hr class="hrclass">
-
+              }
                 <!-- Frequency -->
                 <div class="col-lg-4 col-sm-12 mt-20">
                   <app-dropdown [options]="searchfrequencyOptions" [(selectedValue)]="selectedOption"
@@ -361,7 +363,7 @@
                 <!-- AUD -->
                 <div class="col-lg-4 col-sm-12 mt-20">
                   <app-inputfield type="flag" label="Amount (AUD)" placeholder="$7000" formControlName="amountAUD"
-                    [showaustralianflagPrefix]="true">
+                    [showaustralianflagPrefix]="true"  (input)="main.restrictInput($event, 'number')">
                   </app-inputfield>
                 </div>
 
@@ -373,6 +375,7 @@
                 </div>
                 }
 
+                   @if(i === 0 || miscexpenses.at(i-1).get('category')?.value !== expense.get('category')?.value) {
                 <!-- Add More Button -->
                 <div class="col-lg-4 col-sm-12 mt-20">
                   <app-buttons label="Add More Expenses" class="btn btn-icon Add btncustomClass" [outline]="true"
@@ -380,6 +383,7 @@
                     <img src="/assets/images/icons/addred.svg">
                   </app-buttons>
                 </div>
+              }
 
               </div>
 
@@ -406,7 +410,7 @@
   <div class="col-lg-4  d-flex justify-content-end">
     <app-buttons type="button" label="Back" class="btn btncustomClass" [outline]="true" (click)="back()">
     </app-buttons>
-    <app-buttons type="button" label="Next" class="btn btncustomClass" color="primary" (click)="next()">
+    <app-buttons type="button" label="Next" class="btn btncustomClass" color="primary" (click)="next()" [disabled]="!isExpenseValid()" >
     </app-buttons>
     <!-- <app-buttons type="button" label="Next" class="btn btncustomClass" color="primary" (click)="next1()">
     </app-buttons> -->

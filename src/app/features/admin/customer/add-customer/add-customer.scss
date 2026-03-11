@@ -42,7 +42,7 @@
 
 
 .mobiledetails {
-  
+
   padding: $spacing_18;
   // flex-direction: column;
   // align-items: flex-start;
@@ -56,6 +56,7 @@
     align-items: stretch;
     padding: $spacing_9;
   }
+
   .text-label-data {
     font-weight: 400;
   }
@@ -108,12 +109,14 @@ input {
   }
 }
 
-.mt-20{
+.mt-20 {
   margin-top: $spacing_9;
 }
-.mt-40{
+
+.mt-40 {
   margin-top: $spacing_18;
 }
+
 .phone-label {
   text-align: start;
   color: #25262F;
@@ -126,9 +129,10 @@ input {
 }
 
 
-.btncustomClass{
+.btncustomClass {
   padding: 0;
   width: 100%;
+  height: 52px!important;
 }
 
 
@@ -155,10 +159,10 @@ input {
 
 .step {
   flex: 1;
- display: flex;
-padding: $spacing_9;
-align-items: center;
-gap: $spacing_4;
+  display: flex;
+  padding: $spacing_9;
+  align-items: center;
+  gap: $spacing_4;
   cursor: pointer;
   position: relative;
 }
@@ -184,18 +188,27 @@ gap: $spacing_4;
 }
 
 .step-number {
-  font-size: $font-size-body_lg; 
+  font-size: $font-size-body_lg;
   font-weight: $font-weight-bold;
 }
+
+.step.active,
+.step.completed {
+  border-bottom: 3.5px solid $accent_sec;
+}
+
 .step.active .step-circle {
   background: $accent_sec;
-  color: #fff!important;
+  color: #fff !important;
   border-color: $accent_sec;
+
 }
 
 .step.completed .step-circle {
-  background:  $accent_sec;;
+  background: $accent_sec;
+  ;
   color: #fff;
+
 }
 
 .step-content {
@@ -205,12 +218,13 @@ gap: $spacing_4;
 }
 
 .step-title {
- color: $secondary-text-dark;
+  color: $secondary-text-dark;
 }
 
 .step-desc {
   font-weight: 400;
 }
+
 @media (max-width: 768px) {
   .stepper {
     flex-direction: column;
@@ -227,10 +241,11 @@ gap: $spacing_4;
   display: flex;
   align-items: flex-end;
 }
+
 .success-phone input {
   border: 1px solid #28a745 !important;
   background: #f6fff8;
- 
+
 }
 
 
@@ -243,26 +258,30 @@ gap: $spacing_4;
 
 .phone-col,
 .otp-side {
-  flex: 1;        /* each takes equal width */
+  flex: 1;
+  /* each takes equal width */
   width: 50%;
 }
+
 .otp-side {
   display: flex;
   gap: 6px;
   width: 50%;
 }
 
-.resend-timer{
+.resend-timer {
   color: $secondary-700;
-  font-weight: 700!important;
+  font-weight: 700 !important;
 }
-.resend-link{
+
+.resend-link {
   cursor: pointer;
-  color: $primary_text,;
-font-weight: 700;
-text-decoration-line: underline;
+  color: $primary_text, ;
+  font-weight: 700;
+  text-decoration-line: underline;
 
 }
+
 .resend-link.disabled {
   pointer-events: none;
   opacity: 0.5;
@@ -279,4 +298,3 @@ text-decoration-line: underline;
     width: 100%;
   }
 }
-

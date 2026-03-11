@@ -139,9 +139,47 @@ export class Uploadkyc implements OnDestroy {
     }
   }
 
-  
 
-  selectSameAddress() {
+ checkSequential(value: string, control: any) {
+
+  if (!value || value.length < 12) return;
+
+  if (this.isSequential(value)) {
+    control.control.setErrors({ sequential: true });
+  } else {
+
+    const errors = control.control.errors;
+
+    if (errors) {
+      delete errors['sequential'];
+      if (Object.keys(errors).length === 0) {
+        control.control.setErrors(null);
+      } else {
+        control.control.setErrors(errors);
+      }
+    }
+  }
+
+}
+isSequential(num: string) {
+
+ const ascSeq = "01234567890123456789";
+  const descSeq = "98765432109876543210";
+
+  for (let i = 0; i <= num.length - 6; i++) {
+    const part = num.substring(i, i + 6);
+
+    if (ascSeq.includes(part) || descSeq.includes(part)) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+  selectSameAddress(checked: boolean) {
+   
+    
     this.addressType = 'same';
     this.isDifferentAddress = false;
     this.selectedSecondaryProof = null;
@@ -149,7 +187,9 @@ export class Uploadkyc implements OnDestroy {
     this.isPermanentMailingChecked = true;
   }
 
-  selectDifferentAddress() {
+  selectDifferentAddress(checked: boolean) {
+    
+   
     this.addressType = 'different';
     this.isDifferentAddress = true;
 
@@ -220,7 +260,7 @@ export class Uploadkyc implements OnDestroy {
       city: this.currselectedCityLabel,
       state: this.currselectedStateLabel,
       isPreferredAddress: this.isDifferentAddress == true ? 1 : 0,
-      isMailingAddress: this.isDifferentAddress  == true ? 1 : 0,
+      isMailingAddress: this.isDifferentAddress == true ? 1 : 0,
       zipCode: form.value.currpincode,
       country: 'India'
     };
@@ -248,8 +288,8 @@ export class Uploadkyc implements OnDestroy {
       })
     );
 
-    console.log("this.files----",this.files);
-    
+    console.log("this.files----", this.files);
+
     const fd = new FormData();
 
     // text fields

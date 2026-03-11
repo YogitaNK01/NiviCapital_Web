@@ -43,7 +43,7 @@ export class Estimateexpense {
   placeholderfrequcyval = ""
   labelval = "Select Categories"
   selectedOption: string = '';
- 
+
   livCatagories: OptionItem[] = [];
   misCatagories: OptionItem[] = [];
 
@@ -60,8 +60,8 @@ export class Estimateexpense {
 
   applicantId: any;
   applicationId: any
-  constructor(private fb: FormBuilder, private stepperService: Loanstepperservice, private cd: ChangeDetectorRef, private loanformservice: Loanformservice, 
-    private router: Router,private route: ActivatedRoute, public main: Main,private msgBox:Msgboxservice) { }
+  constructor(private fb: FormBuilder, private stepperService: Loanstepperservice, private cd: ChangeDetectorRef, private loanformservice: Loanformservice,
+    private router: Router, private route: ActivatedRoute, public main: Main, private msgBox: Msgboxservice) { }
 
   ngOnInit(): void {
 
@@ -80,7 +80,7 @@ export class Estimateexpense {
 
       tutionfees: ['', Validators.required],
       tutionfeesAUD: ['', Validators.required],
-      securityfrequency: ['', Validators.required],
+      // securityfrequency: ['', Validators.required],
       livingexpenses: this.fb.array([]),
       miscexpenses: this.fb.array([])
     })
@@ -155,6 +155,20 @@ export class Estimateexpense {
     });
   }
 
+  isExpenseValid(): boolean {
+
+  const tuitionINR = this.expenseForm.get('tutionfees')?.value;
+  const tuitionAUD = this.expenseForm.get('tutionfeesAUD')?.value;
+
+  const living = this.expenseForm.get('livingexpenses')?.value || [];
+  const misc = this.expenseForm.get('miscexpenses')?.value || [];
+
+  const tuitionFilled = tuitionINR && tuitionAUD;
+  const anyExpenseSelected = living.length > 0 || misc.length > 0;
+
+  return tuitionFilled && anyExpenseSelected;
+}
+
   // =======================================================================================================
   get livingexpenses(): FormArray {
     return this.expenseForm.get('livingexpenses') as FormArray;
@@ -195,17 +209,17 @@ export class Estimateexpense {
 
   addmore(category: string) {
     // this.livingexpenses.push(this.createExpense(category));
-     const index = this.livingexpenses.controls
-    .map((g: any) => g.get('category')?.value)
-    .lastIndexOf(category);
+    const index = this.livingexpenses.controls
+      .map((g: any) => g.get('category')?.value)
+      .lastIndexOf(category);
 
-  this.livingexpenses.insert(index + 1, this.createExpense(category));
+    this.livingexpenses.insert(index + 1, this.createExpense(category));
   }
   oncatagoryChange(values: string | string[]): void {
 
     this.selectedCategories = Array.isArray(values) ? values : [values];
 
-    console.log("check val",this.selectedCategories)
+    console.log("check val", this.selectedCategories)
 
     this.handleCategoryChange(
       values,
@@ -267,11 +281,11 @@ export class Estimateexpense {
 
   miscaddmore(category: string) {
     // this.miscexpenses.push(this.createmiscExpense(category));
-     const index = this.miscexpenses.controls
-    .map((g: any) => g.get('category')?.value)
-    .lastIndexOf(category);
+    const index = this.miscexpenses.controls
+      .map((g: any) => g.get('category')?.value)
+      .lastIndexOf(category);
 
-  this.miscexpenses.insert(index + 1, this.createmiscExpense(category));
+    this.miscexpenses.insert(index + 1, this.createmiscExpense(category));
 
   }
 
@@ -378,35 +392,51 @@ export class Estimateexpense {
       message: '',
       showCancel: true,
       onOk: () => {
-    
-    
 
-  if (type === 'living') {
 
-    const livingArray = this.livingexpenses;
-    livingArray.removeAt(index);
 
-    const livcategories = livingArray.controls.map(
-      ctrl => ctrl.get('category')?.value
-    );
-    this.selectedCategories = [...new Set(livcategories)];
-  } 
-  
-  else {
+        if (type === 'living') {
 
-    const miscArray = this.miscexpenses;
-    miscArray.removeAt(index);
+          const livingArray = this.livingexpenses;
+          // livingArray.removeAt(index);
 
-   const miscategories = miscArray.controls.map(
-      ctrl => ctrl.get('category')?.value
-    );
+          const categoryToRemove = livingArray.at(index).get('category')?.value;
 
-    this.selectedmisCategories = [...new Set(miscategories)];
-  }
+          for (let i = livingArray.length - 1; i >= 0; i--) {
+            if (livingArray.at(i).get('category')?.value === categoryToRemove) {
+              livingArray.removeAt(i);
+            }
+          }
 
-    }
+          const livcategories = livingArray.controls.map(
+            ctrl => ctrl.get('category')?.value
+          );
+          this.selectedCategories = [...new Set(livcategories)];
+        }
+
+        else {
+
+          const miscArray = this.miscexpenses;
+          // miscArray.removeAt(index);
+
+          const categoryToRemove = miscArray.at(index).get('category')?.value;
+
+          for (let i = miscArray.length - 1; i >= 0; i--) {
+            if (miscArray.at(i).get('category')?.value === categoryToRemove) {
+              miscArray.removeAt(i);
+            }
+          }
+
+          const miscategories = miscArray.controls.map(
+            ctrl => ctrl.get('category')?.value
+          );
+
+          this.selectedmisCategories = [...new Set(miscategories)];
+        }
+
+      }
     });
-}
+  }
   back() {
     this.stepperService.previous();
   }
@@ -417,7 +447,7 @@ export class Estimateexpense {
   }
   next() {
 
-    // this.stepperService.next();
+    
     let formdata = this.expenseForm.value
     console.log("form data Expenses:", formdata);
 

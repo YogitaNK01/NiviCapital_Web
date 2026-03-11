@@ -37,7 +37,7 @@
       @if (currentStep === 0) {
       <form #registerform="ngForm" (ngSubmit)="createcustId(registerform)" id="registerform"
         class="mobiledetails d-flex flex-column ">
-        <div class="row w-100 ">
+        <div class="row w-100 mb-3">
           <div class="col-lg-4 col-sm-12 ">
 
             <app-inputfield type="text" name="fname" ngModel [required]="true" #fname="ngModel" label="First Name"
@@ -111,19 +111,23 @@
           <div class="d-flex flex-column"
             [ngClass]="otpsent ? 'col-lg-12 col-sm-12 d-flex gap-3' : 'col-lg-12 col-sm-12'">
             <div class="d-flex gap-3">
-              <div class="phone-wrapper d-flex align-items-center gap-3" [ngClass]="{
-       'w-50': otpsent,
-       'w-100': !otpsent,
-       'success-phone': otpVerifiedOk
-     }">
-                <app-inputfield type="tel" name="phone" [(ngModel)]="prefillPhone" [required]="true"
-                  pattern="^[6-9][0-9]{9}$" label="Mobile Number" placeholder="Enter Mobile Number" helpText="Help text"
-                  class="w-100" [readonly]="otpVerifiedOk" [maxlength]="10" #phone="ngModel"
-                  (input)="main.restrictInput($event, 'number')" [showPhonePrefix]="true" [showPhonePrefixnumber]="true"
-                  [rightButtonText]="!otpsent && !otpVerifiedOk ? 'Send OTP' : ''" (rightButtonClick)="sendOtp()"
-                  [state]="otpState">
+              <div class="phone-wrapper d-flex align-items-end gap-3"
+                [ngClass]="{'w-50': otpsent, 'w-100': !otpsent,'success-phone': otpVerifiedOk }">
+                <div [ngClass]="!otpsent ? 'w-100' : 'w-100'">
+                  <app-inputfield type="tel" name="phone" [(ngModel)]="prefillPhone" [required]="true"
+                    pattern="^[6-9][0-9]{9}$" label="Mobile Number" placeholder="Enter Mobile Number"
+                    helpText="Help text" class="w-100" [readonly]="!otpsent ||!otpVerifiedOk" [maxlength]="10"
+                    #phone="ngModel" (input)="main.restrictInput($event, 'number')" [showPhonePrefix]="true"
+                    [showPhonePrefixnumber]="true" [rightButtonText]="!otpsent && !otpVerifiedOk ? 'Send OTP' : ''"
+                    (rightButtonClick)="sendOtp()" [state]="otpState" [disabled]="true">
 
-                </app-inputfield>
+                  </app-inputfield>
+                </div>
+                <div *ngIf="!otpsent" class="d-flex">
+
+                  <app-buttons label="Send OTP" class="btncustomClass primary" [outline]="true" style="width: 135px;"
+                    (click)="sendOtp()"></app-buttons>
+                </div>
               </div>
 
               @if (otpsent && !otpVerifiedOk) {
@@ -153,7 +157,7 @@
               </div>
               <div class="text-label-data otp-inline d-flex align-items-center">
                 <span class="text-label-data">Resend code in</span>
-                <span class="text-label-data resend-timer mx-2"> {{ formatTime(resendSeconds)  }}</span>
+                <span class="text-label-data resend-timer mx-2"> {{ formatTime(resendSeconds) }}</span>
                 <span class="resend-link text-dp-3-regular" (click)="resendOtp()" [class.disabled]=" isCounting">
                   Resend OTP
                 </span>
@@ -181,7 +185,7 @@
               <small *ngIf="email.errors?.['maxlength']">
                 Please enter a valid email address
               </small>
-               <small *ngIf="email.errors?.['blacklistmail']">
+              <small *ngIf="email.errors?.['blacklistmail']">
                 Please use a valid personal or official email address. Temporary or disposable emails are not allowed.
               </small>
             </div>
@@ -190,8 +194,12 @@
 
 
 
+        </div>
+        <div class="row w-100 d-flex justify-content-end">
+          <div class="col-lg-4 col-sm-12  d-flex gap-3 ">
+            <app-buttons label="Back " [outline]="true" class="btncustomClass primary "
+              (click)="goTocontact()"></app-buttons>
 
-          <div class="col-lg-4 col-sm-12 mt-40 ">
             <app-buttons type="submit" class="btn btncustomClass" [disabled]="!registerform.valid || !otpVerifiedOk"
               color="primary" label="Next"></app-buttons>
 

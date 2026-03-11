@@ -38,7 +38,7 @@ export class AddCustomer implements OnInit {
   isnewcustomer: boolean = false;
   otpsent: boolean = false;
   currentStep = 0;
-  maxAllowedStep = 1;
+  maxAllowedStep = 0;
   prefillPhone: any;
   sendotpId: any
   otpmsg: any;
@@ -87,6 +87,8 @@ export class AddCustomer implements OnInit {
       if (params['phone']) {
         this.prefillPhone = params['phone'];
         this.sendotpId = params['id'];
+        this.currentStep=0;
+        this.maxAllowedStep=0;
       }
       if (params['step'] == 2) {
         this.currentStep = +params['step'];
@@ -329,7 +331,7 @@ export class AddCustomer implements OnInit {
     if (action === 'ToDashboard') {
        this.msgBox.open({
       title: 'Are you sure want to go to Dashboard?',
-      message: 'Complete the steps to onboard a new customer',
+      message: '',
       showCancel: true,
       onOk: () => {
        this.router.navigate(['/admin/customer']);
@@ -362,5 +364,11 @@ export class AddCustomer implements OnInit {
       }
     })
 
+  }
+
+  goTocontact() {
+    this.router.navigate(['/admin/customer/checkcontact'],
+      {queryParams:{ phone: this.prefillPhone }})
+    
   }
 }
