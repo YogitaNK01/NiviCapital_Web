@@ -109,7 +109,7 @@ export class GeneralInfo implements OnInit {
 
       occupation: ['', Validators.required],
       qualification: ['', Validators.required],
-      institutionName: ['', [Validators.required, Validators.pattern('^[A-Za-z ]+$')]],
+      institutionName: ['', [Validators.required, Validators.pattern('^[A-Za-z ]+$'),Validators.minLength(2), Validators.maxLength(100)]],
       state: ['', Validators.required],
       university: ['', Validators.required],
       coursetype: ['', Validators.required],
@@ -391,6 +391,10 @@ export class GeneralInfo implements OnInit {
   }
   next1() { this.stepperService.next(); }
   next() {
+    if (!this.registerForm.valid) {
+      console.log("form invalid");
+      return;
+    }
 
     let formdata = this.registerForm.value;
 

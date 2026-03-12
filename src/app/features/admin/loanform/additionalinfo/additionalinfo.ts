@@ -49,10 +49,10 @@ export class Additionalinfo implements OnInit {
   uploadedFiles: Record<string, File | null> = {};
   files: any = {};
   basicConfig: UploadConfig = {
-    accept: '.jpg, .jpeg,',
+    accept: '.jpg, .jpeg',
     maxSize: 2,
     minSize: 50,
-    helperText: 'JPG, JPEG,(max. 2 MB,min. 50KB)'
+    helperText: 'JPG, JPEG (max. 2MB,min. 50KB)'
   };
   genderchecked: string = '';
   gendercheckvalue = ''
@@ -81,13 +81,13 @@ export class Additionalinfo implements OnInit {
 
     this.additionalinfoForm = this.fb.group({
 
-      uploadphoto: ['', Validators.required],
+      uploadphoto: [''],
       maritalstatus: ['', Validators.required,],
       gender: ['', Validators.required,],
       dependents: ['', [Validators.required]],
-      s_fname: ['', [Validators.required, Validators.pattern('^[A-Za-z ]+$'), Validators.minLength(2), Validators.maxLength(25)]],
+      s_fname: ['', [ Validators.pattern('^[A-Za-z ]+$'), Validators.minLength(2), Validators.maxLength(25)]],
       s_mname: ['', [Validators.pattern('^[A-Za-z ]+$'), Validators.minLength(2), Validators.maxLength(25)]],
-      s_lname: ['', [Validators.required, Validators.pattern('^[A-Za-z ]+$'), Validators.minLength(2), Validators.maxLength(25)]],
+      s_lname: ['', [ Validators.pattern('^[A-Za-z ]+$'), Validators.minLength(2), Validators.maxLength(25)]],
       f_fname: ['', [Validators.required, Validators.pattern('^[A-Za-z ]+$'), Validators.minLength(2), Validators.maxLength(25)]],
       f_mname: ['', [Validators.pattern('^[A-Za-z ]+$'), Validators.minLength(2), Validators.maxLength(25)]],
       f_lname: ['', [Validators.required, Validators.pattern('^[A-Za-z ]+$'), Validators.minLength(2), Validators.maxLength(25)]],
@@ -99,7 +99,40 @@ export class Additionalinfo implements OnInit {
     });
 
   
+this.additionalinfoForm.get('maritalstatus')?.valueChanges.subscribe(value => {
 
+  const sFname = this.additionalinfoForm.get('s_fname');
+  const sLname = this.additionalinfoForm.get('s_lname');
+
+  if (value === 'Married') {
+
+    sFname?.setValidators([
+      Validators.required,
+      Validators.pattern('^[A-Za-z ]+$'),
+      Validators.minLength(2),
+      Validators.maxLength(25)
+    ]);
+
+    sLname?.setValidators([
+      Validators.required,
+      Validators.pattern('^[A-Za-z ]+$'),
+      Validators.minLength(2),
+      Validators.maxLength(25)
+    ]);
+
+  } else {
+
+    sFname?.clearValidators();
+    sLname?.clearValidators();
+
+    sFname?.setValue('');
+    sLname?.setValue('');
+  }
+
+  sFname?.updateValueAndValidity();
+  sLname?.updateValueAndValidity();
+
+});
   }
   get f() {
     return this.additionalinfoForm.controls;
@@ -127,15 +160,14 @@ export class Additionalinfo implements OnInit {
     console.log(result);
 
 
-    if (!result.file)  {
+    if (!result || !result.file)  {
     this.profilePhotoUrl = null;
     this.objectName = null;
     this.additionalinfoForm.get('uploadphoto')?.setValue(null);
+    this.additionalinfoForm.get('uploadphoto')?.markAsTouched();
     return;
   }
     const fd = new FormData();
-
-
     fd.append('applicantId', this.applicantId);
     fd.append('file', result.file);
 
@@ -148,8 +180,8 @@ export class Additionalinfo implements OnInit {
         this.additionalinfoForm.patchValue({
           uploadphoto: this.profilePhotoUrl
         });
-        this.additionalinfoForm.get('uploadphoto')?.setValue(this.profilePhotoUrl);
-  this.additionalinfoForm.get('uploadphoto')?.markAsDirty();
+        // this.additionalinfoForm.get('uploadphoto')?.setValue(this.profilePhotoUrl);
+        this.additionalinfoForm.get('uploadphoto')?.markAsDirty();
         this.additionalinfoForm.get('uploadphoto')?.updateValueAndValidity();
 
 
@@ -182,8 +214,13 @@ export class Additionalinfo implements OnInit {
     this.stepperService.next();
   }
   next() {
+  console.log("form--", this.additionalinfoForm.value);
+    if (!this.additionalinfoForm.valid) {
+      console.log("form invalid");
+      return;
+    }
 
-    console.log("form--", this.additionalinfoForm.value);
+  
     let formdata = this.additionalinfoForm.value;
 
     let input =

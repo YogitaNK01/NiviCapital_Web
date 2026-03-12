@@ -164,7 +164,7 @@ export class Kycinfo {
     this.stepperService.previous();
   }
   next() {
-    
+   
     this.stepperService.next();
   }
 

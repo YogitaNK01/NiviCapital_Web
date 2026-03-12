@@ -24,8 +24,17 @@ export class Loanformservice {
   kycdetailsID: any;
 
   constructor(private http: HttpClient) { }
+ // *************************loan info api*********************************
 
-  //genral info apis
+  submitLoanInfo(payload: any, id: string): Observable<ApiResponse<any>> {
+    return this.http.post<ApiResponse<any>>(
+      `${this.baseUrl}/v1/los/applications/${id}/loan-detail`,
+      payload
+    );
+  }
+
+
+  //*************************  genral info apis  *************************
   getOccupations(): Observable<ApiResponse<any>> {
     return this.http.get<ApiResponse<any>>(
       `${this.baseUrl}/v1/masters/occupations`,
@@ -61,7 +70,7 @@ export class Loanformservice {
     );
   }
 
-  // Australian states and cities api 
+  // ************************* Australian states and cities api *************************
 
   getAustralianstates(): Observable<ApiResponse<any>> {
     return this.http.get<ApiResponse<any>>(
@@ -78,7 +87,7 @@ export class Loanformservice {
     );
   }
 
-  // save general info api
+  // ************************* save general info api  *************************
   submitGenralInfo(payload: any, id: string): Observable<ApiResponse<any>> {
     return this.http.post<ApiResponse<any>>(
       `${this.baseUrl}/v1/los/applications/${id}/general-info`,
@@ -86,7 +95,7 @@ export class Loanformservice {
     );
   }
 
-  //additional info api
+  // ************************* additional info api  *************************
 
   //upload user profile photo
   uploadPhoto(payload: any): Observable<ApiResponse<any>> {
@@ -103,7 +112,7 @@ export class Loanformservice {
     );
   }
 
-  //save kyc info api
+  // ************************* save kyc info api *************************
 
   setKycId(id: string) {
     this.kycdetailsID = id;
@@ -119,7 +128,7 @@ export class Loanformservice {
     console.log("service--",data);
     
     return this.http.post<ApiResponse<any>>(
-      `${this.baseUrl}/v1/kyc/kyc/${id}/documents`,
+      `${this.baseUrl}/v1/kyc/${id}/documents`,
       data
     );
   }
@@ -131,7 +140,7 @@ export class Loanformservice {
   }
 
 
-  //estimate expense
+  // ************************* estimate expense  *************************
  getlivingexp(): Observable<ApiResponse<any>> {
     return this.http.get<ApiResponse<any>>(
       `${this.baseUrl}/v1/los/expense-masters/living`,

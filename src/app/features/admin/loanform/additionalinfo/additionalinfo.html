@@ -314,7 +314,7 @@
         <app-buttons type="button" label="Back" class="btn btncustomClass" [outline]="true" (click)="back()">
         </app-buttons>
         <app-buttons type="button" label="Next" class="btn btncustomClass" color="primary" (click)="next()"
-            [disabled]="!additionalinfoForm.valid">
+            [disabled]="additionalinfoForm.invalid">
         </app-buttons>
         <!-- <app-buttons type="button" label="Next" class="btn btncustomClass" color="primary" (click)="next()"
             [disabled]="!additionalinfoForm.valid">

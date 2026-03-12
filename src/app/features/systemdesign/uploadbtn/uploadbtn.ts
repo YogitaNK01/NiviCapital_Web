@@ -9,7 +9,7 @@ export type UploadState = 'idle' | 'focus' | 'uploading' | 'success' | 'error' |
 export interface UploadConfig {
   accept?: string;
   maxSize?: number; // in MB
-  minSize?: number; // in MB
+  minSize?: number; // in KB
   label?: string;
   helperText?: string;
 }
@@ -128,17 +128,22 @@ export class Uploadbtn implements OnInit, ControlValueAccessor {
     }
 
     // Validate file size
+      if (this.config.maxSize) {
     const maxSizeBytes = (this.config.maxSize || 10) * 1024 * 1024;
     if (file.size > maxSizeBytes) {
       this.setError(`File size exceeds ${this.config.maxSize} MB`);
       return;
     }
+  }
 
-    //  const minSizeBytes = (this.config.minSize || 10) * 1024 * 1024;
-    // if (file.size < minSizeBytes) {
-    //   this.setError(`File size minimum ${this.config.minSize} KB`);
-    //   return;
-    // }
+   if (this.config.minSize) {
+    const minSizeBytes = this.config.minSize * 1024;
+
+    if (file.size < minSizeBytes) {
+      this.setError(`File size must be at least ${this.config.minSize} KB`);
+      return;
+    }
+  }
 
     this.fileName = file.name;
     this.uploadFile(file);
@@ -198,7 +203,7 @@ export class Uploadbtn implements OnInit, ControlValueAccessor {
         this.preview = '';
         this.progress = 0;
         this.errorMessage = '';
-
+        this.showHelperMessage = true;
         if (this.fileInput) {
           this.fileInput.value = '';
         }

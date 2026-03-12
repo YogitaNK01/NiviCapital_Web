@@ -32,6 +32,12 @@ export class Estimateexpense {
   ];
   expenseForm!: FormGroup
 
+  totalINRamt: number = 0;
+  totalAUDamt: number = 0;
+
+  totalLivingINR = 0;
+totalMiscINR = 0;
+
   selectedCategories: string[] = [];
   selectedmisCategories: string[] = [];
 
@@ -79,10 +85,8 @@ export class Estimateexpense {
 
     this.expenseForm = this.fb.group({
 
-      tutionfees: ['', Validators.required],
-      // tutionfeesAUD: ['', Validators.required],
+      tutionfees: ['', [Validators.required,Validators.max(10000000)]],
       tutionfeesAUD: [{ value: '', disabled: true }, Validators.required],
-      // securityfrequency: ['', Validators.required],
       livingexpenses: this.fb.array([]),
       miscexpenses: this.fb.array([])
     })
@@ -92,11 +96,22 @@ export class Estimateexpense {
 
     this.expenseForm.get('tutionfees')?.valueChanges.subscribe(() => {
       this.calculateINRtoAUD();
+      this.calculateGrandTotal();
     });
 
     this.expenseForm.get('tutionfeesAUD')?.valueChanges.subscribe(() => {
       this.calculateINRtoAUD();
     });
+
+    this.expenseForm.get('livingexpenses')?.valueChanges.subscribe(() => {
+  this.calculateGrandTotal();
+  
+});
+
+this.expenseForm.get('miscexpenses')?.valueChanges.subscribe(() => {
+ this.calculateGrandTotal();
+});
+
   }
 
  get f() {
@@ -186,7 +201,7 @@ export class Estimateexpense {
       if (!val) { group.patchValue({ amountAUD: '' }); return; }
       const cleanINR = Number(val.toString().replace(/,/g, ''));
       console.log("cleanINR", cleanINR)
-
+     
       if (!cleanINR) return;
 
       const aud = cleanINR / 62.5;
@@ -254,7 +269,7 @@ export class Estimateexpense {
       securityfrequency: ['Monthly', Validators.required],
       amountINR: ['', Validators.required],
       amountAUD: [{ value: '', disabled: true }, Validators.required],
-      description: ['']
+      descriptionmisc: ['']
     });
 
     group.get('amountINR')?.valueChanges.subscribe((val) => {
@@ -322,6 +337,35 @@ export class Estimateexpense {
   }
 
   // =====================================================================================
+calculateGrandTotal() {
+
+  const tuition = Number(this.expenseForm.get('tutionfees')?.value?.toString().replace(/,/g, '')) || 0;
+
+  this.totalLivingINR = this.calculateTotal('livingexpenses');
+  this.totalMiscINR = this.calculateTotal('miscexpenses');
+
+  this.totalINRamt = tuition + this.totalLivingINR + this.totalMiscINR;
+
+  this.totalAUDamt = this.totalINRamt / 62.5;
+
+}
+  calculateTotal(formArrayName: string): number {
+
+  let total = 0;
+
+  const formArray = this.expenseForm.get(formArrayName) as any;
+
+  formArray.controls.forEach((grp: any) => {
+    const val = grp.get('amountINR')?.value;
+
+    if (val) {
+      const clean = Number(val.toString().replace(/,/g, ''));
+      total += clean;
+    }
+  });
+
+  return total;
+}
 
   handleAmountInput(event: any, controlName: string) {
     this.main.restrictInput(event, 'number');
@@ -338,7 +382,14 @@ export class Estimateexpense {
     value = value.replace(/,/g, '');
     value = value.replace(/\D/g, '');
 
-    const formatted = this.formatIndian(value);
+     let num = Number(value);
+
+  if (controlName === 'tutionfees' && num > 10000000) {
+    num = 10000000;
+  }
+
+
+    const formatted = this.formatIndian(num.toString());
     if (index !== undefined) {
       const array = type === 'misc' ? this.miscexpenses : this.livingexpenses;
 
@@ -349,7 +400,7 @@ export class Estimateexpense {
     else {
       this.expenseForm.get(controlName)?.setValue(formatted, { emitEvent: false });
 
-      // console.log("Root Updated:", this.expenseForm.get(controlName)?.value);
+      
     }
 
   }

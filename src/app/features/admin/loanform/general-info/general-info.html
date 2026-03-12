@@ -44,15 +44,28 @@
                 <div class="col-lg-4 col-sm-12 mt-20">
                     <app-dropdown [options]="seleactqualification" [placeholder]="'Select '+ qualification"
                         formControlName="qualification" [required]="true"
-                        (selectedValueChange)="registerForm.get('qualification')?.setValue($event)"
+                        (selectedValueChange)="registerForm.get('qualification')?.setValue($event)" [searchable]="true"
                         [avatarUrl]="avatarUrl" [hasAvatar]="hasAvatar" [label]="qualification">
                     </app-dropdown>
 
                 </div>
                 <div class="col-lg-4 col-sm-12 mt-20">
                     <app-inputfield formControlName="institutionName" label="Last Institution Name" [required]="true"
-                        placeholder="Enter Institution Name">
+                        placeholder="Enter Institution Name" name="institutionName">
                     </app-inputfield>
+
+                    <div class="text-danger" *ngIf="f['institutionName'].touched && f['institutionName'].invalid">
+
+                        <div *ngIf="f['institutionName'].errors?.['required']">
+                            Institution Name is required
+                        </div>
+                         <div *ngIf="f['institutionName'].errors?.['minlength'] ||f['institutionName'].errors?.['maxlength']">
+                            Institution name must be 2–100 characters
+                        </div>
+
+                      
+
+                    </div>
 
                 </div>
 
@@ -94,7 +107,7 @@
                 <!-- course name -->
                 <div class="col-lg-6 col-sm-12 mt-20">
                     <app-dropdown [options]="selectcoursename" [placeholder]="'Select '+coursename" [required]="true"
-                        (selectedValueChange)="selectedCoursename($event)" [avatarUrl]="avatarUrl"
+                        (selectedValueChange)="selectedCoursename($event)" [avatarUrl]="avatarUrl" [searchable]="true"
                         formControlName="coursename" [hasAvatar]="hasAvatar" [label]="coursename">
                     </app-dropdown>
                 </div>
@@ -116,7 +129,7 @@
                 </div>
                 <!-- Course End Date* -->
                 <div class="col-lg-4 col-sm-12 mt-20">
-                    <app-datepickernew formControlName="courseenddate" label="Course End Date"  placeholder="DD/MM/YYYY" [disabled]="true" >
+                    <app-datepickernew formControlName="courseenddate" label="Course End Date"  placeholder="DD/MM/YYYY" [disabled]="true" [disablePastDates]="true">
                     </app-datepickernew>
                 </div>
 

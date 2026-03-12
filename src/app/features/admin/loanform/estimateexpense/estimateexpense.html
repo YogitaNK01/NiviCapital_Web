@@ -42,7 +42,7 @@
             </g>
           </svg>
 
-          <p class="table-head"> 1,71,62,106</p>
+          <p class="table-head">₹ {{totalINRamt}}</p>
         </div>
         <div class="line"></div>
         <div class="flag d-flex">
@@ -125,7 +125,7 @@
                 fill="#F7FCFF" />
             </g>
           </svg>
-          <p class="table-head"> $294,730</p>
+          <p class="table-head"> ${{ totalAUDamt}}</p>
         </div>
       </div>
     </div>
@@ -181,13 +181,16 @@
         <div class="col">
           <div class="form-group mb-3">
             <app-inputfield type="flag" [required]="true" label="Tuition Fees (INR)" formControlName="tutionfees"
-              placeholder="₹ 40,20,337" helpText="Help text" name="tutionfees" [maxlength]="10" [showPhonePrefix]="true"
+              placeholder="₹ 40,20,337" helpText="Help text" name="tutionfees" [showPhonePrefix]="true" [maxlength]="10"
               [showPhonePrefixnumber]="false" (input)="handleAmountInput($event,'tutionfees')">
             </app-inputfield>
             <div class="text-danger" *ngIf="f['tutionfees'].touched && f['tutionfees'].invalid">
 
               <div *ngIf="f['tutionfees'].errors?.['required']">
                 Amount (INR) is required
+              </div>
+              <div class="text-danger" *ngIf="f['tutionfees'].touched && f['tutionfees'].errors?.['max']">
+                Tuition fees cannot exceed ₹1,00,00,000
               </div>
             </div>
           </div>
@@ -281,8 +284,17 @@
                 @if(getCategoryLabel(expense.get('category')?.value) === 'Other Expenses') {
                 <div class="col-12 mt-20">
                   <app-inputfield type="text" label="Expense Description" [required]="true" placeholder="Enter Here"
-                    formControlName="description">
+                    formControlName="description" name="description">
                   </app-inputfield>
+
+                   <div class="text-danger"
+                    *ngIf="expense.get('description')?.touched && expense.get('description')?.invalid">
+
+                    <div *ngIf="expense.get('description')?.errors?.['required'] || amterror">
+                      Description is required
+                    </div>
+                  </div>
+
                 </div>
                 }
               </div>
@@ -388,8 +400,17 @@
                 <!-- Description only for Other Expense -->
                 @if(getmisCategoryLabel(expense.get('category')?.value) === 'Other Expenses') {
                 <div class="col-12 mt-20">
-                  <app-inputfield type="text" label="Expense Description" [required]="true" placeholder="Enter Here">
+                  <app-inputfield type="text" label="Expense Description" [required]="true" placeholder="Enter Here"
+                  formControlName="descriptionmisc" name="descriptionmisc">
                   </app-inputfield>
+                    <div class="text-danger"
+                    *ngIf="expense.get('descriptionmisc')?.touched && expense.get('descriptionmisc')?.invalid">
+
+                    <div *ngIf="expense.get('descriptionmisc')?.errors?.['required'] || amterror">
+                      Description is required
+                    </div>
+                  </div>
+
                 </div>
                 }
               </div>

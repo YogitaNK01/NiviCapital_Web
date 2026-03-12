@@ -6,6 +6,7 @@ import { Loanstepperservice } from '../../../../core/service/loanstepperservice'
 import { Dropdown, DropdownOption } from '../../../systemdesign/dropdown/dropdown';
 import { FormsModule, NgForm } from '@angular/forms';
 import { Charts } from "../../../systemdesign/charts/charts";
+import { Loanformservice } from '../../../../core/service/loanformservice';
 
 @Component({
   selector: 'app-loan-info',
@@ -48,16 +49,16 @@ export class LoanInfo implements OnInit {
     { label: '7yr', value: '7yr', icon: '' },
   ]
 
-selectpaymentmode: DropdownOption[] = [
-  { label: 'EMI-Start Repaying Immediately', value: 'EMI', icon: '' },
-  { label: 'SI–Pay Only Simple Interest During Study', value: 'SI', icon: '' },
-  { label: 'Moratorium – No Payment During Study', value: 'Moratorium', icon: '' },
+  selectpaymentmode: DropdownOption[] = [
+    { label: 'EMI-Start Repaying Immediately', value: 'EMI', icon: '' },
+    { label: 'SI–Pay Only Simple Interest During Study', value: 'SI', icon: '' },
+    { label: 'Moratorium – No Payment During Study', value: 'Moratorium', icon: '' },
 
-]
+  ]
 
   occupation: any;
   annualIncome: number | null = null;
-  rateOfInterest = 6.5;
+  rateOfInterest = 9.5;
   loanAmount = 1000000;
   tenure = 5;
   modeOfPayment = '';
@@ -68,7 +69,7 @@ selectpaymentmode: DropdownOption[] = [
   totalEmiAmount = 19566;
 
   annual_Income!: string;
-  paymentmode!:string;
+  paymentmode!: string;
 
   interestPercentage = Math.round((this.totalInterestPayable / (this.totalPrincipalAmount + this.totalInterestPayable)) * 100);
 
@@ -78,9 +79,9 @@ selectpaymentmode: DropdownOption[] = [
 
   chartData1 = [
     { label: 'Total Principle amount', value: 25, color: '#0D4472' },
-    { label: 'Total Interest payable', value: 75, color:  '#F33B48'},
+    { label: 'Total Interest payable', value: 75, color: '#F33B48' },
   ]
-  constructor(private router: Router, private stepperService: Loanstepperservice, private route: ActivatedRoute) { }
+  constructor(private router: Router, private stepperService: Loanstepperservice, private route: ActivatedRoute, private loanformservice: Loanformservice) { }
   ngOnInit(): void {
     this.route.queryParams.subscribe(params => {
       if (params['applicantId']) {
@@ -93,17 +94,63 @@ selectpaymentmode: DropdownOption[] = [
     });
   }
 
+limitLoanAmount(event: any) {
 
-    submitForm(data: NgForm) {
+  let value = event.target.value;
 
+  if (!value) return;
 
+  value = value.replace(/\D/g, ''); // numbers only
+  let num = Number(value);
+
+  if (num > 4500000) {
+    num = 4500000;
+  }
+
+  if (num < 100000) {
+    num = 100000;
+  }
+
+  this.loanAmount = num;
+}
+
+  submitForm(data: NgForm) {
+
+     if (!data.valid) {
+      console.log("form invalid");
+      return;
     }
 
-  back() {
+    console.log(data);
+    let input = {
+      "annualIncome": data.value.annual_Income,
+      "requestedAmount": data.value.loanamt,
+      "interestRate": data.value.rate,
+      "requestedTenureMonths": data.value.tenureInput*12,
+      "modeOfPayment": data.value.paymentmode,
+      "emiAmount": '',
+      "totalInterest": '',
+      "totalPrincipal": ''
+    }
+
+    console.log(input);
+
+    this.loanformservice.submitLoanInfo(input, this.applicationId).subscribe({
+      next: (data) => {
+        console.log(data);
+ if(data.status =="success"){
+
+  this.stepperService.next();
+ }
+
+      },
+      error: (error) => {
+        console.log(error);
+      }
+    });
 
   }
 
-  next() {
-    this.stepperService.next();
-  }
+
+ 
 }
