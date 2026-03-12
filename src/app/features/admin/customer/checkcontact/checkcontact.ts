@@ -148,7 +148,9 @@ export class Checkcontact implements OnInit {
   }
 
   private loadallusers(): void {
-    this.service.getAllUsers()
+    
+     const page = 0;
+    this.service.getAllUsers(page,6)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (response) => {

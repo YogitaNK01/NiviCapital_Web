@@ -17,7 +17,9 @@ export interface LoginPayload {
 }
 export interface PageResponse<T> {
   content: T[];
-  pageable: any;   // you can type later if needed
+  pageable: any;
+  totalElements:number; 
+  totalPages:number;  
 }
 
 export interface UserData {
@@ -59,9 +61,9 @@ export class Main {
   }
 
  
-  getAllUsers(): Observable<ApiResponse<PageResponse<UserData>>> {
+  getAllUsers(page:number,size:number): Observable<ApiResponse<PageResponse<UserData>>> {
   return this.http.get<ApiResponse<PageResponse<UserData>>>(
-    `${this.baseUrl}/v1/customers/my-customers`
+    `${this.baseUrl}/v1/customers/my-customers?page=${page}&size=${size}`,
   );
 }
 

@@ -60,6 +60,7 @@ export class Estimateexpense {
 
   applicantId: any;
   applicationId: any
+  amterror: boolean = false
   constructor(private fb: FormBuilder, private stepperService: Loanstepperservice, private cd: ChangeDetectorRef, private loanformservice: Loanformservice,
     private router: Router, private route: ActivatedRoute, public main: Main, private msgBox: Msgboxservice) { }
 
@@ -79,7 +80,8 @@ export class Estimateexpense {
     this.expenseForm = this.fb.group({
 
       tutionfees: ['', Validators.required],
-      tutionfeesAUD: ['', Validators.required],
+      // tutionfeesAUD: ['', Validators.required],
+      tutionfeesAUD: [{ value: '', disabled: true }, Validators.required],
       // securityfrequency: ['', Validators.required],
       livingexpenses: this.fb.array([]),
       miscexpenses: this.fb.array([])
@@ -97,7 +99,9 @@ export class Estimateexpense {
     });
   }
 
-
+ get f() {
+    return this.expenseForm.controls;
+  }
   toggle(index: number) {
     if (this.openIndex.includes(index)) {
       this.openIndex = this.openIndex.filter(i => i !== index);
@@ -114,16 +118,16 @@ export class Estimateexpense {
     const tutionfeesINR = this.expenseForm.get('tutionfees')?.value;
 
     const cleanINR = Number(tutionfeesINR.toString().replace(/,/g, ''));
-
+    if (cleanINR == 0) { this.expenseForm.patchValue({ tutionfeesAUD: 0 }); return; }
     if (!cleanINR) return;
 
     const tutionfeesAUDValue = cleanINR / 62.5;
 
     this.expenseForm.patchValue(
       { tutionfeesAUD: tutionfeesAUDValue },
-      { emitEvent: false }
+      { emitEvent: false },
     );
-
+    this.expenseForm.get('tutionfeesAUD')?.disable();
   }
 
   livingexp() {
@@ -155,19 +159,13 @@ export class Estimateexpense {
     });
   }
 
+ 
   isExpenseValid(): boolean {
 
-  const tuitionINR = this.expenseForm.get('tutionfees')?.value;
-  const tuitionAUD = this.expenseForm.get('tutionfeesAUD')?.value;
-
-  const living = this.expenseForm.get('livingexpenses')?.value || [];
-  const misc = this.expenseForm.get('miscexpenses')?.value || [];
-
-  const tuitionFilled = tuitionINR && tuitionAUD;
-  const anyExpenseSelected = living.length > 0 || misc.length > 0;
-
-  return tuitionFilled && anyExpenseSelected;
-}
+    const tuitionINR = this.expenseForm.get('tutionfees')?.value;
+    const tuitionAUD = this.expenseForm.get('tutionfeesAUD')?.value;  
+    return tuitionINR;
+  }
 
   // =======================================================================================================
   get livingexpenses(): FormArray {
@@ -177,15 +175,17 @@ export class Estimateexpense {
   createExpense(category: string): FormGroup {
     const group = this.fb.group({
       category: [category],
+      categoryLabel: [this.getCategoryLabel(category)],
       securityfrequency: ['Monthly', Validators.required],
       amountINR: ['', Validators.required],
-      amountAUD: ['', Validators.required],
+      amountAUD: [{ value: '', disabled: true }, Validators.required],
       description: ['']
     });
     group.get('amountINR')?.valueChanges.subscribe((val) => {
-      if (!val) return;
-
+      console.log("val", val)
+      if (!val) { group.patchValue({ amountAUD: '' }); return; }
       const cleanINR = Number(val.toString().replace(/,/g, ''));
+      console.log("cleanINR", cleanINR)
 
       if (!cleanINR) return;
 
@@ -195,7 +195,7 @@ export class Estimateexpense {
         { amountAUD: aud.toString() },
         { emitEvent: false }
       );
-
+      group.get('amountAUD')?.disable();
 
     });
 
@@ -208,12 +208,13 @@ export class Estimateexpense {
   }
 
   addmore(category: string) {
-    // this.livingexpenses.push(this.createExpense(category));
     const index = this.livingexpenses.controls
       .map((g: any) => g.get('category')?.value)
       .lastIndexOf(category);
 
     this.livingexpenses.insert(index + 1, this.createExpense(category));
+    // setTimeout(() => this.updateView());
+
   }
   oncatagoryChange(values: string | string[]): void {
 
@@ -249,9 +250,10 @@ export class Estimateexpense {
   createmiscExpense(category: string): FormGroup {
     const group = this.fb.group({
       category: [category],
+      categoryLabel: [this.getmisCategoryLabel(category)],
       securityfrequency: ['Monthly', Validators.required],
       amountINR: ['', Validators.required],
-      amountAUD: ['', Validators.required],
+      amountAUD: [{ value: '', disabled: true }, Validators.required],
       description: ['']
     });
 
@@ -268,6 +270,7 @@ export class Estimateexpense {
         { amountAUD: aud.toString() },
         { emitEvent: false }
       );
+      group.get('amountAUD')?.disable();
 
 
     });
@@ -280,7 +283,6 @@ export class Estimateexpense {
   }
 
   miscaddmore(category: string) {
-    // this.miscexpenses.push(this.createmiscExpense(category));
     const index = this.miscexpenses.controls
       .map((g: any) => g.get('category')?.value)
       .lastIndexOf(category);
@@ -447,7 +449,29 @@ export class Estimateexpense {
   }
   next() {
 
-    
+ const livingArray = this.expenseForm.get('livingexpenses') as FormArray;
+  const miscArray = this.expenseForm.get('miscexpenses') as FormArray;
+
+  let invalid = false;
+
+  livingArray.controls.forEach(control => {
+    if (control.invalid) {
+      control.markAllAsTouched();
+      invalid = true;
+    }
+  });
+
+  miscArray.controls.forEach(control => {
+    if (control.invalid) {
+      control.markAllAsTouched();
+      invalid = true;
+    }
+  });
+
+  if (invalid) {
+    return; 
+  }
+  
     let formdata = this.expenseForm.value
     console.log("form data Expenses:", formdata);
 

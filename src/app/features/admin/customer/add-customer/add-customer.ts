@@ -311,7 +311,7 @@ export class AddCustomer implements OnInit {
 
 
   goToStep(step: number) {
-    this.currentStep = step;
+      this.currentStep = step;
     this.maxAllowedStep = Math.max(this.maxAllowedStep, step);
   }
 

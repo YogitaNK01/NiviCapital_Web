@@ -11,7 +11,7 @@ import { Loanstepperservice } from '../../../../core/service/loanstepperservice'
 
 @Component({
   selector: 'app-incomeinfo',
-  imports: [CommonModule, Buttons, Checkbox, Dropdown, ReactiveFormsModule, Uploadbtn, Radiobuttons, Inputfield],
+  imports: [CommonModule, Buttons,  ReactiveFormsModule, Uploadbtn, ],
   standalone: true,
   templateUrl: './incomeinfo.html',
   styleUrl: './incomeinfo.scss'

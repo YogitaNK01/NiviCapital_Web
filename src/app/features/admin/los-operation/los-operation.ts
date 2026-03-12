@@ -69,6 +69,7 @@ export class LosOperation {
   pageSize = 6;
   currentPage = 1;
   totalItems: number = 0;
+   totalPages: number = 0;
   totalPagesArray: (number | string)[] = [];
   fullData: any[] = [];
   AlluserData: any[] = [];
@@ -103,7 +104,7 @@ export class LosOperation {
   ];
 
   kycCompleted: number | null = null;
-  totalPages: any;
+ 
 
   cards=Array(4)
 
@@ -131,15 +132,18 @@ export class LosOperation {
   //-----------get table data from api----------------------------
 
 private loadallusers(): void {
-    this.service.getAllUsers()
+     const page = this.currentPage - 1;
+    this.service.getAllUsers(page,this.pageSize)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (response) => {
            let resdate= response.data.content;
+            this.totalItems = response.data.totalElements;
+          this.totalPages = response.data.totalPages;
           this.AlluserData = resdate;
           this.fullData = this.tableDataService.transformUserData(resdate);
           this.filteredData = this.fullData;
-          this.totalItems = this.fullData.length;
+      
           this.kycCompleted = this.tableDataService.calculateKycMetrics(resdate, this.totalItems);
           this.dataSource.sort = this.sort;
           this.updatePagedData();
@@ -164,11 +168,17 @@ private loadallusers(): void {
   
 
   updatePagedData(): void {
-    const startIndex = (this.currentPage - 1) * this.pageSize;
-    const endIndex = startIndex + this.pageSize;
-    this.dataSource.data = this.filteredData.slice(startIndex, endIndex);
+    
+    this.dataSource.data = this.filteredData;
   }
 
+   onPageChange(page: any): void {
+    if (page === '...') return;
+    if (page < 1 || page > this.totalPages) return;
+
+    this.currentPage = page as number;
+    this.loadallusers()
+  }
   updateVisiblePages(): void {
     const total = this.totalPages;
     this.totalPagesArray = this.tableDataService.getVisiblePages(this.currentPage, total);

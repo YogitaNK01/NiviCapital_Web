@@ -6,7 +6,7 @@ import { Buttons } from "../buttons/buttons";
 @Component({
   selector: 'app-inputfield',
   standalone: true,
-  imports: [CommonModule, Buttons],
+  imports: [CommonModule],
   templateUrl: './inputfield.html',
   styleUrls: ['./inputfield.scss'],
   providers: [

@@ -14,7 +14,7 @@ import { ActivatedRoute } from '@angular/router';
 
 @Component({
   selector: 'app-kycinfo',
-  imports: [CommonModule, Uploadbtn, Inputfield, Datepickernew, Checkbox, ReactiveFormsModule, Buttons, Uploadkyc],
+  imports: [CommonModule, Uploadbtn, Inputfield, Datepickernew, Checkbox, ReactiveFormsModule, Buttons],
   standalone: true,
   templateUrl: './kycinfo.html',
   styleUrl: './kycinfo.scss'

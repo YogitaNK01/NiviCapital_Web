@@ -195,6 +195,14 @@ input {
 .step.active,
 .step.completed {
   border-bottom: 3.5px solid $accent_sec;
+  
+  
+}
+.step.completed {
+  border-bottom: 3.5px solid $accent_sec;
+  pointer-events: none;
+  cursor: not-allowed;
+  
 }
 
 .step.active .step-circle {

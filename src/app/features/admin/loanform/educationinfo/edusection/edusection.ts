@@ -11,7 +11,7 @@ import { Loanstepperservice } from '../../../../../core/service/loanstepperservi
 
 @Component({
   selector: 'app-edusection',
-  imports: [CommonModule, Buttons, Checkbox, Dropdown, ReactiveFormsModule, Uploadbtn, Radiobuttons, Inputfield],
+  imports: [CommonModule, Buttons, Dropdown, ReactiveFormsModule, Uploadbtn, Inputfield],
   standalone: true,
   templateUrl: './edusection.html',
   styleUrl: './edusection.scss'

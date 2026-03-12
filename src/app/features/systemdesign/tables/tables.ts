@@ -48,6 +48,8 @@ export class Tables implements OnChanges {
   selection: any[] = [];
 
 @Output() selectionChange = new EventEmitter<any[]>();
+@Input() totalPages: number = 1;
+@Output() pageChange = new EventEmitter<number>();
   constructor(private http: HttpClient,private router: Router) { }
 
   ngOnInit() {
@@ -71,15 +73,13 @@ export class Tables implements OnChanges {
     }
   }
 
-  get totalPages() {
-    const total = Math.ceil(this.data.length / this.pageSize);
-    return isNaN(total) || total < 1 ? 1 : total;
-
-  }
+ 
+  get totalPagesCount() {
+  return this.totalPages;
+}
 
   updatePagination() {
-    const totalPages = Math.ceil(this.data.length / this.pageSize);
-    // this.totalPagesArray = Array.from({ length: totalPages }, (_, i) => i + 1);
+   const totalPages = this.totalPages;
 
     const total = totalPages;
     const current = this.currentPage;
@@ -112,20 +112,22 @@ export class Tables implements OnChanges {
 
   updatePagedData() {
 
-    const startIndex = (this.currentPage - 1) * this.pageSize;
-    const endIndex = startIndex + this.pageSize;
-    this.pagedData = this.data.slice(startIndex, endIndex);
+    // const startIndex = (this.currentPage - 1) * this.pageSize;
+    // const endIndex = startIndex + this.pageSize;
+    // this.pagedData = this.data.slice(startIndex, endIndex);
+    this.pagedData = this.data;
 
   }
 
   onPageChange(page: any) {
 
-    if (page === '...') return; // ignore ellipsis clicks
+    if (page === '...') return; 
     if (page < 1 || page > this.totalPages) return;
 
     this.currentPage = page as number;
-    this.updatePagination();
-    this.updatePagedData();
+    this.pageChange.emit(this.currentPage);
+    // this.updatePagination();
+    // this.updatePagedData();
   }
 
   onCellClick(col: TableColumn, row: any) {

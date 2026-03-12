@@ -133,7 +133,9 @@ nodata:boolean = false;
   pageSize = CONFIG.PAGE_SIZE;
   currentPage = 1;
   totalItems: number = 0;
+  totalPages: number = 0;
   totalPagesArray: (number | string)[] = [];
+
   fullData: TransformedUserData[] = [];
   AlluserData: any[] = [];
   userData: any;
@@ -179,18 +181,20 @@ allkycstatus = 'All KYC Status';
   }
 
   private loadallusers(): void {
-    this.service.getAllUsers()
+     const page = this.currentPage - 1;
+    this.service.getAllUsers(page,this.pageSize)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (response) => {
           let resdate= response.data.content;
+          this.totalItems = response.data.totalElements;
+          this.totalPages = response.data.totalPages;
           if(resdate.length == 0){
             this.nodata = true;
           } else {
           this.AlluserData = resdate;
           this.fullData = this.tableDataService.transformUserData(resdate);
           this.filteredData = this.fullData;
-          this.totalItems = this.fullData.length;
           this.kycCompleted = this.tableDataService.calculateKycMetrics(resdate, this.totalItems);
           this.dataSource.sort = this.sort;
           this.updatePagedData();
@@ -243,24 +247,24 @@ allkycstatus = 'All KYC Status';
     return this.tableDataService.formatDateOnly(dateArr);
   }
 //pagination methods
-  get totalPages(): number {
-    const total = Math.ceil(this.totalItems / this.pageSize);
-    return isNaN(total) || total < 1 ? 1 : total;
-  }
+  // get totalPages(): number {
+  //   const total = Math.ceil(this.totalItems / this.pageSize);
+  //   return isNaN(total) || total < 1 ? 1 : total;
+  // }
 
   onPageChange(page: any): void {
     if (page === '...') return;
     if (page < 1 || page > this.totalPages) return;
 
     this.currentPage = page as number;
-    this.updateVisiblePages();
-    this.updatePagedData();
+    this.loadallusers()
+    // this.updateVisiblePages();
+    // this.updatePagedData();
   }
 
   updatePagedData(): void {
-    const startIndex = (this.currentPage - 1) * this.pageSize;
-    const endIndex = startIndex + this.pageSize;
-    this.dataSource.data = this.filteredData.slice(startIndex, endIndex);
+          this.dataSource.data = this.filteredData;
+
   }
 
   updateVisiblePages(): void {
