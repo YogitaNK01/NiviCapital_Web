@@ -62,7 +62,7 @@ export class Tables implements OnChanges {
   //*********************** pagination ***************************** 
   ngOnChanges(changes: SimpleChanges) {
     if (changes['data']) {
-      this.currentPage = 1;
+      // this.currentPage = 1;
       if (this.data && this.data.length > 0) {
         this.updatePagination();
         this.updatePagedData();
@@ -112,9 +112,6 @@ export class Tables implements OnChanges {
 
   updatePagedData() {
 
-    // const startIndex = (this.currentPage - 1) * this.pageSize;
-    // const endIndex = startIndex + this.pageSize;
-    // this.pagedData = this.data.slice(startIndex, endIndex);
     this.pagedData = this.data;
 
   }
@@ -126,8 +123,7 @@ export class Tables implements OnChanges {
 
     this.currentPage = page as number;
     this.pageChange.emit(this.currentPage);
-    // this.updatePagination();
-    // this.updatePagedData();
+  
   }
 
   onCellClick(col: TableColumn, row: any) {

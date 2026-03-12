@@ -106,8 +106,7 @@
 
   &.active {
     border-color: $primary-500 !important;
-    background-color: none!important;
-    /* target inner text or number */
+    background-color:transparent;
     .pagecount {
       color: $primary-500 !important;
     }
