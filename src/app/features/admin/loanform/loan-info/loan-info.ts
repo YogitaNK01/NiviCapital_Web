@@ -97,12 +97,9 @@ export class LoanInfo implements OnInit {
 limitLoanAmount(event: any) {
 
   let value = event.target.value;
-
   if (!value) return;
-
-  value = value.replace(/\D/g, ''); // numbers only
+  value = value.replace(/\D/g, ''); 
   let num = Number(value);
-
   if (num > 4500000) {
     num = 4500000;
   }
@@ -112,6 +109,21 @@ limitLoanAmount(event: any) {
   }
 
   this.loanAmount = num;
+}
+limitTenureAmount(event: any) {
+  let value = event.target.value;
+  if (!value) return;
+  let num = Number(value);
+  if (num > 7) {
+    num = 7;
+  }
+
+  if (num < 1) {
+    num = 1;
+  }
+
+  this.tenure = num;
+
 }
 
   submitForm(data: NgForm) {

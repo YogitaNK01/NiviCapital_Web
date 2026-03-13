@@ -194,7 +194,7 @@ this.expenseForm.get('miscexpenses')?.valueChanges.subscribe(() => {
       securityfrequency: ['Monthly', Validators.required],
       amountINR: ['', Validators.required],
       amountAUD: [{ value: '', disabled: true }, Validators.required],
-      description: ['']
+      description: ['',[Validators.minLength(2), Validators.maxLength(50)]],
     });
     group.get('amountINR')?.valueChanges.subscribe((val) => {
       console.log("val", val)
@@ -269,7 +269,7 @@ this.expenseForm.get('miscexpenses')?.valueChanges.subscribe(() => {
       securityfrequency: ['Monthly', Validators.required],
       amountINR: ['', Validators.required],
       amountAUD: [{ value: '', disabled: true }, Validators.required],
-      descriptionmisc: ['']
+      descriptionmisc: ['',[Validators.minLength(2), Validators.maxLength(50)]]
     });
 
     group.get('amountINR')?.valueChanges.subscribe((val) => {

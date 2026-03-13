@@ -283,7 +283,7 @@
                 <!-- Description only for Other Expense -->
                 @if(getCategoryLabel(expense.get('category')?.value) === 'Other Expenses') {
                 <div class="col-12 mt-20">
-                  <app-inputfield type="text" label="Expense Description" [required]="true" placeholder="Enter Here"
+                  <app-inputfield type="text" label="Expense Name" [required]="true" placeholder="Enter Here"
                     formControlName="description" name="description">
                   </app-inputfield>
 
@@ -293,6 +293,9 @@
                     <div *ngIf="expense.get('description')?.errors?.['required'] || amterror">
                       Description is required
                     </div>
+                    <div *ngIf="expense.get('description')?.errors?.['minlength'] ||expense.get('description')?.errors?.['maxlength']">
+                            Description name must be 2–50 characters
+                        </div>
                   </div>
 
                 </div>
@@ -400,7 +403,7 @@
                 <!-- Description only for Other Expense -->
                 @if(getmisCategoryLabel(expense.get('category')?.value) === 'Other Expenses') {
                 <div class="col-12 mt-20">
-                  <app-inputfield type="text" label="Expense Description" [required]="true" placeholder="Enter Here"
+                  <app-inputfield type="text" label="Expense Name" [required]="true" placeholder="Enter Here"
                   formControlName="descriptionmisc" name="descriptionmisc">
                   </app-inputfield>
                     <div class="text-danger"
@@ -409,6 +412,10 @@
                     <div *ngIf="expense.get('descriptionmisc')?.errors?.['required'] || amterror">
                       Description is required
                     </div>
+                      <div *ngIf="expense.get('descriptionmisc')?.errors?.['minlength'] ||expense.get('descriptionmisc')?.errors?.['maxlength']">
+                            Description name must be 2–50 characters
+                        </div>
+
                   </div>
 
                 </div>

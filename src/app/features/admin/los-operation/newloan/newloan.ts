@@ -162,7 +162,7 @@ export class Newloan implements OnInit {
       {
         queryParams: {
           custId: this.selectedRows[0].custId,
-          custName: this.selectedRows[0].firstName + ""+this.selectedRows[0].lastName
+          custName: this.selectedRows[0].firstName + " "+this.selectedRows[0].lastName
 
         }
       }

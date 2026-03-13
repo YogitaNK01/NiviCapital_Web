@@ -51,7 +51,7 @@
                 </div>
                 <div class="col-lg-4 col-sm-12 mt-20">
                     <app-inputfield formControlName="institutionName" label="Last Institution Name" [required]="true"
-                        placeholder="Enter Institution Name" name="institutionName">
+                        placeholder="Enter Institution Name" name="institutionName" [maxlength]="100">
                     </app-inputfield>
 
                     <div class="text-danger" *ngIf="f['institutionName'].touched && f['institutionName'].invalid">
