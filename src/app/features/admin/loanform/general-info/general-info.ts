@@ -10,7 +10,7 @@ import { Dropdown, DropdownOption } from '../../../systemdesign/dropdown/dropdow
 import { ActivatedRoute, Router } from '@angular/router';
 import { Loanstepperservice } from '../../../../core/service/loanstepperservice';
 import { Main } from '../../../../core/service/main';
-
+import {generalerrors} from './generalerror'
 interface OptionItem {
   label: string;
   value: string;
@@ -26,6 +26,9 @@ interface OptionItem {
 })
 export class GeneralInfo implements OnInit {
 
+ allerrors=generalerrors;
+ currenterror =''
+ 
   openIndex: number | null = 0;
   accordions = [
     { title: 'General Info ', alwaysOpen: true },

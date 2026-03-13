@@ -60,7 +60,7 @@
                             Institution Name is required
                         </div>
                          <div *ngIf="f['institutionName'].errors?.['minlength'] ||f['institutionName'].errors?.['maxlength']">
-                            Institution name must be 2–100 characters
+                            {{allerrors.Institutionnameinvalid}}
                         </div>
 
                       

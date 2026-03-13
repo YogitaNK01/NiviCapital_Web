@@ -287,6 +287,18 @@ private loadallusers(): void {
 
    getkyc_type(value: any): void {
     // Implement type filtering logic
+    const statusMap: { [key: string]: string } = {
+      'completed': 'approved',
+      'pending': 'pending',
+      'document issue': 'document issue'
+    };
+
+    this.filteredData = this.tableDataService.filterByStatus(this.fullData, value, statusMap);
+    this.totalItems = this.filteredData.length;
+    this.currentPage = 1;
+    this.updateVisiblePages();
+    this.updatePagedData();
+    
   }
 
   applyLoan() {

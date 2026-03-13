@@ -6,7 +6,8 @@
       <h3 class="section-title1 text-label-data">Total Estimated Expense </h3>
     </div>
     <div class=" d-flex gap-2">
-      <div class=" d-flex align-items-center">
+      <div class=" d-flex align-items-center justify-content-center flex-row">
+        <div class="d-flex ">
         <img src="/assets/images/icons/info-circle.svg" alt="view" width="41" height="24">
         <span class=""><svg xmlns="http://www.w3.org/2000/svg" width="30" height="29" viewBox="0 0 30 29" fill="none">
             <path d="M25.6229 18.1133L19.3604 24.1791" stroke="#25262F" stroke-width="1.5" stroke-miterlimit="10"
@@ -17,10 +18,14 @@
               stroke-linecap="round" stroke-linejoin="round" />
             <path d="M25.625 10.8867H4.375" stroke="#25262F" stroke-width="1.5" stroke-miterlimit="10"
               stroke-linecap="round" stroke-linejoin="round" />
-          </svg></span>
-        <span class="text-dp-2-bold fw-normal ">Rate: 1 AUD = ₹62.5</span>
+          </svg>
+        </span>
+        </div>
+        <div class="d-flex w-max"><span class="text-dp-2-bold fw-normal ">Rate: 1 AUD = ₹62.5</span> 
+        </div>
+
       </div>
-      <div class="country d-lg-flex flex-column flex-lg-row">
+      <div class="country d-lg-flex flex-row flex-lg-row">
         <div class="flag d-flex">
           <svg xmlns="http://www.w3.org/2000/svg" width="32" height="24" viewBox="0 0 32 24" fill="none">
             <rect x="0.25" y="0.25" width="31.5" height="23.5" rx="1.75" fill="white" stroke="#F5F5F5"
@@ -42,7 +47,7 @@
             </g>
           </svg>
 
-          <p class="table-head">₹ {{totalINRamt}}</p>
+          <p class="table-head">₹{{totalINRamt}}</p>
         </div>
         <div class="line"></div>
         <div class="flag d-flex">
@@ -125,7 +130,7 @@
                 fill="#F7FCFF" />
             </g>
           </svg>
-          <p class="table-head"> ${{ totalAUDamt}}</p>
+          <p class="table-head"> ${{totalAUDamt}}</p>
         </div>
       </div>
     </div>
@@ -189,7 +194,7 @@
               <div *ngIf="f['tutionfees'].errors?.['required']">
                 Amount (INR) is required
               </div>
-              <div class="text-danger" *ngIf="f['tutionfees'].touched && f['tutionfees'].errors?.['max']">
+              <div class="text-danger" *ngIf="amterror">
                 Tuition fees cannot exceed ₹1,00,00,000
               </div>
             </div>
@@ -262,7 +267,7 @@
                   <app-inputfield type="flag" [label]="expense.get('categoryLabel')?.value + ' (INR)'"
                     formControlName="amountINR" placeholder="₹ 40,20,337" [showPhonePrefix]="true" [required]="true"
                     [showPhonePrefixnumber]="false"
-                    (input)="formatAmount($event,'amountINR',i,'living');main.restrictInput($event, 'number')">
+                    (input)="formatAmount($event,'amountINR',i,'living');main.restrictInput($event, 'decimal')">
                   </app-inputfield>
                   <div class="text-danger"
                     *ngIf="expense.get('amountINR')?.touched && expense.get('amountINR')?.invalid">
@@ -276,7 +281,7 @@
                 <!-- AUD -->
                 <div class="col-lg-4 col-sm-12 mt-20">
                   <app-inputfield type="flag" label="Amount (AUD)" placeholder="$ 0" formControlName="amountAUD"
-                    (input)="main.restrictInput($event, 'number')" [showaustralianflagPrefix]="true">
+                     [showaustralianflagPrefix]="true">
                   </app-inputfield>
                 </div>
 
@@ -381,7 +386,7 @@
                   <app-inputfield type="flag" [label]="expense.get('categoryLabel')?.value + '(INR)'"
                     placeholder="₹ 40,20,337" [showPhonePrefix]="true" [showPhonePrefixnumber]="false"
                     formControlName="amountINR" [required]="true"
-                    (input)="formatAmount($event,'amountINR',i,'misc');main.restrictInput($event, 'number')">
+                    (input)="formatAmount($event,'amountINR',i,'misc');main.restrictInput($event, 'decimal')">
                   </app-inputfield>
 
                   <div class="text-danger"
@@ -396,7 +401,7 @@
                 <!-- AUD -->
                 <div class="col-lg-4 col-sm-12 mt-20">
                   <app-inputfield type="flag" label="Amount (AUD)" placeholder="$ 0" formControlName="amountAUD"
-                    [showaustralianflagPrefix]="true" (input)="main.restrictInput($event, 'number')">
+                    [showaustralianflagPrefix]="true" >
                   </app-inputfield>
                 </div>
 

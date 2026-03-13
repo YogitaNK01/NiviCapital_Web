@@ -61,8 +61,9 @@ export class Kycinfo {
   applicationId: any;
   kycId: any;
 
-
-
+  passportmissing: boolean = false;
+  passportuploadfailure:boolean = false;
+selectedPassportFile: File | null = null;
 
   constructor(private fb: FormBuilder, private stepperService: Loanstepperservice, private cd: ChangeDetectorRef, private loanformservice: Loanformservice, private route: ActivatedRoute) { }
 
@@ -160,16 +161,7 @@ export class Kycinfo {
     // window.open(url, '_blank');
   }
 
-  back() {
-    this.stepperService.previous();
-  }
-  next() {
-   
-    this.stepperService.next();
-  }
-
-
-  getKycId(event: any) {
+   getKycId(event: any) {
     console.log(event);
 
   }
@@ -193,28 +185,55 @@ export class Kycinfo {
     });
   }
 
+  back() {
+    this.stepperService.previous();
+  }
+  next() {
+   
+      if (!this.selectedPassportFile && !this.passportUrl) {
+    this.passportmissing = true;
+    return;
+
+  } 
+   this.passportmissing = false;
+     
+    if (this.passportUrl) {
+    this.stepperService.next();
+    return;
+  }
+
+  const fd = new FormData();
+
+    // text fields
+    fd.append('docType', 'PASSPORT');
+    fd.append('file', this.selectedPassportFile as File);
+
+    this.loanformservice.uploadpassport(fd, this.kycId).subscribe({
+      next: (data) => {
+        console.log(data);
+         this.stepperService.next();
+      },
+      error: (error) => {
+        console.log(error);
+        this.passportuploadfailure= true
+      }
+    });
+
+  }
+
+
   onFileChange(result: UploadResult, key: string) {
     
  if (!result.file) return; 
 
   
-
- const fd = new FormData();
-
-    // text fields
-    fd.append('docType', 'PASSPORT');
-    fd.append('file', result.file);
-
-    this.loanformservice.uploadpassport(fd, this.kycId).subscribe({
-      next: (data) => {
-        console.log(data);
-      },
-      error: (error) => {
-        console.log(error);
-      }
-    });
+ this.selectedPassportFile = result.file;
+ if(this.selectedPassportFile) {
+  this.passportmissing = false;
+ }
   }
   getKycData(id: any) {
+
     this.loanformservice.getKycDetails(id).subscribe({
       next: (res) => {
         let formdata = res.data;
@@ -238,7 +257,10 @@ export class Kycinfo {
         this.passportUrl = passportDoc?.url || '';
         this.passportFileName = passportDoc?.fileName || '';
         this.ispassport = !!passportDoc; 
-
+        if(this.passportUrl !== '' && this.passportUrl !== null){
+          this.passportmissing = false;
+        }
+        
         this.otherDocumentUrl = otherDoc?.url || '';
         this.otherDocumentFileName = otherDoc?.fileName || '';
 

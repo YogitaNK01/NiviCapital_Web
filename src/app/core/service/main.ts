@@ -168,27 +168,30 @@ export class Main {
 }
 
 // input validations 
-restrictInput(event: Event, type: 'text' | 'number') {
+restrictInput(event: Event, type: 'text' | 'number' | 'decimal') {
     const input = event.target as HTMLInputElement;
     let value = input.value;
 
     if (type === 'text') {
-      // Keep only letters and spaces
       value = value.replace(/[^A-Za-z ]+/g, '');
-
-      // Prevent multiple spaces in a row
       value = value.replace(/\s{2,}/g, ' ');
-
-      // Prevent leading space
-      value = value.replace(/^\s+/, '');
+     value = value.replace(/^\s+/, '');
     }
 
     if (type === 'number') {
-      // Keep only digits
       value = value.replace(/[^0-9]+/g, '');
     }
 
-    // Update only if changed (prevents cursor jumping)
+    if (type === 'decimal') {
+    value = value.replace(/[^0-9.]+/g, '');
+
+    // allow only one decimal point
+    const parts = value.split('.');
+    if (parts.length > 2) {
+      value = parts[0] + '.' + parts.slice(1).join('');
+    }
+  }
+
     if (value !== input.value) {
       input.value = value;
       input.dispatchEvent(new Event('input'));

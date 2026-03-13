@@ -62,7 +62,7 @@
   background: var(--system-background-surface, #F5F5F5);
   width: 368px;
   justify-content: center;
-  gap: $spacing_4;
+  width: 100%;
 
   @media (max-width: 480px) {
     width: 100%;
@@ -84,6 +84,9 @@
 
 }
 
+.w-max{
+  width: max-content;
+}
 .line {
   width: 30px;
   height: 1px;

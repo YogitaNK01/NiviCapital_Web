@@ -288,7 +288,7 @@ allkycstatus = 'All KYC Status';
 
   getkycstatus(value: any): void {
     const statusMap: { [key: string]: string } = {
-      'completed': 'verified',
+      'completed': 'approved',
       'pending': 'pending',
       'document issue': 'document issue'
     };

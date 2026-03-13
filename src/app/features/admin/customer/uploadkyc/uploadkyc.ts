@@ -11,6 +11,8 @@ import { Buttons } from "../../../systemdesign/buttons/buttons";
 import { Addcustomerservice } from '../../../../core/service/addcustomerservice';
 import { ActivatedRoute } from '@angular/router';
 import { Loanformservice } from '../../../../core/service/loanformservice';
+import moment from 'moment';
+
 
 interface OptionItem {
   label: string;
@@ -202,19 +204,14 @@ isSequential(num: string) {
     this.dobValid = this.isAdult(value);
   }
   isAdult(date: any): boolean {
+    
     if (!date) return false;
 
-    const dob = new Date(date);
-    const today = new Date();
+  const age = moment().diff(date, 'years');
 
-    let age = today.getFullYear() - dob.getFullYear();
-    const m = today.getMonth() - dob.getMonth();
+  return age >= 18;
 
-    if (m < 0 || (m === 0 && today.getDate() < dob.getDate())) {
-      age--;
-    }
 
-    return age >= 18;
   }
   kycupload(form: any) {
     console.log(form.value);

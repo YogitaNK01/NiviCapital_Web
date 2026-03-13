@@ -150,9 +150,9 @@
       </div>
 
 
-      <div class="text-danger error" *ngIf="dob.invalid && dob.touched">
+      <div class="text-danger error" *ngIf="(dob.invalid && dob.touched) || (!dobValid && dob.value)">
         <small *ngIf="dob.errors?.['required']">DOB is required</small>
-        <small *ngIf="!dob.errors?.['required'] && !dobValid">
+        <small *ngIf=" !dobValid && dob.value">
           Age must be 18 years or above
         </small>
       </div>

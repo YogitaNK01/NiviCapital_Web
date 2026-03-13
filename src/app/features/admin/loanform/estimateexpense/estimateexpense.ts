@@ -32,11 +32,11 @@ export class Estimateexpense {
   ];
   expenseForm!: FormGroup
 
-  totalINRamt: number = 0;
-  totalAUDamt: number = 0;
+  totalINRamt: any;
+  totalAUDamt: any;
 
   totalLivingINR = 0;
-totalMiscINR = 0;
+  totalMiscINR = 0;
 
   selectedCategories: string[] = [];
   selectedmisCategories: string[] = [];
@@ -67,6 +67,7 @@ totalMiscINR = 0;
   applicantId: any;
   applicationId: any
   amterror: boolean = false
+
   constructor(private fb: FormBuilder, private stepperService: Loanstepperservice, private cd: ChangeDetectorRef, private loanformservice: Loanformservice,
     private router: Router, private route: ActivatedRoute, public main: Main, private msgBox: Msgboxservice) { }
 
@@ -85,7 +86,7 @@ totalMiscINR = 0;
 
     this.expenseForm = this.fb.group({
 
-      tutionfees: ['', [Validators.required,Validators.max(10000000)]],
+      tutionfees: ['', [Validators.required]],
       tutionfeesAUD: [{ value: '', disabled: true }, Validators.required],
       livingexpenses: this.fb.array([]),
       miscexpenses: this.fb.array([])
@@ -104,17 +105,17 @@ totalMiscINR = 0;
     });
 
     this.expenseForm.get('livingexpenses')?.valueChanges.subscribe(() => {
-  this.calculateGrandTotal();
-  
-});
+      this.calculateGrandTotal();
 
-this.expenseForm.get('miscexpenses')?.valueChanges.subscribe(() => {
- this.calculateGrandTotal();
-});
+    });
+
+    this.expenseForm.get('miscexpenses')?.valueChanges.subscribe(() => {
+      this.calculateGrandTotal();
+    });
 
   }
 
- get f() {
+  get f() {
     return this.expenseForm.controls;
   }
   toggle(index: number) {
@@ -136,7 +137,8 @@ this.expenseForm.get('miscexpenses')?.valueChanges.subscribe(() => {
     if (cleanINR == 0) { this.expenseForm.patchValue({ tutionfeesAUD: 0 }); return; }
     if (!cleanINR) return;
 
-    const tutionfeesAUDValue = cleanINR / 62.5;
+    const tutionfeesAUDValueonly = cleanINR / 62.5;
+    const tutionfeesAUDValue = this.formatAustralian(tutionfeesAUDValueonly);
 
     this.expenseForm.patchValue(
       { tutionfeesAUD: tutionfeesAUDValue },
@@ -174,11 +176,11 @@ this.expenseForm.get('miscexpenses')?.valueChanges.subscribe(() => {
     });
   }
 
- 
+
   isExpenseValid(): boolean {
 
     const tuitionINR = this.expenseForm.get('tutionfees')?.value;
-    const tuitionAUD = this.expenseForm.get('tutionfeesAUD')?.value;  
+    const tuitionAUD = this.expenseForm.get('tutionfeesAUD')?.value;
     return tuitionINR;
   }
 
@@ -194,20 +196,20 @@ this.expenseForm.get('miscexpenses')?.valueChanges.subscribe(() => {
       securityfrequency: ['Monthly', Validators.required],
       amountINR: ['', Validators.required],
       amountAUD: [{ value: '', disabled: true }, Validators.required],
-      description: ['',[Validators.minLength(2), Validators.maxLength(50)]],
+      description: ['', [Validators.minLength(2), Validators.maxLength(50)]],
     });
     group.get('amountINR')?.valueChanges.subscribe((val) => {
       console.log("val", val)
       if (!val) { group.patchValue({ amountAUD: '' }); return; }
       const cleanINR = Number(val.toString().replace(/,/g, ''));
       console.log("cleanINR", cleanINR)
-     
+
       if (!cleanINR) return;
 
       const aud = cleanINR / 62.5;
 
       group.patchValue(
-        { amountAUD: aud.toString() },
+        { amountAUD: this.formatAustralian(aud) },
         { emitEvent: false }
       );
       group.get('amountAUD')?.disable();
@@ -269,7 +271,7 @@ this.expenseForm.get('miscexpenses')?.valueChanges.subscribe(() => {
       securityfrequency: ['Monthly', Validators.required],
       amountINR: ['', Validators.required],
       amountAUD: [{ value: '', disabled: true }, Validators.required],
-      descriptionmisc: ['',[Validators.minLength(2), Validators.maxLength(50)]]
+      descriptionmisc: ['', [Validators.minLength(2), Validators.maxLength(50)]]
     });
 
     group.get('amountINR')?.valueChanges.subscribe((val) => {
@@ -282,7 +284,7 @@ this.expenseForm.get('miscexpenses')?.valueChanges.subscribe(() => {
       const aud = cleanINR / 62.5;
 
       group.patchValue(
-        { amountAUD: aud.toString() },
+        { amountAUD: this.formatAustralian(aud) },
         { emitEvent: false }
       );
       group.get('amountAUD')?.disable();
@@ -337,38 +339,41 @@ this.expenseForm.get('miscexpenses')?.valueChanges.subscribe(() => {
   }
 
   // =====================================================================================
-calculateGrandTotal() {
+  calculateGrandTotal() {
 
-  const tuition = Number(this.expenseForm.get('tutionfees')?.value?.toString().replace(/,/g, '')) || 0;
+    const tuition = Number(this.expenseForm.get('tutionfees')?.value?.toString().replace(/,/g, '')) || 0;
 
-  this.totalLivingINR = this.calculateTotal('livingexpenses');
-  this.totalMiscINR = this.calculateTotal('miscexpenses');
+    this.totalLivingINR = this.calculateTotal('livingexpenses');
+    this.totalMiscINR = this.calculateTotal('miscexpenses');
 
-  this.totalINRamt = tuition + this.totalLivingINR + this.totalMiscINR;
+    this.totalINRamt = tuition + this.totalLivingINR + this.totalMiscINR;
+    let totalInramount = this.totalINRamt
+    this.totalINRamt = this.formatIndian(this.totalINRamt.toString());
+    
 
-  this.totalAUDamt = this.totalINRamt / 62.5;
-
-}
+    this.totalAUDamt = totalInramount / 62.5;
+this.totalAUDamt = this.formatAustralian(this.totalAUDamt.toString());
+  }
   calculateTotal(formArrayName: string): number {
 
-  let total = 0;
+    let total = 0;
 
-  const formArray = this.expenseForm.get(formArrayName) as any;
+    const formArray = this.expenseForm.get(formArrayName) as any;
 
-  formArray.controls.forEach((grp: any) => {
-    const val = grp.get('amountINR')?.value;
+    formArray.controls.forEach((grp: any) => {
+      const val = grp.get('amountINR')?.value;
 
-    if (val) {
-      const clean = Number(val.toString().replace(/,/g, ''));
-      total += clean;
-    }
-  });
+      if (val) {
+        const clean = Number(val.toString().replace(/,/g, ''));
+        total += clean;
+      }
+    });
 
-  return total;
-}
+    return total;
+  }
 
   handleAmountInput(event: any, controlName: string) {
-    this.main.restrictInput(event, 'number');
+    this.main.restrictInput(event, 'decimal');
     this.formatAmount(event, controlName);
   }
 
@@ -380,13 +385,23 @@ calculateGrandTotal() {
     if (!value) return;
 
     value = value.replace(/,/g, '');
-    value = value.replace(/\D/g, '');
+    // value = value.replace(/\D/g, '');
 
-     let num = Number(value);
-
-  if (controlName === 'tutionfees' && num > 10000000) {
-    num = 10000000;
+     value = value.replace(/[^0-9.]/g, '');
+  const parts = value.split('.');
+  if (parts.length > 2) {
+    value = parts[0] + '.' + parts.slice(1).join('');
   }
+
+  let integerPart = parts[0];
+  let decimalPart = parts[1] ? '.' + parts[1] : '';
+
+
+    let num = Number(value);
+
+    if (controlName === 'tutionfees' && num >= 10000001) {
+      this.amterror = true;
+    }
 
 
     const formatted = this.formatIndian(num.toString());
@@ -395,23 +410,24 @@ calculateGrandTotal() {
 
       const group = array.at(index) as FormGroup;
       group.get(controlName)?.setValue(formatted, { emitEvent: false });
-      // console.log("Row Updated:", group.value);
+      
     }
     else {
       this.expenseForm.get(controlName)?.setValue(formatted, { emitEvent: false });
 
-      
+
     }
 
   }
 
+ 
   formatIndian(x: string): string {
-    if (!x) return '';
-    let lastThree = x.substring(x.length - 3);
-    let otherNumbers = x.substring(0, x.length - 3);
-    if (otherNumbers !== '') lastThree = ',' + lastThree;
-    return otherNumbers.replace(/\B(?=(\d{2})+(?!\d))/g, ',') + lastThree;
-  }
+  return new Intl.NumberFormat('en-IN').format(Number(x));
+}
+  formatAustralian(x: number): string {
+  return new Intl.NumberFormat('en-AU').format(x);
+}
+
 
   handleCategoryChange(values: string | string[], formArray: FormArray, addFn: (category: string) => void) {
 
@@ -500,29 +516,31 @@ calculateGrandTotal() {
   }
   next() {
 
- const livingArray = this.expenseForm.get('livingexpenses') as FormArray;
-  const miscArray = this.expenseForm.get('miscexpenses') as FormArray;
+    const livingArray = this.expenseForm.get('livingexpenses') as FormArray;
+    const miscArray = this.expenseForm.get('miscexpenses') as FormArray;
 
-  let invalid = false;
+    let invalid = false;
 
-  livingArray.controls.forEach(control => {
-    if (control.invalid) {
-      control.markAllAsTouched();
-      invalid = true;
+    livingArray.controls.forEach(control => {
+      if (control.invalid) {
+        control.markAllAsTouched();
+        invalid = true;
+      }
+    });
+
+    miscArray.controls.forEach(control => {
+      if (control.invalid) {
+        control.markAllAsTouched();
+        invalid = true;
+      }
+    });
+
+    if (invalid || this.amterror ) {
+      console.log("invalid ");
+      
+      return;
     }
-  });
 
-  miscArray.controls.forEach(control => {
-    if (control.invalid) {
-      control.markAllAsTouched();
-      invalid = true;
-    }
-  });
-
-  if (invalid) {
-    return; 
-  }
-  
     let formdata = this.expenseForm.value
     console.log("form data Expenses:", formdata);
 

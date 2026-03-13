@@ -7,6 +7,8 @@ import { Dropdown, DropdownOption } from '../../../systemdesign/dropdown/dropdow
 import { FormsModule, NgForm } from '@angular/forms';
 import { Charts } from "../../../systemdesign/charts/charts";
 import { Loanformservice } from '../../../../core/service/loanformservice';
+import { loanErrors } from './loanerror';
+
 
 @Component({
   selector: 'app-loan-info',
@@ -59,8 +61,8 @@ export class LoanInfo implements OnInit {
   occupation: any;
   annualIncome: number | null = null;
   rateOfInterest = 9.5;
-  loanAmount = 1000000;
-  tenure = 5;
+  loanAmount = 100000;
+  tenure = 1;
   modeOfPayment = '';
 
   // Calculated values (demo values from your screenshot)
@@ -81,6 +83,9 @@ export class LoanInfo implements OnInit {
     { label: 'Total Principle amount', value: 25, color: '#0D4472' },
     { label: 'Total Interest payable', value: 75, color: '#F33B48' },
   ]
+
+  errormsg = loanErrors;
+  currenterror=''
   constructor(private router: Router, private stepperService: Loanstepperservice, private route: ActivatedRoute, private loanformservice: Loanformservice) { }
   ngOnInit(): void {
     this.route.queryParams.subscribe(params => {
@@ -101,11 +106,13 @@ limitLoanAmount(event: any) {
   value = value.replace(/\D/g, ''); 
   let num = Number(value);
   if (num > 4500000) {
-    num = 4500000;
+    // num = 4500000;
+    this.currenterror = this.errormsg.maxLoan;
   }
 
   if (num < 100000) {
-    num = 100000;
+    // num = 100000;
+    this.currenterror = this.errormsg.minLoan;
   }
 
   this.loanAmount = num;
@@ -126,7 +133,10 @@ limitTenureAmount(event: any) {
 
 }
 
-  submitForm(data: NgForm) {
+submitForm(data: NgForm) {
+  this.stepperService.next();
+}
+  submitForm1(data: NgForm) {
 
      if (!data.valid) {
       console.log("form invalid");

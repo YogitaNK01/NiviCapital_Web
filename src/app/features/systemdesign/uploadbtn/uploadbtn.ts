@@ -203,15 +203,17 @@ export class Uploadbtn implements OnInit, ControlValueAccessor {
         this.preview = '';
         this.progress = 0;
         this.errorMessage = '';
-        this.showHelperMessage = true;
+        
         if (this.fileInput) {
           this.fileInput.value = '';
         }
+        
+        this.showHelperMessage = true;
         this.fileRemove.emit();
         this.fileChange.emit({ file: null }); 
+       
       }
     });
-
 
   }
 

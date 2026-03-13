@@ -200,7 +200,7 @@
             <app-buttons label="Back " [outline]="true" class="btncustomClass primary "
               (click)="goTocontact()"></app-buttons>
 
-            <app-buttons type="submit" class="btn btncustomClass" [disabled]="!registerform.valid || !otpVerifiedOk"
+            <app-buttons type="submit" class="btn btncustomClass" [disabled]="!registerform.valid || (!mname.value && !ismiddlename) || !otpVerifiedOk"
               color="primary" label="Next"></app-buttons>
 
           </div>

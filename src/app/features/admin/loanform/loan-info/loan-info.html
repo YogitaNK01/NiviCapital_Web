@@ -30,6 +30,18 @@
           </div>
 
           <input type="range" class="form-range mt-2" min="100000" max="4500000" step="10000" [(ngModel)]="loanAmount" name="loanamt">
+
+           <div class="text-danger">
+
+                        <div *ngIf="loanAmount < 100000">
+                             {{ errormsg.minLoan }}
+                        </div>
+                         <div *ngIf="loanAmount > 4500000">
+                             {{ errormsg.maxLoan }}
+                        </div>
+                        
+
+                    </div>
         </div>
 
           <div class="">
