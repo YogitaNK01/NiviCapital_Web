@@ -349,7 +349,7 @@
         <app-buttons type="button" label="Back" class="btn btncustomClass" [outline]="true" (click)="back()">
         </app-buttons>
         <app-buttons type="button" label="Next" class="btn btncustomClass" color="primary" (click)="next()"
-            [disabled]="additionalinfoForm.invalid">
+            [disabled]="additionalinfoForm.invalid || (additionalinfoForm.get('maritalstatus')?.value == 'Married' && (!isspousemiddlename && !f['s_mname'].value ))|| (!isfathermiddlename && !f['f_mname'].value) || (!ismothermiddlename && !f['m_mname'].value )">
         </app-buttons>
         <!-- <app-buttons type="button" label="Next" class="btn btncustomClass" color="primary" (click)="next()"
             [disabled]="!additionalinfoForm.valid">

@@ -133,10 +133,10 @@ limitTenureAmount(event: any) {
 
 }
 
-submitForm(data: NgForm) {
+submitForm1(data: NgForm) {
   this.stepperService.next();
 }
-  submitForm1(data: NgForm) {
+  submitForm(data: NgForm) {
 
      if (!data.valid) {
       console.log("form invalid");

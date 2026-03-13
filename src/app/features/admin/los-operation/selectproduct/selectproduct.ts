@@ -26,8 +26,8 @@ export class Selectproduct implements OnInit {
   selectedproduct: string = '';
   product_: string = '';
   selectProduct: DropdownOption[] = [
-    { label: 'Loan', value: '289AD3A7489A47A6B2C6642E922DFE78', icon: '' },
-    // { label: 'Loan', value: '4B8B6F9FD511555BE0635A01A8C03D66', icon: '' },
+    // { label: 'Loan', value: '289AD3A7489A47A6B2C6642E922DFE78', icon: '' },
+    { label: 'Loan', value: '4B8B6F9FD511555BE0635A01A8C03D66', icon: '' },
 
   ];
 
