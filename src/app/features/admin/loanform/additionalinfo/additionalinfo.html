@@ -102,7 +102,7 @@
 
                 <div class="col-lg-4 col-sm-12 mt-20">
                     <app-inputfield formControlName="s_fname" label="First Name" [required]="true"
-                        placeholder="First Name" (input)="main.restrictInput($event, 'text')">
+                        placeholder="First Name" (input)="main.restrictInput($event, 'text')" [maxlength]="25">
                     </app-inputfield>
                     <div class="text-danger" *ngIf="f['s_fname'].touched && f['s_fname'].invalid">
 
@@ -128,8 +128,20 @@
 
                 <div class="col-lg-4 col-sm-12 mt-20">
                     <app-inputfield formControlName="s_mname" label="Middle Name" placeholder="Middle Name"
-                        (input)="main.restrictInput($event, 'text')" [disabled]="isspousemiddlename">
+                        (input)="main.restrictInput($event, 'text')" [disabled]="isspousemiddlename" [maxlength]="25">
                     </app-inputfield>
+                     <div class="text-danger" *ngIf="f['s_mname'].touched && f['s_mname'].invalid">
+
+                        <div *ngIf="f['s_mname'].errors?.['minlength']">
+                            Minimum 2 characters required
+                        </div>
+
+                        <div *ngIf="f['s_mname'].errors?.['maxlength']">
+                            Maximum 25 characters allowed
+                        </div>
+
+                    </div>
+
                     <app-checkbox [checked]="isspousemiddlename" [indeterminate]="false"
                         label="I don’t have middle name" (checkedChange)="onmiddlename($event)">
                     </app-checkbox>
@@ -138,7 +150,7 @@
 
                 <div class="col-lg-4 col-sm-12 mt-20">
                     <app-inputfield formControlName="s_lname" label="Last Name" [required]="true"
-                        placeholder="Last Name" (input)="main.restrictInput($event, 'text')">
+                        placeholder="Last Name" (input)="main.restrictInput($event, 'text')" [maxlength]="25">
                     </app-inputfield>
                     <div class="text-danger" *ngIf="f['s_lname'].touched && f['s_lname'].invalid">
 
@@ -166,9 +178,9 @@
 
                 <div class="col-lg-4 col-sm-12 mt-20">
                     <app-inputfield formControlName="f_fname" label="First Name" [required]="true"
-                        placeholder="First Name" (input)="main.restrictInput($event, 'text')">
+                        placeholder="First Name" (input)="main.restrictInput($event, 'text')" [maxlength]="25">
                     </app-inputfield>
-                    <div class="text-danger" *ngIf="f['f_fname'].touched && f['f_fname'].invalid">
+                    <div class="text-danger" *ngIf="f['f_fname'].touched && f['f_fname'].invalid" >
 
                         <div *ngIf="f['f_fname'].errors?.['required']">
                             First name is required
@@ -192,8 +204,20 @@
 
                 <div class="col-lg-4 col-sm-12 mt-20">
                     <app-inputfield formControlName="f_mname" label="Middle Name" placeholder="Middle Name"
-                        (input)="main.restrictInput($event, 'text')" [disabled]="isfathermiddlename">
+                        (input)="main.restrictInput($event, 'text')" [disabled]="isfathermiddlename" [maxlength]="25">
                     </app-inputfield>
+                     <div class="text-danger" *ngIf="f['f_mname'].touched && f['f_mname'].invalid">
+
+                        <div *ngIf="f['f_mname'].errors?.['minlength']">
+                            Minimum 2 characters required
+                        </div>
+
+                        <div *ngIf="f['f_mname'].errors?.['maxlength']">
+                            Maximum 25 characters allowed
+                        </div>
+
+                    </div>
+
                     <app-checkbox [checked]="isfathermiddlename" [indeterminate]="false"
                         label="I don’t have middle name" (checkedChange)="onfathermiddlename($event)">
                     </app-checkbox>
@@ -202,7 +226,7 @@
 
                 <div class="col-lg-4 col-sm-12 mt-20">
                     <app-inputfield formControlName="f_lname" label="Last Name" [required]="true"
-                        placeholder="Last Name" (input)="main.restrictInput($event, 'text')">
+                        placeholder="Last Name" (input)="main.restrictInput($event, 'text')" [maxlength]="25">
                     </app-inputfield>
                     <div class="text-danger" *ngIf="f['f_lname'].touched && f['f_lname'].invalid">
 
@@ -231,7 +255,7 @@
 
                 <div class="col-lg-4 col-sm-12 mt-20">
                     <app-inputfield formControlName="m_fname" label="First Name" [required]="true"
-                        placeholder="First Name" (input)="main.restrictInput($event, 'text')">
+                        placeholder="First Name" (input)="main.restrictInput($event, 'text')" [maxlength]="25">
                     </app-inputfield>
                     <div class="text-danger" *ngIf="f['m_fname'].touched && f['m_fname'].invalid">
 
@@ -257,8 +281,19 @@
 
                 <div class="col-lg-4 col-sm-12 mt-20">
                     <app-inputfield formControlName="m_mname" label="Middle Name" placeholder="Middle Name"
-                        (input)="main.restrictInput($event, 'text')" [disabled]="ismothermiddlename">
+                        (input)="main.restrictInput($event, 'text')" [disabled]="ismothermiddlename" [maxlength]="25">
                     </app-inputfield>
+                     <div class="text-danger" *ngIf="f['m_mname'].touched && f['m_mname'].invalid">
+
+                        <div *ngIf="f['m_mname'].errors?.['minlength']">
+                            Minimum 2 characters required
+                        </div>
+
+                        <div *ngIf="f['m_mname'].errors?.['maxlength']">
+                            Maximum 25 characters allowed
+                        </div>
+
+                    </div>
                     <app-checkbox [checked]="ismothermiddlename" [indeterminate]="false"
                         label="I don’t have middle name" (checkedChange)="onmothermiddlename($event)">
                     </app-checkbox>
@@ -267,7 +302,7 @@
 
                 <div class="col-lg-4 col-sm-12 mt-20">
                     <app-inputfield formControlName="m_lname" label="Last Name" [required]="true"
-                        placeholder="Last Name" (input)="main.restrictInput($event, 'text')">
+                        placeholder="Last Name" (input)="main.restrictInput($event, 'text')" [maxlength]="25">
                     </app-inputfield>
                     <div class="text-danger" *ngIf="f['m_lname'].touched && f['m_lname'].invalid">
 
