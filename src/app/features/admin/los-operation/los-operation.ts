@@ -30,39 +30,25 @@ const SEARCH_FIELDS = ['CIFID', 'CustomerName', 'mobile', 'email'];
 export class LosOperation {
 
    columns = [
-    {
-      key: 'custId',
-      label: 'CUSTID',
-      class: 'cifstyle',
-      clickable: true,
-      // onClick: (row: { Id: any; }) => this.getpidata(row.Id),
-      routerLink: '/admin/customerdetails',
-      queryParams: "{ mode: 'view', id: row.id }"
-    },
-    { key: 'ncId', label: 'NCID' },
-     { key: 'arn', label: 'ARN' },
-     { key: 'arn1', label: 'ARN' },
+    
+   
 
     { key: 'firstName', label: 'First Name' },
      { key: 'lastName', label: 'Last Name' },
     { key: 'mobile', label: 'Mobile' },
-    { key: 'email', label: 'Email' },
+    { key: 'email', label: 'Email ID' },
+     { key: 'loantype', label: 'Loan Type' },
+     { key: 'disbursedAmount', label: 'Disbursed Amount' },
+     { key: 'outstandingBalance', label: 'Outstanding Balance' },
     {
-      key: 'status',
-      label: 'Status',
+      key: 'loanStatus',
+      label: 'Loan Status',
       class: 'status',
-      classFn: (row: any) => this.getStatusClass(row.status).class,
-      transform: (row: any) => this.getStatusClass(row.status).text
+      classFn: (row: any) => this.getStatusClass(row.loanStatus).class,
+      transform: (row: any) => this.getStatusClass(row.loanStatus).text
     },
 
-    {
-      key: 'kycStatus',
-      label: 'KYC Status',
-      class: 'status',
-      classFn: (row: any) => this.getStatusClass(row.kycStatus).class,
-      transform: (row: any) => this.getStatusClass(row.kycStatus).text
-    },
-    // { key: 'registrationDate', label: 'Registration Date' },
+    
 
   ];
 
@@ -133,12 +119,12 @@ export class LosOperation {
 
 private loadallusers(): void {
      const page = this.currentPage - 1;
-    this.service.getAllUsers(page,this.pageSize)
+    this.service.getAllLoanUsers(page,this.pageSize)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (response) => {
-           let resdate= response.data.content;
-            this.totalItems = response.data.totalElements;
+          let resdate= response.data.content;
+          this.totalItems = response.data.totalElements;
           this.totalPages = response.data.totalPages;
           this.AlluserData = resdate;
           this.fullData = this.tableDataService.transformUserData(resdate);

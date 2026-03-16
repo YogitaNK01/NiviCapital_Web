@@ -227,7 +227,7 @@
           <div class="w-100 gap-3">
             <div formArrayName="livingexpenses">
 
-              @for (expense of livingexpenses.controls; track $index; let i = $index) {
+              @for (expense of livingexpenses.controls; track expense; let i = $index) {
               <div class="row mt-40" [formGroupName]="i">
                 @if(i === 0 || livingexpenses.at(i-1).get('category')?.value !== expense.get('category')?.value) {
 
@@ -267,7 +267,7 @@
                   <app-inputfield type="flag" [label]="expense.get('categoryLabel')?.value + ' (INR)'"
                     formControlName="amountINR" placeholder="₹ 40,20,337" [showPhonePrefix]="true" [required]="true"
                     [showPhonePrefixnumber]="false"
-                    (input)="formatAmount($event,'amountINR',i,'living');main.restrictInput($event, 'decimal')">
+                    (input)="formatAmount1($event,'amountINR',expense);main.restrictInput($event, 'decimal')">
                   </app-inputfield>
                   <div class="text-danger"
                     *ngIf="expense.get('amountINR')?.touched && expense.get('amountINR')?.invalid">
@@ -296,10 +296,10 @@
                     *ngIf="expense.get('description')?.touched && expense.get('description')?.invalid">
 
                     <div *ngIf="expense.get('description')?.errors?.['required'] || amterror">
-                      Description is required
+                      Expense Name is required
                     </div>
                     <div *ngIf="expense.get('description')?.errors?.['minlength'] ||expense.get('description')?.errors?.['maxlength']">
-                            Description name must be 2–50 characters
+                            Expense name must be 2–50 characters
                         </div>
                   </div>
 
@@ -386,7 +386,7 @@
                   <app-inputfield type="flag" [label]="expense.get('categoryLabel')?.value + '(INR)'"
                     placeholder="₹ 40,20,337" [showPhonePrefix]="true" [showPhonePrefixnumber]="false"
                     formControlName="amountINR" [required]="true"
-                    (input)="formatAmount($event,'amountINR',i,'misc');main.restrictInput($event, 'decimal')">
+                    (input)="formatAmount1($event,'amountINR',expense );main.restrictInput($event, 'decimal')">
                   </app-inputfield>
 
                   <div class="text-danger"
@@ -415,10 +415,10 @@
                     *ngIf="expense.get('descriptionmisc')?.touched && expense.get('descriptionmisc')?.invalid">
 
                     <div *ngIf="expense.get('descriptionmisc')?.errors?.['required'] || amterror">
-                      Description is required
+                      Expense Name is required
                     </div>
                       <div *ngIf="expense.get('descriptionmisc')?.errors?.['minlength'] ||expense.get('descriptionmisc')?.errors?.['maxlength']">
-                            Description name must be 2–50 characters
+                            Expense name must be 2–50 characters
                         </div>
 
                   </div>

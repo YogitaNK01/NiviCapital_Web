@@ -125,6 +125,8 @@ export class Layout implements OnInit, OnDestroy {
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: () => {
+          localStorage.clear();
+          sessionStorage.clear();
           this.router.navigate(['/login']);
         },
         error: (err) => {

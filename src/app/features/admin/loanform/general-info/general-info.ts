@@ -90,6 +90,9 @@ export class GeneralInfo implements OnInit {
   applicationId: string = '';
   custName: string = '';
   custARN: string = '';
+
+  calculatedEndDate!: Date;
+
   constructor(private fb: FormBuilder, private formSvc: Loanformservice, private router: Router, private stepperService: Loanstepperservice, private route: ActivatedRoute,) { }
   ngOnInit() {
     this.route.queryParams.subscribe(params => {
@@ -353,6 +356,14 @@ export class GeneralInfo implements OnInit {
 
     if (!startDate || !duration) return;
 
+     if (duration.includes('4+')) {
+      this.registerForm.patchValue(
+        { courseenddate: null },
+        { emitEvent: false }
+      );
+      return;
+    }
+
     const years = parseInt(duration);
     if (isNaN(years)) return;
 
@@ -360,18 +371,14 @@ export class GeneralInfo implements OnInit {
     const end = new Date(start);
     end.setFullYear(start.getFullYear() + years);
 
+     this.calculatedEndDate = end;
+
     this.registerForm.patchValue(
       { courseenddate: end },
       { emitEvent: false }
     );
 
-    if (duration.includes('4+')) {
-      this.registerForm.patchValue(
-        { courseenddate: null },
-        { emitEvent: false }
-      );
-      return;
-    }
+   
   }
 
   formatDate(date: any): string | null {

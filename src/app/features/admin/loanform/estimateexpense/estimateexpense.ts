@@ -3,7 +3,7 @@ import { Buttons } from '../../../systemdesign/buttons/buttons';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { Loanstepperservice } from '../../../../core/service/loanstepperservice';
-import { FormArray, FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { AbstractControl, FormArray, FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Loanformservice } from '../../../../core/service/loanformservice';
 import { Inputfield } from '../../../systemdesign/inputfield/inputfield';
 import { Dropdown, DropdownOption } from '../../../systemdesign/dropdown/dropdown';
@@ -229,7 +229,10 @@ export class Estimateexpense {
       .map((g: any) => g.get('category')?.value)
       .lastIndexOf(category);
 
-    this.livingexpenses.insert(index + 1, this.createExpense(category));
+      const newGroup = this.createExpense(category);
+      this.livingexpenses.insert(index + 1, newGroup);
+
+    // this.livingexpenses.insert(index + 1, this.createExpense(category));
     // setTimeout(() => this.updateView());
 
   }
@@ -349,10 +352,10 @@ export class Estimateexpense {
     this.totalINRamt = tuition + this.totalLivingINR + this.totalMiscINR;
     let totalInramount = this.totalINRamt
     this.totalINRamt = this.formatIndian(this.totalINRamt.toString());
-    
+
 
     this.totalAUDamt = totalInramount / 62.5;
-this.totalAUDamt = this.formatAustralian(this.totalAUDamt.toString());
+    this.totalAUDamt = this.formatAustralian(this.totalAUDamt.toString());
   }
   calculateTotal(formArrayName: string): number {
 
@@ -387,21 +390,22 @@ this.totalAUDamt = this.formatAustralian(this.totalAUDamt.toString());
     value = value.replace(/,/g, '');
     // value = value.replace(/\D/g, '');
 
-     value = value.replace(/[^0-9.]/g, '');
-  const parts = value.split('.');
-  if (parts.length > 2) {
-    value = parts[0] + '.' + parts.slice(1).join('');
-  }
+    value = value.replace(/[^0-9.]/g, '');
+    const parts = value.split('.');
+    if (parts.length > 2) {
+      value = parts[0] + '.' + parts.slice(1).join('');
+    }
 
-  let integerPart = parts[0];
-  let decimalPart = parts[1] ? '.' + parts[1] : '';
+    let integerPart = parts[0];
+    let decimalPart = parts[1] ? '.' + parts[1] : '';
 
 
     let num = Number(value);
 
     if (controlName === 'tutionfees' && num >= 10000001) {
       this.amterror = true;
-    }
+    } else { this.amterror = false; }
+
 
 
     const formatted = this.formatIndian(num.toString());
@@ -410,7 +414,7 @@ this.totalAUDamt = this.formatAustralian(this.totalAUDamt.toString());
 
       const group = array.at(index) as FormGroup;
       group.get(controlName)?.setValue(formatted, { emitEvent: false });
-      
+
     }
     else {
       this.expenseForm.get(controlName)?.setValue(formatted, { emitEvent: false });
@@ -419,14 +423,47 @@ this.totalAUDamt = this.formatAustralian(this.totalAUDamt.toString());
     }
 
   }
+   formatAmount1(event: any, controlName: string, control: AbstractControl) {
+  const group = control as FormGroup;
+    let value = event.target.value;
 
- 
+    if (!value) return;
+
+    value = value.replace(/,/g, '');
+    value = value.replace(/[^0-9.]/g, '');
+    const parts = value.split('.');
+    if (parts.length > 2) {
+      value = parts[0] + '.' + parts.slice(1).join('');
+    }
+
+    let integerPart = parts[0];
+    let decimalPart = parts[1] ? '.' + parts[1] : '';
+
+
+    let num = Number(value);
+
+    if (controlName === 'tutionfees' && num >= 10000001) {
+      this.amterror = true;
+    } else { this.amterror = false; }
+
+
+
+    const formatted = this.formatIndian(num.toString());
+     if (group) {
+    group.get(controlName)?.setValue(formatted, { emitEvent: false });
+  } else {
+    this.expenseForm.get(controlName)?.setValue(formatted, { emitEvent: false });
+  }
+
+  }
+
+
   formatIndian(x: string): string {
-  return new Intl.NumberFormat('en-IN').format(Number(x));
-}
+    return new Intl.NumberFormat('en-IN').format(Number(x));
+  }
   formatAustralian(x: number): string {
-  return new Intl.NumberFormat('en-AU').format(x);
-}
+    return new Intl.NumberFormat('en-AU').format(x);
+  }
 
 
   handleCategoryChange(values: string | string[], formArray: FormArray, addFn: (category: string) => void) {
@@ -535,9 +572,9 @@ this.totalAUDamt = this.formatAustralian(this.totalAUDamt.toString());
       }
     });
 
-    if (invalid || this.amterror ) {
+    if (invalid || this.amterror) {
       console.log("invalid ");
-      
+
       return;
     }
 

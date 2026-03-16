@@ -8,16 +8,16 @@
             <div class="w-100 gap-3">
                 <!-- all categories -->
                 <app-dropdown [options]="liabilitiesCatagories" [multiSelect]="true"
-                    [(selectedValue)]="selectedliabilities" [placeholder]="'Select Assets type'" [required]="true"
+                    [(selectedValue)]="selectedliabilities" [placeholder]="'Select Liabilities type'"
                     (selectedValueChange)="onAssetChange($event)" [avatarUrl]="avatarUrl" [hasAvatar]="hasAvatar"
-                    [label]="'Assets'">
+                    [label]="'Liabilities'">
                 </app-dropdown>
             </div>
         </div>
 
     </div>
 
-    <form [formGroup]="assetsForm" (ngSubmit)="submit()" id="expenseForm" class="w-100 ">
+    <form [formGroup]="liabilityForm" (ngSubmit)="submit()" id="expenseForm" class="w-100 ">
 
         <div class=" accordion d-flex flex-column gap-4 mb-4">
 
@@ -25,10 +25,19 @@
                 [hidden]="!selectedliabilities.includes(acc.key)">
 
                 <h2 class="accordion-header">
-                    <button class="accordion-button table-head" [class.collapsed]="!openIndex.includes(i)" type="button"
-                        (click)="toggle(i)">
+                    <button class="accordion-button table-head d-flex justify-content-between align-items-center"
+                        [class.collapsed]="!openIndex.includes(i)" type="button" (click)="toggle(i)">
 
-                        {{ acc.title }}
+                         <span class="flex-grow-1">{{ acc.title }}</span>
+                        <span class="delete-icon" (click)="removeAccordion(acc.key, i, $event)">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
+                                fill="none">
+                                <path d="M3 6H21" stroke="#25262F" stroke-width="1.5" />
+                                <path d="M8 6V4C8 3 9 2 10 2H14C15 2 16 3 16 4V6" stroke="#25262F" stroke-width="1.5" />
+                                <path d="M19 6L18 20C18 21 17 22 15 22H9C7 22 6 21 6 20L5 6" stroke="#25262F"
+                                    stroke-width="1.5" />
+                            </svg>
+                        </span>
                     </button>
                 </h2>
 
@@ -75,13 +84,13 @@
                 <div class="col">
                     <div class="form-group mb-3">
                         <app-inputfield type="text" [required]="true" label="Value INR" [required]="true"
-                            formControlName="goldvalue" placeholder="Enter Value" helpText="Help text" name="goldvalue">
+                            placeholder="Enter Value" helpText="Help text" name="goldvalue">
                         </app-inputfield>
 
                     </div>
                 </div>
             </div>
-            <div class="row common-details-box d-flex flex-row gap-0">
+            <!-- <div class="row common-details-box d-flex flex-row gap-0">
 
                 <div class="text-dp-3-regular"> Home Loan 1</div>
                 <hr class="hrclass">
@@ -125,153 +134,203 @@
                     </div>
                 </div>
 
-            </div>
+            </div> -->
         </ng-template>
 
         <ng-template #creditcardTemplate let-i="index">
-            <div class="row common-details-box d-flex flex-row gap-0">
+            <div class="mobiledetails d-flex w-100 flex-column ">
+                <div class="w-100 gap-3">
+                    <div formArrayName="creditcard">
+                        @for(item of getFormArray('creditcard').controls; track $index; let i = $index){
+                        <div class="row common-details-box d-flex flex-row gap-0" [formGroupName]="i" >
 
-                <div class="text-dp-3-regular"> Credit Card 1</div>
-                <hr class="hrclass">
-
-             
-                <div class="col-lg-4">
-                    <div class="form-group mb-3">
-                        <app-inputfield type="text" [required]="true" label="Bank Name" [required]="true"
-                            formControlName="bankamt" placeholder="Select Bank Name" helpText="Help text"
-                            name="bankamt">
-                        </app-inputfield>
+                            <div class="text-dp-3-regular text-label d-flex align-items-center justify-content-between">
+                                Credit Card {{i+1}}
+                                
+                            </div>
+                            <hr class="hrclass">
 
 
+                            <div class="col-lg-4">
+                                <div class="form-group mb-3">
+                                    <app-inputfield type="text" [required]="true" label="Bank Name" [required]="true"
+                                        formControlName="creditcardbankName" placeholder="Select Bank Name"
+                                        helpText="Help text" name="bankamt">
+                                    </app-inputfield>
+
+
+                                </div>
+                            </div>
+                            <div class="col-lg-4">
+                                <div class="form-group mb-3">
+                                    <app-inputfield type="text" [required]="true" label="Outstanding Balance (INR)"
+                                        [required]="true" formControlName="ccoutstandingBalance"
+                                        placeholder="Enter Value" helpText="Help text" name="bankamt">
+                                    </app-inputfield>
+
+
+                                </div>
+                            </div>
+                            <div class="col-lg-4">
+                                <div class="form-group mb-3">
+                                    <app-inputfield type="text" [required]="true" label="Credit Limit (INR)"
+                                        [required]="true" formControlName="creditLimit" placeholder="Enter Value"
+                                        helpText="Help text" name="bankamt">
+                                    </app-inputfield>
+
+
+                                </div>
+                            </div>
+
+                        </div>
+
+                        @if(i === getFormArray('creditcard').length - 1 ) {
+                        <div class="row common-details-box pt-0 pb-0 ">
+
+                            <div class="form-group mb-3">
+                                <app-buttons label="Add Card" class="btn btn-icon Add btncustomClass" [outline]="true"
+                                    (click)="addRow('creditcard', createCreditcard.bind(this))">
+                                    <img src="/assets/images/icons/addred.svg">
+                                </app-buttons>
+                            </div>
+                        </div>
+                        }
+                        }
                     </div>
-                </div>
-                <div class="col-lg-4">
-                    <div class="form-group mb-3">
-                        <app-inputfield type="text" [required]="true" label="Outstanding Balance (INR)"
-                            [required]="true" formControlName="bankamt" placeholder="Enter Value" helpText="Help text"
-                            name="bankamt">
-                        </app-inputfield>
-
-
-                    </div>
-                </div>
-                <div class="col-lg-4">
-                    <div class="form-group mb-3">
-                        <app-inputfield type="text" [required]="true" label="Credit Limit (INR)" [required]="true"
-                            formControlName="bankamt" placeholder="Enter Value" helpText="Help text" name="bankamt">
-                        </app-inputfield>
-
-
-                    </div>
-                </div>
-                <div class="col-lg-4 mt-20">
-                    <app-buttons label="Add Card" class="btn btn-icon Add btncustomClass" [outline]="true"
-                        (click)="addmore()">
-                        <img src="/assets/images/icons/addred.svg">
-                    </app-buttons>
                 </div>
             </div>
-
         </ng-template>
 
         <ng-template #buynowpaylaterTemplate let-i="index">
-            <div class="row common-details-box d-flex flex-row gap-0">
+            <div class="mobiledetails d-flex w-100 flex-column ">
+                <div class="w-100 gap-3">
+                    <div formArrayName="bnpl">
+                        @for(item of getFormArray('bnpl').controls; track $index; let i = $index){
+                        <div class="row common-details-box d-flex flex-row gap-0" [formGroupName]="i">
 
-                <div class="text-dp-3-regular"> BNPL 1</div>
-                <hr class="hrclass">
+                            <div class="text-dp-3-regular"> BNPL {{i+1}}</div>
+                            <hr class="hrclass">
 
-                <div class="col-lg-6 ">
-                    <div class="form-group mb-3">
-                        <app-dropdown [options]="liabilitiesCatagories" [(selectedValue)]="selectedliabilities"
-                            [placeholder]="'SelectBank Name'" [required]="true"
-                            (selectedValueChange)="onAssetChange($event)" [avatarUrl]="avatarUrl"
-                            [hasAvatar]="hasAvatar" [label]="'Bank Name'">
-                        </app-dropdown>
+                            <div class="col-lg-6 ">
+                                <div class="form-group mb-3">
+                                    <app-dropdown [options]="liabilitiesCatagories"
+                                        [(selectedValue)]="selectedliabilities" [placeholder]="'SelectBank Name'"
+                                        [required]="true" (selectedValueChange)="onAssetChange($event)"
+                                        formControlName="bnplbankName" [avatarUrl]="avatarUrl" [hasAvatar]="hasAvatar"
+                                        [label]="'Bank Name'">
+                                    </app-dropdown>
 
+                                </div>
+                            </div>
+                            <div class="col-lg-6 ">
+                                <div class="form-group mb-3">
+                                    <app-inputfield type="text" [required]="true" label="Outstanding Balance (INR)"
+                                        [required]="true" formControlName="outstandingBalance" placeholder="Enter Value"
+                                        helpText="Help text" name="bankamt">
+                                    </app-inputfield>
+
+
+                                </div>
+                            </div>
+                            <div class="col-lg-6 mt-20">
+                                <div class="form-group mb-3">
+                                    <app-inputfield type="text" [required]="true" label="Credit Limit (INR)"
+                                        [required]="true" formControlName="creditLimit" placeholder="Enter Value"
+                                        helpText="Help text" name="bankamt">
+                                    </app-inputfield>
+
+
+                                </div>
+                            </div>
+                            <div class="col-lg-6 mt-20">
+                                <div class="form-group mb-3">
+                                    <app-inputfield type="text" [required]="true" label="Monthly EMI (INR)"
+                                        [required]="true" formControlName="monthlyEMI" placeholder="Enter Value"
+                                        helpText="Help text" name="bankamt">
+                                    </app-inputfield>
+
+
+                                </div>
+                            </div>
+
+                        </div>
+                        @if(i === getFormArray('bnpl').length - 1 ) {
+                        <div class="row common-details-box pt-0 pb-0 ">
+
+                            <div class="form-group mb-3">
+                                <app-buttons label="Add Buy Now Pay Later (BNPL)"
+                                    class="btn btn-icon Add btncustomClass" [outline]="true" (click)="addRow('bnpl', createBNPL.bind(this))">
+                                    <img src="/assets/images/icons/addred.svg">
+                                </app-buttons>
+                            </div>
+                        </div>
+                        }
+
+                        }
                     </div>
-                </div>
-                <div class="col-lg-6 ">
-                    <div class="form-group mb-3">
-                        <app-inputfield type="text" [required]="true" label="Outstanding Balance (INR)"
-                            [required]="true" formControlName="bankamt" placeholder="Enter Value" helpText="Help text"
-                            name="bankamt">
-                        </app-inputfield>
-
-
-                    </div>
-                </div>
-                <div class="col-lg-6 mt-20">
-                    <div class="form-group mb-3">
-                        <app-inputfield type="text" [required]="true" label="Credit Limit (INR)" [required]="true"
-                            formControlName="bankamt" placeholder="Enter Value" helpText="Help text" name="bankamt">
-                        </app-inputfield>
-
-
-                    </div>
-                </div>
-                <div class="col-lg-6 mt-20">
-                    <div class="form-group mb-3">
-                        <app-inputfield type="text" [required]="true" label="Monthly EMI (INR)" [required]="true"
-                            formControlName="bankamt" placeholder="Enter Value" helpText="Help text" name="bankamt">
-                        </app-inputfield>
-
-
-                    </div>
-                </div>
-                <div class="col-lg-6">
-                    <app-buttons label="Add Buy Now Pay Later (BNPL)" class="btn btn-icon Add btncustomClass"
-                        [outline]="true" (click)="addmore()">
-                        <img src="/assets/images/icons/addred.svg">
-                    </app-buttons>
                 </div>
             </div>
-
         </ng-template>
 
         <ng-template #otherTemplate let-i="index">
+            <div class="mobiledetails d-flex w-100 flex-column ">
+                <div class="w-100 gap-3">
+                    <div formArrayName="other">
+                        @for(item of getFormArray('other').controls; track $index; let i = $index){
+                        <div class="row common-details-box d-flex flex-row gap-0" [formGroupName]="i">
 
-            <div class="row common-details-box d-flex flex-row gap-0">
-
-                <div class="text-dp-3-regular"> Liability 1</div>
-                <hr class="hrclass">
-
-
-                <div class="col-lg-4">
-                    <div class="form-group mb-3">
-                        <app-inputfield type="text" [required]="true" label="Liability Type" [required]="true"
-                            formControlName="bankamt" placeholder="Enter Liability Type" helpText="Help text"
-                            name="bankamt">
-                        </app-inputfield>
+                            <div class="text-dp-3-regular"> Liability {{i+1}}</div>
+                            <hr class="hrclass">
 
 
+                            <div class="col-lg-4">
+                                <div class="form-group mb-3">
+                                    <app-inputfield type="text" [required]="true" label="Liability Type"
+                                        [required]="true" formControlName="LiabilityType"
+                                        placeholder="Enter Liability Type" helpText="Help text" name="bankamt">
+                                    </app-inputfield>
+
+
+                                </div>
+                            </div>
+                            <div class="col-lg-4">
+                                <div class="form-group mb-3">
+                                    <app-inputfield type="text" [required]="true" label="Amount (INR)" [required]="true"
+                                        formControlName="amount" placeholder="Enter Value" helpText="Help text"
+                                        name="bankamt">
+                                    </app-inputfield>
+
+
+                                </div>
+                            </div>
+                            <div class="col-lg-4">
+                                <div class="form-group mb-3">
+                                    <app-inputfield type="text" [required]="true" label="Monthly Repayment (INR)"
+                                        [required]="true" formControlName="MonthlyRepaymentimit"
+                                        placeholder="Enter Value" helpText="Help text" name="bankamt">
+                                    </app-inputfield>
+
+
+                                </div>
+                            </div>
+
+                        </div>
+                        @if(i === getFormArray('other').length - 1 ) {
+                        <div class="row common-details-box pt-0 pb-0 ">
+
+                            <div class="form-group mb-3">
+                                <app-buttons label="Add Other Liabilities" class="btn btn-icon Add btncustomClass"
+                                    [outline]="true" (click)="addRow('other', createOther.bind(this))">
+                                    <img src="/assets/images/icons/addred.svg">
+                                </app-buttons>
+                            </div>
+                        </div>
+                        }
+
+                        }
                     </div>
-                </div>
-                <div class="col-lg-4">
-                    <div class="form-group mb-3">
-                        <app-inputfield type="text" [required]="true" label="Amount (INR)" [required]="true"
-                            formControlName="bankamt" placeholder="Enter Value" helpText="Help text" name="bankamt">
-                        </app-inputfield>
-
-
-                    </div>
-                </div>
-                <div class="col-lg-4">
-                    <div class="form-group mb-3">
-                        <app-inputfield type="text" [required]="true" label="Monthly Repayment (INR)" [required]="true"
-                            formControlName="bankamt" placeholder="Enter Value" helpText="Help text" name="bankamt">
-                        </app-inputfield>
-
-
-                    </div>
-                </div>
-                <div class="col-lg-4 mt-20">
-                    <app-buttons label="Add Other Liabilities" class="btn btn-icon Add btncustomClass" [outline]="true"
-                        (click)="addmore()">
-                        <img src="/assets/images/icons/addred.svg">
-                    </app-buttons>
                 </div>
             </div>
-
         </ng-template>
     </form>
 

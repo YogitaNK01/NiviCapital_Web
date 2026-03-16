@@ -152,14 +152,24 @@ selectedPassportFile: File | null = null;
   viewImage(url: string): void {
     window.open(url, '_blank');
   }
+  
   downloadImage(url: string, filename: string): void {
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = filename;
-    link.target = '_blank';
-    link.click();
-    // window.open(url, '_blank');
-  }
+  fetch(url)
+    .then(res => res.blob())
+    .then(blob => {
+
+      const blobUrl = window.URL.createObjectURL(blob);
+
+      const link = document.createElement('a');
+      link.href = blobUrl;
+      link.download = filename;
+      link.click();
+
+      window.URL.revokeObjectURL(blobUrl);
+
+    });
+
+}
 
    getKycId(event: any) {
     console.log(event);
@@ -223,8 +233,11 @@ selectedPassportFile: File | null = null;
 
 
   onFileChange(result: UploadResult, key: string) {
-    
- if (!result.file) return; 
+    console.log(!result.file);
+ if (!result.file){
+  this.passportmissing = false;
+  return
+ } ; 
 
   
  this.selectedPassportFile = result.file;

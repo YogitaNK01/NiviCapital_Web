@@ -67,6 +67,11 @@ export class Main {
   );
 }
 
+  getAllLoanUsers(page:number,size:number): Observable<ApiResponse<PageResponse<UserData>>> {
+  return this.http.get<ApiResponse<PageResponse<UserData>>>(
+    `${this.baseUrl}/v1/los/applications/loan-customers?page=${page}&size=${size}`,
+  );
+}
 
   getKycDetails(id: string): Observable<any> {
     return this.http.get<any>(

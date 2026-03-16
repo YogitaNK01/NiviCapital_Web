@@ -36,7 +36,7 @@ export class Loanlayout implements OnInit {
 
       this.applicantId = applicantId;
       this.applicationId = applicationId;
-      this.applicantName = applicantName.split('%20')[0];
+       this.applicantName = applicantName.split('%20')[0];
       this.applicationARN = applicationARN;
 
     });

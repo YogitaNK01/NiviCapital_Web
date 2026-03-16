@@ -8,6 +8,7 @@ background: $secondary-50;
 padding: $spacing_16 $spacing_18;
 }
 
+
 .mt-20{
     margin-top: $spacing_9;;
 }
@@ -19,6 +20,11 @@ padding: $spacing_16 $spacing_18;
 .hrclass{
     background: $neutral-300;
     margin: 14px 0 20px 0;
+}
+.delete-icon {
+  cursor: pointer;
+  display: flex;
+  align-items: center;
 }
 
 .accordion-item{

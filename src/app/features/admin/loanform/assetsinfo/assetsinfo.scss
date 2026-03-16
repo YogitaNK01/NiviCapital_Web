@@ -28,6 +28,11 @@ padding: $spacing_16 $spacing_18;
 //   background: $bg, ;
   box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.05);
 }
+.delete-icon {
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+}
 .table-head{
   color: $secondary-700;
 }
@@ -35,7 +40,7 @@ padding: $spacing_16 $spacing_18;
 .btncustomClass{
      width: auto !important;
   min-width: 178px;
-  max-width: 200px;
+  // max-width: 200px;
   padding: 2px 3px;
   height: 52px;
 }

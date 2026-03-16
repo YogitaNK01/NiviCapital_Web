@@ -14,7 +14,6 @@ export interface StatusClass {
 export class TableData {
 
   constructor(private mainService: Main) { }
-  /**  Transform raw user data to table format **/
   transformUserData(data: any[]): any[] {
     return data.map((item, index) => ({
       // id_data: index + 1,
@@ -26,8 +25,11 @@ export class TableData {
       kycStatus: item.kycStatus ?? "-",
       status: item.status ?? "-",
       userId: item.userId ?? "-",
-      // registrationDate: this.formatDateOnly(item.createdAt) ?? "-",
       ncId: item.ncId ?? "-",
+      loantype: item.loanType ?? "-",
+      disbursedAmount: item.disbursedAmount ?? "-",
+      outstandingBalance: item.outstandingBalance ?? "-",
+      loanStatus: item.loanStatus ?? "-",
       // Id: item.id ?? "-"
     }));
   }

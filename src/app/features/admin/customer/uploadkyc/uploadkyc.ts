@@ -12,6 +12,7 @@ import { Addcustomerservice } from '../../../../core/service/addcustomerservice'
 import { ActivatedRoute } from '@angular/router';
 import { Loanformservice } from '../../../../core/service/loanformservice';
 import moment from 'moment';
+import { Msgboxservice } from '../../../../core/service/msgboxservice';
 
 
 interface OptionItem {
@@ -99,7 +100,7 @@ export class Uploadkyc implements OnDestroy {
   editUserData: any = {};
   dobValid = false;
   dobTouched = false;
-  constructor(public main: Main, private addcustomerservice: Addcustomerservice, private route: ActivatedRoute, private loanservice: Loanformservice) { }
+  constructor(public main: Main, private addcustomerservice: Addcustomerservice, private route: ActivatedRoute, private loanservice: Loanformservice,private msgBox:Msgboxservice) { }
 
   ngOnInit(): void {
     this.states();
@@ -123,7 +124,17 @@ export class Uploadkyc implements OnDestroy {
 
 
   goToDashboard() {
-    this.prevstep.emit();
+    
+     this.msgBox.open({
+      title: 'Are you sure want to go to Dashboard?',
+      message: '',
+      showCancel: true,
+      onOk: () => {
+       this.prevstep.emit();
+
+      }
+    });
+
   }
 
   safeParse(value: string | null) {

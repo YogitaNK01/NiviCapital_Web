@@ -8,7 +8,7 @@
             <div class="w-100 gap-3">
                 <!-- all categories -->
                 <app-dropdown [options]="assetsCatagories" [multiSelect]="true" [(selectedValue)]="selectedAssets"
-                    [placeholder]="'Select Assets type'"  (selectedValueChange)="onAssetChange($event)"
+                    [placeholder]="'Select Assets type'" (selectedValueChange)="onAssetChange($event)"
                     [avatarUrl]="avatarUrl" [hasAvatar]="hasAvatar" [label]="'Assets'">
                 </app-dropdown>
             </div>
@@ -27,7 +27,16 @@
                     <button class="accordion-button table-head" [class.collapsed]="!openIndex.includes(i)" type="button"
                         (click)="toggle(i)">
 
-                        {{ acc.title }}
+                         <span class="flex-grow-1">{{ acc.title }}</span>
+                        <span class="delete-icon" (click)="removeAccordion(acc.key, i, $event)">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
+                                fill="none">
+                                <path d="M3 6H21" stroke="#25262F" stroke-width="1.5" />
+                                <path d="M8 6V4C8 3 9 2 10 2H14C15 2 16 3 16 4V6" stroke="#25262F" stroke-width="1.5" />
+                                <path d="M19 6L18 20C18 21 17 22 15 22H9C7 22 6 21 6 20L5 6" stroke="#25262F"
+                                    stroke-width="1.5" />
+                            </svg>
+                        </span>
                     </button>
                 </h2>
 
@@ -74,11 +83,12 @@
 
         <ng-template #goldTemplate let-i="index">
 
-            <div class="row common-details-box d-flex flex-row ">
+            <div class="row common-details-box d-flex flex-row " formGroupName="gold">
                 <div class="col">
                     <div class="form-group mb-3">
-                        <app-inputfield type="text" [required]="true" label="Value INR" [required]="true" (input)="main.restrictInput($event, 'number')"
-                            formControlName="goldvalue" placeholder="Enter Value" helpText="Help text" name="goldvalue">
+                        <app-inputfield type="text" [required]="true" label="Value INR" [required]="true"
+                            (input)="main.restrictInput($event, 'number')" formControlName="goldvalue"
+                            placeholder="Enter Value" helpText="Help text" name="goldvalue">
                         </app-inputfield>
 
                     </div>
@@ -89,124 +99,160 @@
 
 
         <ng-template #liquidassetsTemplate let-i="index">
-            <div class="row common-details-box d-flex flex-row ">
+            <div class="row common-details-box d-flex flex-row " formGroupName="liquidAssets">
                 <div class="col">
                     <div class="form-group mb-3">
                         <app-inputfield type="text" [required]="true" label="Cash In Hand (INR)" [required]="true"
-                            formControlName="cashinhand" placeholder="Enter Value" helpText="Help text" (input)="main.restrictInput($event, 'number')"
-                            name="cashinhand">
+                            formControlName="cashinhand" placeholder="Enter Value" helpText="Help text"
+                            (input)="main.restrictInput($event, 'number')" name="cashinhand">
                         </app-inputfield>
                     </div>
                 </div>
                 <div class="col">
                     <div class="form-group mb-3">
                         <app-inputfield type="text" [required]="true" label="Savings Account Balance (INR)"
-                            [required]="true" placeholder="Enter Value" formControlName="savingbalance" (input)="main.restrictInput($event, 'number')"
-                            helpText="Help text" name="savingbalance" [readonly]="true">
-                        </app-inputfield>
-                    </div>
-                </div>
-            </div>
-
-        </ng-template>
-        <ng-template #propertylandTemplate let-i="index">
-
-            <div class="row common-details-box d-flex flex-row gap-0">
-                <div class="text-dp-3-regular"> Property 1</div>
-                <hr class="hrclass">
-
-                <div class="col-lg-6">
-                    <div class="form-group mb-3">
-                        <app-dropdown [options]="assetsCatagories" [multiSelect]="true"
-                            [(selectedValue)]="selectedAssets" [placeholder]="'Select Property Type'" [required]="true"
-                            (selectedValueChange)="onAssetChange($event)" [avatarUrl]="avatarUrl"
-                            [hasAvatar]="hasAvatar" [label]="'Assets'">
-                        </app-dropdown>
-
-                    </div>
-                </div>
-                <div class="col-lg-6">
-                    <div class="form-group mb-3">
-                        <app-dropdown [options]="assetsCatagories" [multiSelect]="true"
-                            [(selectedValue)]="selectedAssets" [placeholder]="'Select Assets type'" [required]="true"
-                            (selectedValueChange)="onAssetChange($event)" [avatarUrl]="avatarUrl"
-                            [hasAvatar]="hasAvatar" [label]="'Ownership Type'">
-                        </app-dropdown>
-
-
-                    </div>
-                </div>
-                <div class="col-lg-6">
-                    <div class="form-group mb-3">
-                        <app-inputfield type="text" [required]="true" label="Market Value (INR)" [required]="true"
-                            formControlName="marketval" placeholder="Enter Value" helpText="Help text" name="marketval">
-                        </app-inputfield>
-                    </div>
-                </div>
-                <div class="col-lg-6">
-                    <div class="form-group mb-3">
-                        <app-inputfield type="text" [required]="true" label="Location / Address" [required]="true"
-                            placeholder="Enter Value" formControlName="location" helpText="Help text" name="location"
+                            [required]="true" placeholder="Enter Value" formControlName="savingbalance"
+                            (input)="main.restrictInput($event, 'number')" helpText="Help text" name="savingbalance"
                             [readonly]="true">
                         </app-inputfield>
                     </div>
                 </div>
-                <div class="col-lg-6">
-                    <div class="form-group mb-3">
-                        <app-buttons label="Add Property" class="btn btn-icon Add btncustomClass" [outline]="true"
-                            (click)="addmore()">
-                            <img src="/assets/images/icons/addred.svg">
-                        </app-buttons>
-                    </div>
-                </div>
-
-
             </div>
 
         </ng-template>
+
+        <ng-template #propertylandTemplate let-i="index">
+            <div class="mobiledetails d-flex w-100 flex-column ">
+                <div class="w-100 gap-3">
+                    <div formArrayName="properties">
+                        @for(prop of properties.controls; track $index; let i = $index){
+
+
+                        <div class="row common-details-box d-flex flex-row gap-0 " [formGroupName]="i">
+                            <div class="text-dp-3-regular text-label d-flex align-items-center justify-content-between">
+                                Property {{i+1}}
+                                
+                            </div>
+                            <hr class="hrclass">
+
+                            <div class="col-lg-6">
+                                <div class="form-group mb-3">
+                                    <app-dropdown [options]="assetsCatagories" [multiSelect]="true"
+                                        [(selectedValue)]="selectedAssets" [placeholder]="'Select Property Type'"
+                                        [required]="true" (selectedValueChange)="onAssetChange($event)"
+                                        [avatarUrl]="avatarUrl" [hasAvatar]="hasAvatar" [label]="'Assets'">
+                                    </app-dropdown>
+
+                                </div>
+                            </div>
+                            <div class="col-lg-6">
+                                <div class="form-group mb-3">
+                                    <app-dropdown [options]="assetsCatagories" [multiSelect]="true"
+                                        [(selectedValue)]="selectedAssets" [placeholder]="'Select Assets type'"
+                                        [required]="true" (selectedValueChange)="onAssetChange($event)"
+                                        [avatarUrl]="avatarUrl" [hasAvatar]="hasAvatar" [label]="'Ownership Type'">
+                                    </app-dropdown>
+
+
+                                </div>
+                            </div>
+                            <div class="col-lg-6">
+                                <div class="form-group mb-3">
+                                    <app-inputfield type="text" [required]="true" label="Market Value (INR)"
+                                        [required]="true" formControlName="marketval" placeholder="Enter Value"
+                                        helpText="Help text" name="marketval">
+                                    </app-inputfield>
+                                </div>
+                            </div>
+                            <div class="col-lg-6">
+                                <div class="form-group mb-3">
+                                    <app-inputfield type="text" [required]="true" label="Location / Address"
+                                        [required]="true" placeholder="Enter Value" formControlName="location"
+                                        helpText="Help text" name="location" [readonly]="true">
+                                    </app-inputfield>
+                                </div>
+                            </div>
+
+                        </div>
+
+                        @if(i === properties.length - 1 ) {
+                        <div class="row common-details-box pt-0 pb-0 ">
+
+                            <div class="form-group mb-3">
+                                <app-buttons label="Add Property" class="btn btn-icon Add btncustomClass"
+                                    [outline]="true" (click)="addProperty()">
+                                    <img src="/assets/images/icons/addred.svg">
+                                </app-buttons>
+                            </div>
+                        </div>
+                        }
+                        }
+                    </div>
+                </div>
+            </div>
+        </ng-template>
+
         <ng-template #fdTemplate let-i="index">
+            <div class="mobiledetails d-flex w-100 flex-column ">
+                <div class="w-100 gap-3">
+                    <div formArrayName="fixedDeposits">
+                        @for(fd of fixedDeposits.controls; track $index; let i = $index){
+                        <div class="row common-details-box d-flex flex-row gap-0" [formGroupName]="i">
+                            <div class="text-dp-3-regular text-label d-flex align-items-center justify-content-between">
+                                FD {{i+1}}
+                              
+                            </div>
+                            <hr class="hrclass">
 
-            <div class="row common-details-box d-flex flex-row gap-0">
-                <div class="text-dp-3-regular"> FD 1</div>
-                <hr class="hrclass">
+                            <div class="col">
+                                <div class="form-group mb-3">
+                                    <app-inputfield type="text" [required]="true" label="Bank Name" [required]="true"
+                                        formControlName="bankname" placeholder="Enter Bank Name" helpText="Help text"
+                                        name="bankname">
+                                    </app-inputfield>
 
-                <div class="col">
-                    <div class="form-group mb-3">
-                        <app-inputfield type="text" [required]="true" label="Bank Name" [required]="true"
-                            formControlName="bankname" placeholder="Enter Bank Name" helpText="Help text"
-                            name="bankname">
-                        </app-inputfield>
+                                </div>
+                            </div>
+                            <div class="col">
+                                <div class="form-group mb-3">
+                                    <app-inputfield type="text" [required]="true" label="Amount (INR)" [required]="true"
+                                        formControlName="bankamt" placeholder="Enter Value" helpText="Help text"
+                                        name="bankamt">
+                                    </app-inputfield>
 
+
+                                </div>
+                            </div>
+                            <div class="col">
+                                <div class="form-group mb-3">
+                                    <app-datepickernew formControlName="maturitydate" label="Maturity Date"
+                                        placeholder="DD/MM/YYYY">
+                                    </app-datepickernew>
+
+
+                                </div>
+                            </div>
+                           
+                        </div>
+                         @if(i === fixedDeposits.length - 1 ) {
+                        <div class="row common-details-box pt-0 pb-0 ">
+
+                            <div class="form-group mb-3">
+                                <app-buttons label="Add Fixed Deposit" class="btn btn-icon Add btncustomClass"
+                                    [outline]="true" (click)="addFD()">
+                                    <img src="/assets/images/icons/addred.svg">
+                                </app-buttons>
+                            </div>
+                        </div>
+                        }
+                        }
                     </div>
-                </div>
-                <div class="col">
-                    <div class="form-group mb-3">
-                        <app-inputfield type="text" [required]="true" label="Amount (INR)" [required]="true"
-                            formControlName="bankamt" placeholder="Enter Value" helpText="Help text" name="bankamt">
-                        </app-inputfield>
-
-
-                    </div>
-                </div>
-                <div class="col">
-                    <div class="form-group mb-3">
-                        <app-datepickernew formControlName="maturitydate" label="Maturity Date"
-                            placeholder="DD/MM/YYYY">
-                        </app-datepickernew>
-
-
-                    </div>
-                </div>
-                <div class="col">
-                    <app-buttons label="Add Fixed Deposit" class="btn btn-icon Add btncustomClass" [outline]="true"
-                        (click)="addmore()">
-                        <img src="/assets/images/icons/addred.svg">
-                    </app-buttons>
                 </div>
             </div>
         </ng-template>
+
         <ng-template #investmentTemplate let-i="index">
-            <div class="row common-details-box d-flex flex-row ">
+            <div class="row common-details-box d-flex flex-row " formGroupName="investments">
                 <div class="col">
                     <div class="form-group mb-3">
                         <app-dropdown [options]="assetsCatagories" [multiSelect]="true"
