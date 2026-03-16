@@ -11,35 +11,48 @@ jobs:
 
     steps:
 
-      - name: Checkout Code
-        uses: actions/checkout@v4
+    - name: Checkout code
+      uses: actions/checkout@v4
 
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: '24'
+    - name: Setup Node
+      uses: actions/setup-node@v4
+      with:
+        node-version: 24
 
-      - name: Install dependencies
-        run: npm ci
+    - name: Install dependencies
+      run: npm install
 
-      - name: Build Angular
-        run: npx ng build --configuration production --base-href /sit/
+    - name: Build Angular
+      run: npx ng build --configuration production --base-href /sit/
 
-      - name: Copy build to bastion
-        uses: appleboy/scp-action@master
-        with:
-          host: ${{ secrets.SERVER_HOST }}
-          username: ${{ secrets.SERVER_USER }}
-          key: ${{ secrets.SERVER_SSH_KEY }}
-          source: "dist/Nivicapital/*"
-          target: "/tmp/angular-sit"
+    - name: Upload Angular build to Bastion
+      uses: appleboy/scp-action@master
+      with:
+        host: ${{ secrets.SERVER_HOST }}
+        username: ${{ secrets.SERVER_USER }}
+        key: ${{ secrets.SERVER_SSH_KEY }}
+        source: "dist/nivicapital/*"
+        target: "/tmp/angular-sit"
 
-      - name: Move files to application server
-        uses: appleboy/ssh-action@master
-        with:
-          host: ${{ secrets.SERVER_HOST }}
-          username: ${{ secrets.SERVER_USER }}
-          key: ${{ secrets.SERVER_SSH_KEY }}
-          script: |
-            ssh opc@192.168.2.69 "sudo rm -rf /var/www/angular/sit/*"
-            scp -r /tmp/angular-sit/* opc@192.168.2.69:/var/www/angular/sit/
+    - name: Deploy to Application Server
+      uses: appleboy/ssh-action@master
+      with:
+        host: ${{ secrets.SERVER_HOST }}
+        username: ${{ secrets.SERVER_USER }}
+        key: ${{ secrets.SERVER_SSH_KEY }}
+        script: |
+
+          echo "Copying files to application server"
+
+          ssh -i appkey opc@192.168.2.69 << 'EOF'
+
+          sudo rm -rf /var/www/angular/sit/*
+          sudo mkdir -p /var/www/angular/sit
+
+          sudo cp -r /tmp/angular-sit/* /var/www/angular/sit/
+
+          sudo systemctl reload nginx
+
+          echo "Angular SIT deployed successfully"
+
+          EOF
