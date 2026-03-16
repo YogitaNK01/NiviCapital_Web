@@ -1,6 +1,5 @@
 name: Deploy Angular SIT
-env:
-  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 on:
   push:
     branches:
@@ -18,14 +17,13 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-           node-version: '20.x'
+          node-version: '22'
 
       - name: Install Dependencies
         run: npm install
 
       - name: Build Angular
-        run: |
-          npx ng build --configuration production --base-href /sit/
+        run: npx ng build --configuration production --base-href /sit/
 
       - name: Upload Build to Server
         uses: appleboy/scp-action@master
