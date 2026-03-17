@@ -121,7 +121,7 @@
 
             }
             @else{
-            <app-uploadbtn [config]="basicConfig" (fileChange)="onFileChange($event, 'passport')" label="Passport">
+            <app-uploadbtn [config]="basicConfig" (fileChange)="onFileChange($event, 'passport')" label="Passport" [required]="true">
             </app-uploadbtn>
             <div class="text-danger" *ngIf="passportmissing">
               Passport upload is mandatory
