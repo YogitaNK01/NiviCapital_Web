@@ -132,7 +132,7 @@
 
               @if (otpsent && !otpVerifiedOk) {
               <div class="col-lg-6 col-sm-12 d-flex align-items-end justify-content-center ">
-                <app-otpsection [length]="6" (otpSubmit)="onOtpSubmit($event)" (timer)="onTimer($event)"
+                <app-otpsection [length]="6" (otpSubmit)="onOtpSubmit($event)" (timer)="onTimer($event)" [resetTrigger]="resetCounter"
                   (otpVerifiedSuccess)="onOtpVerifiedSuccess($event)" required></app-otpsection>
 
 

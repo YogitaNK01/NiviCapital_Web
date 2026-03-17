@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, effect, EventEmitter, OnInit, Output, Type } from '@angular/core';
+import { ChangeDetectorRef, Component, effect, EventEmitter, OnInit, Output, Type, ViewChild } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Main } from '../../../../core/service/main';
@@ -79,6 +79,9 @@ export class AddCustomer implements OnInit {
   description1 = `Your customer has been added successfully. You can now \ncontinue with KYC and loan processing.`;
 
   description2 = `The customer's KYC details have been submitted and  \nthe profile is now active.`;
+
+  resetCounter = 0;
+  
   constructor(private fb: FormBuilder, public main: Main, private route: ActivatedRoute, private addcustomerservice: Addcustomerservice, 
     private cd: ChangeDetectorRef, private router: Router,private msgBox:Msgboxservice) { }
 
@@ -343,7 +346,7 @@ export class AddCustomer implements OnInit {
   }
 
   resendOtp() {
-
+    this.resetCounter++;
     console.log("Resend OTP API call here");
 
     const input = {

@@ -25,7 +25,7 @@ export class Otpsection implements OnInit {
   @Output() timer = new EventEmitter<number>();
   @Output() resendbtn = new EventEmitter<number>();
 
-
+@Input() resetTrigger: number = 0;
   otp: string[] = [];
   phonenumber: any;
   sendotpId: any;
@@ -176,9 +176,18 @@ export class Otpsection implements OnInit {
     return 'Resend OTP';
   }
 
+resetOtp() {
+  this.otp = new Array(this.length).fill('');
 
+  setTimeout(() => {
+    const first = document.getElementById('otp-0') as HTMLInputElement;
+    first?.focus();
+  });
+}
 
-
+ngOnChanges() {
+  this.resetOtp();
+}
 
   ngOnDestroy() {
     this.timerSub?.unsubscribe();
