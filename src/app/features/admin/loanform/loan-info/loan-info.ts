@@ -173,6 +173,14 @@ submitForm1(data: NgForm) {
 
   }
 
+updateSliderBackground(event: any) {
+  const value = event.target.value;
+  const min = event.target.min;
+  const max = event.target.max;
 
+  const percent = ((value - min) / (max - min)) * 100;
+
+  event.target.style.background = `linear-gradient(to right, #1e3a5f ${percent}%, #e5e7eb ${percent}%)`;
+}
  
 }

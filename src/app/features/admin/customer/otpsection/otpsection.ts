@@ -20,10 +20,10 @@ export class Otpsection implements OnInit {
   @Input() length: number = 6;
   @Output() otpSubmit = new EventEmitter<string>();
   @Output() otpVerifiedSuccess = new EventEmitter<any>();
-    @Output() otp_Verified = new EventEmitter<string>();
+  @Output() otp_Verified = new EventEmitter<string>();
 
-@Output() timer = new EventEmitter<number>();
-@Output() resendbtn = new EventEmitter<number>();
+  @Output() timer = new EventEmitter<number>();
+  @Output() resendbtn = new EventEmitter<number>();
 
 
   otp: string[] = [];
@@ -104,7 +104,7 @@ export class Otpsection implements OnInit {
 
     if (!this.isOtpComplete || this.isCounting) return;
     this.hasStarted = true;
-  
+
     const finalOtp = this.otp.join('');
     if (finalOtp.length === this.length) {
       this.otpSubmit.emit(finalOtp);
@@ -123,13 +123,13 @@ export class Otpsection implements OnInit {
         // this.otpSubmit.emit(res.status);
         this.otp_Verified.emit(res);
 
-    if (res.status === "success") {
-      this.otpVerified = true;
-    } else {
-      this.otpVerified = false;
-    }
+        if (res.status === "success") {
+          this.otpVerified = true;
+        } else {
+          this.otpVerified = false;
+        }
 
-    this.otpVerifiedSuccess.emit(res);
+        this.otpVerifiedSuccess.emit(res);
 
 
       },
@@ -169,37 +169,6 @@ export class Otpsection implements OnInit {
   }
 
 
-
-  // resendOtp() {
-  //   if (this.isCounting) return;
-  //   this.startTimer();
-  //   console.log("Resend OTP API call here");
-
-  //   const input = {
-
-  //     "phoneNumber": this.phonenumber,
-  //     "context": "SIGNUP",
-  //     "sourceId": "WEB",
-  //     "deviceId": "",
-  //     "userId": this.sendotpId
-  //   }
-  //   this.addcustomerservice.SendOTP(input).subscribe({
-  //     next: (res) => {
-  //       this.otp = Array(this.length).fill('');
-  //       this.isOtpComplete = false;
-
-  //       this.hasStarted = false;
-
-  //        setTimeout(() => {
-  //         document.getElementById('otp-0')?.focus();
-  //       });
-  //     },
-  //     error: (err) => {
-  //       console.error("error msg", err);
-  //     }
-  //   })
-    
-  // }
 
   get buttonLabel(): string {
     if (!this.hasStarted) return 'Verify OTP';

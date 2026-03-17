@@ -76,7 +76,7 @@ export class AddCustomer implements OnInit {
     }
   ];
 
-  description1 = `Your customer has been added successfully.You can now \ncontinue with KYC and loan processing.`;
+  description1 = `Your customer has been added successfully. You can now \ncontinue with KYC and loan processing.`;
 
   description2 = `The customer's KYC details have been submitted and  \nthe profile is now active.`;
   constructor(private fb: FormBuilder, public main: Main, private route: ActivatedRoute, private addcustomerservice: Addcustomerservice, 
