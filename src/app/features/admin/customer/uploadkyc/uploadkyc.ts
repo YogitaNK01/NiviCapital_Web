@@ -100,7 +100,7 @@ export class Uploadkyc implements OnDestroy {
   editUserData: any = {};
   dobValid = false;
   dobTouched = false;
-  constructor(public main: Main, private addcustomerservice: Addcustomerservice, private route: ActivatedRoute, private loanservice: Loanformservice,private msgBox:Msgboxservice) { }
+  constructor(public main: Main, private addcustomerservice: Addcustomerservice, private route: ActivatedRoute, private loanservice: Loanformservice, private msgBox: Msgboxservice) { }
 
   ngOnInit(): void {
     this.states();
@@ -124,13 +124,13 @@ export class Uploadkyc implements OnDestroy {
 
 
   goToDashboard() {
-    
-     this.msgBox.open({
+
+    this.msgBox.open({
       title: 'Are you sure want to go to Dashboard?',
       message: '',
       showCancel: true,
       onOk: () => {
-       this.prevstep.emit();
+        this.prevstep.emit();
 
       }
     });
@@ -153,46 +153,46 @@ export class Uploadkyc implements OnDestroy {
   }
 
 
- checkSequential(value: string, control: any) {
+  checkSequential(value: string, control: any) {
 
-  if (!value || value.length < 12) return;
+    if (!value || value.length < 12) return;
 
-  if (this.isSequential(value)) {
-    control.control.setErrors({ sequential: true });
-  } else {
+    if (this.isSequential(value)) {
+      control.control.setErrors({ sequential: true });
+    } else {
 
-    const errors = control.control.errors;
+      const errors = control.control.errors;
 
-    if (errors) {
-      delete errors['sequential'];
-      if (Object.keys(errors).length === 0) {
-        control.control.setErrors(null);
-      } else {
-        control.control.setErrors(errors);
+      if (errors) {
+        delete errors['sequential'];
+        if (Object.keys(errors).length === 0) {
+          control.control.setErrors(null);
+        } else {
+          control.control.setErrors(errors);
+        }
       }
     }
+
   }
+  isSequential(num: string) {
 
-}
-isSequential(num: string) {
+    const ascSeq = "01234567890123456789";
+    const descSeq = "98765432109876543210";
 
- const ascSeq = "01234567890123456789";
-  const descSeq = "98765432109876543210";
+    for (let i = 0; i <= num.length - 6; i++) {
+      const part = num.substring(i, i + 6);
 
-  for (let i = 0; i <= num.length - 6; i++) {
-    const part = num.substring(i, i + 6);
-
-    if (ascSeq.includes(part) || descSeq.includes(part)) {
-      return true;
+      if (ascSeq.includes(part) || descSeq.includes(part)) {
+        return true;
+      }
     }
-  }
 
-  return false;
-}
+    return false;
+  }
 
   selectSameAddress(checked: boolean) {
-   
-    
+
+
     this.addressType = 'same';
     this.isDifferentAddress = false;
     this.selectedSecondaryProof = null;
@@ -201,13 +201,16 @@ isSequential(num: string) {
   }
 
   selectDifferentAddress(checked: boolean) {
-    
-   
+
+
     this.addressType = 'different';
+    this.currstateOptions = [];
+    this.currcityOptions = [];
     this.isDifferentAddress = true;
 
     this.isCurrentMailingChecked = true;
     this.isPermanentMailingChecked = false;
+    this.states();
   }
 
   checkDob(value: any) {
@@ -215,12 +218,12 @@ isSequential(num: string) {
     this.dobValid = this.isAdult(value);
   }
   isAdult(date: any): boolean {
-    
+
     if (!date) return false;
 
-  const age = moment().diff(date, 'years');
+    const age = moment().diff(date, 'years');
 
-  return age >= 18;
+    return age >= 18;
 
 
   }
@@ -242,7 +245,7 @@ isSequential(num: string) {
       addressType: 'PERMANENT',
       addressLine: form.value.addressline1,
       addressLine1: form.value.addressline2,
-       addressLine2: form.value.addressline3,
+      addressLine2: form.value.addressline3,
       city: this.perselectedCityLabel,
       state: this.perselectedStateLabel,
       isPreferredAddress: this.isDifferentAddress == false ? 1 : 0,
@@ -255,7 +258,7 @@ isSequential(num: string) {
       addressType: 'CURRENT',
       addressLine: form.value.addressline1,
       addressLine1: form.value.addressline2,
-       addressLine2: form.value.addressline3,
+      addressLine2: form.value.addressline3,
       city: this.perselectedCityLabel,
       state: this.perselectedStateLabel,
       isPreferredAddress: this.isDifferentAddress == false ? 1 : 0,
@@ -267,7 +270,7 @@ isSequential(num: string) {
       addressType: 'OTHER',
       addressLine: form.value.currentaddressline1,
       addressLine1: form.value.currentaddressline2,
-       addressLine2: form.value.currentaddressline3,
+      addressLine2: form.value.currentaddressline3,
       city: this.currselectedCityLabel,
       state: this.currselectedStateLabel,
       isPreferredAddress: this.isDifferentAddress == true ? 1 : 0,
