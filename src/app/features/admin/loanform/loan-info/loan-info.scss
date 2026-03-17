@@ -15,7 +15,7 @@
 .form-area {
   padding: $spacing_14 $spacing_18;
   border-radius: var(--border-radius-border-radius-m, 12px);
-  border: 1px solid var(--system-border-neutral-neutral_2, #E4E6F1);
+  border: 1px solid $neutral_border_2;
 }
 
 
@@ -101,7 +101,7 @@
   flex: 1 0 0;
   align-self: stretch;
   border-radius: 12px;
-  border: 1px solid var(--system-border-neutral-neutral_2, #E4E6F1);
+  border: 1px solid $neutral_border_2;
   background: rgba(255, 255, 255, 0.60);
   width: 225px;
   height: 155px;

@@ -270,8 +270,8 @@ letter-spacing: 0.16px;
 .dropdown-item {
   display: flex;
   align-items: center;
-  padding: 11px; // your requested padding
-  gap: 10px; // space between icon and text
+  padding: 6px; 
+  gap: 10px; 
   cursor: pointer;
   color: #404040;
   font-size: $font-size-body_sm;
@@ -287,7 +287,14 @@ letter-spacing: 0.16px;
 
 
 .dropdown-item:hover {
+  
   background-color: $input-focus !important;
+
+    color: #ffffff !important;
+
+  * {
+    color: #ffffff !important;
+  }
 }
 
 
@@ -331,8 +338,8 @@ letter-spacing: 0.16px;
 }
 
 .dropdown-item input[type="checkbox"] {
-  width: $spacing_9;
-    height: $spacing_9;
+  width: $spacing_8;
+    height: $spacing_8;
 }
 
 .hrclass{

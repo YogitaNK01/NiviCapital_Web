@@ -31,6 +31,10 @@
     }
 }
 
+.btn.btncustomClass {
+  --bs-btn-padding-x: 0 !important;
+
+}
 .center-page {
   min-height: calc(100vh - 120px); /* subtract header height if exists */
   display: flex;

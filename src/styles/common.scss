@@ -1011,7 +1011,7 @@ p {
 
 .accordion-button {
   border-radius: $border-radius-s;
-  background: $surface;
+  background: $bg;
   min-height: 56px; // important
   padding: 16px 20px; // restore header spacing
   display: flex;
@@ -1022,8 +1022,9 @@ p {
 
 
 .base-layout {
+  width: 100%;
   display: flex;
-  width: 1606px;
+  min-width: 1606px;
   padding: var(--spacing-spacing_19, 44px) var(--spacing-spacing_18, 40px);
   flex-direction: column;
   align-items: flex-start;
@@ -1040,7 +1041,7 @@ p {
 }
 
 .footer-hr-class{
-  border-top: 1px solid var(--system-border-neutral-neutral_2, #E4E6F1);
+  border-top: 1px solid $neutral_border_2;
   margin-top: 0;
 }
 .loan-footerbtns{

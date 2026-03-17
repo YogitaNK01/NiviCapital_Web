@@ -31,6 +31,7 @@
   justify-content: space-between;
   align-items: center;
   align-self: stretch;
+  border-bottom: 1px solid $neutral_border_2;
 
   @media (max-width: 768px) {
    padding: $spacing_4 $spacing_9 ;
