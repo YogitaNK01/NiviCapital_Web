@@ -8,8 +8,9 @@
             <div class="w-100 gap-3">
                 <!-- all categories -->
                 <app-dropdown [options]="assetsCatagories" [multiSelect]="true" [(selectedValue)]="selectedAssets"
-                    [placeholder]="'Select Assets type'" (selectedValueChange)="onAssetChange($event)"
-                    [avatarUrl]="avatarUrl" [hasAvatar]="hasAvatar" [label]="'Assets'">
+                    [placeholder]="'Select Assets type'"
+                    (selectedValueChange)="onAssetChange($event); SelectedAssetvalue($event)" [avatarUrl]="avatarUrl"
+                    [hasAvatar]="hasAvatar" [label]="'Assets'">
                 </app-dropdown>
             </div>
         </div>
@@ -27,7 +28,7 @@
                     <button class="accordion-button table-head" [class.collapsed]="!openIndex.includes(i)" type="button"
                         (click)="toggle(i)">
 
-                         <span class="flex-grow-1">{{ acc.title }}</span>
+                        <span class="flex-grow-1">{{ acc.title }}</span>
                         <span class="delete-icon" (click)="removeAccordion(acc.key, i, $event)">
                             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
                                 fill="none">
@@ -45,29 +46,29 @@
 
                     <div class="accordion-body p-0 ">
 
-                        <ng-container *ngIf="i === 0">
+                        <ng-container *ngIf="acc.key === 'GOLD'">
                             <ng-container *ngTemplateOutlet="goldTemplate; context:{index:i}">
                             </ng-container>
                         </ng-container>
 
-                        <ng-container *ngIf="i === 1">
+                        <ng-container *ngIf="acc.key === 'LIQUID'">
                             <ng-container *ngTemplateOutlet="liquidassetsTemplate; context:{index:i}">
                             </ng-container>
                         </ng-container>
 
-                        <ng-container *ngIf="i === 2">
+                        <ng-container *ngIf="acc.key === 'PROPERTY'">
                             <ng-container *ngTemplateOutlet="propertylandTemplate; context:{index:i}">
 
                             </ng-container>
                         </ng-container>
 
-                        <ng-container *ngIf="i === 3">
+                        <ng-container *ngIf="acc.key === 'FIXED_DEPOSIT'">
                             <ng-container *ngTemplateOutlet="fdTemplate; context:{index:i}">
 
                             </ng-container>
                         </ng-container>
 
-                        <ng-container *ngIf="i === 4">
+                        <ng-container *ngIf="acc.key === 'INVESTMENTS'">
                             <ng-container *ngTemplateOutlet="investmentTemplate; context:{index:i}">
 
                             </ng-container>
@@ -91,6 +92,12 @@
                             placeholder="Enter Value" helpText="Help text" name="goldvalue">
                         </app-inputfield>
 
+                        <div class="text-danger"
+                            *ngIf="control('gold.goldvalue')?.touched && control('gold.goldvalue')?.invalid">
+                            <div *ngIf="control('gold.goldvalue')?.errors?.['required']">
+                                Gold value is required
+                            </div>
+                        </div>
                     </div>
                 </div>
 
@@ -106,15 +113,27 @@
                             formControlName="cashinhand" placeholder="Enter Value" helpText="Help text"
                             (input)="main.restrictInput($event, 'number')" name="cashinhand">
                         </app-inputfield>
+                        <div class="text-danger"
+                            *ngIf="control('liquidAssets.cashinhand')?.touched && control('liquidAssets.cashinhand')?.invalid">
+                            <div *ngIf="control('liquidAssets.cashinhand')?.errors?.['required']">
+                                Cash in hand amount is required
+                            </div>
+                        </div>
+
                     </div>
                 </div>
                 <div class="col">
                     <div class="form-group mb-3">
-                        <app-inputfield type="text" [required]="true" label="Savings Account Balance (INR)"
-                            [required]="true" placeholder="Enter Value" formControlName="savingbalance"
-                            (input)="main.restrictInput($event, 'number')" helpText="Help text" name="savingbalance"
-                            [readonly]="true">
+                        <app-inputfield type="text" label="Savings Account Balance (INR)" [required]="true"
+                            placeholder="Enter Value" formControlName="savingbalance"
+                            (input)="main.restrictInput($event, 'number')" helpText="Help text" name="savingbalance">
                         </app-inputfield>
+                        <div class="text-danger"
+                            *ngIf="control('liquidAssets.savingbalance')?.touched && control('liquidAssets.savingbalance')?.invalid">
+                            <div *ngIf="control('liquidAssets.savingbalance')?.errors?.['required']">
+                                Saving balance is required
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -131,15 +150,15 @@
                         <div class="row common-details-box d-flex flex-row gap-0 " [formGroupName]="i">
                             <div class="text-dp-3-regular text-label d-flex align-items-center justify-content-between">
                                 Property {{i+1}}
-                                
+
                             </div>
                             <hr class="hrclass">
 
                             <div class="col-lg-6">
                                 <div class="form-group mb-3">
-                                    <app-dropdown [options]="assetsCatagories" [multiSelect]="true"
-                                        [(selectedValue)]="selectedAssets" [placeholder]="'Select Property Type'"
-                                        [required]="true" (selectedValueChange)="onAssetChange($event)"
+                                    <app-dropdown [options]="selectPorperty" formControlName="propertytype"
+                                        [(selectedValue)]="selectedPropertyIds" [placeholder]="'Select Property Type'"
+                                        [required]="true" (selectedValueChange)="onchange($event,'property')"
                                         [avatarUrl]="avatarUrl" [hasAvatar]="hasAvatar" [label]="'Assets'">
                                     </app-dropdown>
 
@@ -147,9 +166,9 @@
                             </div>
                             <div class="col-lg-6">
                                 <div class="form-group mb-3">
-                                    <app-dropdown [options]="assetsCatagories" [multiSelect]="true"
-                                        [(selectedValue)]="selectedAssets" [placeholder]="'Select Assets type'"
-                                        [required]="true" (selectedValueChange)="onAssetChange($event)"
+                                    <app-dropdown [options]="selectOwnertype" formControlName="ownershiptype"
+                                        [(selectedValue)]="selectedowner" [placeholder]="'Select Ownership type'"
+                                        [required]="true" (selectedValueChange)="onchange($event,'propertyOwnertype')"
                                         [avatarUrl]="avatarUrl" [hasAvatar]="hasAvatar" [label]="'Ownership Type'">
                                     </app-dropdown>
 
@@ -157,19 +176,32 @@
                                 </div>
                             </div>
                             <div class="col-lg-6">
-                                <div class="form-group mb-3">
+                                <div class="form-group ">
                                     <app-inputfield type="text" [required]="true" label="Market Value (INR)"
                                         [required]="true" formControlName="marketval" placeholder="Enter Value"
                                         helpText="Help text" name="marketval">
                                     </app-inputfield>
+                                    <div class="text-danger"
+                                        *ngIf="prop.get('marketval')?.touched && prop.get('marketval')?.invalid">
+                                        <div *ngIf="prop.get('marketval')?.errors?.['required']">
+                                            Market value is required
+                                        </div>
+                                    </div>
+
                                 </div>
                             </div>
                             <div class="col-lg-6">
-                                <div class="form-group mb-3">
+                                <div class="form-group ">
                                     <app-inputfield type="text" [required]="true" label="Location / Address"
                                         [required]="true" placeholder="Enter Value" formControlName="location"
-                                        helpText="Help text" name="location" [readonly]="true">
+                                        helpText="Help text" name="location">
                                     </app-inputfield>
+                                    <div class="text-danger"
+                                        *ngIf="prop.get('location')?.touched && prop.get('location')?.invalid">
+                                        <div *ngIf="prop.get('location')?.errors?.['required']">
+                                            Location is required
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
 
@@ -200,31 +232,41 @@
                         <div class="row common-details-box d-flex flex-row gap-0" [formGroupName]="i">
                             <div class="text-dp-3-regular text-label d-flex align-items-center justify-content-between">
                                 FD {{i+1}}
-                              
+
                             </div>
                             <hr class="hrclass">
 
                             <div class="col">
-                                <div class="form-group mb-3">
+                                <div class="form-group">
                                     <app-inputfield type="text" [required]="true" label="Bank Name" [required]="true"
                                         formControlName="bankname" placeholder="Enter Bank Name" helpText="Help text"
                                         name="bankname">
                                     </app-inputfield>
-
+                                    <div class="text-danger"
+                                        *ngIf="fd.get('bankname')?.touched && fd.get('bankname')?.invalid">
+                                        <div *ngIf="fd.get('bankname')?.errors?.['required']">
+                                            Market value is required
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                             <div class="col">
-                                <div class="form-group mb-3">
+                                <div class="form-group">
                                     <app-inputfield type="text" [required]="true" label="Amount (INR)" [required]="true"
                                         formControlName="bankamt" placeholder="Enter Value" helpText="Help text"
                                         name="bankamt">
                                     </app-inputfield>
-
+                                    <div class="text-danger"
+                                        *ngIf="fd.get('bankamt')?.touched && fd.get('bankamt')?.invalid">
+                                        <div *ngIf="fd.get('bankamt')?.errors?.['required']">
+                                            Market value is required
+                                        </div>
+                                    </div>
 
                                 </div>
                             </div>
                             <div class="col">
-                                <div class="form-group mb-3">
+                                <div class="form-group">
                                     <app-datepickernew formControlName="maturitydate" label="Maturity Date"
                                         placeholder="DD/MM/YYYY">
                                     </app-datepickernew>
@@ -232,9 +274,9 @@
 
                                 </div>
                             </div>
-                           
+
                         </div>
-                         @if(i === fixedDeposits.length - 1 ) {
+                        @if(i === fixedDeposits.length - 1 ) {
                         <div class="row common-details-box pt-0 pb-0 ">
 
                             <div class="form-group mb-3">
@@ -255,9 +297,9 @@
             <div class="row common-details-box d-flex flex-row " formGroupName="investments">
                 <div class="col">
                     <div class="form-group mb-3">
-                        <app-dropdown [options]="assetsCatagories" [multiSelect]="true"
-                            [(selectedValue)]="selectedAssets" [placeholder]="'Select type'" [required]="true"
-                            (selectedValueChange)="onAssetChange($event)" [avatarUrl]="avatarUrl"
+                        <app-dropdown [options]="selectInvestments" [(selectedValue)]="selectedInvestmentIds"
+                            [placeholder]="'Select type'" [required]="true"
+                            (selectedValueChange)="onchange($event,'investment')" [avatarUrl]="avatarUrl"
                             [hasAvatar]="hasAvatar" [label]="'Select Type'">
                         </app-dropdown>
 
@@ -269,7 +311,12 @@
                             formControlName="stockvalue" placeholder="Enter Value" helpText="Help text"
                             name="stockvalue">
                         </app-inputfield>
-
+                        <div class="text-danger"
+                            *ngIf="control('investments.stockvalue')?.touched && control('investments.stockvalue')?.invalid">
+                            <div *ngIf="control('investments.stockvalue')?.errors?.['required']">
+                                Stock value is required
+                            </div>
+                        </div>
 
                     </div>
                 </div>
@@ -279,7 +326,12 @@
                             formControlName="mutualfundvalue" placeholder="Enter Value" helpText="Help text"
                             name="mutualfundvalue">
                         </app-inputfield>
-
+                        <div class="text-danger"
+                            *ngIf="control('investments.mutualfundvalue')?.touched && control('investments.mutualfundvalue')?.invalid">
+                            <div *ngIf="control('investments.mutualfundvalue')?.errors?.['required']">
+                                Mutual fund value is required
+                            </div>
+                        </div>
 
                     </div>
                 </div>

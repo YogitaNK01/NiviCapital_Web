@@ -121,8 +121,8 @@ export class GeneralInfo implements OnInit {
       coursetype: ['', Validators.required],
       coursename: ['', Validators.required],
       courseduration: ['', Validators.required],
-      coursestartdate: ['', Validators.required],
-      courseenddate: ['', Validators.required],
+      coursestartdate: ['', [Validators.required ,this.dateMinValidator(() => new Date())] ],
+      courseenddate: ['', [Validators.required ,this.dateMinValidator(() => this.calculatedEndDate)]],
       checkedasset: [false, Validators.required],
       lendingpartner: ['', Validators.required],
 
@@ -361,6 +361,7 @@ export class GeneralInfo implements OnInit {
         { courseenddate: null },
         { emitEvent: false }
       );
+      this.registerForm.get('courseenddate')?.updateValueAndValidity();
       return;
     }
 
@@ -377,9 +378,50 @@ export class GeneralInfo implements OnInit {
       { courseenddate: end },
       { emitEvent: false }
     );
-
+this.registerForm.get('courseenddate')?.updateValueAndValidity();
    
   }
+
+  dateMinValidator = (getMinDate: () => Date) => {
+  return (control: any) => {
+    const value = control.value;
+     const minDate = getMinDate();
+
+    if (!value || !minDate) return null;
+
+    const selected = new Date(value);
+    const min = new Date(getMinDate());
+
+   
+    selected.setHours(0, 0, 0, 0);
+    min.setHours(0, 0, 0, 0);
+
+    return selected < min ? { minDateError: true } : null;
+    // if (selected < min) {
+    //   return { minDateError: true };
+    // }
+
+    // return null;
+  };
+};
+
+  endDateValidator = () => {
+  return (control: any) => {
+    const endDate = control.value;
+    const minDate = this.calculatedEndDate;
+
+    if (!endDate || !minDate) return null;
+
+    const end = new Date(endDate);
+    const min = new Date(minDate);
+
+    if (end < min) {
+      return { invalidEndDate: true }; 
+    }
+
+    return null;
+  };
+};
 
   formatDate(date: any): string | null {
     if (!date) return null;

@@ -29,14 +29,15 @@
         </div>
 
         <ng-template #incomeTemplate let-i="index">
-            <div class="row  d-flex  align-items-start pt-4 common-details-box d-flex flex-column">
+            <!-- salaried person -->
+            <div class="row  d-flex  align-items-start pt-4 common-details-box d-flex flex-column" *ngIf="!isbussiness">
 
                 <div class="row ">
                     <div class="text-label fw-bold mt-20">Salary Slips (Last 3 Months)</div>
 
                     <hr class="hrclass">
                     <div class=" mt-20 info-box">
-                        <div class="col-lg-4 col-sm-12">
+                        <div class="col-lg-6 col-sm-12">
                             <p class="text-label">If you are applying in February 2026, please upload salary slips for:</p>
                             <ul class="text-label">
                                 <li class="text-label">November 2025 </li>
@@ -47,17 +48,17 @@
                     </div>
                     <div class="row mt-20">
                         <div class="col-lg-4 col-sm-12">
-                            <app-uploadbtn [config]="basicConfig" (fileChange)="onFileChange($event, 'salary1')"
+                            <app-uploadbtn [config]="basicConfig" (fileChange)="onFileChange($event, 'salary1','LAST_3_MONTHS','SALARY_SLIP')"
                                 [required]="true" label="Salary Slip 1">
                             </app-uploadbtn>
                         </div>
                         <div class="col-lg-4 col-sm-12">
-                            <app-uploadbtn [config]="basicConfig" (fileChange)="onFileChange($event, 'salary2')"
+                            <app-uploadbtn [config]="basicConfig" (fileChange)="onFileChange($event, 'salary2' ,'LAST_3_MONTHS','SALARY_SLIP')"
                                 [required]="true" label="Salary Slip 2">
                             </app-uploadbtn>
                         </div>
                         <div class="col-lg-4 col-sm-12">
-                            <app-uploadbtn [config]="basicConfig" (fileChange)="onFileChange($event, 'salary3')"
+                            <app-uploadbtn [config]="basicConfig" (fileChange)="onFileChange($event, 'salary3' , 'LAST_3_MONTHS','SALARY_SLIP')"
                                 [required]="true" label="Salary Slip 3">
                             </app-uploadbtn>
                         </div>
@@ -72,7 +73,7 @@
 
                     <hr class="hrclass">
                     <div class=" mt-20 info-box">
-                        <div class="col-lg-4 col-sm-12">
+                        <div class="col-lg-6 col-sm-12">
                             <p class="text-label">If you are applying in February 2026, Most recent available would be:</p>
                             <ul class="text-label">
                                 <li class="text-label">Financial Year 2024-25 </li>
@@ -84,7 +85,7 @@
                     </div>
                     <div class="row mt-20">
                         <div class="col-lg-4 col-sm-12">
-                            <app-uploadbtn [config]="basicConfig" (fileChange)="onFileChange($event, 'Form16')"
+                            <app-uploadbtn [config]="basicConfig" (fileChange)="onFileChange($event, 'Form16' ,'FORM_16','FORM_16')"
                                 [required]="true" label="Form 16">
                             </app-uploadbtn>
                         </div>
@@ -100,7 +101,7 @@
 
                     <hr class="hrclass">
                     <div class=" mt-20 info-box">
-                        <div class="col-lg-4 col-sm-12">
+                        <div class="col-lg-6 col-sm-12">
                             <p class="text-label">If you are applying in February 2026, upload bank statement covering:</p>
                             <ul class="text-label">
                                 <li class="text-label">01 February 2025 to 31 January 2026 </li>
@@ -109,7 +110,7 @@
                     </div>
                     <div class="row mt-20">
                         <div class="col-lg-4 col-sm-12">
-                            <app-uploadbtn [config]="basicConfig" (fileChange)="onFileChange($event, 'oneyearbankstatement')"
+                            <app-uploadbtn [config]="basicConfig" (fileChange)="onFileChange($event, 'oneyearbankstatement','BANK_STATEMENT_1_YEAR', 'BANK_STATEMENT')"
                                 [required]="true" label="1 Year bank statement">
                             </app-uploadbtn>
                         </div>
@@ -136,17 +137,17 @@
                     </div>
                     <div class="row mt-20">
                         <div class="col-lg-4 col-sm-12">
-                            <app-uploadbtn [config]="basicConfig" (fileChange)="onFileChange($event, 'ay1')"
+                            <app-uploadbtn [config]="basicConfig" (fileChange)="onFileChange($event, 'ay1','ITR_LAST_3_YEARS','ITR')"
                                 [required]="true" label="AY 1">
                             </app-uploadbtn>
                         </div>
                          <div class="col-lg-4 col-sm-12">
-                            <app-uploadbtn [config]="basicConfig" (fileChange)="onFileChange($event, 'ay2')"
+                            <app-uploadbtn [config]="basicConfig" (fileChange)="onFileChange($event, 'ay2','ITR_LAST_3_YEARS','ITR')"
                                 [required]="true" label="AY 2">
                             </app-uploadbtn>
                         </div>
                          <div class="col-lg-4 col-sm-12">
-                            <app-uploadbtn [config]="basicConfig" (fileChange)="onFileChange($event, 'ay3')"
+                            <app-uploadbtn [config]="basicConfig" (fileChange)="onFileChange($event, 'ay3','ITR_LAST_3_YEARS','ITR')"
                                 [required]="true" label="AY 3">
                             </app-uploadbtn>
                         </div>
@@ -164,7 +165,7 @@
 
                     <hr class="hrclass">
                     <div class="col-lg-4 col-sm-12 mt-20">
-                        <app-uploadbtn [config]="basicConfig" (fileChange)="onFileChange($event,  'marksheet')"
+                        <app-uploadbtn [config]="basicConfig" (fileChange)="onFileChange($event,  'marksheet' ,'OTHER_INCOME','OTHER')"
                             [required]="true" label="Other Documents">
                         </app-uploadbtn>
                     </div>
@@ -177,6 +178,152 @@
                     </div>
                 </div>
             </div>
+
+            <!-- if bussiness -->
+             <!-- <div class="row  d-flex  align-items-start pt-4 common-details-box d-flex flex-column" *ngIf="isbussiness">
+
+                <div class="row ">
+                    <div class="text-label fw-bold mt-20">3 Years Financials of Business</div>
+
+                    <hr class="hrclass">
+                    <div class=" mt-20 info-box">
+                        <div class="col-lg-6 col-sm-12">
+                            <p class="text-label">If you are applying in February 2026, please upload Financial statements for:</p>
+                            <ul class="text-label">
+                                <li class="text-label">FY 2024-25 </li>
+                                <li class="text-label">FY 2023-24</li>
+                                <li class="text-label">FY 2022-23</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="row mt-20">
+                        <div class="col-lg-4 col-sm-12">
+                            <app-uploadbtn [config]="basicConfig" (fileChange)="onFileChange($event, 'bssalary1')"
+                                [required]="true" label="Year 1">
+                            </app-uploadbtn>
+                        </div>
+                        <div class="col-lg-4 col-sm-12">
+                            <app-uploadbtn [config]="basicConfig" (fileChange)="onFileChange($event, 'bssalary2')"
+                                [required]="true" label="Year 2">
+                            </app-uploadbtn>
+                        </div>
+                        <div class="col-lg-4 col-sm-12">
+                            <app-uploadbtn [config]="basicConfig" (fileChange)="onFileChange($event, 'bssalary3')"
+                                [required]="true" label="Year 3">
+                            </app-uploadbtn>
+                        </div>
+                    </div>
+
+
+
+                </div>
+
+                  <div class="row ">
+                    <div class="text-label fw-bold mt-20">Latest 3 year ITR</div>
+
+                    <hr class="hrclass">
+                    <div class=" mt-20 info-box">
+                        <div class="col-lg-4 col-sm-12">
+                            <p class="text-label">If you are applying in February 2026, upload ITR for:</p>
+                            <ul class="text-label">
+                                <li class="text-label">AY 2024-25</li>
+                                <li class="text-label">AY 2023-24</li>
+                                <li class="text-label">AY 2022-23</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="row mt-20">
+                        <div class="col-lg-4 col-sm-12">
+                            <app-uploadbtn [config]="basicConfig" (fileChange)="onFileChange($event, 'bs_ay1')"
+                                [required]="true" label="AY 1">
+                            </app-uploadbtn>
+                        </div>
+                         <div class="col-lg-4 col-sm-12">
+                            <app-uploadbtn [config]="basicConfig" (fileChange)="onFileChange($event, 'bs_ay2')"
+                                [required]="true" label="AY 2">
+                            </app-uploadbtn>
+                        </div>
+                         <div class="col-lg-4 col-sm-12">
+                            <app-uploadbtn [config]="basicConfig" (fileChange)="onFileChange($event, 'bs_ay3')"
+                                [required]="true" label="AY 3">
+                            </app-uploadbtn>
+                        </div>
+                       
+                    </div>
+
+
+
+                </div>
+                
+                    <div class="row ">
+                    <div class="text-label fw-bold mt-20">1 Year GST Return</div>
+
+                    <hr class="hrclass">
+                    <div class=" mt-20 info-box">
+                        <div class="col-lg-6 col-sm-12">
+                            <p class="text-label">If you are applying in February 2026, upload  GST returns for:</p>
+                            <ul class="text-label">
+                                <li class="text-label">January 2025 to December 2025 </li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="row mt-20">
+                        <div class="col-lg-4 col-sm-12">
+                            <app-uploadbtn [config]="basicConfig" (fileChange)="onFileChange($event, 'oneyearGSTreturn')"
+                                [required]="true" label="1 Year GST Return">
+                            </app-uploadbtn>
+                        </div>
+                       
+                    </div>
+
+
+
+                </div>
+
+                <div class="row ">
+                    <div class="text-label fw-bold mt-20">1 Year bank statement</div>
+
+                    <hr class="hrclass">
+                    <div class=" mt-20 info-box">
+                        <div class="col-lg-6 col-sm-12">
+                            <p class="text-label">If you are applying in February 2026, upload bank statement covering:</p>
+                            <ul class="text-label">
+                                <li class="text-label">01 February 2025 to 31 January 2026 </li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="row mt-20">
+                        <div class="col-lg-4 col-sm-12">
+                            <app-uploadbtn [config]="basicConfig" (fileChange)="onFileChange($event, 'bs_oneyearbankstatement')"
+                                [required]="true" label="1 Year bank statement">
+                            </app-uploadbtn>
+                        </div>
+                       
+                    </div>
+
+
+
+                </div>
+
+
+                <div class="row  d-flex flex-column">
+                    <div class="text-label fw-bold mt-20">Other Documents</div>
+
+                    <hr class="hrclass">
+                    <div class="col-lg-4 col-sm-12 mt-20">
+                        <app-uploadbtn [config]="basicConfig" (fileChange)="onFileChange($event,  'bs_otherdocuments')"
+                            [required]="true" label="Other Documents">
+                        </app-uploadbtn>
+                    </div>
+                    <div class="col-lg-4 col-sm-12 mt-20">
+                        <app-buttons label="Add Other Document" class="btn btn-icon Add btncustomClass" [outline]="true"
+                            (click)="addotherdocuments()">
+                            <img src="/assets/images/icons/addred.svg" alt="Add">
+
+                        </app-buttons>
+                    </div>
+                </div>
+            </div> -->
         </ng-template>
 
 

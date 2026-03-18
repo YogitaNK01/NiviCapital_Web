@@ -24,7 +24,7 @@ export class Loanformservice {
   kycdetailsID: any;
 
   constructor(private http: HttpClient) { }
- // *************************loan info api*********************************
+  // *************************loan info api*********************************
 
   submitLoanInfo(payload: any, id: string): Observable<ApiResponse<any>> {
     return this.http.post<ApiResponse<any>>(
@@ -124,9 +124,9 @@ export class Loanformservice {
     return this.kycdetailsID;
   }
 
-  uploadpassport(data:any,id:string): Observable<ApiResponse<any>> {
-    console.log("service--",data);
-    
+  uploadpassport(data: any, id: string): Observable<ApiResponse<any>> {
+    console.log("service--", data);
+
     return this.http.post<ApiResponse<any>>(
       `${this.baseUrl}/v1/kyc/${id}/documents`,
       data
@@ -141,7 +141,7 @@ export class Loanformservice {
 
 
   // ************************* estimate expense  *************************
- getlivingexp(): Observable<ApiResponse<any>> {
+  getlivingexp(): Observable<ApiResponse<any>> {
     return this.http.get<ApiResponse<any>>(
       `${this.baseUrl}/v1/los/expense-masters/living`,
 
@@ -155,11 +155,45 @@ export class Loanformservice {
     );
   }
 
-   estimateExpense(data:any,id:string): Observable<ApiResponse<any>> {
-    console.log("service--",data);
-    
+  estimateExpense(data: any, id: string): Observable<ApiResponse<any>> {
+    console.log("service--", data);
+
     return this.http.post<ApiResponse<any>>(
       `${this.baseUrl}/v1/los/applications/${id}/estimated-expenses`,
+      data
+    );
+  }
+
+
+  // ************************* Income   *************************
+
+ uploadIncome(data: any, id: string): Observable<ApiResponse<any>> {
+
+    return this.http.post<ApiResponse<any>>(
+      `${this.baseUrl}/v1/los/applications/${id}/documents/batch`,
+      data
+    );
+  }
+
+  // ************************* assets   *************************
+
+  getAllAssets(): Observable<ApiResponse<any>> {
+    return this.http.get<ApiResponse<any>>(
+      `${this.baseUrl}/v1/los/asset-masters`,
+
+    );
+  }
+  selectedAssets(data: any): Observable<ApiResponse<any>> {
+    return this.http.get<ApiResponse<any>>(
+      `${this.baseUrl}/v1/los/asset-masters/group/${data}`,
+
+    );
+  }
+
+  getAssets(data: any, id: string): Observable<ApiResponse<any>> {
+
+    return this.http.post<ApiResponse<any>>(
+      `${this.baseUrl}/v1/los/applications/${id}/assets`,
       data
     );
   }

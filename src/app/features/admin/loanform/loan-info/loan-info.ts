@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, ElementRef, Input, OnInit, ViewChild } from '@angular/core';
 import { Buttons } from '../../../systemdesign/buttons/buttons';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Loanstepperservice } from '../../../../core/service/loanstepperservice';
@@ -99,12 +99,19 @@ export class LoanInfo implements OnInit {
     });
   }
 
-limitLoanAmount(event: any) {
+limitLoanAmount(event: any , slider: any) {
 
   let value = event.target.value;
-  if (!value) return;
+  if (!value) {
+    this.loanAmount = 0;
+    this.currenterror = '';
+    slider.value = 100000;
+    this.updateSliderBackground({ target: slider });
+    return;
+  }
   value = value.replace(/\D/g, ''); 
   let num = Number(value);
+  this.currenterror ='';
   if (num > 4500000) {
     // num = 4500000;
     this.currenterror = this.errormsg.maxLoan;
@@ -116,10 +123,19 @@ limitLoanAmount(event: any) {
   }
 
   this.loanAmount = num;
+
+   slider.value = num;
+
+  this.updateSliderBackground({ target: slider });
 }
-limitTenureAmount(event: any) {
+limitTenureAmount(event: any , slider: any) {
   let value = event.target.value;
-  if (!value) return;
+  if (!value) {
+    this.tenure = 1;
+    slider.value = 1;
+    this.updateSliderBackground({ target: slider });
+    return;
+  }
   let num = Number(value);
   if (num > 7) {
     num = 7;
@@ -131,12 +147,16 @@ limitTenureAmount(event: any) {
 
   this.tenure = num;
 
+   slider.value = num;
+
+  this.updateSliderBackground({ target: slider });
+
 }
 
-submitForm1(data: NgForm) {
+submitForm(data: NgForm) {
   this.stepperService.next();
 }
-  submitForm(data: NgForm) {
+  submitForm1(data: NgForm) {
 
      if (!data.valid) {
       console.log("form invalid");
@@ -174,13 +194,14 @@ submitForm1(data: NgForm) {
   }
 
 updateSliderBackground(event: any) {
-  const value = event.target.value;
-  const min = event.target.min;
-  const max = event.target.max;
+  const value = Number(event.target.value);
+  const min = Number(event.target.min);
+  const max = Number(event.target.max);
 
   const percent = ((value - min) / (max - min)) * 100;
 
   event.target.style.background = `linear-gradient(to right, #1e3a5f ${percent}%, #e5e7eb ${percent}%)`;
 }
  
+
 }

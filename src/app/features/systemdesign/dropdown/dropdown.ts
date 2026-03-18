@@ -10,6 +10,7 @@ import {
 export interface DropdownOption {
   value: string;
   label: string;
+  code?: string;
   icon?: string;
   disabled?: boolean;
   checked?: boolean;

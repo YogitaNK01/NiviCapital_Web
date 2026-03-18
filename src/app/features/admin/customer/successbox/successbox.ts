@@ -1,19 +1,19 @@
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { ChangeDetectorRef, Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { Buttons } from "../../../systemdesign/buttons/buttons";
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
-import { JsonPipe, NgFor } from '@angular/common';
+import { CommonModule, JsonPipe, NgFor } from '@angular/common';
 
 
 @Component({
   selector: 'app-successbox',
   standalone: true,
-  imports: [Buttons, NgFor],
+  imports: [CommonModule, Buttons, NgFor],
   templateUrl: './successbox.html',
   styleUrl: './successbox.scss'
 })
 export class Successbox implements OnInit {
 
-  constructor(private router: Router,private route: ActivatedRoute) { }
+  constructor(private router: Router,private route: ActivatedRoute,private cdr: ChangeDetectorRef) { }
 
   @Output() nextStep = new EventEmitter<void>();
   @Output() prevstep = new EventEmitter<void>();
@@ -51,13 +51,18 @@ copied = false;
   }
   
   copyArn() {
-  if (!this.id) return;
+  if (!this.id || this.copied) return;
 
   navigator.clipboard.writeText(this.id).then(() => {
     console.log('ARN copied');
     this.copied = true;
+    this.cdr.detectChanges(); 
 
-    setTimeout(() => this.copied = false, 1500);
-  });
+    setTimeout(() => {this.copied = false, 
+    this.cdr.detectChanges()}
+    ,2000);
+  })
+  .catch(()=>{})
+  
 }
 }

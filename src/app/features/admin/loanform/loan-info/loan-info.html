@@ -1,13 +1,15 @@
 <div class="page-card">
-  
+
   <div class=" form-area row g-4">
     <!-- Left Form -->
     <div class="col-lg-5">
-      <form class="form-section" #basicincomeform="ngForm" (ngSubmit)="submitForm(basicincomeform)" id="basicincomeform" >
+      <form class="form-section" #basicincomeform="ngForm" (ngSubmit)="submitForm(basicincomeform)"
+        id="basicincomeform">
 
         <div class="">
-          <app-dropdown [options]="selectIncome" [placeholder]="'Enter annual income'" [required]="true"  [(ngModel)]="annual_Income"
-            [avatarUrl]="avatarUrl" [hasAvatar]="hasAvatar" [label]="'What’s your Annual Income?'" name="annual_Income">
+          <app-dropdown [options]="selectIncome" [placeholder]="'Enter annual income'" [required]="true"
+            [(ngModel)]="annual_Income" [avatarUrl]="avatarUrl" [hasAvatar]="hasAvatar"
+            [label]="'What’s your Annual Income?'" name="annual_Income">
           </app-dropdown>
         </div>
 
@@ -23,47 +25,47 @@
         <div class="">
           <div class="d-flex justify-content-between align-items-center">
             <div class=""><label class="text-dp-3-regular fw-bold">How much money do you need?</label>
-            <div class="text-body-1">Choose the loan amount that fits your needs <br>and financial goals.</div></div>
-            
-            <!-- <span class="value-box text-dp-1-medium ">₹{{ loanAmount }}</span> -->
-             <input type="text" class="value-box text-dp-1-medium value-box-input"  [(ngModel)]="loanAmount" min="100000"  max="4500000" step="10000" name="loanamt" 
-              (input)="limitLoanAmount($event)" [maxlength]="7">
+              <div class="text-body-1">Choose the loan amount that fits your needs <br>and financial goals.</div>
+            </div>
+
+            <input type="text" class="value-box text-dp-1-medium value-box-input" [(ngModel)]="loanAmount" min="100000"
+              max="4500000" step="10000" name="loanamt" (input)="limitLoanAmount($event ,rangeSlider)" [maxlength]="7">
           </div>
 
-          <input type="range" class="custom-range mt-20" min="100000" max="4500000" step="10000" [(ngModel)]="loanAmount" (input)="updateSliderBackground($event)"
+          <input type="range" class="custom-range mt-20" min="100000" max="4500000" step="10000" [(ngModel)]="loanAmount" (input)="updateSliderBackground($event)" #rangeSlider
             name="loanamt">
            <div class="text-danger">
 
-                        <div *ngIf="loanAmount < 100000">
-                             {{ errormsg.minLoan }}
-                        </div>
-                         <div *ngIf="loanAmount > 4500000">
-                             {{ errormsg.maxLoan }}
-                        </div>
-                        
+            <div *ngIf="loanAmount < 100000">
+              {{ errormsg.minLoan }}
+            </div>
+            <div *ngIf="loanAmount > 4500000">
+              {{ errormsg.maxLoan }}
+            </div>
 
-                    </div>
+
+          </div>
         </div>
 
-          <div class="">
+        <div class="">
           <div class="d-flex justify-content-between align-items-center">
             <label class="text-dp-3-regular fw-bold">Loan Tenure</label>
-             <input type="text" class="value-box text-dp-1-medium value-box-input" [(ngModel)]="tenure" min="1" max="7" step="1" name="tenureInput" 
-             (input)="limitTenureAmount($event)" [maxlength]="1">
+            <input type="text" class="value-box text-dp-1-medium value-box-input" [(ngModel)]="tenure" min="1" max="7"
+              step="1" name="tenureInput" (input)="limitTenureAmount($event ,rangeSlider1)" [maxlength]="1">
           </div>
-        <input type="range" class="custom-range mt-20" min="1" max="7" step="1" [(ngModel)]="tenure" name="tenureInput" (input)="updateSliderBackground($event)">
+        <input type="range" class="custom-range mt-20" min="1" max="7" step="1" [(ngModel)]="tenure" name="tenureInput" (input)="updateSliderBackground($event)" #rangeSlider1>
       
         </div>
 
 
         <div class="">
-          <app-dropdown [options]="selectpaymentmode"  [required]="true" [(ngModel)]="paymentmode" name="paymentmode"
-            [avatarUrl]="avatarUrl" [hasAvatar]="hasAvatar" [label]="'Mode Of Payment'" >
+          <app-dropdown [options]="selectpaymentmode" [required]="true" [(ngModel)]="paymentmode" name="paymentmode"
+            [avatarUrl]="avatarUrl" [hasAvatar]="hasAvatar" [label]="'Mode Of Payment'">
           </app-dropdown>
         </div>
 
-        <app-buttons label="Apply loan" class="btn btncustomClass w-100" type="submit" [disabled]="!basicincomeform.valid"
-         color="primary" ></app-buttons>
+        <app-buttons label="Apply loan" class="btn btncustomClass w-100" type="submit"
+          [disabled]="!basicincomeform.valid" color="primary"></app-buttons>
       </form>
     </div>
 
@@ -73,8 +75,8 @@
         <!-- Donut Chart using Bootstrap + CSS -->
         <div class="donut-chart mx-auto">
           <!-- <app-charts [title]="'Donut Chart'" [data]="chartData1"></app-charts> -->
-          <app-charts [title]="''" [data]="chartData1" [width]="450" [height]="450"
-                                    [radius]="80" [innerRadius]="50" [centerX]="100" [centerY]="100"></app-charts>
+          <app-charts [title]="''" [data]="chartData1" [width]="450" [height]="450" [radius]="80" [innerRadius]="50"
+            [centerX]="100" [centerY]="100"></app-charts>
         </div>
       </div>
     </div>
@@ -92,15 +94,16 @@
           <div class="text-label-data fw-normal">TOTAL EMI AMOUNT</div>
           <div class="text-dp-3-bold text-nowrap">₹ {{ totalEmiAmount | number }}</div>
         </div>
-         <div class="text-center mt-3">
-      <a href="#" class="see-amortization text-dp-3-regular d-flex gap-2"><span><img src="../assets/images/icons/arrow-square-down.svg"></span>See Amortization</a>
-    </div>
-    
+        <div class="text-center mt-3">
+          <a href="#" class="see-amortization text-dp-3-regular d-flex gap-2"><span><img
+                src="../assets/images/icons/arrow-square-down.svg"></span>See Amortization</a>
+        </div>
+
       </div>
 
-      
+
     </div>
-   
+
 
   </div>
 
