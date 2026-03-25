@@ -61,9 +61,17 @@
     opacity: 0.6;
   }
 
-   &.primary .disabled {
+  &.primary .disabled {
     cursor: not-allowed;
     opacity: 0.6;
+
+  
+  }
+
+    &.primary:disabled {
+    .btn-label {
+      color: $primary-text-light!important;
+    }
   }
 }
 
@@ -106,8 +114,8 @@
     // color: #fff;
   }
   &.btn-label {
- color: blue;
-}
+    color: blue;
+  }
 }
 
 // Icon + Label style
@@ -136,17 +144,19 @@ svg {
   white-space: nowrap; // Keep text on one line
   color: #fff;
 }
+
 .btn.btn-outline .btn-label {
   flex-shrink: 0; // Don't let text shrink
   white-space: nowrap; // Keep text on one line
-  color:  $primary-500;
+  color: $primary-500;
 }
 
- @media (max-width: 480px) {
-   .text-dp-3-regular {
+@media (max-width: 480px) {
+  .text-dp-3-regular {
     font-size: 14px;
-   }
-   .btn{
-    gap: 0;
-   }
   }
+
+  .btn {
+    gap: 0;
+  }
+}

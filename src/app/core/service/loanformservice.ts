@@ -198,6 +198,39 @@ export class Loanformservice {
     );
   }
 
+
+  // ************************* Liability   *************************
+
+  getAllLiabilities(): Observable<ApiResponse<any>> {
+    return this.http.get<ApiResponse<any>>(
+      `${this.baseUrl}/v1/los/applications/liability-types`,
+
+    );
+  }
+  getloan_type(): Observable<ApiResponse<any>> {
+    return this.http.get<ApiResponse<any>>(
+      `${this.baseUrl}/v1/los/applications/loan-types`,
+
+    );
+  }
+
+  submitliability(data: any, id: string): Observable<ApiResponse<any>> {
+
+    return this.http.post<ApiResponse<any>>(
+      `${this.baseUrl}/v1/los/applications/${id}/liabilities`,
+      data
+    );
+  }
+
+   // ************************* Monthly Expenditure   *************************
+    MonthlyExpenditure(data: any, id: string): Observable<ApiResponse<any>> {
+
+    return this.http.post<ApiResponse<any>>(
+      `${this.baseUrl}/v1/los/applications/${id}/monthly-expenses`,
+      data
+    );
+  }
+
 }
 
 

@@ -71,6 +71,8 @@ export class Dropdown implements OnChanges, ControlValueAccessor {
  private onChange = (value: any) => {};
   private onTouched = () => { };
 
+  constructor(private eRef: ElementRef) {}
+
   ngOnChanges(changes: SimpleChanges) {
   if (changes['selectedValue']) {
     const value = changes['selectedValue'].currentValue;
@@ -90,6 +92,14 @@ export class Dropdown implements OnChanges, ControlValueAccessor {
     this.isOpen = !this.isOpen;
 
   }
+
+   @HostListener('document:click', ['$event'])
+  clickOutside(event: Event) {
+    if (!this.eRef.nativeElement.contains(event.target)) {
+      this.isOpen = false;
+    }
+  }
+  
 
   get selectedLabel(): string {
     if (this.showSubtext && this.subtext) {

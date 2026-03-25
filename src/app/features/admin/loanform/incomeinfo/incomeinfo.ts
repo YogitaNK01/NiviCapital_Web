@@ -13,13 +13,13 @@ import { ActivatedRoute } from '@angular/router';
 
 @Component({
   selector: 'app-incomeinfo',
-  imports: [CommonModule, Buttons,  ReactiveFormsModule, Uploadbtn, ],
+  imports: [CommonModule, Buttons, ReactiveFormsModule, Uploadbtn,],
   standalone: true,
   templateUrl: './incomeinfo.html',
   styleUrl: './incomeinfo.scss'
 })
 export class Incomeinfo {
-uploadedFiles = {};
+  uploadedFiles = {};
   files: any = {};
 
   basicConfig: UploadConfig = {
@@ -35,12 +35,12 @@ uploadedFiles = {};
   applicantId: string = '';
   applicationId: string = '';
   incomeForm!: FormGroup
-  
+
   isbussiness: boolean = false
 
-  constructor(private fb: FormBuilder, private stepperService: Loanstepperservice, private cd: ChangeDetectorRef ,private loanformservice: Loanformservice,private route: ActivatedRoute) { }
+  constructor(private fb: FormBuilder, private stepperService: Loanstepperservice, private cd: ChangeDetectorRef, private loanformservice: Loanformservice, private route: ActivatedRoute) { }
   ngOnInit(): void {
-       this.route.queryParams.subscribe(params => {
+    this.route.queryParams.subscribe(params => {
 
       const applicantId = params['applicantId'];
       const applicationId = params['applicationId'];
@@ -53,94 +53,88 @@ uploadedFiles = {};
 
     this.incomeForm = this.fb.group({
 
-     
+
 
     });
   }
 
-   toggle(i: number) {
+  toggle(i: number) {
     this.openIndex = this.openIndex === i ? null : i;
   }
 
-  
+
 
   documentConfigMap: any = {
-  salary1: {
-   
-    subcategory: 'SALARY_SLIP_1',
-    fileType: 'SALARY'
-  },
-  salary2: {
-   
-    subcategory: 'SALARY_SLIP_2',
-    fileType: 'SALARY'
-  },
-  salary3: {
-   
-    subcategory: 'SALARY_SLIP_3',
-    fileType: 'SALARY'
-  },
-  itr: {
-   
-    subcategory: 'ITR_LAST_3_YEARS',
-    fileType: 'ITR'
+    salary1: {
+
+      subcategory: 'SALARY_SLIP_1',
+      fileType: 'SALARY'
+    },
+    salary2: {
+
+      subcategory: 'SALARY_SLIP_2',
+      fileType: 'SALARY'
+    },
+    salary3: {
+
+      subcategory: 'SALARY_SLIP_3',
+      fileType: 'SALARY'
+    },
+    itr: {
+
+      subcategory: 'ITR_LAST_3_YEARS',
+      fileType: 'ITR'
+    }
+  };
+
+  onFileChange(result: UploadResult, key: string, subcategory: 'LAST_3_MONTHS' | 'FORM_16' | 'BANK_STATEMENT_1_YEAR' | 'ITR_LAST_3_YEARS' | 'OTHER_INCOME',
+    type: 'SALARY_SLIP' | 'FORM_16' | 'BANK_STATEMENT' | 'ITR' | 'OTHER') {
+    if (!result.file) return;
+
+    const config = this.documentConfigMap[key];
+
+    const fd = new FormData();
+    fd.append('category', 'INCOME');
+    fd.append('subcategory', subcategory);
+    fd.append('applicantId', this.applicantId);
+    fd.append('files[0].type', type);
+    fd.append('files[0].file', result.file);
+
+    this.loanformservice.uploadIncome(fd, this.applicationId).subscribe({
+      next: res => console.log(res)
+    });
   }
-};
-
-onFileChange(result: UploadResult, key: string , subcategory: 'LAST_3_MONTHS'|'FORM_16'|'BANK_STATEMENT_1_YEAR'|'ITR_LAST_3_YEARS'|'OTHER_INCOME',
- type: 'SALARY_SLIP' | 'FORM_16' | 'BANK_STATEMENT' | 'ITR' | 'OTHER') {
-  if (!result.file) return;
-
-  const config = this.documentConfigMap[key];
-
-  const fd = new FormData();
-  fd.append('category', 'INCOME');
-  fd.append('subcategory', subcategory);
-  fd.append('applicantId', this.applicantId);
-  fd.append('files[0].type', type);
-  fd.append('files[0].file', result.file);
-
-  this.loanformservice.uploadIncome(fd,this.applicationId).subscribe({
-    next: res => console.log(res)
-  });
-}
-   onFileChange1(result: UploadResult, controlName: string) {
+  onFileChange1(result: UploadResult, controlName: string) {
     if (!result.file) {
-      
+
       return;
     }
-  
+
     // this.group.get(controlName)?.setValue(result.file);
   }
-  
-  submit(){}
 
-  addotherdocuments(){}
-    back(){
+  submit() { }
+
+  addotherdocuments() { }
+  back() {
     this.stepperService.previous();
   }
-   next() {
+  next() {
 
-     const fd = new FormData();
+    const fd = new FormData();
 
     // text fields
     fd.append('docType', 'PASSPORT');
-    fd.append('file','');
-
-
-
-
-
-
+    fd.append('file', '');
 
     this.loanformservice.uploadIncome(fd, this.applicationId).subscribe({
       next: (data) => {
         console.log(data);
-         this.stepperService.next();
+        this.stepperService.next();
       },
       error: (error) => {
         console.log(error);
-        
+
       }
     });
 

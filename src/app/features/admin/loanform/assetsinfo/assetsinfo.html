@@ -74,6 +74,12 @@
                             </ng-container>
                         </ng-container>
 
+                        <ng-container *ngIf="acc.key === 'OTHER'">
+                            <ng-container *ngTemplateOutlet="otherTemplate; context:{index:i}">
+
+                            </ng-container>
+                        </ng-container>
+
 
                     </div>
                 </div>
@@ -102,6 +108,10 @@
                 </div>
 
             </div>
+
+
+
+
         </ng-template>
 
 
@@ -148,9 +158,30 @@
 
 
                         <div class="row common-details-box d-flex flex-row gap-0 " [formGroupName]="i">
-                            <div class="text-dp-3-regular text-label d-flex align-items-center justify-content-between">
-                                Property {{i+1}}
 
+                            <div class="text-dp-3-regular d-flex align-items-center justify-content-between">
+                                Property {{ i + 1 }}
+                                <span (click)="removeitem(i,'property')">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                                        fill="none">
+                                        <path
+                                            d="M21 5.98047C17.67 5.65047 14.32 5.48047 10.98 5.48047C9 5.48047 7.02 5.58047 5.04 5.78047L3 5.98047"
+                                            stroke="#25262F" stroke-width="1.5" stroke-linecap="round"
+                                            stroke-linejoin="round" />
+                                        <path
+                                            d="M8.5 4.97L8.72 3.66C8.88 2.71 9 2 10.69 2H13.31C15 2 15.13 2.75 15.28 3.67L15.5 4.97"
+                                            stroke="#25262F" stroke-width="1.5" stroke-linecap="round"
+                                            stroke-linejoin="round" />
+                                        <path
+                                            d="M18.8484 9.14062L18.1984 19.2106C18.0884 20.7806 17.9984 22.0006 15.2084 22.0006H8.78844C5.99844 22.0006 5.90844 20.7806 5.79844 19.2106L5.14844 9.14062"
+                                            stroke="#25262F" stroke-width="1.5" stroke-linecap="round"
+                                            stroke-linejoin="round" />
+                                        <path d="M10.3281 16.5H13.6581" stroke="#25262F" stroke-width="1.5"
+                                            stroke-linecap="round" stroke-linejoin="round" />
+                                        <path d="M9.5 12.5H14.5" stroke="#25262F" stroke-width="1.5"
+                                            stroke-linecap="round" stroke-linejoin="round" />
+                                    </svg>
+                                </span>
                             </div>
                             <hr class="hrclass">
 
@@ -167,7 +198,7 @@
                             <div class="col-lg-6">
                                 <div class="form-group mb-3">
                                     <app-dropdown [options]="selectOwnertype" formControlName="ownershiptype"
-                                        [(selectedValue)]="selectedowner" [placeholder]="'Select Ownership type'"
+                                         [placeholder]="'Select Ownership type'"
                                         [required]="true" (selectedValueChange)="onchange($event,'propertyOwnertype')"
                                         [avatarUrl]="avatarUrl" [hasAvatar]="hasAvatar" [label]="'Ownership Type'">
                                     </app-dropdown>
@@ -179,7 +210,8 @@
                                 <div class="form-group ">
                                     <app-inputfield type="text" [required]="true" label="Market Value (INR)"
                                         [required]="true" formControlName="marketval" placeholder="Enter Value"
-                                        helpText="Help text" name="marketval">
+                                        helpText="Help text" name="marketval"
+                                        (input)="main.restrictInput($event, 'number')">
                                     </app-inputfield>
                                     <div class="text-danger"
                                         *ngIf="prop.get('marketval')?.touched && prop.get('marketval')?.invalid">
@@ -194,7 +226,8 @@
                                 <div class="form-group ">
                                     <app-inputfield type="text" [required]="true" label="Location / Address"
                                         [required]="true" placeholder="Enter Value" formControlName="location"
-                                        helpText="Help text" name="location">
+                                        helpText="Help text" name="location"
+                                        (input)="main.restrictInput($event, 'text')">
                                     </app-inputfield>
                                     <div class="text-danger"
                                         *ngIf="prop.get('location')?.touched && prop.get('location')?.invalid">
@@ -230,9 +263,29 @@
                     <div formArrayName="fixedDeposits">
                         @for(fd of fixedDeposits.controls; track $index; let i = $index){
                         <div class="row common-details-box d-flex flex-row gap-0" [formGroupName]="i">
-                            <div class="text-dp-3-regular text-label d-flex align-items-center justify-content-between">
-                                FD {{i+1}}
-
+                            <div class="text-dp-3-regular d-flex align-items-center justify-content-between">
+                                FD {{ i + 1 }}
+                                <span (click)="removeitem(i,'fd')">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                                        fill="none">
+                                        <path
+                                            d="M21 5.98047C17.67 5.65047 14.32 5.48047 10.98 5.48047C9 5.48047 7.02 5.58047 5.04 5.78047L3 5.98047"
+                                            stroke="#25262F" stroke-width="1.5" stroke-linecap="round"
+                                            stroke-linejoin="round" />
+                                        <path
+                                            d="M8.5 4.97L8.72 3.66C8.88 2.71 9 2 10.69 2H13.31C15 2 15.13 2.75 15.28 3.67L15.5 4.97"
+                                            stroke="#25262F" stroke-width="1.5" stroke-linecap="round"
+                                            stroke-linejoin="round" />
+                                        <path
+                                            d="M18.8484 9.14062L18.1984 19.2106C18.0884 20.7806 17.9984 22.0006 15.2084 22.0006H8.78844C5.99844 22.0006 5.90844 20.7806 5.79844 19.2106L5.14844 9.14062"
+                                            stroke="#25262F" stroke-width="1.5" stroke-linecap="round"
+                                            stroke-linejoin="round" />
+                                        <path d="M10.3281 16.5H13.6581" stroke="#25262F" stroke-width="1.5"
+                                            stroke-linecap="round" stroke-linejoin="round" />
+                                        <path d="M9.5 12.5H14.5" stroke="#25262F" stroke-width="1.5"
+                                            stroke-linecap="round" stroke-linejoin="round" />
+                                    </svg>
+                                </span>
                             </div>
                             <hr class="hrclass">
 
@@ -240,12 +293,12 @@
                                 <div class="form-group">
                                     <app-inputfield type="text" [required]="true" label="Bank Name" [required]="true"
                                         formControlName="bankname" placeholder="Enter Bank Name" helpText="Help text"
-                                        name="bankname">
+                                        name="bankname" (input)="main.restrictInput($event, 'text')">
                                     </app-inputfield>
                                     <div class="text-danger"
                                         *ngIf="fd.get('bankname')?.touched && fd.get('bankname')?.invalid">
                                         <div *ngIf="fd.get('bankname')?.errors?.['required']">
-                                            Market value is required
+                                            Bank Name is required
                                         </div>
                                     </div>
                                 </div>
@@ -254,12 +307,12 @@
                                 <div class="form-group">
                                     <app-inputfield type="text" [required]="true" label="Amount (INR)" [required]="true"
                                         formControlName="bankamt" placeholder="Enter Value" helpText="Help text"
-                                        name="bankamt">
+                                        name="bankamt" (input)="main.restrictInput($event, 'number')">
                                     </app-inputfield>
                                     <div class="text-danger"
                                         *ngIf="fd.get('bankamt')?.touched && fd.get('bankamt')?.invalid">
                                         <div *ngIf="fd.get('bankamt')?.errors?.['required']">
-                                            Market value is required
+                                            Amount is required
                                         </div>
                                     </div>
 
@@ -309,7 +362,7 @@
                     <div class="form-group mb-3">
                         <app-inputfield type="text" [required]="true" label="Stocks (INR)" [required]="true"
                             formControlName="stockvalue" placeholder="Enter Value" helpText="Help text"
-                            name="stockvalue">
+                            (input)="main.restrictInput($event, 'number')" name="stockvalue">
                         </app-inputfield>
                         <div class="text-danger"
                             *ngIf="control('investments.stockvalue')?.touched && control('investments.stockvalue')?.invalid">
@@ -324,7 +377,7 @@
                     <div class="form-group mb-3">
                         <app-inputfield type="text" [required]="true" label="Mutual Funds (INR)" [required]="true"
                             formControlName="mutualfundvalue" placeholder="Enter Value" helpText="Help text"
-                            name="mutualfundvalue">
+                            (input)="main.restrictInput($event, 'number')" name="mutualfundvalue">
                         </app-inputfield>
                         <div class="text-danger"
                             *ngIf="control('investments.mutualfundvalue')?.touched && control('investments.mutualfundvalue')?.invalid">
@@ -333,6 +386,88 @@
                             </div>
                         </div>
 
+                    </div>
+                </div>
+            </div>
+        </ng-template>
+
+        <ng-template #otherTemplate let-i="index">
+
+            <div class="mobiledetails d-flex w-100 flex-column ">
+                <div class="w-100 gap-3">
+                    <div formArrayName="otherassets">
+                        @for(other of otherassets.controls; track $index; let i = $index){
+                        <div class="row common-details-box d-flex flex-row gap-0" [formGroupName]="i">
+                            <div class="text-dp-3-regular d-flex align-items-center justify-content-between">
+                                Assets {{ i + 1 }}
+                                <span (click)="removeitem(i,'other')">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                                        fill="none">
+                                        <path
+                                            d="M21 5.98047C17.67 5.65047 14.32 5.48047 10.98 5.48047C9 5.48047 7.02 5.58047 5.04 5.78047L3 5.98047"
+                                            stroke="#25262F" stroke-width="1.5" stroke-linecap="round"
+                                            stroke-linejoin="round" />
+                                        <path
+                                            d="M8.5 4.97L8.72 3.66C8.88 2.71 9 2 10.69 2H13.31C15 2 15.13 2.75 15.28 3.67L15.5 4.97"
+                                            stroke="#25262F" stroke-width="1.5" stroke-linecap="round"
+                                            stroke-linejoin="round" />
+                                        <path
+                                            d="M18.8484 9.14062L18.1984 19.2106C18.0884 20.7806 17.9984 22.0006 15.2084 22.0006H8.78844C5.99844 22.0006 5.90844 20.7806 5.79844 19.2106L5.14844 9.14062"
+                                            stroke="#25262F" stroke-width="1.5" stroke-linecap="round"
+                                            stroke-linejoin="round" />
+                                        <path d="M10.3281 16.5H13.6581" stroke="#25262F" stroke-width="1.5"
+                                            stroke-linecap="round" stroke-linejoin="round" />
+                                        <path d="M9.5 12.5H14.5" stroke="#25262F" stroke-width="1.5"
+                                            stroke-linecap="round" stroke-linejoin="round" />
+                                    </svg>
+                                </span>
+                            </div>
+                            <hr class="hrclass">
+
+                            <div class="col">
+                                <div class="form-group">
+                                    <app-inputfield type="text" [required]="true" label="Assets Type" [required]="true"
+                                        formControlName="assettype" placeholder="Enter Assets Type" helpText="Help text"
+                                        name="assettype" (input)="main.restrictInput($event, 'text')">
+                                    </app-inputfield>
+                                    <div class="text-danger"
+                                        *ngIf="other.get('assettype')?.touched && other.get('assettype')?.invalid">
+                                        <div *ngIf="other.get('assettype')?.errors?.['required']">
+                                            Asset Type is required
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col">
+                                <div class="form-group">
+                                    <app-inputfield type="text" [required]="true" label="Amount (INR)" [required]="true"
+                                        formControlName="assetamt" placeholder="Enter Value" helpText="Help text"
+                                        (input)="main.restrictInput($event, 'number')" name="assetamt">
+                                    </app-inputfield>
+                                    <div class="text-danger"
+                                        *ngIf="other.get('assetamt')?.touched && other.get('assetamt')?.invalid">
+                                        <div *ngIf="other.get('assetamt')?.errors?.['required']">
+                                            Amount is required
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+
+
+                        </div>
+                        @if(i === otherassets.length - 1 ) {
+                        <div class="row common-details-box pt-0 pb-0 ">
+
+                            <div class="form-group mb-3">
+                                <app-buttons label="Add Other Assets" class="btn btn-icon Add btncustomClass"
+                                    [outline]="true" (click)="addOther()">
+                                    <img src="/assets/images/icons/addred.svg">
+                                </app-buttons>
+                            </div>
+                        </div>
+                        }
+                        }
                     </div>
                 </div>
             </div>

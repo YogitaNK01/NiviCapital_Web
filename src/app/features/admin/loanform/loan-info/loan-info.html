@@ -18,8 +18,9 @@
             <label class="text-dp-3-regular fw-bold">Rate Of Interest (p.a)</label>
             <span class="value-box text-dp-1-medium ">{{ rateOfInterest }}%</span>
           </div>
-           <input type="range" class="custom-range mt-20" min="9.5" max="15" step="0.1" [(ngModel)]="rateOfInterest" name="rate" (input)="updateSliderBackground($event)">
-      
+          <input type="range" class="custom-range mt-20" min="9.5" max="15" step="0.1" [(ngModel)]="rateOfInterest"
+            name="rate" (input)="updateSliderBackground($event)">
+
         </div>
 
         <div class="">
@@ -27,14 +28,17 @@
             <div class=""><label class="text-dp-3-regular fw-bold">How much money do you need?</label>
               <div class="text-body-1">Choose the loan amount that fits your needs <br>and financial goals.</div>
             </div>
-
-            <input type="text" class="value-box text-dp-1-medium value-box-input" [(ngModel)]="loanAmount" min="100000"
-              max="4500000" step="10000" name="loanamt" (input)="limitLoanAmount($event ,rangeSlider)" [maxlength]="7">
+            <div class="input-with-prefix">
+              <span class="prefix text-dp-1-medium">₹</span>
+              <input type="text" class="value-box text-dp-1-medium value-box-input" [(ngModel)]="loanAmount"
+                min="100000" [value]="'₹' + loanAmount" max="4500000" step="10000" name="loanamt" [required]="true"
+                (input)="limitLoanAmount($event ,rangeSlider)" [maxlength]="7">
+            </div>
           </div>
 
-          <input type="range" class="custom-range mt-20" min="100000" max="4500000" step="10000" [(ngModel)]="loanAmount" (input)="updateSliderBackground($event)" #rangeSlider
-            name="loanamt">
-           <div class="text-danger">
+          <input type="range" class="custom-range mt-20" min="100000" max="4500000" step="10000"
+            [(ngModel)]="loanAmount" (input)="updateSliderBackground($event)" #rangeSlider name="loanamt">
+          <div class="text-danger">
 
             <div *ngIf="loanAmount < 100000">
               {{ errormsg.minLoan }}
@@ -50,11 +54,27 @@
         <div class="">
           <div class="d-flex justify-content-between align-items-center">
             <label class="text-dp-3-regular fw-bold">Loan Tenure</label>
-            <input type="text" class="value-box text-dp-1-medium value-box-input" [(ngModel)]="tenure" min="1" max="7"
+             <div class="input-with-prefix">
+              
+            <input type="text" class="value-box text-dp-1-medium value-box-input" [(ngModel)]="tenure" min="1" max="7" [required]="true"
               step="1" name="tenureInput" (input)="limitTenureAmount($event ,rangeSlider1)" [maxlength]="1">
+              <span class="suffix text-dp-1-medium">yr</span></div>
           </div>
-        <input type="range" class="custom-range mt-20" min="1" max="7" step="1" [(ngModel)]="tenure" name="tenureInput" (input)="updateSliderBackground($event)" #rangeSlider1>
-      
+          <input type="range" class="custom-range mt-20" min="1" max="7" step="1" [(ngModel)]="tenure"
+            name="tenureInput" (input)="updateSliderBackground($event)" #rangeSlider1>
+
+            <div class="text-danger">
+
+            <div *ngIf="tenure < 1">
+              {{ errormsg.minTenure }}
+            </div>
+            <div *ngIf="tenure > 7">
+              {{ errormsg.maxTenure }}
+            </div>
+
+
+          </div>
+
         </div>
 
 
@@ -65,7 +85,7 @@
         </div>
 
         <app-buttons label="Apply loan" class="btn btncustomClass w-100" type="submit"
-          [disabled]="!basicincomeform.valid" color="primary"></app-buttons>
+          [disabled]="isFormInvalid" color="primary"></app-buttons>
       </form>
     </div>
 

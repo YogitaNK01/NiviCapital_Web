@@ -48,6 +48,46 @@ export class Monthlyexpenditureinfo {
 
   monthlyExpenditureForm!: FormGroup;
 
+  CodeMap: { [key: string]: string } = {};
+
+  fieldMap: any = {
+    RentHomeMaintenance: {
+      form: 'rent',
+      api: 'RENT_HOME_MAINTENANCE'
+    },
+    GroceriesandHousehold: {
+      form: 'grocery',
+      api: 'GROCERIES_HOUSEHOLD'
+    },
+    Utilities: {
+      form: 'utilities',
+      api: 'UTILITIES'
+    },
+    Transportation: {
+      form: 'transportation',
+      api: 'TRANSPORTATION'
+    },
+    SchoolEducationFees: {
+      form: 'SchoolFees',
+      api: 'SCHOOL_EDUCATION_FEES'
+    },
+    Medical: {
+      form: 'MedicalMedicines',
+      api: 'MEDICAL_MEDICINES'
+    },
+    Others: {
+      form: 'other',
+      api: 'OTHER_RECURRING'
+    }
+  };
+  selectedexpense: string[] = [];
+  otherExpenses: DropdownOption[] = [
+    { label: 'Subscriptions', value: 'Subscriptions', icon: '' },
+    { label: 'Lifestyle', value: 'Lifestyle', icon: '' },
+    { label: 'Entertainment', value: 'Entertainment', icon: '' },
+    { label: 'Insurance Premium', value: 'Insurance Premium', icon: '' },
+    { label: 'Other', value: 'Other', icon: '' },
+  ];
   constructor(private fb: FormBuilder, public main: Main, private route: ActivatedRoute,
     private stepperService: Loanstepperservice, private formSvc: Loanformservice, private cd: ChangeDetectorRef) { }
 
@@ -93,20 +133,24 @@ export class Monthlyexpenditureinfo {
   get other(): FormArray {
     return this.monthlyExpenditureForm.get('other') as FormArray;
   }
+  getGroupValues(group: any) {
+    return Object.values(group).filter(v => v !== null && v !== '');
+  }
 
   createOther(): FormGroup {
     return this.fb.group({
-      othervalue1: ['', Validators.required],
-      othervalue2: ['', Validators.required]
+      type: ['', Validators.required],       
+      customType: [''],                       
+      amount: ['', Validators.required]
     });
   }
-    addmore() {
-   
-  this.other.push(this.createOther());
+  addmore() {
+
+    this.other.push(this.createOther());
 
   }
 
-  onAssetChange(values: string | string[]): void {
+  onChange(values: string | string[]): void {
     this.selectedexpenditure = Array.isArray(values) ? values : [values];
 
     this.openIndex = [];
@@ -119,6 +163,12 @@ export class Monthlyexpenditureinfo {
     });
   }
 
+  onExpenseChange(values: string | string[]): void {
+    this.selectedexpense = Array.isArray(values) ? values : [values];
+    this.openIndex = [];
+
+
+  }
   toggle(index: number) {
     if (this.openIndex.includes(index)) {
       this.openIndex = this.openIndex.filter(i => i !== index);
@@ -147,7 +197,24 @@ export class Monthlyexpenditureinfo {
     this.monthlyExpenditureForm.get(key)?.reset();
 
   }
+  removeAccordion1(key: string, index: number, event: Event) {
+    event.stopPropagation();
 
+    this.selectedexpenditure =
+      this.selectedexpenditure.filter(k => k !== key);
+
+    this.openIndex =
+      this.openIndex.filter(i => i !== index);
+
+    const groupName = this.fieldMap[key];
+
+    if (groupName === 'other') {
+      this.other.clear();
+      this.other.push(this.createOther());
+    } else {
+      this.monthlyExpenditureForm.get(groupName)?.reset();
+    }
+  }
 
   back() {
     this.stepperService.previous();
@@ -155,7 +222,113 @@ export class Monthlyexpenditureinfo {
 
 
   next() {
-    this.stepperService.next();
+
+
+    //   if (!this.monthlyExpenditureForm.valid) {
+    //   console.log("form invalid");
+    //   return;
+    // }
+
+    let form = this.monthlyExpenditureForm.value;
+    console.log("form", form);
+
+    const items: any[] = [];
+
+    let invalid = false;
+
+    const addItem = (code: string, value: any, extra: any = null) => {
+      if (!value) return;
+
+      items.push({
+        expenseType: code,
+        amountInr: Number(value),
+        ...extra
+      });
+    };
+
+    const markGroupInvalid = (groupName: string) => {
+      const group = this.monthlyExpenditureForm.get(groupName);
+      group?.markAllAsTouched();
+      invalid = true;
+    };
+
+    this.selectedexpenditure.forEach(key => {
+      const config = this.fieldMap[key];
+      if (!config) return;
+
+      const groupName = config.form;
+      const apiKey = config.api;
+
+      const groupValue = form[groupName];
+
+      if (groupName === 'utilities') {
+        const map = {
+          utilityvalue1: 'TELEPHONE',
+          utilityvalue2: 'UTILITIES'
+        } as const
+
+        (Object.keys(map) as Array<keyof typeof map>).forEach(key => {
+          const val = groupValue[key];
+
+          if (!val) {
+            this.monthlyExpenditureForm.get(`utilities.${key}`)?.markAsTouched();
+            invalid = true;
+          } else {
+            addItem(map[key], val);
+          }
+        });
+        return;
+      }
+
+      if (groupName === 'other') {
+        groupValue.forEach((item: any, i: number) => {
+          const type = item.type === 'Other' ? item.customType : item.type;
+
+          if (!type || !item.amount) {
+            this.other.at(i).markAllAsTouched();
+            invalid = true;
+          } else {
+            addItem('OTHER_RECURRING', item.amount, {
+              expenseTypeText:
+                item.type === 'Other'
+                  ? item.customType
+                  : item.type
+            });
+          }
+        }
+        );
+      }
+
+      //  normal groups
+      else {
+        const values = Object.values(groupValue).filter(v => v);
+
+        if (!values.length) {
+          this.monthlyExpenditureForm.get(groupName)?.markAllAsTouched();
+          invalid = true;
+        } else {
+          values.forEach(val => addItem(apiKey, val));
+        }
+      }
+    });
+
+    // if (invalid) return;
+
+    const payload = { items };
+
+    console.log("FINAL PAYLOAD:", payload);
+
+
+
+    this.formSvc.MonthlyExpenditure(payload, this.applicationId).pipe().subscribe({
+      next: (res) => {
+        console.log("resp---", res);
+        if (res.status == "success") {
+
+          this.stepperService.next();
+        }
+      }
+    });
   }
 
 }

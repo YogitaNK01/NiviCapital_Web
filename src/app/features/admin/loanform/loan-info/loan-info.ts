@@ -85,8 +85,12 @@ export class LoanInfo implements OnInit {
   ]
 
   errormsg = loanErrors;
-  currenterror=''
+  currenterror = ''
+  loanError: string = '';
+  tenureError: string = '';
   constructor(private router: Router, private stepperService: Loanstepperservice, private route: ActivatedRoute, private loanformservice: Loanformservice) { }
+
+
   ngOnInit(): void {
     this.route.queryParams.subscribe(params => {
       if (params['applicantId']) {
@@ -99,66 +103,72 @@ export class LoanInfo implements OnInit {
     });
   }
 
-limitLoanAmount(event: any , slider: any) {
+  limitLoanAmount(event: any, slider: any) {
 
-  let value = event.target.value;
-  if (!value) {
-    this.loanAmount = 0;
-    this.currenterror = '';
-    slider.value = 100000;
+    let value = event.target.value.replace(/[^0-9]/g, '');
+    this.loanAmount = value;
+    if (!value) {
+      this.loanAmount = 0;
+      this.loanError = '';
+      slider.value = 100000;
+      this.updateSliderBackground({ target: slider });
+      return;
+    }
+    value = value.replace(/\D/g, '');
+    let num = Number(value);
+    this.loanError = '';
+    if (num > 4500000) {
+      // num = 4500000;
+      this.loanError = this.errormsg.maxLoan;
+    }
+
+    if (num < 100000) {
+      // num = 100000;
+      this.loanError = this.errormsg.minLoan;
+    }
+
+    this.loanAmount = num;
+
+    slider.value = num;
+
     this.updateSliderBackground({ target: slider });
-    return;
   }
-  value = value.replace(/\D/g, ''); 
-  let num = Number(value);
-  this.currenterror ='';
-  if (num > 4500000) {
-    // num = 4500000;
-    this.currenterror = this.errormsg.maxLoan;
-  }
+  limitTenureAmount(event: any, slider: any) {
+    let value = event.target.value;
+    if (!value) {
+      this.tenure = 1;
+      this.tenureError = '';
+      slider.value = 1;
+      this.updateSliderBackground({ target: slider });
+      return;
+    }
+    let num = Number(value);
+    this.tenureError = '';
+    if (num > 7) {
+      num = 7;
+      this.tenureError = this.errormsg.maxTenure;
+    }
 
-  if (num < 100000) {
-    // num = 100000;
-    this.currenterror = this.errormsg.minLoan;
-  }
+    if (num < 1) {
+      // num = 1;
+      this.tenureError = this.errormsg.minTenure;
+    }
 
-  this.loanAmount = num;
 
-   slider.value = num;
+    this.tenure = num;
 
-  this.updateSliderBackground({ target: slider });
-}
-limitTenureAmount(event: any , slider: any) {
-  let value = event.target.value;
-  if (!value) {
-    this.tenure = 1;
-    slider.value = 1;
+    slider.value = num;
+
     this.updateSliderBackground({ target: slider });
-    return;
-  }
-  let num = Number(value);
-  if (num > 7) {
-    num = 7;
+
   }
 
-  if (num < 1) {
-    num = 1;
-  }
-
-  this.tenure = num;
-
-   slider.value = num;
-
-  this.updateSliderBackground({ target: slider });
-
-}
-
-submitForm(data: NgForm) {
-  this.stepperService.next();
-}
   submitForm1(data: NgForm) {
+    this.stepperService.next();
+  }
+  submitForm(data: NgForm) {
 
-     if (!data.valid) {
+    if (!data.valid) {
       console.log("form invalid");
       return;
     }
@@ -168,7 +178,7 @@ submitForm(data: NgForm) {
       "annualIncome": data.value.annual_Income,
       "requestedAmount": data.value.loanamt,
       "interestRate": data.value.rate,
-      "requestedTenureMonths": data.value.tenureInput*12,
+      "requestedTenureMonths": data.value.tenureInput * 12,
       "modeOfPayment": data.value.paymentmode,
       "emiAmount": '',
       "totalInterest": '',
@@ -180,10 +190,10 @@ submitForm(data: NgForm) {
     this.loanformservice.submitLoanInfo(input, this.applicationId).subscribe({
       next: (data) => {
         console.log(data);
- if(data.status =="success"){
+        if (data.status == "success") {
 
-  this.stepperService.next();
- }
+          this.stepperService.next();
+        }
 
       },
       error: (error) => {
@@ -193,15 +203,30 @@ submitForm(data: NgForm) {
 
   }
 
-updateSliderBackground(event: any) {
-  const value = Number(event.target.value);
-  const min = Number(event.target.min);
-  const max = Number(event.target.max);
+  get isFormInvalid(): boolean {
+    return (
+      !this.annual_Income ||
+      !this.paymentmode ||
+      !this.loanAmount ||
+      this.loanAmount < 100000 ||
+      this.loanAmount > 4500000 ||
+      !this.tenure ||
+      this.tenure < 1 ||
+      this.tenure > 7 ||
+      !!this.loanError ||
+      !!this.tenureError
+    );
+  }
 
-  const percent = ((value - min) / (max - min)) * 100;
+  updateSliderBackground(event: any) {
+    const value = Number(event.target.value);
+    const min = Number(event.target.min);
+    const max = Number(event.target.max);
 
-  event.target.style.background = `linear-gradient(to right, #1e3a5f ${percent}%, #e5e7eb ${percent}%)`;
-}
- 
+    const percent = ((value - min) / (max - min)) * 100;
+
+    event.target.style.background = `linear-gradient(to right, #1e3a5f ${percent}%, #e5e7eb ${percent}%)`;
+  }
+
 
 }

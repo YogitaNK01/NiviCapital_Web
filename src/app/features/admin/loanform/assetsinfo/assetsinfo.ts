@@ -66,7 +66,8 @@ export class Assetsinfo implements OnInit {
     'LIQUID',
     'PROPERTY',
     'FIXED_DEPOSIT',
-    'INVESTMENTS'
+    'INVESTMENTS',
+    'OTHER'
   ];
 
   groupIdMap: { [key: string]: string[] } = {};
@@ -107,15 +108,19 @@ export class Assetsinfo implements OnInit {
       investments: this.fb.group({
         stockvalue: ['', Validators.required],
         mutualfundvalue: ['', Validators.required]
-      })
+      }),
+      otherassets: this.fb.array([this.createOther()]),
     });
     this.allAssetCatagory();
 
+    if(this.selectedAssets.includes('Property')) {
+
+    }
   }
 
   control(path: string) {
-  return this.assetsForm.get(path);
-}
+    return this.assetsForm.get(path);
+  }
 
   get properties(): FormArray {
     return this.assetsForm.get('properties') as FormArray;
@@ -125,21 +130,25 @@ export class Assetsinfo implements OnInit {
     return this.assetsForm.get('fixedDeposits') as FormArray;
   }
 
+  get otherassets(): FormArray {
+    return this.assetsForm.get('otherassets') as FormArray;
+  }
+  //properties
   createProperty(): FormGroup {
     return this.fb.group({
       propertytype: ['', Validators.required],
       ownershiptype: ['', Validators.required],
       marketval: ['', Validators.required],
-      location: ['', [Validators.required, Validators.pattern('^[A-Za-z ]+$'),Validators.minLength(2), Validators.maxLength(25)]]
+      location: ['', [Validators.required, Validators.pattern('^[A-Za-z ]+$'), Validators.minLength(2), Validators.maxLength(25)]]
     });
   }
   addProperty() {
     this.properties.push(this.createProperty());
   }
-
+  //fixed deposits
   createFD(): FormGroup {
     return this.fb.group({
-      bankname: ['', [Validators.required,Validators.pattern('^[A-Za-z ]+$'),Validators.minLength(2), Validators.maxLength(25)]],
+      bankname: ['', [Validators.required, Validators.pattern('^[A-Za-z ]+$'), Validators.minLength(2), Validators.maxLength(25)]],
       bankamt: ['', Validators.required],
       maturitydate: ['', Validators.required]
     });
@@ -148,6 +157,17 @@ export class Assetsinfo implements OnInit {
     this.fixedDeposits.push(this.createFD());
   }
 
+  //Other assets
+  createOther(): FormGroup {
+    return this.fb.group({
+      assettype: ['', [Validators.required, Validators.pattern('^[A-Za-z ]+$'), Validators.minLength(2), Validators.maxLength(25)]],
+      assetamt: ['', Validators.required],
+
+    });
+  }
+  addOther() {
+    this.otherassets.push(this.createOther());
+  }
 
   toggle(index: number) {
     if (this.openIndex.includes(index)) {
@@ -174,26 +194,27 @@ export class Assetsinfo implements OnInit {
 
   removeAccordion(key: string, index: number, event: Event) {
 
-  event.stopPropagation();
+    event.stopPropagation();
 
-  this.selectedAssets = this.selectedAssets.filter(k => k !== key);
+    this.selectedAssets = this.selectedAssets.filter(k => k !== key);
 
-  this.selectedAssetIds = this.selectedAssets.flatMap(
-    group => this.groupIdMap[group] || []
-  );
+    this.selectedAssetIds = this.selectedAssets.flatMap(
+      group => this.groupIdMap[group] || []
+    );
 
-  this.openIndex = this.openIndex.filter(i => i !== index);
+    this.openIndex = this.openIndex.filter(i => i !== index);
 
-  const formKeyMap: any = {
-    GOLD: 'gold',
-    LIQUID: 'liquidAssets',
-    PROPERTY: 'properties',
-    FIXED_DEPOSIT: 'fixedDeposits',
-    INVESTMENTS: 'investments'
-  };
+    const formKeyMap: any = {
+      GOLD: 'gold',
+      LIQUID: 'liquidAssets',
+      PROPERTY: 'properties',
+      FIXED_DEPOSIT: 'fixedDeposits',
+      INVESTMENTS: 'investments',
+      OTHERS: 'others'
+    };
 
-  this.assetsForm.get(formKeyMap[key])?.reset();
-}
+    this.assetsForm.get(formKeyMap[key])?.reset();
+  }
 
   submit() {
     if (this.assetsForm.invalid) return;
@@ -219,18 +240,18 @@ export class Assetsinfo implements OnInit {
   onAssetChange(values: string | string[]): void {
 
     const groups = Array.isArray(values) ? values : [values];
-this.selectedAssets = groups;
-  // const merged = [...this.selectedAssets, ...incoming];
+    this.selectedAssets = groups;
+    // const merged = [...this.selectedAssets, ...incoming];
 
-  // this.selectedAssets = [...new Set(merged)];
+    // this.selectedAssets = [...new Set(merged)];
 
-  // this.selectedAssetIds = this.selectedAssets.flatMap(
-  //   group => this.groupIdMap[group] || []
-  // );
+    // this.selectedAssetIds = this.selectedAssets.flatMap(
+    //   group => this.groupIdMap[group] || []
+    // );
 
-  this.selectedAssetIds = groups.flatMap(
-    group => this.groupIdMap[group] || []
-  );
+    this.selectedAssetIds = groups.flatMap(
+      group => this.groupIdMap[group] || []
+    );
     console.log("Selected Groups:", this.selectedAssets);
     console.log("API IDs:", this.selectedAssetIds);
 
@@ -297,6 +318,8 @@ this.selectedAssets = groups;
         return 'Fixed Deposit';
       case 'INVESTMENTS':
         return 'Investments';
+      case 'OTHER':
+        return 'Other Assets';
       default:
         return text;
     }
@@ -333,7 +356,7 @@ this.selectedAssets = groups;
 
       });
     }
-    else if (this.selectedAssetLabel.includes('Investments')) {
+     if (this.selectedAssetLabel.includes('Investments')) {
       let data = 'INVESTMENTS'
       this.formSvc.selectedAssets(data).subscribe((res: any) => {
         const list = res.data ?? res;
@@ -346,6 +369,7 @@ this.selectedAssets = groups;
 
       });
     }
+
 
 
   }
@@ -363,6 +387,47 @@ this.selectedAssets = groups;
   }
 
 
+  removeitem(index: number, type: 'property' | 'fd' | 'other') {
+    this.msgBox.open({
+      title: 'Are you sure want to Remove',
+      message: '',
+      showCancel: true,
+      onOk: () => {
+        if (type === 'property') {
+          const loanArray = this.properties;
+          const categoryToRemove = loanArray.at(index).get('type')?.value;
+
+          for (let i = loanArray.length - 1; i >= 0; i--) {
+            if (loanArray.at(i).get('type')?.value === categoryToRemove) {
+              if (loanArray.length === 1) return;
+              loanArray.removeAt(i);
+            }
+          }
+
+          const livcategories = loanArray.controls.map(
+            ctrl => ctrl.get('type')?.value
+          );
+          this.selectedAssets = [...new Set(livcategories)];
+        }
+
+        if (type === 'fd') {
+          if (this.fixedDeposits.length === 1) {
+            // this.showError('At least one FD is required');
+            return;
+          }
+          this.fixedDeposits.removeAt(index);
+        }
+
+
+        if (type === 'other') {
+          this.otherassets.removeAt(index);
+        }
+
+
+
+      }
+    });
+  }
 
   back() {
     this.stepperService.previous();
@@ -376,91 +441,107 @@ this.selectedAssets = groups;
 
     let invalid = false;
 
-     const addItem = (code: string, value: any, extra: any = null) => {
-    if (!value) return;
+    const addItem = (code: string, value: any, extra: any = null) => {
+      if (!value) return;
 
-    items.push({
-      assetItemMasterId: this.assetCodeMap[code],
-      valueInr: Number(value),
-      ...extra 
-    });
-  };
+      items.push({
+        assetItemMasterId: this.assetCodeMap[code],
+        valueInr: Number(value),
+        ...extra
+      });
+    };
 
-  const markInvalid = (path: string) => {
-    this.assetsForm.get(path)?.markAsTouched();
-    invalid = true;
-  };
-
-  //  GOLD
-  if (this.selectedAssets.includes('GOLD')) {
-    const val = form.gold?.goldvalue;
-    !val ? markInvalid('gold.goldvalue') : addItem('GOLD', val);
-  }
-
-  //  LIQUID
-  if (this.selectedAssets.includes('LIQUID')) {
-    const cash = form.liquidAssets?.cashinhand;
-    const savings = form.liquidAssets?.savingbalance;
-
-    !cash ? markInvalid('liquidAssets.cashinhand') : addItem('LIQUID_CASH', cash);
-    !savings ? markInvalid('liquidAssets.savingbalance') : addItem('LIQUID_SAVINGS', savings);
-  }
-
-  //  PROPERTY (FormArray)
- if (this.selectedAssets.includes('PROPERTY')) {
-  const arr = this.assetsForm.get('properties') as FormArray;
-
-  arr.controls.forEach((ctrl: any) => {
-    if (ctrl.invalid) {
-      ctrl.markAllAsTouched();
+    const markInvalid = (path: string) => {
+      this.assetsForm.get(path)?.markAsTouched();
       invalid = true;
-    } else {
-      addItem('PROPERTY', ctrl.value.marketval, {
-        propertyType: ctrl.value.propertytype,
-        ownershipType: ctrl.value.ownershiptype,
-        location: ctrl.value.location
+    };
+
+    //  GOLD
+    if (this.selectedAssets.includes('GOLD')) {
+      const val = form.gold?.goldvalue;
+      !val ? markInvalid('gold.goldvalue') : addItem('GOLD', val);
+    }
+
+    //  LIQUID
+    if (this.selectedAssets.includes('LIQUID')) {
+      const cash = form.liquidAssets?.cashinhand;
+      const savings = form.liquidAssets?.savingbalance;
+
+      !cash ? markInvalid('liquidAssets.cashinhand') : addItem('LIQUID_SAVINGS', cash);
+      !savings ? markInvalid('liquidAssets.savingbalance') : addItem('LIQUID_SAVINGS', savings);
+    }
+
+    //  PROPERTY (FormArray)
+    if (this.selectedAssets.includes('PROPERTY')) {
+      const arr = this.assetsForm.get('properties') as FormArray;
+
+      arr.controls.forEach((ctrl: any) => {
+        if (ctrl.invalid) {
+          ctrl.markAllAsTouched();
+          invalid = true;
+        } else {
+          addItem('PROPERTY', ctrl.value.marketval, {
+            propertyType: ctrl.value.propertytype,
+            ownershipType: ctrl.value.ownershiptype,
+            location: ctrl.value.location
+          });
+        }
       });
     }
-  });
-}
 
-  //  FIXED DEPOSIT (FormArray)
-if (this.selectedAssets.includes('FIXED_DEPOSIT')) {
-  const arr = this.assetsForm.get('fixedDeposits') as FormArray;
+    //  FIXED DEPOSIT (FormArray)
+    if (this.selectedAssets.includes('FIXED_DEPOSIT')) {
+      const arr = this.assetsForm.get('fixedDeposits') as FormArray;
 
-  arr.controls.forEach((ctrl: any) => {
-    if (ctrl.invalid) {
-      ctrl.markAllAsTouched();
-      invalid = true;
-    } else {
-      addItem('FIXED_DEPOSIT', ctrl.value.bankamt, {
-        bankName: ctrl.value.bankname,
-        maturityDate: (ctrl.value.maturitydate).format('YYYY-MM-DD')
+      arr.controls.forEach((ctrl: any) => {
+        if (ctrl.invalid) {
+          ctrl.markAllAsTouched();
+          invalid = true;
+        } else {
+          addItem('FIXED_DEPOSIT', ctrl.value.bankamt, {
+            bankName: ctrl.value.bankname,
+            maturityDate: (ctrl.value.maturitydate).format('YYYY-MM-DD')
+          });
+        }
       });
     }
-  });
-}
 
-  //  INVESTMENTS
-  if (this.selectedAssets.includes('INVESTMENTS')) {
-    const stock = form.investments?.stockvalue;
-    const mf = form.investments?.mutualfundvalue;
+    //  INVESTMENTS
+    if (this.selectedAssets.includes('INVESTMENTS')) {
+      const stock = form.investments?.stockvalue;
+      const mf = form.investments?.mutualfundvalue;
 
-    stock && addItem('STOCKS', stock);
-    mf && addItem('MUTUAL_FUNDS', mf);
-  }
+      stock && addItem('STOCKS', stock);
+      mf && addItem('MUTUAL_FUNDS', mf);
+    }
+
+    //  Other Assets
+    if (this.selectedAssets.includes('OTHER')) {
+      const arr = this.assetsForm.get('otherassets') as FormArray;
+
+      arr.controls.forEach((ctrl: any) => {
+        if (ctrl.invalid) {
+          ctrl.markAllAsTouched();
+          invalid = true;
+        } else {
+          addItem('OTHER_ASSETS', ctrl.value.assetamt, {
+            assetType: ctrl.value.assettype,
 
 
-  if (invalid) return;
+          });
+        }
+      });
+    }
+    if (invalid) return;
 
 
-  const payload = { items };
+    const payload = { items };
 
-  console.log("FINAL PAYLOAD:", payload);
+    console.log("FINAL PAYLOAD:", payload);
 
-    
 
-     this.formSvc.getAssets(payload, this.applicationId).pipe().subscribe({
+
+    this.formSvc.getAssets(payload, this.applicationId).pipe().subscribe({
       next: (res) => {
         console.log("resp---", res);
         if (res.status == "success") {

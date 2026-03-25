@@ -1,1 +1,59 @@
-<p>summaryinfo works!</p>
+<div class="base-layout">
+
+
+    <form [formGroup]="summaryForm" (ngSubmit)="submit()" id="summaryForm" class="w-100 ">
+
+        <div class=" accordion d-flex flex-column gap-4 mb-4">
+
+            <div class="accordion-item b-0" *ngFor="let acc of accordions; let i = index">
+
+                <h2 class="accordion-header">
+                    <button class="accordion-button table-head" [class.collapsed]="!openIndex.includes(i)" type="button"
+                        (click)="toggle(i)">
+
+                        {{ acc.title }}<span *ngIf="acc" class="text-danger">*</span>
+                    </button>
+                </h2>
+
+
+                <div class="accordion-collapse collapse" [class.show]="openIndex.includes(i)">
+
+                    <div class="accordion-body p-0 ">
+
+                        <ng-container *ngIf="i === 0">
+                            <ng-container *ngTemplateOutlet="refernce1Template; context:{index:i}">
+                            </ng-container>
+                        </ng-container>
+
+                        <ng-container *ngIf="i === 1">
+                            <ng-container *ngTemplateOutlet="refernce2Template; context:{index:i}">
+                            </ng-container>
+                        </ng-container>
+
+
+                       
+
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+        <ng-template #refernce1Template let-i="index">
+
+                            <div class="row common-details-box d-flex flex-row ">
+                                <div class="col">
+                                </div>
+                            </div>
+                        </ng-template>
+                        <ng-template #refernce2Template let-i="index">
+
+                            <div class="row common-details-box d-flex flex-row ">
+                                <div class="col">
+                                </div>
+                            </div>
+                        </ng-template>
+
+        </form>
+        </div>

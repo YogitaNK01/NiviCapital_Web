@@ -72,6 +72,7 @@
   border-radius: $border_radius_s;
   border: 1px solid $neutral-500;
   background: $bg;
+  text-align: center;
 }
 .value-box-input{
   width: 100px;
@@ -240,4 +241,27 @@ color: $secondary-700;
   height: 4px;
   // background: #e5e7eb;
   border-radius: 5px;
+}
+
+
+.input-with-prefix {
+  position: relative;
+  display: flex;
+  align-items: center;
+
+  .prefix {
+    position: absolute;
+    left: 25px;
+    pointer-events: none; 
+  }
+
+  .suffix {
+    position: absolute;
+    right: 55px;
+    pointer-events: none; 
+  }
+
+  input {
+    padding-left: 28px; 
+  }
 }
