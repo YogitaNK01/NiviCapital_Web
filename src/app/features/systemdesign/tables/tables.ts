@@ -50,6 +50,8 @@ export class Tables implements OnChanges {
 @Output() selectionChange = new EventEmitter<any[]>();
 @Input() totalPages: number = 1;
 @Output() pageChange = new EventEmitter<number>();
+@Input() disableEditFn?: (row: any) => boolean;
+
   constructor(private http: HttpClient,private router: Router) { }
 
   ngOnInit() {
@@ -178,6 +180,9 @@ export class Tables implements OnChanges {
     }
   }
 
+isEditDisabled(row: any): boolean {
+  return this.disableEditFn ? this.disableEditFn(row) : false;
+}
 
   onEdit(row: any) {
   console.log("Edit", row);
@@ -209,6 +214,9 @@ export class Tables implements OnChanges {
         }
       }
     );
+  }
+  else {
+
   }
   
 }

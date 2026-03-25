@@ -152,7 +152,7 @@ private loadallusers(): void {
     return this.tableDataService.formatDateOnly(dateArr);
   }
   
-
+//pagination
   updatePagedData(): void {
     
     this.dataSource.data = this.filteredData;
@@ -290,4 +290,12 @@ private loadallusers(): void {
   applyLoan() {
     this.router.navigate(['/admin/losoperation/newloan']);
   }
+
+//disable edit btn from row
+  disableEditCondition = (row: any) => {
+
+  return true; 
+
+ 
+};
 }

@@ -109,9 +109,12 @@
     <!-- Table -->
      
     <!-- @if (!nodata) { -->
-    <app-tables [columns]="columns" [data]="filteredData" [pageSize]="6" 
+    <app-tables [columns]="columns" 
+    [data]="filteredData" 
+    [pageSize]="6" 
     [totalPages]="totalPages"
-  (pageChange)="onPageChange($event)">
+  (pageChange)="onPageChange($event)"
+  [disableEditFn]="disableEditCondition">
     </app-tables>
     <!-- } @else {
   <div class="text-label text-center mt-4">

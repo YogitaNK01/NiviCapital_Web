@@ -45,7 +45,7 @@
                 </button>
 
                 <mat-menu #menu="matMenu">
-                    <button mat-menu-item (click)="onEdit(row)">
+                    <button mat-menu-item (click)="onEdit(row)" [disabled]="isEditDisabled(row)">
                         Edit
                     </button>
 
