@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, OnInit } from '@angular/core';
 import { Buttons } from '../../../systemdesign/buttons/buttons';
-import { FormArray, FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { AbstractControl, FormArray, FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { Loanformservice } from '../../../../core/service/loanformservice';
 import { Loanstepperservice } from '../../../../core/service/loanstepperservice';
@@ -113,7 +113,7 @@ export class Assetsinfo implements OnInit {
     });
     this.allAssetCatagory();
 
-    if(this.selectedAssets.includes('Property')) {
+    if (this.selectedAssets.includes('Property')) {
 
     }
   }
@@ -356,7 +356,7 @@ export class Assetsinfo implements OnInit {
 
       });
     }
-     if (this.selectedAssetLabel.includes('Investments')) {
+    if (this.selectedAssetLabel.includes('Investments')) {
       let data = 'INVESTMENTS'
       this.formSvc.selectedAssets(data).subscribe((res: any) => {
         const list = res.data ?? res;
@@ -428,6 +428,83 @@ export class Assetsinfo implements OnInit {
       }
     });
   }
+
+  handleAmountInput(event: any, controlName: string, ctrl?: any) {
+    this.main.restrictInput(event, 'decimal');
+    if (ctrl) {
+      this.formatAmountfromarray(event, controlName, ctrl);
+    } else {
+      this.formatAmount(event, controlName);
+    }
+
+
+  }
+
+  //format amount 2000000 to 20,00,000
+  formatAmount(event: any, controlName: string) {
+    let value = event.target.value;
+
+    if (!value) return;
+
+    value = value.replace(/,/g, '');
+    value = value.replace(/[^0-9.]/g, '');
+    const parts = value.split('.');
+    if (parts.length > 2) {
+      value = parts[0] + '.' + parts.slice(1).join('');
+    }
+
+    let integerPart = parts[0];
+    let decimalPart = parts[1] ? '.' + parts[1] : '';
+
+
+    let num = Number(value);
+
+
+
+    const formatted = this.formatIndian(num.toString());
+
+    this.assetsForm.get(controlName)?.setValue(formatted, { emitEvent: false });
+   
+
+  }
+
+  formatAmountfromarray(event: any, controlName: string, control: AbstractControl) {
+    const group = control as FormGroup;
+    let value = event.target.value;
+
+    if (!value) return;
+
+    value = value.replace(/,/g, '');
+    value = value.replace(/[^0-9.]/g, '');
+    const parts = value.split('.');
+    if (parts.length > 2) {
+      value = parts[0] + '.' + parts.slice(1).join('');
+    }
+
+    let integerPart = parts[0];
+    let decimalPart = parts[1] ? '.' + parts[1] : '';
+
+
+    let num = Number(value);
+
+
+
+    const formatted = this.formatIndian(num.toString());
+
+    if (group) {
+      group.get(controlName)?.setValue(formatted, { emitEvent: false });
+    } else {
+      this.assetsForm.get(controlName)?.setValue(formatted, { emitEvent: false });
+    }
+
+  }
+
+
+  formatIndian(x: string): string {
+    return new Intl.NumberFormat('en-IN').format(Number(x));
+  }
+
+
 
   back() {
     this.stepperService.previous();

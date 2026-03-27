@@ -30,7 +30,7 @@
 
         <ng-template #incomeTemplate let-i="index">
             <!-- salaried person -->
-            <div class="row  d-flex  align-items-start pt-4 common-details-box d-flex flex-column" *ngIf="!isbussiness">
+            <div class="row  d-flex  align-items-start pt-4 common-details-box d-flex flex-column" *ngIf="isbussiness">
 
                 <div class="row ">
                     <div class="text-label fw-bold mt-20">Salary Slips (Last 3 Months)</div>
@@ -38,7 +38,8 @@
                     <hr class="hrclass">
                     <div class=" mt-20 info-box">
                         <div class="col-lg-6 col-sm-12">
-                            <p class="text-label">If you are applying in February 2026, please upload salary slips for:</p>
+                            <p class="text-label">If you are applying in February 2026, please upload salary slips for:
+                            </p>
                             <ul class="text-label">
                                 <li class="text-label">November 2025 </li>
                                 <li class="text-label">December 2025</li>
@@ -48,19 +49,81 @@
                     </div>
                     <div class="row mt-20">
                         <div class="col-lg-4 col-sm-12">
-                            <app-uploadbtn [config]="basicConfig" (fileChange)="onFileChange($event, 'salary1','LAST_3_MONTHS','SALARY_SLIP')"
-                                [required]="true" label="Salary Slip 1">
+
+
+
+                            @if(handleresponse && hasDocument('SALARY_SLIP')){
+                            <label class="text-label">Salary Slip 1<span class="text-danger">*</span></label>
+                            <div class="addcust-img-box">
+                                <p class="text-label">{{ getDocumentName('SALARY_SLIP') }}</p>
+                                <div class="icons">
+                                    <span (click)="viewImage(getDocumentUrl('SALARY_SLIP'))"><img
+                                            src="/assets/images/icons/eyered.svg" alt="view"></span>
+                                    <span
+                                        (click)="downloadImage(getDocumentUrl('SALARY_SLIP'), getDocumentName('SALARY_SLIP'))"><img
+                                            src="/assets/images/icons/import-red.svg" alt="Download"></span>
+                                    <span (click)="deleteImage('SALARY_SLIP')"><img src="/assets/images/icons/close.svg"
+                                            alt="Download"></span>
+                                </div>
+                            </div>
+
+                            } @else{
+                            <app-uploadbtn [config]="basicConfig"
+                                (fileChange)="onFileChange($event, 'salary1','LAST_3_MONTHS','SALARY_SLIP')"
+                                [uploadViaApi]="true" [required]="true" label="Salary Slip 1"
+                                (uploadStarted)="onUploadStarted($event, 'salary1','INCOME','LAST_3_MONTHS','SALARY_SLIP')"
+                                [fileuploadresponse]="handleresponse">
                             </app-uploadbtn>
+                            }
+
                         </div>
                         <div class="col-lg-4 col-sm-12">
-                            <app-uploadbtn [config]="basicConfig" (fileChange)="onFileChange($event, 'salary2' ,'LAST_3_MONTHS','SALARY_SLIP')"
-                                [required]="true" label="Salary Slip 2">
+                            @if(handleresponse && hasDocument('SALARY_SLIP')){
+                            <label class="text-label">Salary Slip 1<span class="text-danger">*</span></label>
+                            <div class="addcust-img-box">
+                                <p class="text-label">{{ getDocumentName('SALARY_SLIP') }}</p>
+                                <div class="icons">
+                                    <span (click)="viewImage(getDocumentUrl('SALARY_SLIP'))"><img
+                                            src="/assets/images/icons/eyered.svg" alt="view"></span>
+                                    <span
+                                        (click)="downloadImage(getDocumentUrl('SALARY_SLIP'), getDocumentName('SALARY_SLIP'))"><img
+                                            src="/assets/images/icons/import-red.svg" alt="Download"></span>
+                                    <span (click)="deleteImage('SALARY_SLIP')"><img src="/assets/images/icons/close.svg"
+                                            alt="Download"></span>
+                                </div>
+                            </div>
+
+                            } @else{
+                            <app-uploadbtn [config]="basicConfig"
+                                (uploadStarted)="onUploadStarted($event, 'salary2' ,'INCOME' ,'LAST_3_MONTHS','SALARY_SLIP')"
+                                [uploadViaApi]="true" [fileuploadresponse]="handleresponse" [required]="true"
+                                label="Salary Slip 2">
                             </app-uploadbtn>
+                            }
                         </div>
                         <div class="col-lg-4 col-sm-12">
-                            <app-uploadbtn [config]="basicConfig" (fileChange)="onFileChange($event, 'salary3' , 'LAST_3_MONTHS','SALARY_SLIP')"
-                                [required]="true" label="Salary Slip 3">
+                            @if(handleresponse && hasDocument('SALARY_SLIP')){
+                            <label class="text-label">Salary Slip 1<span class="text-danger">*</span></label>
+                            <div class="addcust-img-box">
+                                <p class="text-label">{{ getDocumentName('SALARY_SLIP') }}</p>
+                                <div class="icons">
+                                    <span (click)="viewImage(getDocumentUrl('SALARY_SLIP'))"><img
+                                            src="/assets/images/icons/eyered.svg" alt="view"></span>
+                                    <span
+                                        (click)="downloadImage(getDocumentUrl('SALARY_SLIP'), getDocumentName('SALARY_SLIP'))"><img
+                                            src="/assets/images/icons/import-red.svg" alt="Download"></span>
+                                    <span (click)="deleteImage('SALARY_SLIP')"><img src="/assets/images/icons/close.svg"
+                                            alt="Download"></span>
+                                </div>
+                            </div>
+
+                            } @else{
+                            <app-uploadbtn [config]="basicConfig"
+                                (uploadStarted)="onUploadStarted($event, 'salary3','INCOME' , 'LAST_3_MONTHS','SALARY_SLIP')"
+                                [uploadViaApi]="true" [fileuploadresponse]="handleresponse" [required]="true"
+                                label="Salary Slip 3">
                             </app-uploadbtn>
+                            }
                         </div>
                     </div>
 
@@ -74,7 +137,8 @@
                     <hr class="hrclass">
                     <div class=" mt-20 info-box">
                         <div class="col-lg-6 col-sm-12">
-                            <p class="text-label">If you are applying in February 2026, Most recent available would be:</p>
+                            <p class="text-label">If you are applying in February 2026, Most recent available would be:
+                            </p>
                             <ul class="text-label">
                                 <li class="text-label">Financial Year 2024-25 </li>
                                 <li class="text-label">Assessment Year 2025-26</li>
@@ -85,11 +149,30 @@
                     </div>
                     <div class="row mt-20">
                         <div class="col-lg-4 col-sm-12">
-                            <app-uploadbtn [config]="basicConfig" (fileChange)="onFileChange($event, 'Form16' ,'FORM_16','FORM_16')"
-                                [required]="true" label="Form 16">
+                            @if(handleresponse && hasDocument('FORM_16')){
+                            <label class="text-label">Salary Slip 1<span class="text-danger">*</span></label>
+                            <div class="addcust-img-box">
+                                <p class="text-label">{{ getDocumentName('FORM_16') }}</p>
+                                <div class="icons">
+                                    <span (click)="viewImage(getDocumentUrl('FORM_16'))"><img
+                                            src="/assets/images/icons/eyered.svg" alt="view"></span>
+                                    <span
+                                        (click)="downloadImage(getDocumentUrl('FORM_16'), getDocumentName('FORM_16'))"><img
+                                            src="/assets/images/icons/import-red.svg" alt="Download"></span>
+                                    <span (click)="deleteImage('FORM_16')"><img src="/assets/images/icons/close.svg"
+                                            alt="Download"></span>
+                                </div>
+                            </div>
+
+                            } @else{
+                            <app-uploadbtn [config]="basicConfig"
+                                (uploadStarted)="onUploadStarted($event, 'Form16' ,'INCOME','FORM_16','FORM_16')"
+                                [uploadViaApi]="true" [fileuploadresponse]="handleresponse" [required]="true"
+                                label="Form 16">
                             </app-uploadbtn>
+                            }
                         </div>
-                       
+
                     </div>
 
 
@@ -102,7 +185,8 @@
                     <hr class="hrclass">
                     <div class=" mt-20 info-box">
                         <div class="col-lg-6 col-sm-12">
-                            <p class="text-label">If you are applying in February 2026, upload bank statement covering:</p>
+                            <p class="text-label">If you are applying in February 2026, upload bank statement covering:
+                            </p>
                             <ul class="text-label">
                                 <li class="text-label">01 February 2025 to 31 January 2026 </li>
                             </ul>
@@ -110,11 +194,30 @@
                     </div>
                     <div class="row mt-20">
                         <div class="col-lg-4 col-sm-12">
-                            <app-uploadbtn [config]="basicConfig" (fileChange)="onFileChange($event, 'oneyearbankstatement','BANK_STATEMENT_1_YEAR', 'BANK_STATEMENT')"
-                                [required]="true" label="1 Year bank statement">
+                            @if(handleresponse && hasDocument('BANK_STATEMENT')){
+                            <label class="text-label">Salary Slip 1<span class="text-danger">*</span></label>
+                            <div class="addcust-img-box">
+                                <p class="text-label">{{ getDocumentName('BANK_STATEMENT') }}</p>
+                                <div class="icons">
+                                    <span (click)="viewImage(getDocumentUrl('BANK_STATEMENT'))"><img
+                                            src="/assets/images/icons/eyered.svg" alt="view"></span>
+                                    <span
+                                        (click)="downloadImage(getDocumentUrl('BANK_STATEMENT'), getDocumentName('BANK_STATEMENT'))"><img
+                                            src="/assets/images/icons/import-red.svg" alt="Download"></span>
+                                    <span (click)="deleteImage('BANK_STATEMENT')"><img
+                                            src="/assets/images/icons/close.svg" alt="Download"></span>
+                                </div>
+                            </div>
+
+                            } @else{
+                            <app-uploadbtn [config]="basicConfig"
+                                (uploadStarted)="onUploadStarted($event, 'oneyearbankstatement','INCOME','BANK_STATEMENT_1_YEAR', 'BANK_STATEMENT')"
+                                [uploadViaApi]="true" [fileuploadresponse]="handleresponse" [required]="true"
+                                label="1 Year bank statement">
                             </app-uploadbtn>
+                            }
                         </div>
-                       
+
                     </div>
 
 
@@ -137,21 +240,76 @@
                     </div>
                     <div class="row mt-20">
                         <div class="col-lg-4 col-sm-12">
-                            <app-uploadbtn [config]="basicConfig" (fileChange)="onFileChange($event, 'ay1','ITR_LAST_3_YEARS','ITR')"
-                                [required]="true" label="AY 1">
+                            @if(handleresponse && hasDocument('ITR')){
+                            <label class="text-label">Salary Slip 1<span class="text-danger">*</span></label>
+                            <div class="addcust-img-box">
+                                <p class="text-label">{{ getDocumentName('ITR') }}</p>
+                                <div class="icons">
+                                    <span (click)="viewImage(getDocumentUrl('ITR'))"><img
+                                            src="/assets/images/icons/eyered.svg" alt="view"></span>
+                                    <span (click)="downloadImage(getDocumentUrl('ITR'), getDocumentName('ITR'))"><img
+                                            src="/assets/images/icons/import-red.svg" alt="Download"></span>
+                                    <span (click)="deleteImage('ITR')"><img src="/assets/images/icons/close.svg"
+                                            alt="Download"></span>
+                                </div>
+                            </div>
+
+                            } @else{
+                            <app-uploadbtn [config]="basicConfig"
+                                (uploadStarted)="onUploadStarted($event, 'ay1','INCOME','ITR_LAST_3_YEARS','ITR')"
+                                [uploadViaApi]="true" [fileuploadresponse]="handleresponse" [required]="true"
+                                label="AY 1">
                             </app-uploadbtn>
+                            }
                         </div>
-                         <div class="col-lg-4 col-sm-12">
-                            <app-uploadbtn [config]="basicConfig" (fileChange)="onFileChange($event, 'ay2','ITR_LAST_3_YEARS','ITR')"
-                                [required]="true" label="AY 2">
+                        <div class="col-lg-4 col-sm-12">
+                            @if(handleresponse && hasDocument('ITR')){
+                            <label class="text-label">Salary Slip 1<span class="text-danger">*</span></label>
+                            <div class="addcust-img-box">
+                                <p class="text-label">{{ getDocumentName('ITR') }}</p>
+                                <div class="icons">
+                                    <span (click)="viewImage(getDocumentUrl('ITR'))"><img
+                                            src="/assets/images/icons/eyered.svg" alt="view"></span>
+                                    <span (click)="downloadImage(getDocumentUrl('ITR'), getDocumentName('ITR'))"><img
+                                            src="/assets/images/icons/import-red.svg" alt="Download"></span>
+                                    <span (click)="deleteImage('ITR')"><img src="/assets/images/icons/close.svg"
+                                            alt="Download"></span>
+                                </div>
+                            </div>
+
+                            } @else{
+                            <app-uploadbtn [config]="basicConfig"
+                                (uploadStarted)="onUploadStarted($event, 'ay2','INCOME','ITR_LAST_3_YEARS','ITR')"
+                                [uploadViaApi]="true" [fileuploadresponse]="handleresponse" [required]="true"
+                                label="AY 2">
                             </app-uploadbtn>
+                            }
                         </div>
-                         <div class="col-lg-4 col-sm-12">
-                            <app-uploadbtn [config]="basicConfig" (fileChange)="onFileChange($event, 'ay3','ITR_LAST_3_YEARS','ITR')"
-                                [required]="true" label="AY 3">
+                        <div class="col-lg-4 col-sm-12">
+                            @if(handleresponse && hasDocument('ITR')){
+                            <label class="text-label">Salary Slip 1<span class="text-danger">*</span></label>
+                            <div class="addcust-img-box">
+                                <p class="text-label">{{ getDocumentName('ITR') }}</p>
+                                <div class="icons">
+                                    <span (click)="viewImage(getDocumentUrl('ITR'))"><img
+                                            src="/assets/images/icons/eyered.svg" alt="view"></span>
+                                    <span (click)="downloadImage(getDocumentUrl('ITR'), getDocumentName('ITR'))"><img
+                                            src="/assets/images/icons/import-red.svg" alt="Download"></span>
+                                    <span (click)="deleteImage('ITR')"><img src="/assets/images/icons/close.svg"
+                                            alt="Download"></span>
+                                </div>
+                            </div>
+
+                            } @else{
+
+                            <app-uploadbtn [config]="basicConfig"
+                                (uploadStarted)="onUploadStarted($event, 'ay3','INCOME','ITR_LAST_3_YEARS','ITR')"
+                                [uploadViaApi]="true" [fileuploadresponse]="handleresponse" [required]="true"
+                                label="AY 3">
                             </app-uploadbtn>
+                            }
                         </div>
-                       
+
                     </div>
 
 
@@ -164,11 +322,49 @@
                     <div class="text-label fw-bold mt-20">Other Documents</div>
 
                     <hr class="hrclass">
-                    <div class="col-lg-4 col-sm-12 mt-20">
-                        <app-uploadbtn [config]="basicConfig" (fileChange)="onFileChange($event,  'marksheet' ,'OTHER_INCOME','OTHER')"
-                            [required]="true" label="Other Documents">
-                        </app-uploadbtn>
+                    <div class=" mt-20 info-box">
+                        <div class="col-lg-4 col-sm-12">
+                            <p class="text-label">You can add extra documents here:</p>
+
+                        </div>
                     </div>
+                    <div class="col-lg-4 col-sm-12 mt-20">
+                        <app-inputfield formControlName="assettitle" label="Title" placeholder="Enter text here"
+                            (input)="main.restrictInput($event, 'text')" [maxlength]="25">
+                        </app-inputfield>
+
+
+                        <div class="text-danger" *ngIf="f['assettitle'].touched && f['assettitle'].invalid">
+
+                            <div *ngIf="f['title'].errors?.['minlength']">
+                                Minimum 2 characters required
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-4 col-sm-12 mt-20">
+                        @if(handleresponse && hasDocument('OTHER')){
+                        <label class="text-label">Salary Slip 1<span class="text-danger">*</span></label>
+                        <div class="addcust-img-box">
+                            <p class="text-label">{{ getDocumentName('OTHER') }}</p>
+                            <div class="icons">
+                                <span (click)="viewImage(getDocumentUrl('OTHER'))"><img
+                                        src="/assets/images/icons/eyered.svg" alt="view"></span>
+                                <span (click)="downloadImage(getDocumentUrl('OTHER'), getDocumentName('OTHER'))"><img
+                                        src="/assets/images/icons/import-red.svg" alt="Download"></span>
+                                <span (click)="deleteImage('OTHER')"><img src="/assets/images/icons/close.svg"
+                                        alt="Download"></span>
+                            </div>
+                        </div>
+
+                        } @else{
+                        <app-uploadbtn [config]="basicConfig"
+                            (uploadStarted)="onUploadStarted($event,  'other' ,'INCOME','OTHER_INCOME','OTHER')"
+                            [uploadViaApi]="true" [fileuploadresponse]="handleresponse" [required]="true"
+                            label="Other Documents">
+                        </app-uploadbtn>}
+                    </div>
+
                     <div class="col-lg-4 col-sm-12 mt-20">
                         <app-buttons label="Add Other Document" class="btn btn-icon Add btncustomClass" [outline]="true"
                             (click)="addotherdocuments()">
@@ -180,7 +376,7 @@
             </div>
 
             <!-- if bussiness -->
-             <!-- <div class="row  d-flex  align-items-start pt-4 common-details-box d-flex flex-column" *ngIf="isbussiness">
+            <div class="row  d-flex  align-items-start pt-4 common-details-box d-flex flex-column" *ngIf="!isbussiness">
 
                 <div class="row ">
                     <div class="text-label fw-bold mt-20">3 Years Financials of Business</div>
@@ -188,7 +384,8 @@
                     <hr class="hrclass">
                     <div class=" mt-20 info-box">
                         <div class="col-lg-6 col-sm-12">
-                            <p class="text-label">If you are applying in February 2026, please upload Financial statements for:</p>
+                            <p class="text-label">If you are applying in February 2026, please upload Financial
+                                statements for:</p>
                             <ul class="text-label">
                                 <li class="text-label">FY 2024-25 </li>
                                 <li class="text-label">FY 2023-24</li>
@@ -198,19 +395,73 @@
                     </div>
                     <div class="row mt-20">
                         <div class="col-lg-4 col-sm-12">
-                            <app-uploadbtn [config]="basicConfig" (fileChange)="onFileChange($event, 'bssalary1')"
-                                [required]="true" label="Year 1">
-                            </app-uploadbtn>
+                            @if(handleresponse && hasDocument('BUSINESS_FINANCE')){
+                            <label class="text-label">Year 1<span class="text-danger">*</span></label>
+                            <div class="addcust-img-box">
+                                <p class="text-label">{{ getDocumentName('BUSINESS_FINANCE') }}</p>
+                                <div class="icons">
+                                    <span (click)="viewImage(getDocumentUrl('BUSINESS_FINANCE'))"><img
+                                            src="/assets/images/icons/eyered.svg" alt="view"></span>
+                                    <span
+                                        (click)="downloadImage(getDocumentUrl('BUSINESS_FINANCE'), getDocumentName('BUSINESS_FINANCE'))"><img
+                                            src="/assets/images/icons/import-red.svg" alt="Download"></span>
+                                    <span (click)="deleteImage('BUSINESS_FINANCE')"><img
+                                            src="/assets/images/icons/close.svg" alt="Download"></span>
+                                </div>
+                            </div>
+
+                            } @else{
+                            <app-uploadbtn [config]="basicConfig"
+                                (uploadStarted)="onUploadStarted($event,  'year1' ,'BUSINESS','BUSINESS_FINANCE_3_YEARS','BUSINESS_FINANCE')"
+                                [uploadViaApi]="true" [fileuploadresponse]="handleresponse" [required]="true"
+                                label="Year 1">
+                            </app-uploadbtn>}
                         </div>
                         <div class="col-lg-4 col-sm-12">
-                            <app-uploadbtn [config]="basicConfig" (fileChange)="onFileChange($event, 'bssalary2')"
-                                [required]="true" label="Year 2">
-                            </app-uploadbtn>
+                            @if(handleresponse && hasDocument('BUSINESS_FINANCE')){
+                            <label class="text-label">Year 2<span class="text-danger">*</span></label>
+                            <div class="addcust-img-box">
+                                <p class="text-label">{{ getDocumentName('BUSINESS_FINANCE') }}</p>
+                                <div class="icons">
+                                    <span (click)="viewImage(getDocumentUrl('BUSINESS_FINANCE'))"><img
+                                            src="/assets/images/icons/eyered.svg" alt="view"></span>
+                                    <span
+                                        (click)="downloadImage(getDocumentUrl('BUSINESS_FINANCE'), getDocumentName('BUSINESS_FINANCE'))"><img
+                                            src="/assets/images/icons/import-red.svg" alt="Download"></span>
+                                    <span (click)="deleteImage('BUSINESS_FINANCE')"><img
+                                            src="/assets/images/icons/close.svg" alt="Download"></span>
+                                </div>
+                            </div>
+
+                            } @else{
+                            <app-uploadbtn [config]="basicConfig"
+                                (uploadStarted)="onUploadStarted($event,  'year2' ,'BUSINESS','BUSINESS_FINANCE_3_YEARS','BUSINESS_FINANCE')"
+                                [uploadViaApi]="true" [fileuploadresponse]="handleresponse" [required]="true"
+                                label="Year 2">
+                            </app-uploadbtn>}
                         </div>
                         <div class="col-lg-4 col-sm-12">
-                            <app-uploadbtn [config]="basicConfig" (fileChange)="onFileChange($event, 'bssalary3')"
-                                [required]="true" label="Year 3">
-                            </app-uploadbtn>
+                            @if(handleresponse && hasDocument('BUSINESS_FINANCE')){
+                            <label class="text-label">Year 3<span class="text-danger">*</span></label>
+                            <div class="addcust-img-box">
+                                <p class="text-label">{{ getDocumentName('BUSINESS_FINANCE') }}</p>
+                                <div class="icons">
+                                    <span (click)="viewImage(getDocumentUrl('BUSINESS_FINANCE'))"><img
+                                            src="/assets/images/icons/eyered.svg" alt="view"></span>
+                                    <span
+                                        (click)="downloadImage(getDocumentUrl('BUSINESS_FINANCE'), getDocumentName('BUSINESS_FINANCE'))"><img
+                                            src="/assets/images/icons/import-red.svg" alt="Download"></span>
+                                    <span (click)="deleteImage('BUSINESS_FINANCE')"><img
+                                            src="/assets/images/icons/close.svg" alt="Download"></span>
+                                </div>
+                            </div>
+
+                            } @else{
+                            <app-uploadbtn [config]="basicConfig"
+                                (uploadStarted)="onUploadStarted($event,  'year3' ,'BUSINESS','BUSINESS_FINANCE_3_YEARS','BUSINESS_FINANCE')"
+                                [uploadViaApi]="true" [fileuploadresponse]="handleresponse" [required]="true"
+                                label="Year 3">
+                            </app-uploadbtn>}
                         </div>
                     </div>
 
@@ -218,7 +469,7 @@
 
                 </div>
 
-                  <div class="row ">
+                <div class="row ">
                     <div class="text-label fw-bold mt-20">Latest 3 year ITR</div>
 
                     <hr class="hrclass">
@@ -234,34 +485,88 @@
                     </div>
                     <div class="row mt-20">
                         <div class="col-lg-4 col-sm-12">
-                            <app-uploadbtn [config]="basicConfig" (fileChange)="onFileChange($event, 'bs_ay1')"
-                                [required]="true" label="AY 1">
-                            </app-uploadbtn>
+                            @if(handleresponse && hasDocument('BUSINESS_ITR')){
+                            <label class="text-label">Year 1<span class="text-danger">*</span></label>
+                            <div class="addcust-img-box">
+                                <p class="text-label">{{ getDocumentName('BUSINESS_ITR') }}</p>
+                                <div class="icons">
+                                    <span (click)="viewImage(getDocumentUrl('BUSINESS_ITR'))"><img
+                                            src="/assets/images/icons/eyered.svg" alt="view"></span>
+                                    <span
+                                        (click)="downloadImage(getDocumentUrl('BUSINESS_ITR'), getDocumentName('BUSINESS_ITR'))"><img
+                                            src="/assets/images/icons/import-red.svg" alt="Download"></span>
+                                    <span (click)="deleteImage('BUSINESS_ITR')"><img
+                                            src="/assets/images/icons/close.svg" alt="Download"></span>
+                                </div>
+                            </div>
+
+                            } @else{
+                            <app-uploadbtn [config]="basicConfig"
+                                (uploadStarted)="onUploadStarted($event,  'businessITR1' ,'BUSINESS','BUSINESS_ITR_3_YEARS','BUSINESS_ITR')"
+                                [uploadViaApi]="true" [fileuploadresponse]="handleresponse" [required]="true"
+                                label="Year 1">
+                            </app-uploadbtn>}
                         </div>
-                         <div class="col-lg-4 col-sm-12">
-                            <app-uploadbtn [config]="basicConfig" (fileChange)="onFileChange($event, 'bs_ay2')"
-                                [required]="true" label="AY 2">
-                            </app-uploadbtn>
+                        <div class="col-lg-4 col-sm-12">
+                            @if(handleresponse && hasDocument('BUSINESS_ITR')){
+                            <label class="text-label">Year 2<span class="text-danger">*</span></label>
+                            <div class="addcust-img-box">
+                                <p class="text-label">{{ getDocumentName('BUSINESS_ITR') }}</p>
+                                <div class="icons">
+                                    <span (click)="viewImage(getDocumentUrl('BUSINESS_ITR'))"><img
+                                            src="/assets/images/icons/eyered.svg" alt="view"></span>
+                                    <span
+                                        (click)="downloadImage(getDocumentUrl('BUSINESS_ITR'), getDocumentName('BUSINESS_ITR'))"><img
+                                            src="/assets/images/icons/import-red.svg" alt="Download"></span>
+                                    <span (click)="deleteImage('BUSINESS_ITR')"><img
+                                            src="/assets/images/icons/close.svg" alt="Download"></span>
+                                </div>
+                            </div>
+
+                            } @else{
+                            <app-uploadbtn [config]="basicConfig"
+                                (uploadStarted)="onUploadStarted($event,  'businessITR2' ,'BUSINESS','BUSINESS_ITR_3_YEARS','BUSINESS_ITR')"
+                                [uploadViaApi]="true" [fileuploadresponse]="handleresponse" [required]="true"
+                                label="Year 2">
+                            </app-uploadbtn>}
                         </div>
-                         <div class="col-lg-4 col-sm-12">
-                            <app-uploadbtn [config]="basicConfig" (fileChange)="onFileChange($event, 'bs_ay3')"
-                                [required]="true" label="AY 3">
-                            </app-uploadbtn>
+                        <div class="col-lg-4 col-sm-12">
+                            @if(handleresponse && hasDocument('BUSINESS_ITR')){
+                            <label class="text-label">Year 3<span class="text-danger">*</span></label>
+                            <div class="addcust-img-box">
+                                <p class="text-label">{{ getDocumentName('BUSINESS_ITR') }}</p>
+                                <div class="icons">
+                                    <span (click)="viewImage(getDocumentUrl('BUSINESS_ITR'))"><img
+                                            src="/assets/images/icons/eyered.svg" alt="view"></span>
+                                    <span
+                                        (click)="downloadImage(getDocumentUrl('BUSINESS_ITR'), getDocumentName('BUSINESS_ITR'))"><img
+                                            src="/assets/images/icons/import-red.svg" alt="Download"></span>
+                                    <span (click)="deleteImage('BUSINESS_ITR')"><img
+                                            src="/assets/images/icons/close.svg" alt="Download"></span>
+                                </div>
+                            </div>
+
+                            } @else{
+                            <app-uploadbtn [config]="basicConfig"
+                                (uploadStarted)="onUploadStarted($event,  'businessITR3','BUSINESS' ,'BUSINESS_ITR_3_YEARS','BUSINESS_ITR')"
+                                [uploadViaApi]="true" [fileuploadresponse]="handleresponse" [required]="true"
+                                label="Year 3">
+                            </app-uploadbtn>}
                         </div>
-                       
+
                     </div>
 
 
 
                 </div>
-                
-                    <div class="row ">
+
+                <div class="row ">
                     <div class="text-label fw-bold mt-20">1 Year GST Return</div>
 
                     <hr class="hrclass">
                     <div class=" mt-20 info-box">
                         <div class="col-lg-6 col-sm-12">
-                            <p class="text-label">If you are applying in February 2026, upload  GST returns for:</p>
+                            <p class="text-label">If you are applying in February 2026, upload GST returns for:</p>
                             <ul class="text-label">
                                 <li class="text-label">January 2025 to December 2025 </li>
                             </ul>
@@ -269,11 +574,29 @@
                     </div>
                     <div class="row mt-20">
                         <div class="col-lg-4 col-sm-12">
-                            <app-uploadbtn [config]="basicConfig" (fileChange)="onFileChange($event, 'oneyearGSTreturn')"
-                                [required]="true" label="1 Year GST Return">
-                            </app-uploadbtn>
+                            @if(handleresponse && hasDocument('BUSINESS_GST')){
+                            <label class="text-label">1 Year GST Return<span class="text-danger">*</span></label>
+                            <div class="addcust-img-box">
+                                <p class="text-label">{{ getDocumentName('BUSINESS_GST') }}</p>
+                                <div class="icons">
+                                    <span (click)="viewImage(getDocumentUrl('BUSINESS_GST'))"><img
+                                            src="/assets/images/icons/eyered.svg" alt="view"></span>
+                                    <span
+                                        (click)="downloadImage(getDocumentUrl('BUSINESS_GST'), getDocumentName('BUSINESS_GST'))"><img
+                                            src="/assets/images/icons/import-red.svg" alt="Download"></span>
+                                    <span (click)="deleteImage('BUSINESS_GST')"><img
+                                            src="/assets/images/icons/close.svg" alt="Download"></span>
+                                </div>
+                            </div>
+
+                            } @else{
+                            <app-uploadbtn [config]="basicConfig"
+                                (uploadStarted)="onUploadStarted($event,  'businessGST','BUSINESS' ,'BUSINESS_GST_1_YEAR','BUSINESS_GST')"
+                                [uploadViaApi]="true" [fileuploadresponse]="handleresponse" [required]="true"
+                                label="1 Year GST Return">
+                            </app-uploadbtn>}
                         </div>
-                       
+
                     </div>
 
 
@@ -286,7 +609,8 @@
                     <hr class="hrclass">
                     <div class=" mt-20 info-box">
                         <div class="col-lg-6 col-sm-12">
-                            <p class="text-label">If you are applying in February 2026, upload bank statement covering:</p>
+                            <p class="text-label">If you are applying in February 2026, upload bank statement covering:
+                            </p>
                             <ul class="text-label">
                                 <li class="text-label">01 February 2025 to 31 January 2026 </li>
                             </ul>
@@ -294,11 +618,29 @@
                     </div>
                     <div class="row mt-20">
                         <div class="col-lg-4 col-sm-12">
-                            <app-uploadbtn [config]="basicConfig" (fileChange)="onFileChange($event, 'bs_oneyearbankstatement')"
-                                [required]="true" label="1 Year bank statement">
-                            </app-uploadbtn>
+                            @if(handleresponse && hasDocument('BUSINESS_BANK_STATEMENT')){
+                            <label class="text-label">1 Year bank statement<span class="text-danger">*</span></label>
+                            <div class="addcust-img-box">
+                                <p class="text-label">{{ getDocumentName('BUSINESS_BANK_STATEMENT') }}</p>
+                                <div class="icons">
+                                    <span (click)="viewImage(getDocumentUrl('BUSINESS_BANK_STATEMENT'))"><img
+                                            src="/assets/images/icons/eyered.svg" alt="view"></span>
+                                    <span
+                                        (click)="downloadImage(getDocumentUrl('BUSINESS_BANK_STATEMENT'), getDocumentName('BUSINESS_BANK_STATEMENT'))"><img
+                                            src="/assets/images/icons/import-red.svg" alt="Download"></span>
+                                    <span (click)="deleteImage('BUSINESS_BANK_STATEMENT')"><img
+                                            src="/assets/images/icons/close.svg" alt="Download"></span>
+                                </div>
+                            </div>
+
+                            } @else{
+                            <app-uploadbtn [config]="basicConfig"
+                                (uploadStarted)="onUploadStarted($event,  'businessBankstatement' ,'BUSINESS','BUSINESS_BANK_STATEMENT_1_YEAR','BUSINESS_BANK_STATEMENT')"
+                                [uploadViaApi]="true" [fileuploadresponse]="handleresponse" [required]="true"
+                                label="1 Year bank statement">
+                            </app-uploadbtn>}
                         </div>
-                       
+
                     </div>
 
 
@@ -308,22 +650,45 @@
 
                 <div class="row  d-flex flex-column">
                     <div class="text-label fw-bold mt-20">Other Documents</div>
-
                     <hr class="hrclass">
-                    <div class="col-lg-4 col-sm-12 mt-20">
-                        <app-uploadbtn [config]="basicConfig" (fileChange)="onFileChange($event,  'bs_otherdocuments')"
-                            [required]="true" label="Other Documents">
-                        </app-uploadbtn>
+                    <div class=" mt-20 info-box">
+                        <div class="col-lg-6 col-sm-12">
+                            <p class="text-label">You can add extra documents here
+                            </p>
+                        </div>
+                    </div>
+
+
+                    <div class="col-lg-4 col-sm-12 mt-20" *ngIf="otherbusinessdoc">
+                        @if(handleresponse && hasDocument('OTHER')){
+                        <label class="text-label">Salary Slip 1<span class="text-danger">*</span></label>
+                        <div class="addcust-img-box">
+                            <p class="text-label">{{ getDocumentName('OTHER') }}</p>
+                            <div class="icons">
+                                <span (click)="viewImage(getDocumentUrl('OTHER'))"><img
+                                        src="/assets/images/icons/eyered.svg" alt="view"></span>
+                                <span (click)="downloadImage(getDocumentUrl('OTHER'), getDocumentName('OTHER'))"><img
+                                        src="/assets/images/icons/import-red.svg" alt="Download"></span>
+                                <span (click)="deleteImage('OTHER')"><img src="/assets/images/icons/close.svg"
+                                        alt="Download"></span>
+                            </div>
+                        </div>
+
+                        } @else{
+                        <app-uploadbtn [config]="basicConfig"
+                            (uploadStarted)="onUploadStarted($event,  'other','BUSINESS' ,'OTHER_INCOME','OTHER')"
+                            [uploadViaApi]="true" [fileuploadresponse]="handleresponse" label="Other Documents">
+                        </app-uploadbtn>}
                     </div>
                     <div class="col-lg-4 col-sm-12 mt-20">
                         <app-buttons label="Add Other Document" class="btn btn-icon Add btncustomClass" [outline]="true"
-                            (click)="addotherdocuments()">
+                            (click)="addotherbusinessdocuments()">
                             <img src="/assets/images/icons/addred.svg" alt="Add">
 
                         </app-buttons>
                     </div>
                 </div>
-            </div> -->
+            </div>
         </ng-template>
 
 
@@ -339,7 +704,8 @@
     <div class="col-lg-4  d-flex justify-content-end">
         <app-buttons type="button" label="Back" class="btn btncustomClass" [outline]="true" (click)="back()">
         </app-buttons>
-        <app-buttons type="button" label="Next" class="btn btncustomClass" color="primary" (click)="next()">
+        <app-buttons type="button" label="Next" class="btn btncustomClass" color="primary" (click)="next()"
+            [disabled]="!allRequiredFilesUploaded">
         </app-buttons>
 
     </div>

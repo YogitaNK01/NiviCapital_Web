@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, Input, Output, EventEmitter, OnInit, input, forwardRef } from '@angular/core';
+import { Component, Input, Output, EventEmitter, OnInit, input, forwardRef, OnChanges, SimpleChanges } from '@angular/core';
 import { Msgboxservice } from '../../../core/service/msgboxservice';
 import { Router } from '@angular/router';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
@@ -34,7 +34,7 @@ export interface UploadResult {
     }
   ]
 })
-export class Uploadbtn implements OnInit, ControlValueAccessor {
+export class Uploadbtn implements OnInit, ControlValueAccessor, OnChanges {
   @Input() config: UploadConfig = {
     accept: '.svg, .png, .jpg, .jpeg, .pdf, .tiff, .heic',
     maxSize: 10,
@@ -49,6 +49,12 @@ export class Uploadbtn implements OnInit, ControlValueAccessor {
 
   @Output() fileChange = new EventEmitter<UploadResult>();
   @Output() fileRemove = new EventEmitter<void>();
+  @Input() fileuploadresponse: any;
+
+
+
+  @Input() uploadViaApi: boolean = false;
+  @Output() uploadStarted = new EventEmitter<UploadResult>();
 
   state: UploadState = 'idle';
   progress: number = 0;
@@ -77,6 +83,13 @@ export class Uploadbtn implements OnInit, ControlValueAccessor {
     }
   }
 
+  ngOnChanges() {
+    if (this.fileuploadresponse) {
+      // console.log("Received :", this.fileuploadresponse);
+
+
+    }
+  }
   onFileSelect(event: Event) {
     const input = event.target as HTMLInputElement;
     if (input.files && input.files.length > 0) {
@@ -128,22 +141,22 @@ export class Uploadbtn implements OnInit, ControlValueAccessor {
     }
 
     // Validate file size
-      if (this.config.maxSize) {
-    const maxSizeBytes = (this.config.maxSize || 10) * 1024 * 1024;
-    if (file.size > maxSizeBytes) {
-      this.setError(`File size exceeds ${this.config.maxSize} MB`);
-      return;
+    if (this.config.maxSize) {
+      const maxSizeBytes = (this.config.maxSize || 10) * 1024 * 1024;
+      if (file.size > maxSizeBytes) {
+        this.setError(`File size exceeds ${this.config.maxSize} MB`);
+        return;
+      }
     }
-  }
 
-   if (this.config.minSize) {
-    const minSizeBytes = this.config.minSize * 1024;
+    if (this.config.minSize) {
+      const minSizeBytes = this.config.minSize * 1024;
 
-    if (file.size < minSizeBytes) {
-      this.setError(`File size must be at least ${this.config.minSize} KB`);
-      return;
+      if (file.size < minSizeBytes) {
+        this.setError(`File size must be at least ${this.config.minSize} KB`);
+        return;
+      }
     }
-  }
 
     this.fileName = file.name;
     this.uploadFile(file);
@@ -163,24 +176,61 @@ export class Uploadbtn implements OnInit, ControlValueAccessor {
       reader.readAsDataURL(file);
     }
 
-    // Simulate upload progress
-    const interval = setInterval(() => {
-      this.progress += 10;
-      if (this.progress >= 100) {
-        clearInterval(interval);
-        this.state = 'success';
-        this.showHelperMessage = true;
-        this.fileChange.emit({
-          file: file,
-          preview: this.preview
-        });
-        this.hideHelperMessageAfterDelay();
-      }
+    if (this.uploadViaApi) {
+      this.uploadStarted.emit({
+        file: file,
+        preview: this.preview
+      });
 
-    }, 200);
+      this.state = 'uploading';
+      this.progress = 0;
+
+      const interval = setInterval(() => {
+        this.progress += 10;
+        if (this.progress >= 100) {
+          clearInterval(interval);
+          console.log("Received in upload btn:", this.fileuploadresponse);
+
+          if (this.fileuploadresponse.status === 'success') {
+            this.state = 'success';
+            this.showHelperMessage = true;
+           this.hideHelperMessageAfterDelay();
+          } else {
+            this.state = 'error';
+            this.showHelperMessage = true;
+           this.hideHelperMessageAfterDelay();
+          }
+
+        
+        }
+
+      }, 200);
+
+
+
+    } else {
+      const interval = setInterval(() => {
+        this.progress += 10;
+        if (this.progress >= 100) {
+          clearInterval(interval);
+          this.state = 'success';
+          this.showHelperMessage = true;
+          this.fileChange.emit({
+            file: file,
+            preview: this.preview
+          });
+          this.hideHelperMessageAfterDelay();
+        }
+
+      }, 200);
+    }
 
   }
 
+  checkresponse(data: any) {
+    console.log("checkresponse", data)
+
+  }
   setError(message: string) {
     this.state = 'error';
     this.errorMessage = message;
@@ -192,6 +242,27 @@ export class Uploadbtn implements OnInit, ControlValueAccessor {
     this.hideHelperMessageAfterDelay();
   }
 
+  public setSuccess(file: File) {
+    this.state = 'success';
+    this.fileName = file.name;
+    this.showHelperMessage = true;
+    this.fileChange.emit({
+      file: file,
+      preview: this.preview
+    });
+    this.hideHelperMessageAfterDelay();
+  }
+
+  public setErrorFromApi(message: string) {
+    this.state = 'error';
+    this.errorMessage = message || 'Upload failed. Please try again.';
+    this.showHelperMessage = true;
+    this.fileChange.emit({
+      file: null,
+      error: this.errorMessage
+    });
+    this.hideHelperMessageAfterDelay();
+  }
   removeFile() {
     this.msgBox.open({
       title: 'Are you sure want to Remove',
@@ -203,15 +274,15 @@ export class Uploadbtn implements OnInit, ControlValueAccessor {
         this.preview = '';
         this.progress = 0;
         this.errorMessage = '';
-        
+
         if (this.fileInput) {
           this.fileInput.value = '';
         }
-        
+
         this.showHelperMessage = true;
         this.fileRemove.emit();
-        this.fileChange.emit({ file: null }); 
-       
+        this.fileChange.emit({ file: null });
+
       }
     });
 
@@ -247,8 +318,8 @@ export class Uploadbtn implements OnInit, ControlValueAccessor {
 
 
 
-  onChange = (value: any) => {};
-  onTouched = () => {};
+  onChange = (value: any) => { };
+  onTouched = () => { };
 
   writeValue(value: any): void {
     this.value = value;

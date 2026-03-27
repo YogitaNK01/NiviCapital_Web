@@ -51,3 +51,31 @@ background: rgba(179, 228, 253, 0.30);
     background: $neutral-300;
     margin:16px 0 0 0 ;
 }
+
+.addcust-img-box {
+  display: flex;
+  padding: $spacing_7;
+  justify-content: space-between;
+  align-items: baseline;
+  align-self: stretch;
+  border-radius: $border_radius_rounded;
+  background: $secondary-50;
+
+  @media (max-width: 480px) {
+    padding: $spacing_4;
+
+  }
+}
+
+.addcust-img-box {
+  position: relative;
+  background: #d9e3ea;
+  border-radius: 30px;
+  padding: 12px 50px 12px 20px;
+  /* space for icons */
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  min-width: 280px;
+  width: 100%;
+}

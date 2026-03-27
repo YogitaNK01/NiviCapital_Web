@@ -94,7 +94,7 @@
                 <div class="col">
                     <div class="form-group mb-3">
                         <app-inputfield type="text" [required]="true" label="Value INR" [required]="true"
-                            (input)="main.restrictInput($event, 'number')" formControlName="goldvalue"
+                            (input)="handleAmountInput($event,'gold.goldvalue')" formControlName="goldvalue"
                             placeholder="Enter Value" helpText="Help text" name="goldvalue">
                         </app-inputfield>
 
@@ -121,7 +121,7 @@
                     <div class="form-group mb-3">
                         <app-inputfield type="text" [required]="true" label="Cash In Hand (INR)" [required]="true"
                             formControlName="cashinhand" placeholder="Enter Value" helpText="Help text"
-                            (input)="main.restrictInput($event, 'number')" name="cashinhand">
+                            (input)="handleAmountInput($event,'liquidAssets.cashinhand')" name="cashinhand">
                         </app-inputfield>
                         <div class="text-danger"
                             *ngIf="control('liquidAssets.cashinhand')?.touched && control('liquidAssets.cashinhand')?.invalid">
@@ -136,7 +136,7 @@
                     <div class="form-group mb-3">
                         <app-inputfield type="text" label="Savings Account Balance (INR)" [required]="true"
                             placeholder="Enter Value" formControlName="savingbalance"
-                            (input)="main.restrictInput($event, 'number')" helpText="Help text" name="savingbalance">
+                            (input)="handleAmountInput($event,'liquidAssets.savingbalance')" helpText="Help text" name="savingbalance">
                         </app-inputfield>
                         <div class="text-danger"
                             *ngIf="control('liquidAssets.savingbalance')?.touched && control('liquidAssets.savingbalance')?.invalid">
@@ -211,7 +211,7 @@
                                     <app-inputfield type="text" [required]="true" label="Market Value (INR)"
                                         [required]="true" formControlName="marketval" placeholder="Enter Value"
                                         helpText="Help text" name="marketval"
-                                        (input)="main.restrictInput($event, 'number')">
+                                        (input)="handleAmountInput($event,'marketval',prop)">
                                     </app-inputfield>
                                     <div class="text-danger"
                                         *ngIf="prop.get('marketval')?.touched && prop.get('marketval')?.invalid">
@@ -307,7 +307,7 @@
                                 <div class="form-group">
                                     <app-inputfield type="text" [required]="true" label="Amount (INR)" [required]="true"
                                         formControlName="bankamt" placeholder="Enter Value" helpText="Help text"
-                                        name="bankamt" (input)="main.restrictInput($event, 'number')">
+                                        name="bankamt" (input)="handleAmountInput($event,'bankamt',fd)">
                                     </app-inputfield>
                                     <div class="text-danger"
                                         *ngIf="fd.get('bankamt')?.touched && fd.get('bankamt')?.invalid">
@@ -362,7 +362,7 @@
                     <div class="form-group mb-3">
                         <app-inputfield type="text" [required]="true" label="Stocks (INR)" [required]="true"
                             formControlName="stockvalue" placeholder="Enter Value" helpText="Help text"
-                            (input)="main.restrictInput($event, 'number')" name="stockvalue">
+                           (input)="handleAmountInput($event,'investments.stockvalue')" name="stockvalue">
                         </app-inputfield>
                         <div class="text-danger"
                             *ngIf="control('investments.stockvalue')?.touched && control('investments.stockvalue')?.invalid">
@@ -377,7 +377,7 @@
                     <div class="form-group mb-3">
                         <app-inputfield type="text" [required]="true" label="Mutual Funds (INR)" [required]="true"
                             formControlName="mutualfundvalue" placeholder="Enter Value" helpText="Help text"
-                            (input)="main.restrictInput($event, 'number')" name="mutualfundvalue">
+                            (input)="handleAmountInput($event,'investments.mutualfundvalue')" name="mutualfundvalue">
                         </app-inputfield>
                         <div class="text-danger"
                             *ngIf="control('investments.mutualfundvalue')?.touched && control('investments.mutualfundvalue')?.invalid">
@@ -442,7 +442,7 @@
                                 <div class="form-group">
                                     <app-inputfield type="text" [required]="true" label="Amount (INR)" [required]="true"
                                         formControlName="assetamt" placeholder="Enter Value" helpText="Help text"
-                                        (input)="main.restrictInput($event, 'number')" name="assetamt">
+                                        (input)="handleAmountInput($event,'assetamt')" name="assetamt">
                                     </app-inputfield>
                                     <div class="text-danger"
                                         *ngIf="other.get('assetamt')?.touched && other.get('assetamt')?.invalid">

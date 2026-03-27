@@ -9,6 +9,7 @@ import { Inputfield } from '../../../systemdesign/inputfield/inputfield';
 import { Dropdown, DropdownOption } from '../../../systemdesign/dropdown/dropdown';
 import { Main } from '../../../../core/service/main';
 import { Msgboxservice } from '../../../../core/service/msgboxservice';
+import { groupBy } from 'rxjs';
 
 interface OptionItem {
   label: string;
@@ -67,6 +68,9 @@ export class Estimateexpense {
   applicantId: any;
   applicationId: any
   amterror: boolean = false
+  amtlimit: boolean = false;
+  amountErrors: { [key: string]: boolean } = {};
+
 
   constructor(private fb: FormBuilder, private stepperService: Loanstepperservice, private cd: ChangeDetectorRef, private loanformservice: Loanformservice,
     private router: Router, private route: ActivatedRoute, public main: Main, private msgBox: Msgboxservice) { }
@@ -181,6 +185,10 @@ export class Estimateexpense {
 
     const tuitionINR = this.expenseForm.get('tutionfees')?.value;
     const tuitionAUD = this.expenseForm.get('tutionfeesAUD')?.value;
+
+    const isTuitionINRValid = tuitionINR != null && tuitionINR !== '' && !isNaN(Number(tuitionINR));
+    const isTuitionAUDValid = tuitionAUD != null && tuitionAUD !== '' && !isNaN(Number(tuitionAUD));
+
     return tuitionINR;
   }
 
@@ -199,6 +207,7 @@ export class Estimateexpense {
       description: ['', [Validators.minLength(2), Validators.maxLength(50)]],
     });
     group.get('amountINR')?.valueChanges.subscribe((val) => {
+
       console.log("val", val)
       if (!val) { group.patchValue({ amountAUD: '' }); return; }
       const cleanINR = Number(val.toString().replace(/,/g, ''));
@@ -214,6 +223,14 @@ export class Estimateexpense {
       );
       group.get('amountAUD')?.disable();
 
+      group.get('amountINR')?.valueChanges.subscribe(() => {
+        this.validateAmount(group);
+      });
+
+      group.get('securityfrequency')?.valueChanges.subscribe(() => {
+        this.validateAmount(group); // ✅ Trigger validation on frequency change
+
+      })
     });
 
     return group;
@@ -229,8 +246,8 @@ export class Estimateexpense {
       .map((g: any) => g.get('category')?.value)
       .lastIndexOf(category);
 
-      const newGroup = this.createExpense(category);
-      this.livingexpenses.insert(index + 1, newGroup);
+    const newGroup = this.createExpense(category);
+    this.livingexpenses.insert(index + 1, newGroup);
 
     // this.livingexpenses.insert(index + 1, this.createExpense(category));
     // setTimeout(() => this.updateView());
@@ -278,6 +295,7 @@ export class Estimateexpense {
     });
 
     group.get('amountINR')?.valueChanges.subscribe((val) => {
+
       if (!val) return;
 
       const cleanINR = Number(val.toString().replace(/,/g, ''));
@@ -292,8 +310,16 @@ export class Estimateexpense {
       );
       group.get('amountAUD')?.disable();
 
+      group.get('amountINR')?.valueChanges.subscribe(() => {
+        this.validateAmount(group);
+      });
+
+      group.get('securityfrequency')?.valueChanges.subscribe(() => {
+        this.validateAmount(group); // ✅ This was missing!
+      });
 
     });
+
 
     return group;
   }
@@ -402,7 +428,7 @@ export class Estimateexpense {
 
     let num = Number(value);
 
-    if (controlName === 'tutionfees' && num >= 10000001) {
+    if ((controlName === 'tutionfees' && num >= 10000001) || (controlName === 'amountINR' && num >= 10000001)) {
       this.amterror = true;
     } else { this.amterror = false; }
 
@@ -423,8 +449,10 @@ export class Estimateexpense {
     }
 
   }
-   formatAmount1(event: any, controlName: string, control: AbstractControl) {
-  const group = control as FormGroup;
+
+  //old
+  formatAmount2(event: any, controlName: string, control: AbstractControl) {
+    const group = control as FormGroup;
     let value = event.target.value;
 
     if (!value) return;
@@ -442,21 +470,79 @@ export class Estimateexpense {
 
     let num = Number(value);
 
-    if (controlName === 'tutionfees' && num >= 10000001) {
+    if ((controlName === 'tutionfees' && num >= 10000001) || (controlName === 'amountINR' && num >= 10000001)) {
       this.amterror = true;
     } else { this.amterror = false; }
 
+    console.log(group.value.securityfrequency)
 
+    this.amtlimit = false;
+    if (group.value.securityfrequency == 'Weekly' && num > 100000) {
+      this.amtlimit = true;
+    }
+    if (group.value.securityfrequency == 'Monthly' && num > 5000000) {
+      this.amtlimit = true;
+    }
+    if (group.value.securityfrequency == 'Yearly' && num > 10000000) {
+      this.amtlimit = true;
+    }
 
     const formatted = this.formatIndian(num.toString());
-     if (group) {
+    if (group) {
+      group.get(controlName)?.setValue(formatted, { emitEvent: false });
+    } else {
+      this.expenseForm.get(controlName)?.setValue(formatted, { emitEvent: false });
+    }
+
+  }
+
+  formatAmount1(event: any, controlName: string, control: AbstractControl) {
+    const group = control as FormGroup;
+    let value = event.target.value;
+
+    if (!value) return;
+
+    value = value.replace(/,/g, '').replace(/[^0-9.]/g, '');
+    const parts = value.split('.');
+    if (parts.length > 2) value = parts[0] + '.' + parts.slice(1).join('');
+    const num = Number(value);
+
+    const formatted = this.formatIndian(num.toString());
     group.get(controlName)?.setValue(formatted, { emitEvent: false });
-  } else {
-    this.expenseForm.get(controlName)?.setValue(formatted, { emitEvent: false });
+    this.validateAmount(group);
   }
 
-  }
 
+// ✅ Handles comma-separated strings perfectly
+validateAmount(group: FormGroup) {
+  const amountStr = group.get('amountINR')?.value;  // "50,00,000"
+  const frequency = group.get('securityfrequency')?.value || 'Monthly';
+  
+  const cleanINR = Number(amountStr.toString().replace(/,/g, ''));  // 5000000
+  
+  const limits = {
+    'Weekly': 100000,     // → "1,00,000"
+    'Monthly': 5000000,   // → "50,00,000" 
+    'Yearly': 10000000    // → "1,00,00,000"
+  };
+
+  const exceedsLimit = cleanINR > limits[frequency as keyof typeof limits];
+  
+  group.get('amountINR')?.setErrors(exceedsLimit ? { exceedsLimit: true } : null);
+}
+  getFormattedLimit(frequency: string): string {
+  const limits = {
+    'Weekly': 100000,
+    'Monthly': 5000000,
+    'Yearly': 10000000
+  };
+  const limit = limits[frequency as keyof typeof limits] || 5000000;
+  return this.formatIndian(limit.toString()); 
+}
+
+  getFrequencyLabel(frequency: string): string {
+    return frequency || 'Monthly';
+  }
 
   formatIndian(x: string): string {
     return new Intl.NumberFormat('en-IN').format(Number(x));
@@ -504,15 +590,15 @@ export class Estimateexpense {
         if (type === 'living') {
 
           const livingArray = this.livingexpenses;
-          // livingArray.removeAt(index);
+          livingArray.removeAt(index);
 
-          const categoryToRemove = livingArray.at(index).get('category')?.value;
+          // const categoryToRemove = livingArray.at(index).get('category')?.value;
 
-          for (let i = livingArray.length - 1; i >= 0; i--) {
-            if (livingArray.at(i).get('category')?.value === categoryToRemove) {
-              livingArray.removeAt(i);
-            }
-          }
+          // for (let i = livingArray.length - 1; i >= 0; i--) {
+          //   if (livingArray.at(i).get('category')?.value === categoryToRemove) {
+          //     livingArray.removeAt(i);
+          //   }
+          // }
 
           const livcategories = livingArray.controls.map(
             ctrl => ctrl.get('category')?.value
@@ -523,15 +609,15 @@ export class Estimateexpense {
         else {
 
           const miscArray = this.miscexpenses;
-          // miscArray.removeAt(index);
+          miscArray.removeAt(index);
 
-          const categoryToRemove = miscArray.at(index).get('category')?.value;
+          // const categoryToRemove = miscArray.at(index).get('category')?.value;
 
-          for (let i = miscArray.length - 1; i >= 0; i--) {
-            if (miscArray.at(i).get('category')?.value === categoryToRemove) {
-              miscArray.removeAt(i);
-            }
-          }
+          // for (let i = miscArray.length - 1; i >= 0; i--) {
+          //   if (miscArray.at(i).get('category')?.value === categoryToRemove) {
+          //     miscArray.removeAt(i);
+          //   }
+          // }
 
           const miscategories = miscArray.controls.map(
             ctrl => ctrl.get('category')?.value
@@ -547,16 +633,16 @@ export class Estimateexpense {
     this.stepperService.previous();
   }
 
-  next1() {
 
-    this.stepperService.next();
-  }
   next() {
 
+    // alert(this.expenseForm.get('tutionfees')?.value)
     const livingArray = this.expenseForm.get('livingexpenses') as FormArray;
     const miscArray = this.expenseForm.get('miscexpenses') as FormArray;
-
+    const tutionfee = this.expenseForm.get('tutionfees')
     let invalid = false;
+
+
 
     livingArray.controls.forEach(control => {
       if (control.invalid) {
@@ -572,9 +658,10 @@ export class Estimateexpense {
       }
     });
 
-    if (invalid || this.amterror) {
-      console.log("invalid ");
 
+
+    if (invalid || this.amterror || !tutionfee?.value || tutionfee.value < 0) {
+      console.log("Form is invalid or tuition fee is missing/negative");
       return;
     }
 
@@ -613,4 +700,5 @@ export class Estimateexpense {
 
 
   }
+
 }

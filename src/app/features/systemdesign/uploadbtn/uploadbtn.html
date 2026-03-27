@@ -1,4 +1,4 @@
-<div class="upload-wrapper1" [ngClass]="getStateClass()">
+<div class="upload-wrapper1" [ngClass]="getStateClass()" >
   <div class="upload-label">{{ label}}<span class="text-danger" *ngIf="required">*</span></div>
 
   <!-- <div class="upload-label" [class.error-text]="state === 'error'" [class.success-text]="state === 'success'">
@@ -29,12 +29,9 @@
     </div>
 
     <!-- Uploading State -->
-    <div *ngIf="state === 'uploading'" class="upload-content uploading">
+    <div *ngIf="state === 'uploading'" class="upload-content uploading" >
       <div class="file-info">
-        <div class="file-name-row">
-          <span class="file-name">{{ fileName }}</span>
-          <span class="progress-text">{{ progress }}%</span>
-        </div>
+        
         <div class="progress-bar-container">
           <div class="progress-bar" [style.width.%]="progress"></div>
         </div>
