@@ -401,21 +401,29 @@ export class Estimateexpense {
     return total;
   }
 
-  handleAmountInput(event: any, controlName: string) {
+  handleAmountInput1(event: any, controlName: string) {
     this.main.restrictInput(event, 'decimal');
     this.formatAmount(event, controlName);
   }
 
+   handleAmountInput(event: any, controlName: string, ctrl?: any) {
+    this.main.restrictInput(event, 'decimal');
+    if (ctrl) {
+      this.formatAmount1(event, controlName, ctrl);
+    } else {
+      this.formatAmount(event, controlName);
+    }
+
+
+  }
+
   //format amount 2000000 to 20,00,000
-  formatAmount(event: any, controlName: string, index?: number, type?: 'living' | 'misc') {
+  formatAmountold(event: any, controlName: string, index?: number, type?: 'living' | 'misc') {
 
     let value = event.target.value;
-
     if (!value) return;
-
     value = value.replace(/,/g, '');
-    // value = value.replace(/\D/g, '');
-
+    
     value = value.replace(/[^0-9.]/g, '');
     const parts = value.split('.');
     if (parts.length > 2) {
@@ -450,51 +458,6 @@ export class Estimateexpense {
 
   }
 
-  //old
-  formatAmount2(event: any, controlName: string, control: AbstractControl) {
-    const group = control as FormGroup;
-    let value = event.target.value;
-
-    if (!value) return;
-
-    value = value.replace(/,/g, '');
-    value = value.replace(/[^0-9.]/g, '');
-    const parts = value.split('.');
-    if (parts.length > 2) {
-      value = parts[0] + '.' + parts.slice(1).join('');
-    }
-
-    let integerPart = parts[0];
-    let decimalPart = parts[1] ? '.' + parts[1] : '';
-
-
-    let num = Number(value);
-
-    if ((controlName === 'tutionfees' && num >= 10000001) || (controlName === 'amountINR' && num >= 10000001)) {
-      this.amterror = true;
-    } else { this.amterror = false; }
-
-    console.log(group.value.securityfrequency)
-
-    this.amtlimit = false;
-    if (group.value.securityfrequency == 'Weekly' && num > 100000) {
-      this.amtlimit = true;
-    }
-    if (group.value.securityfrequency == 'Monthly' && num > 5000000) {
-      this.amtlimit = true;
-    }
-    if (group.value.securityfrequency == 'Yearly' && num > 10000000) {
-      this.amtlimit = true;
-    }
-
-    const formatted = this.formatIndian(num.toString());
-    if (group) {
-      group.get(controlName)?.setValue(formatted, { emitEvent: false });
-    } else {
-      this.expenseForm.get(controlName)?.setValue(formatted, { emitEvent: false });
-    }
-
-  }
 
   formatAmount1(event: any, controlName: string, control: AbstractControl) {
     const group = control as FormGroup;
@@ -513,7 +476,54 @@ export class Estimateexpense {
   }
 
 
-// ✅ Handles comma-separated strings perfectly
+formatAmount(event: any, controlName: string) {
+    let value = event.target.value;
+    if (!value) return;
+    value = value.replace(/,/g, '');
+    value = value.replace(/[^0-9.]/g, '');
+    const parts = value.split('.');
+    if (parts.length > 2) {
+      value = parts[0] + '.' + parts.slice(1).join('');
+    }
+
+    let integerPart = parts[0];
+    let decimalPart = parts[1] ? '.' + parts[1] : '';
+
+    let num = Number(value);
+    const formatted = this.formatIndian(num.toString());
+    this.expenseForm.get(controlName)?.setValue(formatted, { emitEvent: false });
+   
+
+  }
+
+  formatAmountfromarray(event: any, controlName: string, control: AbstractControl) {
+    const group = control as FormGroup;
+    let value = event.target.value;
+
+    if (!value) return;
+
+    value = value.replace(/,/g, '');
+    value = value.replace(/[^0-9.]/g, '');
+    const parts = value.split('.');
+    if (parts.length > 2) {
+      value = parts[0] + '.' + parts.slice(1).join('');
+    }
+
+    let integerPart = parts[0];
+    let decimalPart = parts[1] ? '.' + parts[1] : '';
+
+
+    let num = Number(value);
+    const formatted = this.formatIndian(num.toString());
+
+    if (group) {
+      group.get(controlName)?.setValue(formatted, { emitEvent: false });
+    } else {
+      this.expenseForm.get(controlName)?.setValue(formatted, { emitEvent: false });
+    }
+
+  }
+
 validateAmount(group: FormGroup) {
   const amountStr = group.get('amountINR')?.value;  // "50,00,000"
   const frequency = group.get('securityfrequency')?.value || 'Monthly';

@@ -11,7 +11,7 @@
                     <button class="accordion-button table-head" [class.collapsed]="!openIndex.includes(i)" type="button"
                         (click)="toggle(i)">
 
-                        {{ acc.title }}<span *ngIf="acc" class="text-danger">*</span>
+                        {{ acc.title }}
                     </button>
                 </h2>
 
@@ -31,7 +31,7 @@
                         </ng-container>
 
 
-                       
+
 
                     </div>
                 </div>
@@ -42,18 +42,67 @@
 
         <ng-template #refernce1Template let-i="index">
 
-                            <div class="row common-details-box d-flex flex-row ">
-                                <div class="col">
-                                </div>
-                            </div>
-                        </ng-template>
-                        <ng-template #refernce2Template let-i="index">
+            <div class="row common-details-box d-flex flex-row ">
+                <form [formGroup]="summaryForm">
+                    <div class="info-grid-img">
+                        <div class="info-item d-flex flex-column"
+                            *ngFor="let field of otherFields; trackBy: trackByKey">
 
-                            <div class="row common-details-box d-flex flex-row ">
-                                <div class="col">
-                                </div>
-                            </div>
-                        </ng-template>
+                            <label class="text-label">{{ field.label }}</label>
 
-        </form>
-        </div>
+
+                            <p class="text-label-data">
+                                {{ summaryForm.get(field.key)?.value || '-' }}
+                            </p>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+        </ng-template>
+        <ng-template #refernce2Template let-i="index">
+
+            <div class="row common-details-box d-flex flex-row ">
+                 <div class="info-grid-img ">
+      <div class="info-item d-flex flex-column">
+        <label class="text-label">First Name</label>
+        <p class="text-label-data">Rajesh</p>
+      </div>
+      <div class="info-item d-flex flex-column">
+        <label class="text-label">Middle Name</label>
+        <p class="text-label-data">-</p>
+      </div>
+      <div class="info-item d-flex flex-column">
+        <label class="text-label">Last Name</label>
+        <p class="text-label-data">Doe</p>
+      </div>
+      <div class="info-item d-flex flex-column">
+        <label class="text-label">Middle Name</label>
+        <p class="text-label-data">-</p>
+      </div>
+      <div class="info-item d-flex flex-column">
+        <label class="text-label">Last Name</label>
+        <p class="text-label-data">Doe</p>
+      </div>
+      <div class="info-item d-flex flex-column">
+        <label class="text-label">Middle Name</label>
+        <p class="text-label-data">-</p>
+      </div>
+      <div class="info-item d-flex flex-column">
+        <label class="text-label">Last Name</label>
+        <p class="text-label-data">Doe</p>
+      </div>
+      <div class="info-item d-flex flex-column">
+        <label class="text-label">Middle Name</label>
+        <p class="text-label-data">-</p>
+      </div>
+      <div class="info-item d-flex flex-column">
+        <label class="text-label">Last Name</label>
+        <p class="text-label-data">Doe</p>
+      </div>
+    </div> 
+            </div>
+        </ng-template>
+
+    </form>
+</div>

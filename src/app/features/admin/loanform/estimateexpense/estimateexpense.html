@@ -267,7 +267,7 @@
                   <app-inputfield type="flag" [label]="expense.get('categoryLabel')?.value + ' (INR)'"
                     formControlName="amountINR" placeholder="₹ 40,20,337" [showPhonePrefix]="true" [required]="true"
                     [showPhonePrefixnumber]="false" [maxlength]="10"
-                    (input)="formatAmount1($event,'amountINR',expense);main.restrictInput($event, 'decimal')">
+                    (input)="handleAmountInput($event,'amountINR',expense);main.restrictInput($event, 'decimal')">
                   </app-inputfield>
                   <div class="text-danger"
                     *ngIf="expense.get('amountINR')?.touched && expense.get('amountINR')?.invalid">
@@ -278,7 +278,7 @@
 
                     <div *ngIf="expense.get('amountINR')?.errors?.['exceedsLimit']">
                       Amount cannot exceed
-                      <strong>₹{{getFormattedLimit(expense.get('securityfrequency')?.value)}}</strong>
+                      ₹{{getFormattedLimit(expense.get('securityfrequency')?.value)}}
                       for {{getFrequencyLabel(expense.get('securityfrequency')?.value)}}
                     </div>
 
@@ -396,7 +396,7 @@
                   <app-inputfield type="flag" [label]="expense.get('categoryLabel')?.value + '(INR)'"
                     placeholder="₹ 40,20,337" [showPhonePrefix]="true" [showPhonePrefixnumber]="false"
                     formControlName="amountINR" [required]="true"
-                    (input)="formatAmount1($event,'amountINR',expense );main.restrictInput($event, 'decimal')">
+                    (input)="handleAmountInput($event,'amountINR',expense );main.restrictInput($event, 'decimal')">
                   </app-inputfield>
 
                   <div class="text-danger"
@@ -406,7 +406,11 @@
                       Amount (INR) is required
                     </div>
 
-
+                  <div *ngIf="expense.get('amountINR')?.errors?.['exceedsLimit']">
+                      Amount cannot exceed
+                      ₹{{getFormattedLimit(expense.get('securityfrequency')?.value)}}
+                      for {{getFrequencyLabel(expense.get('securityfrequency')?.value)}}
+                    </div>
 
                   </div>
                 </div>

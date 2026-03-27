@@ -443,9 +443,7 @@ export class Assetsinfo implements OnInit {
   //format amount 2000000 to 20,00,000
   formatAmount(event: any, controlName: string) {
     let value = event.target.value;
-
     if (!value) return;
-
     value = value.replace(/,/g, '');
     value = value.replace(/[^0-9.]/g, '');
     const parts = value.split('.');
@@ -456,13 +454,8 @@ export class Assetsinfo implements OnInit {
     let integerPart = parts[0];
     let decimalPart = parts[1] ? '.' + parts[1] : '';
 
-
     let num = Number(value);
-
-
-
     const formatted = this.formatIndian(num.toString());
-
     this.assetsForm.get(controlName)?.setValue(formatted, { emitEvent: false });
    
 

@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
-import { Router, RouterModule } from '@angular/router';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { Loanstepperservice } from '../../../../core/service/loanstepperservice';
 
 @Component({
@@ -12,13 +12,28 @@ import { Loanstepperservice } from '../../../../core/service/loanstepperservice'
 })
 export class Loanstepper implements OnInit {
   steps: any;
+   applicantId: string = '';
+  applicationId: string = '';
+  custName: string = '';
+  custARN: string = '';
 
-  constructor(public router: Router, public stepservice: Loanstepperservice) {
+   completedSteps: Set<number> = new Set();
+  constructor(public router: Router, public stepservice: Loanstepperservice,private route:ActivatedRoute,private stepperService:Loanstepperservice) {
 
   }
 
   ngOnInit() {
     this.steps = this.stepservice.steps;
+    this.route.queryParams.subscribe(params => {
+      if (params['applicantId']) {
+        this.applicantId = params['applicantId'];
+        this.applicationId = params['applicationId'];
+       this.custName = params['custName'];
+        this.custARN = params['custARN'];
+
+        this.stepperService.setLoanId(this.applicantId, this.applicationId,this.custName,this.custARN);
+      }
+    });
   }
 
   get currentIndex(): number {

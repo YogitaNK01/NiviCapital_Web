@@ -190,11 +190,17 @@ restrictInput(event: Event, type: 'text' | 'number' | 'decimal') {
     if (type === 'decimal') {
     value = value.replace(/[^0-9.]+/g, '');
 
-    // allow only one decimal point
+   
     const parts = value.split('.');
     if (parts.length > 2) {
       value = parts[0] + '.' + parts.slice(1).join('');
     }
+    if (parts.length === 2) {
+      if (parts[1].length > 2) {
+        value = parts[0] + '.' + parts[1].substring(0, 2);
+      }
+    }
+
   }
 
     if (value !== input.value) {
@@ -202,6 +208,41 @@ restrictInput(event: Event, type: 'text' | 'number' | 'decimal') {
       input.dispatchEvent(new Event('input'));
     }
   }
+
+  restrictInput1(event: Event, type: 'text' | 'number' | 'decimal', decimalPlaces: number = 2, isMutualFund: boolean = false) {
+  const input = event.target as HTMLInputElement;
+  let value = input.value;
+
+  if (type === 'text') {
+    value = value.replace(/[^A-Za-z ]+/g, '');
+    value = value.replace(/\s{2,}/g, ' ');
+    value = value.replace(/^\s+/, '');
+  }
+
+  if (type === 'number') {
+    value = value.replace(/[^0-9]+/g, '');
+  }
+
+  if (type === 'decimal') {
+    value = value.replace(/[^0-9.]+/g, '');
+
+    const parts = value.split('.');
+    if (parts.length > 2) {
+      value = parts[0] + '.' + parts.slice(1).join('');
+    }
+    
+    // Dynamic decimal places: 4 for mutual funds, 2 for others
+    const maxDecimalPlaces = isMutualFund ? 4 : decimalPlaces;
+    if (parts.length === 2 && parts[1].length > maxDecimalPlaces) {
+      value = parts[0] + '.' + parts[1].substring(0, maxDecimalPlaces);
+    }
+  }
+
+  if (value !== input.value) {
+    input.value = value;
+    input.dispatchEvent(new Event('input'));
+  }
+}
 
   // Indian states and cities api 
 

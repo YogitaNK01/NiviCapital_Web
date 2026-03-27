@@ -39,7 +39,7 @@ const routes: Routes = [
       { path: 'monthlyexpinfo', component: Monthlyexpenditureinfo },
       { path: 'referenceinfo', component: Referenceinfo },
       // { path: 'coapplicantinfo', component: Coapplicantinfo },
-      // { path: 'summaryinfo', component: Summaryinfo },
+      { path: 'summaryinfo', component: Summaryinfo },
     ]
   },
 

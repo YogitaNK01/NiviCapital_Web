@@ -94,7 +94,7 @@
                 <div class="col">
                     <div class="form-group mb-3">
                         <app-inputfield type="text" [required]="true" label="Value INR" [required]="true"
-                            (input)="handleAmountInput($event,'gold.goldvalue')" formControlName="goldvalue"
+                            (input)="handleAmountInput($event,'gold.goldvalue')" formControlName="goldvalue" [maxlength]="10"
                             placeholder="Enter Value" helpText="Help text" name="goldvalue">
                         </app-inputfield>
 

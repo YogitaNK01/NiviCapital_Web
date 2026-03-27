@@ -115,7 +115,7 @@ export class GeneralInfo implements OnInit {
 
       occupation: ['', Validators.required],
       qualification: ['', Validators.required],
-      institutionName: ['', [Validators.required, Validators.pattern('^[A-Za-z ]+$'),Validators.minLength(2), Validators.maxLength(100)]],
+      institutionName: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(100)]],
       state: ['', Validators.required],
       university: ['', Validators.required],
       coursetype: ['', Validators.required],
