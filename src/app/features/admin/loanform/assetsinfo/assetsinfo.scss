@@ -2,6 +2,17 @@
 @use 'typography' as *;
 @use 'common' as *;
 
+.vh-container {
+    display: flex;
+    flex-direction: column;
+    height: 90vh;
+}
+
+.base-height {
+    flex: 1;
+    overflow: auto; 
+}
+
 .blue-head-box{
     border-radius:$border_radius_m;
 background: $secondary-50;
@@ -45,3 +56,7 @@ padding: $spacing_16 $spacing_18;
   height: 52px;
 }
 
+::ng-deep app-dropdown .dropdown-container .dropdown-list {
+  max-height: 500px;
+  
+}

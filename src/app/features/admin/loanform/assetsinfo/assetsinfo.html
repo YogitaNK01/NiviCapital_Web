@@ -1,7 +1,8 @@
-<div class="base-layout">
+<div class="vh-container">
+<div class="base-layout base-height">
 
     <div class="row w-100 d-flex blue-head-box text-center">
-        <p class="text-dp-3-bold">Total Amount : ₹1,16,97,289 </p>
+        <p class="text-dp-3-bold">Total Amount : ₹{{totalamount}} </p>
     </div>
     <div class="row w-100 ">
         <div class=" d-flex  ">
@@ -29,14 +30,26 @@
                         (click)="toggle(i)">
 
                         <span class="flex-grow-1">{{ acc.title }}</span>
-                        <span class="delete-icon" (click)="removeAccordion(acc.key, i, $event)">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
-                                fill="none">
-                                <path d="M3 6H21" stroke="#25262F" stroke-width="1.5" />
-                                <path d="M8 6V4C8 3 9 2 10 2H14C15 2 16 3 16 4V6" stroke="#25262F" stroke-width="1.5" />
-                                <path d="M19 6L18 20C18 21 17 22 15 22H9C7 22 6 21 6 20L5 6" stroke="#25262F"
-                                    stroke-width="1.5" />
-                            </svg>
+                        <span class="delete-icon px-2" (click)="removeAccordion(acc.key, i, $event)">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                                        fill="none">
+                                        <path
+                                            d="M21 5.98047C17.67 5.65047 14.32 5.48047 10.98 5.48047C9 5.48047 7.02 5.58047 5.04 5.78047L3 5.98047"
+                                            stroke="#25262F" stroke-width="1.5" stroke-linecap="round"
+                                            stroke-linejoin="round" />
+                                        <path
+                                            d="M8.5 4.97L8.72 3.66C8.88 2.71 9 2 10.69 2H13.31C15 2 15.13 2.75 15.28 3.67L15.5 4.97"
+                                            stroke="#25262F" stroke-width="1.5" stroke-linecap="round"
+                                            stroke-linejoin="round" />
+                                        <path
+                                            d="M18.8484 9.14062L18.1984 19.2106C18.0884 20.7806 17.9984 22.0006 15.2084 22.0006H8.78844C5.99844 22.0006 5.90844 20.7806 5.79844 19.2106L5.14844 9.14062"
+                                            stroke="#25262F" stroke-width="1.5" stroke-linecap="round"
+                                            stroke-linejoin="round" />
+                                        <path d="M10.3281 16.5H13.6581" stroke="#25262F" stroke-width="1.5"
+                                            stroke-linecap="round" stroke-linejoin="round" />
+                                        <path d="M9.5 12.5H14.5" stroke="#25262F" stroke-width="1.5"
+                                            stroke-linecap="round" stroke-linejoin="round" />
+                                    </svg>
                         </span>
                     </button>
                 </h2>
@@ -161,7 +174,7 @@
 
                             <div class="text-dp-3-regular d-flex align-items-center justify-content-between">
                                 Property {{ i + 1 }}
-                                <span (click)="removeitem(i,'property')">
+                                <span (click)="removeitem(i,'property')"  class="delete-icon px-2">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
                                         fill="none">
                                         <path
@@ -265,7 +278,7 @@
                         <div class="row common-details-box d-flex flex-row gap-0" [formGroupName]="i">
                             <div class="text-dp-3-regular d-flex align-items-center justify-content-between">
                                 FD {{ i + 1 }}
-                                <span (click)="removeitem(i,'fd')">
+                                <span (click)="removeitem(i,'fd')" class="delete-icon px-2">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
                                         fill="none">
                                         <path
@@ -320,7 +333,7 @@
                             </div>
                             <div class="col">
                                 <div class="form-group">
-                                    <app-datepickernew formControlName="maturitydate" label="Maturity Date"
+                                    <app-datepickernew formControlName="maturitydate" label="Maturity Date" [disablePastDates]="true"
                                         placeholder="DD/MM/YYYY">
                                     </app-datepickernew>
 
@@ -400,7 +413,7 @@
                         <div class="row common-details-box d-flex flex-row gap-0" [formGroupName]="i">
                             <div class="text-dp-3-regular d-flex align-items-center justify-content-between">
                                 Assets {{ i + 1 }}
-                                <span (click)="removeitem(i,'other')">
+                                <span (click)="removeitem(i,'other')" class="delete-icon px-2">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
                                         fill="none">
                                         <path
@@ -426,14 +439,19 @@
 
                             <div class="col">
                                 <div class="form-group">
-                                    <app-inputfield type="text" [required]="true" label="Assets Type" [required]="true"
-                                        formControlName="assettype" placeholder="Enter Assets Type" helpText="Help text"
+                                    <app-inputfield type="text" [required]="true" label="Assets Name" [required]="true"
+                                        formControlName="assettype" placeholder="Enter Assets name" helpText="Help text"
                                         name="assettype" (input)="main.restrictInput($event, 'text')">
                                     </app-inputfield>
-                                    <div class="text-danger"
-                                        *ngIf="other.get('assettype')?.touched && other.get('assettype')?.invalid">
+                                    <div class="text-danger" *ngIf="other.get('assettype')?.touched && other.get('assettype')?.invalid">
                                         <div *ngIf="other.get('assettype')?.errors?.['required']">
-                                            Asset Type is required
+                                            Asset name is required
+                                        </div>
+                                        <div *ngIf="other.get('assettype')?.errors?.['minlength']">
+                                            Asset name should be minimum 2 char
+                                        </div>
+                                        <div *ngIf="other.get('assettype')?.errors?.['maxlength']">
+                                            Asset name should be maximum 50 char
                                         </div>
                                     </div>
                                 </div>
@@ -490,5 +508,5 @@
         <app-buttons type="button" label="Next" class="btn btncustomClass" color="primary" (click)="next()">
         </app-buttons>
 
-    </div>
+    </div></div>
 </div>

@@ -73,6 +73,7 @@ export class Assetsinfo implements OnInit {
   groupIdMap: { [key: string]: string[] } = {};
   assetCodeMap: { [key: string]: string } = {};
 
+  totalamount=0;
 
   constructor(private fb: FormBuilder, public main: Main, private route: ActivatedRoute, private msgBox: Msgboxservice,
     private stepperService: Loanstepperservice, private formSvc: Loanformservice, private cd: ChangeDetectorRef) { }
@@ -113,9 +114,16 @@ export class Assetsinfo implements OnInit {
     });
     this.allAssetCatagory();
 
-    if (this.selectedAssets.includes('Property')) {
+  
 
-    }
+    this.assetsForm.get('properties')?.valueChanges.subscribe(() => {
+      this.calculateGrandTotal();
+    });
+    this.assetsForm.get('fixedDeposits')?.valueChanges.subscribe(() => {
+      this.calculateGrandTotal();
+    });
+
+
   }
 
   control(path: string) {
@@ -160,7 +168,7 @@ export class Assetsinfo implements OnInit {
   //Other assets
   createOther(): FormGroup {
     return this.fb.group({
-      assettype: ['', [Validators.required, Validators.pattern('^[A-Za-z ]+$'), Validators.minLength(2), Validators.maxLength(25)]],
+      assettype: ['', [Validators.required, Validators.pattern('^[A-Za-z ]+$'), Validators.minLength(2), Validators.maxLength(50)]],
       assetamt: ['', Validators.required],
 
     });
@@ -193,27 +201,33 @@ export class Assetsinfo implements OnInit {
   }
 
   removeAccordion(key: string, index: number, event: Event) {
+    this.msgBox.open({
+      title: 'Are you sure want to Remove',
+      message: '',
+      showCancel: true,
+      onOk: () => {
+        event.stopPropagation();
 
-    event.stopPropagation();
+        this.selectedAssets = this.selectedAssets.filter(k => k !== key);
 
-    this.selectedAssets = this.selectedAssets.filter(k => k !== key);
+        this.selectedAssetIds = this.selectedAssets.flatMap(
+          group => this.groupIdMap[group] || []
+        );
 
-    this.selectedAssetIds = this.selectedAssets.flatMap(
-      group => this.groupIdMap[group] || []
-    );
+        this.openIndex = this.openIndex.filter(i => i !== index);
 
-    this.openIndex = this.openIndex.filter(i => i !== index);
+        const formKeyMap: any = {
+          GOLD: 'gold',
+          LIQUID: 'liquidAssets',
+          PROPERTY: 'properties',
+          FIXED_DEPOSIT: 'fixedDeposits',
+          INVESTMENTS: 'investments',
+          OTHERS: 'others'
+        };
 
-    const formKeyMap: any = {
-      GOLD: 'gold',
-      LIQUID: 'liquidAssets',
-      PROPERTY: 'properties',
-      FIXED_DEPOSIT: 'fixedDeposits',
-      INVESTMENTS: 'investments',
-      OTHERS: 'others'
-    };
-
-    this.assetsForm.get(formKeyMap[key])?.reset();
+        this.assetsForm.get(formKeyMap[key])?.reset();
+      }
+    });
   }
 
   submit() {
@@ -457,7 +471,7 @@ export class Assetsinfo implements OnInit {
     let num = Number(value);
     const formatted = this.formatIndian(num.toString());
     this.assetsForm.get(controlName)?.setValue(formatted, { emitEvent: false });
-   
+
 
   }
 
