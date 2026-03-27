@@ -80,6 +80,7 @@ export class Assetsinfo implements OnInit {
 
 
   ngOnInit(): void {
+    this.totalamount=100;
     this.route.queryParams.subscribe(params => {
 
       const applicantId = params['applicantId'];
@@ -117,10 +118,10 @@ export class Assetsinfo implements OnInit {
   
 
     this.assetsForm.get('properties')?.valueChanges.subscribe(() => {
-      this.calculateGrandTotal();
+      // this.calculateGrandTotal();
     });
     this.assetsForm.get('fixedDeposits')?.valueChanges.subscribe(() => {
-      this.calculateGrandTotal();
+      // this.calculateGrandTotal();
     });
 
 
