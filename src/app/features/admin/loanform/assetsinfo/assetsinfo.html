@@ -1,512 +1,525 @@
 <div class="vh-container">
-<div class="base-layout base-height">
+    <div class="base-layout base-height">
 
-    <div class="row w-100 d-flex blue-head-box text-center">
-        <p class="text-dp-3-bold">Total Amount : ₹{{totalamount}} </p>
-    </div>
-    <div class="row w-100 ">
-        <div class=" d-flex  ">
-            <div class="w-100 gap-3">
-                <!-- all categories -->
-                <app-dropdown [options]="assetsCatagories" [multiSelect]="true" [(selectedValue)]="selectedAssets"
-                    [placeholder]="'Select Assets type'"
-                    (selectedValueChange)="onAssetChange($event); SelectedAssetvalue($event)" [avatarUrl]="avatarUrl"
-                    [hasAvatar]="hasAvatar" [label]="'Assets'">
-                </app-dropdown>
-            </div>
+        <div class="row w-100 d-flex blue-head-box text-center">
+            <p class="text-dp-3-bold">Total Amount : ₹{{totalINRamt}} </p>
         </div>
-
-    </div>
-
-    <form [formGroup]="assetsForm" (ngSubmit)="submit()" id="expenseForm" class="w-100 ">
-
-        <div class=" accordion d-flex flex-column gap-4 mb-4">
-
-            <div class="accordion-item b-0" *ngFor="let acc of accordions; let i = index"
-                [hidden]="!selectedAssets.includes(acc.key)">
-
-                <h2 class="accordion-header">
-                    <button class="accordion-button table-head" [class.collapsed]="!openIndex.includes(i)" type="button"
-                        (click)="toggle(i)">
-
-                        <span class="flex-grow-1">{{ acc.title }}</span>
-                        <span class="delete-icon px-2" (click)="removeAccordion(acc.key, i, $event)">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
-                                        fill="none">
-                                        <path
-                                            d="M21 5.98047C17.67 5.65047 14.32 5.48047 10.98 5.48047C9 5.48047 7.02 5.58047 5.04 5.78047L3 5.98047"
-                                            stroke="#25262F" stroke-width="1.5" stroke-linecap="round"
-                                            stroke-linejoin="round" />
-                                        <path
-                                            d="M8.5 4.97L8.72 3.66C8.88 2.71 9 2 10.69 2H13.31C15 2 15.13 2.75 15.28 3.67L15.5 4.97"
-                                            stroke="#25262F" stroke-width="1.5" stroke-linecap="round"
-                                            stroke-linejoin="round" />
-                                        <path
-                                            d="M18.8484 9.14062L18.1984 19.2106C18.0884 20.7806 17.9984 22.0006 15.2084 22.0006H8.78844C5.99844 22.0006 5.90844 20.7806 5.79844 19.2106L5.14844 9.14062"
-                                            stroke="#25262F" stroke-width="1.5" stroke-linecap="round"
-                                            stroke-linejoin="round" />
-                                        <path d="M10.3281 16.5H13.6581" stroke="#25262F" stroke-width="1.5"
-                                            stroke-linecap="round" stroke-linejoin="round" />
-                                        <path d="M9.5 12.5H14.5" stroke="#25262F" stroke-width="1.5"
-                                            stroke-linecap="round" stroke-linejoin="round" />
-                                    </svg>
-                        </span>
-                    </button>
-                </h2>
-
-
-                <div class="accordion-collapse collapse" [class.show]="openIndex.includes(i)">
-
-                    <div class="accordion-body p-0 ">
-
-                        <ng-container *ngIf="acc.key === 'GOLD'">
-                            <ng-container *ngTemplateOutlet="goldTemplate; context:{index:i}">
-                            </ng-container>
-                        </ng-container>
-
-                        <ng-container *ngIf="acc.key === 'LIQUID'">
-                            <ng-container *ngTemplateOutlet="liquidassetsTemplate; context:{index:i}">
-                            </ng-container>
-                        </ng-container>
-
-                        <ng-container *ngIf="acc.key === 'PROPERTY'">
-                            <ng-container *ngTemplateOutlet="propertylandTemplate; context:{index:i}">
-
-                            </ng-container>
-                        </ng-container>
-
-                        <ng-container *ngIf="acc.key === 'FIXED_DEPOSIT'">
-                            <ng-container *ngTemplateOutlet="fdTemplate; context:{index:i}">
-
-                            </ng-container>
-                        </ng-container>
-
-                        <ng-container *ngIf="acc.key === 'INVESTMENTS'">
-                            <ng-container *ngTemplateOutlet="investmentTemplate; context:{index:i}">
-
-                            </ng-container>
-                        </ng-container>
-
-                        <ng-container *ngIf="acc.key === 'OTHER'">
-                            <ng-container *ngTemplateOutlet="otherTemplate; context:{index:i}">
-
-                            </ng-container>
-                        </ng-container>
-
-
-                    </div>
+        <div class="row w-100 ">
+            <div class=" d-flex  ">
+                <div class="w-100 gap-3">
+                    <!-- all categories -->
+                    <app-dropdown [options]="assetsCatagories" [multiSelect]="true" [(selectedValue)]="selectedAssets"
+                        [placeholder]="'Select Assets type'"
+                        (selectedValueChange)="onAssetChange($event); SelectedAssetvalue($event)"
+                        [avatarUrl]="avatarUrl" [hasAvatar]="hasAvatar" [label]="'Assets'">
+                    </app-dropdown>
                 </div>
-
             </div>
 
         </div>
 
-        <ng-template #goldTemplate let-i="index">
+        <form [formGroup]="assetsForm" (ngSubmit)="submit()" id="expenseForm" class="w-100 ">
 
-            <div class="row common-details-box d-flex flex-row " formGroupName="gold">
-                <div class="col">
-                    <div class="form-group mb-3">
-                        <app-inputfield type="text" [required]="true" label="Value INR" [required]="true"
-                            (input)="handleAmountInput($event,'gold.goldvalue')" formControlName="goldvalue" [maxlength]="10"
-                            placeholder="Enter Value" helpText="Help text" name="goldvalue">
-                        </app-inputfield>
+            <div class=" accordion d-flex flex-column gap-4 mb-4">
 
-                        <div class="text-danger"
-                            *ngIf="control('gold.goldvalue')?.touched && control('gold.goldvalue')?.invalid">
-                            <div *ngIf="control('gold.goldvalue')?.errors?.['required']">
-                                Gold value is required
-                            </div>
+                <div class="accordion-item b-0" *ngFor="let acc of accordions; let i = index"
+                    [hidden]="!selectedAssets.includes(acc.key)">
+
+                    <h2 class="accordion-header">
+                        <button class="accordion-button table-head" [class.collapsed]="!openIndex.includes(i)"
+                            type="button" (click)="toggle(i)">
+
+                            <span class="flex-grow-1">{{ acc.title }}</span>
+                            <span class="delete-icon px-2" (click)="removeAccordion(acc.key, i, $event)">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                                    fill="none">
+                                    <path
+                                        d="M21 5.98047C17.67 5.65047 14.32 5.48047 10.98 5.48047C9 5.48047 7.02 5.58047 5.04 5.78047L3 5.98047"
+                                        stroke="#25262F" stroke-width="1.5" stroke-linecap="round"
+                                        stroke-linejoin="round" />
+                                    <path
+                                        d="M8.5 4.97L8.72 3.66C8.88 2.71 9 2 10.69 2H13.31C15 2 15.13 2.75 15.28 3.67L15.5 4.97"
+                                        stroke="#25262F" stroke-width="1.5" stroke-linecap="round"
+                                        stroke-linejoin="round" />
+                                    <path
+                                        d="M18.8484 9.14062L18.1984 19.2106C18.0884 20.7806 17.9984 22.0006 15.2084 22.0006H8.78844C5.99844 22.0006 5.90844 20.7806 5.79844 19.2106L5.14844 9.14062"
+                                        stroke="#25262F" stroke-width="1.5" stroke-linecap="round"
+                                        stroke-linejoin="round" />
+                                    <path d="M10.3281 16.5H13.6581" stroke="#25262F" stroke-width="1.5"
+                                        stroke-linecap="round" stroke-linejoin="round" />
+                                    <path d="M9.5 12.5H14.5" stroke="#25262F" stroke-width="1.5" stroke-linecap="round"
+                                        stroke-linejoin="round" />
+                                </svg>
+                            </span>
+                        </button>
+                    </h2>
+
+
+                    <div class="accordion-collapse collapse" [class.show]="openIndex.includes(i)">
+
+                        <div class="accordion-body p-0 ">
+
+                            <ng-container *ngIf="acc.key === 'GOLD'">
+                                <ng-container *ngTemplateOutlet="goldTemplate; context:{index:i}">
+                                </ng-container>
+                            </ng-container>
+
+                            <ng-container *ngIf="acc.key === 'LIQUID'">
+                                <ng-container *ngTemplateOutlet="liquidassetsTemplate; context:{index:i}">
+                                </ng-container>
+                            </ng-container>
+
+                            <ng-container *ngIf="acc.key === 'PROPERTY'">
+                                <ng-container *ngTemplateOutlet="propertylandTemplate; context:{index:i}">
+
+                                </ng-container>
+                            </ng-container>
+
+                            <ng-container *ngIf="acc.key === 'FIXED_DEPOSIT'">
+                                <ng-container *ngTemplateOutlet="fdTemplate; context:{index:i}">
+
+                                </ng-container>
+                            </ng-container>
+
+                            <ng-container *ngIf="acc.key === 'INVESTMENTS'">
+                                <ng-container *ngTemplateOutlet="investmentTemplate; context:{index:i}">
+
+                                </ng-container>
+                            </ng-container>
+
+                            <ng-container *ngIf="acc.key === 'OTHER'">
+                                <ng-container *ngTemplateOutlet="otherTemplate; context:{index:i}">
+
+                                </ng-container>
+                            </ng-container>
+
+
                         </div>
                     </div>
+
                 </div>
 
             </div>
 
+            <ng-template #goldTemplate let-i="index">
 
+                <div class="row common-details-box d-flex flex-row " formGroupName="gold">
+                    <div class="col">
+                        <div class="form-group mb-3">
+                            <app-inputfield type="text" [required]="true" label="Value INR" [required]="true"
+                                (input)="handleAmountInput($event,'gold.goldvalue')" formControlName="goldvalue"
+                                placeholder="Enter Value" helpText="Help text" name="goldvalue">
+                            </app-inputfield>
 
-
-        </ng-template>
-
-
-        <ng-template #liquidassetsTemplate let-i="index">
-            <div class="row common-details-box d-flex flex-row " formGroupName="liquidAssets">
-                <div class="col">
-                    <div class="form-group mb-3">
-                        <app-inputfield type="text" [required]="true" label="Cash In Hand (INR)" [required]="true"
-                            formControlName="cashinhand" placeholder="Enter Value" helpText="Help text"
-                            (input)="handleAmountInput($event,'liquidAssets.cashinhand')" name="cashinhand">
-                        </app-inputfield>
-                        <div class="text-danger"
-                            *ngIf="control('liquidAssets.cashinhand')?.touched && control('liquidAssets.cashinhand')?.invalid">
-                            <div *ngIf="control('liquidAssets.cashinhand')?.errors?.['required']">
-                                Cash in hand amount is required
-                            </div>
-                        </div>
-
-                    </div>
-                </div>
-                <div class="col">
-                    <div class="form-group mb-3">
-                        <app-inputfield type="text" label="Savings Account Balance (INR)" [required]="true"
-                            placeholder="Enter Value" formControlName="savingbalance"
-                            (input)="handleAmountInput($event,'liquidAssets.savingbalance')" helpText="Help text" name="savingbalance">
-                        </app-inputfield>
-                        <div class="text-danger"
-                            *ngIf="control('liquidAssets.savingbalance')?.touched && control('liquidAssets.savingbalance')?.invalid">
-                            <div *ngIf="control('liquidAssets.savingbalance')?.errors?.['required']">
-                                Saving balance is required
+                            <div class="text-danger"
+                                *ngIf="control('gold.goldvalue')?.touched && control('gold.goldvalue')?.invalid">
+                                <div *ngIf="control('gold.goldvalue')?.errors?.['required']">
+                                    Gold value is required
+                                </div>
                             </div>
                         </div>
                     </div>
+
                 </div>
-            </div>
-
-        </ng-template>
-
-        <ng-template #propertylandTemplate let-i="index">
-            <div class="mobiledetails d-flex w-100 flex-column ">
-                <div class="w-100 gap-3">
-                    <div formArrayName="properties">
-                        @for(prop of properties.controls; track $index; let i = $index){
 
 
-                        <div class="row common-details-box d-flex flex-row gap-0 " [formGroupName]="i">
 
-                            <div class="text-dp-3-regular d-flex align-items-center justify-content-between">
-                                Property {{ i + 1 }}
-                                <span (click)="removeitem(i,'property')"  class="delete-icon px-2">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
-                                        fill="none">
-                                        <path
-                                            d="M21 5.98047C17.67 5.65047 14.32 5.48047 10.98 5.48047C9 5.48047 7.02 5.58047 5.04 5.78047L3 5.98047"
-                                            stroke="#25262F" stroke-width="1.5" stroke-linecap="round"
-                                            stroke-linejoin="round" />
-                                        <path
-                                            d="M8.5 4.97L8.72 3.66C8.88 2.71 9 2 10.69 2H13.31C15 2 15.13 2.75 15.28 3.67L15.5 4.97"
-                                            stroke="#25262F" stroke-width="1.5" stroke-linecap="round"
-                                            stroke-linejoin="round" />
-                                        <path
-                                            d="M18.8484 9.14062L18.1984 19.2106C18.0884 20.7806 17.9984 22.0006 15.2084 22.0006H8.78844C5.99844 22.0006 5.90844 20.7806 5.79844 19.2106L5.14844 9.14062"
-                                            stroke="#25262F" stroke-width="1.5" stroke-linecap="round"
-                                            stroke-linejoin="round" />
-                                        <path d="M10.3281 16.5H13.6581" stroke="#25262F" stroke-width="1.5"
-                                            stroke-linecap="round" stroke-linejoin="round" />
-                                        <path d="M9.5 12.5H14.5" stroke="#25262F" stroke-width="1.5"
-                                            stroke-linecap="round" stroke-linejoin="round" />
-                                    </svg>
-                                </span>
+
+            </ng-template>
+
+
+            <ng-template #liquidassetsTemplate let-i="index">
+                <div class="row common-details-box d-flex flex-row " formGroupName="liquidAssets">
+                    <div class="col">
+                        <div class="form-group mb-3">
+                            <app-inputfield type="text" [required]="true" label="Cash In Hand (INR)" [required]="true"
+                                formControlName="cashinhand" placeholder="Enter Value" helpText="Help text"
+                                (input)="handleAmountInput($event,'liquidAssets.cashinhand')" name="cashinhand">
+                            </app-inputfield>
+                            <div class="text-danger"
+                                *ngIf="control('liquidAssets.cashinhand')?.touched && control('liquidAssets.cashinhand')?.invalid">
+                                <div *ngIf="control('liquidAssets.cashinhand')?.errors?.['required']">
+                                    Cash in hand amount is required
+                                </div>
                             </div>
-                            <hr class="hrclass">
 
-                            <div class="col-lg-6">
+                        </div>
+                    </div>
+                    <div class="col">
+                        <div class="form-group mb-3">
+                            <app-inputfield type="text" label="Savings Account Balance (INR)" [required]="true"
+                                placeholder="Enter Value" formControlName="savingbalance"
+                                (input)="handleAmountInput($event,'liquidAssets.savingbalance')" helpText="Help text"
+                                name="savingbalance">
+                            </app-inputfield>
+                            <div class="text-danger"
+                                *ngIf="control('liquidAssets.savingbalance')?.touched && control('liquidAssets.savingbalance')?.invalid">
+                                <div *ngIf="control('liquidAssets.savingbalance')?.errors?.['required']">
+                                    Saving balance is required
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </ng-template>
+
+            <ng-template #propertylandTemplate let-i="index">
+                <div class="mobiledetails d-flex w-100 flex-column ">
+                    <div class="w-100 gap-3">
+                        <div formArrayName="properties">
+                            @for(prop of properties.controls; track $index; let i = $index){
+
+
+                            <div class="row common-details-box d-flex flex-row gap-0 " [formGroupName]="i">
+
+                                <div class="text-dp-3-regular d-flex align-items-center justify-content-between">
+                                    Property {{ i + 1 }}
+                                    <span (click)="removeitem(i,'property')" class="delete-icon px-2">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                                            viewBox="0 0 24 24" fill="none">
+                                            <path
+                                                d="M21 5.98047C17.67 5.65047 14.32 5.48047 10.98 5.48047C9 5.48047 7.02 5.58047 5.04 5.78047L3 5.98047"
+                                                stroke="#25262F" stroke-width="1.5" stroke-linecap="round"
+                                                stroke-linejoin="round" />
+                                            <path
+                                                d="M8.5 4.97L8.72 3.66C8.88 2.71 9 2 10.69 2H13.31C15 2 15.13 2.75 15.28 3.67L15.5 4.97"
+                                                stroke="#25262F" stroke-width="1.5" stroke-linecap="round"
+                                                stroke-linejoin="round" />
+                                            <path
+                                                d="M18.8484 9.14062L18.1984 19.2106C18.0884 20.7806 17.9984 22.0006 15.2084 22.0006H8.78844C5.99844 22.0006 5.90844 20.7806 5.79844 19.2106L5.14844 9.14062"
+                                                stroke="#25262F" stroke-width="1.5" stroke-linecap="round"
+                                                stroke-linejoin="round" />
+                                            <path d="M10.3281 16.5H13.6581" stroke="#25262F" stroke-width="1.5"
+                                                stroke-linecap="round" stroke-linejoin="round" />
+                                            <path d="M9.5 12.5H14.5" stroke="#25262F" stroke-width="1.5"
+                                                stroke-linecap="round" stroke-linejoin="round" />
+                                        </svg>
+                                    </span>
+                                </div>
+                                <hr class="hrclass">
+
+                                <div class="col-lg-6">
+                                    <div class="form-group mb-3">
+                                        <app-dropdown [options]="selectPorperty" formControlName="propertytype"
+                                            [(selectedValue)]="selectedPropertyIds"
+                                            [placeholder]="'Select Property Type'" [required]="true"
+                                            (selectedValueChange)="onchange($event,'property')" [avatarUrl]="avatarUrl"
+                                            [hasAvatar]="hasAvatar" [label]="'Assets'">
+                                        </app-dropdown>
+
+                                    </div>
+                                </div>
+                                <div class="col-lg-6">
+                                    <div class="form-group mb-3">
+                                        <app-dropdown [options]="selectOwnertype" formControlName="ownershiptype"
+                                            [placeholder]="'Select Ownership type'" [required]="true"
+                                            (selectedValueChange)="onchange($event,'propertyOwnertype')"
+                                            [avatarUrl]="avatarUrl" [hasAvatar]="hasAvatar" [label]="'Ownership Type'">
+                                        </app-dropdown>
+
+
+                                    </div>
+                                </div>
+                                <div class="col-lg-6">
+                                    <div class="form-group ">
+                                        <app-inputfield type="text" [required]="true" label="Market Value (INR)"
+                                            [required]="true" formControlName="marketval" placeholder="Enter Value"
+                                            helpText="Help text" name="marketval"
+                                            (input)="handleAmountInput($event,'marketval',prop)">
+                                        </app-inputfield>
+                                        <div class="text-danger"
+                                            *ngIf="prop.get('marketval')?.touched && prop.get('marketval')?.invalid">
+                                            <div *ngIf="prop.get('marketval')?.errors?.['required']">
+                                                Market value is required
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                </div>
+                                <div class="col-lg-6">
+                                    <div class="form-group ">
+                                        <app-inputfield type="text" [required]="true" label="Location / Address"
+                                            [required]="true" placeholder="Enter Value" formControlName="location"
+                                            helpText="Help text" name="location"
+                                            (input)="main.restrictInput($event, 'text')">
+                                        </app-inputfield>
+                                        <div class="text-danger"
+                                            *ngIf="prop.get('location')?.touched && prop.get('location')?.invalid">
+                                            <div *ngIf="prop.get('location')?.errors?.['required']">
+                                                Location is required
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+
+                            @if(i === properties.length - 1 ) {
+                            <div class="row common-details-box pt-0 pb-0 ">
+
                                 <div class="form-group mb-3">
-                                    <app-dropdown [options]="selectPorperty" formControlName="propertytype"
-                                        [(selectedValue)]="selectedPropertyIds" [placeholder]="'Select Property Type'"
-                                        [required]="true" (selectedValueChange)="onchange($event,'property')"
-                                        [avatarUrl]="avatarUrl" [hasAvatar]="hasAvatar" [label]="'Assets'">
-                                    </app-dropdown>
-
+                                    <app-buttons label="Add Property" class="btn btn-icon Add btncustomClass"
+                                        [outline]="true" (click)="addProperty()">
+                                        <img src="/assets/images/icons/addred.svg">
+                                    </app-buttons>
                                 </div>
                             </div>
-                            <div class="col-lg-6">
+                            }
+                            }
+                        </div>
+                    </div>
+                </div>
+            </ng-template>
+
+            <ng-template #fdTemplate let-i="index">
+                <div class="mobiledetails d-flex w-100 flex-column ">
+                    <div class="w-100 gap-3">
+                        <div formArrayName="fixedDeposits">
+                            @for(fd of fixedDeposits.controls; track $index; let i = $index){
+                            <div class="row common-details-box d-flex flex-row gap-0" [formGroupName]="i">
+                                <div class="text-dp-3-regular d-flex align-items-center justify-content-between">
+                                    FD {{ i + 1 }}
+                                    <span (click)="removeitem(i,'fd')" class="delete-icon px-2">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                                            viewBox="0 0 24 24" fill="none">
+                                            <path
+                                                d="M21 5.98047C17.67 5.65047 14.32 5.48047 10.98 5.48047C9 5.48047 7.02 5.58047 5.04 5.78047L3 5.98047"
+                                                stroke="#25262F" stroke-width="1.5" stroke-linecap="round"
+                                                stroke-linejoin="round" />
+                                            <path
+                                                d="M8.5 4.97L8.72 3.66C8.88 2.71 9 2 10.69 2H13.31C15 2 15.13 2.75 15.28 3.67L15.5 4.97"
+                                                stroke="#25262F" stroke-width="1.5" stroke-linecap="round"
+                                                stroke-linejoin="round" />
+                                            <path
+                                                d="M18.8484 9.14062L18.1984 19.2106C18.0884 20.7806 17.9984 22.0006 15.2084 22.0006H8.78844C5.99844 22.0006 5.90844 20.7806 5.79844 19.2106L5.14844 9.14062"
+                                                stroke="#25262F" stroke-width="1.5" stroke-linecap="round"
+                                                stroke-linejoin="round" />
+                                            <path d="M10.3281 16.5H13.6581" stroke="#25262F" stroke-width="1.5"
+                                                stroke-linecap="round" stroke-linejoin="round" />
+                                            <path d="M9.5 12.5H14.5" stroke="#25262F" stroke-width="1.5"
+                                                stroke-linecap="round" stroke-linejoin="round" />
+                                        </svg>
+                                    </span>
+                                </div>
+                                <hr class="hrclass">
+
+                                <div class="col">
+                                    <div class="form-group">
+                                        <app-inputfield type="text" [required]="true" label="Bank Name"
+                                            [required]="true" formControlName="bankname" placeholder="Enter Bank Name"
+                                            helpText="Help text" name="bankname"
+                                            (input)="main.restrictInput($event, 'text')">
+                                        </app-inputfield>
+                                        <div class="text-danger"
+                                            *ngIf="fd.get('bankname')?.touched && fd.get('bankname')?.invalid">
+                                            <div *ngIf="fd.get('bankname')?.errors?.['required']">
+                                                Bank Name is required
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col">
+                                    <div class="form-group">
+                                        <app-inputfield type="text" [required]="true" label="Amount (INR)"
+                                            [required]="true" formControlName="bankamt" placeholder="Enter Value"
+                                            helpText="Help text" name="bankamt"
+                                            (input)="handleAmountInput($event,'bankamt',fd)">
+                                        </app-inputfield>
+                                        <div class="text-danger"
+                                            *ngIf="fd.get('bankamt')?.touched && fd.get('bankamt')?.invalid">
+                                            <div *ngIf="fd.get('bankamt')?.errors?.['required']">
+                                                Amount is required
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                </div>
+                                <div class="col">
+                                    <div class="form-group">
+                                        <app-datepickernew formControlName="maturitydate" label="Maturity Date"
+                                            [disablePastDates]="true" placeholder="DD/MM/YYYY">
+                                        </app-datepickernew>
+                                        <div class="text-danger"
+                                            *ngIf="fd.get('maturitydate')?.touched && fd.get('maturitydate')?.errors?.['minDateError']">
+                                            Maturity date cannot be in the past
+                                        </div>
+
+                                    </div>
+                                </div>
+
+                            </div>
+                            @if(i === fixedDeposits.length - 1 ) {
+                            <div class="row common-details-box pt-0 pb-0 ">
+
                                 <div class="form-group mb-3">
-                                    <app-dropdown [options]="selectOwnertype" formControlName="ownershiptype"
-                                         [placeholder]="'Select Ownership type'"
-                                        [required]="true" (selectedValueChange)="onchange($event,'propertyOwnertype')"
-                                        [avatarUrl]="avatarUrl" [hasAvatar]="hasAvatar" [label]="'Ownership Type'">
-                                    </app-dropdown>
-
-
+                                    <app-buttons label="Add Fixed Deposit" class="btn btn-icon Add btncustomClass"
+                                        [outline]="true" (click)="addFD()">
+                                        <img src="/assets/images/icons/addred.svg">
+                                    </app-buttons>
                                 </div>
                             </div>
-                            <div class="col-lg-6">
-                                <div class="form-group ">
-                                    <app-inputfield type="text" [required]="true" label="Market Value (INR)"
-                                        [required]="true" formControlName="marketval" placeholder="Enter Value"
-                                        helpText="Help text" name="marketval"
-                                        (input)="handleAmountInput($event,'marketval',prop)">
-                                    </app-inputfield>
-                                    <div class="text-danger"
-                                        *ngIf="prop.get('marketval')?.touched && prop.get('marketval')?.invalid">
-                                        <div *ngIf="prop.get('marketval')?.errors?.['required']">
-                                            Market value is required
-                                        </div>
-                                    </div>
-
-                                </div>
-                            </div>
-                            <div class="col-lg-6">
-                                <div class="form-group ">
-                                    <app-inputfield type="text" [required]="true" label="Location / Address"
-                                        [required]="true" placeholder="Enter Value" formControlName="location"
-                                        helpText="Help text" name="location"
-                                        (input)="main.restrictInput($event, 'text')">
-                                    </app-inputfield>
-                                    <div class="text-danger"
-                                        *ngIf="prop.get('location')?.touched && prop.get('location')?.invalid">
-                                        <div *ngIf="prop.get('location')?.errors?.['required']">
-                                            Location is required
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
+                            }
+                            }
                         </div>
-
-                        @if(i === properties.length - 1 ) {
-                        <div class="row common-details-box pt-0 pb-0 ">
-
-                            <div class="form-group mb-3">
-                                <app-buttons label="Add Property" class="btn btn-icon Add btncustomClass"
-                                    [outline]="true" (click)="addProperty()">
-                                    <img src="/assets/images/icons/addred.svg">
-                                </app-buttons>
-                            </div>
-                        </div>
-                        }
-                        }
                     </div>
                 </div>
-            </div>
-        </ng-template>
+            </ng-template>
 
-        <ng-template #fdTemplate let-i="index">
-            <div class="mobiledetails d-flex w-100 flex-column ">
-                <div class="w-100 gap-3">
-                    <div formArrayName="fixedDeposits">
-                        @for(fd of fixedDeposits.controls; track $index; let i = $index){
-                        <div class="row common-details-box d-flex flex-row gap-0" [formGroupName]="i">
-                            <div class="text-dp-3-regular d-flex align-items-center justify-content-between">
-                                FD {{ i + 1 }}
-                                <span (click)="removeitem(i,'fd')" class="delete-icon px-2">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
-                                        fill="none">
-                                        <path
-                                            d="M21 5.98047C17.67 5.65047 14.32 5.48047 10.98 5.48047C9 5.48047 7.02 5.58047 5.04 5.78047L3 5.98047"
-                                            stroke="#25262F" stroke-width="1.5" stroke-linecap="round"
-                                            stroke-linejoin="round" />
-                                        <path
-                                            d="M8.5 4.97L8.72 3.66C8.88 2.71 9 2 10.69 2H13.31C15 2 15.13 2.75 15.28 3.67L15.5 4.97"
-                                            stroke="#25262F" stroke-width="1.5" stroke-linecap="round"
-                                            stroke-linejoin="round" />
-                                        <path
-                                            d="M18.8484 9.14062L18.1984 19.2106C18.0884 20.7806 17.9984 22.0006 15.2084 22.0006H8.78844C5.99844 22.0006 5.90844 20.7806 5.79844 19.2106L5.14844 9.14062"
-                                            stroke="#25262F" stroke-width="1.5" stroke-linecap="round"
-                                            stroke-linejoin="round" />
-                                        <path d="M10.3281 16.5H13.6581" stroke="#25262F" stroke-width="1.5"
-                                            stroke-linecap="round" stroke-linejoin="round" />
-                                        <path d="M9.5 12.5H14.5" stroke="#25262F" stroke-width="1.5"
-                                            stroke-linecap="round" stroke-linejoin="round" />
-                                    </svg>
-                                </span>
-                            </div>
-                            <hr class="hrclass">
+            <ng-template #investmentTemplate let-i="index">
+                <div class="row common-details-box d-flex flex-row " formGroupName="investments">
+                    <div class="col">
+                        <div class="form-group mb-3">
+                            <app-dropdown [options]="selectInvestments" [(selectedValue)]="selectedInvestmentIds"
+                                [placeholder]="'Select type'" [required]="true"
+                                (selectedValueChange)="onchange($event,'investment')" [avatarUrl]="avatarUrl"
+                                [hasAvatar]="hasAvatar" [label]="'Select Type'">
+                            </app-dropdown>
 
-                            <div class="col">
-                                <div class="form-group">
-                                    <app-inputfield type="text" [required]="true" label="Bank Name" [required]="true"
-                                        formControlName="bankname" placeholder="Enter Bank Name" helpText="Help text"
-                                        name="bankname" (input)="main.restrictInput($event, 'text')">
-                                    </app-inputfield>
-                                    <div class="text-danger"
-                                        *ngIf="fd.get('bankname')?.touched && fd.get('bankname')?.invalid">
-                                        <div *ngIf="fd.get('bankname')?.errors?.['required']">
-                                            Bank Name is required
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col">
-                                <div class="form-group">
-                                    <app-inputfield type="text" [required]="true" label="Amount (INR)" [required]="true"
-                                        formControlName="bankamt" placeholder="Enter Value" helpText="Help text"
-                                        name="bankamt" (input)="handleAmountInput($event,'bankamt',fd)">
-                                    </app-inputfield>
-                                    <div class="text-danger"
-                                        *ngIf="fd.get('bankamt')?.touched && fd.get('bankamt')?.invalid">
-                                        <div *ngIf="fd.get('bankamt')?.errors?.['required']">
-                                            Amount is required
-                                        </div>
-                                    </div>
-
-                                </div>
-                            </div>
-                            <div class="col">
-                                <div class="form-group">
-                                    <app-datepickernew formControlName="maturitydate" label="Maturity Date" [disablePastDates]="true"
-                                        placeholder="DD/MM/YYYY">
-                                    </app-datepickernew>
-
-
+                        </div>
+                    </div>
+                    <div class="col">
+                        <div class="form-group mb-3">
+                            <app-inputfield type="text" [required]="true" label="Stocks (INR)" [required]="true"
+                                formControlName="stockvalue" placeholder="Enter Value" helpText="Help text"
+                                (input)="handleAmountInput($event,'investments.stockvalue')" name="stockvalue">
+                            </app-inputfield>
+                            <div class="text-danger"
+                                *ngIf="control('investments.stockvalue')?.touched && control('investments.stockvalue')?.invalid">
+                                <div *ngIf="control('investments.stockvalue')?.errors?.['required']">
+                                    Stock value is required
                                 </div>
                             </div>
 
                         </div>
-                        @if(i === fixedDeposits.length - 1 ) {
-                        <div class="row common-details-box pt-0 pb-0 ">
-
-                            <div class="form-group mb-3">
-                                <app-buttons label="Add Fixed Deposit" class="btn btn-icon Add btncustomClass"
-                                    [outline]="true" (click)="addFD()">
-                                    <img src="/assets/images/icons/addred.svg">
-                                </app-buttons>
+                    </div>
+                    <div class="col">
+                        <div class="form-group mb-3">
+                            <app-inputfield type="text" [required]="true" label="Mutual Funds (INR)" [required]="true"
+                                formControlName="mutualfundvalue" placeholder="Enter Value" helpText="Help text"
+                                (input)="handleAmountInput($event,'investments.mutualfundvalue')"
+                                name="mutualfundvalue">
+                            </app-inputfield>
+                            <div class="text-danger"
+                                *ngIf="control('investments.mutualfundvalue')?.touched && control('investments.mutualfundvalue')?.invalid">
+                                <div *ngIf="control('investments.mutualfundvalue')?.errors?.['required']">
+                                    Mutual fund value is required
+                                </div>
                             </div>
+
                         </div>
-                        }
-                        }
                     </div>
                 </div>
-            </div>
-        </ng-template>
+            </ng-template>
 
-        <ng-template #investmentTemplate let-i="index">
-            <div class="row common-details-box d-flex flex-row " formGroupName="investments">
-                <div class="col">
-                    <div class="form-group mb-3">
-                        <app-dropdown [options]="selectInvestments" [(selectedValue)]="selectedInvestmentIds"
-                            [placeholder]="'Select type'" [required]="true"
-                            (selectedValueChange)="onchange($event,'investment')" [avatarUrl]="avatarUrl"
-                            [hasAvatar]="hasAvatar" [label]="'Select Type'">
-                        </app-dropdown>
+            <ng-template #otherTemplate let-i="index">
 
-                    </div>
-                </div>
-                <div class="col">
-                    <div class="form-group mb-3">
-                        <app-inputfield type="text" [required]="true" label="Stocks (INR)" [required]="true"
-                            formControlName="stockvalue" placeholder="Enter Value" helpText="Help text"
-                           (input)="handleAmountInput($event,'investments.stockvalue')" name="stockvalue">
-                        </app-inputfield>
-                        <div class="text-danger"
-                            *ngIf="control('investments.stockvalue')?.touched && control('investments.stockvalue')?.invalid">
-                            <div *ngIf="control('investments.stockvalue')?.errors?.['required']">
-                                Stock value is required
-                            </div>
-                        </div>
+                <div class="mobiledetails d-flex w-100 flex-column ">
+                    <div class="w-100 gap-3">
+                        <div formArrayName="otherassets">
+                            @for(other of otherassets.controls; track $index; let i = $index){
+                            <div class="row common-details-box d-flex flex-row gap-0" [formGroupName]="i">
+                                <div class="text-dp-3-regular d-flex align-items-center justify-content-between">
+                                    Assets {{ i + 1 }}
+                                    <span (click)="removeitem(i,'other')" class="delete-icon px-2">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                                            viewBox="0 0 24 24" fill="none">
+                                            <path
+                                                d="M21 5.98047C17.67 5.65047 14.32 5.48047 10.98 5.48047C9 5.48047 7.02 5.58047 5.04 5.78047L3 5.98047"
+                                                stroke="#25262F" stroke-width="1.5" stroke-linecap="round"
+                                                stroke-linejoin="round" />
+                                            <path
+                                                d="M8.5 4.97L8.72 3.66C8.88 2.71 9 2 10.69 2H13.31C15 2 15.13 2.75 15.28 3.67L15.5 4.97"
+                                                stroke="#25262F" stroke-width="1.5" stroke-linecap="round"
+                                                stroke-linejoin="round" />
+                                            <path
+                                                d="M18.8484 9.14062L18.1984 19.2106C18.0884 20.7806 17.9984 22.0006 15.2084 22.0006H8.78844C5.99844 22.0006 5.90844 20.7806 5.79844 19.2106L5.14844 9.14062"
+                                                stroke="#25262F" stroke-width="1.5" stroke-linecap="round"
+                                                stroke-linejoin="round" />
+                                            <path d="M10.3281 16.5H13.6581" stroke="#25262F" stroke-width="1.5"
+                                                stroke-linecap="round" stroke-linejoin="round" />
+                                            <path d="M9.5 12.5H14.5" stroke="#25262F" stroke-width="1.5"
+                                                stroke-linecap="round" stroke-linejoin="round" />
+                                        </svg>
+                                    </span>
+                                </div>
+                                <hr class="hrclass">
 
-                    </div>
-                </div>
-                <div class="col">
-                    <div class="form-group mb-3">
-                        <app-inputfield type="text" [required]="true" label="Mutual Funds (INR)" [required]="true"
-                            formControlName="mutualfundvalue" placeholder="Enter Value" helpText="Help text"
-                            (input)="handleAmountInput($event,'investments.mutualfundvalue')" name="mutualfundvalue">
-                        </app-inputfield>
-                        <div class="text-danger"
-                            *ngIf="control('investments.mutualfundvalue')?.touched && control('investments.mutualfundvalue')?.invalid">
-                            <div *ngIf="control('investments.mutualfundvalue')?.errors?.['required']">
-                                Mutual fund value is required
-                            </div>
-                        </div>
-
-                    </div>
-                </div>
-            </div>
-        </ng-template>
-
-        <ng-template #otherTemplate let-i="index">
-
-            <div class="mobiledetails d-flex w-100 flex-column ">
-                <div class="w-100 gap-3">
-                    <div formArrayName="otherassets">
-                        @for(other of otherassets.controls; track $index; let i = $index){
-                        <div class="row common-details-box d-flex flex-row gap-0" [formGroupName]="i">
-                            <div class="text-dp-3-regular d-flex align-items-center justify-content-between">
-                                Assets {{ i + 1 }}
-                                <span (click)="removeitem(i,'other')" class="delete-icon px-2">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
-                                        fill="none">
-                                        <path
-                                            d="M21 5.98047C17.67 5.65047 14.32 5.48047 10.98 5.48047C9 5.48047 7.02 5.58047 5.04 5.78047L3 5.98047"
-                                            stroke="#25262F" stroke-width="1.5" stroke-linecap="round"
-                                            stroke-linejoin="round" />
-                                        <path
-                                            d="M8.5 4.97L8.72 3.66C8.88 2.71 9 2 10.69 2H13.31C15 2 15.13 2.75 15.28 3.67L15.5 4.97"
-                                            stroke="#25262F" stroke-width="1.5" stroke-linecap="round"
-                                            stroke-linejoin="round" />
-                                        <path
-                                            d="M18.8484 9.14062L18.1984 19.2106C18.0884 20.7806 17.9984 22.0006 15.2084 22.0006H8.78844C5.99844 22.0006 5.90844 20.7806 5.79844 19.2106L5.14844 9.14062"
-                                            stroke="#25262F" stroke-width="1.5" stroke-linecap="round"
-                                            stroke-linejoin="round" />
-                                        <path d="M10.3281 16.5H13.6581" stroke="#25262F" stroke-width="1.5"
-                                            stroke-linecap="round" stroke-linejoin="round" />
-                                        <path d="M9.5 12.5H14.5" stroke="#25262F" stroke-width="1.5"
-                                            stroke-linecap="round" stroke-linejoin="round" />
-                                    </svg>
-                                </span>
-                            </div>
-                            <hr class="hrclass">
-
-                            <div class="col">
-                                <div class="form-group">
-                                    <app-inputfield type="text" [required]="true" label="Assets Name" [required]="true"
-                                        formControlName="assettype" placeholder="Enter Assets name" helpText="Help text"
-                                        name="assettype" (input)="main.restrictInput($event, 'text')">
-                                    </app-inputfield>
-                                    <div class="text-danger" *ngIf="other.get('assettype')?.touched && other.get('assettype')?.invalid">
-                                        <div *ngIf="other.get('assettype')?.errors?.['required']">
-                                            Asset name is required
-                                        </div>
-                                        <div *ngIf="other.get('assettype')?.errors?.['minlength']">
-                                            Asset name should be minimum 2 char
-                                        </div>
-                                        <div *ngIf="other.get('assettype')?.errors?.['maxlength']">
-                                            Asset name should be maximum 50 char
+                                <div class="col">
+                                    <div class="form-group">
+                                        <app-inputfield type="text" [required]="true" label="Assets Name"
+                                            [required]="true" formControlName="assettype"
+                                            placeholder="Enter Assets name" helpText="Help text" name="assettype"
+                                            (input)="main.restrictInput($event, 'text')">
+                                        </app-inputfield>
+                                        <div class="text-danger"
+                                            *ngIf="other.get('assettype')?.touched && other.get('assettype')?.invalid">
+                                            <div *ngIf="other.get('assettype')?.errors?.['required']">
+                                                Asset name is required
+                                            </div>
+                                            <div *ngIf="other.get('assettype')?.errors?.['minlength']">
+                                                Asset name should be minimum 2 char
+                                            </div>
+                                            <div *ngIf="other.get('assettype')?.errors?.['maxlength']">
+                                                Asset name should be maximum 50 char
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
-                            </div>
-                            <div class="col">
-                                <div class="form-group">
-                                    <app-inputfield type="text" [required]="true" label="Amount (INR)" [required]="true"
-                                        formControlName="assetamt" placeholder="Enter Value" helpText="Help text"
-                                        (input)="handleAmountInput($event,'assetamt')" name="assetamt">
-                                    </app-inputfield>
-                                    <div class="text-danger"
-                                        *ngIf="other.get('assetamt')?.touched && other.get('assetamt')?.invalid">
-                                        <div *ngIf="other.get('assetamt')?.errors?.['required']">
-                                            Amount is required
+                                <div class="col">
+                                    <div class="form-group">
+                                        <app-inputfield type="text" [required]="true" label="Amount (INR)"
+                                            [required]="true" formControlName="assetamt" placeholder="Enter Value"
+                                            helpText="Help text" (input)="handleAmountInput($event,'assetamt')"
+                                            name="assetamt">
+                                        </app-inputfield>
+                                        <div class="text-danger"
+                                            *ngIf="other.get('assetamt')?.touched && other.get('assetamt')?.invalid">
+                                            <div *ngIf="other.get('assetamt')?.errors?.['required']">
+                                                Amount is required
+                                            </div>
                                         </div>
-                                    </div>
 
+                                    </div>
+                                </div>
+
+
+                            </div>
+                            @if(i === otherassets.length - 1 ) {
+                            <div class="row common-details-box pt-0 pb-0 ">
+
+                                <div class="form-group mb-3">
+                                    <app-buttons label="Add Other Assets" class="btn btn-icon Add btncustomClass"
+                                        [outline]="true" (click)="addOther()">
+                                        <img src="/assets/images/icons/addred.svg">
+                                    </app-buttons>
                                 </div>
                             </div>
-
-
+                            }
+                            }
                         </div>
-                        @if(i === otherassets.length - 1 ) {
-                        <div class="row common-details-box pt-0 pb-0 ">
-
-                            <div class="form-group mb-3">
-                                <app-buttons label="Add Other Assets" class="btn btn-icon Add btncustomClass"
-                                    [outline]="true" (click)="addOther()">
-                                    <img src="/assets/images/icons/addred.svg">
-                                </app-buttons>
-                            </div>
-                        </div>
-                        }
-                        }
                     </div>
                 </div>
-            </div>
-        </ng-template>
-    </form>
+            </ng-template>
+        </form>
 
 
 
-</div>
-<hr class="footer-hr-class">
-<div class="loan-footerbtns row w-100  d-flex justify-content-between align-items-center">
-
-    <div class="col-lg-4 ">
-        <img src="../assets/images/icons/save.svg">
-        <span class="text-dp-3-regular mx-2 blue-text"> Save and Exit</span>
     </div>
-    <div class="col-lg-4  d-flex justify-content-end">
-        <app-buttons type="button" label="Back" class="btn btncustomClass" [outline]="true" (click)="back()">
-        </app-buttons>
-        <app-buttons type="button" label="Next" class="btn btncustomClass" color="primary" (click)="next()">
-        </app-buttons>
+    <hr class="footer-hr-class">
+    <div class="loan-footerbtns row w-100  d-flex justify-content-between align-items-center">
 
-    </div></div>
+        <div class="col-lg-4 ">
+            <img src="../assets/images/icons/save.svg">
+            <span class="text-dp-3-regular mx-2 blue-text"> Save and Exit</span>
+        </div>
+        <div class="col-lg-4  d-flex justify-content-end">
+            <app-buttons type="button" label="Back" class="btn btncustomClass" [outline]="true" (click)="back()">
+            </app-buttons>
+            <app-buttons type="button" label="Next" class="btn btncustomClass" color="primary" (click)="next()"
+                [disabled]="isNextDisabled">
+            </app-buttons>
+
+        </div>
+    </div>
 </div>

@@ -141,6 +141,11 @@ export class Assetsinfo implements OnInit {
     });
   }
 
+  get f() {
+    return this.assetsForm.controls;
+  }
+
+
   control(path: string) {
     return this.assetsForm.get(path);
   }
@@ -173,7 +178,7 @@ export class Assetsinfo implements OnInit {
     return this.fb.group({
       bankname: ['', [Validators.required, Validators.pattern('^[A-Za-z ]+$'), Validators.minLength(2), Validators.maxLength(25)]],
       bankamt: ['', Validators.required],
-      maturitydate: ['', Validators.required]
+      maturitydate: ['',[Validators.required,this.dateMinValidator(() => new Date())]]
     });
   }
   addFD() {
@@ -183,7 +188,7 @@ export class Assetsinfo implements OnInit {
   //Other assets
   createOther(): FormGroup {
     return this.fb.group({
-      assettype: ['', [Validators.required, Validators.pattern('^[A-Za-z ]+$'), Validators.minLength(2), Validators.maxLength(25)]],
+      assettype: ['', [Validators.required, Validators.pattern('^[A-Za-z ]+$'), Validators.minLength(2), Validators.maxLength(50)]],
       assetamt: ['', Validators.required],
 
     });
@@ -526,10 +531,10 @@ export class Assetsinfo implements OnInit {
 
   calculateGrandTotal() {
 
-    const gold = Number(this.assetsForm.get('gold.goldvalue')?.value || 0);
+    const gold = Number(this.assetsForm.get('gold.goldvalue')?.value?.toString().replace(/,/g, '') || 0);
 
-    const liquid = Number(this.assetsForm.get('liquidAssets.cashinhand')?.value || 0) +
-      Number(this.assetsForm.get('liquidAssets.savingbalance')?.value || 0);
+    const liquid = Number(this.assetsForm.get('liquidAssets.cashinhand')?.value?.toString().replace(/,/g, '') || 0) +
+      Number(this.assetsForm.get('liquidAssets.savingbalance')?.value?.toString().replace(/,/g, '') || 0);
 
     this.totalproperty = this.calculateTotal('properties', 'marketval');
     this.totalfd = this.calculateTotal('fixedDeposits', 'bankamt');
@@ -561,9 +566,64 @@ export class Assetsinfo implements OnInit {
     return new Intl.NumberFormat('en-IN').format(Number(x));
   }
 
+  // Add this getter to your component
+get isNextDisabled(): boolean {
+  const form = this.assetsForm.value;
+  
+ 
+  if (!this.selectedAssets?.length) return true;
+  
+  if (this.selectedAssets.includes('GOLD') && !form.gold?.goldvalue) return true;
+  
+  if (this.selectedAssets.includes('LIQUID')) {
+    const hasLiquidData = form.liquidAssets?.cashinhand || form.liquidAssets?.savingbalance;
+    if (!hasLiquidData) return true;
+  }
+  
+  if (this.selectedAssets.includes('PROPERTY')) {
+    const properties = this.assetsForm.get('properties') as FormArray;
+    if (!properties?.length) return true;
+  }
+  
+  if (this.selectedAssets.includes('FIXED_DEPOSIT')) {
+    const fixedDeposits = this.assetsForm.get('fixedDeposits') as FormArray;
+    if (!fixedDeposits?.length) return true;
+  }
+  
+  if (this.selectedAssets.includes('INVESTMENTS')) {
+    const hasInvestmentData = form.investments?.stockvalue || form.investments?.mutualfundvalue;
+    if (!hasInvestmentData) return true;
+  }
+  
+  if (this.selectedAssets.includes('OTHER')) {
+    const otherAssets = this.assetsForm.get('otherassets') as FormArray;
+    if (!otherAssets?.length) return true;
+  }
+  
+  return false;
+}
+
   back() {
     this.stepperService.previous();
   }
+ dateMinValidator = (getMinDate: () => Date) => {
+  return (control: any) => {
+    const value = control.value;
+     const minDate = getMinDate();
+
+    if (!value || !minDate) return null;
+
+    const selected = new Date(value);
+    const min = new Date(getMinDate());
+
+   
+    selected.setHours(0, 0, 0, 0);
+    min.setHours(0, 0, 0, 0);
+
+    return selected < min ? { minDateError: true } : null;
+   
+  };
+};
 
   patchAssetsData() {
     const data = this.formSvc.aseetsInfoData;
