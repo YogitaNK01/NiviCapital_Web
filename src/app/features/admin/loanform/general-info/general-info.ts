@@ -158,13 +158,7 @@ export class GeneralInfo implements OnInit {
     this.checkboxasset = this.formSvc.generalInfoData.hasAssets ? "Yes" : "No";
   }
 
-    // const savedData = this.stepperService.getStepData('genralinfo');
-
-    // if (savedData) {
-    //   this.registerForm.patchValue(savedData);
-      // this.restoreDropdownLabels(savedData);
-
-    // }
+  
   }
 
   get form() {
@@ -191,11 +185,13 @@ export class GeneralInfo implements OnInit {
 
   checkassetOnChange(event: any) {
     this.checkboxasset = event;
-     if(this.checkboxasset === 'yes'){
+     if(this.checkboxasset === 'Yes'){
       this.formSvc.isasset = true;
+       this.stepperService.rebuildSteps();
     }else{
       this.formSvc.isasset = false;
     }
+   
     console.log(event);
   }
   get f() {
@@ -213,6 +209,20 @@ export class GeneralInfo implements OnInit {
       }));
       // this.restoreDropdownLabels(this.registerForm.value);
     });
+    setTimeout(() => {
+       let data = this.registerForm.get('occupation')?.valueChanges.subscribe(value => {
+      const selected = this.selectoccupation.find(o => o.value === value);
+      // this.occupationlabel = selected ? selected.label : 'Current Occupation';
+      this.formSvc.isincome = selected?.label === 'Employed' ? true :selected?.label === 'Self-employed' ? true : false;
+      console.log('Selected Occupation:', this.formSvc.isincome);
+      this.formSvc.issalaried = selected?.label === 'Employed' ? true : false;
+      this.stepperService.rebuildSteps();
+    });
+    }, 10000);
+   
+
+    // console.log(data);
+    
   }
 
   getEducationdetails() {

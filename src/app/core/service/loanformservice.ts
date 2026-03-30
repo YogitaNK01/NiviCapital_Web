@@ -24,7 +24,8 @@ export class Loanformservice {
   kycdetailsID: any;
 
    isasset:boolean=false;
-  issalaries:boolean=false;
+  isincome:boolean=false;
+  issalaried:boolean=false;
   
   generalInfoData: any ;
   estExpenseInfoData: any ;

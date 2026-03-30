@@ -66,7 +66,7 @@ export class Incomeinfo {
 
   otherbusinessdoc: boolean = false;
 
-  constructor(private fb: FormBuilder, private stepperService: Loanstepperservice, private cd: ChangeDetectorRef, private loanformservice: Loanformservice, private route: ActivatedRoute, public main: Main) { }
+  constructor(private fb: FormBuilder, private stepperService: Loanstepperservice, private cd: ChangeDetectorRef, public loanformservice: Loanformservice, private route: ActivatedRoute, public main: Main) { }
   ngOnInit(): void {
     this.route.queryParams.subscribe(params => {
 
@@ -233,7 +233,7 @@ export class Incomeinfo {
 
   /** Single function to check if any document exists */
   hasDocument(documentKey: string) {
-    const documents = this.allDocuments?.some(item => item.type === documentKey) || false;
+    const documents = this.allDocuments?.some(item => item.title === documentKey) || false;
     return documents;
   }
 

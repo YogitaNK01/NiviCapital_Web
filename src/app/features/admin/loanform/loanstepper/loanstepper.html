@@ -5,16 +5,17 @@
 </div>
 <div class="stepcls">
   <div
-    *ngFor="let s of steps; let i = index"
+    *ngFor="let s of steps ; let i = index;"
     class="step"
      [ngClass]="{
       active: isActive(s.route),
       completed: isCompleted(i),
       upcoming: isUpcoming(i)
     }"
+    (click)="canNavigateTo(i) && goToStep(s.route, i)"
     
-    (click)="!isUpcoming(i) && goToStep(s.route)"
   >
+  <!-- (click)="!isUpcoming(i) && goToStep(s.route)" -->
 
     <div class="circle">{{ i + 1 | number:'2.0' }}</div>
 

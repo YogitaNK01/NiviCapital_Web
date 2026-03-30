@@ -30,7 +30,7 @@
 
         <ng-template #incomeTemplate let-i="index">
             <!-- salaried person -->
-            <div class="row  d-flex  align-items-start pt-4 common-details-box d-flex flex-column" *ngIf="isbussiness">
+            <div class="row  d-flex  align-items-start pt-4 common-details-box d-flex flex-column" *ngIf="loanformservice.issalaried">
 
                 <div class="row ">
                     <div class="text-label fw-bold mt-20">Salary Slips (Last 3 Months)</div>
@@ -52,7 +52,7 @@
 
 
 
-                            @if(handleresponse && hasDocument('SALARY_SLIP')){
+                            @if(handleresponse && hasDocument('salary1')){
                             <label class="text-label">Salary Slip 1<span class="text-danger">*</span></label>
                             <div class="addcust-img-box">
                                 <p class="text-label">{{ getDocumentName('SALARY_SLIP') }}</p>
@@ -68,9 +68,8 @@
                             </div>
 
                             } @else{
-                            <app-uploadbtn [config]="basicConfig"
-                                (fileChange)="onFileChange($event, 'salary1','LAST_3_MONTHS','SALARY_SLIP')"
-                                [uploadViaApi]="true" [required]="true" label="Salary Slip 1"
+                            <app-uploadbtn [config]="basicConfig" [uploadViaApi]="true" [required]="true"
+                                label="Salary Slip 1"
                                 (uploadStarted)="onUploadStarted($event, 'salary1','INCOME','LAST_3_MONTHS','SALARY_SLIP')"
                                 [fileuploadresponse]="handleresponse">
                             </app-uploadbtn>
@@ -78,7 +77,7 @@
 
                         </div>
                         <div class="col-lg-4 col-sm-12">
-                            @if(handleresponse && hasDocument('SALARY_SLIP')){
+                            @if(handleresponse && hasDocument('salary2')){
                             <label class="text-label">Salary Slip 1<span class="text-danger">*</span></label>
                             <div class="addcust-img-box">
                                 <p class="text-label">{{ getDocumentName('SALARY_SLIP') }}</p>
@@ -102,7 +101,7 @@
                             }
                         </div>
                         <div class="col-lg-4 col-sm-12">
-                            @if(handleresponse && hasDocument('SALARY_SLIP')){
+                            @if(handleresponse && hasDocument('salary3')){
                             <label class="text-label">Salary Slip 1<span class="text-danger">*</span></label>
                             <div class="addcust-img-box">
                                 <p class="text-label">{{ getDocumentName('SALARY_SLIP') }}</p>
@@ -149,7 +148,7 @@
                     </div>
                     <div class="row mt-20">
                         <div class="col-lg-4 col-sm-12">
-                            @if(handleresponse && hasDocument('FORM_16')){
+                            @if(handleresponse && hasDocument('Form16')){
                             <label class="text-label">Salary Slip 1<span class="text-danger">*</span></label>
                             <div class="addcust-img-box">
                                 <p class="text-label">{{ getDocumentName('FORM_16') }}</p>
@@ -194,7 +193,7 @@
                     </div>
                     <div class="row mt-20">
                         <div class="col-lg-4 col-sm-12">
-                            @if(handleresponse && hasDocument('BANK_STATEMENT')){
+                            @if(handleresponse && hasDocument('oneyearbankstatement')){
                             <label class="text-label">Salary Slip 1<span class="text-danger">*</span></label>
                             <div class="addcust-img-box">
                                 <p class="text-label">{{ getDocumentName('BANK_STATEMENT') }}</p>
@@ -240,7 +239,7 @@
                     </div>
                     <div class="row mt-20">
                         <div class="col-lg-4 col-sm-12">
-                            @if(handleresponse && hasDocument('ITR')){
+                            @if(handleresponse && hasDocument('ay1')){
                             <label class="text-label">Salary Slip 1<span class="text-danger">*</span></label>
                             <div class="addcust-img-box">
                                 <p class="text-label">{{ getDocumentName('ITR') }}</p>
@@ -263,7 +262,7 @@
                             }
                         </div>
                         <div class="col-lg-4 col-sm-12">
-                            @if(handleresponse && hasDocument('ITR')){
+                            @if(handleresponse && hasDocument('ay2')){
                             <label class="text-label">Salary Slip 1<span class="text-danger">*</span></label>
                             <div class="addcust-img-box">
                                 <p class="text-label">{{ getDocumentName('ITR') }}</p>
@@ -286,7 +285,7 @@
                             }
                         </div>
                         <div class="col-lg-4 col-sm-12">
-                            @if(handleresponse && hasDocument('ITR')){
+                            @if(handleresponse && hasDocument('ay3')){
                             <label class="text-label">Salary Slip 1<span class="text-danger">*</span></label>
                             <div class="addcust-img-box">
                                 <p class="text-label">{{ getDocumentName('ITR') }}</p>
@@ -328,43 +327,45 @@
 
                         </div>
                     </div>
-                    <div class="col-lg-4 col-sm-12 mt-20">
-                        <app-inputfield formControlName="assettitle" label="Title" placeholder="Enter text here"
-                            (input)="main.restrictInput($event, 'text')" [maxlength]="25">
-                        </app-inputfield>
+                    <div class="row">
+                        <div class="col-lg-4 col-sm-12 mt-20">
+                            <app-inputfield formControlName="assettitle" label="Title" placeholder="Enter text here"
+                                (input)="main.restrictInput($event, 'text')" [maxlength]="25">
+                            </app-inputfield>
 
 
-                        <div class="text-danger" *ngIf="f['assettitle'].touched && f['assettitle'].invalid">
+                            <div class="text-danger" *ngIf="f['assettitle'].touched && f['assettitle'].invalid">
 
-                            <div *ngIf="f['title'].errors?.['minlength']">
-                                Minimum 2 characters required
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="col-lg-4 col-sm-12 mt-20">
-                        @if(handleresponse && hasDocument('OTHER')){
-                        <label class="text-label">Salary Slip 1<span class="text-danger">*</span></label>
-                        <div class="addcust-img-box">
-                            <p class="text-label">{{ getDocumentName('OTHER') }}</p>
-                            <div class="icons">
-                                <span (click)="viewImage(getDocumentUrl('OTHER'))"><img
-                                        src="/assets/images/icons/eyered.svg" alt="view"></span>
-                                <span (click)="downloadImage(getDocumentUrl('OTHER'), getDocumentName('OTHER'))"><img
-                                        src="/assets/images/icons/import-red.svg" alt="Download"></span>
-                                <span (click)="deleteImage('OTHER')"><img src="/assets/images/icons/close.svg"
-                                        alt="Download"></span>
+                                <div *ngIf="f['title'].errors?.['minlength']">
+                                    Minimum 2 characters required
+                                </div>
                             </div>
                         </div>
 
-                        } @else{
-                        <app-uploadbtn [config]="basicConfig"
-                            (uploadStarted)="onUploadStarted($event,  'other' ,'INCOME','OTHER_INCOME','OTHER')"
-                            [uploadViaApi]="true" [fileuploadresponse]="handleresponse" [required]="true"
-                            label="Other Documents">
-                        </app-uploadbtn>}
-                    </div>
+                        <div class="col-lg-4 col-sm-12 mt-20">
+                            @if(handleresponse && hasDocument('other')){
+                            <label class="text-label">Other Documents<span class="text-danger">*</span></label>
+                            <div class="addcust-img-box">
+                                <p class="text-label">{{ getDocumentName('OTHER') }}</p>
+                                <div class="icons">
+                                    <span (click)="viewImage(getDocumentUrl('OTHER'))"><img
+                                            src="/assets/images/icons/eyered.svg" alt="view"></span>
+                                    <span
+                                        (click)="downloadImage(getDocumentUrl('OTHER'), getDocumentName('OTHER'))"><img
+                                            src="/assets/images/icons/import-red.svg" alt="Download"></span>
+                                    <span (click)="deleteImage('OTHER')"><img src="/assets/images/icons/close.svg"
+                                            alt="Download"></span>
+                                </div>
+                            </div>
 
+                            } @else{
+                            <app-uploadbtn [config]="basicConfig"
+                                (uploadStarted)="onUploadStarted($event,  'other' ,'INCOME','OTHER_INCOME','OTHER')"
+                                [uploadViaApi]="true" [fileuploadresponse]="handleresponse" [required]="true"
+                                label="Other Documents">
+                            </app-uploadbtn>}
+                        </div>
+                    </div>
                     <div class="col-lg-4 col-sm-12 mt-20">
                         <app-buttons label="Add Other Document" class="btn btn-icon Add btncustomClass" [outline]="true"
                             (click)="addotherdocuments()">
@@ -376,7 +377,7 @@
             </div>
 
             <!-- if bussiness -->
-            <div class="row  d-flex  align-items-start pt-4 common-details-box d-flex flex-column" *ngIf="!isbussiness">
+            <div class="row  d-flex  align-items-start pt-4 common-details-box d-flex flex-column" *ngIf="!loanformservice.issalaried">
 
                 <div class="row ">
                     <div class="text-label fw-bold mt-20">3 Years Financials of Business</div>
@@ -395,7 +396,7 @@
                     </div>
                     <div class="row mt-20">
                         <div class="col-lg-4 col-sm-12">
-                            @if(handleresponse && hasDocument('BUSINESS_FINANCE')){
+                            @if(handleresponse && hasDocument('year1')){
                             <label class="text-label">Year 1<span class="text-danger">*</span></label>
                             <div class="addcust-img-box">
                                 <p class="text-label">{{ getDocumentName('BUSINESS_FINANCE') }}</p>
@@ -418,7 +419,7 @@
                             </app-uploadbtn>}
                         </div>
                         <div class="col-lg-4 col-sm-12">
-                            @if(handleresponse && hasDocument('BUSINESS_FINANCE')){
+                            @if(handleresponse && hasDocument('year2')){
                             <label class="text-label">Year 2<span class="text-danger">*</span></label>
                             <div class="addcust-img-box">
                                 <p class="text-label">{{ getDocumentName('BUSINESS_FINANCE') }}</p>
@@ -441,7 +442,7 @@
                             </app-uploadbtn>}
                         </div>
                         <div class="col-lg-4 col-sm-12">
-                            @if(handleresponse && hasDocument('BUSINESS_FINANCE')){
+                            @if(handleresponse && hasDocument('year3')){
                             <label class="text-label">Year 3<span class="text-danger">*</span></label>
                             <div class="addcust-img-box">
                                 <p class="text-label">{{ getDocumentName('BUSINESS_FINANCE') }}</p>
@@ -485,7 +486,7 @@
                     </div>
                     <div class="row mt-20">
                         <div class="col-lg-4 col-sm-12">
-                            @if(handleresponse && hasDocument('BUSINESS_ITR')){
+                            @if(handleresponse && hasDocument('businessITR1')){
                             <label class="text-label">Year 1<span class="text-danger">*</span></label>
                             <div class="addcust-img-box">
                                 <p class="text-label">{{ getDocumentName('BUSINESS_ITR') }}</p>
@@ -508,7 +509,7 @@
                             </app-uploadbtn>}
                         </div>
                         <div class="col-lg-4 col-sm-12">
-                            @if(handleresponse && hasDocument('BUSINESS_ITR')){
+                            @if(handleresponse && hasDocument('businessITR2')){
                             <label class="text-label">Year 2<span class="text-danger">*</span></label>
                             <div class="addcust-img-box">
                                 <p class="text-label">{{ getDocumentName('BUSINESS_ITR') }}</p>
@@ -531,7 +532,7 @@
                             </app-uploadbtn>}
                         </div>
                         <div class="col-lg-4 col-sm-12">
-                            @if(handleresponse && hasDocument('BUSINESS_ITR')){
+                            @if(handleresponse && hasDocument('businessITR3')){
                             <label class="text-label">Year 3<span class="text-danger">*</span></label>
                             <div class="addcust-img-box">
                                 <p class="text-label">{{ getDocumentName('BUSINESS_ITR') }}</p>
@@ -574,7 +575,7 @@
                     </div>
                     <div class="row mt-20">
                         <div class="col-lg-4 col-sm-12">
-                            @if(handleresponse && hasDocument('BUSINESS_GST')){
+                            @if(handleresponse && hasDocument('businessGST')){
                             <label class="text-label">1 Year GST Return<span class="text-danger">*</span></label>
                             <div class="addcust-img-box">
                                 <p class="text-label">{{ getDocumentName('BUSINESS_GST') }}</p>
@@ -618,7 +619,7 @@
                     </div>
                     <div class="row mt-20">
                         <div class="col-lg-4 col-sm-12">
-                            @if(handleresponse && hasDocument('BUSINESS_BANK_STATEMENT')){
+                            @if(handleresponse && hasDocument('businessBankstatement')){
                             <label class="text-label">1 Year bank statement<span class="text-danger">*</span></label>
                             <div class="addcust-img-box">
                                 <p class="text-label">{{ getDocumentName('BUSINESS_BANK_STATEMENT') }}</p>
@@ -660,7 +661,7 @@
 
 
                     <div class="col-lg-4 col-sm-12 mt-20" *ngIf="otherbusinessdoc">
-                        @if(handleresponse && hasDocument('OTHER')){
+                        @if(handleresponse && hasDocument('otherbusiness')){
                         <label class="text-label">Salary Slip 1<span class="text-danger">*</span></label>
                         <div class="addcust-img-box">
                             <p class="text-label">{{ getDocumentName('OTHER') }}</p>
@@ -676,7 +677,7 @@
 
                         } @else{
                         <app-uploadbtn [config]="basicConfig"
-                            (uploadStarted)="onUploadStarted($event,  'other','BUSINESS' ,'OTHER_INCOME','OTHER')"
+                            (uploadStarted)="onUploadStarted($event,  'otherbusiness','BUSINESS' ,'OTHER_INCOME','OTHER')"
                             [uploadViaApi]="true" [fileuploadresponse]="handleresponse" label="Other Documents">
                         </app-uploadbtn>}
                     </div>

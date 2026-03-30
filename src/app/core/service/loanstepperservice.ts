@@ -1,7 +1,12 @@
-import { Injectable } from '@angular/core';
+import { ChangeDetectorRef, Injectable } from '@angular/core';
 import { Router } from '@angular/router';
 import { Loanformservice } from '../service/loanformservice';
+import { BehaviorSubject } from 'rxjs';
 
+interface Step {
+  label: string;
+  route: string;
+}
 @Injectable({
   providedIn: 'root'
 })
@@ -11,61 +16,63 @@ export class Loanstepperservice {
      private custName: string | null = null;
      private custARN: string | null = null;
 
-     steps: any[] = [];
+    //  steps: any[] = [];
 
+      private stepsSubject = new BehaviorSubject<any[]>([]);
+  public steps$ = this.stepsSubject.asObservable();
      constructor(private formSvc: Loanformservice,private router: Router) {
-  this.buildSteps();
+   this.rebuildSteps();
 }
-  steps1 = [
-    { label: 'Loan Info', route: 'loaninfo' },
-    
-    { label: 'General Info', route: 'genralinfo' },
-    { label: 'Estimated Expense', route: 'expense' },
-    { label: 'Additional Info', route: 'additionalinfo' },
-    { label: 'KYC', route: 'kycinfo' },
-    { label: 'Education Details', route: 'educationinfo' },
-    { label: 'Income Details', route: 'incomeinfo' },
-    { label: 'Assets', route: 'assetsinfo' },
-    { label: 'Liabilities', route: 'liabilitiesinfo' },
-     { label: 'Monthly Expenditure', route: 'monthlyexpinfo' },
-    { label: 'Reference', route: 'referenceinfo' },
-     { label: 'Co-Applicant', route: 'coapplicantinfo' },
-      { label: 'Summary', route: 'summaryinfo' },
-  ];
-
-buildSteps() {
-  this.steps = [
-    { label: 'Loan Info', route: 'loaninfo' },
-    { label: 'General Info', route: 'genralinfo' },
-    { label: 'Estimated Expense', route: 'expense' },
-    { label: 'Additional Info', route: 'additionalinfo' },
-    { label: 'KYC', route: 'kycinfo' },
-    { label: 'Education Details', route: 'educationinfo' },
-    { label: 'Income Details', route: 'incomeinfo' }
-  ];
-
-  if (this.formSvc.isasset) {
-    this.steps.push({ label: 'Assets', route: 'assetsinfo' });
+ rebuildSteps() {
+    this.buildSteps();
   }
-
-  this.steps.push(
-    { label: 'Liabilities', route: 'liabilitiesinfo' },
-    { label: 'Monthly Expenditure', route: 'monthlyexpinfo' },
-    { label: 'Reference', route: 'referenceinfo' },
-    { label: 'Co-Applicant', route: 'coapplicantinfo' },
-    { label: 'Summary', route: 'summaryinfo' }
-  );
-}
-  
-
  
 
+private buildSteps() {
+  
+   const baseSteps : Step[] = [
+    { label: 'Loan Info', route: 'loaninfo' },
+    { label: 'General Info', route: 'genralinfo' },
+    { label: 'Estimated Expense', route: 'expense' },
+    { label: 'Additional Info', route: 'additionalinfo' },
+    { label: 'KYC', route: 'kycinfo' },
+    { label: 'Education Details', route: 'educationinfo' },
+    
+  ];
+ const conditionalSteps: { label: string; route: string }[] = [];
+   if (this.formSvc.isincome) {
+    conditionalSteps.push({ label: 'Income Details', route: 'incomeinfo' });
+  }
+  if (this.formSvc.isasset) {
+    conditionalSteps.push({ label: 'Assets', route: 'assetsinfo' });
+  }
+
+   const finalSteps :  Step[] = [
+      ...baseSteps,
+      ...conditionalSteps,
+      { label: 'Liabilities', route: 'liabilitiesinfo' },
+      { label: 'Monthly Expenditure', route: 'monthlyexpinfo' },
+      { label: 'Reference', route: 'referenceinfo' },
+      { label: 'Co-Applicant', route: 'coapplicantinfo' },
+      { label: 'Summary', route: 'summaryinfo' }
+    ];
+     console.log('📋 Final Steps:', finalSteps);
+    this.stepsSubject.next(finalSteps);
+
+  
+  
+}
+get steps(): Step[] {
+    return this.stepsSubject.getValue();
+  }
+  
 
   setLoanId(id1: string,id2: string,name:string,arn:string) {
     this.applicantId = id1;
      this.applicationId = id2;
      this.custName = name;
      this.custARN = arn;
+     this.buildSteps();
   }
 
 
@@ -128,3 +135,19 @@ buildSteps() {
 
   
 // }
+//  steps1 = [
+//     { label: 'Loan Info', route: 'loaninfo' },
+    
+//     { label: 'General Info', route: 'genralinfo' },
+//     { label: 'Estimated Expense', route: 'expense' },
+//     { label: 'Additional Info', route: 'additionalinfo' },
+//     { label: 'KYC', route: 'kycinfo' },
+//     { label: 'Education Details', route: 'educationinfo' },
+//     { label: 'Income Details', route: 'incomeinfo' },
+//     { label: 'Assets', route: 'assetsinfo' },
+//     { label: 'Liabilities', route: 'liabilitiesinfo' },
+//      { label: 'Monthly Expenditure', route: 'monthlyexpinfo' },
+//     { label: 'Reference', route: 'referenceinfo' },
+//      { label: 'Co-Applicant', route: 'coapplicantinfo' },
+//       { label: 'Summary', route: 'summaryinfo' },
+//   ];

@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { Loanstepperservice } from '../../../../core/service/loanstepperservice';
 
@@ -18,9 +18,13 @@ export class Loanstepper implements OnInit {
   custARN: string = '';
 
    completedSteps: Set<number> = new Set();
-  constructor(public router: Router, public stepservice: Loanstepperservice,private route:ActivatedRoute,private stepperService:Loanstepperservice) {
-
+  constructor(public router: Router, public stepservice: Loanstepperservice,private route:ActivatedRoute,private stepperService:Loanstepperservice,private cdr: ChangeDetectorRef) {
+ this.stepperService.steps$.subscribe(steps => {
+      this.steps = steps;
+      this.cdr.detectChanges(); // ✅ Force change detection
+    });
   }
+
 
   ngOnInit() {
     this.steps = this.stepservice.steps;
@@ -44,10 +48,35 @@ export class Loanstepper implements OnInit {
     return this.router.url.includes(route);
   }
 
-  goToStep(route: string) {
-    this.router.navigate(['/loanform', route]);
-  }
+  // goToStep(route: string) {
+  //   this.router.navigate(['/loanform', route]);
+  // }
 
+
+canNavigateTo(index: number): boolean {
+  const currentIdx = this.currentIndex;
+  return index <= currentIdx + 1;
+}
+
+goToStep(route: string, index: number) {
+  if (this.canNavigateTo(index)) {
+    console.log(` Navigating to ${route} (index ${index})`);
+    this.router.navigate(['/loanform', route], {
+      queryParams: {
+        applicantId: this.applicantId,
+        applicationId: this.applicationId,
+        custName: this.custName,
+        custARN: this.custARN
+      }
+    });
+  } else {
+    console.log(`Blocked navigation to index ${index}`);
+  }
+}
+
+isNextStep(index: number): boolean {
+  return index === this.currentIndex + 1;
+}
   isCompleted(index: number): boolean {
     return index < this.currentIndex;
   }
