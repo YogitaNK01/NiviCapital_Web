@@ -70,6 +70,10 @@ export class Referenceinfo implements OnInit {
           this.searchMobile(value);
         }
       });
+
+      if( this.loanformservice.referenceInfoData ){
+        this.patchReferenceData();
+      }
   }
 
 
@@ -195,12 +199,106 @@ export class Referenceinfo implements OnInit {
   submit() {
   }
 
+  patchReferenceData() {
+  const data = this.loanformservice.referenceInfoData;
+
+  if (!data) return;
+
+  this.reference1Array.clear();
+  this.reference2Array.clear();
+
+  // ---------------- REFERENCE 1 ----------------
+  if (data.reference1 && data.reference1.length) {
+    data.reference1.forEach((item: any) => {
+
+      const group = this.createReferenceGroup();
+
+      group.patchValue({
+        fname: item.fname,
+        mname: item.mname,
+        lname: item.lname,
+        peraddressline1: item.peraddressline1,
+        peraddressline2: item.peraddressline2,
+        peraddressline3: item.peraddressline3,
+        percountry: item.percountry,
+        perstate: item.perstate,
+        percity: item.percity,
+        perpincode: item.perpincode,
+        phone: item.phone
+      });
+
+      this.reference1Array.push(group);
+    });
+  }
+
+  // ---------------- REFERENCE 2 ----------------
+  if (data.reference2 && data.reference2.length) {
+    data.reference2.forEach((item: any) => {
+
+      const group = this.createReferenceGroup();
+
+      group.patchValue({
+        fname: item.fname,
+        mname: item.mname,
+        lname: item.lname,
+        peraddressline1: item.peraddressline1,
+        peraddressline2: item.peraddressline2,
+        peraddressline3: item.peraddressline3,
+        percountry: item.percountry,
+        perstate: item.perstate,
+        percity: item.percity,
+        perpincode: item.perpincode,
+        phone: item.phone
+      });
+
+      this.reference2Array.push(group);
+    });
+  }
+
+  if (this.reference1Array.length === 0) {
+    this.reference1Array.push(this.createReferenceGroup());
+  }
+
+  if (this.reference2Array.length === 0) {
+    this.reference2Array.push(this.createReferenceGroup());
+  }
+
+  this.cd.detectChanges();
+}
   back() {
     this.stepperService.previous();
   }
 
-  next() {
+  next1() {
 
     this.stepperService.next();
   }
+  next() {
+
+  if (this.referenceForm.invalid) {
+    this.referenceForm.markAllAsTouched();
+    return;
+  }
+
+  const form = this.referenceForm.value;
+
+  const payload = {
+    reference1: form.reference1,
+    reference2: form.reference2
+  };
+
+  console.log("REFERENCE PAYLOAD:", payload);
+
+  // this.loanformservice.saveReference(payload).subscribe({
+  //   next: (res: any) => {
+  //     if (res.status === 'success') {
+
+  //      
+  //       this.loanformservice.referenceInfoData = payload;
+
+  //       this.stepperService.next();
+  //     }
+  //   }
+  // });
+}
 }

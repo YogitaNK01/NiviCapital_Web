@@ -98,6 +98,9 @@ export class Additionalinfo implements OnInit {
 
     });
 
+      if(this.formSvc.additionalInfoData){
+      this.patchAdditionalInfo();
+    }
   
 this.additionalinfoForm.get('maritalstatus')?.valueChanges.subscribe(value => {
 
@@ -210,9 +213,30 @@ this.additionalinfoForm.get('maritalstatus')?.valueChanges.subscribe(value => {
     this.stepperService.previous();
   }
 
-  next1() {
-    this.stepperService.next();
-  }
+  patchAdditionalInfo() {
+  const data = this.formSvc.additionalInfoData;
+
+  if (!data) return;
+
+  this.additionalinfoForm.patchValue({
+    uploadphoto: data.uploadphoto,
+    maritalstatus: data.maritalstatus,
+    gender: data.gender,
+    dependents: data.dependents,
+
+    s_fname: data.s_fname,
+    s_mname: data.s_mname,
+    s_lname: data.s_lname,
+
+    f_fname: data.f_fname,
+    f_mname: data.f_mname,
+    f_lname: data.f_lname,
+
+    m_fname: data.m_fname,
+    m_mname: data.m_mname,
+    m_lname: data.m_lname
+  });
+}
   next() {
   console.log("form--", this.additionalinfoForm.value);
     if (!this.additionalinfoForm.valid) {
@@ -256,7 +280,7 @@ this.additionalinfoForm.get('maritalstatus')?.valueChanges.subscribe(value => {
       next: (res) => {
         console.log(res);
         if (res.status == "success") {
-
+         this.formSvc.additionalInfoData = input;
           this.stepperService.next();
         }
 

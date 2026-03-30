@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
+import { Loanformservice } from '../service/loanformservice';
 
 @Injectable({
   providedIn: 'root'
@@ -10,8 +11,14 @@ export class Loanstepperservice {
      private custName: string | null = null;
      private custARN: string | null = null;
 
-  steps = [
+     steps: any[] = [];
+
+     constructor(private formSvc: Loanformservice,private router: Router) {
+  this.buildSteps();
+}
+  steps1 = [
     { label: 'Loan Info', route: 'loaninfo' },
+    
     { label: 'General Info', route: 'genralinfo' },
     { label: 'Estimated Expense', route: 'expense' },
     { label: 'Additional Info', route: 'additionalinfo' },
@@ -26,9 +33,32 @@ export class Loanstepperservice {
       { label: 'Summary', route: 'summaryinfo' },
   ];
 
+buildSteps() {
+  this.steps = [
+    { label: 'Loan Info', route: 'loaninfo' },
+    { label: 'General Info', route: 'genralinfo' },
+    { label: 'Estimated Expense', route: 'expense' },
+    { label: 'Additional Info', route: 'additionalinfo' },
+    { label: 'KYC', route: 'kycinfo' },
+    { label: 'Education Details', route: 'educationinfo' },
+    { label: 'Income Details', route: 'incomeinfo' }
+  ];
+
+  if (this.formSvc.isasset) {
+    this.steps.push({ label: 'Assets', route: 'assetsinfo' });
+  }
+
+  this.steps.push(
+    { label: 'Liabilities', route: 'liabilitiesinfo' },
+    { label: 'Monthly Expenditure', route: 'monthlyexpinfo' },
+    { label: 'Reference', route: 'referenceinfo' },
+    { label: 'Co-Applicant', route: 'coapplicantinfo' },
+    { label: 'Summary', route: 'summaryinfo' }
+  );
+}
   
 
-  constructor(private router: Router) {}
+ 
 
 
   setLoanId(id1: string,id2: string,name:string,arn:string) {

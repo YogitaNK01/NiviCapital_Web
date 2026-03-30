@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { ChangeDetectorRef, Component, Input } from '@angular/core';
-import { ReactiveFormsModule, FormGroup, FormBuilder, Validators, FormArray } from '@angular/forms';
+import { ReactiveFormsModule, FormGroup, FormBuilder, Validators, FormArray, AbstractControl } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { Loanformservice } from '../../../../core/service/loanformservice';
 import { Loanstepperservice } from '../../../../core/service/loanstepperservice';
@@ -8,6 +8,7 @@ import { Main } from '../../../../core/service/main';
 import { Buttons } from '../../../systemdesign/buttons/buttons';
 import { Dropdown, DropdownOption } from '../../../systemdesign/dropdown/dropdown';
 import { Inputfield } from '../../../systemdesign/inputfield/inputfield';
+import { debounceTime } from 'rxjs/operators';
 
 @Component({
   selector: 'app-monthlyexpenditureinfo',
@@ -88,6 +89,11 @@ export class Monthlyexpenditureinfo {
     { label: 'Insurance Premium', value: 'Insurance Premium', icon: '' },
     { label: 'Other', value: 'Other', icon: '' },
   ];
+  totalrent = 0;
+  totalgrocery = 0;
+  totaltransportation = 0;
+  totalother = 0;
+  totalINRamt: any;
   constructor(private fb: FormBuilder, public main: Main, private route: ActivatedRoute,
     private stepperService: Loanstepperservice, private formSvc: Loanformservice, private cd: ChangeDetectorRef) { }
 
@@ -103,6 +109,8 @@ export class Monthlyexpenditureinfo {
       this.applicationId = applicationId;
 
     });
+
+
 
     this.monthlyExpenditureForm = this.fb.group({
       rent: this.fb.group({
@@ -128,6 +136,17 @@ export class Monthlyexpenditureinfo {
 
     });
 
+   
+    if (this.formSvc.monthlyExpenditureData) {
+      this.patchMonthlyExpenditure();
+    }
+
+    this.monthlyExpenditureForm.valueChanges
+  .pipe(debounceTime(200))
+  .subscribe(() => {
+    this.calculateGrandTotal();
+  });
+
   }
 
   get other(): FormArray {
@@ -139,8 +158,8 @@ export class Monthlyexpenditureinfo {
 
   createOther(): FormGroup {
     return this.fb.group({
-      type: ['', Validators.required],       
-      customType: [''],                       
+      type: ['', Validators.required],
+      customType: [''],
       amount: ['', Validators.required]
     });
   }
@@ -216,6 +235,234 @@ export class Monthlyexpenditureinfo {
     }
   }
 
+
+  calculateGrandTotal() {
+    const rent = this.getValue('rent.rentvalue');
+    const grocery = this.getValue('grocery.groceryvalue');
+    const utility1 = this.getValue('utilities.utilityvalue1');
+    const utility2 = this.getValue('utilities.utilityvalue2');
+    const transportation = this.getValue('transportation.transportationvalue');
+    const schoolFees = this.getValue('SchoolFees.SchoolFeesvalue');
+    const medical = this.getValue('MedicalMedicines.MedicalMedicinesvalue');
+
+    const otherTotal = this.calculateTotal('other', 'amount');
+
+    const total =
+      rent +
+      grocery +
+      utility1 +
+      utility2 +
+      transportation +
+      schoolFees +
+      medical +
+      otherTotal;
+
+    this.totalINRamt = this.formatIndian(total.toString());
+  }
+  getValue(path: string): number {
+    const val = this.monthlyExpenditureForm.get(path)?.value;
+
+    if (!val) return 0;
+
+    return Number(val.toString().replace(/,/g, ''));
+  }
+
+
+  calculateTotal(formArrayName: string, controlName: string): number {
+
+    let total = 0;
+
+    const formArray = this.monthlyExpenditureForm.get(formArrayName) as FormArray;
+
+    formArray.controls.forEach((grp: any) => {
+      const val = grp.get(controlName)?.value;
+
+      if (val) {
+        const clean = Number(val.toString().replace(/,/g, ''));
+        total += clean;
+      }
+    });
+
+    return total;
+  }
+  formatIndian(x: string): string {
+    return new Intl.NumberFormat('en-IN').format(Number(x));
+  }
+
+   handleAmountInput(event: any, controlName: string, ctrl?: any) {
+    this.main.restrictInput(event, 'decimal');
+    this.formatAmountfromarray(event, controlName, ctrl);
+   
+
+
+  }
+
+  //format amount 2000000 to 20,00,000
+  formatAmount(event: any, controlName: string) {
+    let value = event.target.value;
+    if (!value) return;
+    value = value.replace(/,/g, '');
+    value = value.replace(/[^0-9.]/g, '');
+    const parts = value.split('.');
+    if (parts.length > 2) {
+      value = parts[0] + '.' + parts.slice(1).join('');
+    }
+
+    let integerPart = parts[0];
+    let decimalPart = parts[1] ? '.' + parts[1] : '';
+
+    let num = Number(value);
+    const formatted = this.formatIndian(num.toString());
+    this.monthlyExpenditureForm.get(controlName)?.setValue(formatted, { emitEvent: false });
+
+
+  }
+   formatAmountfromarray(event: any, controlName: string, control: AbstractControl) {
+    const group = control as FormGroup;
+    let value = event.target.value;
+
+    if (!value) return;
+
+    value = value.replace(/,/g, '');
+    value = value.replace(/[^0-9.]/g, '');
+    const parts = value.split('.');
+    if (parts.length > 2) {
+      value = parts[0] + '.' + parts.slice(1).join('');
+    }
+
+    let integerPart = parts[0];
+    let decimalPart = parts[1] ? '.' + parts[1] : '';
+
+
+    let num = Number(value);
+
+
+
+    const formatted = this.formatIndian(num.toString());
+
+    if (group) {
+      group.get(controlName)?.setValue(formatted, { emitEvent: false });
+    } else {
+      this.monthlyExpenditureForm.get(controlName)?.setValue(formatted, { emitEvent: false });
+    }
+
+  }
+
+  patchMonthlyExpenditure() {
+    const data = this.formSvc.monthlyExpenditureData;
+
+    if (!data || !data.items) return;
+
+    const items = data.items;
+
+    this.selectedexpenditure = [];
+    this.other.clear();
+
+    items.forEach((item: any) => {
+
+      // ---------------- RENT ----------------
+      if (item.expenseType === 'RENT_HOME_MAINTENANCE') {
+        this.selectedexpenditure.push('RentHomeMaintenance');
+
+        this.monthlyExpenditureForm.get('rent')?.patchValue({
+          rentvalue: item.amountInr
+        });
+      }
+
+      // ---------------- GROCERY ----------------
+      if (item.expenseType === 'GROCERIES_HOUSEHOLD') {
+        this.selectedexpenditure.push('GroceriesandHousehold');
+
+        this.monthlyExpenditureForm.get('grocery')?.patchValue({
+          groceryvalue: item.amountInr
+        });
+      }
+
+      // ---------------- UTILITIES ----------------
+      if (item.expenseType === 'TELEPHONE') {
+        this.selectedexpenditure.push('Utilities');
+
+        this.monthlyExpenditureForm.get('utilities')?.patchValue({
+          utilityvalue1: item.amountInr
+        });
+      }
+
+      if (item.expenseType === 'UTILITIES') {
+        this.selectedexpenditure.push('Utilities');
+
+        this.monthlyExpenditureForm.get('utilities')?.patchValue({
+          utilityvalue2: item.amountInr
+        });
+      }
+
+      // ---------------- TRANSPORT ----------------
+      if (item.expenseType === 'TRANSPORTATION') {
+        this.selectedexpenditure.push('Transportation');
+
+        this.monthlyExpenditureForm.get('transportation')?.patchValue({
+          transportationvalue: item.amountInr
+        });
+      }
+
+      // ---------------- SCHOOL ----------------
+      if (item.expenseType === 'SCHOOL_EDUCATION_FEES') {
+        this.selectedexpenditure.push('SchoolEducationFees');
+
+        this.monthlyExpenditureForm.get('SchoolFees')?.patchValue({
+          SchoolFeesvalue: item.amountInr
+        });
+      }
+
+      // ---------------- MEDICAL ----------------
+      if (item.expenseType === 'MEDICAL_MEDICINES') {
+        this.selectedexpenditure.push('Medical');
+
+        this.monthlyExpenditureForm.get('MedicalMedicines')?.patchValue({
+          MedicalMedicinesvalue: item.amountInr
+        });
+      }
+
+      // ---------------- OTHER ----------------
+      this.monthlyExpenditureForm.setControl('other', this.fb.array([]));
+      if (item.expenseType === 'OTHER_RECURRING') {
+        this.selectedexpenditure.push('Others');
+
+        const group = this.createOther();
+
+        group.patchValue({
+          type: this.getOtherType(item.expenseTypeText),
+          customType: item.expenseTypeText,
+          amount: item.amountInr
+        });
+        this.other.clear()
+        this.other.push(group);
+      }
+      this.calculateGrandTotal();
+    });
+
+    this.selectedexpenditure = [...new Set(this.selectedexpenditure)];
+
+    if (this.other.length === 0) {
+      this.other.push(this.createOther());
+    }
+
+    this.openIndex = [];
+    this.selectedexpenditure.forEach(val => {
+      const index = this.accordions.findIndex(a => a.key === val);
+      if (index !== -1) {
+        this.openIndex.push(index);
+      }
+    });
+
+    this.cd.detectChanges();
+  }
+
+  getOtherType(val: string): string {
+    const predefined = this.otherExpenses.map(o => o.value);
+
+    return predefined.includes(val) ? val : 'Other';
+  }
+
   back() {
     this.stepperService.previous();
   }
@@ -241,7 +488,8 @@ export class Monthlyexpenditureinfo {
 
       items.push({
         expenseType: code,
-        amountInr: Number(value),
+        // amountInr: Number(value),
+        amountInr: Number(value.toString().replace(/,/g, '')),
         ...extra
       });
     };
@@ -324,7 +572,7 @@ export class Monthlyexpenditureinfo {
       next: (res) => {
         console.log("resp---", res);
         if (res.status == "success") {
-
+          this.formSvc.monthlyExpenditureData = payload;
           this.stepperService.next();
         }
       }

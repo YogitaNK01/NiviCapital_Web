@@ -99,6 +99,10 @@ export class Estimateexpense {
     this.livingexp();
     this.miscgexp();
 
+      if (this.loanformservice.estExpenseInfoData) {
+      this.patchExpenseData()
+    }
+
     this.expenseForm.get('tutionfees')?.valueChanges.subscribe(() => {
       this.calculateINRtoAUD();
       this.calculateGrandTotal();
@@ -417,6 +421,7 @@ export class Estimateexpense {
 
   }
 
+  
   //format amount 2000000 to 20,00,000
   formatAmountold(event: any, controlName: string, index?: number, type?: 'living' | 'misc') {
 
@@ -639,6 +644,67 @@ validateAmount(group: FormGroup) {
       }
     });
   }
+
+   patchExpenseData() {
+    const data = this.loanformservice.estExpenseInfoData;
+
+    if (!data) return;
+
+    this.expenseForm.patchValue({
+      tutionfees: this.formatIndian(data.tuitionFeesInr)
+    });
+
+    this.livingexpenses.clear();
+    this.miscexpenses.clear();
+
+    data.items.forEach((item: any) => {
+
+      //  Living
+      if (item.livingExpenseItemMasterId) {
+
+        const group = this.createExpense(item.livingExpenseItemMasterId);
+
+        group.patchValue({
+          securityfrequency: this.capitalize(item.frequency),
+          amountINR: this.formatIndian(item.amountInr),
+          description: item.description
+        });
+
+        this.livingexpenses.push(group);
+
+        // maintain selected categories
+        if (!this.selectedCategories.includes(item.livingExpenseItemMasterId)) {
+          this.selectedCategories.push(item.livingExpenseItemMasterId);
+        }
+      }
+
+      // 👉 Misc
+      if (item.miscellaneousExpenseItemMasterId) {
+
+        const group = this.createmiscExpense(item.miscellaneousExpenseItemMasterId);
+
+        group.patchValue({
+          securityfrequency: this.capitalize(item.frequency),
+          amountINR: this.formatIndian(item.amountInr),
+          descriptionmisc: item.description
+        });
+
+        this.miscexpenses.push(group);
+
+        if (!this.selectedmisCategories.includes(item.miscellaneousExpenseItemMasterId)) {
+          this.selectedmisCategories.push(item.miscellaneousExpenseItemMasterId);
+        }
+      }
+
+    });
+
+    this.calculateINRtoAUD();
+    this.calculateGrandTotal();
+  }
+  capitalize(val: string): string {
+    return val.charAt(0).toUpperCase() + val.slice(1).toLowerCase();
+  }
+
   back() {
     this.stepperService.previous();
   }
@@ -702,7 +768,7 @@ validateAmount(group: FormGroup) {
       next: (res) => {
         console.log("resp---", res);
         if (res.status == "success") {
-
+this.loanformservice.estExpenseInfoData = input;
           this.stepperService.next();
         }
       }

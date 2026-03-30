@@ -140,6 +140,24 @@ export class GeneralInfo implements OnInit {
       this.checkassetOnChange(value);
     });
 
+     if (this.formSvc.generalInfoData) {
+    this.registerForm.patchValue({
+      occupation: this.formSvc.generalInfoData.currentOccupationId,
+      qualification: this.formSvc.generalInfoData.lastQualificationId,
+      institutionName: this.formSvc.generalInfoData.lastInstitutionName,
+      state: this.formSvc.generalInfoData.stateId,
+      university: this.formSvc.generalInfoData.universityId,
+      coursename: this.formSvc.generalInfoData.courseId,
+      courseduration: this.formSvc.generalInfoData.courseDuration,
+      coursestartdate: this.formSvc.generalInfoData.courseStartDate,
+      courseenddate: this.formSvc.generalInfoData.courseEndDate,
+      lendingpartner: this.formSvc.generalInfoData.lendingPartnerId
+    });
+
+  //  coursestartdate: new Date(this.formSvc.generalInfoData.courseStartDate)
+    this.checkboxasset = this.formSvc.generalInfoData.hasAssets ? "Yes" : "No";
+  }
+
     // const savedData = this.stepperService.getStepData('genralinfo');
 
     // if (savedData) {
@@ -173,6 +191,11 @@ export class GeneralInfo implements OnInit {
 
   checkassetOnChange(event: any) {
     this.checkboxasset = event;
+     if(this.checkboxasset === 'yes'){
+      this.formSvc.isasset = true;
+    }else{
+      this.formSvc.isasset = false;
+    }
     console.log(event);
   }
   get f() {
@@ -477,6 +500,7 @@ this.registerForm.get('courseenddate')?.updateValueAndValidity();
         if (res.status == "success") {
 
           this.stepperService.next();
+           this.formSvc.generalInfoData = input;
           this.stepperService.setStepData('genralinfo', formdata);
        
           console.log("resp---", this.registerForm.value);

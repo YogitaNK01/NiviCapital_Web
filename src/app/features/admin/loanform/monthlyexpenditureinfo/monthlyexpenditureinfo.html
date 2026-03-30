@@ -101,7 +101,8 @@
 
                 <div class="form-group mb-3">
                     <app-inputfield type="text" label="Rent/ Home Maintenance" formControlName="rentvalue"
-                        placeholder="Enter Rent/ Home Maintenance" helpText="Help text" name="rentvalue">
+                        placeholder="Enter Rent/ Home Maintenance" helpText="Help text" name="rentvalue"
+                        (input)="handleAmountInput($event,'rentvalue')">
                     </app-inputfield>
 
 
@@ -114,7 +115,8 @@
 
                 <div class="form-group mb-3">
                     <app-inputfield type="text" label="Groceries and Household" formControlName="groceryvalue"
-                        placeholder="Enter Groceries and Household" helpText="Help text" name="groceryvalue">
+                        placeholder="Enter Groceries and Household" helpText="Help text" name="groceryvalue"
+                        (input)="handleAmountInput($event,'groceryvalue')">
                     </app-inputfield>
 
 
@@ -127,7 +129,8 @@
                 <div class="col">
                     <div class="form-group mb-3">
                         <app-inputfield type="text" label="Telephone and Internet bills" formControlName="utilityvalue1"
-                            placeholder="Enter Telephone and Internet bills" helpText="Help text" name="utilityvalue1">
+                            placeholder="Enter Telephone and Internet bills" helpText="Help text" name="utilityvalue1"
+                            (input)="handleAmountInput($event,'utilityvalue1')">
                         </app-inputfield>
 
 
@@ -137,7 +140,7 @@
                     <div class="form-group mb-3">
                         <app-inputfield type="text" label="Utilities (Electricity, Water, Gas)"
                             formControlName="utilityvalue2" placeholder="Enter Utility bills" helpText="Help text"
-                            name="utilityvalue2">
+                            name="utilityvalue2" (input)="handleAmountInput($event,'utilityvalue2')">
                         </app-inputfield>
 
 
@@ -152,7 +155,7 @@
 
                 <div class="form-group mb-3">
                     <app-inputfield type="text" label="Transportation" formControlName="transportationvalue"
-                        placeholder="Enter Transportation" helpText="Help text" name="transportationvalue">
+                        placeholder="Enter Transportation" helpText="Help text" name="transportationvalue" (input)="handleAmountInput($event,'transportationvalue')">
                     </app-inputfield>
 
 
@@ -165,7 +168,8 @@
 
                 <div class="form-group mb-3">
                     <app-inputfield type="text" label="School Education Fees" formControlName="SchoolFeesvalue"
-                        placeholder="Enter School Education Fees" helpText="Help text" name="SchoolFeesvalue">
+                        placeholder="Enter School Education Fees" helpText="Help text" name="SchoolFeesvalue"
+                         (input)="handleAmountInput($event,'SchoolFeesvalue')">
                     </app-inputfield>
 
 
@@ -178,7 +182,8 @@
 
                 <div class="form-group mb-3">
                     <app-inputfield type="text" label="Medical/ Medicines" formControlName="MedicalMedicinesvalue"
-                        placeholder="Enter Medical/ Medicines" helpText="Help text" name="MedicalMedicinesvalue">
+                        placeholder="Enter Medical/ Medicines" helpText="Help text" name="MedicalMedicinesvalue"
+                        (input)="handleAmountInput($event,'MedicalMedicinesvalue')">
                     </app-inputfield>
 
 
@@ -213,7 +218,8 @@
                     <div class="col">
                         <div class="form-group mb-3">
                             <app-inputfield type="text" label="Amount (INR)" formControlName="amount"
-                                placeholder="Enter Amount" helpText="Help text" name="amount">
+                                placeholder="Enter Amount" helpText="Help text" name="amount"
+                                (input)="handleAmountInput($event,'amount',item)">
                             </app-inputfield>
 
 

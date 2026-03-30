@@ -73,14 +73,17 @@ export class Assetsinfo implements OnInit {
   groupIdMap: { [key: string]: string[] } = {};
   assetCodeMap: { [key: string]: string } = {};
 
-  totalamount=0;
+  totalamount = 0;
+  totalINRamt: any;
+  totalproperty = 0;
+  totalfd = 0;
+  totalother = 0
 
   constructor(private fb: FormBuilder, public main: Main, private route: ActivatedRoute, private msgBox: Msgboxservice,
     private stepperService: Loanstepperservice, private formSvc: Loanformservice, private cd: ChangeDetectorRef) { }
 
 
   ngOnInit(): void {
-    this.totalamount=100;
     this.route.queryParams.subscribe(params => {
 
       const applicantId = params['applicantId'];
@@ -115,16 +118,27 @@ export class Assetsinfo implements OnInit {
     });
     this.allAssetCatagory();
 
-  
-
+    if (this.formSvc.aseetsInfoData) {
+      this.patchAssetsData();
+    }
+    this.assetsForm.get('gold.goldvalue')?.valueChanges.subscribe(() => {
+      this.calculateGrandTotal();
+    });
+    this.assetsForm.get('liquidAssets')?.valueChanges.subscribe(() => {
+      this.calculateGrandTotal();
+    });
     this.assetsForm.get('properties')?.valueChanges.subscribe(() => {
-      // this.calculateGrandTotal();
+      this.calculateGrandTotal();
+
     });
+
     this.assetsForm.get('fixedDeposits')?.valueChanges.subscribe(() => {
-      // this.calculateGrandTotal();
+      this.calculateGrandTotal();
     });
 
-
+    this.assetsForm.get('otherassets')?.valueChanges.subscribe(() => {
+      this.calculateGrandTotal();
+    });
   }
 
   control(path: string) {
@@ -169,7 +183,7 @@ export class Assetsinfo implements OnInit {
   //Other assets
   createOther(): FormGroup {
     return this.fb.group({
-      assettype: ['', [Validators.required, Validators.pattern('^[A-Za-z ]+$'), Validators.minLength(2), Validators.maxLength(50)]],
+      assettype: ['', [Validators.required, Validators.pattern('^[A-Za-z ]+$'), Validators.minLength(2), Validators.maxLength(25)]],
       assetamt: ['', Validators.required],
 
     });
@@ -202,34 +216,100 @@ export class Assetsinfo implements OnInit {
   }
 
   removeAccordion(key: string, index: number, event: Event) {
-    this.msgBox.open({
+ this.msgBox.open({
       title: 'Are you sure want to Remove',
       message: '',
       showCancel: true,
       onOk: () => {
-        event.stopPropagation();
+    event.stopPropagation();
 
-        this.selectedAssets = this.selectedAssets.filter(k => k !== key);
+    this.selectedAssets = this.selectedAssets.filter(k => k !== key);
 
-        this.selectedAssetIds = this.selectedAssets.flatMap(
-          group => this.groupIdMap[group] || []
-        );
+    this.selectedAssetIds = this.selectedAssets.flatMap(
+      group => this.groupIdMap[group] || []
+    );
 
-        this.openIndex = this.openIndex.filter(i => i !== index);
+    this.openIndex = this.openIndex.filter(i => i !== index);
 
-        const formKeyMap: any = {
-          GOLD: 'gold',
-          LIQUID: 'liquidAssets',
-          PROPERTY: 'properties',
-          FIXED_DEPOSIT: 'fixedDeposits',
-          INVESTMENTS: 'investments',
-          OTHERS: 'others'
-        };
+    const formKeyMap: any = {
+      GOLD: 'gold',
+      LIQUID: 'liquidAssets',
+      PROPERTY: 'properties',
+      FIXED_DEPOSIT: 'fixedDeposits',
+      INVESTMENTS: 'investments',
+      OTHERS: 'others'
+    };
 
-        this.assetsForm.get(formKeyMap[key])?.reset();
-      }
-    });
+    this.assetsForm.get(formKeyMap[key])?.reset();
   }
+})
+  }
+
+   handleAmountInput(event: any, controlName: string, ctrl?: any) {
+    this.main.restrictInput(event, 'decimal');
+    if (ctrl) {
+      this.formatAmountfromarray(event, controlName, ctrl);
+    } else {
+      this.formatAmount(event, controlName);
+    }
+
+
+  }
+
+  //format amount 2000000 to 20,00,000
+  formatAmount(event: any, controlName: string) {
+    let value = event.target.value;
+    if (!value) return;
+    value = value.replace(/,/g, '');
+    value = value.replace(/[^0-9.]/g, '');
+    const parts = value.split('.');
+    if (parts.length > 2) {
+      value = parts[0] + '.' + parts.slice(1).join('');
+    }
+
+    let integerPart = parts[0];
+    let decimalPart = parts[1] ? '.' + parts[1] : '';
+
+    let num = Number(value);
+    const formatted = this.formatIndian(num.toString());
+    this.assetsForm.get(controlName)?.setValue(formatted, { emitEvent: false });
+
+
+  }
+
+  formatAmountfromarray(event: any, controlName: string, control: AbstractControl) {
+    const group = control as FormGroup;
+    let value = event.target.value;
+
+    if (!value) return;
+
+    value = value.replace(/,/g, '');
+    value = value.replace(/[^0-9.]/g, '');
+    const parts = value.split('.');
+    if (parts.length > 2) {
+      value = parts[0] + '.' + parts.slice(1).join('');
+    }
+
+    let integerPart = parts[0];
+    let decimalPart = parts[1] ? '.' + parts[1] : '';
+
+
+    let num = Number(value);
+
+
+
+    const formatted = this.formatIndian(num.toString());
+
+    if (group) {
+      group.get(controlName)?.setValue(formatted, { emitEvent: false });
+    } else {
+      this.assetsForm.get(controlName)?.setValue(formatted, { emitEvent: false });
+    }
+
+  }
+
+
+ 
 
   submit() {
     if (this.assetsForm.invalid) return;
@@ -444,80 +524,167 @@ export class Assetsinfo implements OnInit {
     });
   }
 
-  handleAmountInput(event: any, controlName: string, ctrl?: any) {
-    this.main.restrictInput(event, 'decimal');
-    if (ctrl) {
-      this.formatAmountfromarray(event, controlName, ctrl);
-    } else {
-      this.formatAmount(event, controlName);
-    }
+  calculateGrandTotal() {
 
+    const gold = Number(this.assetsForm.get('gold.goldvalue')?.value || 0);
 
+    const liquid = Number(this.assetsForm.get('liquidAssets.cashinhand')?.value || 0) +
+      Number(this.assetsForm.get('liquidAssets.savingbalance')?.value || 0);
+
+    this.totalproperty = this.calculateTotal('properties', 'marketval');
+    this.totalfd = this.calculateTotal('fixedDeposits', 'bankamt');
+    this.totalother = this.calculateTotal('otherassets', 'assetamt');
+
+    this.totalINRamt = gold + liquid + this.totalproperty + this.totalfd + this.totalother;
+
+    this.totalINRamt = this.formatIndian(this.totalINRamt.toString());
   }
 
-  //format amount 2000000 to 20,00,000
-  formatAmount(event: any, controlName: string) {
-    let value = event.target.value;
-    if (!value) return;
-    value = value.replace(/,/g, '');
-    value = value.replace(/[^0-9.]/g, '');
-    const parts = value.split('.');
-    if (parts.length > 2) {
-      value = parts[0] + '.' + parts.slice(1).join('');
-    }
+  calculateTotal(formArrayName: string, controlName: string): number {
 
-    let integerPart = parts[0];
-    let decimalPart = parts[1] ? '.' + parts[1] : '';
+    let total = 0;
 
-    let num = Number(value);
-    const formatted = this.formatIndian(num.toString());
-    this.assetsForm.get(controlName)?.setValue(formatted, { emitEvent: false });
+    const formArray = this.assetsForm.get(formArrayName) as FormArray;
 
+    formArray.controls.forEach((grp: any) => {
+      const val = grp.get(controlName)?.value;
 
+      if (val) {
+        const clean = Number(val.toString().replace(/,/g, ''));
+        total += clean;
+      }
+    });
+
+    return total;
   }
-
-  formatAmountfromarray(event: any, controlName: string, control: AbstractControl) {
-    const group = control as FormGroup;
-    let value = event.target.value;
-
-    if (!value) return;
-
-    value = value.replace(/,/g, '');
-    value = value.replace(/[^0-9.]/g, '');
-    const parts = value.split('.');
-    if (parts.length > 2) {
-      value = parts[0] + '.' + parts.slice(1).join('');
-    }
-
-    let integerPart = parts[0];
-    let decimalPart = parts[1] ? '.' + parts[1] : '';
-
-
-    let num = Number(value);
-
-
-
-    const formatted = this.formatIndian(num.toString());
-
-    if (group) {
-      group.get(controlName)?.setValue(formatted, { emitEvent: false });
-    } else {
-      this.assetsForm.get(controlName)?.setValue(formatted, { emitEvent: false });
-    }
-
-  }
-
-
   formatIndian(x: string): string {
     return new Intl.NumberFormat('en-IN').format(Number(x));
   }
-
-
 
   back() {
     this.stepperService.previous();
   }
 
+  patchAssetsData() {
+    const data = this.formSvc.aseetsInfoData;
+
+    if (!data || !data.items) return;
+
+    const items = data.items;
+
+
+    this.selectedAssets = [];
+    this.properties.clear();
+    this.fixedDeposits.clear();
+    this.otherassets.clear();
+
+    items.forEach((item: any) => {
+
+      const code = Object.keys(this.assetCodeMap)
+        .find(key => this.assetCodeMap[key] === item.assetItemMasterId);
+
+      if (!code) return;
+
+      // ---------------- GOLD ----------------
+      if (code === 'GOLD') {
+        this.selectedAssets.push('GOLD');
+
+        this.assetsForm.get('gold')?.patchValue({
+          goldvalue: item.valueInr
+        });
+      }
+
+      // ---------------- LIQUID ----------------
+      if (code === 'LIQUID_SAVINGS') {
+        this.selectedAssets.push('LIQUID');
+
+        const liquidGroup = this.assetsForm.get('liquidAssets');
+
+        if (!liquidGroup?.value.cashinhand) {
+          liquidGroup?.patchValue({ cashinhand: item.valueInr });
+        } else {
+          liquidGroup?.patchValue({ savingbalance: item.valueInr });
+        }
+      }
+
+      // ---------------- PROPERTY ----------------
+      if (code === 'PROPERTY') {
+        this.selectedAssets.push('PROPERTY');
+
+        const group = this.createProperty();
+
+        group.patchValue({
+          propertytype: item.propertyType,
+          ownershiptype: item.ownershipType,
+          marketval: item.valueInr,
+          location: item.location
+        });
+
+        this.properties.push(group);
+      }
+
+      // ---------------- FD ----------------
+      if (code === 'FIXED_DEPOSIT') {
+        this.selectedAssets.push('FIXED_DEPOSIT');
+
+        const group = this.createFD();
+
+        group.patchValue({
+          bankname: item.bankName,
+          bankamt: item.valueInr,
+          maturitydate: item.maturityDate
+        });
+
+        this.fixedDeposits.push(group);
+      }
+
+      // ---------------- INVESTMENTS ----------------
+      if (code === 'STOCKS') {
+        this.selectedAssets.push('INVESTMENTS');
+
+        this.assetsForm.get('investments')?.patchValue({
+          stockvalue: item.valueInr
+        });
+      }
+
+      if (code === 'MUTUAL_FUNDS') {
+        this.selectedAssets.push('INVESTMENTS');
+
+        this.assetsForm.get('investments')?.patchValue({
+          mutualfundvalue: item.valueInr
+        });
+      }
+
+      // ---------------- OTHER ----------------
+      if (code === 'OTHER_ASSETS') {
+        this.selectedAssets.push('OTHER');
+
+        const group = this.createOther();
+
+        group.patchValue({
+          assettype: item.assetType,
+          assetamt: item.valueInr
+        });
+
+        this.otherassets.push(group);
+      }
+
+    });
+
+    this.selectedAssets = [...new Set(this.selectedAssets)];
+
+
+    this.openIndex = [];
+    this.selectedAssets.forEach(val => {
+      const index = this.accordions.findIndex(a => a.key === val);
+      if (index !== -1) {
+        this.openIndex.push(index);
+      }
+    });
+
+
+    this.cd.detectChanges();
+  }
 
   next() {
     let form = this.assetsForm.value
@@ -630,7 +797,8 @@ export class Assetsinfo implements OnInit {
       next: (res) => {
         console.log("resp---", res);
         if (res.status == "success") {
-
+          this.formSvc.aseetsInfoData = payload
+          this.patchAssetsData();
           this.stepperService.next();
         }
       }

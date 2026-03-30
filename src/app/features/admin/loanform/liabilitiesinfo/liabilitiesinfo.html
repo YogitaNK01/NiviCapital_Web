@@ -1,8 +1,7 @@
-<div class="vh-container">
-<div class="base-layout base-height">
+<div class="base-layout">
 
     <div class="row w-100 d-flex blue-head-box text-center">
-        <p class="text-dp-3-bold">Total Amount : ₹1,16,97,289 </p>
+        <p class="text-dp-3-bold">Total Amount : ₹{{totalINRamt}} </p>
     </div>
     <div class="row w-100 ">
         <div class=" d-flex  ">
@@ -147,7 +146,7 @@
                         <div class="form-group mb-3">
                             <app-inputfield type="text" [required]="true" label="Outstanding Balance (INR)"
                                 formControlName="outstanding" [required]="true" placeholder="Enter Value"
-                                helpText="Help text" name="outstanding">
+                                helpText="Help text" name="outstanding" (input)="handleAmountInput($event,'outstanding',loan)">
                             </app-inputfield>
                             <div class="text-danger"
                                 *ngIf="loan.get('outstanding')?.touched && loan.get('outstanding')?.invalid">
@@ -162,7 +161,7 @@
                         <div class="form-group mb-3">
                             <app-inputfield type="text" [required]="true" label="EMI Amount (INR)" [required]="true"
                                 formControlName="emiamount" placeholder="Enter Value" helpText="Help text"
-                                name="emiamount">
+                                name="emiamount" (input)="handleAmountInput($event,'emiamount',loan)">
                             </app-inputfield>
                             <div class="text-danger"
                                 *ngIf="loan.get('emiamount')?.touched && loan.get('emiamount')?.invalid">
@@ -177,7 +176,7 @@
                         <div class="form-group mb-3">
                             <app-inputfield type="text" [required]="true" label="Remaining Tenure (Months)"
                                 formControlName="remtenure" [required]="true" placeholder="Enter Value"
-                                helpText="Help text" name="remtenure">
+                                helpText="Help text" name="remtenure" (input)="main.restrictInput($event,'number')">
                             </app-inputfield>
                             <div class="text-danger"
                                 *ngIf="loan.get('remtenure')?.touched && loan.get('remtenure')?.invalid">
@@ -248,7 +247,7 @@
                                 <div class="form-group mb-3">
                                     <app-inputfield type="text" [required]="true" label="Outstanding Balance (INR)"
                                         [required]="true" formControlName="ccoutstandingBalance"
-                                        (input)="main.restrictInput($event, 'number')" placeholder="Enter Value"
+                                        (input)="handleAmountInput($event,'ccoutstandingBalance',item)" placeholder="Enter Value"
                                         helpText="Help text" name="ccoutstandingBalance">
                                     </app-inputfield>
                                     <div class="text-danger"
@@ -263,13 +262,13 @@
                             <div class="col-lg-4">
                                 <div class="form-group mb-3">
                                     <app-inputfield type="text" [required]="true" label="Credit Limit (INR)"
-                                        (input)="main.restrictInput($event, 'number')" [required]="true"
-                                        formControlName="creditLimit" placeholder="Enter Value" helpText="Help text"
-                                        name="creditLimit">
+                                        (input)="handleAmountInput($event,'creditcard',item)" [required]="true"
+                                        formControlName="cccreditLimit" placeholder="Enter Value" helpText="Help text"
+                                        name="cccreditLimit">
                                     </app-inputfield>
                                     <div class="text-danger"
-                                        *ngIf="item.get('creditLimit')?.touched && item.get('creditLimit')?.invalid">
-                                        <div *ngIf="item.get('creditLimit')?.errors?.['required']">
+                                        *ngIf="item.get('cccreditLimit')?.touched && item.get('cccreditLimit')?.invalid">
+                                        <div *ngIf="item.get('cccreditLimit')?.errors?.['required']">
                                             Credit Limit is required
                                         </div>
                                     </div>
@@ -344,7 +343,7 @@
                             <div class="col-lg-6 ">
                                 <div class="form-group mb-3">
                                     <app-inputfield type="text" [required]="true" label="Outstanding Balance (INR)"
-                                        (input)="main.restrictInput($event, 'number')" [required]="true"
+                                        (input)="handleAmountInput($event,'outstandingBalance',item)" [required]="true"
                                         formControlName="outstandingBalance" placeholder="Enter Value"
                                         helpText="Help text" name="outstandingBalance">
                                     </app-inputfield>
@@ -360,7 +359,7 @@
                             <div class="col-lg-6 mt-20">
                                 <div class="form-group mb-3">
                                     <app-inputfield type="text" [required]="true" label="Credit Limit (INR)"
-                                        (input)="main.restrictInput($event, 'number')" [required]="true"
+                                        (input)="handleAmountInput($event,'creditLimit',item)" [required]="true"
                                         formControlName="creditLimit" placeholder="Enter Value" helpText="Help text"
                                         name="creditLimit">
                                     </app-inputfield>
@@ -376,7 +375,7 @@
                             <div class="col-lg-6 mt-20">
                                 <div class="form-group mb-3">
                                     <app-inputfield type="text" [required]="true" label="Monthly EMI (INR)"
-                                        (input)="main.restrictInput($event, 'number')" [required]="true"
+                                       (input)="handleAmountInput($event,'monthlyEMI',item)" [required]="true"
                                         formControlName="monthlyEMI" placeholder="Enter Value" helpText="Help text"
                                         name="monthlyEMI">
                                     </app-inputfield>
@@ -459,7 +458,7 @@
                                 <div class="form-group mb-3">
                                     <app-inputfield type="text" [required]="true" label="Amount (INR)" [required]="true"
                                         formControlName="amount" placeholder="Enter Value" helpText="Help text"
-                                        name="bankamt">
+                                        name="bankamt" (input)="handleAmountInput($event,'amount',item)">
                                     </app-inputfield>
 
 
@@ -488,7 +487,7 @@
     </form>
 
 
-</div>
+
 </div>
 <hr class="footer-hr-class">
 <div class="loan-footerbtns row w-100  d-flex justify-content-between align-items-center">

@@ -23,6 +23,20 @@ export class Loanformservice {
 
   kycdetailsID: any;
 
+   isasset:boolean=false;
+  issalaries:boolean=false;
+  
+  generalInfoData: any ;
+  estExpenseInfoData: any ;
+  additionalInfoData:any ;
+  kycInfoData: any ;
+  incomeInfoData: any ;
+  aseetsInfoData:any ;
+  liabilitiesInfoData: any ;
+  monthlyExpenditureData: any ;
+  referenceInfoData:any ;
+  educationInfoData:any;
+
   constructor(private http: HttpClient) { }
   // *************************loan info api*********************************
 
