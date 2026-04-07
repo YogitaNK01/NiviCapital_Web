@@ -190,6 +190,7 @@ export class GeneralInfo implements OnInit {
        this.stepperService.rebuildSteps();
     }else{
       this.formSvc.isasset = false;
+      this.stepperService.rebuildSteps();
     }
    
     console.log(event);
@@ -218,7 +219,7 @@ export class GeneralInfo implements OnInit {
       this.formSvc.issalaried = selected?.label === 'Employed' ? true : false;
       this.stepperService.rebuildSteps();
     });
-    }, 10000);
+    }, 1000);
    
 
     // console.log(data);
