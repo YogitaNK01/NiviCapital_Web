@@ -189,7 +189,7 @@ export class Uploadbtn implements OnInit, ControlValueAccessor, OnChanges {
         this.progress += 10;
         if (this.progress >= 100) {
           clearInterval(interval);
-          console.log("Received in upload btn:", this.fileuploadresponse);
+          // console.log("Received in upload btn:", this.fileuploadresponse);
 
           if (this.fileuploadresponse.status === 'success') {
             this.state = 'success';

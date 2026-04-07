@@ -57,6 +57,8 @@ export class Incomeinfo {
   handleresponse: any;
 
   requiredDocs = ['salary1', 'salary2', 'salary3', 'Form16', 'oneyearbankstatement', 'ay1', 'ay2', 'ay3'];   // only required ones
+  requiredBusinessDocs = ['businessITR1', 'businessITR2', 'businessITR3', 'businessGST', 'businessBankstatement'];   // only required ones
+
   optionalDocs = ['other'];
   uploadedFiles: Record<string, File | null> = {};
   uploadedrespfiles: any[] = [];
@@ -95,6 +97,17 @@ export class Incomeinfo {
     });
     this.requiredDocs.forEach(k => this.uploadedFiles[k] = null);
     this.optionalDocs.forEach(k => this.uploadedFiles[k] = null);
+    this.requiredBusinessDocs.forEach(k => this.uploadedFiles[k] = null);
+
+
+    // const stored = localStorage.getItem('income_uploaded_docs');
+
+    // if (stored) {
+    //   this.uploadedrespfiles = JSON.parse(stored);
+    //   this.getAllDocuments();
+    //   this.restoreSlotsFromDocuments(); // very important
+    // }
+
   }
 
   toggle(i: number) {
@@ -160,26 +173,16 @@ export class Incomeinfo {
 
         this.fileresponse.emit(res)
         this.handleresponse = res
-
-        // Check for duplicates using documentId
-        // const newDocId = res.data[0]?.documentId;
-        // const docExists = this.uploadedrespfiles.some(item =>
-        //   item.uploadedDocuments?.some((doc: { documentId: any; }) => doc.documentId === newDocId)
-        // );
-        // if (!docExists) {
-        //   this.uploadedrespfiles.push(res.data);
-        //   console.log("Added new file response:", res.data);
-        // } else {
-        //   console.log("Duplicate file skipped:", newDocId);
-        // }
-        // const uploadedDoc = res.data[0].uploadedDocuments[0];
-        // uploadedDoc.key = slotKey;
-        // uploadedDoc.slotIndex = index;
-
-        // this.allDocuments.push(uploadedDoc);
-
         this.uploadedrespfiles.push(res.data)
         this.uploadedFiles = { ...  this.uploadedFiles }
+
+
+        // localStorage.setItem(
+        //   'income_uploaded_docs',
+        //   JSON.stringify(this.uploadedrespfiles)
+        // );
+
+
         this.getAllDocuments();
         // this.cd.detectChanges();
       },
@@ -229,7 +232,12 @@ export class Incomeinfo {
   }
 
   get allRequiredFilesUploaded(): boolean {
-    return this.requiredDocs.every(key => !!this.getDocumentByKey(key));
+    if(this.loanformservice.issalaried){
+      return this.requiredDocs.every(key => !!this.getDocumentByKey(key));
+    } else {
+      return this.requiredBusinessDocs.every(key => !!this.getDocumentByKey(key));
+    }
+    // return this.requiredDocs.every(key => !!this.getDocumentByKey(key));
   }
 
 
@@ -237,7 +245,7 @@ export class Incomeinfo {
     if (!this.allDocuments?.length) return null;
 
     // let doc = this.allDocuments.find(doc => doc.title === key);
-     let doc = this.allDocuments.find(doc =>doc.title === key || doc.type === key);
+    let doc = this.allDocuments.find(doc => doc.title === key || doc.type === key);
 
     if (!doc) {
       doc = this.allDocuments.find(doc =>
@@ -250,7 +258,7 @@ export class Incomeinfo {
     return doc || null;
   }
 
-  
+
 
 
   hasDocument(documentKey: string): boolean {
@@ -306,10 +314,13 @@ export class Incomeinfo {
           }
           return true;
         });
-
-
-
         this.cd.detectChanges();
+
+        // localStorage.setItem(
+        //   'income_uploaded_docs',
+        //   JSON.stringify(this.uploadedrespfiles)
+        // );
+
       }
     });
   }
@@ -332,7 +343,7 @@ export class Incomeinfo {
     this.otherIncomeSlots.push({
       id,
       key: `other_income_${id}`,
-     
+
     });
   }
 
@@ -342,29 +353,59 @@ export class Incomeinfo {
     this.otherBusinessSlots.push({
       id,
       key: `other_business_${id}`,
-     
+
     });
   }
 
 
-getDocumentBySlot(key: string): any | null {
-  if (!this.allDocuments?.length) return null;
+  getDocumentBySlot(key: string): any | null {
+    if (!this.allDocuments?.length) return null;
 
-  return this.allDocuments.find(doc =>
-    doc.title === key ||       
-    doc.type === key          
-  ) || null;
-}
+    return this.allDocuments.find(doc =>
+      doc.title === key ||
+      doc.type === key
+    ) || null;
+  }
+
+  // restore again
+
+  restoreSlotsFromDocuments(): void {
+
+    // BUSINESS OTHER DOCS
+    const businessDocs = this.allDocuments.filter(doc =>
+      doc.title?.startsWith('other_business_')
+    );
+
+    this.otherBusinessSlots = businessDocs.map((doc, index) => ({
+      id: index + 1,
+      key: doc.title
+    }));
+
+    // INCOME OTHER DOCS
+    const incomeDocs = this.allDocuments.filter(doc =>
+      doc.title?.startsWith('other_income_')
+    );
+
+    this.otherIncomeSlots = incomeDocs.map((doc, index) => ({
+      id: index + 1,
+      key: doc.title
+    }));
+
+    this.slotCounter =
+      this.otherBusinessSlots.length + this.otherIncomeSlots.length;
+  }
+
+
 
   back() {
     this.stepperService.previous();
   }
   next() {
-
+this.stepperService.next();
 
 
   }
 
-  // this.stepperService.next();
+   
 }
 

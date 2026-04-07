@@ -11,6 +11,11 @@ import { Inputfield } from "../../../systemdesign/inputfield/inputfield";
 import { Datepickernew } from '../../../systemdesign/datepickernew/datepickernew';
 import { Msgboxservice } from '../../../../core/service/msgboxservice';
 
+
+interface BankOption {
+  value: string;
+  label: string;
+}
 @Component({
   selector: 'app-assetsinfo',
   standalone: true,
@@ -53,7 +58,7 @@ export class Assetsinfo implements OnInit {
   selectedowner = ''
   selectedownertype: string[] = [];
 
-  selectBanks = [];
+  selectBanks: BankOption[] = [];
   selectedbankIds: string[] = [];
 
   selectedInvestmentIds: string[] = [];
@@ -80,8 +85,10 @@ export class Assetsinfo implements OnInit {
   totalINRamt: any;
   totalproperty = 0;
   totalfd = 0;
-  totalother = 0
+  totalother = 0;
+  totalinvestment = 0;
 
+  selectedbakname!: string;
 
   constructor(private fb: FormBuilder, public main: Main, private route: ActivatedRoute, private msgBox: Msgboxservice,
     private stepperService: Loanstepperservice, private formSvc: Loanformservice, private cd: ChangeDetectorRef) { }
@@ -171,6 +178,7 @@ export class Assetsinfo implements OnInit {
   get otherassets(): FormArray {
     return this.assetsForm.get('otherassets') as FormArray;
   }
+
   //properties
   createProperty(): FormGroup {
     return this.fb.group({
@@ -187,6 +195,7 @@ export class Assetsinfo implements OnInit {
   createFD(): FormGroup {
     return this.fb.group({
       bankname: [''],
+      title: [''],
       bankamt: ['', Validators.required],
       maturitydate: ['', [Validators.required, this.dateMinValidator(() => new Date())]]
     });
@@ -225,6 +234,8 @@ export class Assetsinfo implements OnInit {
   addOther() {
     this.otherassets.push(this.createOther());
   }
+
+
 
 
   toggle(index: number) {
@@ -487,18 +498,35 @@ resetLiquidAssets() {
     console.log(this.assetsForm.value);
   }
 
-  onAssetChange1(values: string | string[]): void {
-    const ids = Array.isArray(values) ? values : [values];
-    this.selectedAssetIds = ids;
-    const selected = this.assetsCatagories.filter(s => ids.includes(s.value));
+  onAssetChange11(values: string[] | string) {
+    const assets = Array.isArray(values) ? values : [];
 
-    this.selectedAssets = [...new Set(selected.map(s => s.code))];
+    this.selectedAssets = assets;
     this.openIndex = [];
 
-    this.selectedAssets.forEach(val => {
-      const index = this.accordions.findIndex(a => a.key === val);
-      if (index !== -1) {
-        this.openIndex.push(index);
+    assets.forEach(asset => {
+      if (asset === 'GOLD' && !this.assetsForm.get('gold')) {
+        this.assetsForm.addControl(
+          'gold',
+          this.fb.group({ goldvalue: ['', Validators.required] })
+        );
+      }
+
+      if (asset === 'LIQUID' && !this.assetsForm.get('liquidAssets')) {
+        this.assetsForm.addControl(
+          'liquidAssets',
+          this.fb.group({
+            cashinhand: ['', Validators.required],
+            savingbalance: ['', Validators.required]
+          })
+        );
+      }
+
+      if (asset === 'PROPERTY' && !this.assetsForm.get('properties')) {
+        this.assetsForm.addControl(
+          'properties',
+          this.fb.array([this.createProperty()])
+        );
       }
     });
   }
@@ -506,22 +534,9 @@ resetLiquidAssets() {
 
     const groups = Array.isArray(values) ? values : [values];
 
-    
-if (!groups.includes('Property/Land Assets')) {
-    this.selectedPropertyIds = [];
-  }
-
-
     this.selectedAssets = groups;
-   
-
-    // this.selectedAssetIds = groups.flatMap(
-    //   group => this.groupIdMap[group] || []
-    // );
-    
 
     this.openIndex = [];
-
     this.selectedAssets.forEach(val => {
       const index = this.accordions.findIndex(a => a.key === val);
       if (index !== -1) {
@@ -559,7 +574,7 @@ if (!groups.includes('Property/Land Assets')) {
       this.accordions = uniqueGroups.map((group: any) => ({
         title: this.accordianTitle(group),
         alwaysOpen: true,
-        key: group
+        key: this.accordianTitle(group)
       }));
       this.assetCodeMap = list.reduce((acc: any, item: any) => {
         acc[item.code] = item.id;
@@ -657,7 +672,8 @@ if (!groups.includes('Property/Land Assets')) {
     }
     // else if (type === 'investment') {
     //   this.selectedInvestmentIds = ids;
-    // } 
+    // }
+   
     else {
       this.selectedownertype = ids;
     }
@@ -695,7 +711,7 @@ if (!groups.includes('Property/Land Assets')) {
     console.log('Investments shown:', this.investmentsArray.value);
   }
 
-  removeitem(index: number, type: 'property' | 'fd' | 'other') {
+  removeitem1(index: number, type: 'property' | 'fd' | 'other') {
     this.msgBox.open({
       title: 'Are you sure want to Remove',
       message: '',
@@ -706,7 +722,7 @@ if (!groups.includes('Property/Land Assets')) {
           const categoryToRemove = loanArray.at(index).get('type')?.value;
 
           for (let i = loanArray.length - 1; i >= 0; i--) {
-            if (loanArray.at(i).get('type')?.value === categoryToRemove) {
+            if (loanArray.at(i).get('propertytype')?.value === categoryToRemove) {
               if (loanArray.length === 1) return;
               loanArray.removeAt(i);
             }
@@ -719,13 +735,16 @@ if (!groups.includes('Property/Land Assets')) {
         }
 
         if (type === 'fd') {
-
-          this.fixedDeposits.removeAt(index);
+          if (this.fixedDeposits?.length > 0) {
+            this.fixedDeposits.removeAt(index);
+          }
         }
 
 
         if (type === 'other') {
-          this.otherassets.removeAt(index);
+          if (this.otherassets?.length > 0) {
+            this.otherassets.removeAt(index);
+          }
         }
 
 
@@ -733,6 +752,59 @@ if (!groups.includes('Property/Land Assets')) {
       }
     });
   }
+removeitem(index: number, type: 'property' | 'fd' | 'other') {
+  this.msgBox.open({
+    title: 'Are you sure want to Remove',
+    message: '',
+    showCancel: true,
+    onOk: () => {
+      switch (type) {
+        case 'property':
+          this.properties.removeAt(index);
+          break;
+        case 'fd':
+          this.fixedDeposits.removeAt(index);
+          break;
+        case 'other':
+          this.otherassets.removeAt(index);
+          break;
+      }
+      this.handleEmptyAccordion(type);
+      this.calculateGrandTotal();  // Recalc total
+    }
+  });
+}
+handleEmptyAccordion(type: 'property' | 'fd' | 'other') {
+  let array: FormArray;
+  let accKey: string;
+
+  switch (type) {
+    case 'property':
+      array = this.properties;
+      accKey = 'Property/Land Assets';  // Match your acc.key
+      break;
+    case 'fd':
+      array = this.fixedDeposits;
+      accKey = 'Fixed Deposit';  // Match acc.key
+      break;
+    case 'other':
+      array = this.otherassets;
+      accKey = 'other';  // Match acc.key (lowercase from template)
+      break;
+  }
+
+  if (array && array.length === 0) {
+    // Remove from selectedAssets → hides *ngIf accordion
+    this.selectedAssets = this.selectedAssets.filter(k => k !== accKey);
+    this.selectedAssets = [...this.selectedAssets];  // Trigger change detection
+
+    // Close accordion
+    const accIndex = this.accordions.findIndex(a => a.key === accKey);
+    if (accIndex !== -1) {
+      this.openIndex = this.openIndex.filter(i => i !== accIndex);
+    }
+  }
+}
 
   calculateGrandTotal() {
 
@@ -742,10 +814,11 @@ if (!groups.includes('Property/Land Assets')) {
       Number(this.assetsForm.get('liquidAssets.savingbalance')?.value?.toString().replace(/,/g, '') || 0);
 
     this.totalproperty = this.calculateTotal('properties', 'marketval');
+    this.totalinvestment = this.calculateTotal('investments', 'value');
     this.totalfd = this.calculateTotal('fixedDeposits', 'bankamt');
     this.totalother = this.calculateTotal('otherassets', 'assetamt');
 
-    this.totalINRamt = gold + liquid + this.totalproperty + this.totalfd + this.totalother;
+    this.totalINRamt = gold + liquid + this.totalproperty + this.totalfd + this.totalother + this.totalinvestment;
 
     this.totalINRamt = this.formatIndian(this.totalINRamt.toString());
   }
@@ -785,25 +858,17 @@ if (!groups.includes('Property/Land Assets')) {
       if (!hasLiquidData) return true;
     }
 
-    if (this.selectedAssets.includes('Property/Land Assets')) {
-      const properties = this.assetsForm.get('properties') as FormArray;
-      if (!properties?.length) return true;
-    }
+  
+    if (this.selectedAssets.includes('Property/Land Assets') && this.properties.length === 0) return true;
 
-    if (this.selectedAssets.includes('Fixed Deposit')) {
-      const fixedDeposits = this.assetsForm.get('fixedDeposits') as FormArray;
-      if (!fixedDeposits?.length) return true;
-    }
+    if (this.selectedAssets.includes('Fixed Deposit') && this.fixedDeposits.length === 0) return true;
+    if (this.selectedAssets.includes('other') && this.otherassets.length === 0) return true;
 
     if (this.selectedAssets.includes('investments')) {
       const hasInvestmentData = form.investments?.stockvalue || form.investments?.mutualfundvalue;
       if (!hasInvestmentData) return true;
     }
 
-    if (this.selectedAssets.includes('other')) {
-      const otherAssets = this.assetsForm.get('otherassets') as FormArray;
-      if (!otherAssets?.length) return true;
-    }
 
     return false;
   }
@@ -817,10 +882,41 @@ if (!groups.includes('Property/Land Assets')) {
         value: s.id,
         label: s.name,
 
+
+
       }));
 
     });
   }
+ onBankSelected(selectedId: any, fd: AbstractControl) {
+  const fg = fd as FormGroup;
+
+  const found = this.selectBanks.find(
+    (b: BankOption) => b.value === selectedId
+  );
+  const bankLabel = found?.label ?? '';
+  this.selectedbakname = bankLabel;
+
+  const titleCtrl = fg.get('title');
+
+  if (bankLabel === 'Other') {
+    titleCtrl?.setValidators([Validators.required]);
+  } else {
+    titleCtrl?.clearValidators();
+    titleCtrl?.setValue('');
+  }
+
+  titleCtrl?.updateValueAndValidity();
+}
+
+
+isOtherSelected(fd: AbstractControl): boolean {
+  const selectedId = fd.get('bankname')?.value;
+  const found = this.selectBanks.find(b => b.value === selectedId);
+  return found?.label === 'Other';
+}
+
+
 
   back() {
     this.stepperService.previous();
@@ -1042,6 +1138,7 @@ if (!groups.includes('Property/Land Assets')) {
           } else {
             addItem('FIXED_DEPOSIT', ctrl.value.bankamt, {
               bankName: ctrl.value.bankname,
+               ...(this.isOtherSelected(ctrl) && { title: ctrl.value.title }),
               maturityDate: (ctrl.value.maturitydate).format('YYYY-MM-DD')
             });
           }

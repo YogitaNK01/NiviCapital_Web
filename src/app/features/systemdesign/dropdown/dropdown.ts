@@ -196,6 +196,7 @@ writeValue(value: string | string[]): void {
     this.selectedValues = [];
     this.onChange(this.selectedValues);
     this.selectedValueChange.emit(this.selectedValues);
+    
   }
 
   isAllSelected() {

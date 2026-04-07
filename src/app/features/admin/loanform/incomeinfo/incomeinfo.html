@@ -431,7 +431,7 @@
 
                         <div class="col-lg-4 col-sm-12 mt-20">
                             <app-buttons label="Add Other Document" class="btn btn-icon Add btncustomClass"
-                                [outline]="true" (click)="addOtherBusinessDocument()">
+                                [outline]="true" (click)="addOtherIncomeDocument()">
                                 <img src="/assets/images/icons/addred.svg">
                             </app-buttons>
                         </div>
@@ -439,12 +439,7 @@
 
 
 
-                <div class="col-lg-4 col-sm-12 mt-20">
-                    <app-buttons label="Add Other Document" class="btn btn-icon Add btncustomClass" [outline]="true">
-                        <img src="/assets/images/icons/addred.svg" alt="Add">
-
-                    </app-buttons>
-                </div>
+               
             </div>
 
             <!-- if bussiness -->
@@ -733,27 +728,7 @@
                     </div>
 
 
-                    <!-- <div class="col-lg-4 col-sm-12 mt-20" *ngIf="otherbusinessdoc">
-                        @if(handleresponse && hasDocument('otherbusiness')){
-                        <label class="text-label">Salary Slip 1<span class="text-danger">*</span></label>
-                        <div class="addcust-img-box mt-2">
-                            <p class="text-label">{{ getDocumentName('otherbusiness') }}</p>
-                            <div class="icons">
-                                <span class="view" (click)="viewImage(getDocumentUrl('otherbusiness'))"><img
-                                        src="/assets/images/icons/eyered.svg" alt="view"></span>
-                                <span class="download" (click)="downloadImage(getDocumentUrl('otherbusiness'), getDocumentName('otherbusiness'))"><img
-                                        src="/assets/images/icons/import-red.svg" alt="Download"></span>
-                                <span class="delete" (click)="deleteImage('otherbusiness')"><img src="/assets/images/icons/close.svg"
-                                        alt="Download"></span>
-                            </div>
-                        </div>
-
-                        } @else{
-                        <app-uploadbtn [config]="basicConfig"
-                            (uploadStarted)="onUploadStarted($event,  'otherbusiness','BUSINESS' ,'OTHER_INCOME','OTHER')"
-                            [uploadViaApi]="true" [fileuploadresponse]="handleresponse" label="Other Documents">
-                        </app-uploadbtn>}
-                    </div> -->
+                   
 
                     <div class="row d-flex flex-column">
                         <div class="text-label fw-bold mt-20">Other Documents</div>

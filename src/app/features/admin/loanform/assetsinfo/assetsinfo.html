@@ -21,83 +21,81 @@
         <form [formGroup]="assetsForm" (ngSubmit)="submit()" id="expenseForm" class="w-100 ">
 
             <div class=" accordion d-flex flex-column gap-4 mb-4">
-
-                <div class="accordion-item b-0" *ngFor="let acc of accordions; let i = index"
-                    [hidden]="!selectedAssets.includes(acc.key)">
-
-                    <h2 class="accordion-header">
-                        <button class="accordion-button table-head" [class.collapsed]="!openIndex.includes(i)"
-                            type="button" (click)="toggle(i)">
-
-                            <span class="flex-grow-1">{{ acc.title }}</span>
-                            <span class="delete-icon px-2" (click)="removeAccordion(acc.key, i, $event)">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
-                                    fill="none">
-                                    <path
-                                        d="M21 5.98047C17.67 5.65047 14.32 5.48047 10.98 5.48047C9 5.48047 7.02 5.58047 5.04 5.78047L3 5.98047"
-                                        stroke="#25262F" stroke-width="1.5" stroke-linecap="round"
-                                        stroke-linejoin="round" />
-                                    <path
-                                        d="M8.5 4.97L8.72 3.66C8.88 2.71 9 2 10.69 2H13.31C15 2 15.13 2.75 15.28 3.67L15.5 4.97"
-                                        stroke="#25262F" stroke-width="1.5" stroke-linecap="round"
-                                        stroke-linejoin="round" />
-                                    <path
-                                        d="M18.8484 9.14062L18.1984 19.2106C18.0884 20.7806 17.9984 22.0006 15.2084 22.0006H8.78844C5.99844 22.0006 5.90844 20.7806 5.79844 19.2106L5.14844 9.14062"
-                                        stroke="#25262F" stroke-width="1.5" stroke-linecap="round"
-                                        stroke-linejoin="round" />
-                                    <path d="M10.3281 16.5H13.6581" stroke="#25262F" stroke-width="1.5"
-                                        stroke-linecap="round" stroke-linejoin="round" />
-                                    <path d="M9.5 12.5H14.5" stroke="#25262F" stroke-width="1.5" stroke-linecap="round"
-                                        stroke-linejoin="round" />
-                                </svg>
-                            </span>
-                        </button>
-                    </h2>
+                <ng-container *ngFor="let acc of accordions; let i = index">
+                    <div class="accordion-item b-0" *ngIf="selectedAssets.includes(acc.key)">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button table-head" [class.collapsed]="!openIndex.includes(i)"
+                                type="button" (click)="toggle(i)">
+                                <span class="flex-grow-1">{{ acc.title }}</span>
+                                <span class="delete-icon px-2" (click)="removeAccordion(acc.key, i, $event)">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                                        fill="none">
+                                        <path
+                                            d="M21 5.98047C17.67 5.65047 14.32 5.48047 10.98 5.48047C9 5.48047 7.02 5.58047 5.04 5.78047L3 5.98047"
+                                            stroke="#25262F" stroke-width="1.5" stroke-linecap="round"
+                                            stroke-linejoin="round" />
+                                        <path
+                                            d="M8.5 4.97L8.72 3.66C8.88 2.71 9 2 10.69 2H13.31C15 2 15.13 2.75 15.28 3.67L15.5 4.97"
+                                            stroke="#25262F" stroke-width="1.5" stroke-linecap="round"
+                                            stroke-linejoin="round" />
+                                        <path
+                                            d="M18.8484 9.14062L18.1984 19.2106C18.0884 20.7806 17.9984 22.0006 15.2084 22.0006H8.78844C5.99844 22.0006 5.90844 20.7806 5.79844 19.2106L5.14844 9.14062"
+                                            stroke="#25262F" stroke-width="1.5" stroke-linecap="round"
+                                            stroke-linejoin="round" />
+                                        <path d="M10.3281 16.5H13.6581" stroke="#25262F" stroke-width="1.5"
+                                            stroke-linecap="round" stroke-linejoin="round" />
+                                        <path d="M9.5 12.5H14.5" stroke="#25262F" stroke-width="1.5"
+                                            stroke-linecap="round" stroke-linejoin="round" />
+                                    </svg>
+                                </span>
+                            </button>
+                        </h2>
 
 
-                    <div class="accordion-collapse collapse" [class.show]="openIndex.includes(i)">
+                        <div class="accordion-collapse collapse" [class.show]="openIndex.includes(i)">
 
-                        <div class="accordion-body p-0 ">
+                            <div class="accordion-body p-0 ">
 
-                            <ng-container *ngIf="acc.key === 'Gold'">
-                                <ng-container *ngTemplateOutlet="goldTemplate; context:{index:i}">
+                                <ng-container *ngIf="acc.key === 'Gold'">
+                                    <ng-container *ngTemplateOutlet="goldTemplate; context:{index:i}">
+                                    </ng-container>
                                 </ng-container>
-                            </ng-container>
 
-                            <ng-container *ngIf="acc.key === 'Liquid Assets'">
-                                <ng-container *ngTemplateOutlet="liquidassetsTemplate; context:{index:i}">
+                                <ng-container *ngIf="acc.key === 'Liquid Assets'">
+                                    <ng-container *ngTemplateOutlet="liquidassetsTemplate; context:{index:i}">
+                                    </ng-container>
                                 </ng-container>
-                            </ng-container>
 
-                            <ng-container *ngIf="acc.key === 'Property/Land Assets'">
-                                <ng-container *ngTemplateOutlet="propertylandTemplate; context:{index:i}">
+                                <ng-container *ngIf="acc.key === 'Property/Land Assets'">
+                                    <ng-container *ngTemplateOutlet="propertylandTemplate; context:{index:i}">
 
+                                    </ng-container>
                                 </ng-container>
-                            </ng-container>
 
-                            <ng-container *ngIf="acc.key === 'Fixed Deposit'">
-                                <ng-container *ngTemplateOutlet="fdTemplate; context:{index:i}">
+                                <ng-container *ngIf="acc.key === 'Fixed Deposit'">
+                                    <ng-container *ngTemplateOutlet="fdTemplate; context:{index:i}">
 
+                                    </ng-container>
                                 </ng-container>
-                            </ng-container>
 
-                            <ng-container *ngIf="acc.key === 'Investments'">
-                                <ng-container *ngTemplateOutlet="investmentTemplate; context:{index:i}">
+                                <ng-container *ngIf="acc.key === 'Investments'">
+                                    <ng-container *ngTemplateOutlet="investmentTemplate; context:{index:i}">
 
+                                    </ng-container>
                                 </ng-container>
-                            </ng-container>
 
-                            <ng-container *ngIf="acc.key === 'other'">
-                                <ng-container *ngTemplateOutlet="otherTemplate; context:{index:i}">
+                                <ng-container *ngIf="acc.key === 'other'">
+                                    <ng-container *ngTemplateOutlet="otherTemplate; context:{index:i}">
 
+                                    </ng-container>
                                 </ng-container>
-                            </ng-container>
 
 
+                            </div>
                         </div>
-                    </div>
 
-                </div>
+                    </div>
+                </ng-container>
 
             </div>
 
@@ -175,7 +173,8 @@
 
                                 <div class="text-dp-3-regular d-flex align-items-center justify-content-between">
                                     Property {{ i + 1 }}
-                                    <span *ngIf="properties.length > 1" (click)="removeitem(i,'property')" class="delete-icon px-2">
+                                    <span *ngIf="properties.length > 1" (click)="removeitem(i,'property')"
+                                        class="delete-icon px-2">
                                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
                                             viewBox="0 0 24 24" fill="none">
                                             <path
@@ -205,7 +204,7 @@
                                             [(selectedValue)]="selectedPropertyIds"
                                             [placeholder]="'Select Property Type'" [required]="true"
                                             (selectedValueChange)="onchange($event,'property')" [avatarUrl]="avatarUrl"
-                                            [hasAvatar]="hasAvatar" [label]="'Assets'">
+                                            [hasAvatar]="hasAvatar" [label]="'Property Type'">
                                         </app-dropdown>
 
                                     </div>
@@ -272,6 +271,8 @@
                 </div>
             </ng-template>
 
+
+
             <ng-template #fdTemplate let-i="index">
                 <div class="mobiledetails d-flex w-100 flex-column ">
                     <div class="w-100 gap-3">
@@ -280,7 +281,8 @@
                             <div class="row common-details-box d-flex flex-row gap-0" [formGroupName]="i">
                                 <div class="text-dp-3-regular d-flex align-items-center justify-content-between">
                                     FD {{ i + 1 }}
-                                    <span *ngIf="fixedDeposits.length > 1" (click)="removeitem(i,'fd')" class="delete-icon px-2">
+                                    <span *ngIf="fixedDeposits.length > 1" (click)="removeitem(i,'fd')"
+                                        class="delete-icon px-2">
                                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
                                             viewBox="0 0 24 24" fill="none">
                                             <path
@@ -304,23 +306,34 @@
                                 </div>
                                 <hr class="hrclass">
 
-                                <div class="col">
-                                    <div class="form-group">
+                                <!-- ================= ROW 1 ================= -->
 
+                                <!-- Bank Name -->
+                                <div [class.col-4]="!isOtherSelected(fd)" [class.col-6]="isOtherSelected(fd)">
+                                    <div class="form-group">
                                         <app-dropdown [options]="selectBanks" formControlName="bankname"
-                                            [placeholder]="'Select Bank Name'" [required]="true"
-                                            (selectedValueChange)="onchange($event,'bank')" [avatarUrl]="avatarUrl"
-                                            [hasAvatar]="hasAvatar" [label]="'Assets'">
+                                            [label]="'Bank Name'" [required]="true" [searchable]="true"
+                                            (selectedValueChange)="onBankSelected($event,fd)">
                                         </app-dropdown>
+                                    </div>
+                                </div>
+
+                                <!-- Title (ONLY when Other) -->
+                                <div class="col-6" *ngIf="isOtherSelected(fd)">
+                                    <div class="form-group">
+                                        <app-inputfield formControlName="title" label="Title" placeholder="Enter Title"
+                                            [required]="true">
+                                        </app-inputfield>
+
                                         <div class="text-danger"
-                                            *ngIf="fd.get('bankname')?.touched && fd.get('bankname')?.invalid">
-                                            <div *ngIf="fd.get('bankname')?.errors?.['required']">
-                                                Bank Name is required
-                                            </div>
+                                            *ngIf="fd.get('title')?.touched && fd.get('title')?.invalid">
+                                            Title is required
                                         </div>
                                     </div>
                                 </div>
-                                <div class="col">
+
+                                <!-- Amount (Normal banks only – SAME ROW) -->
+                                <div class="col-4" *ngIf="!isOtherSelected(fd)">
                                     <div class="form-group">
                                         <app-inputfield type="text" [required]="true" label="Amount (INR)"
                                             [required]="true" formControlName="bankamt" placeholder="Enter Value"
@@ -333,10 +346,11 @@
                                                 Amount is required
                                             </div>
                                         </div>
-
                                     </div>
                                 </div>
-                                <div class="col">
+
+                                <!-- Maturity Date (Normal banks only – SAME ROW) -->
+                                <div class="col-4" *ngIf="!isOtherSelected(fd)">
                                     <div class="form-group">
                                         <app-datepickernew formControlName="maturitydate" label="Maturity Date"
                                             [disablePastDates]="true" placeholder="DD/MM/YYYY">
@@ -345,10 +359,43 @@
                                             *ngIf="fd.get('maturitydate')?.touched && fd.get('maturitydate')?.errors?.['minDateError']">
                                             Maturity date cannot be in the past
                                         </div>
-
                                     </div>
                                 </div>
 
+
+                                <!-- ================= ROW 2 (Only when Other) ================= -->
+
+                                <ng-container *ngIf="isOtherSelected(fd)">
+
+                                    <div class="col-6 mt-3">
+                                        <div class="form-group">
+                                            <app-inputfield type="text" [required]="true" label="Amount (INR)"
+                                                [required]="true" formControlName="bankamt" placeholder="Enter Value"
+                                                helpText="Help text" name="bankamt"
+                                                (input)="handleAmountInput($event,'bankamt',fd)">
+                                            </app-inputfield>
+                                            <div class="text-danger"
+                                                *ngIf="fd.get('bankamt')?.touched && fd.get('bankamt')?.invalid">
+                                                <div *ngIf="fd.get('bankamt')?.errors?.['required']">
+                                                    Amount is required
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-6 mt-3">
+                                        <div class="form-group">
+                                            <app-datepickernew formControlName="maturitydate" label="Maturity Date"
+                                                [disablePastDates]="true" placeholder="DD/MM/YYYY">
+                                            </app-datepickernew>
+                                            <div class="text-danger"
+                                                *ngIf="fd.get('maturitydate')?.touched && fd.get('maturitydate')?.errors?.['minDateError']">
+                                                Maturity date cannot be in the past
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                </ng-container>
                             </div>
                             @if(i === fixedDeposits.length - 1 ) {
                             <div class="row common-details-box pt-0 pb-0 ">
@@ -464,7 +511,8 @@
                             <div class="row common-details-box d-flex flex-row gap-0" [formGroupName]="i">
                                 <div class="text-dp-3-regular d-flex align-items-center justify-content-between">
                                     Assets {{ i + 1 }}
-                                    <span *ngIf="otherassets.length > 1" (click)="removeitem(i,'other')" class="delete-icon px-2">
+                                    <span *ngIf="otherassets.length > 1" (click)="removeitem(i,'other')"
+                                        class="delete-icon px-2">
                                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
                                             viewBox="0 0 24 24" fill="none">
                                             <path

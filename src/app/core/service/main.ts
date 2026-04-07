@@ -173,7 +173,7 @@ export class Main {
 }
 
 // input validations 
-restrictInput(event: Event, type: 'text' | 'number' | 'decimal') {
+restrictInput(event: Event, type: 'text' | 'number' | 'decimal', decimalLimit: number = 2) {
     const input = event.target as HTMLInputElement;
     let value = input.value;
 
@@ -197,7 +197,7 @@ restrictInput(event: Event, type: 'text' | 'number' | 'decimal') {
     }
     if (parts.length === 2) {
       if (parts[1].length > 2) {
-        value = parts[0] + '.' + parts[1].substring(0, 2);
+        value = parts[0] + '.' + parts[1].substring(0, decimalLimit);
       }
     }
 
