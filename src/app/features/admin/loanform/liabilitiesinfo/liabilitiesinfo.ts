@@ -66,6 +66,9 @@ export class Liabilitiesinfo {
   totalother = 0;
   totalINRamt: any;
 
+  selectBanks=[];
+  selectedbankIds: string[] = [];
+
   constructor(private fb: FormBuilder, public main: Main, private route: ActivatedRoute, private msgBox: Msgboxservice,
     private stepperService: Loanstepperservice, private formSvc: Loanformservice, private cd: ChangeDetectorRef) { }
 
@@ -112,6 +115,7 @@ export class Liabilitiesinfo {
 
     this.alllibilitiy_type();
     this.getloantype();
+    this.getbanks();
   }
 
   get loans(): FormArray {
@@ -244,6 +248,19 @@ export class Liabilitiesinfo {
         return this.fb.group({});
     }
 
+  }
+
+   getbanks(){
+ this.formSvc.getallBanks().subscribe((res: any) => {
+        const list = res.data ?? res;
+
+        this.selectBanks = list.map((s: any) => ({
+          value: s.id,
+          label: s.name,
+          code: s.code
+        }));
+
+      });
   }
 
   toggle(index: number) {

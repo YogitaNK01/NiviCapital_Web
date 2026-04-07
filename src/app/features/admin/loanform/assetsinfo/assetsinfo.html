@@ -1,10 +1,10 @@
 <div class="vh-container">
     <div class="base-layout base-height">
 
-        <div class="row w-100 d-flex blue-head-box text-center">
+        <div class=" w-100 d-flex blue-head-box d-flex  justify-content-center ">
             <p class="text-dp-3-bold">Total Amount : ₹{{totalINRamt}} </p>
         </div>
-        <div class="row w-100 ">
+        <div class=" w-100 ">
             <div class=" d-flex  ">
                 <div class="w-100 gap-3">
                     <!-- all categories -->
@@ -59,35 +59,35 @@
 
                         <div class="accordion-body p-0 ">
 
-                            <ng-container *ngIf="acc.key === 'GOLD'">
+                            <ng-container *ngIf="acc.key === 'Gold'">
                                 <ng-container *ngTemplateOutlet="goldTemplate; context:{index:i}">
                                 </ng-container>
                             </ng-container>
 
-                            <ng-container *ngIf="acc.key === 'LIQUID'">
+                            <ng-container *ngIf="acc.key === 'Liquid Assets'">
                                 <ng-container *ngTemplateOutlet="liquidassetsTemplate; context:{index:i}">
                                 </ng-container>
                             </ng-container>
 
-                            <ng-container *ngIf="acc.key === 'PROPERTY'">
+                            <ng-container *ngIf="acc.key === 'Property/Land Assets'">
                                 <ng-container *ngTemplateOutlet="propertylandTemplate; context:{index:i}">
 
                                 </ng-container>
                             </ng-container>
 
-                            <ng-container *ngIf="acc.key === 'FIXED_DEPOSIT'">
+                            <ng-container *ngIf="acc.key === 'Fixed Deposit'">
                                 <ng-container *ngTemplateOutlet="fdTemplate; context:{index:i}">
 
                                 </ng-container>
                             </ng-container>
 
-                            <ng-container *ngIf="acc.key === 'INVESTMENTS'">
+                            <ng-container *ngIf="acc.key === 'Investments'">
                                 <ng-container *ngTemplateOutlet="investmentTemplate; context:{index:i}">
 
                                 </ng-container>
                             </ng-container>
 
-                            <ng-container *ngIf="acc.key === 'OTHER'">
+                            <ng-container *ngIf="acc.key === 'other'">
                                 <ng-container *ngTemplateOutlet="otherTemplate; context:{index:i}">
 
                                 </ng-container>
@@ -168,14 +168,14 @@
                 <div class="mobiledetails d-flex w-100 flex-column ">
                     <div class="w-100 gap-3">
                         <div formArrayName="properties">
-                            @for(prop of properties.controls; track $index; let i = $index){
+                            @for(prop of properties.controls; track prop; let i = $index){
 
 
                             <div class="row common-details-box d-flex flex-row gap-0 " [formGroupName]="i">
 
                                 <div class="text-dp-3-regular d-flex align-items-center justify-content-between">
                                     Property {{ i + 1 }}
-                                    <span (click)="removeitem(i,'property')" class="delete-icon px-2">
+                                    <span *ngIf="properties.length > 1" (click)="removeitem(i,'property')" class="delete-icon px-2">
                                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
                                             viewBox="0 0 24 24" fill="none">
                                             <path
@@ -280,7 +280,7 @@
                             <div class="row common-details-box d-flex flex-row gap-0" [formGroupName]="i">
                                 <div class="text-dp-3-regular d-flex align-items-center justify-content-between">
                                     FD {{ i + 1 }}
-                                    <span (click)="removeitem(i,'fd')" class="delete-icon px-2">
+                                    <span *ngIf="fixedDeposits.length > 1" (click)="removeitem(i,'fd')" class="delete-icon px-2">
                                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
                                             viewBox="0 0 24 24" fill="none">
                                             <path
@@ -306,11 +306,12 @@
 
                                 <div class="col">
                                     <div class="form-group">
-                                        <app-inputfield type="text" [required]="true" label="Bank Name"
-                                            [required]="true" formControlName="bankname" placeholder="Enter Bank Name"
-                                            helpText="Help text" name="bankname"
-                                            (input)="main.restrictInput($event, 'text')">
-                                        </app-inputfield>
+
+                                        <app-dropdown [options]="selectBanks" formControlName="bankname"
+                                            [placeholder]="'Select Bank Name'" [required]="true"
+                                            (selectedValueChange)="onchange($event,'bank')" [avatarUrl]="avatarUrl"
+                                            [hasAvatar]="hasAvatar" [label]="'Assets'">
+                                        </app-dropdown>
                                         <div class="text-danger"
                                             *ngIf="fd.get('bankname')?.touched && fd.get('bankname')?.invalid">
                                             <div *ngIf="fd.get('bankname')?.errors?.['required']">
@@ -367,18 +368,60 @@
             </ng-template>
 
             <ng-template #investmentTemplate let-i="index">
-                <div class="row common-details-box d-flex flex-row " formGroupName="investments">
+                <div class="row common-details-box d-flex flex-row ">
                     <div class="col">
                         <div class="form-group mb-3">
                             <app-dropdown [options]="selectInvestments" [(selectedValue)]="selectedInvestmentIds"
-                                [placeholder]="'Select type'" [required]="true"
-                                (selectedValueChange)="onchange($event,'investment')" [avatarUrl]="avatarUrl"
+                                [placeholder]="'Select type'" [required]="true" [multiSelect]="true"
+                                (selectedValueChange)="onchangeinvestment($event)" [avatarUrl]="avatarUrl"
                                 [hasAvatar]="hasAvatar" [label]="'Select Type'">
                             </app-dropdown>
 
                         </div>
                     </div>
-                    <div class="col">
+
+
+                    <div formArrayName="investments" class="row">
+
+                        <ng-container *ngFor="let inv of investmentsArray.controls; let i = index" [formGroupName]="i">
+
+                            <!-- <div class="mt-20"> -->
+                            <div *ngIf="inv.get('type')?.value !== 'Others'" class="col-12 col-md-6 col-lg-3 mt-20">
+
+                                <app-inputfield type="text" [label]="inv.get('type')?.value + ' (INR)'"
+                                    formControlName="value" placeholder="Enter value" [required]="true"
+                                    (input)="handleAmountInput($event,'value',inv)">
+                                </app-inputfield>
+                            </div>
+                            <!-- </div> -->
+                        </ng-container>
+                        <ng-container *ngFor="let inv of investmentsArray.controls; let i = index" [formGroupName]="i">
+
+                            <div class="row mt-20" *ngIf="inv.get('type')?.value === 'Others'">
+                                <div class="col-12 col-md-6">
+
+                                    <app-inputfield type="text" label="Others" formControlName="name" [required]="true"
+                                        placeholder="Enter title" (input)="main.restrictInput($event, 'text')">
+                                    </app-inputfield>
+
+
+                                </div>
+
+                                <div class="col-12 col-md-6">
+
+                                    <app-inputfield type="text" label="Amount (INR)" formControlName="value"
+                                        [required]="true" placeholder="Enter value"
+                                        (input)="handleAmountInput($event,'value',inv)">
+                                    </app-inputfield>
+
+                                </div>
+                            </div>
+
+                        </ng-container>
+
+                    </div>
+
+                    <!-- <div class="col">
                         <div class="form-group mb-3">
                             <app-inputfield type="text" [required]="true" label="Stocks (INR)" [required]="true"
                                 formControlName="stockvalue" placeholder="Enter Value" helpText="Help text"
@@ -408,7 +451,7 @@
                             </div>
 
                         </div>
-                    </div>
+                    </div> -->
                 </div>
             </ng-template>
 
@@ -421,7 +464,7 @@
                             <div class="row common-details-box d-flex flex-row gap-0" [formGroupName]="i">
                                 <div class="text-dp-3-regular d-flex align-items-center justify-content-between">
                                     Assets {{ i + 1 }}
-                                    <span (click)="removeitem(i,'other')" class="delete-icon px-2">
+                                    <span *ngIf="otherassets.length > 1" (click)="removeitem(i,'other')" class="delete-icon px-2">
                                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
                                             viewBox="0 0 24 24" fill="none">
                                             <path
@@ -470,9 +513,12 @@
                                     <div class="form-group">
                                         <app-inputfield type="text" [required]="true" label="Amount (INR)"
                                             [required]="true" formControlName="assetamt" placeholder="Enter Value"
-                                            helpText="Help text" (input)="handleAmountInput($event,'assetamt')"
+                                            helpText="Help text" (input)="handleAmountInput($event,'assetamt',other)"
                                             name="assetamt">
                                         </app-inputfield>
+
+
+
                                         <div class="text-danger"
                                             *ngIf="other.get('assetamt')?.touched && other.get('assetamt')?.invalid">
                                             <div *ngIf="other.get('assetamt')?.errors?.['required']">

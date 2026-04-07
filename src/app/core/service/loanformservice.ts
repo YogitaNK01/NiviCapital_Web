@@ -212,6 +212,10 @@ export class Loanformservice {
       data
     );
   }
+  getallBanks(): Observable<ApiResponse<any>> {
+    return this.http.get<ApiResponse<any>>(
+      `${this.baseUrl}/v1/los/applications/bank-list`,
+    )};
 
 
   // ************************* Liability   *************************

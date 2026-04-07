@@ -36,7 +36,7 @@ private buildSteps() {
     { label: 'Estimated Expense', route: 'expense' },
     { label: 'Additional Info', route: 'additionalinfo' },
     { label: 'KYC', route: 'kycinfo' },
-    { label: 'Education Details', route: 'educationinfo' },
+    // { label: 'Education Details', route: 'educationinfo' },
     
   ];
  const conditionalSteps: { label: string; route: string }[] = [];

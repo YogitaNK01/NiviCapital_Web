@@ -53,6 +53,9 @@ export class Assetsinfo implements OnInit {
   selectedowner = ''
   selectedownertype: string[] = [];
 
+  selectBanks = [];
+  selectedbankIds: string[] = [];
+
   selectedInvestmentIds: string[] = [];
   selectInvestments: DropdownOption[] = []
 
@@ -78,6 +81,7 @@ export class Assetsinfo implements OnInit {
   totalproperty = 0;
   totalfd = 0;
   totalother = 0
+
 
   constructor(private fb: FormBuilder, public main: Main, private route: ActivatedRoute, private msgBox: Msgboxservice,
     private stepperService: Loanstepperservice, private formSvc: Loanformservice, private cd: ChangeDetectorRef) { }
@@ -109,11 +113,8 @@ export class Assetsinfo implements OnInit {
       properties: this.fb.array([this.createProperty()]),
 
       fixedDeposits: this.fb.array([this.createFD()]),
+      investments: this.fb.array([]),
 
-      investments: this.fb.group({
-        stockvalue: ['', Validators.required],
-        mutualfundvalue: ['', Validators.required]
-      }),
       otherassets: this.fb.array([this.createOther()]),
     });
     this.allAssetCatagory();
@@ -131,7 +132,9 @@ export class Assetsinfo implements OnInit {
       this.calculateGrandTotal();
 
     });
-
+    this.assetsForm.get('investments')?.valueChanges.subscribe(() => {
+      this.calculateGrandTotal();
+    });
     this.assetsForm.get('fixedDeposits')?.valueChanges.subscribe(() => {
       this.calculateGrandTotal();
     });
@@ -139,6 +142,8 @@ export class Assetsinfo implements OnInit {
     this.assetsForm.get('otherassets')?.valueChanges.subscribe(() => {
       this.calculateGrandTotal();
     });
+
+    this.getbanks();
   }
 
   get f() {
@@ -156,6 +161,11 @@ export class Assetsinfo implements OnInit {
 
   get fixedDeposits(): FormArray {
     return this.assetsForm.get('fixedDeposits') as FormArray;
+  }
+
+
+  get investmentsArray(): FormArray {
+    return this.assetsForm.get('investments') as FormArray;
   }
 
   get otherassets(): FormArray {
@@ -176,14 +186,33 @@ export class Assetsinfo implements OnInit {
   //fixed deposits
   createFD(): FormGroup {
     return this.fb.group({
-      bankname: ['', [Validators.required, Validators.pattern('^[A-Za-z ]+$'), Validators.minLength(2), Validators.maxLength(25)]],
+      bankname: [''],
       bankamt: ['', Validators.required],
-      maturitydate: ['',[Validators.required,this.dateMinValidator(() => new Date())]]
+      maturitydate: ['', [Validators.required, this.dateMinValidator(() => new Date())]]
     });
   }
   addFD() {
     this.fixedDeposits.push(this.createFD());
   }
+  //investments
+
+  createInvestment(type: string): FormGroup {
+
+    if (type === 'Others') {
+      return this.fb.group({
+        type: [type, Validators.required],
+        name: ['', Validators.required],
+        value: ['', Validators.required]
+      });
+    }
+
+
+    return this.fb.group({
+      type: [type, Validators.required],
+      value: ['', Validators.required]
+    });
+  }
+
 
   //Other assets
   createOther(): FormGroup {
@@ -197,13 +226,14 @@ export class Assetsinfo implements OnInit {
     this.otherassets.push(this.createOther());
   }
 
+
   toggle(index: number) {
     if (this.openIndex.includes(index)) {
       this.openIndex = this.openIndex.filter(i => i !== index);
     } else {
       this.openIndex.push(index);
     }
-    this.cd.detectChanges();
+    // this.cd.detectChanges();
   }
 
   removeAccordion1(key: string, index: number, event: Event) {
@@ -221,36 +251,95 @@ export class Assetsinfo implements OnInit {
   }
 
   removeAccordion(key: string, index: number, event: Event) {
- this.msgBox.open({
+    this.msgBox.open({
       title: 'Are you sure want to Remove',
       message: '',
       showCancel: true,
       onOk: () => {
-    event.stopPropagation();
+        event.stopPropagation();
 
-    this.selectedAssets = this.selectedAssets.filter(k => k !== key);
+        this.selectedAssets = this.selectedAssets.filter(k => k !== key);
+        this.selectedAssets = [...this.selectedAssets];
+        // this.selectedAssetIds = this.selectedAssets.flatMap(
+        //   group => this.groupIdMap[group] || []
+        // );
 
-    this.selectedAssetIds = this.selectedAssets.flatMap(
-      group => this.groupIdMap[group] || []
-    );
+        this.openIndex = this.openIndex.filter(i => i !== index);
 
-    this.openIndex = this.openIndex.filter(i => i !== index);
+        const formKeyMap: any = {
+          GOLD: 'gold',
+          LIQUID: 'liquidAssets',
+          PROPERTY: 'properties',
+          FIXED_DEPOSIT: 'fixedDeposits',
+          INVESTMENTS: 'investments',
+          OTHERS: 'otherassets'
+        };
 
-    const formKeyMap: any = {
-      GOLD: 'gold',
-      LIQUID: 'liquidAssets',
-      PROPERTY: 'properties',
-      FIXED_DEPOSIT: 'fixedDeposits',
-      INVESTMENTS: 'investments',
-      OTHERS: 'others'
-    };
+        // this.assetsForm.get(formKeyMap[key])?.reset();
+        const control = this.assetsForm.get(formKeyMap[key]);
 
-    this.assetsForm.get(formKeyMap[key])?.reset();
+        if (control instanceof FormArray) {
+          control.clear();
+        } else if (control instanceof FormGroup) {
+          control.reset();
+        }
+
+
+
+        switch (key) {
+          case 'Gold':
+            this.resetGold();
+            break;
+
+          case 'Liquid Assets':
+            this.resetLiquidAssets();
+            break;
+
+          case 'Property/Land Assets':
+            this.properties.clear(); 
+            this.selectedPropertyIds = [];
+            this.properties.push(this.createProperty());
+           
+            break;
+
+          case 'Fixed Deposit':
+            this.fixedDeposits.clear();
+            this.fixedDeposits.push(this.createFD());
+            break;
+
+          case 'Investments':
+            this.investmentsArray.clear();
+            this.selectedInvestmentIds = [];
+            break;
+
+          case 'other':
+            this.otherassets.clear();
+            this.otherassets.push(this.createOther());
+            break;
+        }
+      }
+    })
   }
-})
-  }
 
-   handleAmountInput(event: any, controlName: string, ctrl?: any) {
+  resetGold() {
+  this.assetsForm.setControl(
+    'gold',
+    this.fb.group({
+      goldvalue: ['', Validators.required]
+    })
+  );
+}
+
+resetLiquidAssets() {
+  this.assetsForm.setControl(
+    'liquidAssets',
+    this.fb.group({
+      cashinhand: ['', Validators.required],
+      savingbalance: ['', Validators.required]
+    })
+  );
+}
+  handleAmountInput(event: any, controlName: string, ctrl?: any) {
     this.main.restrictInput(event, 'decimal');
     if (ctrl) {
       this.formatAmountfromarray(event, controlName, ctrl);
@@ -262,7 +351,7 @@ export class Assetsinfo implements OnInit {
   }
 
   //format amount 2000000 to 20,00,000
-  formatAmount(event: any, controlName: string) {
+  formatAmount1(event: any, controlName: string) {
     let value = event.target.value;
     if (!value) return;
     value = value.replace(/,/g, '');
@@ -282,7 +371,7 @@ export class Assetsinfo implements OnInit {
 
   }
 
-  formatAmountfromarray(event: any, controlName: string, control: AbstractControl) {
+  formatAmountfromarray1(event: any, controlName: string, control: AbstractControl) {
     const group = control as FormGroup;
     let value = event.target.value;
 
@@ -314,7 +403,83 @@ export class Assetsinfo implements OnInit {
   }
 
 
- 
+  formatIndian(x: string): string {
+    const parts = x.split('.');
+    const integerPart = parts[0];
+    const decimalPart = parts[1] ? '.' + parts[1].substring(0, 2) : '';
+
+    if (!integerPart || integerPart === '0') return '0' + decimalPart;
+
+    const bigIntValue = BigInt(integerPart);
+    let str = bigIntValue.toString();
+    let length = str.length;
+
+    let groups: string[] = [];
+
+    let lastGroup = str.substring(Math.max(0, length - 3), length);
+    groups.unshift(lastGroup);
+
+    let remaining = str.substring(0, Math.max(0, length - 3));
+    for (let i = remaining.length; i > 0; i -= 2) {
+      let start = Math.max(0, i - 2);
+      let group = remaining.substring(start, i).replace(/^0+/, '') || '0';
+      groups.unshift(group);
+    }
+
+    return groups.join(',') + decimalPart;
+  }
+
+
+
+  // Updated formatAmount - SAFE FOR LARGE NUMBERS
+  formatAmount(event: any, controlName: string) {
+    let value = event.target.value;
+    if (!value) {
+      this.assetsForm.get(controlName)?.setValue('');
+      return;
+    }
+
+    value = value.replace(/,/g, '').replace(/[^0-9.]/g, '');
+    const parts = value.split('.');
+    if (parts.length > 2) {
+      value = parts[0] + '.' + parts.slice(1).join('');
+    }
+
+    const decimalIndex = value.indexOf('.');
+    if (decimalIndex !== -1 && value.length - decimalIndex > 3) {
+      value = value.substring(0, decimalIndex + 3);
+    }
+
+    const formatted = this.formatIndian(value);
+    this.assetsForm.get(controlName)?.setValue(formatted, { emitEvent: false });
+  }
+
+  // Updated formatAmountfromarray
+  formatAmountfromarray(event: any, controlName: string, control: AbstractControl) {
+    let value = event.target.value;
+    if (!value) return;
+
+    // Same cleaning logic
+    value = value.replace(/,/g, '').replace(/[^0-9.]/g, '');
+    const parts = value.split('.');
+    if (parts.length > 2) {
+      value = parts[0] + '.' + parts.slice(1).join('');
+    }
+
+    const decimalIndex = value.indexOf('.');
+    if (decimalIndex !== -1 && value.length - decimalIndex > 3) {
+      value = value.substring(0, decimalIndex + 3);
+    }
+
+    const formatted = this.formatIndian(value);
+
+    if (control && (control as FormGroup)?.get(controlName)) {
+      (control as FormGroup).get(controlName)?.setValue(formatted, { emitEvent: false });
+    } else {
+      this.assetsForm.get(controlName)?.setValue(formatted, { emitEvent: false });
+    }
+  }
+
 
   submit() {
     if (this.assetsForm.invalid) return;
@@ -340,20 +505,20 @@ export class Assetsinfo implements OnInit {
   onAssetChange(values: string | string[]): void {
 
     const groups = Array.isArray(values) ? values : [values];
+
+    
+if (!groups.includes('Property/Land Assets')) {
+    this.selectedPropertyIds = [];
+  }
+
+
     this.selectedAssets = groups;
-    // const merged = [...this.selectedAssets, ...incoming];
+   
 
-    // this.selectedAssets = [...new Set(merged)];
-
-    // this.selectedAssetIds = this.selectedAssets.flatMap(
+    // this.selectedAssetIds = groups.flatMap(
     //   group => this.groupIdMap[group] || []
     // );
-
-    this.selectedAssetIds = groups.flatMap(
-      group => this.groupIdMap[group] || []
-    );
-    console.log("Selected Groups:", this.selectedAssets);
-    console.log("API IDs:", this.selectedAssetIds);
+    
 
     this.openIndex = [];
 
@@ -368,16 +533,17 @@ export class Assetsinfo implements OnInit {
   allAssetCatagory() {
     this.formSvc.getAllAssets().subscribe((res: any) => {
       const list = res.data ?? res;
+      console.log("list:", list);
 
       this.groupIdMap = list.reduce((acc: any, item: any) => {
-        if (!acc[item.assetGroup]) {
-          acc[item.assetGroup] = [];
+        if (!acc[item.name]) {
+          acc[item.name] = [];
         }
-        acc[item.assetGroup].push(item.id);
+        acc[item.name].push(item.id);
         return acc;
       }, {});
 
-      const uniqueGroups = [...new Set(list.map((s: any) => s.assetGroup))];
+      const uniqueGroups = [...new Set(list.map((s: any) => s.name))];
 
       const sortedGroups = uniqueGroups.sort(
         (a: any, b: any) =>
@@ -390,7 +556,7 @@ export class Assetsinfo implements OnInit {
         code: group
       }));
 
-      this.accordions = sortedGroups.map((group: any) => ({
+      this.accordions = uniqueGroups.map((group: any) => ({
         title: this.accordianTitle(group),
         alwaysOpen: true,
         key: group
@@ -399,6 +565,8 @@ export class Assetsinfo implements OnInit {
         acc[item.code] = item.id;
         return acc;
       }, {});
+
+      console.log(this.assetCodeMap);
 
 
     });
@@ -444,13 +612,13 @@ export class Assetsinfo implements OnInit {
 
   propertyinvestmentasset() {
     if (this.selectedAssetLabel.includes('Property')) {
-      let data = 'PROPERTY'
+      let data = 'PROPERTY_LAND_ASSETS'
       this.formSvc.selectedAssets(data).subscribe((res: any) => {
         const list = res.data ?? res;
 
         this.selectPorperty = list.map((s: any) => ({
           value: s.id,
-          label: s.assetGroup,
+          label: s.name,
           code: s.code
         }));
 
@@ -467,25 +635,65 @@ export class Assetsinfo implements OnInit {
           code: s.code
         }));
 
+
+        list.forEach((item: any) => {
+          this.assetCodeMap[item.code] = item.id;
+        });
+
       });
+      console.log(" this.assetCodeMap investment", this.assetCodeMap);
+
     }
 
 
 
   }
 
-  onchange(values: string | string[], type: 'property' | 'investment' | 'propertyOwnertype'): void {
+  onchange(values: string | string[], type: 'property' | 'investment' | 'propertyOwnertype' | 'bank'): void {
 
     const ids = Array.isArray(values) ? values : [values];
     if (type === 'property') {
       this.selectedPropertyIds = ids;
-    } else if (type === 'investment') {
-      this.selectedInvestmentIds = ids;
-    } else {
+    }
+    // else if (type === 'investment') {
+    //   this.selectedInvestmentIds = ids;
+    // } 
+    else {
       this.selectedownertype = ids;
     }
   }
 
+  onchangeinvestment(selectedIds: any) {
+    if (!Array.isArray(selectedIds)) return;
+
+    // map ids → codes
+    const selectedCodes: string[] = selectedIds
+      .map(id => this.selectInvestments.find(x => x.value === id)?.code)
+      .filter((code): code is string => typeof code === 'string');
+
+    const existingCodes = this.investmentsArray.value.map(
+      (v: any) => v.type
+    );
+
+    //  Add newly selected
+    selectedCodes.forEach(code => {
+      if (!existingCodes.includes(code)) {
+        this.investmentsArray.push(
+          this.createInvestment(code)
+        );
+      }
+    });
+
+    //  Remove deselected
+    for (let i = this.investmentsArray.length - 1; i >= 0; i--) {
+      const ctrl = this.investmentsArray.at(i);
+      if (!selectedCodes.includes(ctrl.value.type)) {
+        this.investmentsArray.removeAt(i);
+      }
+    }
+
+    console.log('Investments shown:', this.investmentsArray.value);
+  }
 
   removeitem(index: number, type: 'property' | 'fd' | 'other') {
     this.msgBox.open({
@@ -511,10 +719,7 @@ export class Assetsinfo implements OnInit {
         }
 
         if (type === 'fd') {
-          if (this.fixedDeposits.length === 1) {
-            // this.showError('At least one FD is required');
-            return;
-          }
+
           this.fixedDeposits.removeAt(index);
         }
 
@@ -562,68 +767,82 @@ export class Assetsinfo implements OnInit {
 
     return total;
   }
-  formatIndian(x: string): string {
+  formatIndian1(x: string): string {
     return new Intl.NumberFormat('en-IN').format(Number(x));
   }
 
   // Add this getter to your component
-get isNextDisabled(): boolean {
-  const form = this.assetsForm.value;
-  
- 
-  if (!this.selectedAssets?.length) return true;
-  
-  if (this.selectedAssets.includes('GOLD') && !form.gold?.goldvalue) return true;
-  
-  if (this.selectedAssets.includes('LIQUID')) {
-    const hasLiquidData = form.liquidAssets?.cashinhand || form.liquidAssets?.savingbalance;
-    if (!hasLiquidData) return true;
+  get isNextDisabled(): boolean {
+    const form = this.assetsForm.value;
+
+
+    if (!this.selectedAssets?.length) return true;
+
+    if (this.selectedAssets.includes('Gold') && !form.gold?.goldvalue) return true;
+
+    if (this.selectedAssets.includes('Liquid Assets')) {
+      const hasLiquidData = form.liquidAssets?.cashinhand || form.liquidAssets?.savingbalance;
+      if (!hasLiquidData) return true;
+    }
+
+    if (this.selectedAssets.includes('Property/Land Assets')) {
+      const properties = this.assetsForm.get('properties') as FormArray;
+      if (!properties?.length) return true;
+    }
+
+    if (this.selectedAssets.includes('Fixed Deposit')) {
+      const fixedDeposits = this.assetsForm.get('fixedDeposits') as FormArray;
+      if (!fixedDeposits?.length) return true;
+    }
+
+    if (this.selectedAssets.includes('investments')) {
+      const hasInvestmentData = form.investments?.stockvalue || form.investments?.mutualfundvalue;
+      if (!hasInvestmentData) return true;
+    }
+
+    if (this.selectedAssets.includes('other')) {
+      const otherAssets = this.assetsForm.get('otherassets') as FormArray;
+      if (!otherAssets?.length) return true;
+    }
+
+    return false;
   }
-  
-  if (this.selectedAssets.includes('PROPERTY')) {
-    const properties = this.assetsForm.get('properties') as FormArray;
-    if (!properties?.length) return true;
+
+
+  getbanks() {
+    this.formSvc.getallBanks().subscribe((res: any) => {
+      const list = res.data ?? res;
+
+      this.selectBanks = list.map((s: any) => ({
+        value: s.id,
+        label: s.name,
+
+      }));
+
+    });
   }
-  
-  if (this.selectedAssets.includes('FIXED_DEPOSIT')) {
-    const fixedDeposits = this.assetsForm.get('fixedDeposits') as FormArray;
-    if (!fixedDeposits?.length) return true;
-  }
-  
-  if (this.selectedAssets.includes('INVESTMENTS')) {
-    const hasInvestmentData = form.investments?.stockvalue || form.investments?.mutualfundvalue;
-    if (!hasInvestmentData) return true;
-  }
-  
-  if (this.selectedAssets.includes('OTHER')) {
-    const otherAssets = this.assetsForm.get('otherassets') as FormArray;
-    if (!otherAssets?.length) return true;
-  }
-  
-  return false;
-}
 
   back() {
     this.stepperService.previous();
   }
- dateMinValidator = (getMinDate: () => Date) => {
-  return (control: any) => {
-    const value = control.value;
-     const minDate = getMinDate();
+  dateMinValidator = (getMinDate: () => Date) => {
+    return (control: any) => {
+      const value = control.value;
+      const minDate = getMinDate();
 
-    if (!value || !minDate) return null;
+      if (!value || !minDate) return null;
 
-    const selected = new Date(value);
-    const min = new Date(getMinDate());
+      const selected = new Date(value);
+      const min = new Date(getMinDate());
 
-   
-    selected.setHours(0, 0, 0, 0);
-    min.setHours(0, 0, 0, 0);
 
-    return selected < min ? { minDateError: true } : null;
-   
+      selected.setHours(0, 0, 0, 0);
+      min.setHours(0, 0, 0, 0);
+
+      return selected < min ? { minDateError: true } : null;
+
+    };
   };
-};
 
   patchAssetsData() {
     const data = this.formSvc.aseetsInfoData;
@@ -655,7 +874,7 @@ get isNextDisabled(): boolean {
       }
 
       // ---------------- LIQUID ----------------
-      if (code === 'LIQUID_SAVINGS') {
+      if (code === 'LIQUID_CASH') {
         this.selectedAssets.push('LIQUID');
 
         const liquidGroup = this.assetsForm.get('liquidAssets');
@@ -699,7 +918,7 @@ get isNextDisabled(): boolean {
       }
 
       // ---------------- INVESTMENTS ----------------
-      if (code === 'STOCKS') {
+      if (code === 'INVESTMENT') {
         this.selectedAssets.push('INVESTMENTS');
 
         this.assetsForm.get('investments')?.patchValue({
@@ -716,7 +935,7 @@ get isNextDisabled(): boolean {
       }
 
       // ---------------- OTHER ----------------
-      if (code === 'OTHER_ASSETS') {
+      if (code === 'OTHER') {
         this.selectedAssets.push('OTHER');
 
         const group = this.createOther();
@@ -769,28 +988,29 @@ get isNextDisabled(): boolean {
     };
 
     //  GOLD
-    if (this.selectedAssets.includes('GOLD')) {
+    if (this.selectedAssets.includes('Gold')) {
       const val = form.gold?.goldvalue;
       !val ? markInvalid('gold.goldvalue') : addItem('GOLD', val);
     }
 
     //  LIQUID
-    if (this.selectedAssets.includes('LIQUID')) {
+    if (this.selectedAssets.includes('Liquid Assets')) {
       const cash = form.liquidAssets?.cashinhand;
       const savings = form.liquidAssets?.savingbalance;
 
-      !cash ? markInvalid('liquidAssets.cashinhand') : addItem('LIQUID_SAVINGS', cash);
-      !savings ? markInvalid('liquidAssets.savingbalance') : addItem('LIQUID_SAVINGS', savings);
+      !cash ? markInvalid('liquidAssets.cashinhand') : addItem('LIQUID_CASH', cash);
+      !savings ? markInvalid('liquidAssets.savingbalance') : addItem('LIQUID_CASH', savings);
     }
 
     //  PROPERTY (FormArray)
-    if (this.selectedAssets.includes('PROPERTY')) {
+    if (this.selectedAssets.includes('Property/Land Assets')) {
       const arr = this.assetsForm.get('properties') as FormArray;
 
       arr.controls.forEach((ctrl: any) => {
         if (ctrl.invalid) {
           ctrl.markAllAsTouched();
           invalid = true;
+          console.log('properties true:');
         } else {
           addItem('PROPERTY', ctrl.value.marketval, {
             propertyType: ctrl.value.propertytype,
@@ -801,42 +1021,84 @@ get isNextDisabled(): boolean {
       });
     }
 
+
+
     //  FIXED DEPOSIT (FormArray)
-    if (this.selectedAssets.includes('FIXED_DEPOSIT')) {
-      const arr = this.assetsForm.get('fixedDeposits') as FormArray;
+    if (this.selectedAssets.includes('Fixed Deposit')) {
+      const arr1 = this.assetsForm.get('fixedDeposits') as FormArray;
+      const arr = this.fixedDeposits;
+      if (!arr || arr.length === 0) {
 
-      arr.controls.forEach((ctrl: any) => {
-        if (ctrl.invalid) {
+        invalid = true;
+      }
+      else {
+        arr.controls.forEach((ctrl: any, index: number) => {
           ctrl.markAllAsTouched();
-          invalid = true;
-        } else {
-          addItem('FIXED_DEPOSIT', ctrl.value.bankamt, {
-            bankName: ctrl.value.bankname,
-            maturityDate: (ctrl.value.maturitydate).format('YYYY-MM-DD')
-          });
-        }
-      });
+          if (ctrl.invalid) {
+
+            invalid = true;
+            console.log('Fixed Deposit true:'); return
+
+          } else {
+            addItem('FIXED_DEPOSIT', ctrl.value.bankamt, {
+              bankName: ctrl.value.bankname,
+              maturityDate: (ctrl.value.maturitydate).format('YYYY-MM-DD')
+            });
+          }
+        });
+      }
     }
 
-    //  INVESTMENTS
-    if (this.selectedAssets.includes('INVESTMENTS')) {
-      const stock = form.investments?.stockvalue;
-      const mf = form.investments?.mutualfundvalue;
 
-      stock && addItem('STOCKS', stock);
-      mf && addItem('MUTUAL_FUNDS', mf);
+
+    //  INVESTMENTS 
+    if (this.selectedAssets.includes('Investments')) {
+
+      const arr = this.investmentsArray;
+
+      if (!arr || arr.length === 0) {
+        invalid = true;
+        // return;
+      } else {
+
+
+
+        arr.controls.forEach((ctrl: any) => {
+          ctrl.markAllAsTouched();
+          if (ctrl.invalid) {
+            ctrl.markAllAsTouched();
+            invalid = true;
+            console.log('Investment true:');
+            return;
+          }
+
+          const type = ctrl.value.type;
+          const amount = ctrl.value.value;
+
+          if (type === 'Others') {
+            addItem('OTHER_ASSETS', amount, {
+              assetType: ctrl.value.name
+            });
+          }
+          else {
+            addItem(type, amount);
+          }
+        });
+      }
     }
+
 
     //  Other Assets
-    if (this.selectedAssets.includes('OTHER')) {
+    if (this.selectedAssets.includes('other')) {
       const arr = this.assetsForm.get('otherassets') as FormArray;
 
       arr.controls.forEach((ctrl: any) => {
         if (ctrl.invalid) {
           ctrl.markAllAsTouched();
           invalid = true;
+          console.log('Other Assets true:');
         } else {
-          addItem('OTHER_ASSETS', ctrl.value.assetamt, {
+          addItem('OTHER', ctrl.value.assetamt, {
             assetType: ctrl.value.assettype,
 
 
@@ -844,7 +1106,8 @@ get isNextDisabled(): boolean {
         }
       });
     }
-    if (invalid) return;
+    if (invalid) { console.log("invalid--"); return; }
+
 
 
     const payload = { items };
@@ -853,16 +1116,16 @@ get isNextDisabled(): boolean {
 
 
 
-    this.formSvc.getAssets(payload, this.applicationId).pipe().subscribe({
-      next: (res) => {
-        console.log("resp---", res);
-        if (res.status == "success") {
-          this.formSvc.aseetsInfoData = payload
-          this.patchAssetsData();
-          this.stepperService.next();
-        }
-      }
-    });
+    // this.formSvc.getAssets(payload, this.applicationId).pipe().subscribe({
+    //   next: (res) => {
+    //     console.log("resp---", res);
+    //     if (res.status == "success") {
+    //       this.formSvc.aseetsInfoData = payload
+    //       this.patchAssetsData();
+    //       this.stepperService.next();
+    //     }
+    //   }
+    // });
 
   }
 }
