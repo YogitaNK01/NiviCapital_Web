@@ -69,8 +69,11 @@ export class Incomeinfo {
   otherbusinessdoc: boolean = false;
   otherdoc: boolean = false;
 
-  private otherBusinessSlots: { id: number, key: string }[] = [];
-  maxOtherBusinessSlots = 3;
+
+  otherIncomeSlots: { id: number; key: string }[] = [];
+  otherBusinessSlots: { id: number; key: string }[] = [];
+  private slotCounter = 0;
+
 
   constructor(private fb: FormBuilder, private stepperService: Loanstepperservice, private cd: ChangeDetectorRef, private msgBox: Msgboxservice, public loanformservice: Loanformservice, private route: ActivatedRoute, public main: Main) { }
   ngOnInit(): void {
@@ -102,28 +105,7 @@ export class Incomeinfo {
     return this.incomeForm.controls;
   }
 
-  documentConfigMap: any = {
-    salary1: {
 
-      subcategory: 'SALARY_SLIP_1',
-      fileType: 'SALARY'
-    },
-    salary2: {
-
-      subcategory: 'SALARY_SLIP_2',
-      fileType: 'SALARY'
-    },
-    salary3: {
-
-      subcategory: 'SALARY_SLIP_3',
-      fileType: 'SALARY'
-    },
-    itr: {
-
-      subcategory: 'ITR_LAST_3_YEARS',
-      fileType: 'ITR'
-    }
-  };
 
   onFileChange(result: UploadResult, key: string,
     subcategory: 'LAST_3_MONTHS' | 'FORM_16' | 'BANK_STATEMENT_1_YEAR' | 'ITR_LAST_3_YEARS' | 'OTHER_INCOME',
@@ -131,7 +113,6 @@ export class Incomeinfo {
 
     if (!result.file) return;
 
-    const config = this.documentConfigMap[key];
 
     const fd = new FormData();
     fd.append('category', 'INCOME');
@@ -158,19 +139,12 @@ export class Incomeinfo {
   onUploadStarted(result: UploadResult, key: string, category: 'INCOME' | 'BUSINESS' | 'OTHER',
     subcategory: 'LAST_3_MONTHS' | 'FORM_16' | 'BANK_STATEMENT_1_YEAR' | 'ITR_LAST_3_YEARS' | 'OTHER_INCOME' | 'BUSINESS_BANK_STATEMENT_1_YEAR' | 'BUSINESS_ITR_3_YEARS' | 'BUSINESS_GST_1_YEAR' | 'BUSINESS_FINANCE_3_YEARS' | 'OTHER_BUSSINESS_INCOME',
     type: 'SALARY_SLIP' | 'FORM_16' | 'BANK_STATEMENT' | 'ITR' | 'OTHER' | 'BUSINESS_BANK_STATEMENT' | 'BUSINESS_ITR' | 'BUSINESS_GST' | 'BUSINESS_FINANCE',
-    index?: number) {
+    index?: any) {
 
     if (!result.file) return;
 
 
-    // const slotKey =
-    //   index !== undefined
-    //     ? `other_${category.toLowerCase()}_${index}`
-    //     : key;
-    // this.uploadedFiles[slotKey] = result.file;
-
     this.uploadedFiles[key] = result.file;
-    const config = this.documentConfigMap[key];
 
     const fd = new FormData();
     fd.append('category', category);
@@ -204,10 +178,8 @@ export class Incomeinfo {
 
         // this.allDocuments.push(uploadedDoc);
 
-         this.uploadedrespfiles.push(res.data)
+        this.uploadedrespfiles.push(res.data)
         this.uploadedFiles = { ...  this.uploadedFiles }
-        console.log("this.uploadedFiles", this.uploadedrespfiles)
-
         this.getAllDocuments();
         // this.cd.detectChanges();
       },
@@ -250,7 +222,7 @@ export class Incomeinfo {
     return doc?.fileName || 'No file uploaded';  // Use fileName!
   }
 
-  
+
   getDocumentUrl(key: string): string {
     const doc = this.getDocumentByKey(key);
     return doc?.viewUrl || '';  // Use viewUrl!
@@ -264,7 +236,8 @@ export class Incomeinfo {
   getDocumentByKey(key: string): Document | null {
     if (!this.allDocuments?.length) return null;
 
-    let doc = this.allDocuments.find(doc => doc.type === key);
+    // let doc = this.allDocuments.find(doc => doc.title === key);
+     let doc = this.allDocuments.find(doc =>doc.title === key || doc.type === key);
 
     if (!doc) {
       doc = this.allDocuments.find(doc =>
@@ -277,9 +250,8 @@ export class Incomeinfo {
     return doc || null;
   }
 
-  getDocumentByKey2(key: string): Document | null {
-    return this.allDocuments.find(doc => doc.key === key) || null;
-  }
+  
+
 
   hasDocument(documentKey: string): boolean {
     return !!this.getDocumentByKey(documentKey);
@@ -354,7 +326,35 @@ export class Incomeinfo {
 
   submit() { }
 
- 
+  addOtherIncomeDocument(): void {
+    const id = ++this.slotCounter;
+
+    this.otherIncomeSlots.push({
+      id,
+      key: `other_income_${id}`,
+     
+    });
+  }
+
+  addOtherBusinessDocument(): void {
+    const id = ++this.slotCounter;
+
+    this.otherBusinessSlots.push({
+      id,
+      key: `other_business_${id}`,
+     
+    });
+  }
+
+
+getDocumentBySlot(key: string): any | null {
+  if (!this.allDocuments?.length) return null;
+
+  return this.allDocuments.find(doc =>
+    doc.title === key ||       
+    doc.type === key          
+  ) || null;
+}
 
   back() {
     this.stepperService.previous();

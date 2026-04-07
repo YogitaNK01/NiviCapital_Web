@@ -30,7 +30,8 @@
 
         <ng-template #incomeTemplate let-i="index">
             <!-- salaried person -->
-            <div class="row  d-flex  align-items-start pt-4 common-details-box d-flex flex-column" *ngIf="loanformservice.issalaried">
+            <div class="row  d-flex  align-items-start pt-4 common-details-box d-flex flex-column"
+                *ngIf="loanformservice.issalaried">
 
                 <div class="row ">
                     <div class="text-label fw-bold mt-20">Salary Slips (Last 3 Months)</div>
@@ -111,8 +112,8 @@
                                     <span class="download"
                                         (click)="downloadImage(getDocumentUrl('salary3'), getDocumentName('salary3'))"><img
                                             src="/assets/images/icons/import-red.svg" alt="Download"></span>
-                                    <span class="delete" (click)="deleteImage('salary3')"><img src="/assets/images/icons/close.svg"
-                                            alt="Download"></span>
+                                    <span class="delete" (click)="deleteImage('salary3')"><img
+                                            src="/assets/images/icons/close.svg" alt="Download"></span>
                                 </div>
                             </div>
 
@@ -246,7 +247,8 @@
                                 <div class="icons">
                                     <span class="view" (click)="viewImage(getDocumentUrl('ay1'))"><img
                                             src="/assets/images/icons/eyered.svg" alt="view"></span>
-                                    <span class="download" (click)="downloadImage(getDocumentUrl('ay1'), getDocumentName('ay1'))"><img
+                                    <span class="download"
+                                        (click)="downloadImage(getDocumentUrl('ay1'), getDocumentName('ay1'))"><img
                                             src="/assets/images/icons/import-red.svg" alt="Download"></span>
                                     <span (click)="deleteImage('ay1')"><img src="/assets/images/icons/close.svg"
                                             alt="Download"></span>
@@ -269,10 +271,11 @@
                                 <div class="icons">
                                     <span class="view" (click)="viewImage(getDocumentUrl('ay2'))"><img
                                             src="/assets/images/icons/eyered.svg" alt="view"></span>
-                                    <span class="download" (click)="downloadImage(getDocumentUrl('ay2'), getDocumentName('ay2'))"><img
+                                    <span class="download"
+                                        (click)="downloadImage(getDocumentUrl('ay2'), getDocumentName('ay2'))"><img
                                             src="/assets/images/icons/import-red.svg" alt="Download"></span>
-                                    <span class="delete" (click)="deleteImage('ay2')"><img src="/assets/images/icons/close.svg"
-                                            alt="Download"></span>
+                                    <span class="delete" (click)="deleteImage('ay2')"><img
+                                            src="/assets/images/icons/close.svg" alt="Download"></span>
                                 </div>
                             </div>
 
@@ -292,10 +295,11 @@
                                 <div class="icons">
                                     <span class="view" (click)="viewImage(getDocumentUrl('ay3'))"><img
                                             src="/assets/images/icons/eyered.svg" alt="view"></span>
-                                    <span class="download" (click)="downloadImage(getDocumentUrl('ay3'), getDocumentName('ay3'))"><img
+                                    <span class="download"
+                                        (click)="downloadImage(getDocumentUrl('ay3'), getDocumentName('ay3'))"><img
                                             src="/assets/images/icons/import-red.svg" alt="Download"></span>
-                                    <span class="delete" (click)="deleteImage('ay3')"><img src="/assets/images/icons/close.svg"
-                                            alt="Download"></span>
+                                    <span class="delete" (click)="deleteImage('ay3')"><img
+                                            src="/assets/images/icons/close.svg" alt="Download"></span>
                                 </div>
                             </div>
 
@@ -374,54 +378,69 @@
                         </app-buttons>
                     </div>
                 </div> -->
-                <div class="row  d-flex flex-column">
-                    <div class="text-label fw-bold mt-20">Other Documents</div>
+               <div class="row d-flex flex-column">
+                        <div class="text-label fw-bold mt-20">Other Documents</div>
+                        <hr class="hrclass">
 
-                    <hr class="hrclass">
-                    <div class=" mt-20 info-box">
-                        <div class="col-lg-4 col-sm-12">
-                            <p class="text-label">You can add extra documents here:</p>
+                        <div class="row">
+                            @for (slot of otherIncomeSlots; track slot.id) {
 
-                        </div>
-                    </div>
-                    <!-- <div class="row" *ngIf="otherdoc">
-                        @for (slot of getOtherBusinessSlots(); track slot.id; let i = $index) {
-                        <div class="col-lg-4 col-sm-12 mt-20">
-                            @if (handleresponse && hasDocumentForSlot('other',i)) {
-                            <label class="text-label">Other Document {{ i + 1 }}<span
-                                    class="text-danger">*</span></label>
+                            <div class="col-lg-4 col-sm-12 mt-20">
 
-                            <div class="addcust-img-box mt-2">
-                                <p class="text-label">{{ getDocumentName('other') }}</p>
-                                <div class="icons">
-                                    <span class="view" (click)="viewImage(getDocumentUrl('other'))"><img
-                                            src="/assets/images/icons/eyered.svg" alt="view"></span>
-                                    <span class="download"
-                                        (click)="downloadImage(getDocumentUrl('other'), getDocumentName('other'))"><img
-                                            src="/assets/images/icons/import-red.svg" alt="Download"></span>
-                                    <span class="delete" (click)="deleteImage('other')"><img src="/assets/images/icons/close.svg"
-                                            alt="Download"></span>
+                                @if (handleresponse && getDocumentByKey( slot.key)) {
+
+                                <label class="text-label">
+                                    Other Document {{ slot.id }}
+                                </label>
+
+                                <div class="addcust-img-box mt-2">
+                                    <p class="text-label">
+                                        {{ getDocumentName(slot.key) }}
+                                    </p>
+
+                                    <div class="icons">
+                                        <span class="view" (click)="viewImage(getDocumentUrl(slot.key))">
+                                            <img src="/assets/images/icons/eyered.svg">
+                                        </span>
+
+                                        <span class="download" (click)="downloadImage(getDocumentUrl(slot.key), getDocumentName(slot.key))">
+                                            <img src="/assets/images/icons/import-red.svg">
+                                        </span>
+
+                                        <span class="delete" (click)="deleteImage(slot.key)">
+                                            <img src="/assets/images/icons/close.svg">
+                                        </span>
+                                    </div>
                                 </div>
-                            </div>
 
-                            } @else {
-                            <app-uploadbtn [config]="basicConfig"
-                                (uploadStarted)="onUploadStarted($event, 'other', 'OTHER', 'OTHER_BUSSINESS_INCOME', 'OTHER', i)"
-                                [uploadViaApi]="true" [fileuploadresponse]="handleresponse"
-                                [label]="'Other Document ' + (i + 1)">
-                            </app-uploadbtn>
+                                } @else {
+
+
+
+                                <app-uploadbtn [config]="basicConfig"
+                                    (uploadStarted)="onUploadStarted($event,  slot.key,'OTHER' ,'OTHER_INCOME','OTHER')"
+                                    [uploadViaApi]="true" [fileuploadresponse]="handleresponse" [required]="true"
+                                    label="Other Documents">
+                                </app-uploadbtn>
+
+                                }
+
+                            </div>
                             }
                         </div>
-                        }
 
-                    </div> -->
-                </div>
+                        <div class="col-lg-4 col-sm-12 mt-20">
+                            <app-buttons label="Add Other Document" class="btn btn-icon Add btncustomClass"
+                                [outline]="true" (click)="addOtherBusinessDocument()">
+                                <img src="/assets/images/icons/addred.svg">
+                            </app-buttons>
+                        </div>
+                    </div>
 
 
 
                 <div class="col-lg-4 col-sm-12 mt-20">
-                    <app-buttons label="Add Other Document" class="btn btn-icon Add btncustomClass" [outline]="true"
-                       >
+                    <app-buttons label="Add Other Document" class="btn btn-icon Add btncustomClass" [outline]="true">
                         <img src="/assets/images/icons/addred.svg" alt="Add">
 
                     </app-buttons>
@@ -459,8 +478,8 @@
                                     <span class="download"
                                         (click)="downloadImage(getDocumentUrl('year1'), getDocumentName('year1'))"><img
                                             src="/assets/images/icons/import-red.svg" alt="Download"></span>
-                                    <span class="delete" (click)="deleteImage('year1')"><img src="/assets/images/icons/close.svg"
-                                            alt="Download"></span>
+                                    <span class="delete" (click)="deleteImage('year1')"><img
+                                            src="/assets/images/icons/close.svg" alt="Download"></span>
                                 </div>
                             </div>
 
@@ -483,8 +502,8 @@
                                     <span class="download"
                                         (click)="downloadImage(getDocumentUrl('year2'), getDocumentName('year2'))"><img
                                             src="/assets/images/icons/import-red.svg" alt="Download"></span>
-                                    <span class="delete" (click)="deleteImage('year2')"><img src="/assets/images/icons/close.svg"
-                                            alt="Download"></span>
+                                    <span class="delete" (click)="deleteImage('year2')"><img
+                                            src="/assets/images/icons/close.svg" alt="Download"></span>
                                 </div>
                             </div>
 
@@ -506,8 +525,8 @@
                                     <span class="download"
                                         (click)="downloadImage(getDocumentUrl('year3'), getDocumentName('year3'))"><img
                                             src="/assets/images/icons/import-red.svg" alt="Download"></span>
-                                    <span class="delete" (click)="deleteImage('year3')"><img src="/assets/images/icons/close.svg"
-                                            alt="Download"></span>
+                                    <span class="delete" (click)="deleteImage('year3')"><img
+                                            src="/assets/images/icons/close.svg" alt="Download"></span>
                                 </div>
                             </div>
 
@@ -639,8 +658,8 @@
                                     <span class="download"
                                         (click)="downloadImage(getDocumentUrl('businessGST'), getDocumentName('businessGST'))"><img
                                             src="/assets/images/icons/import-red.svg" alt="Download"></span>
-                                    <span class="delete" (click)="deleteImage('businessGST')"><img src="/assets/images/icons/close.svg"
-                                            alt="Download"></span>
+                                    <span class="delete" (click)="deleteImage('businessGST')"><img
+                                            src="/assets/images/icons/close.svg" alt="Download"></span>
                                 </div>
                             </div>
 
@@ -736,64 +755,64 @@
                         </app-uploadbtn>}
                     </div> -->
 
-                    <div class="row" *ngIf="otherbusinessdoc">
-                        <!-- @for (slot of getOtherBusinessSlots(); track slot.id; let i = $index) { -->
-                        <div class="col-lg-4 col-sm-12 mt-20">
-                            @if (handleresponse) {
-                            <label class="text-label">Other Document {{ i + 1 }}<span
-                                    class="text-danger">*</span></label>
-                            <!-- <div class="addcust-img-box mt-2">
-                                <p class="text-label">{{ getDocumentNameForSlot('otherbusiness', i) }}</p>
-                                <div class="icons">
-                                    <span class="view" (click)="viewImage(getDocumentUrlForSlot('otherbusiness', i))">
-                                        <img src="/assets/images/icons/eyered.svg" alt="view">
-                                    </span>
-                                    <span class="download"
-                                        (click)="downloadImage(getDocumentUrlForSlot('otherbusiness', i), getDocumentNameForSlot('otherbusiness', i))">
-                                        <img src="/assets/images/icons/import-red.svg" alt="Download">
-                                    </span>
-                                    <span class="delete" (click)="deleteImageForSlot('otherbusiness', i)">
-                                        <img src="/assets/images/icons/close.svg" alt="Delete">
-                                    </span>
-                                </div>
-                            </div> -->
+                    <div class="row d-flex flex-column">
+                        <div class="text-label fw-bold mt-20">Other Documents</div>
+                        <hr class="hrclass">
 
-                            <div class="addcust-img-box mt-2">
-                                <p class="text-label">{{ getDocumentName('otherbusiness') }}</p>
-                                <div class="icons">
-                                    <span class="view" (click)="viewImage(getDocumentUrl('otherbusiness'))"><img
-                                            src="/assets/images/icons/eyered.svg" alt="view"></span>
-                                    <span class="download"
-                                        (click)="downloadImage(getDocumentUrl('otherbusiness'), getDocumentName('otherbusiness'))"><img
-                                            src="/assets/images/icons/import-red.svg" alt="Download"></span>
-                                    <span class="delete" (click)="deleteImage('otherbusiness')"><img
-                                            src="/assets/images/icons/close.svg" alt="Download"></span>
+                        <div class="row">
+                            @for (slot of otherBusinessSlots; track slot.id) {
+
+                            <div class="col-lg-4 col-sm-12 mt-20">
+
+                                @if (handleresponse && getDocumentByKey( slot.key)) {
+
+                                <label class="text-label">
+                                    Other Document {{ slot.id }}
+                                </label>
+
+                                <div class="addcust-img-box mt-2">
+                                    <p class="text-label">
+                                        {{ getDocumentName(slot.key) }}
+                                    </p>
+
+                                    <div class="icons">
+                                        <span class="view" (click)="viewImage(getDocumentUrl(slot.key))">
+                                            <img src="/assets/images/icons/eyered.svg">
+                                        </span>
+
+                                        <span class="download" (click)="downloadImage(getDocumentUrl(slot.key), getDocumentName(slot.key))">
+                                            <img src="/assets/images/icons/import-red.svg">
+                                        </span>
+
+                                        <span class="delete" (click)="deleteImage(slot.key)">
+                                            <img src="/assets/images/icons/close.svg">
+                                        </span>
+                                    </div>
                                 </div>
+
+                                } @else {
+
+
+
+                                <app-uploadbtn [config]="basicConfig"
+                                    (uploadStarted)="onUploadStarted($event,  slot.key,'BUSINESS' ,'OTHER_INCOME','OTHER')"
+                                    [uploadViaApi]="true" [fileuploadresponse]="handleresponse" [required]="true"
+                                    label="Other Documents">
+                                </app-uploadbtn>
+
+                                }
+
                             </div>
-
-                            } @else {
-                            <app-uploadbtn [config]="basicConfig"
-                                (uploadStarted)="onUploadStarted($event, 'otherbusiness', 'OTHER', 'OTHER_BUSSINESS_INCOME', 'OTHER', i)"
-                                [uploadViaApi]="true" [fileuploadresponse]="handleresponse"
-                                [label]="'Other Document ' + (i + 1)">
-                            </app-uploadbtn>
                             }
                         </div>
-                        <!-- } -->
 
-
+                        <div class="col-lg-4 col-sm-12 mt-20">
+                            <app-buttons label="Add Other Document" class="btn btn-icon Add btncustomClass"
+                                [outline]="true" (click)="addOtherBusinessDocument()">
+                                <img src="/assets/images/icons/addred.svg">
+                            </app-buttons>
+                        </div>
                     </div>
-
-
-
-                    <div class="col-lg-4 col-sm-12 mt-20">
-                        <app-buttons label="Add Other Document" class="btn btn-icon Add btncustomClass" [outline]="true"
-                           >
-                            <img src="/assets/images/icons/addred.svg" alt="Add">
-
-                        </app-buttons>
-                    </div>
-
 
 
                 </div>
