@@ -162,14 +162,12 @@ export class Incomeinfo {
 
     if (!result.file) return;
 
-    
-const slotKey =
-    index !== undefined
-      ? `other_${category.toLowerCase()}_${index}`
-      : key;
 
-  // ✅ store file with slotKey (NOT "other")
-  this.uploadedFiles[slotKey] = result.file;
+    // const slotKey =
+    //   index !== undefined
+    //     ? `other_${category.toLowerCase()}_${index}`
+    //     : key;
+    // this.uploadedFiles[slotKey] = result.file;
 
     this.uploadedFiles[key] = result.file;
     const config = this.documentConfigMap[key];
@@ -190,27 +188,28 @@ const slotKey =
         this.handleresponse = res
 
         // Check for duplicates using documentId
-        const newDocId = res.data[0]?.documentId;
-        const docExists = this.uploadedrespfiles.some(item =>
-          item.uploadedDocuments?.some((doc: { documentId: any; }) => doc.documentId === newDocId)
-        );
+        // const newDocId = res.data[0]?.documentId;
+        // const docExists = this.uploadedrespfiles.some(item =>
+        //   item.uploadedDocuments?.some((doc: { documentId: any; }) => doc.documentId === newDocId)
+        // );
+        // if (!docExists) {
+        //   this.uploadedrespfiles.push(res.data);
+        //   console.log("Added new file response:", res.data);
+        // } else {
+        //   console.log("Duplicate file skipped:", newDocId);
+        // }
+        // const uploadedDoc = res.data[0].uploadedDocuments[0];
+        // uploadedDoc.key = slotKey;
+        // uploadedDoc.slotIndex = index;
 
-        if (!docExists) {
-          this.uploadedrespfiles.push(res.data);
-          console.log("Added new file response:", res.data);
-        } else {
-          console.log("Duplicate file skipped:", newDocId);
-        }
+        // this.allDocuments.push(uploadedDoc);
 
+         this.uploadedrespfiles.push(res.data)
+        this.uploadedFiles = { ...  this.uploadedFiles }
+        console.log("this.uploadedFiles", this.uploadedrespfiles)
 
-        const uploadedDoc = res.data[0].uploadedDocuments[0];
-
-        uploadedDoc.key = slotKey;       
-        uploadedDoc.slotIndex = index;
-
-  this.allDocuments.push(uploadedDoc);
-        // this.getAllDocuments();
-        this.cd.detectChanges();
+        this.getAllDocuments();
+        // this.cd.detectChanges();
       },
       error: (err) => {
 
@@ -243,7 +242,7 @@ const slotKey =
 
     console.log("documentMap keys:", Object.keys(this.documentMap));
     this.allDocuments = docs;
-    this.rebuildDocumentMap();
+    // this.rebuildDocumentMap();
   }
 
   getDocumentName(key: any): any {
@@ -251,6 +250,7 @@ const slotKey =
     return doc?.fileName || 'No file uploaded';  // Use fileName!
   }
 
+  
   getDocumentUrl(key: string): string {
     const doc = this.getDocumentByKey(key);
     return doc?.viewUrl || '';  // Use viewUrl!
@@ -261,7 +261,7 @@ const slotKey =
   }
 
 
-  getDocumentByKey1(key: string): Document | null {
+  getDocumentByKey(key: string): Document | null {
     if (!this.allDocuments?.length) return null;
 
     let doc = this.allDocuments.find(doc => doc.type === key);
@@ -277,9 +277,9 @@ const slotKey =
     return doc || null;
   }
 
-getDocumentByKey(key: string): Document | null {
-  return this.allDocuments.find(doc => doc.key === key) || null;
-}
+  getDocumentByKey2(key: string): Document | null {
+    return this.allDocuments.find(doc => doc.key === key) || null;
+  }
 
   hasDocument(documentKey: string): boolean {
     return !!this.getDocumentByKey(documentKey);
@@ -354,100 +354,7 @@ getDocumentByKey(key: string): Document | null {
 
   submit() { }
 
-  addotherdocuments() {
-    this.otherdoc = true;
-    this.addOtherBusinessSlot();
-  }
-
-  addotherbusinessdocuments() {
-
-    this.otherbusinessdoc = true;
-    this.addOtherBusinessSlot();
-  }
-  addOtherBusinessSlot() {
-    if (this.otherBusinessSlots.length < this.maxOtherBusinessSlots) {
-      const newSlot = {
-        id: Date.now(),
-        key: `other_${this.otherBusinessSlots.length}`
-      };
-      this.otherBusinessSlots.push(newSlot);
-    }
-  }
-
-  getOtherBusinessSlots(): { id: number, key: string }[] {
-    if (this.otherBusinessSlots.length === 0) {
-      this.addOtherBusinessSlot();
-    }
-    return this.otherBusinessSlots;
-  }
-
-  // hasDocumentForSlot(type: string, slotIndex?: number): boolean {
-  //   const slotKey = slotIndex !== undefined ? `otherbusiness_${slotIndex}` : undefined;
-  //   return this.allDocuments.some(doc =>
-  //     doc.key === slotKey ||
-  //     (doc.type === type && doc.slotIndex === slotIndex)
-  //   );
-  // }
-
-  getDocumentNameForSlot(type: string, slotIndex: number): string {
-    const doc = this.allDocuments.find(doc =>
-      doc.key === `otherbusiness_${slotIndex}` ||
-      (doc.type === type && doc.slotIndex === slotIndex)
-    );
-    return doc?.fileName || doc?.name || 'Document';
-  }
-  hasDocumentForSlot1(type: string, slotIndex: number): boolean {
-    const slotKey = `otherbusiness_${slotIndex}`;
-
-    return !!this.getDocumentByKey(slotKey);
-  }
-  hasDocumentForSlot(type: string, index: number): boolean {
-  const slotKey = `other_${type}_${index}`;
-  return !!this.getDocumentByKey(slotKey);
-}
-
-
-  getDocumentUrlForSlot(type: string, slotIndex: number): string {
-    const doc = this.allDocuments.find(doc =>
-      doc.key === `otherbusiness_${slotIndex}` ||
-      (doc.type === type && doc.slotIndex === slotIndex)
-    );
-    return doc?.viewUrl || doc?.url || '';
-  }
-  deleteImageForSlot(type: string, slotIndex: number): void {
-    this.msgBox.open({
-      title: 'Are you sure want to Remove',
-      message: '',
-      showCancel: true,
-      onOk: () => {
-        const slotKey = `otherbusiness_${slotIndex}`;
-        const docToDelete = this.allDocuments.find(doc =>
-          doc.key === slotKey ||
-          (doc.type === type && doc.slotIndex === slotIndex)
-        );
-
-        if (docToDelete) {
-          this.allDocuments = this.allDocuments.filter(doc =>
-            doc.documentId !== docToDelete.documentId
-          );
-
-          this.uploadedrespfiles = this.uploadedrespfiles.filter(item => {
-            if (item.uploadedDocuments) {
-              item.uploadedDocuments = item.uploadedDocuments.filter((doc: any) =>
-                doc.documentId !== docToDelete.documentId
-              );
-              return item.uploadedDocuments.length > 0;
-            }
-            return true;
-          });
-
-          this.rebuildDocumentMap();
-          this.handleresponse = null;
-          this.cd.detectChanges();
-        }
-      }
-    });
-  }
+ 
 
   back() {
     this.stepperService.previous();

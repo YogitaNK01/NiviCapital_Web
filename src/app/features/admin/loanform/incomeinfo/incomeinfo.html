@@ -54,12 +54,12 @@
 
                             @if(handleresponse && hasDocument('salary1')){
                             <label class="text-label">Salary Slip 1<span class="text-danger">*</span></label>
-                            <div class="addcust-img-box">
+                            <div class="addcust-img-box mt-2">
                                 <p class="text-label">{{ getDocumentName('salary1') }}</p>
                                 <div class="icons">
-                                    <span (click)="viewImage(getDocumentUrl('salary1'))"><img
+                                    <span class="view" (click)="viewImage(getDocumentUrl('salary1'))"><img
                                             src="/assets/images/icons/eyered.svg" alt="view"></span>
-                                    <span
+                                    <span class="download"
                                         (click)="downloadImage(getDocumentUrl('salary1'), getDocumentName('salary1'))"><img
                                             src="/assets/images/icons/import-red.svg" alt="Download"></span>
                                     <span (click)="deleteImage('salary1')"><img src="/assets/images/icons/close.svg"
@@ -79,12 +79,12 @@
                         <div class="col-lg-4 col-sm-12">
                             @if(handleresponse && hasDocument('salary2')){
                             <label class="text-label">Salary Slip 2<span class="text-danger">*</span></label>
-                            <div class="addcust-img-box">
+                            <div class="addcust-img-box mt-2">
                                 <p class="text-label">{{ getDocumentName('salary2') }}</p>
                                 <div class="icons">
-                                    <span (click)="viewImage(getDocumentUrl('salary2'))"><img
+                                    <span class="view" (click)="viewImage(getDocumentUrl('salary2'))"><img
                                             src="/assets/images/icons/eyered.svg" alt="view"></span>
-                                    <span
+                                    <span class="download"
                                         (click)="downloadImage(getDocumentUrl('salary2'), getDocumentName('salary2'))"><img
                                             src="/assets/images/icons/import-red.svg" alt="Download"></span>
                                     <span (click)="deleteImage('salary2')"><img src="/assets/images/icons/close.svg"
@@ -103,15 +103,15 @@
                         <div class="col-lg-4 col-sm-12">
                             @if(handleresponse && hasDocument('salary3')){
                             <label class="text-label">Salary Slip 3<span class="text-danger">*</span></label>
-                            <div class="addcust-img-box">
+                            <div class="addcust-img-box mt-2">
                                 <p class="text-label">{{ getDocumentName('salary3') }}</p>
                                 <div class="icons">
-                                    <span (click)="viewImage(getDocumentUrl('salary3'))"><img
+                                    <span class="view" (click)="viewImage(getDocumentUrl('salary3'))"><img
                                             src="/assets/images/icons/eyered.svg" alt="view"></span>
-                                    <span
+                                    <span class="download"
                                         (click)="downloadImage(getDocumentUrl('salary3'), getDocumentName('salary3'))"><img
                                             src="/assets/images/icons/import-red.svg" alt="Download"></span>
-                                    <span (click)="deleteImage('salary3')"><img src="/assets/images/icons/close.svg"
+                                    <span class="delete" (click)="deleteImage('salary3')"><img src="/assets/images/icons/close.svg"
                                             alt="Download"></span>
                                 </div>
                             </div>
@@ -150,12 +150,12 @@
                         <div class="col-lg-4 col-sm-12">
                             @if(handleresponse && hasDocument('Form16')){
                             <label class="text-label">Form 16<span class="text-danger">*</span></label>
-                            <div class="addcust-img-box">
+                            <div class="addcust-img-box mt-2">
                                 <p class="text-label">{{ getDocumentName('Form16') }}</p>
                                 <div class="icons">
-                                    <span (click)="viewImage(getDocumentUrl('Form16'))"><img
+                                    <span class="view" (click)="viewImage(getDocumentUrl('Form16'))"><img
                                             src="/assets/images/icons/eyered.svg" alt="view"></span>
-                                    <span
+                                    <span class="download"
                                         (click)="downloadImage(getDocumentUrl('Form16'), getDocumentName('Form16'))"><img
                                             src="/assets/images/icons/import-red.svg" alt="Download"></span>
                                     <span (click)="deleteImage('Form16')"><img src="/assets/images/icons/close.svg"
@@ -195,12 +195,12 @@
                         <div class="col-lg-4 col-sm-12">
                             @if(handleresponse && hasDocument('oneyearbankstatement')){
                             <label class="text-label">1 Year bank statement<span class="text-danger">*</span></label>
-                            <div class="addcust-img-box">
+                            <div class="addcust-img-box mt-2">
                                 <p class="text-label">{{ getDocumentName('oneyearbankstatement') }}</p>
                                 <div class="icons">
-                                    <span (click)="viewImage(getDocumentUrl('oneyearbankstatement'))"><img
+                                    <span class="view" (click)="viewImage(getDocumentUrl('oneyearbankstatement'))"><img
                                             src="/assets/images/icons/eyered.svg" alt="view"></span>
-                                    <span
+                                    <span class="download"
                                         (click)="downloadImage(getDocumentUrl('oneyearbankstatement'), getDocumentName('oneyearbankstatement'))"><img
                                             src="/assets/images/icons/import-red.svg" alt="Download"></span>
                                     <span (click)="deleteImage('oneyearbankstatement')"><img
@@ -241,12 +241,12 @@
                         <div class="col-lg-4 col-sm-12">
                             @if(handleresponse && hasDocument('ay1')){
                             <label class="text-label">Year 1<span class="text-danger">*</span></label>
-                            <div class="addcust-img-box">
+                            <div class="addcust-img-box mt-2">
                                 <p class="text-label">{{ getDocumentName('ay1') }}</p>
                                 <div class="icons">
-                                    <span (click)="viewImage(getDocumentUrl('ay1'))"><img
+                                    <span class="view" (click)="viewImage(getDocumentUrl('ay1'))"><img
                                             src="/assets/images/icons/eyered.svg" alt="view"></span>
-                                    <span (click)="downloadImage(getDocumentUrl('ay1'), getDocumentName('ay1'))"><img
+                                    <span class="download" (click)="downloadImage(getDocumentUrl('ay1'), getDocumentName('ay1'))"><img
                                             src="/assets/images/icons/import-red.svg" alt="Download"></span>
                                     <span (click)="deleteImage('ay1')"><img src="/assets/images/icons/close.svg"
                                             alt="Download"></span>
@@ -264,14 +264,14 @@
                         <div class="col-lg-4 col-sm-12">
                             @if(handleresponse && hasDocument('ay2')){
                             <label class="text-label">Year 2<span class="text-danger">*</span></label>
-                            <div class="addcust-img-box">
+                            <div class="addcust-img-box mt-2">
                                 <p class="text-label">{{ getDocumentName('ay2') }}</p>
                                 <div class="icons">
-                                    <span (click)="viewImage(getDocumentUrl('ay2'))"><img
+                                    <span class="view" (click)="viewImage(getDocumentUrl('ay2'))"><img
                                             src="/assets/images/icons/eyered.svg" alt="view"></span>
-                                    <span (click)="downloadImage(getDocumentUrl('ay2'), getDocumentName('ay2'))"><img
+                                    <span class="download" (click)="downloadImage(getDocumentUrl('ay2'), getDocumentName('ay2'))"><img
                                             src="/assets/images/icons/import-red.svg" alt="Download"></span>
-                                    <span (click)="deleteImage('ay2')"><img src="/assets/images/icons/close.svg"
+                                    <span class="delete" (click)="deleteImage('ay2')"><img src="/assets/images/icons/close.svg"
                                             alt="Download"></span>
                                 </div>
                             </div>
@@ -287,14 +287,14 @@
                         <div class="col-lg-4 col-sm-12">
                             @if(handleresponse && hasDocument('ay3')){
                             <label class="text-label">Year 3<span class="text-danger">*</span></label>
-                            <div class="addcust-img-box">
+                            <div class="addcust-img-box mt-2">
                                 <p class="text-label">{{ getDocumentName('ay3') }}</p>
                                 <div class="icons">
-                                    <span (click)="viewImage(getDocumentUrl('ay3'))"><img
+                                    <span class="view" (click)="viewImage(getDocumentUrl('ay3'))"><img
                                             src="/assets/images/icons/eyered.svg" alt="view"></span>
-                                    <span (click)="downloadImage(getDocumentUrl('ay3'), getDocumentName('ay3'))"><img
+                                    <span class="download" (click)="downloadImage(getDocumentUrl('ay3'), getDocumentName('ay3'))"><img
                                             src="/assets/images/icons/import-red.svg" alt="Download"></span>
-                                    <span (click)="deleteImage('ay3')"><img src="/assets/images/icons/close.svg"
+                                    <span class="delete" (click)="deleteImage('ay3')"><img src="/assets/images/icons/close.svg"
                                             alt="Download"></span>
                                 </div>
                             </div>
@@ -345,15 +345,15 @@
                         <div class="col-lg-4 col-sm-12 mt-20">
                             @if(handleresponse && hasDocument('other')){
                             <label class="text-label">Other Documents<span class="text-danger">*</span></label>
-                            <div class="addcust-img-box">
+                            <div class="addcust-img-box mt-2">
                                 <p class="text-label">{{ getDocumentName('other') }}</p>
                                 <div class="icons">
-                                    <span (click)="viewImage(getDocumentUrl('other'))"><img
+                                    <span class="view" (click)="viewImage(getDocumentUrl('other'))"><img
                                             src="/assets/images/icons/eyered.svg" alt="view"></span>
-                                    <span
+                                    <span class="download"
                                         (click)="downloadImage(getDocumentUrl('other'), getDocumentName('other'))"><img
                                             src="/assets/images/icons/import-red.svg" alt="Download"></span>
-                                    <span (click)="deleteImage('other')"><img src="/assets/images/icons/close.svg"
+                                    <span class="delete" (click)="deleteImage('other')"><img src="/assets/images/icons/close.svg"
                                             alt="Download"></span>
                                 </div>
                             </div>
@@ -384,22 +384,22 @@
 
                         </div>
                     </div>
-                    <div class="row" *ngIf="otherdoc">
+                    <!-- <div class="row" *ngIf="otherdoc">
                         @for (slot of getOtherBusinessSlots(); track slot.id; let i = $index) {
                         <div class="col-lg-4 col-sm-12 mt-20">
                             @if (handleresponse && hasDocumentForSlot('other',i)) {
                             <label class="text-label">Other Document {{ i + 1 }}<span
                                     class="text-danger">*</span></label>
 
-                            <div class="addcust-img-box">
+                            <div class="addcust-img-box mt-2">
                                 <p class="text-label">{{ getDocumentName('other') }}</p>
                                 <div class="icons">
-                                    <span (click)="viewImage(getDocumentUrl('other'))"><img
+                                    <span class="view" (click)="viewImage(getDocumentUrl('other'))"><img
                                             src="/assets/images/icons/eyered.svg" alt="view"></span>
-                                    <span
+                                    <span class="download"
                                         (click)="downloadImage(getDocumentUrl('other'), getDocumentName('other'))"><img
                                             src="/assets/images/icons/import-red.svg" alt="Download"></span>
-                                    <span (click)="deleteImage('other')"><img src="/assets/images/icons/close.svg"
+                                    <span class="delete" (click)="deleteImage('other')"><img src="/assets/images/icons/close.svg"
                                             alt="Download"></span>
                                 </div>
                             </div>
@@ -414,14 +414,14 @@
                         </div>
                         }
 
-                    </div>
+                    </div> -->
                 </div>
 
 
 
                 <div class="col-lg-4 col-sm-12 mt-20">
                     <app-buttons label="Add Other Document" class="btn btn-icon Add btncustomClass" [outline]="true"
-                        (click)="addotherdocuments()">
+                       >
                         <img src="/assets/images/icons/addred.svg" alt="Add">
 
                     </app-buttons>
@@ -451,15 +451,15 @@
                         <div class="col-lg-4 col-sm-12">
                             @if(handleresponse && hasDocument('year1')){
                             <label class="text-label">Year 1<span class="text-danger">*</span></label>
-                            <div class="addcust-img-box">
+                            <div class="addcust-img-box mt-2">
                                 <p class="text-label">{{ getDocumentName('year1') }}</p>
                                 <div class="icons">
-                                    <span (click)="viewImage(getDocumentUrl('year1'))"><img
+                                    <span class="view" (click)="viewImage(getDocumentUrl('year1'))"><img
                                             src="/assets/images/icons/eyered.svg" alt="view"></span>
-                                    <span
+                                    <span class="download"
                                         (click)="downloadImage(getDocumentUrl('year1'), getDocumentName('year1'))"><img
                                             src="/assets/images/icons/import-red.svg" alt="Download"></span>
-                                    <span (click)="deleteImage('year1')"><img src="/assets/images/icons/close.svg"
+                                    <span class="delete" (click)="deleteImage('year1')"><img src="/assets/images/icons/close.svg"
                                             alt="Download"></span>
                                 </div>
                             </div>
@@ -475,15 +475,15 @@
                         <div class="col-lg-4 col-sm-12">
                             @if(handleresponse && hasDocument('year2')){
                             <label class="text-label">Year 2<span class="text-danger">*</span></label>
-                            <div class="addcust-img-box">
+                            <div class="addcust-img-box mt-2">
                                 <p class="text-label">{{ getDocumentName('year2') }}</p>
                                 <div class="icons">
-                                    <span (click)="viewImage(getDocumentUrl('year2'))"><img
+                                    <span class="view" (click)="viewImage(getDocumentUrl('year2'))"><img
                                             src="/assets/images/icons/eyered.svg" alt="view"></span>
-                                    <span
+                                    <span class="download"
                                         (click)="downloadImage(getDocumentUrl('year2'), getDocumentName('year2'))"><img
                                             src="/assets/images/icons/import-red.svg" alt="Download"></span>
-                                    <span (click)="deleteImage('year2')"><img src="/assets/images/icons/close.svg"
+                                    <span class="delete" (click)="deleteImage('year2')"><img src="/assets/images/icons/close.svg"
                                             alt="Download"></span>
                                 </div>
                             </div>
@@ -498,15 +498,15 @@
                         <div class="col-lg-4 col-sm-12">
                             @if(handleresponse && hasDocument('year3')){
                             <label class="text-label">Year 3<span class="text-danger">*</span></label>
-                            <div class="addcust-img-box">
+                            <div class="addcust-img-box mt-2">
                                 <p class="text-label">{{ getDocumentName('year3') }}</p>
                                 <div class="icons">
-                                    <span (click)="viewImage(getDocumentUrl('year3'))"><img
+                                    <span class="view" (click)="viewImage(getDocumentUrl('year3'))"><img
                                             src="/assets/images/icons/eyered.svg" alt="view"></span>
-                                    <span
+                                    <span class="download"
                                         (click)="downloadImage(getDocumentUrl('year3'), getDocumentName('year3'))"><img
                                             src="/assets/images/icons/import-red.svg" alt="Download"></span>
-                                    <span (click)="deleteImage('year3')"><img src="/assets/images/icons/close.svg"
+                                    <span class="delete" (click)="deleteImage('year3')"><img src="/assets/images/icons/close.svg"
                                             alt="Download"></span>
                                 </div>
                             </div>
@@ -542,15 +542,15 @@
                         <div class="col-lg-4 col-sm-12">
                             @if(handleresponse && hasDocument('businessITR1')){
                             <label class="text-label">Year 1<span class="text-danger">*</span></label>
-                            <div class="addcust-img-box">
+                            <div class="addcust-img-box mt-2">
                                 <p class="text-label">{{ getDocumentName('businessITR1') }}</p>
                                 <div class="icons">
-                                    <span (click)="viewImage(getDocumentUrl('businessITR1'))"><img
+                                    <span class="view" (click)="viewImage(getDocumentUrl('businessITR1'))"><img
                                             src="/assets/images/icons/eyered.svg" alt="view"></span>
-                                    <span
+                                    <span class="download"
                                         (click)="downloadImage(getDocumentUrl('businessITR1'), getDocumentName('businessITR1'))"><img
                                             src="/assets/images/icons/import-red.svg" alt="Download"></span>
-                                    <span (click)="deleteImage('businessITR1')"><img
+                                    <span class="delete" (click)="deleteImage('businessITR1')"><img
                                             src="/assets/images/icons/close.svg" alt="Download"></span>
                                 </div>
                             </div>
@@ -565,15 +565,15 @@
                         <div class="col-lg-4 col-sm-12">
                             @if(handleresponse && hasDocument('businessITR2')){
                             <label class="text-label">Year 2<span class="text-danger">*</span></label>
-                            <div class="addcust-img-box">
+                            <div class="addcust-img-box mt-2">
                                 <p class="text-label">{{ getDocumentName('businessITR2') }}</p>
                                 <div class="icons">
-                                    <span (click)="viewImage(getDocumentUrl('businessITR2'))"><img
+                                    <span class="view" (click)="viewImage(getDocumentUrl('businessITR2'))"><img
                                             src="/assets/images/icons/eyered.svg" alt="view"></span>
-                                    <span
+                                    <span class="download"
                                         (click)="downloadImage(getDocumentUrl('businessITR2'), getDocumentName('businessITR2'))"><img
                                             src="/assets/images/icons/import-red.svg" alt="Download"></span>
-                                    <span (click)="deleteImage('businessITR2')"><img
+                                    <span class="delete" (click)="deleteImage('businessITR2')"><img
                                             src="/assets/images/icons/close.svg" alt="Download"></span>
                                 </div>
                             </div>
@@ -588,15 +588,15 @@
                         <div class="col-lg-4 col-sm-12">
                             @if(handleresponse && hasDocument('businessITR3')){
                             <label class="text-label">Year 3<span class="text-danger">*</span></label>
-                            <div class="addcust-img-box">
+                            <div class="addcust-img-box mt-2">
                                 <p class="text-label">{{ getDocumentName('businessITR3') }}</p>
                                 <div class="icons">
-                                    <span (click)="viewImage(getDocumentUrl('businessITR3'))"><img
+                                    <span class="view" (click)="viewImage(getDocumentUrl('businessITR3'))"><img
                                             src="/assets/images/icons/eyered.svg" alt="view"></span>
-                                    <span
+                                    <span class="download"
                                         (click)="downloadImage(getDocumentUrl('businessITR3'), getDocumentName('businessITR3'))"><img
                                             src="/assets/images/icons/import-red.svg" alt="Download"></span>
-                                    <span (click)="deleteImage('businessITR3')"><img
+                                    <span class="delete" (click)="deleteImage('businessITR3')"><img
                                             src="/assets/images/icons/close.svg" alt="Download"></span>
                                 </div>
                             </div>
@@ -631,15 +631,15 @@
                         <div class="col-lg-4 col-sm-12">
                             @if(handleresponse && hasDocument('businessGST')){
                             <label class="text-label">1 Year GST Return<span class="text-danger">*</span></label>
-                            <div class="addcust-img-box">
+                            <div class="addcust-img-box mt-2">
                                 <p class="text-label">{{ getDocumentName('businessGST') }}</p>
                                 <div class="icons">
-                                    <span (click)="viewImage(getDocumentUrl('businessGST'))"><img
+                                    <span class="view" (click)="viewImage(getDocumentUrl('businessGST'))"><img
                                             src="/assets/images/icons/eyered.svg" alt="view"></span>
-                                    <span
+                                    <span class="download"
                                         (click)="downloadImage(getDocumentUrl('businessGST'), getDocumentName('businessGST'))"><img
                                             src="/assets/images/icons/import-red.svg" alt="Download"></span>
-                                    <span (click)="deleteImage('businessGST')"><img src="/assets/images/icons/close.svg"
+                                    <span class="delete" (click)="deleteImage('businessGST')"><img src="/assets/images/icons/close.svg"
                                             alt="Download"></span>
                                 </div>
                             </div>
@@ -675,15 +675,15 @@
                         <div class="col-lg-4 col-sm-12">
                             @if(handleresponse && hasDocument('businessBankstatement')){
                             <label class="text-label">1 Year bank statement<span class="text-danger">*</span></label>
-                            <div class="addcust-img-box">
+                            <div class="addcust-img-box mt-2">
                                 <p class="text-label">{{ getDocumentName('businessBankstatement') }}</p>
                                 <div class="icons">
-                                    <span (click)="viewImage(getDocumentUrl('businessBankstatement'))"><img
+                                    <span class="view" (click)="viewImage(getDocumentUrl('businessBankstatement'))"><img
                                             src="/assets/images/icons/eyered.svg" alt="view"></span>
-                                    <span
+                                    <span class="download"
                                         (click)="downloadImage(getDocumentUrl('businessBankstatement'), getDocumentName('businessBankstatement'))"><img
                                             src="/assets/images/icons/import-red.svg" alt="Download"></span>
-                                    <span (click)="deleteImage('businessBankstatement')"><img
+                                    <span class="delete" (click)="deleteImage('businessBankstatement')"><img
                                             src="/assets/images/icons/close.svg" alt="Download"></span>
                                 </div>
                             </div>
@@ -717,14 +717,14 @@
                     <!-- <div class="col-lg-4 col-sm-12 mt-20" *ngIf="otherbusinessdoc">
                         @if(handleresponse && hasDocument('otherbusiness')){
                         <label class="text-label">Salary Slip 1<span class="text-danger">*</span></label>
-                        <div class="addcust-img-box">
+                        <div class="addcust-img-box mt-2">
                             <p class="text-label">{{ getDocumentName('otherbusiness') }}</p>
                             <div class="icons">
-                                <span (click)="viewImage(getDocumentUrl('otherbusiness'))"><img
+                                <span class="view" (click)="viewImage(getDocumentUrl('otherbusiness'))"><img
                                         src="/assets/images/icons/eyered.svg" alt="view"></span>
-                                <span (click)="downloadImage(getDocumentUrl('otherbusiness'), getDocumentName('otherbusiness'))"><img
+                                <span class="download" (click)="downloadImage(getDocumentUrl('otherbusiness'), getDocumentName('otherbusiness'))"><img
                                         src="/assets/images/icons/import-red.svg" alt="Download"></span>
-                                <span (click)="deleteImage('otherbusiness')"><img src="/assets/images/icons/close.svg"
+                                <span class="delete" (click)="deleteImage('otherbusiness')"><img src="/assets/images/icons/close.svg"
                                         alt="Download"></span>
                             </div>
                         </div>
@@ -737,36 +737,36 @@
                     </div> -->
 
                     <div class="row" *ngIf="otherbusinessdoc">
-                        @for (slot of getOtherBusinessSlots(); track slot.id; let i = $index) {
+                        <!-- @for (slot of getOtherBusinessSlots(); track slot.id; let i = $index) { -->
                         <div class="col-lg-4 col-sm-12 mt-20">
-                            @if (handleresponse && hasDocumentForSlot('otherbusiness',i)) {
+                            @if (handleresponse) {
                             <label class="text-label">Other Document {{ i + 1 }}<span
                                     class="text-danger">*</span></label>
-                            <!-- <div class="addcust-img-box">
+                            <!-- <div class="addcust-img-box mt-2">
                                 <p class="text-label">{{ getDocumentNameForSlot('otherbusiness', i) }}</p>
                                 <div class="icons">
-                                    <span (click)="viewImage(getDocumentUrlForSlot('otherbusiness', i))">
+                                    <span class="view" (click)="viewImage(getDocumentUrlForSlot('otherbusiness', i))">
                                         <img src="/assets/images/icons/eyered.svg" alt="view">
                                     </span>
-                                    <span
+                                    <span class="download"
                                         (click)="downloadImage(getDocumentUrlForSlot('otherbusiness', i), getDocumentNameForSlot('otherbusiness', i))">
                                         <img src="/assets/images/icons/import-red.svg" alt="Download">
                                     </span>
-                                    <span (click)="deleteImageForSlot('otherbusiness', i)">
+                                    <span class="delete" (click)="deleteImageForSlot('otherbusiness', i)">
                                         <img src="/assets/images/icons/close.svg" alt="Delete">
                                     </span>
                                 </div>
                             </div> -->
 
-                            <div class="addcust-img-box">
+                            <div class="addcust-img-box mt-2">
                                 <p class="text-label">{{ getDocumentName('otherbusiness') }}</p>
                                 <div class="icons">
-                                    <span (click)="viewImage(getDocumentUrl('otherbusiness'))"><img
+                                    <span class="view" (click)="viewImage(getDocumentUrl('otherbusiness'))"><img
                                             src="/assets/images/icons/eyered.svg" alt="view"></span>
-                                    <span
+                                    <span class="download"
                                         (click)="downloadImage(getDocumentUrl('otherbusiness'), getDocumentName('otherbusiness'))"><img
                                             src="/assets/images/icons/import-red.svg" alt="Download"></span>
-                                    <span (click)="deleteImage('otherbusiness')"><img
+                                    <span class="delete" (click)="deleteImage('otherbusiness')"><img
                                             src="/assets/images/icons/close.svg" alt="Download"></span>
                                 </div>
                             </div>
@@ -779,7 +779,7 @@
                             </app-uploadbtn>
                             }
                         </div>
-                        }
+                        <!-- } -->
 
 
                     </div>
@@ -788,7 +788,7 @@
 
                     <div class="col-lg-4 col-sm-12 mt-20">
                         <app-buttons label="Add Other Document" class="btn btn-icon Add btncustomClass" [outline]="true"
-                            (click)="addotherbusinessdocuments()">
+                           >
                             <img src="/assets/images/icons/addred.svg" alt="Add">
 
                         </app-buttons>

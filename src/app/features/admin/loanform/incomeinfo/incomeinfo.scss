@@ -79,3 +79,32 @@ background: rgba(179, 228, 253, 0.30);
   min-width: 280px;
   width: 100%;
 }
+
+
+
+/* Icons container */
+.addcust-img-box .icons {
+  display: flex;
+  gap: 10px;
+}
+
+/* Hide view & download by default */
+.addcust-img-box .icons .view,
+.addcust-img-box .icons .download {
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.2s ease-in-out;
+}
+
+/* Always show delete icon */
+.addcust-img-box .icons .delete {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* On hover → show view & download */
+.addcust-img-box:hover .icons .view,
+.addcust-img-box:hover .icons .download {
+  opacity: 1;
+  visibility: visible;
+}
