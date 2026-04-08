@@ -99,6 +99,7 @@ export class Monthlyexpenditureinfo {
 
 
   ngOnInit(): void {
+    this.stepperService.rebuildSteps();
     this.route.queryParams.subscribe(params => {
 
       const applicantId = params['applicantId'];

@@ -92,6 +92,7 @@ export class LoanInfo implements OnInit {
 
 
   ngOnInit(): void {
+    this.stepperService.rebuildSteps();
     this.route.queryParams.subscribe(params => {
       if (params['applicantId']) {
         this.applicantId = params['applicantId'];

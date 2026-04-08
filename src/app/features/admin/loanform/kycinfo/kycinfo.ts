@@ -68,7 +68,7 @@ selectedPassportFile: File | null = null;
   constructor(private fb: FormBuilder, private stepperService: Loanstepperservice, private cd: ChangeDetectorRef, private loanformservice: Loanformservice, private route: ActivatedRoute) { }
 
   ngOnInit(): void {
-
+this.stepperService.rebuildSteps();
     this.route.queryParams.subscribe(params => {
 
       const applicantId = params['applicantId'];

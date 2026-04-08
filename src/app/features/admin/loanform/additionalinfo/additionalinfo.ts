@@ -67,7 +67,7 @@ export class Additionalinfo implements OnInit {
   objectName: any;
   constructor(private fb: FormBuilder, public main: Main, private route: ActivatedRoute, private stepperService: Loanstepperservice, private formSvc: Loanformservice) { }
   ngOnInit(): void {
-
+this.stepperService.rebuildSteps();
     this.route.queryParams.subscribe(params => {
 
       const applicantId = params['applicantId'];

@@ -95,6 +95,7 @@ export class Assetsinfo implements OnInit {
 
 
   ngOnInit(): void {
+    this.stepperService.rebuildSteps();
     this.route.queryParams.subscribe(params => {
 
       const applicantId = params['applicantId'];
@@ -1220,16 +1221,16 @@ export class Assetsinfo implements OnInit {
 
 
 
-    // this.formSvc.getAssets(payload, this.applicationId).pipe().subscribe({
-    //   next: (res) => {
-    //     console.log("resp---", res);
-    //     if (res.status == "success") {
-    //       this.formSvc.aseetsInfoData = payload
-    //       this.patchAssetsData();
-    //       this.stepperService.next();
-    //     }
-    //   }
-    // });
+    this.formSvc.getAssets(payload, this.applicationId).pipe().subscribe({
+      next: (res) => {
+        console.log("resp---", res);
+        if (res.status == "success") {
+          this.formSvc.aseetsInfoData = payload
+          this.patchAssetsData();
+          this.stepperService.next();
+        }
+      }
+    });
 
   }
 }

@@ -80,6 +80,7 @@ newOtherBusinessTitle: string = '';
 
   constructor(private fb: FormBuilder, private stepperService: Loanstepperservice, private cd: ChangeDetectorRef, private msgBox: Msgboxservice, public loanformservice: Loanformservice, private route: ActivatedRoute, public main: Main) { }
   ngOnInit(): void {
+    this.stepperService.rebuildSteps();
     this.route.queryParams.subscribe(params => {
 
       const applicantId = params['applicantId'];

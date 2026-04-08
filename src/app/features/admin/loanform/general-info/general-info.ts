@@ -111,6 +111,7 @@ export class GeneralInfo implements OnInit {
     this.getOccupationdetails();
     this.getEducationdetails();
     this.getlendingpartnersdetails();
+    this.stepperService.rebuildSteps();
     this.registerForm = this.fb.group({
 
       occupation: ['', Validators.required],

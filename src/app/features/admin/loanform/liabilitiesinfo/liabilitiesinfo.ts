@@ -89,6 +89,7 @@ export class Liabilitiesinfo {
 
 
   ngOnInit(): void {
+    this.stepperService.rebuildSteps();
     this.route.queryParams.subscribe(params => {
 
       const applicantId = params['applicantId'];

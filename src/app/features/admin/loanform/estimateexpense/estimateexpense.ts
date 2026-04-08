@@ -76,7 +76,7 @@ export class Estimateexpense {
     private router: Router, private route: ActivatedRoute, public main: Main, private msgBox: Msgboxservice) { }
 
   ngOnInit(): void {
-
+    this.stepperService.rebuildSteps();
     this.route.queryParams.subscribe(params => {
 
       const applicantId = params['applicantId'];
