@@ -111,6 +111,20 @@ export class GeneralInfo implements OnInit {
     this.getOccupationdetails();
     this.getEducationdetails();
     this.getlendingpartnersdetails();
+    
+const saved = localStorage.getItem('isasset');
+  if (saved !== null) {
+    const value = JSON.parse(saved);
+    this.formSvc.isasset = value;
+    this.checkboxasset = value ? 'Yes' : 'No';
+  }
+
+  const savedIncome = localStorage.getItem('isincome');
+  if (savedIncome !== null) {
+    const value = JSON.parse(savedIncome);
+    this.formSvc.isincome = value;
+  }
+
     this.stepperService.rebuildSteps();
     this.registerForm = this.fb.group({
 
@@ -188,9 +202,11 @@ export class GeneralInfo implements OnInit {
     this.checkboxasset = event;
      if(this.checkboxasset === 'Yes'){
       this.formSvc.isasset = true;
+      localStorage.setItem('isasset', JSON.stringify(this.formSvc.isasset));
        this.stepperService.rebuildSteps();
     }else{
       this.formSvc.isasset = false;
+      localStorage.setItem('isasset', JSON.stringify(this.formSvc.isasset));
       this.stepperService.rebuildSteps();
     }
    
@@ -218,6 +234,8 @@ export class GeneralInfo implements OnInit {
       this.formSvc.isincome = selected?.label === 'Employed' ? true :selected?.label === 'Self-employed' ? true : false;
       console.log('Selected Occupation:', this.formSvc.isincome);
       this.formSvc.issalaried = selected?.label === 'Employed' ? true : false;
+      localStorage.setItem('isincome', JSON.stringify(this.formSvc.isincome));
+      localStorage.setItem('issalaried', JSON.stringify(this.formSvc.issalaried));
       this.stepperService.rebuildSteps();
     });
     }, 1000);
