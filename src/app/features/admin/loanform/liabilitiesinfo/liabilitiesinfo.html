@@ -20,62 +20,77 @@
     <form [formGroup]="liabilityForm" (ngSubmit)="submit()" id="expenseForm" class="w-100 ">
 
         <div class=" accordion d-flex flex-column gap-4 mb-4">
+            <ng-container *ngFor="let acc of accordions; let i = index">
+                <div class="accordion-item b-0" [hidden]="!selectedliabilities.includes(acc.key)">
 
-            <div class="accordion-item b-0" *ngFor="let acc of accordions; let i = index"
-                [hidden]="!selectedliabilities.includes(acc.key)">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button table-head d-flex justify-content-between align-items-center"
+                            [class.collapsed]="!openIndex.includes(i)" type="button" (click)="toggle(i)">
 
-                <h2 class="accordion-header">
-                    <button class="accordion-button table-head d-flex justify-content-between align-items-center"
-                        [class.collapsed]="!openIndex.includes(i)" type="button" (click)="toggle(i)">
-
-                        <span class="flex-grow-1">{{ acc.title }}</span>
-                        <span class="delete-icon" (click)="removeAccordion(acc.key, i, $event)">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
-                                fill="none">
-                                <path d="M3 6H21" stroke="#25262F" stroke-width="1.5" />
-                                <path d="M8 6V4C8 3 9 2 10 2H14C15 2 16 3 16 4V6" stroke="#25262F" stroke-width="1.5" />
-                                <path d="M19 6L18 20C18 21 17 22 15 22H9C7 22 6 21 6 20L5 6" stroke="#25262F"
-                                    stroke-width="1.5" />
-                            </svg>
-                        </span>
-                    </button>
-                </h2>
+                            <span class="flex-grow-1">{{ acc.title }}</span>
 
 
-                <div class="accordion-collapse collapse" [class.show]="openIndex.includes(i)">
-
-                    <div class="accordion-body p-0 ">
 
 
-                        <ng-container *ngIf="i === 0">
-                            <ng-container *ngTemplateOutlet="existingloansTemplate; context:{index:i}">
+                            <span class="delete-icon" (click)="removeAccordion(acc.key, i, $event)">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                                    fill="none">
+                                    <path
+                                        d="M21 5.98047C17.67 5.65047 14.32 5.48047 10.98 5.48047C9 5.48047 7.02 5.58047 5.04 5.78047L3 5.98047"
+                                        stroke="#25262F" stroke-width="1.5" stroke-linecap="round"
+                                        stroke-linejoin="round" />
+                                    <path
+                                        d="M8.5 4.97L8.72 3.66C8.88 2.71 9 2 10.69 2H13.31C15 2 15.13 2.75 15.28 3.67L15.5 4.97"
+                                        stroke="#25262F" stroke-width="1.5" stroke-linecap="round"
+                                        stroke-linejoin="round" />
+                                    <path
+                                        d="M18.8484 9.14062L18.1984 19.2106C18.0884 20.7806 17.9984 22.0006 15.2084 22.0006H8.78844C5.99844 22.0006 5.90844 20.7806 5.79844 19.2106L5.14844 9.14062"
+                                        stroke="#25262F" stroke-width="1.5" stroke-linecap="round"
+                                        stroke-linejoin="round" />
+                                    <path d="M10.3281 16.5H13.6581" stroke="#25262F" stroke-width="1.5"
+                                        stroke-linecap="round" stroke-linejoin="round" />
+                                    <path d="M9.5 12.5H14.5" stroke="#25262F" stroke-width="1.5" stroke-linecap="round"
+                                        stroke-linejoin="round" />
+                                </svg>
+                            </span>
+                        </button>
+                    </h2>
+
+
+                    <div class="accordion-collapse collapse" [class.show]="openIndex.includes(i)">
+
+                        <div class="accordion-body p-0 ">
+
+
+                            <ng-container *ngIf="i === 0">
+                                <ng-container *ngTemplateOutlet="existingloansTemplate; context:{index:i}">
+                                </ng-container>
                             </ng-container>
-                        </ng-container>
 
-                        <ng-container *ngIf="i === 1">
-                            <ng-container *ngTemplateOutlet="creditcardTemplate; context:{index:i}">
+                            <ng-container *ngIf="i === 1">
+                                <ng-container *ngTemplateOutlet="creditcardTemplate; context:{index:i}">
 
+                                </ng-container>
                             </ng-container>
-                        </ng-container>
 
-                        <ng-container *ngIf="i === 2">
-                            <ng-container *ngTemplateOutlet="buynowpaylaterTemplate; context:{index:i}">
+                            <ng-container *ngIf="i === 2">
+                                <ng-container *ngTemplateOutlet="buynowpaylaterTemplate; context:{index:i}">
 
+                                </ng-container>
                             </ng-container>
-                        </ng-container>
 
-                        <ng-container *ngIf="i === 3">
-                            <ng-container *ngTemplateOutlet="otherTemplate; context:{index:i}">
+                            <ng-container *ngIf="i === 3">
+                                <ng-container *ngTemplateOutlet="otherTemplate; context:{index:i}">
 
+                                </ng-container>
                             </ng-container>
-                        </ng-container>
 
 
+                        </div>
                     </div>
+
                 </div>
-
-            </div>
-
+            </ng-container>
         </div>
 
         <ng-template #existingloansTemplate let-i="index">
@@ -99,8 +114,8 @@
 
 
                     <div class="text-dp-3-regular d-flex align-items-center justify-content-between">
-                        {{ loan.get('type')?.value }} {{ i + 1 }}
-                        <span (click)="removeitem(i,'loantype')">
+                        {{ loan.get('type')?.value }} 
+                        <span *ngIf="loans.controls.length>1" (click)="removeitem(i,'loantype')">
                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
                                 fill="none">
                                 <path
@@ -125,14 +140,93 @@
 
                     <hr class="hrclass">
 
-                    <div class="col-lg-12">
+                    <!-- ================= ROW 1 ================= -->
+
+                    <!-- Bank Name -->
+                    <div [class.col-12]="!isOtherSelected(loan)" [class.col-6]="isOtherSelected(loan)">
+                        <div class="form-group">
+
+                            <app-dropdown [options]="selectBanks" formControlName="bankname"
+                                [placeholder]="'Select Bank Name'" [required]="true" [searchable]="true"
+                                (selectedValueChange)="onBankSelected($event,loan)" [avatarUrl]="avatarUrl"
+                                [hasAvatar]="hasAvatar" [label]="'Bank Name'">
+                            </app-dropdown>
+                        </div>
+                    </div>
+
+                    <!-- Title (ONLY when Other) -->
+                    <div class="col-6" *ngIf="isOtherSelected(loan)">
+                        <div class="form-group">
+                            <app-inputfield formControlName="title" label="Title" placeholder="Enter Title" (input)="main.restrictInput($event,'text')"
+                                [required]="true">
+                            </app-inputfield>
+
+                            <div class="text-danger" *ngIf="loan.get('title')?.touched && loan.get('title')?.invalid">
+                                Title is required
+                            </div>
+                        </div>
+                    </div>
+
+                   
+
+                    <!-- ================= ROW 2 (Only when Other) ================= -->
+                    <!-- <ng-container *ngIf="isOtherSelected(loan)"> -->
+
+                        <div class="col-lg-4 mt-20">
+                            <div class="form-group mb-3">
+                                <app-inputfield type="text" [required]="true" label="Outstanding Balance (INR)"
+                                    formControlName="outstanding" [required]="true" placeholder="Enter Value"
+                                    helpText="Help text" name="outstanding"
+                                    (input)="handleAmountInput($event,'outstanding',loan)">
+                                </app-inputfield>
+                                <div class="text-danger"
+                                    *ngIf="loan.get('outstanding')?.touched && loan.get('outstanding')?.invalid">
+                                    <div *ngIf="loan.get('outstanding')?.errors?.['required']">
+                                        Amount is required
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                        <div class="col-lg-4 mt-20">
+                            <div class="form-group mb-3">
+                                <app-inputfield type="text" [required]="true" label="EMI Amount (INR)" [required]="true"
+                                    formControlName="emiamount" placeholder="Enter Value" helpText="Help text"
+                                    name="emiamount" (input)="handleAmountInput($event,'emiamount',loan)">
+                                </app-inputfield>
+                                <div class="text-danger"
+                                    *ngIf="loan.get('emiamount')?.touched && loan.get('emiamount')?.invalid">
+                                    <div *ngIf="loan.get('emiamount')?.errors?.['required']">
+                                        EMI Amount is required
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                        <div class="col-lg-4 mt-20">
+                            <div class="form-group mb-3">
+                                <app-inputfield type="text" [required]="true" label="Remaining Tenure (Months)"
+                                    formControlName="remtenure" [required]="true" placeholder="Enter Value"
+                                    helpText="Help text" name="remtenure" (input)="main.restrictInput($event,'number')">
+                                </app-inputfield>
+                                <div class="text-danger"
+                                    *ngIf="loan.get('remtenure')?.touched && loan.get('remtenure')?.invalid">
+                                    <div *ngIf="loan.get('remtenure')?.errors?.['required']">
+                                        Tenure is required
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+
+                    <!-- </ng-container> -->
+
+                    <!-- <div class="col-lg-12">
                         <div class="form-group mb-3">
-                             <app-dropdown [options]="selectBanks" formControlName="bankname"
-                                            [(selectedValue)]="selectedbankIds"
-                                            [placeholder]="'Select Bank Name'" [required]="true"
-                                            [avatarUrl]="avatarUrl"
-                                            [hasAvatar]="hasAvatar" [label]="'Assets'">
-                                        </app-dropdown>
+                            <app-dropdown [options]="selectBanks" formControlName="bankname"
+                                [placeholder]="'Select Bank Name'" [required]="true" [searchable]="true"
+                                [avatarUrl]="avatarUrl" [hasAvatar]="hasAvatar" [label]="'Assets'">
+                            </app-dropdown>
 
                             <div class="text-danger"
                                 *ngIf="loan.get('bankname')?.touched && loan.get('bankname')?.invalid">
@@ -148,7 +242,8 @@
                         <div class="form-group mb-3">
                             <app-inputfield type="text" [required]="true" label="Outstanding Balance (INR)"
                                 formControlName="outstanding" [required]="true" placeholder="Enter Value"
-                                helpText="Help text" name="outstanding" (input)="handleAmountInput($event,'outstanding',loan)">
+                                helpText="Help text" name="outstanding"
+                                (input)="handleAmountInput($event,'outstanding',loan)">
                             </app-inputfield>
                             <div class="text-danger"
                                 *ngIf="loan.get('outstanding')?.touched && loan.get('outstanding')?.invalid">
@@ -188,7 +283,7 @@
                             </div>
 
                         </div>
-                    </div>
+                    </div> -->
 
                 </div>
             </div>
@@ -205,7 +300,8 @@
 
                             <div class="text-dp-3-regular d-flex align-items-center justify-content-between">
                                 Credit Card {{ i + 1 }}
-                                <span (click)="removeitem(i,'creditcard')">
+                                <span *ngIf="getFormArray('creditcard').controls.length > 1"
+                                    (click)="removeitem(i,'creditcard')">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
                                         fill="none">
                                         <path
@@ -229,14 +325,112 @@
                             </div>
                             <hr class="hrclass">
 
+                            <!-- ================= ROW 1 ================= -->
 
-                            <div class="col-lg-4">
-                                <div class="form-group mb-3">
-                                    <app-inputfield type="text" [required]="true" label="Bank Name" [required]="true"
-                                        formControlName="creditcardbankName" placeholder="Select Bank Name"
-                                        helpText="Help text" name="creditcardbankName"
-                                        (input)="main.restrictInput($event, 'text')">
+                            <!-- Bank Name -->
+                            <div [class.col-4]="!isOtherSelected(item)" [class.col-6]="isOtherSelected(item)">
+                                <div class="form-group">
+
+                                    <app-dropdown [options]="selectBanks" formControlName="creditcardbankName"
+                                        [placeholder]="'Select Bank Name'" [required]="true" [searchable]="true"
+                                        (selectedValueChange)="onBankSelected($event,item)" [avatarUrl]="avatarUrl"
+                                        [hasAvatar]="hasAvatar" [label]="'Bank Name'">
+                                    </app-dropdown>
+                                </div>
+                            </div>
+
+                            <!-- Title (ONLY when Other) -->
+                            <div class="col-6" *ngIf="isOtherSelected(item)">
+                                <div class="form-group">
+                                    <app-inputfield formControlName="title" label="Title" placeholder="Enter Title" (input)="main.restrictInput($event,'text')"
+                                        [required]="true">
                                     </app-inputfield>
+
+                                    <div class="text-danger"
+                                        *ngIf="item.get('title')?.touched && item.get('title')?.invalid">
+                                        Title is required
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Amount (Normal banks only – SAME ROW) -->
+                            <div class="col-4" *ngIf="!isOtherSelected(item)">
+                                <div class="form-group">
+                                    <app-inputfield type="text" [required]="true" label="Outstanding Balance (INR)"
+                                        [required]="true" formControlName="ccoutstandingBalance"
+                                        (input)="handleAmountInput($event,'ccoutstandingBalance',item)"
+                                        placeholder="Enter Value" helpText="Help text" name="ccoutstandingBalance">
+                                    </app-inputfield>
+                                    <div class="text-danger"
+                                        *ngIf="item.get('ccoutstandingBalance')?.touched && item.get('ccoutstandingBalance')?.invalid">
+                                        <div *ngIf="item.get('ccoutstandingBalance')?.errors?.['required']">
+                                            Outstanding Balance is required
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-4" *ngIf="!isOtherSelected(item)">
+                                <div class="form-group">
+                                    <app-inputfield type="text" [required]="true" label="Credit Limit (INR)"
+                                        (input)="handleAmountInput($event,'creditcard',item)" [required]="true"
+                                        formControlName="cccreditLimit" placeholder="Enter Value" helpText="Help text"
+                                        name="cccreditLimit">
+                                    </app-inputfield>
+                                    <div class="text-danger"
+                                        *ngIf="item.get('cccreditLimit')?.touched && item.get('cccreditLimit')?.invalid">
+                                        <div *ngIf="item.get('cccreditLimit')?.errors?.['required']">
+                                            Credit Limit is required
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+
+                            <!-- ================= ROW 2 (Only when Other) ================= -->
+
+                            <ng-container *ngIf="isOtherSelected(item)">
+
+                                <div class="col-6 mt-3">
+                                    <div class="form-group">
+                                        <app-inputfield type="text" [required]="true" label="Outstanding Balance (INR)"
+                                            [required]="true" formControlName="ccoutstandingBalance"
+                                            (input)="handleAmountInput($event,'ccoutstandingBalance',item)"
+                                            placeholder="Enter Value" helpText="Help text" name="ccoutstandingBalance">
+                                        </app-inputfield>
+                                        <div class="text-danger"
+                                            *ngIf="item.get('ccoutstandingBalance')?.touched && item.get('ccoutstandingBalance')?.invalid">
+                                            <div *ngIf="item.get('ccoutstandingBalance')?.errors?.['required']">
+                                                Outstanding Balance is required
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-6 mt-3">
+                                    <div class="form-group">
+                                        <app-inputfield type="text" [required]="true" label="Credit Limit (INR)"
+                                            (input)="handleAmountInput($event,'creditcard',item)" [required]="true"
+                                            formControlName="cccreditLimit" placeholder="Enter Value"
+                                            helpText="Help text" name="cccreditLimit">
+                                        </app-inputfield>
+                                        <div class="text-danger"
+                                            *ngIf="item.get('cccreditLimit')?.touched && item.get('cccreditLimit')?.invalid">
+                                            <div *ngIf="item.get('cccreditLimit')?.errors?.['required']">
+                                                Credit Limit is required
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </ng-container>
+                            <!-- <div class="col-lg-4">
+                                <div class="form-group mb-3">
+
+                                    <app-dropdown [options]="selectBanks" formControlName="creditcardbankName"
+                                        [placeholder]="'Select Bank Name'" [required]="true" [searchable]="true"
+                                        [avatarUrl]="avatarUrl" [hasAvatar]="hasAvatar" [label]="'Bank Name'">
+                                    </app-dropdown>
                                     <div class="text-danger"
                                         *ngIf="item.get('creditcardbankName')?.touched && item.get('creditcardbankName')?.invalid">
                                         <div *ngIf="item.get('creditcardbankName')?.errors?.['required']">
@@ -249,8 +443,8 @@
                                 <div class="form-group mb-3">
                                     <app-inputfield type="text" [required]="true" label="Outstanding Balance (INR)"
                                         [required]="true" formControlName="ccoutstandingBalance"
-                                        (input)="handleAmountInput($event,'ccoutstandingBalance',item)" placeholder="Enter Value"
-                                        helpText="Help text" name="ccoutstandingBalance">
+                                        (input)="handleAmountInput($event,'ccoutstandingBalance',item)"
+                                        placeholder="Enter Value" helpText="Help text" name="ccoutstandingBalance">
                                     </app-inputfield>
                                     <div class="text-danger"
                                         *ngIf="item.get('ccoutstandingBalance')?.touched && item.get('ccoutstandingBalance')?.invalid">
@@ -276,7 +470,7 @@
                                     </div>
 
                                 </div>
-                            </div>
+                            </div> -->
 
                         </div>
 
@@ -307,7 +501,7 @@
 
                             <div class="text-dp-3-regular d-flex align-items-center justify-content-between">
                                 BNPL {{ i + 1 }}
-                                <span (click)="removeitem(i,'bnpl')">
+                                <span *ngIf="getFormArray('bnpl').controls.length > 1" (click)="removeitem(i,'bnpl')">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
                                         fill="none">
                                         <path
@@ -337,7 +531,7 @@
                                         [(selectedValue)]="selectedliabilities" [placeholder]="'SelectBank Name'"
                                         [required]="true" (selectedValueChange)="onChange($event)"
                                         formControlName="bnplbankName" [avatarUrl]="avatarUrl" [hasAvatar]="hasAvatar"
-                                        [label]="'Bank Name'">
+                                        [label]="'Lender Name'">
                                     </app-dropdown>
 
                                 </div>
@@ -377,7 +571,7 @@
                             <div class="col-lg-6 mt-20">
                                 <div class="form-group mb-3">
                                     <app-inputfield type="text" [required]="true" label="Monthly EMI (INR)"
-                                       (input)="handleAmountInput($event,'monthlyEMI',item)" [required]="true"
+                                        (input)="handleAmountInput($event,'monthlyEMI',item)" [required]="true"
                                         formControlName="monthlyEMI" placeholder="Enter Value" helpText="Help text"
                                         name="monthlyEMI">
                                     </app-inputfield>
@@ -421,7 +615,7 @@
 
                             <div class="text-dp-3-regular d-flex align-items-center justify-content-between">
                                 Liability {{ i + 1 }}
-                                <span (click)="removeitem(i,'other')">
+                                <span *ngIf="getFormArray('other').controls.length > 1" (click)="removeitem(i,'other')">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
                                         fill="none">
                                         <path
@@ -449,10 +643,16 @@
                             <div class="col">
                                 <div class="form-group mb-3">
                                     <app-inputfield type="text" [required]="true" label="Liability Type"
-                                        [required]="true" formControlName="LiabilityType"
+                                        [required]="true" formControlName="LiabilityType" (input)="main.restrictInput($event,'text')"
                                         placeholder="Enter Liability Type" helpText="Help text" name="bankamt">
                                     </app-inputfield>
+                                     <div class="text-danger"
+                                        *ngIf="item.get('LiabilityType')?.touched && item.get('LiabilityType')?.invalid">
+                                        <div *ngIf="item.get('LiabilityType')?.errors?.['required']">
+                                            Liability Type is required
+                                        </div>
 
+                                    </div>
 
                                 </div>
                             </div>
@@ -466,7 +666,17 @@
 
                                 </div>
                             </div>
-                           
+                             <div class="col">
+                                <div class="form-group mb-3">
+                                    <app-inputfield type="text" [required]="true" label="Monthly Repayment (INR)" [required]="true"
+                                        formControlName="MonthlyRepaymentimit" placeholder="Enter Value" helpText="Help text"
+                                        name="bankamt" (input)="handleAmountInput($event,'MonthlyRepaymentimit',item)">
+                                    </app-inputfield>
+
+
+                                </div>
+                            </div>
+
 
                         </div>
                         @if(i === getFormArray('other').length - 1 ) {

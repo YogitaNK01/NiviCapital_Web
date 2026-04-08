@@ -378,68 +378,68 @@
                         </app-buttons>
                     </div>
                 </div> -->
-               <div class="row d-flex flex-column">
-                        <div class="text-label fw-bold mt-20">Other Documents</div>
-                        <hr class="hrclass">
+                <div class="row d-flex flex-column">
+                    <div class="text-label fw-bold mt-20">Other Documents</div>
+                    <hr class="hrclass">
 
-                        <div class="row">
-                            @for (slot of otherIncomeSlots; track slot.id) {
-
-                            <div class="col-lg-4 col-sm-12 mt-20">
-
-                                @if (handleresponse && getDocumentByKey( slot.key)) {
-
-                                <label class="text-label">
-                                    Other Document {{ slot.id }}
-                                </label>
-
-                                <div class="addcust-img-box mt-2">
-                                    <p class="text-label">
-                                        {{ getDocumentName(slot.key) }}
-                                    </p>
-
-                                    <div class="icons">
-                                        <span class="view" (click)="viewImage(getDocumentUrl(slot.key))">
-                                            <img src="/assets/images/icons/eyered.svg">
-                                        </span>
-
-                                        <span class="download" (click)="downloadImage(getDocumentUrl(slot.key), getDocumentName(slot.key))">
-                                            <img src="/assets/images/icons/import-red.svg">
-                                        </span>
-
-                                        <span class="delete" (click)="deleteImage(slot.key)">
-                                            <img src="/assets/images/icons/close.svg">
-                                        </span>
-                                    </div>
-                                </div>
-
-                                } @else {
-
-
-
-                                <app-uploadbtn [config]="basicConfig"
-                                    (uploadStarted)="onUploadStarted($event,  slot.key,'OTHER' ,'OTHER_INCOME','OTHER')"
-                                    [uploadViaApi]="true" [fileuploadresponse]="handleresponse" [required]="true"
-                                    label="Other Documents">
-                                </app-uploadbtn>
-
-                                }
-
-                            </div>
-                            }
-                        </div>
+                    <div class="row">
+                        @for (slot of otherIncomeSlots; track slot.id) {
 
                         <div class="col-lg-4 col-sm-12 mt-20">
-                            <app-buttons label="Add Other Document" class="btn btn-icon Add btncustomClass"
-                                [outline]="true" (click)="addOtherIncomeDocument()">
-                                <img src="/assets/images/icons/addred.svg">
-                            </app-buttons>
+
+                            @if (handleresponse && getDocumentByKey( slot.key)) {
+
+                            <label class="text-label">
+                                Other Document {{ slot.id }}
+                            </label>
+
+                            <div class="addcust-img-box mt-2">
+                                <p class="text-label">
+                                    {{ getDocumentName(slot.key) }}
+                                </p>
+
+                                <div class="icons">
+                                    <span class="view" (click)="viewImage(getDocumentUrl(slot.key))">
+                                        <img src="/assets/images/icons/eyered.svg">
+                                    </span>
+
+                                        <span class="download" (click)="downloadImage(getDocumentUrl(slot.key), getDocumentName(slot.key))">
+                                        <img src="/assets/images/icons/import-red.svg">
+                                    </span>
+
+                                    <span class="delete" (click)="deleteImage(slot.key)">
+                                        <img src="/assets/images/icons/close.svg">
+                                    </span>
+                                </div>
+                            </div>
+
+                            } @else {
+
+
+
+                            <app-uploadbtn [config]="basicConfig"
+                                (uploadStarted)="onUploadStarted($event,  slot.key,'OTHER' ,'OTHER_INCOME','OTHER')"
+                                [uploadViaApi]="true" [fileuploadresponse]="handleresponse" [required]="true"
+                                label="Other Documents">
+                            </app-uploadbtn>
+
+                            }
+
                         </div>
+                        }
                     </div>
 
+                    <div class="col-lg-4 col-sm-12 mt-20">
+                            <app-buttons label="Add Other Document" class="btn btn-icon Add btncustomClass"
+                                [outline]="true" (click)="addOtherIncomeDocument()">
+                            <img src="/assets/images/icons/addred.svg">
+                        </app-buttons>
+                    </div>
+                </div>
 
 
-               
+
+
             </div>
 
             <!-- if bussiness -->
@@ -728,8 +728,6 @@
                     </div>
 
 
-                   
-
                     <div class="row d-flex flex-column">
                         <div class="text-label fw-bold mt-20">Other Documents</div>
                         <hr class="hrclass">
@@ -737,58 +735,77 @@
                         <div class="row">
                             @for (slot of otherBusinessSlots; track slot.id) {
 
-                            <div class="col-lg-4 col-sm-12 mt-20">
+                            <div class="row mt-20 row  d-flex  align-items-start ">
 
-                                @if (handleresponse && getDocumentByKey( slot.key)) {
 
-                                <label class="text-label">
-                                    Other Document {{ slot.id }}
-                                </label>
+                                <div class="col-lg-4 col-sm-12">
 
-                                <div class="addcust-img-box mt-2">
-                                    <p class="text-label">
-                                        {{ getDocumentName(slot.key) }}
-                                    </p>
+                                    <app-inputfield label="Title" [required]="true" placeholder="Enter text here" [(ngModel)]="newOtherBusinessTitle" [ngModelOptions]="{ standalone: true }"
+                                        (input)="main.restrictInput($event, 'text');onTitleInput($event)" [maxlength]="25">
+                                    </app-inputfield>
 
-                                    <div class="icons">
-                                        <span class="view" (click)="viewImage(getDocumentUrl(slot.key))">
-                                            <img src="/assets/images/icons/eyered.svg">
-                                        </span>
+                                    <div class="text-danger" *ngIf="f['assettitle'].touched && f['assettitle'].invalid">
 
-                                        <span class="download" (click)="downloadImage(getDocumentUrl(slot.key), getDocumentName(slot.key))">
-                                            <img src="/assets/images/icons/import-red.svg">
-                                        </span>
-
-                                        <span class="delete" (click)="deleteImage(slot.key)">
-                                            <img src="/assets/images/icons/close.svg">
-                                        </span>
+                                        <div *ngIf="f['title'].errors?.['minlength']">
+                                            Minimum 2 characters required
+                                        </div>
                                     </div>
                                 </div>
 
-                                } @else {
 
 
+                                <div class="col-lg-4 col-sm-12 ">
 
-                                <app-uploadbtn [config]="basicConfig"
-                                    (uploadStarted)="onUploadStarted($event,  slot.key,'BUSINESS' ,'OTHER_INCOME','OTHER')"
-                                    [uploadViaApi]="true" [fileuploadresponse]="handleresponse" [required]="true"
-                                    label="Other Documents">
-                                </app-uploadbtn>
+                                    @if (handleresponse && getDocumentByKey(slot.key)) {
 
-                                }
+                                    <div class="addcust-img-box mt-4">
+                                        <p class="text-label">
+                                            {{ getDocumentName(slot.key) }}
+                                        </p>
+
+                                        <div class="icons">
+                                            <span class="view" (click)="viewImage(getDocumentUrl(slot.key))">
+                                                <img src="/assets/images/icons/eyered.svg">
+                                            </span>
+                                            <span class="download"
+                                                (click)="downloadImage(getDocumentUrl(slot.key),getDocumentName(slot.key))">
+                                                <img src="/assets/images/icons/import-red.svg">
+                                            </span>
+                                            <span class="delete" (click)="deleteImage(slot.key)">
+                                                <img src="/assets/images/icons/close.svg">
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    }
+                                    @else {
+
+
+                                    <app-uploadbtn label="Other Documents" [config]="basicConfig" [required]="true"
+                                        [uploadViaApi]="true" [fileuploadresponse]="handleresponse"
+                                        (uploadStarted)="onUploadStarted($event, newOtherBusinessTitle,'BUSINESS', 'OTHER_INCOME', 'OTHER', slot.title)">
+                                    </app-uploadbtn>
+
+                                    }
+
+                                </div>
+
+
+                                <div class="col-lg-4 d-none d-lg-block"></div>
 
                             </div>
+
                             }
                         </div>
 
+                        <!-- Add button -->
                         <div class="col-lg-4 col-sm-12 mt-20">
                             <app-buttons label="Add Other Document" class="btn btn-icon Add btncustomClass"
                                 [outline]="true" (click)="addOtherBusinessDocument()">
-                                <img src="/assets/images/icons/addred.svg">
+
                             </app-buttons>
                         </div>
                     </div>
-
 
                 </div>
             </div>
@@ -809,7 +826,7 @@
         </app-buttons>
         <app-buttons type="button" label="Next" class="btn btncustomClass" color="primary" (click)="next()"
             [disabled]="!allRequiredFilesUploaded">
-        </app-buttons>
+                </app-buttons>
 
     </div>
 </div>

@@ -9,6 +9,18 @@ import { Loanformservice } from '../../../../core/service/loanformservice';
 import { Loanstepperservice } from '../../../../core/service/loanstepperservice';
 import { Main } from '../../../../core/service/main';
 import { Msgboxservice } from '../../../../core/service/msgboxservice';
+import { Title } from '@angular/platform-browser';
+
+interface BankOption {
+  value: string;
+  label: string;
+}
+interface LiabilityOption {
+  code: string;
+  name: string;
+  id: string;
+  displayOrder?: number;
+}
 
 @Component({
   selector: 'app-liabilitiesinfo',
@@ -40,6 +52,7 @@ export class Liabilitiesinfo {
     // { label: 'Other Liabilities', value: 'OtherLiabilities', icon: '' },
   ];
   selectedliabilities: string[] = [];
+  selectedliabilities1: LiabilityOption[] = [];
   selectedlibilitiesIds: string[] = [];
   selectedliabilityLabel = ''
   liabilityForm!: FormGroup;
@@ -66,8 +79,10 @@ export class Liabilitiesinfo {
   totalother = 0;
   totalINRamt: any;
 
-  selectBanks=[];
+  selectBanks: BankOption[] = [];
   selectedbankIds: string[] = [];
+
+  selectedbakname!: string;
 
   constructor(private fb: FormBuilder, public main: Main, private route: ActivatedRoute, private msgBox: Msgboxservice,
     private stepperService: Loanstepperservice, private formSvc: Loanformservice, private cd: ChangeDetectorRef) { }
@@ -178,7 +193,8 @@ export class Liabilitiesinfo {
       bankname: ['', Validators.required],
       outstanding: ['', Validators.required],
       emiamount: ['', Validators.required],
-      remtenure: ['', Validators.required]
+      remtenure: ['', Validators.required],
+      title: ['']
     });
   }
 
@@ -186,6 +202,7 @@ export class Liabilitiesinfo {
   createCreditcard(): FormGroup {
     return this.fb.group({
       creditcardbankName: ['', Validators.required],
+      title: [''],
       ccoutstandingBalance: ['', Validators.required],
       cccreditLimit: ['', Validators.required],
     });
@@ -250,17 +267,51 @@ export class Liabilitiesinfo {
 
   }
 
-   getbanks(){
- this.formSvc.getallBanks().subscribe((res: any) => {
-        const list = res.data ?? res;
+  getbanks() {
+    this.formSvc.getallBanks().subscribe((res: any) => {
+      const list = res.data ?? res;
 
-        this.selectBanks = list.map((s: any) => ({
-          value: s.id,
-          label: s.name,
-          code: s.code
-        }));
+      this.selectBanks = list.map((s: any) => ({
+        value: s.id,
+        label: s.name,
+        code: s.code
+      }));
 
-      });
+    });
+  }
+
+  onBankSelected(selectedId: any, fd: AbstractControl) {
+    const fg = fd as FormGroup;
+
+    const found = this.selectBanks.find(
+      (b: BankOption) => b.value === selectedId
+    );
+    const bankLabel = found?.label ?? '';
+    this.selectedbakname = bankLabel;
+
+    const titleCtrl = fg.get('title');
+
+    if (bankLabel === 'Other') {
+      titleCtrl?.setValidators([Validators.required]);
+    } else {
+      titleCtrl?.clearValidators();
+      titleCtrl?.setValue('');
+    }
+
+    titleCtrl?.updateValueAndValidity();
+  }
+
+
+  isOtherSelected(fd: AbstractControl): boolean {
+    const selectedId = fd.get('bankname')?.value;
+    const found = this.selectBanks.find(b => b.value === selectedId);
+    return found?.label === 'Other';
+  }
+
+  isOtherSelected1(fd: AbstractControl): boolean {
+    const selectedId = fd.get('creditcardbankName')?.value;
+    const found = this.selectBanks.find(b => b.value === selectedId);
+    return found?.label === 'Other';
   }
 
   toggle(index: number) {
@@ -293,31 +344,58 @@ export class Liabilitiesinfo {
   }
 
   removeAccordion(key: string, index: number, event: Event) {
+    this.msgBox.open({
+      title: 'Are you sure want to Remove',
+      message: '',
+      showCancel: true,
+      onOk: () => {
+        event.stopPropagation();
 
-    event.stopPropagation();
+        this.selectedliabilities =
+          this.selectedliabilities.filter(k => k !== key);
 
-    this.selectedliabilities =
-      this.selectedliabilities.filter(k => k !== key);
+        this.openIndex =
+          this.openIndex.filter(i => i !== index);
 
-    this.openIndex =
-      this.openIndex.filter(i => i !== index);
+        const map: any = {
+          CreditCardOutstanding: 'creditcard',
+          BuyNowPayLater: 'bnpl',
+          OtherLiabilities: 'other'
+        };
 
-    const map: any = {
-      CreditCardOutstanding: 'creditcard',
-      BuyNowPayLater: 'bnpl',
-      OtherLiabilities: 'other'
-    };
+        const control = this.liabilityForm.get(map[key]);
 
-    const control = this.liabilityForm.get(map[key]);
+        if (control instanceof FormArray) {
+          control.clear();
+          control.push(this.createEmptyRow(map[key]));
+        }
+        switch (key) {
 
-    if (control instanceof FormArray) {
-      control.clear();
-      control.push(this.createEmptyRow(map[key]));
-    }
 
+          case 'loans':
+            this.loans.clear();
+           break;
+
+          case 'creditcard':
+            this.creditcard.clear();
+            this.creditcard.push(this.createCreditcard());
+            break;
+
+          case 'bnpl':
+            this.bnpl.clear();
+            this.bnpl.push(this.createBNPL());
+            break;
+
+          case 'other':
+            this.other.clear();
+            this.other.push(this.createOther());
+            break;
+        }
+      }
+    });
   }
 
-  removeitem(index: number, type: 'loantype' | 'creditcard' | 'bnpl' | 'other') {
+  removeitem1(index: number, type: 'loantype' | 'creditcard' | 'bnpl' | 'other') {
 
 
     this.msgBox.open({
@@ -359,6 +437,66 @@ export class Liabilitiesinfo {
     });
   }
 
+    removeitem(index: number, type: 'loantype' | 'creditcard' | 'bnpl' | 'other') {
+    this.msgBox.open({
+      title: 'Are you sure want to Remove',
+      message: '',
+      showCancel: true,
+      onOk: () => {
+        switch (type) {
+          case 'loantype':
+            this.loans.removeAt(index);
+            break;
+          case 'creditcard':
+            this.creditcard.removeAt(index);
+            break;
+          case 'bnpl':
+            this.bnpl.removeAt(index);
+            break;
+             case 'other':
+            this.other.removeAt(index);
+            break;
+        }
+        this.handleEmptyAccordion(type);
+        this.calculateGrandTotal();  // Recalc total
+      }
+    });
+  }
+   handleEmptyAccordion(type: 'loantype' | 'creditcard' | 'bnpl' | 'other') {
+    let array: FormArray;
+    let accKey: string;
+
+    switch (type) {
+      case 'loantype':
+        array = this.loans;
+        accKey = 'Property/Land Assets';  // Match your acc.key
+        break;
+      case 'creditcard':
+        array = this.creditcard;
+        accKey = 'Credit Card';  // Match acc.key
+        break;
+      case 'bnpl':
+        array = this.bnpl;
+        accKey = 'Buy Now Pay Later';  // Match acc.key
+        break;
+      case 'other':
+        array = this.other;
+        accKey = 'other';  // Match acc.key (lowercase from template)
+        break;
+    }
+
+    if (array && array.length === 0) {
+      // Remove from selectedliabilities → hides *ngIf accordion
+      this.selectedliabilities = this.selectedliabilities.filter(k => k !== accKey);
+      this.selectedliabilities = [...this.selectedliabilities];  // Trigger change detection
+
+      // Close accordion
+      const accIndex = this.accordions.findIndex(a => a.key === accKey);
+      if (accIndex !== -1) {
+        this.openIndex = this.openIndex.filter(i => i !== accIndex);
+      }
+    }
+  }
   alllibilitiy_type() {
     this.formSvc.getAllLiabilities().subscribe((res: any) => {
       const list = res.data ?? res;
@@ -377,22 +515,25 @@ export class Liabilitiesinfo {
         (a: any, b: any) =>
           this.liabilityOrder.indexOf(a) - this.liabilityOrder.indexOf(b)
       );
-      this.liabilitiesCatagories = uniqueGroups.map((a: any) => ({
+      this.liabilitiesCatagories = list.map((a: any) => ({
         value: a,
-        label: this.formatTitle(a),
+        label: a.name,//this.formatTitle(a),
         code: a
       }));
 
-      this.accordions = sortedGroups.map((group: any) => ({
-        title: this.accordianTitle(group),
+      this.accordions = list.map((group: any) => ({
+        // title: group.name ,
+        title: this.accordianTitle(group.code),
         alwaysOpen: true,
         key: group
       }));
       this.liabilityCodeMap = list.reduce((acc: any, item: any) => {
-        acc[item.code] = item.id;
+        acc[item.code] = item.code;
         return acc;
       }, {});
-      this.patchLiabilitiesData();
+      console.log("this.liabilityCodeMap--", this.liabilityCodeMap);
+
+      // this.patchLiabilitiesData();
     });
   }
 
@@ -458,9 +599,9 @@ export class Liabilitiesinfo {
   calculateGrandTotal() {
 
     this.totalloans = this.calculateTotal('loans', 'outstanding');
-    this.totalcc = this.calculateTotal('creditcard', 'ccoutstandingBalance');
-    this.totalbnpl = this.calculateTotal('bnpl', 'outstandingBalance');
-    this.totalother = this.calculateTotal('other', 'amount');
+    this.totalcc = this.calculateTotal('creditcard', 'ccoutstandingBalance') + this.calculateTotal('creditcard', 'cccreditLimit');
+    this.totalbnpl = this.calculateTotal('bnpl', 'outstandingBalance') + this.calculateTotal('bnpl', 'creditLimit') + this.calculateTotal('bnpl', 'monthlyEMI');
+    this.totalother = this.calculateTotal('other', 'amount') + this.calculateTotal('other', 'MonthlyRepaymentLimit');
 
     const total =
       this.totalloans +
@@ -499,9 +640,86 @@ export class Liabilitiesinfo {
 
 
   }
+  formatIndian(x: string): string {
+    const parts = x.split('.');
+    const integerPart = parts[0];
+    const decimalPart = parts[1] ? '.' + parts[1].substring(0, 2) : '';
+
+    if (!integerPart || integerPart === '0') return '0' + decimalPart;
+
+    const bigIntValue = BigInt(integerPart);
+    let str = bigIntValue.toString();
+    let length = str.length;
+
+    let groups: string[] = [];
+
+    let lastGroup = str.substring(Math.max(0, length - 3), length);
+    groups.unshift(lastGroup);
+
+    let remaining = str.substring(0, Math.max(0, length - 3));
+    for (let i = remaining.length; i > 0; i -= 2) {
+      let start = Math.max(0, i - 2);
+      let group = remaining.substring(start, i).replace(/^0+/, '') || '0';
+      groups.unshift(group);
+    }
+
+    return groups.join(',') + decimalPart;
+  }
+
+
+
+  // Updated formatAmount - SAFE FOR LARGE NUMBERS
+  formatAmount(event: any, controlName: string) {
+    let value = event.target.value;
+    if (!value) {
+      this.liabilityForm.get(controlName)?.setValue('');
+      return;
+    }
+
+    value = value.replace(/,/g, '');
+    value = value.replace(/[^0-9.]/g, '');
+    const parts = value.split('.');
+    if (parts.length > 2) {
+      value = parts[0] + '.' + parts.slice(1).join('');
+    }
+
+    const decimalIndex = value.indexOf('.');
+    if (decimalIndex !== -1 && value.length - decimalIndex > 3) {
+      value = value.substring(0, decimalIndex + 3);
+    }
+
+    const formatted = this.formatIndian(value);
+    this.liabilityForm.get(controlName)?.setValue(formatted, { emitEvent: false });
+  }
+
+  // Updated formatAmountfromarray
+  formatAmountfromarray(event: any, controlName: string, control: AbstractControl) {
+    let value = event.target.value;
+    if (!value) return;
+
+    // Same cleaning logic
+    value = value.replace(/,/g, '').replace(/[^0-9.]/g, '');
+    const parts = value.split('.');
+    if (parts.length > 2) {
+      value = parts[0] + '.' + parts.slice(1).join('');
+    }
+
+    const decimalIndex = value.indexOf('.');
+    if (decimalIndex !== -1 && value.length - decimalIndex > 3) {
+      value = value.substring(0, decimalIndex + 3);
+    }
+
+    const formatted = this.formatIndian(value);
+
+    if (control && (control as FormGroup)?.get(controlName)) {
+      (control as FormGroup).get(controlName)?.setValue(formatted, { emitEvent: false });
+    } else {
+      this.liabilityForm.get(controlName)?.setValue(formatted, { emitEvent: false });
+    }
+  }
 
   //format amount 2000000 to 20,00,000
-  formatAmount(event: any, controlName: string) {
+  formatAmount1(event: any, controlName: string) {
     let value = event.target.value;
     if (!value) return;
     value = value.replace(/,/g, '');
@@ -521,7 +739,7 @@ export class Liabilitiesinfo {
 
   }
 
-  formatAmountfromarray(event: any, controlName: string, control: AbstractControl) {
+  formatAmountfromarray1(event: any, controlName: string, control: AbstractControl) {
     const group = control as FormGroup;
     let value = event.target.value;
 
@@ -553,7 +771,7 @@ export class Liabilitiesinfo {
   }
 
 
-  formatIndian(x: string): string {
+  formatIndian1(x: string): string {
     return new Intl.NumberFormat('en-IN').format(Number(x));
   }
   patchLiabilitiesData() {
@@ -685,7 +903,9 @@ export class Liabilitiesinfo {
     };
 
     //  EXISTING LOANS
-    if (this.selectedliabilities.includes('ExistingLoans')) {
+    // if (this.selectedliabilities.includes('EXISTING_LOAN')) {
+        if (this.selectedliabilities.some((l: any) => l.code === 'EXISTING_LOAN')) {
+
       if (this.loans.length === 0) {
         invalid = true;
       }
@@ -696,18 +916,19 @@ export class Liabilitiesinfo {
           invalid = true;
         } else {
           items.push({
-            type: loan.value.type,
+            liabilityType: "EXISTING_LOAN",
             bankName: loan.value.bankname,
-            outstanding: Number(loan.value.outstanding),
-            emi: Number(loan.value.emiamount),
-            tenure: loan.value.remtenure
+            ...(this.isOtherSelected(loan) && { title: loan.value.title }),
+            outstandingBalanceInr: Number(loan.value.outstanding),
+            emiAmountInr: Number(loan.value.emiamount),
+            remainingTenureMonths: loan.value.remtenure
           });
         }
       });
     }
 
     //  CREDIT CARD
-    if (this.selectedliabilities.includes('CreditCardOutstanding')) {
+    if (this.selectedliabilities.some((l: any) => l.code === 'CREDIT_CARD_OUTSTANDING')) {
       if (this.creditcard.length === 0) invalid = true;
 
       this.creditcard.controls.forEach((card: any) => {
@@ -716,17 +937,22 @@ export class Liabilitiesinfo {
           invalid = true;
         } else {
           items.push({
-            type: 'CREDIT_CARD',
+            liabilityType: 'CREDIT_CARD_OUTSTANDING',
             bankName: card.value.creditcardbankName,
-            outstanding: Number(card.value.ccoutstandingBalance),
-            limit: Number(card.value.creditLimit)
+            ...(this.isOtherSelected(card) && { title: card.value.title }),
+            outstandingBalanceInr: Number(card.value.ccoutstandingBalance),
+            creditLimitInr: Number(card.value.cccreditLimit)
           });
         }
       });
     }
 
+
+
+
     //  BNPL
-    if (this.selectedliabilities.includes('BuyNowPayLater')) {
+    // if (this.selectedliabilities.includes('BNPL')) {
+        if (this.selectedliabilities.some((l: any) => l.code === 'BNPL')) {
       if (this.bnpl.length === 0) invalid = true;
 
       this.bnpl.controls.forEach((bnpl: any) => {
@@ -735,18 +961,18 @@ export class Liabilitiesinfo {
           invalid = true;
         } else {
           items.push({
-            type: 'BNPL',
+            liabilityType: 'BNPL',
             bankName: bnpl.value.bnplbankName,
-            outstanding: Number(bnpl.value.outstandingBalance),
-            limit: Number(bnpl.value.creditLimit),
-            emi: Number(bnpl.value.monthlyEMI)
+            outstandingBalanceInr: Number(bnpl.value.outstandingBalance),
+            creditLimitInr: Number(bnpl.value.creditLimit),
+            monthlyEmiInr: Number(bnpl.value.monthlyEMI)
           });
         }
       });
     }
 
     //  OTHER
-    if (this.selectedliabilities.includes('OtherLiabilities')) {
+        if (this.selectedliabilities.some((l: any) => l.code === 'OTHER_LIABILITY')) {
       if (this.other.length === 0) invalid = true;
 
       this.other.controls.forEach((other: any) => {
@@ -755,9 +981,10 @@ export class Liabilitiesinfo {
           invalid = true;
         } else {
           items.push({
-            type: other.value.LiabilityType,
-            amount: Number(other.value.amount),
-            emi: Number(other.value.MonthlyRepaymentimit)
+            liabilityType: "OTHER_LIABILITY",
+            liabilityTypeText: other.value.LiabilityType,
+            amountInr: Number(other.value.amount),
+            monthlyRepaymentInr: Number(other.value.MonthlyRepaymentimit)
           });
         }
       });
@@ -774,7 +1001,7 @@ export class Liabilitiesinfo {
 
 
 
-    this.formSvc.getAssets(payload, this.applicationId).pipe().subscribe({
+    this.formSvc.submitliability(payload, this.applicationId).pipe().subscribe({
       next: (res) => {
         console.log("resp---", res);
         if (res.status == "success") {

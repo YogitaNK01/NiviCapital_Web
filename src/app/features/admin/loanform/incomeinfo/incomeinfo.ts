@@ -72,9 +72,10 @@ export class Incomeinfo {
   otherdoc: boolean = false;
 
 
-  otherIncomeSlots: { id: number; key: string }[] = [];
-  otherBusinessSlots: { id: number; key: string }[] = [];
+  otherIncomeSlots: { id: number; key: string,title: string }[] = [];
+  otherBusinessSlots: { id: number; key: string,title: string }[] = [];
   private slotCounter = 0;
+newOtherBusinessTitle: string = '';
 
 
   constructor(private fb: FormBuilder, private stepperService: Loanstepperservice, private cd: ChangeDetectorRef, private msgBox: Msgboxservice, public loanformservice: Loanformservice, private route: ActivatedRoute, public main: Main) { }
@@ -149,10 +150,11 @@ export class Incomeinfo {
     });
   }
 
-  onUploadStarted(result: UploadResult, key: string, category: 'INCOME' | 'BUSINESS' | 'OTHER',
+  onUploadStarted(
+    result: UploadResult, key: string, category: 'INCOME' | 'BUSINESS' | 'OTHER',
     subcategory: 'LAST_3_MONTHS' | 'FORM_16' | 'BANK_STATEMENT_1_YEAR' | 'ITR_LAST_3_YEARS' | 'OTHER_INCOME' | 'BUSINESS_BANK_STATEMENT_1_YEAR' | 'BUSINESS_ITR_3_YEARS' | 'BUSINESS_GST_1_YEAR' | 'BUSINESS_FINANCE_3_YEARS' | 'OTHER_BUSSINESS_INCOME',
     type: 'SALARY_SLIP' | 'FORM_16' | 'BANK_STATEMENT' | 'ITR' | 'OTHER' | 'BUSINESS_BANK_STATEMENT' | 'BUSINESS_ITR' | 'BUSINESS_GST' | 'BUSINESS_FINANCE',
-    index?: any) {
+    othertitle?: any) {
 
     if (!result.file) return;
 
@@ -337,24 +339,37 @@ export class Incomeinfo {
 
   submit() { }
 
+  onTitleInput(event: any) {
+const value = (event.target as HTMLInputElement).value;
+  this.newOtherBusinessTitle = value;
+
+}
+
   addOtherIncomeDocument(): void {
     const id = ++this.slotCounter;
 
     this.otherIncomeSlots.push({
       id,
       key: `other_income_${id}`,
+      title: `Other Document ${id}`
 
     });
   }
 
   addOtherBusinessDocument(): void {
-    const id = ++this.slotCounter;
+    
+//  if (!this.newOtherBusinessTitle?.trim()) {
+//     return; 
+//   }
 
+    const id = ++this.slotCounter;
     this.otherBusinessSlots.push({
       id,
       key: `other_business_${id}`,
+      title: `other_business_${id}`
 
     });
+    // this.newOtherBusinessTitle = '';
   }
 
 
@@ -366,35 +381,6 @@ export class Incomeinfo {
       doc.type === key
     ) || null;
   }
-
-  // restore again
-
-  restoreSlotsFromDocuments(): void {
-
-    // BUSINESS OTHER DOCS
-    const businessDocs = this.allDocuments.filter(doc =>
-      doc.title?.startsWith('other_business_')
-    );
-
-    this.otherBusinessSlots = businessDocs.map((doc, index) => ({
-      id: index + 1,
-      key: doc.title
-    }));
-
-    // INCOME OTHER DOCS
-    const incomeDocs = this.allDocuments.filter(doc =>
-      doc.title?.startsWith('other_income_')
-    );
-
-    this.otherIncomeSlots = incomeDocs.map((doc, index) => ({
-      id: index + 1,
-      key: doc.title
-    }));
-
-    this.slotCounter =
-      this.otherBusinessSlots.length + this.otherIncomeSlots.length;
-  }
-
 
 
   back() {

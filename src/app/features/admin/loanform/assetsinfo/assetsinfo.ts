@@ -307,10 +307,10 @@ export class Assetsinfo implements OnInit {
             break;
 
           case 'Property/Land Assets':
-            this.properties.clear(); 
+            this.properties.clear();
             this.selectedPropertyIds = [];
             this.properties.push(this.createProperty());
-           
+
             break;
 
           case 'Fixed Deposit':
@@ -333,25 +333,31 @@ export class Assetsinfo implements OnInit {
   }
 
   resetGold() {
-  this.assetsForm.setControl(
-    'gold',
-    this.fb.group({
-      goldvalue: ['', Validators.required]
-    })
-  );
-}
+    this.assetsForm.setControl(
+      'gold',
+      this.fb.group({
+        goldvalue: ['', Validators.required]
+      })
+    );
+  }
 
-resetLiquidAssets() {
-  this.assetsForm.setControl(
-    'liquidAssets',
-    this.fb.group({
-      cashinhand: ['', Validators.required],
-      savingbalance: ['', Validators.required]
-    })
-  );
-}
+  resetLiquidAssets() {
+    this.assetsForm.setControl(
+      'liquidAssets',
+      this.fb.group({
+        cashinhand: ['', Validators.required],
+        savingbalance: ['', Validators.required]
+      })
+    );
+  }
   handleAmountInput(event: any, controlName: string, ctrl?: any) {
-    this.main.restrictInput(event, 'decimal');
+    const fg = ctrl as FormGroup;
+    const type: string = fg.get('type')?.value || '';
+    const isMutualFund = type.toLowerCase().includes('mutual fund');
+    const decimalLimit = isMutualFund ? 4 : 2;
+
+    this.main.restrictInput(event, 'decimal', decimalLimit);
+    // this.main.restrictInput(event, 'decimal')
     if (ctrl) {
       this.formatAmountfromarray(event, controlName, ctrl);
     } else {
@@ -450,7 +456,8 @@ resetLiquidAssets() {
       return;
     }
 
-    value = value.replace(/,/g, '').replace(/[^0-9.]/g, '');
+    value = value.replace(/,/g, '');
+    value = value.replace(/[^0-9.]/g, '');
     const parts = value.split('.');
     if (parts.length > 2) {
       value = parts[0] + '.' + parts.slice(1).join('');
@@ -673,7 +680,7 @@ resetLiquidAssets() {
     // else if (type === 'investment') {
     //   this.selectedInvestmentIds = ids;
     // }
-   
+
     else {
       this.selectedownertype = ids;
     }
@@ -752,59 +759,59 @@ resetLiquidAssets() {
       }
     });
   }
-removeitem(index: number, type: 'property' | 'fd' | 'other') {
-  this.msgBox.open({
-    title: 'Are you sure want to Remove',
-    message: '',
-    showCancel: true,
-    onOk: () => {
-      switch (type) {
-        case 'property':
-          this.properties.removeAt(index);
-          break;
-        case 'fd':
-          this.fixedDeposits.removeAt(index);
-          break;
-        case 'other':
-          this.otherassets.removeAt(index);
-          break;
+  removeitem(index: number, type: 'property' | 'fd' | 'other') {
+    this.msgBox.open({
+      title: 'Are you sure want to Remove',
+      message: '',
+      showCancel: true,
+      onOk: () => {
+        switch (type) {
+          case 'property':
+            this.properties.removeAt(index);
+            break;
+          case 'fd':
+            this.fixedDeposits.removeAt(index);
+            break;
+          case 'other':
+            this.otherassets.removeAt(index);
+            break;
+        }
+        this.handleEmptyAccordion(type);
+        this.calculateGrandTotal();  // Recalc total
       }
-      this.handleEmptyAccordion(type);
-      this.calculateGrandTotal();  // Recalc total
-    }
-  });
-}
-handleEmptyAccordion(type: 'property' | 'fd' | 'other') {
-  let array: FormArray;
-  let accKey: string;
-
-  switch (type) {
-    case 'property':
-      array = this.properties;
-      accKey = 'Property/Land Assets';  // Match your acc.key
-      break;
-    case 'fd':
-      array = this.fixedDeposits;
-      accKey = 'Fixed Deposit';  // Match acc.key
-      break;
-    case 'other':
-      array = this.otherassets;
-      accKey = 'other';  // Match acc.key (lowercase from template)
-      break;
+    });
   }
+  handleEmptyAccordion(type: 'property' | 'fd' | 'other') {
+    let array: FormArray;
+    let accKey: string;
 
-  if (array && array.length === 0) {
-    // Remove from selectedAssets → hides *ngIf accordion
-    this.selectedAssets = this.selectedAssets.filter(k => k !== accKey);
-    this.selectedAssets = [...this.selectedAssets];  // Trigger change detection
+    switch (type) {
+      case 'property':
+        array = this.properties;
+        accKey = 'Property/Land Assets';  // Match your acc.key
+        break;
+      case 'fd':
+        array = this.fixedDeposits;
+        accKey = 'Fixed Deposit';  // Match acc.key
+        break;
+      case 'other':
+        array = this.otherassets;
+        accKey = 'other';  // Match acc.key (lowercase from template)
+        break;
+    }
 
-    // Close accordion
-    const accIndex = this.accordions.findIndex(a => a.key === accKey);
-    if (accIndex !== -1) {
-      this.openIndex = this.openIndex.filter(i => i !== accIndex);
+    if (array && array.length === 0) {
+      // Remove from selectedAssets → hides *ngIf accordion
+      this.selectedAssets = this.selectedAssets.filter(k => k !== accKey);
+      this.selectedAssets = [...this.selectedAssets];  // Trigger change detection
+
+      // Close accordion
+      const accIndex = this.accordions.findIndex(a => a.key === accKey);
+      if (accIndex !== -1) {
+        this.openIndex = this.openIndex.filter(i => i !== accIndex);
+      }
     }
   }
-}
 
   calculateGrandTotal() {
 
@@ -858,7 +865,7 @@ handleEmptyAccordion(type: 'property' | 'fd' | 'other') {
       if (!hasLiquidData) return true;
     }
 
-  
+
     if (this.selectedAssets.includes('Property/Land Assets') && this.properties.length === 0) return true;
 
     if (this.selectedAssets.includes('Fixed Deposit') && this.fixedDeposits.length === 0) return true;
@@ -888,33 +895,33 @@ handleEmptyAccordion(type: 'property' | 'fd' | 'other') {
 
     });
   }
- onBankSelected(selectedId: any, fd: AbstractControl) {
-  const fg = fd as FormGroup;
+  onBankSelected(selectedId: any, fd: AbstractControl) {
+    const fg = fd as FormGroup;
 
-  const found = this.selectBanks.find(
-    (b: BankOption) => b.value === selectedId
-  );
-  const bankLabel = found?.label ?? '';
-  this.selectedbakname = bankLabel;
+    const found = this.selectBanks.find(
+      (b: BankOption) => b.value === selectedId
+    );
+    const bankLabel = found?.label ?? '';
+    this.selectedbakname = bankLabel;
 
-  const titleCtrl = fg.get('title');
+    const titleCtrl = fg.get('title');
 
-  if (bankLabel === 'Other') {
-    titleCtrl?.setValidators([Validators.required]);
-  } else {
-    titleCtrl?.clearValidators();
-    titleCtrl?.setValue('');
+    if (bankLabel === 'Other') {
+      titleCtrl?.setValidators([Validators.required]);
+    } else {
+      titleCtrl?.clearValidators();
+      titleCtrl?.setValue('');
+    }
+
+    titleCtrl?.updateValueAndValidity();
   }
 
-  titleCtrl?.updateValueAndValidity();
-}
 
-
-isOtherSelected(fd: AbstractControl): boolean {
-  const selectedId = fd.get('bankname')?.value;
-  const found = this.selectBanks.find(b => b.value === selectedId);
-  return found?.label === 'Other';
-}
+  isOtherSelected(fd: AbstractControl): boolean {
+    const selectedId = fd.get('bankname')?.value;
+    const found = this.selectBanks.find(b => b.value === selectedId);
+    return found?.label === 'Other';
+  }
 
 
 
@@ -1138,7 +1145,7 @@ isOtherSelected(fd: AbstractControl): boolean {
           } else {
             addItem('FIXED_DEPOSIT', ctrl.value.bankamt, {
               bankName: ctrl.value.bankname,
-               ...(this.isOtherSelected(ctrl) && { title: ctrl.value.title }),
+              ...(this.isOtherSelected(ctrl) && { title: ctrl.value.title }),
               maturityDate: (ctrl.value.maturitydate).format('YYYY-MM-DD')
             });
           }

@@ -104,8 +104,12 @@
                 <div class="row common-details-box d-flex flex-row " formGroupName="gold">
                     <div class="col">
                         <div class="form-group mb-3">
-                            <app-inputfield type="text" [required]="true" label="Value INR" [required]="true"
+                            <!-- <app-inputfield type="text" [required]="true" label="Value INR" [required]="true"
                                 (input)="handleAmountInput($event,'gold.goldvalue')" formControlName="goldvalue"
+                                placeholder="Enter Value" helpText="Help text" name="goldvalue">
+                            </app-inputfield> -->
+                              <app-inputfield type="text" [required]="true" label="Value INR" [required]="true"
+                                (input)=" main.restrictInput($event, 'decimal');formatAmount($event,'gold.goldvalue')" formControlName="goldvalue"
                                 placeholder="Enter Value" helpText="Help text" name="goldvalue">
                             </app-inputfield>
 
@@ -132,7 +136,7 @@
                         <div class="form-group mb-3">
                             <app-inputfield type="text" [required]="true" label="Cash In Hand (INR)" [required]="true"
                                 formControlName="cashinhand" placeholder="Enter Value" helpText="Help text"
-                                (input)="handleAmountInput($event,'liquidAssets.cashinhand')" name="cashinhand">
+                                (input)="main.restrictInput($event, 'decimal');formatAmount($event,'liquidAssets.cashinhand')" name="cashinhand">
                             </app-inputfield>
                             <div class="text-danger"
                                 *ngIf="control('liquidAssets.cashinhand')?.touched && control('liquidAssets.cashinhand')?.invalid">
@@ -147,7 +151,7 @@
                         <div class="form-group mb-3">
                             <app-inputfield type="text" label="Savings Account Balance (INR)" [required]="true"
                                 placeholder="Enter Value" formControlName="savingbalance"
-                                (input)="handleAmountInput($event,'liquidAssets.savingbalance')" helpText="Help text"
+                                (input)="main.restrictInput($event, 'decimal');formatAmount($event,'liquidAssets.savingbalance')" helpText="Help text"
                                 name="savingbalance">
                             </app-inputfield>
                             <div class="text-danger"
