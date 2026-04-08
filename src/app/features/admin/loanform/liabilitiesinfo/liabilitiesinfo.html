@@ -1,4 +1,5 @@
-<div class="base-layout">
+<div class="vh-container">
+    <div class="base-layout base-height">
 
     <div class="row w-100 d-flex blue-head-box text-center">
         <p class="text-dp-3-bold">Total Amount : ₹{{totalINRamt}} </p>
@@ -32,7 +33,7 @@
 
 
 
-                            <span class="delete-icon" (click)="removeAccordion(acc.key, i, $event)">
+                            <span class="delete-icon px-2" (click)="removeAccordion(acc.key, i, $event)">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
                                     fill="none">
                                     <path
@@ -328,7 +329,7 @@
                             <!-- ================= ROW 1 ================= -->
 
                             <!-- Bank Name -->
-                            <div [class.col-4]="!isOtherSelected(item)" [class.col-6]="isOtherSelected(item)">
+                            <div [class.col-4]="!isOtherSelectedcc(item)" [class.col-6]="isOtherSelectedcc(item)">
                                 <div class="form-group">
 
                                     <app-dropdown [options]="selectBanks" formControlName="creditcardbankName"
@@ -340,7 +341,7 @@
                             </div>
 
                             <!-- Title (ONLY when Other) -->
-                            <div class="col-6" *ngIf="isOtherSelected(item)">
+                            <div class="col-6" *ngIf="isOtherSelectedcc(item)">
                                 <div class="form-group">
                                     <app-inputfield formControlName="title" label="Title" placeholder="Enter Title" (input)="main.restrictInput($event,'text')"
                                         [required]="true">
@@ -354,7 +355,7 @@
                             </div>
 
                             <!-- Amount (Normal banks only – SAME ROW) -->
-                            <div class="col-4" *ngIf="!isOtherSelected(item)">
+                            <div class="col-4" *ngIf="!isOtherSelectedcc(item)">
                                 <div class="form-group">
                                     <app-inputfield type="text" [required]="true" label="Outstanding Balance (INR)"
                                         [required]="true" formControlName="ccoutstandingBalance"
@@ -370,7 +371,7 @@
                                 </div>
                             </div>
 
-                            <div class="col-4" *ngIf="!isOtherSelected(item)">
+                            <div class="col-4" *ngIf="!isOtherSelectedcc(item)">
                                 <div class="form-group">
                                     <app-inputfield type="text" [required]="true" label="Credit Limit (INR)"
                                         (input)="handleAmountInput($event,'creditcard',item)" [required]="true"
@@ -389,7 +390,7 @@
 
                             <!-- ================= ROW 2 (Only when Other) ================= -->
 
-                            <ng-container *ngIf="isOtherSelected(item)">
+                            <ng-container *ngIf="isOtherSelectedcc(item)">
 
                                 <div class="col-6 mt-3">
                                     <div class="form-group">
@@ -527,11 +528,12 @@
 
                             <div class="col-lg-6 ">
                                 <div class="form-group mb-3">
-                                    <app-dropdown [options]="liabilitiesCatagories"
-                                        [(selectedValue)]="selectedliabilities" [placeholder]="'SelectBank Name'"
-                                        [required]="true" (selectedValueChange)="onChange($event)"
-                                        formControlName="bnplbankName" [avatarUrl]="avatarUrl" [hasAvatar]="hasAvatar"
-                                        [label]="'Lender Name'">
+                                   
+
+                                     <app-dropdown [options]="selectLenders" formControlName="bnplbankName"
+                                        [placeholder]="'Select Lender Name'" [required]="true" [searchable]="true"
+                                        (selectedValueChange)="onlenderSelected($event,item)" [avatarUrl]="avatarUrl"
+                                        [hasAvatar]="hasAvatar" [label]="'Lender Name'">
                                     </app-dropdown>
 
                                 </div>
@@ -715,4 +717,4 @@
         </app-buttons>
 
     </div>
-</div>
+</div></div>

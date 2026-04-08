@@ -217,6 +217,11 @@ export class Loanformservice {
       `${this.baseUrl}/v1/los/applications/bank-list`,
     )};
 
+    
+  getalllenders(): Observable<ApiResponse<any>> {
+    return this.http.get<ApiResponse<any>>(
+      `${this.baseUrl}/v1/masters/lending-partners`,
+    )};
 
   // ************************* Liability   *************************
 

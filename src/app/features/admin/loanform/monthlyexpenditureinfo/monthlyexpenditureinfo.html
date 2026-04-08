@@ -1,261 +1,276 @@
-<div class="base-layout">
+<div class="vh-container">
+    <div class="base-layout base-height">
 
-    <div class="row w-100 d-flex blue-head-box text-center">
-        <p class="text-dp-3-bold">Total Expense : ₹10,00,00 </p>
-    </div>
-    <div class="row w-100 ">
-        <div class=" d-flex  ">
-            <div class="w-100 gap-3">
-                <!-- all categories -->
-                <app-dropdown [options]="monthlyExpenditure" [multiSelect]="true"
-                    [(selectedValue)]="selectedexpenditure" [placeholder]="'Select Monthly Expenditure'"
-                    (selectedValueChange)="onChange($event)" [avatarUrl]="avatarUrl" [hasAvatar]="hasAvatar"
-                    [label]="'Monthly Expenditure'">
-                </app-dropdown>
+        <div class="row w-100 d-flex blue-head-box text-center">
+            <p class="text-dp-3-bold">Total Expense : ₹10,00,00 </p>
+        </div>
+        <div class="row w-100 ">
+            <div class=" d-flex  ">
+                <div class="w-100 gap-3">
+                    <!-- all categories -->
+                    <app-dropdown [options]="monthlyExpenditure" [multiSelect]="true"
+                        [(selectedValue)]="selectedexpenditure" [placeholder]="'Select Monthly Expenditure'"
+                        (selectedValueChange)="onChange($event)" [avatarUrl]="avatarUrl" [hasAvatar]="hasAvatar"
+                        [label]="'Monthly Expenditure'">
+                    </app-dropdown>
+                </div>
             </div>
+
         </div>
 
-    </div>
+        <form [formGroup]="monthlyExpenditureForm" (ngSubmit)="submit()" id="expenseForm" class="w-100 ">
 
-    <form [formGroup]="monthlyExpenditureForm" (ngSubmit)="submit()" id="expenseForm" class="w-100 ">
+            <div class=" accordion d-flex flex-column gap-4 mb-4">
 
-        <div class=" accordion d-flex flex-column gap-4 mb-4">
+                <div class="accordion-item b-0" *ngFor="let acc of accordions; let i = index"
+                    [hidden]="!selectedexpenditure.includes(acc.key)">
 
-            <div class="accordion-item b-0" *ngFor="let acc of accordions; let i = index"
-                [hidden]="!selectedexpenditure.includes(acc.key)">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button table-head" [class.collapsed]="!openIndex.includes(i)"
+                            type="button" (click)="toggle(i)">
 
-                <h2 class="accordion-header">
-                    <button class="accordion-button table-head" [class.collapsed]="!openIndex.includes(i)" type="button"
-                        (click)="toggle(i)">
-
-                        <span class="flex-grow-1">{{ acc.title }}</span>
-                        <span class="delete-icon" (click)="removeAccordion(acc.key, i, $event)">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
+                            <span class="flex-grow-1">{{ acc.title }}</span>
+                            <span class="delete-icon px-2" (click)="removeAccordion(acc.key, i, $event)">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
                                 fill="none">
-                                <path d="M3 6H21" stroke="#25262F" stroke-width="1.5" />
-                                <path d="M8 6V4C8 3 9 2 10 2H14C15 2 16 3 16 4V6" stroke="#25262F" stroke-width="1.5" />
-                                <path d="M19 6L18 20C18 21 17 22 15 22H9C7 22 6 21 6 20L5 6" stroke="#25262F"
-                                    stroke-width="1.5" />
+                                <path
+                                    d="M21 5.98047C17.67 5.65047 14.32 5.48047 10.98 5.48047C9 5.48047 7.02 5.58047 5.04 5.78047L3 5.98047"
+                                    stroke="#25262F" stroke-width="1.5" stroke-linecap="round"
+                                    stroke-linejoin="round" />
+                                <path
+                                    d="M8.5 4.97L8.72 3.66C8.88 2.71 9 2 10.69 2H13.31C15 2 15.13 2.75 15.28 3.67L15.5 4.97"
+                                    stroke="#25262F" stroke-width="1.5" stroke-linecap="round"
+                                    stroke-linejoin="round" />
+                                <path
+                                    d="M18.8484 9.14062L18.1984 19.2106C18.0884 20.7806 17.9984 22.0006 15.2084 22.0006H8.78844C5.99844 22.0006 5.90844 20.7806 5.79844 19.2106L5.14844 9.14062"
+                                    stroke="#25262F" stroke-width="1.5" stroke-linecap="round"
+                                    stroke-linejoin="round" />
+                                <path d="M10.3281 16.5H13.6581" stroke="#25262F" stroke-width="1.5"
+                                    stroke-linecap="round" stroke-linejoin="round" />
+                                <path d="M9.5 12.5H14.5" stroke="#25262F" stroke-width="1.5" stroke-linecap="round"
+                                    stroke-linejoin="round" />
                             </svg>
-                        </span>
-                    </button>
-                </h2>
+                            </span>
+                        </button>
+                    </h2>
 
 
-                <div class="accordion-collapse collapse" [class.show]="openIndex.includes(i)">
+                    <div class="accordion-collapse collapse" [class.show]="openIndex.includes(i)">
 
-                    <div class="accordion-body p-0 ">
+                        <div class="accordion-body p-0 ">
 
 
-                        <ng-container *ngIf="i === 0">
-                            <ng-container *ngTemplateOutlet="rentmaintenanceTemplate; context:{index:i}">
+                            <ng-container *ngIf="i === 0">
+                                <ng-container *ngTemplateOutlet="rentmaintenanceTemplate; context:{index:i}">
+                                </ng-container>
                             </ng-container>
-                        </ng-container>
 
-                        <ng-container *ngIf="i === 1">
-                            <ng-container *ngTemplateOutlet="GroceriesandHouseholdTemplate; context:{index:i}">
+                            <ng-container *ngIf="i === 1">
+                                <ng-container *ngTemplateOutlet="GroceriesandHouseholdTemplate; context:{index:i}">
 
+                                </ng-container>
                             </ng-container>
-                        </ng-container>
 
-                        <ng-container *ngIf="i === 2">
-                            <ng-container *ngTemplateOutlet="UtilitiesTemplate; context:{index:i}">
+                            <ng-container *ngIf="i === 2">
+                                <ng-container *ngTemplateOutlet="UtilitiesTemplate; context:{index:i}">
 
+                                </ng-container>
                             </ng-container>
-                        </ng-container>
 
-                        <ng-container *ngIf="i === 3">
-                            <ng-container *ngTemplateOutlet="TransportationTemplate; context:{index:i}">
+                            <ng-container *ngIf="i === 3">
+                                <ng-container *ngTemplateOutlet="TransportationTemplate; context:{index:i}">
 
+                                </ng-container>
                             </ng-container>
-                        </ng-container>
-                        <ng-container *ngIf="i === 4">
-                            <ng-container *ngTemplateOutlet="SchoolTemplate; context:{index:i}">
+                            <ng-container *ngIf="i === 4">
+                                <ng-container *ngTemplateOutlet="SchoolTemplate; context:{index:i}">
 
+                                </ng-container>
                             </ng-container>
-                        </ng-container>
-                        <ng-container *ngIf="i === 5">
-                            <ng-container *ngTemplateOutlet="MedicalTemplate; context:{index:i}">
+                            <ng-container *ngIf="i === 5">
+                                <ng-container *ngTemplateOutlet="MedicalTemplate; context:{index:i}">
 
+                                </ng-container>
                             </ng-container>
-                        </ng-container>
 
-                        <ng-container *ngIf="i === 6">
-                            <ng-container *ngTemplateOutlet="OtherTemplate; context:{index:i}">
+                            <ng-container *ngIf="i === 6">
+                                <ng-container *ngTemplateOutlet="OtherTemplate; context:{index:i}">
 
+                                </ng-container>
                             </ng-container>
-                        </ng-container>
 
 
+
+
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+
+            <ng-template #rentmaintenanceTemplate let-i="index">
+                <div class="row common-details-box d-flex flex-row gap-0 " formGroupName="rent">
+
+                    <div class="form-group mb-3">
+                        <app-inputfield type="text" label="Rent/ Home Maintenance" formControlName="rentvalue"
+                            placeholder="Enter Rent/ Home Maintenance" helpText="Help text" name="rentvalue"
+                            (input)="handleAmountInput($event,'rent.rentvalue')">
+                        </app-inputfield>
 
 
                     </div>
                 </div>
+            </ng-template>
 
-            </div>
+            <ng-template #GroceriesandHouseholdTemplate let-i="index">
+                <div class="row common-details-box d-flex flex-row gap-0 " formGroupName="grocery">
+
+                    <div class="form-group mb-3">
+                        <app-inputfield type="text" label="Groceries and Household" formControlName="groceryvalue"
+                            placeholder="Enter Groceries and Household" helpText="Help text" name="groceryvalue"
+                            (input)="handleAmountInput($event,'grocery.groceryvalue')">
+                        </app-inputfield>
+
+
+                    </div>
+                </div>
+            </ng-template>
+
+            <ng-template #UtilitiesTemplate let-i="index">
+                <div class="row common-details-box d-flex flex-row gap-0 " formGroupName="utilities">
+                    <div class="col">
+                        <div class="form-group mb-3">
+                            <app-inputfield type="text" label="Telephone and Internet bills"
+                                formControlName="utilityvalue1" placeholder="Enter Telephone and Internet bills"
+                                helpText="Help text" name="utilityvalue1"
+                                (input)="handleAmountInput($event,'utilities.utilityvalue1')">
+                            </app-inputfield>
+
+
+                        </div>
+                    </div>
+                    <div class="col">
+                        <div class="form-group mb-3">
+                            <app-inputfield type="text" label="Utilities (Electricity, Water, Gas)"
+                                formControlName="utilityvalue2" placeholder="Enter Utility bills" helpText="Help text"
+                                name="utilityvalue2" (input)="handleAmountInput($event,'utilities.utilityvalue2')">
+                            </app-inputfield>
+
+
+                        </div>
+                    </div>
+
+                </div>
+            </ng-template>
+
+            <ng-template #TransportationTemplate let-i="index">
+                <div class="row common-details-box d-flex flex-row gap-0 " formGroupName="transportation">
+
+                    <div class="form-group mb-3">
+                        <app-inputfield type="text" label="Transportation" formControlName="transportationvalue"
+                            placeholder="Enter Transportation" helpText="Help text" name="transportationvalue"
+                            (input)="handleAmountInput($event,'transportation.transportationvalue')">
+                        </app-inputfield>
+
+
+                    </div>
+                </div>
+            </ng-template>
+
+            <ng-template #SchoolTemplate let-i="index">
+                <div class="row common-details-box d-flex flex-row gap-0 " formGroupName="SchoolFees">
+
+                    <div class="form-group mb-3">
+                        <app-inputfield type="text" label="School Education Fees" formControlName="SchoolFeesvalue"
+                            placeholder="Enter School Education Fees" helpText="Help text" name="SchoolFeesvalue"
+                            (input)="handleAmountInput($event,'SchoolFees.SchoolFeesvalue')">
+                        </app-inputfield>
+
+
+                    </div>
+                </div>
+            </ng-template>
+
+            <ng-template #MedicalTemplate let-i="index">
+                <div class="row common-details-box d-flex flex-row gap-0 " formGroupName="MedicalMedicines">
+
+                    <div class="form-group mb-3">
+                        <app-inputfield type="text" label="Medical/ Medicines" formControlName="MedicalMedicinesvalue"
+                            placeholder="Enter Medical/ Medicines" helpText="Help text" name="MedicalMedicinesvalue"
+                            (input)="handleAmountInput($event,'MedicalMedicines.MedicalMedicinesvalue')">
+                        </app-inputfield>
+
+
+                    </div>
+                </div>
+            </ng-template>
+
+            <ng-template #OtherTemplate let-i="index">
+                <div formArrayName="other">
+                    @for(item of other.controls; track $index; let i = $index){
+                    <div class="row common-details-box d-flex flex-row pb-0" [formGroupName]="i">
+
+                        <div class="col">
+                            <div class="form-group mb-3">
+
+
+                                <app-dropdown [options]="otherExpenses" formControlName="type" name="type"
+                                    [placeholder]="'Select type'" [avatarUrl]="avatarUrl" [hasAvatar]="hasAvatar"
+                                    [label]="'Expense '+(i+1)">
+                                </app-dropdown>
+
+                            </div>
+                        </div>
+                        <div class="col" *ngIf="other.at(i).get('type')?.value === 'Other'">
+                            <div class="form-group mb-3">
+                                <app-inputfield type="text" label="Enter Other Expense" formControlName="customType"
+                                    placeholder="Enter custom expense">
+                                </app-inputfield>
+                            </div>
+                        </div>
+                        <div class="col">
+                            <div class="form-group mb-3">
+                                <app-inputfield type="text" label="Amount (INR)" formControlName="amount"
+                                    placeholder="Enter Amount" helpText="Help text" name="amount"
+                                    (input)="handleAmountInput($event,'amount',item)">
+                                </app-inputfield>
+
+
+                            </div>
+                        </div>
+                    </div>
+                    @if(i == other.length - 1){
+                    <div class="form-group common-details-box pt-0">
+                        <app-buttons label="Add Other Recurring Expense" class="btn btn-icon Add btncustomClass"
+                            [outline]="true" (click)="addmore()">
+                            <img src="/assets/images/icons/addred.svg">
+                        </app-buttons>
+
+
+                    </div>
+                    }
+
+                    }
+                </div>
+            </ng-template>
+        </form>
+    </div>
+    <hr class="footer-hr-class">
+    <div class="loan-footerbtns row w-100  d-flex justify-content-between align-items-center">
+
+        <div class="col-lg-4 ">
+            <img src="../assets/images/icons/save.svg">
+            <span class="text-dp-3-regular mx-2 blue-text"> Save and Exit</span>
+        </div>
+        <div class="col-lg-4  d-flex justify-content-end">
+            <app-buttons type="button" label="Back" class="btn btncustomClass" [outline]="true" (click)="back()">
+            </app-buttons>
+            <!-- <app-buttons type="button" label="Next" class="btn btncustomClass" color="primary" (click)="next1()" ></app-buttons> -->
+            <app-buttons type="button" label="Next" class="btn btncustomClass" color="primary" (click)="next()">
+            </app-buttons>
 
         </div>
-
-        <ng-template #rentmaintenanceTemplate let-i="index">
-            <div class="row common-details-box d-flex flex-row gap-0 " formGroupName="rent">
-
-                <div class="form-group mb-3">
-                    <app-inputfield type="text" label="Rent/ Home Maintenance" formControlName="rentvalue"
-                        placeholder="Enter Rent/ Home Maintenance" helpText="Help text" name="rentvalue"
-                        (input)="handleAmountInput($event,'rentvalue')">
-                    </app-inputfield>
-
-
-                </div>
-            </div>
-        </ng-template>
-
-        <ng-template #GroceriesandHouseholdTemplate let-i="index">
-            <div class="row common-details-box d-flex flex-row gap-0 " formGroupName="grocery">
-
-                <div class="form-group mb-3">
-                    <app-inputfield type="text" label="Groceries and Household" formControlName="groceryvalue"
-                        placeholder="Enter Groceries and Household" helpText="Help text" name="groceryvalue"
-                        (input)="handleAmountInput($event,'groceryvalue')">
-                    </app-inputfield>
-
-
-                </div>
-            </div>
-        </ng-template>
-
-        <ng-template #UtilitiesTemplate let-i="index">
-            <div class="row common-details-box d-flex flex-row gap-0 " formGroupName="utilities">
-                <div class="col">
-                    <div class="form-group mb-3">
-                        <app-inputfield type="text" label="Telephone and Internet bills" formControlName="utilityvalue1"
-                            placeholder="Enter Telephone and Internet bills" helpText="Help text" name="utilityvalue1"
-                            (input)="handleAmountInput($event,'utilityvalue1')">
-                        </app-inputfield>
-
-
-                    </div>
-                </div>
-                <div class="col">
-                    <div class="form-group mb-3">
-                        <app-inputfield type="text" label="Utilities (Electricity, Water, Gas)"
-                            formControlName="utilityvalue2" placeholder="Enter Utility bills" helpText="Help text"
-                            name="utilityvalue2" (input)="handleAmountInput($event,'utilityvalue2')">
-                        </app-inputfield>
-
-
-                    </div>
-                </div>
-
-            </div>
-        </ng-template>
-
-        <ng-template #TransportationTemplate let-i="index">
-            <div class="row common-details-box d-flex flex-row gap-0 " formGroupName="transportation">
-
-                <div class="form-group mb-3">
-                    <app-inputfield type="text" label="Transportation" formControlName="transportationvalue"
-                        placeholder="Enter Transportation" helpText="Help text" name="transportationvalue" (input)="handleAmountInput($event,'transportationvalue')">
-                    </app-inputfield>
-
-
-                </div>
-            </div>
-        </ng-template>
-
-        <ng-template #SchoolTemplate let-i="index">
-            <div class="row common-details-box d-flex flex-row gap-0 " formGroupName="SchoolFees">
-
-                <div class="form-group mb-3">
-                    <app-inputfield type="text" label="School Education Fees" formControlName="SchoolFeesvalue"
-                        placeholder="Enter School Education Fees" helpText="Help text" name="SchoolFeesvalue"
-                         (input)="handleAmountInput($event,'SchoolFeesvalue')">
-                    </app-inputfield>
-
-
-                </div>
-            </div>
-        </ng-template>
-
-        <ng-template #MedicalTemplate let-i="index">
-            <div class="row common-details-box d-flex flex-row gap-0 " formGroupName="MedicalMedicines">
-
-                <div class="form-group mb-3">
-                    <app-inputfield type="text" label="Medical/ Medicines" formControlName="MedicalMedicinesvalue"
-                        placeholder="Enter Medical/ Medicines" helpText="Help text" name="MedicalMedicinesvalue"
-                        (input)="handleAmountInput($event,'MedicalMedicinesvalue')">
-                    </app-inputfield>
-
-
-                </div>
-            </div>
-        </ng-template>
-
-        <ng-template #OtherTemplate let-i="index">
-            <div formArrayName="other">
-                @for(item of other.controls; track $index; let i = $index){
-                <div class="row common-details-box d-flex flex-row gap-0 " [formGroupName]="i">
-
-                    <div class="col">
-                        <div class="form-group mb-3">
-
-
-                            <app-dropdown [options]="otherExpenses" formControlName="type" name="type"
-                                [placeholder]="'Select type'" [avatarUrl]="avatarUrl" [hasAvatar]="hasAvatar"
-                                [label]="'Expense '+(i+1)">
-                            </app-dropdown>
-
-                        </div>
-                    </div>
-                    <div class="col" *ngIf="other.at(i).get('type')?.value === 'Other'">
-                        <div class="form-group mb-3">
-                            <app-inputfield  type="text"
-                                label="Enter Other Expense" formControlName="customType"
-                                placeholder="Enter custom expense">
-                            </app-inputfield>
-                        </div>
-                    </div>
-                    <div class="col">
-                        <div class="form-group mb-3">
-                            <app-inputfield type="text" label="Amount (INR)" formControlName="amount"
-                                placeholder="Enter Amount" helpText="Help text" name="amount"
-                                (input)="handleAmountInput($event,'amount',item)">
-                            </app-inputfield>
-
-
-                        </div>
-                    </div>
-                </div>
-                @if(i == other.length - 1){
-                <div class="form-group common-details-box pt-0">
-                    <app-buttons label="Add Other Recurring Expense" class="btn btn-icon Add btncustomClass"
-                        [outline]="true" (click)="addmore()">
-                        <img src="/assets/images/icons/addred.svg">
-                    </app-buttons>
-
-
-                </div>
-                }
-
-                }
-            </div>
-        </ng-template>
-    </form>
-</div>
-<hr class="footer-hr-class">
-<div class="loan-footerbtns row w-100  d-flex justify-content-between align-items-center">
-
-    <div class="col-lg-4 ">
-        <img src="../assets/images/icons/save.svg">
-        <span class="text-dp-3-regular mx-2 blue-text"> Save and Exit</span>
-    </div>
-    <div class="col-lg-4  d-flex justify-content-end">
-        <app-buttons type="button" label="Back" class="btn btncustomClass" [outline]="true" (click)="back()">
-        </app-buttons>
-        <!-- <app-buttons type="button" label="Next" class="btn btncustomClass" color="primary" (click)="next1()" ></app-buttons> -->
-        <app-buttons type="button" label="Next" class="btn btncustomClass" color="primary" (click)="next()">
-        </app-buttons>
-
     </div>
 </div>
 <!-- [disabled]="!monthlyExpenditureForm.valid" -->

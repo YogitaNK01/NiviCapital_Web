@@ -11,7 +11,7 @@ import { Main } from '../../../../core/service/main';
 import { Msgboxservice } from '../../../../core/service/msgboxservice';
 import { Title } from '@angular/platform-browser';
 
-interface BankOption {
+interface Bank_lenderOption {
   value: string;
   label: string;
 }
@@ -79,10 +79,14 @@ export class Liabilitiesinfo {
   totalother = 0;
   totalINRamt: any;
 
-  selectBanks: BankOption[] = [];
+  selectBanks: Bank_lenderOption[] = [];
   selectedbankIds: string[] = [];
-
   selectedbakname!: string;
+
+
+  selectLenders: Bank_lenderOption[] = [];
+  selectedLenderIds: string[] = [];
+  selectedlendername!: string;
 
   constructor(private fb: FormBuilder, public main: Main, private route: ActivatedRoute, private msgBox: Msgboxservice,
     private stepperService: Loanstepperservice, private formSvc: Loanformservice, private cd: ChangeDetectorRef) { }
@@ -132,6 +136,7 @@ export class Liabilitiesinfo {
     this.alllibilitiy_type();
     this.getloantype();
     this.getbanks();
+    this.getlender();
   }
 
   get loans(): FormArray {
@@ -152,7 +157,7 @@ export class Liabilitiesinfo {
     return this.liabilityForm.get(name) as FormArray;
   }
 
-  onChange(values: string | string[]): void {
+  onChange1(values: string | string[]): void {
     this.selectedliabilities = Array.isArray(values) ? values : [values];
 
     const groups = Array.isArray(values) ? values : [values];
@@ -173,6 +178,34 @@ export class Liabilitiesinfo {
       }
     });
   }
+  onChange(values: string | string[]): void {
+  this.selectedliabilities = Array.isArray(values) ? values : [values];
+  
+  if (!this.selectedliabilities.includes('Existing Loans')) {
+    this.selectedloantype = [];
+    this.loans.clear();
+    this.loans.push(this.fb.group({
+      type: [''],
+      bankname: [''],
+      outstanding: ['', Validators.required],
+      emiamount: ['', Validators.required],
+      remtenure: ['', Validators.required],
+      title: ['']
+    }));
+  }
+
+  this.selectedlibilitiesIds = this.selectedliabilities.flatMap(
+    group => this.groupIdMap[group] || []
+  );
+
+  this.openIndex = [];
+  this.selectedliabilities.forEach(val => {
+    const index = this.accordions.findIndex(a => a.key === val);
+    if (index !== -1) {
+      this.openIndex.push(index);
+    }
+  });
+}
 
   Selectedvalue(values: string | string[]) {
     const ids = Array.isArray(values) ? values : [values];
@@ -249,24 +282,7 @@ export class Liabilitiesinfo {
     arr.push(createFn());
     this.cd.detectChanges();
   }
-  createEmptyRow(type: string): FormGroup {
 
-    switch (type) {
-
-      case 'creditcard':
-        return this.createCreditcard();
-
-      case 'bnpl':
-        return this.createBNPL();
-
-      case 'other':
-        return this.createOther();
-
-      default:
-        return this.fb.group({});
-    }
-
-  }
 
   getbanks() {
     this.formSvc.getallBanks().subscribe((res: any) => {
@@ -285,7 +301,7 @@ export class Liabilitiesinfo {
     const fg = fd as FormGroup;
 
     const found = this.selectBanks.find(
-      (b: BankOption) => b.value === selectedId
+      (b: Bank_lenderOption) => b.value === selectedId
     );
     const bankLabel = found?.label ?? '';
     this.selectedbakname = bankLabel;
@@ -302,18 +318,53 @@ export class Liabilitiesinfo {
     titleCtrl?.updateValueAndValidity();
   }
 
-
+//existing loan
   isOtherSelected(fd: AbstractControl): boolean {
     const selectedId = fd.get('bankname')?.value;
     const found = this.selectBanks.find(b => b.value === selectedId);
     return found?.label === 'Other';
   }
 
-  isOtherSelected1(fd: AbstractControl): boolean {
+  //creditcard
+  isOtherSelectedcc(fd: AbstractControl): boolean {
     const selectedId = fd.get('creditcardbankName')?.value;
     const found = this.selectBanks.find(b => b.value === selectedId);
     return found?.label === 'Other';
   }
+
+  getlender() {
+    this.formSvc.getalllenders().subscribe((res: any) => {
+      const list = res.data ?? res;
+
+      this.selectLenders = list.map((s: any) => ({
+        value: s.partnerId,
+        label: s.partnerName,
+        code: s.partnerCode
+      }));
+
+    });
+  }
+ onlenderSelected(selectedId: any, fd: AbstractControl) {
+    const fg = fd as FormGroup;
+
+    const found = this.selectLenders.find(
+      (l: Bank_lenderOption) => l.value === selectedId
+    );
+    const bankLabel = found?.label ?? '';
+    this.selectedlendername = bankLabel;
+
+    const titleCtrl = fg.get('title');
+
+    if (bankLabel === 'Other') {
+      titleCtrl?.setValidators([Validators.required]);
+    } else {
+      titleCtrl?.clearValidators();
+      titleCtrl?.setValue('');
+    }
+
+    titleCtrl?.updateValueAndValidity();
+  }
+
 
   toggle(index: number) {
     if (this.openIndex.includes(index)) {
@@ -344,58 +395,99 @@ export class Liabilitiesinfo {
 
   }
 
-  removeAccordion(key: string, index: number, event: Event) {
-    this.msgBox.open({
-      title: 'Are you sure want to Remove',
-      message: '',
-      showCancel: true,
-      onOk: () => {
-        event.stopPropagation();
+removeAccordion(key: string, index: number, event: Event) {
+  event.stopPropagation();
 
-        this.selectedliabilities =
-          this.selectedliabilities.filter(k => k !== key);
+  this.msgBox.open({
+    title: 'Are you sure want to Remove?',
+    showCancel: true,
+    onOk: () => {
+      // 1. Remove from selected liabilities
+      this.selectedliabilities = this.selectedliabilities.filter(k => k !== key);
 
-        this.openIndex =
-          this.openIndex.filter(i => i !== index);
+      // 2. Map accordion key to FormArray name
+      const map: any = {
+        'Existing Loans': 'loans',
+        'Credit Card Outstanding': 'creditcard',
+        'Buy Now Pay Later (BNPL)': 'bnpl',
+        'Other Liabilities': 'other'
+      };
 
-        const map: any = {
-          CreditCardOutstanding: 'creditcard',
-          BuyNowPayLater: 'bnpl',
-          OtherLiabilities: 'other'
-        };
+      const arrayName = map[key];
+      const control = this.liabilityForm.get(arrayName) as FormArray;
 
-        const control = this.liabilityForm.get(map[key]);
-
-        if (control instanceof FormArray) {
-          control.clear();
-          control.push(this.createEmptyRow(map[key]));
-        }
-        switch (key) {
-
-
+      if (control) {
+        control.clear();
+        
+        // ✅ FIXED: Create proper empty forms
+        switch (arrayName) {
           case 'loans':
-            this.loans.clear();
-           break;
-
+            // Create EMPTY loan without loan type dependency
+            control.push(this.fb.group({
+              type: [''],
+              bankname: [''],
+              outstanding: ['', Validators.required],
+              emiamount: ['', Validators.required],
+              remtenure: ['', Validators.required],
+              title: ['']
+            }));
+            break;
           case 'creditcard':
-            this.creditcard.clear();
-            this.creditcard.push(this.createCreditcard());
+            control.push(this.createCreditcard());
             break;
-
           case 'bnpl':
-            this.bnpl.clear();
-            this.bnpl.push(this.createBNPL());
+            control.push(this.createBNPL());
             break;
-
           case 'other':
-            this.other.clear();
-            this.other.push(this.createOther());
+            control.push(this.createOther());
             break;
         }
+        
+        control.markAsPristine();
+        control.markAsUntouched();
+        control.updateValueAndValidity();
       }
-    });
+
+      // 3. Close accordion
+      this.openIndex = this.openIndex.filter(i => i !== index);
+      this.cd.detectChanges();
+    },
+    message: ''
+  });
+}
+handleEmptyAccordion(type: 'loantype' | 'creditcard' | 'bnpl' | 'other') {
+  let array: FormArray;
+  let accKey: string;
+
+  switch (type) {
+    case 'loantype':
+      array = this.loans;
+      accKey = 'Existing Loans';  // ✅ FIXED: Match accordion key
+      break;
+    case 'creditcard':
+      array = this.creditcard;
+      accKey = 'Credit Card Outstanding';  // ✅ FIXED
+      break;
+    case 'bnpl':
+      array = this.bnpl;
+      accKey = 'Buy Now Pay Later (BNPL)';  // ✅ FIXED
+      break;
+    case 'other':
+      array = this.other;
+      accKey = 'Other Liabilities';  // ✅ FIXED
+      break;
   }
 
+  if (array && array.length === 0) {
+    this.selectedliabilities = this.selectedliabilities.filter(k => k !== accKey);
+    this.selectedliabilities = [...this.selectedliabilities];
+
+    const accIndex = this.accordions.findIndex(a => a.key === accKey);
+    if (accIndex !== -1) {
+      this.openIndex = this.openIndex.filter(i => i !== accIndex);
+    }
+  }
+}
   removeitem1(index: number, type: 'loantype' | 'creditcard' | 'bnpl' | 'other') {
 
 
@@ -463,41 +555,7 @@ export class Liabilitiesinfo {
       }
     });
   }
-   handleEmptyAccordion(type: 'loantype' | 'creditcard' | 'bnpl' | 'other') {
-    let array: FormArray;
-    let accKey: string;
-
-    switch (type) {
-      case 'loantype':
-        array = this.loans;
-        accKey = 'Property/Land Assets';  // Match your acc.key
-        break;
-      case 'creditcard':
-        array = this.creditcard;
-        accKey = 'Credit Card';  // Match acc.key
-        break;
-      case 'bnpl':
-        array = this.bnpl;
-        accKey = 'Buy Now Pay Later';  // Match acc.key
-        break;
-      case 'other':
-        array = this.other;
-        accKey = 'other';  // Match acc.key (lowercase from template)
-        break;
-    }
-
-    if (array && array.length === 0) {
-      // Remove from selectedliabilities → hides *ngIf accordion
-      this.selectedliabilities = this.selectedliabilities.filter(k => k !== accKey);
-      this.selectedliabilities = [...this.selectedliabilities];  // Trigger change detection
-
-      // Close accordion
-      const accIndex = this.accordions.findIndex(a => a.key === accKey);
-      if (accIndex !== -1) {
-        this.openIndex = this.openIndex.filter(i => i !== accIndex);
-      }
-    }
-  }
+ 
   alllibilitiy_type() {
     this.formSvc.getAllLiabilities().subscribe((res: any) => {
       const list = res.data ?? res;
@@ -526,7 +584,7 @@ export class Liabilitiesinfo {
         // title: group.name ,
         title: this.accordianTitle(group.code),
         alwaysOpen: true,
-        key: group
+        key:  this.accordianTitle(group) //group
       }));
       this.liabilityCodeMap = list.reduce((acc: any, item: any) => {
         acc[item.code] = item.code;

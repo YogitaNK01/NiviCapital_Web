@@ -286,22 +286,55 @@ export class Monthlyexpenditureinfo {
 
     return total;
   }
-  formatIndian(x: string): string {
-    return new Intl.NumberFormat('en-IN').format(Number(x));
-  }
 
    handleAmountInput(event: any, controlName: string, ctrl?: any) {
     this.main.restrictInput(event, 'decimal');
-    this.formatAmountfromarray(event, controlName, ctrl);
+    if (ctrl) {
+      this.formatAmountfromarray(event, controlName, ctrl);
+    } else {
+      this.formatAmount(event, controlName);
+    }
    
 
 
   }
 
-  //format amount 2000000 to 20,00,000
+  formatIndian(x: string): string {
+    const parts = x.split('.');
+    const integerPart = parts[0];
+    const decimalPart = parts[1] ? '.' + parts[1].substring(0, 2) : '';
+
+    if (!integerPart || integerPart === '0') return '0' + decimalPart;
+
+    const bigIntValue = BigInt(integerPart);
+    let str = bigIntValue.toString();
+    let length = str.length;
+
+    let groups: string[] = [];
+
+    let lastGroup = str.substring(Math.max(0, length - 3), length);
+    groups.unshift(lastGroup);
+
+    let remaining = str.substring(0, Math.max(0, length - 3));
+    for (let i = remaining.length; i > 0; i -= 2) {
+      let start = Math.max(0, i - 2);
+      let group = remaining.substring(start, i).replace(/^0+/, '') || '0';
+      groups.unshift(group);
+    }
+
+    return groups.join(',') + decimalPart;
+  }
+
+
+
+  // Updated formatAmount - SAFE FOR LARGE NUMBERS
   formatAmount(event: any, controlName: string) {
     let value = event.target.value;
-    if (!value) return;
+    if (!value) {
+      this.monthlyExpenditureForm.get(controlName)?.setValue('');
+      return;
+    }
+
     value = value.replace(/,/g, '');
     value = value.replace(/[^0-9.]/g, '');
     const parts = value.split('.');
@@ -309,44 +342,39 @@ export class Monthlyexpenditureinfo {
       value = parts[0] + '.' + parts.slice(1).join('');
     }
 
-    let integerPart = parts[0];
-    let decimalPart = parts[1] ? '.' + parts[1] : '';
+    const decimalIndex = value.indexOf('.');
+    if (decimalIndex !== -1 && value.length - decimalIndex > 3) {
+      value = value.substring(0, decimalIndex + 3);
+    }
 
-    let num = Number(value);
-    const formatted = this.formatIndian(num.toString());
+    const formatted = this.formatIndian(value);
     this.monthlyExpenditureForm.get(controlName)?.setValue(formatted, { emitEvent: false });
-
-
   }
-   formatAmountfromarray(event: any, controlName: string, control: AbstractControl) {
-    const group = control as FormGroup;
-    let value = event.target.value;
 
+  // Updated formatAmountfromarray
+  formatAmountfromarray(event: any, controlName: string, control: AbstractControl) {
+    let value = event.target.value;
     if (!value) return;
 
-    value = value.replace(/,/g, '');
-    value = value.replace(/[^0-9.]/g, '');
+    // Same cleaning logic
+    value = value.replace(/,/g, '').replace(/[^0-9.]/g, '');
     const parts = value.split('.');
     if (parts.length > 2) {
       value = parts[0] + '.' + parts.slice(1).join('');
     }
 
-    let integerPart = parts[0];
-    let decimalPart = parts[1] ? '.' + parts[1] : '';
+    const decimalIndex = value.indexOf('.');
+    if (decimalIndex !== -1 && value.length - decimalIndex > 3) {
+      value = value.substring(0, decimalIndex + 3);
+    }
 
+    const formatted = this.formatIndian(value);
 
-    let num = Number(value);
-
-
-
-    const formatted = this.formatIndian(num.toString());
-
-    if (group) {
-      group.get(controlName)?.setValue(formatted, { emitEvent: false });
+    if (control && (control as FormGroup)?.get(controlName)) {
+      (control as FormGroup).get(controlName)?.setValue(formatted, { emitEvent: false });
     } else {
       this.monthlyExpenditureForm.get(controlName)?.setValue(formatted, { emitEvent: false });
     }
-
   }
 
   patchMonthlyExpenditure() {
