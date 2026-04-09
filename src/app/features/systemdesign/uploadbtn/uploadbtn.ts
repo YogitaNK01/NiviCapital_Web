@@ -83,12 +83,16 @@ export class Uploadbtn implements OnInit, ControlValueAccessor, OnChanges {
     }
   }
 
-  ngOnChanges() {
-    if (this.fileuploadresponse) {
-      // console.log("Received :", this.fileuploadresponse);
+
+    
+ngOnChanges() {
+  if (this.disabled) {
+    this.state = 'disabled';
+  } else if (this.state === 'disabled') {
+    this.state = 'idle';
+  }
 
 
-    }
   }
   onFileSelect(event: Event) {
     const input = event.target as HTMLInputElement;

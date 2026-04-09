@@ -120,14 +120,14 @@ export class Incomeinfo {
     return this.incomeForm.controls;
   }
 
-removeOtherDocument(type: 'other' | 'otherbusiness', id: number): void {
+  removeOtherDocument(type: 'other' | 'otherbusiness', id: number): void {
 
     if (type === 'other') {
       this.otherIncomeSlots = this.otherIncomeSlots.filter(slot => slot.id !== id);
     } else {
       this.otherBusinessSlots = this.otherBusinessSlots.filter(slot => slot.id !== id);
     }
-}
+  }
 
   onFileChange(result: UploadResult, key: string,
     subcategory: 'LAST_3_MONTHS' | 'FORM_16' | 'BANK_STATEMENT_1_YEAR' | 'ITR_LAST_3_YEARS' | 'OTHER_INCOME',
@@ -157,6 +157,9 @@ removeOtherDocument(type: 'other' | 'otherbusiness', id: number): void {
       }
     });
   }
+
+  
+
 
   onUploadStarted(
     result: UploadResult, key: string, category: 'INCOME' | 'BUSINESS' | 'OTHER',
@@ -255,7 +258,7 @@ removeOtherDocument(type: 'other' | 'otherbusiness', id: number): void {
     if (!this.allDocuments?.length) return null;
 
     // let doc = this.allDocuments.find(doc => doc.title === key);
-    let doc = this.allDocuments.find(doc =>  doc.type === key);
+    let doc = this.allDocuments.find(doc => doc.type === key);
 
     if (!doc) {
       doc = this.allDocuments.find(doc =>
@@ -268,21 +271,21 @@ removeOtherDocument(type: 'other' | 'otherbusiness', id: number): void {
     return doc || null;
   }
 
-getDocumentByKey(key: string): Document | null {
-  if (!key || !key.trim() || !this.allDocuments?.length) return null;
+  getDocumentByKey(key: string): Document | null {
+    if (!key || !key.trim() || !this.allDocuments?.length) return null;
 
-  let doc = this.allDocuments.find(d => d.type === key || d.title === key);
+    let doc = this.allDocuments.find(d => d.type === key || d.title === key);
 
-  if (!doc) {
-    doc = this.allDocuments.find(d =>
-      (d.type && d.type.includes(key)) ||
-      (d.title && d.title.includes(key)) ||
-      (d.fileName && d.fileName.includes(key))
-    );
+    if (!doc) {
+      doc = this.allDocuments.find(d =>
+        (d.type && d.type.includes(key)) ||
+        (d.title && d.title.includes(key)) ||
+        (d.fileName && d.fileName.includes(key))
+      );
+    }
+
+    return doc || null;
   }
-
-  return doc || null;
-}
 
 
   hasDocument(documentKey: string): boolean {
@@ -406,11 +409,12 @@ getDocumentByKey(key: string): Document | null {
     this.stepperService.previous();
   }
   next() {
-  console.log('allRequiredFilesUploaded:', this.allRequiredFilesUploaded);
-  if(this.allRequiredFilesUploaded) {
-   
-  this.stepperService.next();
-}}
+    console.log('allRequiredFilesUploaded:', this.allRequiredFilesUploaded);
+    if (this.allRequiredFilesUploaded) {
+
+      this.stepperService.next();
+    }
+  }
 
 
 }

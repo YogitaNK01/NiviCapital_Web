@@ -435,7 +435,7 @@
 
 
                             <app-uploadbtn [config]="basicConfig"
-                                (uploadStarted)="onUploadStarted($event,  slot.title,'OTHER' ,'OTHER_INCOME','OTHER')"
+                                (uploadStarted)="onUploadStarted($event,  slot.title,'OTHER' ,'OTHER_INCOME','OTHER')"  [disabled]="!slot.title && slot.title.trim().length === 0"
                                 [uploadViaApi]="true" [fileuploadresponse]="handleresponse" [required]="true"
                                 label="Other Documents">
                             </app-uploadbtn>
@@ -824,7 +824,7 @@
                                     @else {
 
 
-                                    <app-uploadbtn label="Other Documents" [config]="basicConfig" [required]="true"
+                                    <app-uploadbtn label="Other Documents" [config]="basicConfig" [required]="true" [disabled]="!slot.title && slot.title.trim().length === 0"
                                         [uploadViaApi]="true" [fileuploadresponse]="handleresponse"
                                         (uploadStarted)="onUploadStarted($event, slot.title,'BUSINESS', 'OTHER_INCOME', 'OTHER', slot.key)">
                                     </app-uploadbtn>

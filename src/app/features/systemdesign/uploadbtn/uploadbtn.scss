@@ -279,3 +279,16 @@
     max-width: 100%;
   }
 }
+
+
+.upload-area:not(.disabled) {
+  background: #ffffff;
+  opacity: 1;
+}
+
+.upload-content:not(.disabled) {
+  .upload-icon,
+  .upload-text {
+    color: #374151; // normal enabled text
+  }
+}
