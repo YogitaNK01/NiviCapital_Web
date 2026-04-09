@@ -218,12 +218,8 @@ export class Loanformservice {
     )};
 
     
-  getalllenders(): Observable<ApiResponse<any>> {
-    return this.http.get<ApiResponse<any>>(
-      `${this.baseUrl}/v1/applications/lending-names`,
-    )};
 
-  // ************************* Liability   *************************
+    // ************************* Liability   *************************
 
   getAllLiabilities(): Observable<ApiResponse<any>> {
     return this.http.get<ApiResponse<any>>(
@@ -237,6 +233,10 @@ export class Loanformservice {
 
     );
   }
+  getalllenders(): Observable<ApiResponse<any>> {
+    return this.http.get<ApiResponse<any>>(
+      `${this.baseUrl}/los/applications/lender-names`,
+    )};
 
   submitliability(data: any, id: string): Observable<ApiResponse<any>> {
 

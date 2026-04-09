@@ -222,6 +222,10 @@
                                  <app-inputfield type="text"  [label]="'Expense '+(i+1)" formControlName="type" name="type"
                                     placeholder="Enter name">
                                 </app-inputfield>
+                                 <div class="text-danger"
+                                    *ngIf="item.get('type')?.touched && item.get('type')?.invalid">
+                                    Type is required
+                                </div>
 
                             </div>
                         </div>
@@ -230,6 +234,10 @@
                                 <app-inputfield type="text" label="Enter Other Expense" formControlName="customType"
                                     placeholder="Enter custom expense">
                                 </app-inputfield>
+                                 <div class="text-danger"
+                                    *ngIf="item.get('customType')?.touched && item.get('customType')?.invalid">
+                                    Custom type is required
+                                </div>
                             </div>
                         </div>
                         <div class="col">
@@ -239,7 +247,10 @@
                                     (input)="handleAmountInput($event,'amount',item)">
                                 </app-inputfield>
 
-
+                                <div class="text-danger"
+                                    *ngIf="item.get('amount')?.touched && item.get('amount')?.invalid">
+                                    Amount is required
+                                </div>
                             </div>
                         </div>
                     </div>
