@@ -38,7 +38,34 @@ export class Loanformservice {
   referenceInfoData:any ;
   educationInfoData:any;
 
-  constructor(private http: HttpClient) { }
+  constructor(private http: HttpClient,) { this.restoreFromStorage();}
+
+  
+ restoreFromStorage() {
+    this.isasset = JSON.parse(localStorage.getItem('isasset') || 'false');
+    this.isincome = JSON.parse(localStorage.getItem('isincome') || 'false');
+    this.issalaried = JSON.parse(localStorage.getItem('issalaried') || 'false');
+  }
+
+setValues(isAsset?: boolean, isIncome?: boolean, issalaried?: boolean) {
+    if (isAsset !== undefined) {
+      this.isasset = isAsset;
+      localStorage.setItem('isasset', JSON.stringify(isAsset));
+    }
+
+    if (isIncome !== undefined) {
+      this.isincome = isIncome;
+      localStorage.setItem('isincome', JSON.stringify(isIncome));
+    }
+
+    if (issalaried !== undefined) {
+      this.issalaried = issalaried;
+      localStorage.setItem('issalaried', JSON.stringify(issalaried));
+    }
+  }
+
+
+
   // *************************loan info api*********************************
 
   submitLoanInfo(payload: any, id: string): Observable<ApiResponse<any>> {
@@ -235,7 +262,7 @@ export class Loanformservice {
   }
   getalllenders(): Observable<ApiResponse<any>> {
     return this.http.get<ApiResponse<any>>(
-      `${this.baseUrl}/los/applications/lender-names`,
+      `${this.baseUrl}/v1/los/applications/lender-names`,
     )};
 
   submitliability(data: any, id: string): Observable<ApiResponse<any>> {

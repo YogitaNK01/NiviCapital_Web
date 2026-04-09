@@ -363,9 +363,9 @@ export class Liabilitiesinfo {
       const list = res.data ?? res;
 
       this.selectLenders = list.map((s: any) => ({
-        value: s.partnerId,
-        label: s.partnerName,
-        code: s.partnerCode
+        value: s.id,
+        label: s.lenderName,
+        code: s.lenderName
       }));
 
     });
@@ -673,9 +673,9 @@ removeAccordion(key: any, index: number, event: Event) {
   calculateGrandTotal() {
 
     this.totalloans = this.calculateTotal('loans', 'outstanding');
-    this.totalcc = this.calculateTotal('creditcard', 'ccoutstandingBalance') + this.calculateTotal('creditcard', 'cccreditLimit');
-    this.totalbnpl = this.calculateTotal('bnpl', 'outstandingBalance') + this.calculateTotal('bnpl', 'creditLimit') + this.calculateTotal('bnpl', 'monthlyEMI');
-    this.totalother = this.calculateTotal('other', 'amount') + this.calculateTotal('other', 'MonthlyRepaymentLimit');
+    this.totalcc = this.calculateTotal('creditcard', 'ccoutstandingBalance') ;
+    this.totalbnpl = this.calculateTotal('bnpl', 'outstandingBalance') ;
+    this.totalother = this.calculateTotal('other', 'amount') ;
 
     const total =
       this.totalloans +

@@ -15,13 +15,18 @@ export class Loanstepperservice {
     private applicationId: string | null = null;
      private custName: string | null = null;
      private custARN: string | null = null;
+     
+  isasset: boolean = false;
+  isincome: boolean = false;
+  issalaried: boolean = false;
+
 
     //  steps: any[] = [];
 
       private stepsSubject = new BehaviorSubject<any[]>([]);
   public steps$ = this.stepsSubject.asObservable();
      constructor(private formSvc: Loanformservice,private router: Router) {
-   this.rebuildSteps();
+   this.buildSteps();
 }
  rebuildSteps() {
     this.buildSteps();
@@ -31,7 +36,7 @@ export class Loanstepperservice {
 private buildSteps() {
   
    const baseSteps : Step[] = [
-    { label: 'Loan Info', route: 'loaninfo' },
+    { label: 'Loan Info', route: 'loaninfo' },{ label: 'Income Details', route: 'incomeinfo' },
     { label: 'General Info', route: 'genralinfo' },
     { label: 'Estimated Expense', route: 'expense' },
     { label: 'Additional Info', route: 'additionalinfo' },
@@ -62,6 +67,9 @@ private buildSteps() {
   
   
 }
+
+
+  
 get steps(): Step[] {
     return this.stepsSubject.getValue();
   }
@@ -80,6 +88,14 @@ get steps(): Step[] {
     return [this.applicantId, this.applicationId,this.custName,this.custARN];
   }
   
+  setvalues(isAsset?: boolean, isIncome?: boolean, issalaried?: boolean) {
+  this.formSvc.setValues(isAsset, isIncome, issalaried);
+  this.buildSteps();
+}
+
+  getvalues() {
+    return { isAsset: this.formSvc.isasset, isIncome: this.formSvc.isincome ,issalaried:this.formSvc.issalaried};
+  }
   
   next() {
     const currentRoute = this.router.url.split('?')[0].split('/').pop();;

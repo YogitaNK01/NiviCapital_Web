@@ -120,7 +120,9 @@ export class Incomeinfo {
     return this.incomeForm.controls;
   }
 
-
+removeOtherBusinessDocument(id: number): void {
+    this.otherBusinessSlots = this.otherBusinessSlots.filter(slot => slot.id !== id);
+}
 
   onFileChange(result: UploadResult, key: string,
     subcategory: 'LAST_3_MONTHS' | 'FORM_16' | 'BANK_STATEMENT_1_YEAR' | 'ITR_LAST_3_YEARS' | 'OTHER_INCOME',
@@ -244,7 +246,7 @@ export class Incomeinfo {
   }
 
 
-  getDocumentByKey(key: string): Document | null {
+  getDocumentByKeyold(key: string): Document | null {
     if (!this.allDocuments?.length) return null;
 
     // let doc = this.allDocuments.find(doc => doc.title === key);
@@ -261,7 +263,21 @@ export class Incomeinfo {
     return doc || null;
   }
 
+getDocumentByKey(key: string): Document | null {
+  if (!key || !key.trim() || !this.allDocuments?.length) return null;
 
+  let doc = this.allDocuments.find(d => d.type === key || d.title === key);
+
+  if (!doc) {
+    doc = this.allDocuments.find(d =>
+      (d.type && d.type.includes(key)) ||
+      (d.title && d.title.includes(key)) ||
+      (d.fileName && d.fileName.includes(key))
+    );
+  }
+
+  return doc || null;
+}
 
 
   hasDocument(documentKey: string): boolean {
@@ -352,7 +368,7 @@ export class Incomeinfo {
     this.otherIncomeSlots.push({
       id,
       key: `other_income_${id}`,
-      title: `Other Document ${id}`
+      title: ''
 
     });
   }

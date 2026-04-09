@@ -204,10 +204,17 @@ export class GeneralInfo implements OnInit {
       this.formSvc.isasset = true;
       localStorage.setItem('isasset', JSON.stringify(this.formSvc.isasset));
        this.stepperService.rebuildSteps();
+
+this.stepperService.setvalues(
+    this.formSvc.isasset,
+    this.formSvc.isincome,
+    this.formSvc.issalaried
+  );
     }else{
       this.formSvc.isasset = false;
       localStorage.setItem('isasset', JSON.stringify(this.formSvc.isasset));
       this.stepperService.rebuildSteps();
+      this.stepperService.setvalues(this.formSvc.isasset, this.formSvc.isincome, this.formSvc.issalaried);
     }
    
     console.log(event);
@@ -234,9 +241,12 @@ export class GeneralInfo implements OnInit {
       this.formSvc.isincome = selected?.label === 'Employed' ? true :selected?.label === 'Self-employed' ? true : false;
       console.log('Selected Occupation:', this.formSvc.isincome);
       this.formSvc.issalaried = selected?.label === 'Employed' ? true : false;
-      localStorage.setItem('isincome', JSON.stringify(this.formSvc.isincome));
-      localStorage.setItem('issalaried', JSON.stringify(this.formSvc.issalaried));
       this.stepperService.rebuildSteps();
+      
+this.stepperService.setvalues(
+      this.formSvc.isasset,this.formSvc.isincome,  this.formSvc.issalaried
+    );
+
     });
     }, 1000);
    
