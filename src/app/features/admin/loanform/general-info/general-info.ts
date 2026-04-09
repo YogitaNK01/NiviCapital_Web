@@ -112,18 +112,18 @@ export class GeneralInfo implements OnInit {
     this.getEducationdetails();
     this.getlendingpartnersdetails();
     
-const saved = localStorage.getItem('isasset');
-  if (saved !== null) {
-    const value = JSON.parse(saved);
-    this.formSvc.isasset = value;
-    this.checkboxasset = value ? 'Yes' : 'No';
-  }
+// const saved = localStorage.getItem('isasset');
+//   if (saved !== null) {
+//     const value = JSON.parse(saved);
+//     this.formSvc.isasset = value;
+//     this.checkboxasset = value ? 'Yes' : 'No';
+//   }
 
-  const savedIncome = localStorage.getItem('isincome');
-  if (savedIncome !== null) {
-    const value = JSON.parse(savedIncome);
-    this.formSvc.isincome = value;
-  }
+//   const savedIncome = localStorage.getItem('isincome');
+//   if (savedIncome !== null) {
+//     const value = JSON.parse(savedIncome);
+//     this.formSvc.isincome = value;
+//   }
 
     this.stepperService.rebuildSteps();
     this.registerForm = this.fb.group({

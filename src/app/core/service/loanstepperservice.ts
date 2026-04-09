@@ -80,6 +80,7 @@ get steps(): Step[] {
     return [this.applicantId, this.applicationId,this.custName,this.custARN];
   }
   
+  
   next() {
     const currentRoute = this.router.url.split('?')[0].split('/').pop();;
 

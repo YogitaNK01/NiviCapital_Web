@@ -740,7 +740,7 @@
 
                                 <div class="col-lg-4 col-sm-12">
 
-                                    <app-inputfield label="Title" [required]="true" placeholder="Enter text here" [(ngModel)]="newOtherBusinessTitle" [ngModelOptions]="{ standalone: true }"
+                                    <app-inputfield label="Title" [required]="true" placeholder="Enter text here" [(ngModel)]="slot.title" [ngModelOptions]="{ standalone: true }"
                                         (input)="main.restrictInput($event, 'text');onTitleInput($event)" [maxlength]="25">
                                     </app-inputfield>
 
@@ -783,7 +783,7 @@
 
                                     <app-uploadbtn label="Other Documents" [config]="basicConfig" [required]="true"
                                         [uploadViaApi]="true" [fileuploadresponse]="handleresponse"
-                                        (uploadStarted)="onUploadStarted($event, newOtherBusinessTitle,'BUSINESS', 'OTHER_INCOME', 'OTHER', slot.title)">
+                                        (uploadStarted)="onUploadStarted($event, slot.title,'BUSINESS', 'OTHER_INCOME', 'OTHER', slot.title)">
                                     </app-uploadbtn>
 
                                     }

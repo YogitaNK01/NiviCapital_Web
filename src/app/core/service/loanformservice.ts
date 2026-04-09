@@ -220,7 +220,7 @@ export class Loanformservice {
     
   getalllenders(): Observable<ApiResponse<any>> {
     return this.http.get<ApiResponse<any>>(
-      `${this.baseUrl}/v1/masters/lending-partners`,
+      `${this.baseUrl}/v1/applications/lending-names`,
     )};
 
   // ************************* Liability   *************************

@@ -72,10 +72,10 @@ export class Incomeinfo {
   otherdoc: boolean = false;
 
 
-  otherIncomeSlots: { id: number; key: string,title: string }[] = [];
-  otherBusinessSlots: { id: number; key: string,title: string }[] = [];
+  otherIncomeSlots: { id: number; key: string, title: string }[] = [];
+  otherBusinessSlots: { id: number; key: string, title: string }[] = [];
   private slotCounter = 0;
-newOtherBusinessTitle: string = '';
+  newOtherBusinessTitle: string = '';
 
 
   constructor(private fb: FormBuilder, private stepperService: Loanstepperservice, private cd: ChangeDetectorRef, private msgBox: Msgboxservice, public loanformservice: Loanformservice, private route: ActivatedRoute, public main: Main) { }
@@ -225,7 +225,7 @@ newOtherBusinessTitle: string = '';
 
   getDocumentName(key: any): any {
     const doc = this.getDocumentByKey(key);
-    return doc?.fileName || 'No file uploaded';  // Use fileName!
+    return doc?.fileName || doc?.title || 'No file uploaded';  // Use fileName!
   }
 
 
@@ -235,7 +235,7 @@ newOtherBusinessTitle: string = '';
   }
 
   get allRequiredFilesUploaded(): boolean {
-    if(this.loanformservice.issalaried){
+    if (this.loanformservice.issalaried) {
       return this.requiredDocs.every(key => !!this.getDocumentByKey(key));
     } else {
       return this.requiredBusinessDocs.every(key => !!this.getDocumentByKey(key));
@@ -248,7 +248,7 @@ newOtherBusinessTitle: string = '';
     if (!this.allDocuments?.length) return null;
 
     // let doc = this.allDocuments.find(doc => doc.title === key);
-    let doc = this.allDocuments.find(doc => doc.title === key || doc.type === key);
+    let doc = this.allDocuments.find(doc =>  doc.type === key);
 
     if (!doc) {
       doc = this.allDocuments.find(doc =>
@@ -341,10 +341,10 @@ newOtherBusinessTitle: string = '';
   submit() { }
 
   onTitleInput(event: any) {
-const value = (event.target as HTMLInputElement).value;
-  this.newOtherBusinessTitle = value;
+    const value = (event.target as HTMLInputElement).value;
+    this.newOtherBusinessTitle = value;
 
-}
+  }
 
   addOtherIncomeDocument(): void {
     const id = ++this.slotCounter;
@@ -358,16 +358,13 @@ const value = (event.target as HTMLInputElement).value;
   }
 
   addOtherBusinessDocument(): void {
-    
-//  if (!this.newOtherBusinessTitle?.trim()) {
-//     return; 
-//   }
+
 
     const id = ++this.slotCounter;
     this.otherBusinessSlots.push({
       id,
       key: `other_business_${id}`,
-      title: `other_business_${id}`
+      title: ''
 
     });
     // this.newOtherBusinessTitle = '';
@@ -388,11 +385,12 @@ const value = (event.target as HTMLInputElement).value;
     this.stepperService.previous();
   }
   next() {
-this.stepperService.next();
-
-
-  }
-
+  console.log('allRequiredFilesUploaded:', this.allRequiredFilesUploaded);
+  if(this.allRequiredFilesUploaded) {
    
+  this.stepperService.next();
+}}
+
+
 }
 

@@ -2,7 +2,7 @@
     <div class="base-layout base-height">
 
         <div class="row w-100 d-flex blue-head-box text-center">
-            <p class="text-dp-3-bold">Total Expense : ₹10,00,00 </p>
+            <p class="text-dp-3-bold">Total Expense :{{ totalINRamt | currency:'INR' }} </p>
         </div>
         <div class="row w-100 ">
             <div class=" d-flex  ">
@@ -215,10 +215,13 @@
                             <div class="form-group mb-3">
 
 
-                                <app-dropdown [options]="otherExpenses" formControlName="type" name="type"
+                                <!-- <app-dropdown [options]="otherExpenses" formControlName="type" name="type"
                                     [placeholder]="'Select type'" [avatarUrl]="avatarUrl" [hasAvatar]="hasAvatar"
                                     [label]="'Expense '+(i+1)">
-                                </app-dropdown>
+                                </app-dropdown> -->
+                                 <app-inputfield type="text"  [label]="'Expense '+(i+1)" formControlName="type" name="type"
+                                    placeholder="Enter name">
+                                </app-inputfield>
 
                             </div>
                         </div>

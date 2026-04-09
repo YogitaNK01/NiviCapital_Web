@@ -108,9 +108,10 @@
                                 (input)="handleAmountInput($event,'gold.goldvalue')" formControlName="goldvalue"
                                 placeholder="Enter Value" helpText="Help text" name="goldvalue">
                             </app-inputfield> -->
-                              <app-inputfield type="text" [required]="true" label="Value INR" [required]="true"
-                                (input)=" main.restrictInput($event, 'decimal');formatAmount($event,'gold.goldvalue')" formControlName="goldvalue"
-                                placeholder="Enter Value" helpText="Help text" name="goldvalue">
+                            <app-inputfield type="text" [required]="true" label="Value INR" [required]="true"
+                                (input)=" main.restrictInput($event, 'decimal');formatAmount($event,'gold.goldvalue')"
+                                formControlName="goldvalue" placeholder="Enter Value" helpText="Help text"
+                                name="goldvalue">
                             </app-inputfield>
 
                             <div class="text-danger"
@@ -136,7 +137,8 @@
                         <div class="form-group mb-3">
                             <app-inputfield type="text" [required]="true" label="Cash In Hand (INR)" [required]="true"
                                 formControlName="cashinhand" placeholder="Enter Value" helpText="Help text"
-                                (input)="main.restrictInput($event, 'decimal');formatAmount($event,'liquidAssets.cashinhand')" name="cashinhand">
+                                (input)="main.restrictInput($event, 'decimal');formatAmount($event,'liquidAssets.cashinhand')"
+                                name="cashinhand">
                             </app-inputfield>
                             <div class="text-danger"
                                 *ngIf="control('liquidAssets.cashinhand')?.touched && control('liquidAssets.cashinhand')?.invalid">
@@ -151,8 +153,8 @@
                         <div class="form-group mb-3">
                             <app-inputfield type="text" label="Savings Account Balance (INR)" [required]="true"
                                 placeholder="Enter Value" formControlName="savingbalance"
-                                (input)="main.restrictInput($event, 'decimal');formatAmount($event,'liquidAssets.savingbalance')" helpText="Help text"
-                                name="savingbalance">
+                                (input)="main.restrictInput($event, 'decimal');formatAmount($event,'liquidAssets.savingbalance')"
+                                helpText="Help text" name="savingbalance">
                             </app-inputfield>
                             <div class="text-danger"
                                 *ngIf="control('liquidAssets.savingbalance')?.touched && control('liquidAssets.savingbalance')?.invalid">
@@ -349,6 +351,11 @@
                                             <div *ngIf="fd.get('bankamt')?.errors?.['required']">
                                                 Amount is required
                                             </div>
+
+                                            <div *ngIf="fd.get('bankamt')?.errors?.['zeroNotAllowed']">
+                                                Amount cannot be zero
+                                            </div>
+
                                         </div>
                                     </div>
                                 </div>
@@ -437,12 +444,23 @@
                         <ng-container *ngFor="let inv of investmentsArray.controls; let i = index" [formGroupName]="i">
 
                             <!-- <div class="mt-20"> -->
-                            <div *ngIf="inv.get('type')?.value !== 'Others'" class="col-12 col-md-6 col-lg-3 mt-20">
+                            <div *ngIf="inv.get('type')?.value !== 'Others'" class="col-lg-3 col-md-6  mt-20">
 
                                 <app-inputfield type="text" [label]="inv.get('type')?.value + ' (INR)'"
                                     formControlName="value" placeholder="Enter value" [required]="true"
-                                    (input)="handleAmountInput($event,'value',inv)">
+                                    (input)="handleAmountInput($event,'value',inv)" name="value">
+                                  
                                 </app-inputfield>
+                                  <div class="text-danger"
+                                        *ngIf="inv.get('value')?.touched && inv.get('value')?.invalid">
+                                        <div *ngIf="inv.get('value')?.errors?.['required']">
+                                            Amount is required
+                                        </div>
+                                        <div *ngIf="inv.get('value')?.errors?.['zeroNotAllowed']">
+                                            Amount cannot be zero  
+                                        </div>
+
+                                    </div>
                             </div>
                             <!-- </div> -->
                         </ng-container>
@@ -456,15 +474,25 @@
                                     </app-inputfield>
 
 
+
                                 </div>
 
                                 <div class="col-12 col-md-6">
 
                                     <app-inputfield type="text" label="Amount (INR)" formControlName="value"
-                                        [required]="true" placeholder="Enter value"
+                                        [required]="true" placeholder="Enter value" name="value"
                                         (input)="handleAmountInput($event,'value',inv)">
                                     </app-inputfield>
+                                    <div class="text-danger"
+                                        *ngIf="inv.get('value')?.touched && inv.get('value')?.invalid">
+                                        <div *ngIf="inv.get('value')?.errors?.['required']">
+                                            Amount is required
+                                        </div>
+                                        <div *ngIf="inv.get('value')?.errors?.['zeroNotAllowed']">
+                                            Amount cannot be zero  
+                                        </div>
 
+                                    </div>
                                 </div>
                             </div>
 

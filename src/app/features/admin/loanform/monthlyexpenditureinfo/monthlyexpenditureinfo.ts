@@ -204,7 +204,7 @@ export class Monthlyexpenditureinfo {
     console.log(this.monthlyExpenditureForm.value);
   }
 
-  removeAccordion(key: string, index: number, event: Event) {
+  removeAccordion1(key: string, index: number, event: Event) {
 
     event.stopPropagation();
 
@@ -217,24 +217,47 @@ export class Monthlyexpenditureinfo {
     this.monthlyExpenditureForm.get(key)?.reset();
 
   }
-  removeAccordion1(key: string, index: number, event: Event) {
-    event.stopPropagation();
+ 
+removeAccordion(key: string, index: number, event: Event) {
 
-    this.selectedexpenditure =
-      this.selectedexpenditure.filter(k => k !== key);
+ event.stopPropagation();
 
-    this.openIndex =
-      this.openIndex.filter(i => i !== index);
+this.selectedexpenditure = this.selectedexpenditure.filter(k => k !== key);
 
-    const groupName = this.fieldMap[key];
+ this.openIndex = this.openIndex.filter(i => i !== index);
 
-    if (groupName === 'other') {
-      this.other.clear();
-      this.other.push(this.createOther());
-    } else {
-      this.monthlyExpenditureForm.get(groupName)?.reset();
-    }
-  }
+ const formKey = this.fieldMap[key]?.form;
+
+ if (!formKey) return;
+
+ const control = this.monthlyExpenditureForm.get(formKey);
+
+ if (control instanceof FormGroup) {
+ control.reset(
+ Object.keys(control.controls).reduce((acc, k) => {
+
+acc[k] = '';
+
+ return acc;
+
+ }, {} as any)
+);
+
+ } else if (control instanceof FormArray) {
+ control.clear();
+
+ if (formKey === 'other') {
+ control.push(this.createOther());
+
+ }
+ }
+
+ this.cd.detectChanges();
+
+}
+
+
+
 
 
   calculateGrandTotal() {
@@ -512,13 +535,15 @@ export class Monthlyexpenditureinfo {
 
     let invalid = false;
 
+    const cleanAmount = (val: any) =>
+      val ? Number(val.toString().replace(/,/g, '')) : 0;
     const addItem = (code: string, value: any, extra: any = null) => {
       if (!value) return;
 
       items.push({
         expenseType: code,
         // amountInr: Number(value),
-        amountInr: Number(value.toString().replace(/,/g, '')),
+        amountInr: cleanAmount(value),
         ...extra
       });
     };

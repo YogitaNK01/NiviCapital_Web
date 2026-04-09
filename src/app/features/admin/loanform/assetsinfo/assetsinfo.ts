@@ -89,6 +89,7 @@ export class Assetsinfo implements OnInit {
   totalinvestment = 0;
 
   selectedbakname!: string;
+  invalidamt: boolean= false;;
 
   constructor(private fb: FormBuilder, public main: Main, private route: ActivatedRoute, private msgBox: Msgboxservice,
     private stepperService: Loanstepperservice, private formSvc: Loanformservice, private cd: ChangeDetectorRef) { }
@@ -197,7 +198,7 @@ export class Assetsinfo implements OnInit {
     return this.fb.group({
       bankname: [''],
       title: [''],
-      bankamt: ['', Validators.required],
+      bankamt: ['', [Validators.required,this.nonZeroValidator]],
       maturitydate: ['', [Validators.required, this.dateMinValidator(() => new Date())]]
     });
   }
@@ -212,14 +213,14 @@ export class Assetsinfo implements OnInit {
       return this.fb.group({
         type: [type, Validators.required],
         name: ['', Validators.required],
-        value: ['', Validators.required]
+        value: ['', [Validators.required,this.nonZeroValidator]]
       });
     }
 
 
     return this.fb.group({
       type: [type, Validators.required],
-      value: ['', Validators.required]
+       value: ['', [Validators.required,this.nonZeroValidator]]
     });
   }
 
@@ -361,10 +362,11 @@ export class Assetsinfo implements OnInit {
     // this.main.restrictInput(event, 'decimal')
     if (ctrl) {
       this.formatAmountfromarray(event, controlName, ctrl);
+      ctrl.get(controlName)?.markAsTouched();
+
     } else {
       this.formatAmount(event, controlName);
     }
-
 
   }
 
@@ -848,9 +850,7 @@ export class Assetsinfo implements OnInit {
 
     return total;
   }
-  formatIndian1(x: string): string {
-    return new Intl.NumberFormat('en-IN').format(Number(x));
-  }
+ 
 
   // Add this getter to your component
   get isNextDisabled(): boolean {
@@ -948,6 +948,15 @@ export class Assetsinfo implements OnInit {
     };
   };
 
+  nonZeroValidator(control: any) {
+  const raw = control.value;
+
+  if (!raw) return null;
+
+  const numeric = Number(raw.toString().replace(/,/g, ''));
+
+  return numeric === 0 ? { zeroNotAllowed: true } : null;
+}
   patchAssetsData() {
     const data = this.formSvc.aseetsInfoData;
 
@@ -1081,10 +1090,12 @@ export class Assetsinfo implements OnInit {
 
       items.push({
         assetItemMasterId: this.assetCodeMap[code],
-        valueInr: Number(value),
+        valueInr: cleanAmount(value),
         ...extra
       });
     };
+      const cleanAmount = (val: any) =>
+      val ? Number(val.toString().replace(/,/g, '')) : 0;
 
     const markInvalid = (path: string) => {
       this.assetsForm.get(path)?.markAsTouched();
@@ -1144,6 +1155,7 @@ export class Assetsinfo implements OnInit {
             console.log('Fixed Deposit true:'); return
 
           } else {
+            
             addItem('FIXED_DEPOSIT', ctrl.value.bankamt, {
               bankName: ctrl.value.bankname,
               ...(this.isOtherSelected(ctrl) && { title: ctrl.value.title }),
@@ -1178,7 +1190,7 @@ export class Assetsinfo implements OnInit {
           }
 
           const type = ctrl.value.type;
-          const amount = ctrl.value.value;
+          const amount = ctrl.value.value?ctrl.value.value:ctrl.value.value1;
 
           if (type === 'Others') {
             addItem('OTHER_ASSETS', amount, {
@@ -1211,7 +1223,8 @@ export class Assetsinfo implements OnInit {
         }
       });
     }
-    if (invalid) { console.log("invalid--"); return; }
+    if (invalid || this.invalidamt === true) 
+      { console.log("invalid--"); return; }
 
 
 
