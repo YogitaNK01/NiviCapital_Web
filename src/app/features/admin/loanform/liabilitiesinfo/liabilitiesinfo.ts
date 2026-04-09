@@ -66,29 +66,17 @@ export class Liabilitiesinfo {
 
 
   fieldMap: any = {
-    ExistingLoans: {
-      form: 'loans',
-      api: 'Existing_Loans'
-    },
-    CreditCardOutstanding: {
-      form: 'creditcard',
-      api: 'Credit_Card_Outstanding'
-    },
-    BuyNowPayLater: {
-      form: 'bnpl',
-      api: 'Buy_Now_Pay_Later'
-    },
-    OtherLiabilities: {
-      form: 'other',
-      api: 'Other_Liabilities'
-    },
-  }
-  private liabilityFormMap: Record<string, string> = {
-  'EXISTING_LOAN': 'loans',
-  'CREDIT_CARD_OUTSTANDING': 'creditcard',
-  'BNPL': 'bnpl',
-  'OTHER_LIABILITY': 'other'
+  ExistingLoans: { form: 'loans', api: 'Existing_Loans' },
+  CreditCardOutstanding: { form: 'creditcard', api: 'Credit_Card_Outstanding' },
+  BuyNowPayLater: { form: 'bnpl', api: 'Buy_Now_Pay_Later' },
+  OtherLiabilities: { form: 'other', api: 'Other_Liabilities' }
 };
+  private liabilityFormMap: Record<string, string> = {
+    'EXISTING_LOAN': 'loans',
+    'CREDIT_CARD_OUTSTANDING': 'creditcard',
+    'BNPL': 'bnpl',
+    'OTHER_LIABILITY': 'other'
+  };
 
   selectedloantype: string[] = [];
   loanoptions: DropdownOption[] = [];
@@ -407,57 +395,57 @@ export class Liabilitiesinfo {
     console.log(this.liabilityForm.value);
   }
 
- 
-  
-removeAccordion(key: any, index: number, event: Event) {
-  this.msgBox.open({
-    title: 'Are you sure want to Remove',
-    showCancel: true,
-    onOk: () => {
-      event.stopPropagation();
 
-      const code = key.code;
 
-      //  Remove from selected liabilities
-      this.selectedliabilities = this.selectedliabilities.filter(
-        (k: any) => k.code !== code
-      );
-      //  Close accordion
-      this.openIndex = this.openIndex.filter(i => i !== index);
+  removeAccordion(key: any, index: number, event: Event) {
+    this.msgBox.open({
+      title: 'Are you sure want to Remove',
+      showCancel: true,
+      onOk: () => {
+        event.stopPropagation();
 
-      // Clear correct FormArray
-      const formName = this.liabilityFormMap[code]; 
-      const control = formName ? this.liabilityForm.get(formName) : null;
+        const code = key.code;
 
-      if (control instanceof FormArray) {
-        control.clear();
+        //  Remove from selected liabilities
+        this.selectedliabilities = this.selectedliabilities.filter(
+          (k: any) => k.code !== code
+        );
+        //  Close accordion
+        this.openIndex = this.openIndex.filter(i => i !== index);
 
-        //  Re-add empty row (CRITICAL)
-        switch (formName) {
-          case 'loans':
-            control.push(this.createLoan(''));
-            break;
-          case 'creditcard':
-            control.push(this.createCreditcard());
-            break;
-          case 'bnpl':
-            control.push(this.createBNPL());
-            break;
-          case 'other':
-            control.push(this.createOther());
-            break;
+        // Clear correct FormArray
+        const formName = this.liabilityFormMap[code];
+        const control = formName ? this.liabilityForm.get(formName) : null;
+
+        if (control instanceof FormArray) {
+          control.clear();
+
+          //  Re-add empty row (CRITICAL)
+          switch (formName) {
+            case 'loans':
+              control.push(this.createLoan(''));
+              break;
+            case 'creditcard':
+              control.push(this.createCreditcard());
+              break;
+            case 'bnpl':
+              control.push(this.createBNPL());
+              break;
+            case 'other':
+              control.push(this.createOther());
+              break;
+          }
         }
-      }
 
-      control?.markAsPristine();
-      control?.markAsUntouched();
-      control?.updateValueAndValidity();
+        control?.markAsPristine();
+        control?.markAsUntouched();
+        control?.updateValueAndValidity();
 
-      this.cd.detectChanges();
-    },
-    message: ''
-  });
-}
+        this.cd.detectChanges();
+      },
+      message: ''
+    });
+  }
 
   handleEmptyAccordion(type: 'loantype' | 'creditcard' | 'bnpl' | 'other') {
     let array: FormArray;
@@ -673,9 +661,9 @@ removeAccordion(key: any, index: number, event: Event) {
   calculateGrandTotal() {
 
     this.totalloans = this.calculateTotal('loans', 'outstanding');
-    this.totalcc = this.calculateTotal('creditcard', 'ccoutstandingBalance') ;
-    this.totalbnpl = this.calculateTotal('bnpl', 'outstandingBalance') ;
-    this.totalother = this.calculateTotal('other', 'amount') ;
+    this.totalcc = this.calculateTotal('creditcard', 'ccoutstandingBalance');
+    this.totalbnpl = this.calculateTotal('bnpl', 'outstandingBalance');
+    this.totalother = this.calculateTotal('other', 'amount');
 
     const total =
       this.totalloans +
@@ -881,7 +869,6 @@ removeAccordion(key: any, index: number, event: Event) {
         this.loans.push(group);
       }
 
-      // ---------------- CREDIT CARD ----------------
       if (item.type === 'CREDIT_CARD') {
 
         this.selectedliabilities.push('CreditCardOutstanding');
@@ -952,7 +939,105 @@ removeAccordion(key: any, index: number, event: Event) {
     this.stepperService.previous();
   }
 
+ get isNextDisabled(): boolean {
+  if (!this.selectedliabilities?.length) {
+    return true;
+  }
 
+  return !(
+    this.hasValidLoans() ||
+    this.hasValidCreditCards() ||
+    this.hasValidBNPL() ||
+    this.hasValidOther()
+  );
+}
+
+private hasValidLoans(): boolean {
+  return this.loans.controls.some(c => 
+    c.get('outstanding')?.valid && 
+    c.get('bankname')?.valid
+  );
+}
+
+private hasValidCreditCards(): boolean {
+  return this.creditcard.controls.some(c => 
+    c.get('ccoutstandingBalance')?.valid && 
+    c.get('creditcardbankName')?.valid
+    // ✅ Ignore title validation for button enablement
+  );
+}
+
+private hasValidBNPL(): boolean {
+  return this.bnpl.controls.some(c => 
+    c.get('outstandingBalance')?.valid && 
+    c.get('bnplbankName')?.valid
+  );
+}
+
+private hasValidOther(): boolean {
+  return this.other.controls.some(c => 
+    c.get('amount')?.valid && 
+    c.get('LiabilityType')?.valid
+  );
+}
+  get isNextDisabled1(): boolean {
+
+    if (!this.selectedliabilities?.length) {
+      return true;
+    }
+
+    // normalize labels
+    const labels = this.selectedliabilityLabel
+      ?.split(',')
+      .map(l =>
+        l
+          .replace(/\(.*?\)/g, '')   // remove (BNPL)
+          .trim()
+          .toLowerCase()
+      ) || [];
+
+    // ✅ Existing Loans
+    if (labels.includes('existing loans')) {
+      if (
+        this.loans.length > 0 &&
+        this.loans.controls.some(ctrl => ctrl.valid)
+      ) {
+        return false;
+      }
+    }
+
+    // ✅ Credit Card
+    if (labels.includes('credit card outstanding')) {
+      if (
+        this.creditcard.length > 0 &&
+        this.creditcard.controls.some(ctrl => ctrl.valid)
+      ) {
+        return false;
+      }
+    }
+
+    // ✅ BNPL
+    if (labels.includes('buy now pay later')) {
+      if (
+        this.bnpl.length > 0 &&
+        this.bnpl.controls.some(ctrl => ctrl.valid)
+      ) {
+        return false;
+      }
+    }
+
+    // ✅ Other Liabilities
+    if (labels.includes('other liabilities')) {
+      if (
+        this.other.length > 0 &&
+        this.other.controls.some(ctrl => ctrl.valid)
+      ) {
+        return false;
+      }
+    }
+
+    return true; // disable if nothing valid
+  }
 
   next() {
     let form = this.liabilityForm.value
@@ -980,7 +1065,6 @@ removeAccordion(key: any, index: number, event: Event) {
     };
 
     //  EXISTING LOANS
-    // if (this.selectedliabilities.includes('EXISTING_LOAN')) {
     if (this.selectedliabilities.some((l: any) => l.code === 'EXISTING_LOAN')) {
 
       if (this.loans.length === 0) {
@@ -1028,7 +1112,6 @@ removeAccordion(key: any, index: number, event: Event) {
 
 
     //  BNPL
-    // if (this.selectedliabilities.includes('BNPL')) {
     if (this.selectedliabilities.some((l: any) => l.code === 'BNPL')) {
       if (this.bnpl.length === 0) invalid = true;
 
@@ -1085,6 +1168,10 @@ removeAccordion(key: any, index: number, event: Event) {
           this.formSvc.liabilitiesInfoData = payload
           this.stepperService.next();
         }
+      },
+      error: (err) => {
+        console.error('Submit failed:', err);
+        this.msgBox.open({ title: 'Submission failed', message: err.message });
       }
     });
 

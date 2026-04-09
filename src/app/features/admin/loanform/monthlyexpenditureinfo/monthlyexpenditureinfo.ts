@@ -137,16 +137,16 @@ export class Monthlyexpenditureinfo {
 
     });
 
-   
+
     if (this.formSvc.monthlyExpenditureData) {
       this.patchMonthlyExpenditure();
     }
 
     this.monthlyExpenditureForm.valueChanges
-  .pipe(debounceTime(200))
-  .subscribe(() => {
-    this.calculateGrandTotal();
-  });
+      .pipe(debounceTime(200))
+      .subscribe(() => {
+        this.calculateGrandTotal();
+      });
 
   }
 
@@ -217,44 +217,44 @@ export class Monthlyexpenditureinfo {
     this.monthlyExpenditureForm.get(key)?.reset();
 
   }
- 
-removeAccordion(key: string, index: number, event: Event) {
 
- event.stopPropagation();
+  removeAccordion(key: string, index: number, event: Event) {
 
-this.selectedexpenditure = this.selectedexpenditure.filter(k => k !== key);
+    event.stopPropagation();
 
- this.openIndex = this.openIndex.filter(i => i !== index);
+    this.selectedexpenditure = this.selectedexpenditure.filter(k => k !== key);
 
- const formKey = this.fieldMap[key]?.form;
+    this.openIndex = this.openIndex.filter(i => i !== index);
 
- if (!formKey) return;
+    const formKey = this.fieldMap[key]?.form;
 
- const control = this.monthlyExpenditureForm.get(formKey);
+    if (!formKey) return;
 
- if (control instanceof FormGroup) {
- control.reset(
- Object.keys(control.controls).reduce((acc, k) => {
+    const control = this.monthlyExpenditureForm.get(formKey);
 
-acc[k] = '';
+    if (control instanceof FormGroup) {
+      control.reset(
+        Object.keys(control.controls).reduce((acc, k) => {
 
- return acc;
+          acc[k] = '';
 
- }, {} as any)
-);
+          return acc;
 
- } else if (control instanceof FormArray) {
- control.clear();
+        }, {} as any)
+      );
 
- if (formKey === 'other') {
- control.push(this.createOther());
+    } else if (control instanceof FormArray) {
+      control.clear();
 
- }
- }
+      if (formKey === 'other') {
+        control.push(this.createOther());
 
- this.cd.detectChanges();
+      }
+    }
 
-}
+    this.cd.detectChanges();
+
+  }
 
 
 
@@ -310,14 +310,14 @@ acc[k] = '';
     return total;
   }
 
-   handleAmountInput(event: any, controlName: string, ctrl?: any) {
+  handleAmountInput(event: any, controlName: string, ctrl?: any) {
     this.main.restrictInput(event, 'decimal');
     if (ctrl) {
       this.formatAmountfromarray(event, controlName, ctrl);
     } else {
       this.formatAmount(event, controlName);
     }
-   
+
 
 
   }
@@ -515,6 +515,48 @@ acc[k] = '';
     return predefined.includes(val) ? val : 'Other';
   }
 
+  get isNextDisabled(): boolean {
+    const form = this.monthlyExpenditureForm.value;
+
+    // nothing selected at all
+    if (!this.selectedexpenditure?.length) {
+      return true;
+    }
+
+    for (const key of this.selectedexpenditure) {
+      const config = this.fieldMap[key];
+      if (!config) continue;
+
+      const groupName = config.form;
+      const groupValue = form[groupName];
+
+      // Utilities
+      if (groupName === 'utilities') {
+        if (groupValue?.utilityvalue1 || groupValue?.utilityvalue2) {
+          return false; // ✅ enable Next
+        }
+      }
+
+      // Other recurring
+      else if (groupName === 'other') {
+        if (
+          Array.isArray(groupValue) &&
+          groupValue.some((item: any) => item?.type && item?.amount)
+        ) {
+          return false;
+        }
+      }
+
+      // Normal dropdown groups
+      else {
+        if (groupValue && Object.values(groupValue).some(v => !!v)) {
+          return false;
+        }
+      }
+    }
+
+    return true;
+  }
   back() {
     this.stepperService.previous();
   }
@@ -522,11 +564,6 @@ acc[k] = '';
 
   next() {
 
-
-    //   if (!this.monthlyExpenditureForm.valid) {
-    //   console.log("form invalid");
-    //   return;
-    // }
 
     let form = this.monthlyExpenditureForm.value;
     console.log("form", form);
@@ -537,6 +574,7 @@ acc[k] = '';
 
     const cleanAmount = (val: any) =>
       val ? Number(val.toString().replace(/,/g, '')) : 0;
+
     const addItem = (code: string, value: any, extra: any = null) => {
       if (!value) return;
 
@@ -570,7 +608,7 @@ acc[k] = '';
         } as const
 
         (Object.keys(map) as Array<keyof typeof map>).forEach(key => {
-          const val = groupValue[key];
+          const val = groupValue?.[key];
 
           if (!val) {
             this.monthlyExpenditureForm.get(`utilities.${key}`)?.markAsTouched();
@@ -583,6 +621,13 @@ acc[k] = '';
       }
 
       if (groupName === 'other') {
+        
+if (!groupValue || groupValue.length === 0) {
+        this.other.markAllAsTouched();
+        invalid = true;
+        return;
+      }
+
         groupValue.forEach((item: any, i: number) => {
           const type = item.type === 'Other' ? item.customType : item.type;
 
@@ -614,7 +659,7 @@ acc[k] = '';
       }
     });
 
-    // if (invalid) return;
+    if (invalid) return;
 
     const payload = { items };
 

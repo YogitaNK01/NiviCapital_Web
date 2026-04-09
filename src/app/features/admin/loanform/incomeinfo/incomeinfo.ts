@@ -121,12 +121,23 @@ export class Incomeinfo {
   }
 
   removeOtherDocument(type: 'other' | 'otherbusiness', id: number): void {
+     this.msgBox.open({
+      title: 'Are you sure want to Remove',
+      message: '',
+      showCancel: true,
+      onOk: () => {
+       
 
-    if (type === 'other') {
+        if (type === 'other') {
       this.otherIncomeSlots = this.otherIncomeSlots.filter(slot => slot.id !== id);
     } else {
       this.otherBusinessSlots = this.otherBusinessSlots.filter(slot => slot.id !== id);
     }
+
+      }
+    });
+
+
   }
 
   onFileChange(result: UploadResult, key: string,

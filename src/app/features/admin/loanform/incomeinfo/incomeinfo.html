@@ -321,165 +321,113 @@
 
 
 
-                <!-- <div class="row  d-flex flex-column">
-                    <div class="text-label fw-bold mt-20">Other Documents</div>
 
-                    <hr class="hrclass">
-                    <div class=" mt-20 info-box">
-                        <div class="col-lg-4 col-sm-12">
-                            <p class="text-label">You can add extra documents here:</p>
-
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-lg-4 col-sm-12 mt-20">
-                            <app-inputfield formControlName="assettitle" label="Title" placeholder="Enter text here"
-                                (input)="main.restrictInput($event, 'text')" [maxlength]="25">
-                            </app-inputfield>
-
-
-                            <div class="text-danger" *ngIf="f['assettitle'].touched && f['assettitle'].invalid">
-
-                                <div *ngIf="f['title'].errors?.['minlength']">
-                                    Minimum 2 characters required
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="col-lg-4 col-sm-12 mt-20">
-                            @if(handleresponse && hasDocument('other')){
-                            <label class="text-label">Other Documents<span class="text-danger">*</span></label>
-                            <div class="addcust-img-box mt-2">
-                                <p class="text-label">{{ getDocumentName('other') }}</p>
-                                <div class="icons">
-                                    <span class="view" (click)="viewImage(getDocumentUrl('other'))"><img
-                                            src="/assets/images/icons/eyered.svg" alt="view"></span>
-                                    <span class="download"
-                                        (click)="downloadImage(getDocumentUrl('other'), getDocumentName('other'))"><img
-                                            src="/assets/images/icons/import-red.svg" alt="Download"></span>
-                                    <span class="delete" (click)="deleteImage('other')"><img src="/assets/images/icons/close.svg"
-                                            alt="Download"></span>
-                                </div>
-                            </div>
-
-                            } @else{
-                            <app-uploadbtn [config]="basicConfig"
-                                (uploadStarted)="onUploadStarted($event,  'other' ,'OTHER','OTHER_INCOME','OTHER')"
-                                [uploadViaApi]="true" [fileuploadresponse]="handleresponse" [required]="true"
-                                label="Other Documents">
-                            </app-uploadbtn>}
-                        </div>
-                    </div>
-                    <div class="col-lg-4 col-sm-12 mt-20">
-                        <app-buttons label="Add Other Document" class="btn btn-icon Add btncustomClass" [outline]="true"
-                            (click)="addotherdocuments()">
-                            <img src="/assets/images/icons/addred.svg" alt="Add">
-
-                        </app-buttons>
-                    </div>
-                </div> -->
-               
                 <div class="row d-flex flex-column">
                     <div class="text-label fw-bold mt-20">Other Documents</div>
                     <hr class="hrclass">
-
+                    <div class=" mt-20 info-box">
+                        <div class="col-lg-6 col-sm-12">
+                            <p class="text-label">You can add extra documents here
+                            </p>
+                        </div>
+                    </div>
+                   <div class="row d-flex flex-column">
                     <div class="row">
                         @for (slot of otherIncomeSlots; track slot.id) {
 
-                             <div class="row mt-20 row  d-flex  align-items-start ">
+                        <div class="row mt-20 row  d-flex  align-items-start ">
 
 
-                                <div class="col-lg-4 col-sm-12">
+                            <div class="col-lg-4 col-sm-12">
 
-                                    <app-inputfield label="Title" [required]="true" placeholder="Enter text here" [(ngModel)]="slot.title" [ngModelOptions]="{ standalone: true }"
-                                        (input)="main.restrictInput($event, 'text')" [maxlength]="25">
-                                    </app-inputfield>
+                                <app-inputfield label="Title" [required]="true" placeholder="Enter text here"
+                                    [(ngModel)]="slot.title" [ngModelOptions]="{ standalone: true }"
+                                    (input)="main.restrictInput($event, 'text')" [maxlength]="25">
+                                </app-inputfield>
 
-                                    <div class="text-danger" *ngIf="f['assettitle'].touched && f['assettitle'].invalid">
+                                <div class="text-danger" *ngIf="f['assettitle'].touched && f['assettitle'].invalid">
 
-                                        <div *ngIf="f['title'].errors?.['minlength']">
-                                            Minimum 2 characters required
-                                        </div>
+                                    <div *ngIf="f['title'].errors?.['minlength']">
+                                        Minimum 2 characters required
                                     </div>
                                 </div>
-                        <div class="col-lg-4 col-sm-12 mt-20">
-
-                            @if (handleresponse && getDocumentByKey( slot.title)) {
-
-                            <label class="text-label">
-                                Other Document {{ slot.id }}
-                            </label>
-
-                            <div class="addcust-img-box mt-2">
-                                <p class="text-label">
-                                    {{ getDocumentName(slot.title) }}
-                                </p>
-
-                                <div class="icons">
-                                    <span class="view" (click)="viewImage(getDocumentUrl(slot.title))">
-                                        <img src="/assets/images/icons/eyered.svg">
-                                    </span>
-
-                                        <span class="download" (click)="downloadImage(getDocumentUrl(slot.title), getDocumentName(slot.title))">
-                                        <img src="/assets/images/icons/import-red.svg">
-                                    </span>
-
-                                    <span class="delete" (click)="deleteImage(slot.title)">
-                                        <img src="/assets/images/icons/close.svg">
-                                    </span>
-                                </div>
                             </div>
+                            <div class="col-lg-4 col-sm-12 ">
 
-                            } @else {
+                                @if (handleresponse && getDocumentByKey( slot.title)) {
+
+                               
+
+                                <div class="addcust-img-box mt-2">
+                                    <p class="text-label">
+                                        {{ getDocumentName(slot.title) }}
+                                    </p>
+
+                                    <div class="icons">
+                                        <span class="view" (click)="viewImage(getDocumentUrl(slot.title))">
+                                            <img src="/assets/images/icons/eyered.svg">
+                                        </span>
+
+                                        <span class="download"
+                                            (click)="downloadImage(getDocumentUrl(slot.title), getDocumentName(slot.title))">
+                                            <img src="/assets/images/icons/import-red.svg">
+                                        </span>
+
+                                        <span class="delete" (click)="deleteImage(slot.title)">
+                                            <img src="/assets/images/icons/close.svg">
+                                        </span>
+                                    </div>
+                                </div>
+
+                                } @else {
 
 
 
-                            <app-uploadbtn [config]="basicConfig"
-                                (uploadStarted)="onUploadStarted($event,  slot.title,'OTHER' ,'OTHER_INCOME','OTHER')"  [disabled]="!slot.title && slot.title.trim().length === 0"
-                                [uploadViaApi]="true" [fileuploadresponse]="handleresponse" [required]="true"
-                                label="Other Documents">
-                            </app-uploadbtn>
+                                <app-uploadbtn [config]="basicConfig"
+                                    (uploadStarted)="onUploadStarted($event,  slot.title,'OTHER' ,'OTHER_INCOME','OTHER')"
+                                    [disabled]="!slot.title && slot.title.trim().length === 0" [uploadViaApi]="true"
+                                    [fileuploadresponse]="handleresponse" [required]="true" label="Other Documents">
+                                </app-uploadbtn>
 
-                            }
+                                }
+
+                            </div>
+                            <div class="col-lg-4 d-flex justify-content-end align-items-end mt-5">
+                                <span class="delete d-none d-lg-block" (click)="removeOtherDocument('other',slot.id)">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                                        fill="none">
+                                        <path
+                                            d="M21 5.98047C17.67 5.65047 14.32 5.48047 10.98 5.48047C9 5.48047 7.02 5.58047 5.04 5.78047L3 5.98047"
+                                            stroke="#25262F" stroke-width="1.5" stroke-linecap="round"
+                                            stroke-linejoin="round" />
+                                        <path
+                                            d="M8.5 4.97L8.72 3.66C8.88 2.71 9 2 10.69 2H13.31C15 2 15.13 2.75 15.28 3.67L15.5 4.97"
+                                            stroke="#25262F" stroke-width="1.5" stroke-linecap="round"
+                                            stroke-linejoin="round" />
+                                        <path
+                                            d="M18.8484 9.14062L18.1984 19.2106C18.0884 20.7806 17.9984 22.0006 15.2084 22.0006H8.78844C5.99844 22.0006 5.90844 20.7806 5.79844 19.2106L5.14844 9.14062"
+                                            stroke="#25262F" stroke-width="1.5" stroke-linecap="round"
+                                            stroke-linejoin="round" />
+                                        <path d="M10.3281 16.5H13.6581" stroke="#25262F" stroke-width="1.5"
+                                            stroke-linecap="round" stroke-linejoin="round" />
+                                        <path d="M9.5 12.5H14.5" stroke="#25262F" stroke-width="1.5"
+                                            stroke-linecap="round" stroke-linejoin="round" />
+                                    </svg>
+                                </span>
+                            </div>
 
                         </div>
-                       <div class="col-lg-4 d-flex justify-content-end align-items-end mt-5">
-                                     <span class="delete d-none d-lg-block" (click)="removeOtherDocument('other',slot.id)"
-                                        >
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
-                                            viewBox="0 0 24 24" fill="none">
-                                            <path
-                                                d="M21 5.98047C17.67 5.65047 14.32 5.48047 10.98 5.48047C9 5.48047 7.02 5.58047 5.04 5.78047L3 5.98047"
-                                                stroke="#25262F" stroke-width="1.5" stroke-linecap="round"
-                                                stroke-linejoin="round" />
-                                            <path
-                                                d="M8.5 4.97L8.72 3.66C8.88 2.71 9 2 10.69 2H13.31C15 2 15.13 2.75 15.28 3.67L15.5 4.97"
-                                                stroke="#25262F" stroke-width="1.5" stroke-linecap="round"
-                                                stroke-linejoin="round" />
-                                            <path
-                                                d="M18.8484 9.14062L18.1984 19.2106C18.0884 20.7806 17.9984 22.0006 15.2084 22.0006H8.78844C5.99844 22.0006 5.90844 20.7806 5.79844 19.2106L5.14844 9.14062"
-                                                stroke="#25262F" stroke-width="1.5" stroke-linecap="round"
-                                                stroke-linejoin="round" />
-                                            <path d="M10.3281 16.5H13.6581" stroke="#25262F" stroke-width="1.5"
-                                                stroke-linecap="round" stroke-linejoin="round" />
-                                            <path d="M9.5 12.5H14.5" stroke="#25262F" stroke-width="1.5"
-                                                stroke-linecap="round" stroke-linejoin="round" />
-                                        </svg>
-                                    </span>
-                                </div>
-
-                            </div>
                         }
                     </div>
 
                     <div class="col-lg-4 col-sm-12 mt-20">
-                            <app-buttons label="Add Other Document" class="btn btn-icon Add btncustomClass"
-                                [outline]="true" (click)="addOtherIncomeDocument()">
+                        <app-buttons label="Add Other Document" class="btn btn-icon Add btncustomClass" [outline]="true"
+                            (click)="addOtherIncomeDocument()">
                             <img src="/assets/images/icons/addred.svg">
                         </app-buttons>
                     </div>
                 </div>
-
+</div>
 
 
 
@@ -772,8 +720,8 @@
 
 
                     <div class="row d-flex flex-column">
-                        <div class="text-label fw-bold mt-20">Other Documents</div>
-                        <hr class="hrclass">
+                        <!-- <div class="text-label fw-bold mt-20">Other Documents</div> -->
+                        <!-- <hr class="hrclass"> -->
 
                         <div class="row">
                             @for (slot of otherBusinessSlots; track slot.id) {
@@ -783,7 +731,8 @@
 
                                 <div class="col-lg-4 col-sm-12">
 
-                                    <app-inputfield label="Title" [required]="true" placeholder="Enter text here" [(ngModel)]="slot.title" [ngModelOptions]="{ standalone: true }"
+                                    <app-inputfield label="Title" [required]="true" placeholder="Enter text here"
+                                        [(ngModel)]="slot.title" [ngModelOptions]="{ standalone: true }"
                                         (input)="main.restrictInput($event, 'text')" [maxlength]="25">
                                     </app-inputfield>
 
@@ -824,8 +773,9 @@
                                     @else {
 
 
-                                    <app-uploadbtn label="Other Documents" [config]="basicConfig" [required]="true" [disabled]="!slot.title && slot.title.trim().length === 0"
-                                        [uploadViaApi]="true" [fileuploadresponse]="handleresponse"
+                                    <app-uploadbtn label="Other Documents" [config]="basicConfig" [required]="true"
+                                        [disabled]="!slot.title && slot.title.trim().length === 0" [uploadViaApi]="true"
+                                        [fileuploadresponse]="handleresponse"
                                         (uploadStarted)="onUploadStarted($event, slot.title,'BUSINESS', 'OTHER_INCOME', 'OTHER', slot.key)">
                                     </app-uploadbtn>
 
@@ -835,8 +785,8 @@
 
 
                                 <div class="col-lg-4 d-flex justify-content-end align-items-end mt-5">
-                                     <span class="delete d-none d-lg-block" (click)="removeOtherDocument('otherbusiness',slot.id)"
-                                        >
+                                    <span class="delete d-none d-lg-block"
+                                        (click)="removeOtherDocument('otherbusiness',slot.id)">
                                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
                                             viewBox="0 0 24 24" fill="none">
                                             <path
@@ -892,7 +842,7 @@
         </app-buttons>
         <app-buttons type="button" label="Next" class="btn btncustomClass" color="primary" (click)="next()"
             [disabled]="!allRequiredFilesUploaded">
-                </app-buttons>
+        </app-buttons>
 
     </div>
 </div>
