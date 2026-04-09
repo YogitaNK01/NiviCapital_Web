@@ -120,8 +120,13 @@ export class Incomeinfo {
     return this.incomeForm.controls;
   }
 
-removeOtherBusinessDocument(id: number): void {
-    this.otherBusinessSlots = this.otherBusinessSlots.filter(slot => slot.id !== id);
+removeOtherDocument(type: 'other' | 'otherbusiness', id: number): void {
+
+    if (type === 'other') {
+      this.otherIncomeSlots = this.otherIncomeSlots.filter(slot => slot.id !== id);
+    } else {
+      this.otherBusinessSlots = this.otherBusinessSlots.filter(slot => slot.id !== id);
+    }
 }
 
   onFileChange(result: UploadResult, key: string,
