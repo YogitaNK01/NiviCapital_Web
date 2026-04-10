@@ -48,7 +48,7 @@ export class Checkcontact implements OnInit {
   filteredData: any[] = [];
   mobilenumber: any;
   number_id: any
-  prefillPhone:any;
+  prefillPhone: any;
 
   fullData: TransformedUserData[] = [];
   AlluserData: any[] = [];
@@ -85,17 +85,19 @@ export class Checkcontact implements OnInit {
 
 
   ];
+   isLoading: boolean = false;
+
   dataSource = new MatTableDataSource<any>([]);
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
 
-  constructor(public service: Main, private tableDataService: TableData, private router: Router, private addcustomerservice: Addcustomerservice, 
-    private route: ActivatedRoute,private cd: ChangeDetectorRef) { }
+  constructor(public service: Main, private tableDataService: TableData, private router: Router, private addcustomerservice: Addcustomerservice,
+    private route: ActivatedRoute, private cd: ChangeDetectorRef) { }
   ngOnInit(): void {
-      this.route.queryParams.subscribe(params => {
+    this.route.queryParams.subscribe(params => {
       if (params['phone']) {
         this.prefillPhone = params['phone'];
-        
+
       }
     });
   }
@@ -148,16 +150,33 @@ export class Checkcontact implements OnInit {
   }
 
   private loadallusers(): void {
-    
-     const page = 0;
-    this.service.getAllUsers(page,6)
+ if (this.isLoading) {
+      return;
+    }
+
+    this.isLoading = true;
+    const page = 0;
+    this.service.checkAllUsers()
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (response) => {
+           this.isLoading = false;
           let resdate = response.data.content;
           this.AlluserData = resdate;
           this.fullData = this.tableDataService.transformUserData(resdate);
-          this.filteredData = this.fullData;
+
+          this.filteredData = this.fullData.filter(item => {
+            const apiMobile = item?.mobile?.toString().trim();
+            const inputMobile = this.mobilenumber?.toString().trim();
+
+            console.log('COMPARE:', apiMobile, inputMobile);
+
+            return apiMobile === inputMobile;
+          });
+
+          console.log(this.filteredData);
+
+          // this.filteredData = data;
           this.dataSource.sort = this.sort;
           this.cd.detectChanges();
         },

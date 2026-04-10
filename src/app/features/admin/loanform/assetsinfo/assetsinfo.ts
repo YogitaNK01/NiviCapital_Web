@@ -91,6 +91,37 @@ export class Assetsinfo implements OnInit {
   selectedbakname!: string;
   invalidamt: boolean= false;;
 
+  assetFieldMap: any = {
+  Gold: {
+    form: 'gold',
+    api: 'GOLD'
+  },
+
+  LiquidAssets: {
+    form: 'liquidAssets',
+    api: 'LIQUID_ASSETS'
+  },
+
+  Properties: {
+    form: 'properties',
+    api: 'PROPERTIES'
+  },
+
+  FixedDeposits: {
+    form: 'fixedDeposits',
+    api: 'FIXED_DEPOSITS'
+  },
+
+  Investments: {
+    form: 'investments',
+    api: 'INVESTMENTS'
+  },
+
+  OtherAssets: {
+    form: 'otherassets',
+    api: 'OTHER_ASSETS'
+  }
+};
   constructor(private fb: FormBuilder, public main: Main, private route: ActivatedRoute, private msgBox: Msgboxservice,
     private stepperService: Loanstepperservice, private formSvc: Loanformservice, private cd: ChangeDetectorRef) { }
 
@@ -249,19 +280,6 @@ export class Assetsinfo implements OnInit {
     // this.cd.detectChanges();
   }
 
-  removeAccordion1(key: string, index: number, event: Event) {
-
-    event.stopPropagation();
-
-    this.selectedAssets =
-      this.selectedAssets.filter(k => k !== key);
-
-    this.openIndex =
-      this.openIndex.filter(i => i !== index);
-
-    this.assetsForm.get(key)?.reset();
-
-  }
 
   removeAccordion(key: string, index: number, event: Event) {
     this.msgBox.open({
@@ -540,7 +558,7 @@ export class Assetsinfo implements OnInit {
       }
     });
   }
-  onAssetChange(values: string | string[]): void {
+  onAssetChange22(values: string | string[]): void {
 
     const groups = Array.isArray(values) ? values : [values];
 
@@ -555,6 +573,95 @@ export class Assetsinfo implements OnInit {
     });
   }
 
+    onAssetChange(values: string | string[]): void {
+
+    const newSelected = Array.isArray(values) ? values : [values];
+    // Detect if cleared all
+    const clearedAll = newSelected.length === 0;
+    if (clearedAll) {
+      // Clear all selections and reset form fully
+      this.selectedAssets = [];
+      this.openIndex = [];
+      this.assetsForm.reset();
+
+
+
+      // Clear all 'other' entries
+
+      // while (this.other.length !== 0) {
+      //   this.other.removeAt(0);
+      // }
+
+    } else {
+
+      const deselected = this.selectedAssets.filter(k => !newSelected.includes(k));
+    
+      const newlySelected = newSelected.filter(k => !this.selectedAssets.includes(k));
+
+      this.selectedAssets = newSelected;
+      
+
+      this.openIndex = [];
+      this.selectedAssets.forEach(val => {
+        const index = this.accordions.findIndex(a => a.key === val);
+        if (index !== -1) {
+          this.openIndex.push(index);
+        }
+
+      });
+
+
+
+      // Reset form groups for deselected keys only
+
+      deselected.forEach(key => {
+        const formKey = this.assetFieldMap[key]?.form;
+        if (!formKey) return;
+
+        const control = this.assetsForm.get(formKey);
+        if (control instanceof FormGroup) {
+          control.reset();
+        } else if (control instanceof FormArray) {
+          if (formKey === 'other') {
+            control.clear();
+          } else {
+            control.clear();
+
+          }
+
+        }
+
+      });
+
+
+
+      // Initialize form groups for newly selected keys
+
+      this.selectedAssets.forEach(key => {
+
+        const formKey = this.assetFieldMap[key]?.form;
+        if (!formKey) return;
+        const control = this.assetsForm.get(formKey);
+        if (control instanceof FormGroup) {
+          if (Object.values(control.value).every(v => v === '' || v === null)) {
+            control.reset();
+
+          }
+
+        } else if (control instanceof FormArray) {
+          if (formKey === 'other') {
+            if (control.length === 0) {
+              control.push(this.createOther());
+
+            }
+          }
+        }
+
+      });
+    }
+
+  }
+  
   allAssetCatagory() {
     this.formSvc.getAllAssets().subscribe((res: any) => {
       const list = res.data ?? res;
@@ -1190,10 +1297,10 @@ export class Assetsinfo implements OnInit {
           }
 
           const type = ctrl.value.type;
-          const amount = ctrl.value.value?ctrl.value.value:ctrl.value.value1;
+          const amount = ctrl.value.value;
 
           if (type === 'Others') {
-            addItem('OTHER_ASSETS', amount, {
+            addItem('Others', amount, {
               assetType: ctrl.value.name
             });
           }

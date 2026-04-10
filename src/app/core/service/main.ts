@@ -66,10 +66,22 @@ export class Main {
     `${this.baseUrl}/v1/customers/my-customers?page=${page}&size=${size}`,
   );
 }
+ checkAllUsers(): Observable<ApiResponse<PageResponse<UserData>>> {
+  return this.http.get<ApiResponse<PageResponse<UserData>>>(
+    `${this.baseUrl}/v1/customers/my-customers`,
+  );
+}
 
+// 0-6 users
   getAllLoanUsers(page:number,size:number): Observable<ApiResponse<PageResponse<UserData>>> {
   return this.http.get<ApiResponse<PageResponse<UserData>>>(
     `${this.baseUrl}/v1/los/applications/loan-customers?page=${page}&size=${size}`,
+  );
+}
+//all users of loan
+ AllLoan_Users(): Observable<ApiResponse<PageResponse<UserData>>> {
+  return this.http.get<ApiResponse<PageResponse<UserData>>>(
+    `${this.baseUrl}/v1/los/applications/loan-customers`,
   );
 }
 

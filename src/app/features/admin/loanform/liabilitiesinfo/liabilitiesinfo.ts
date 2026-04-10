@@ -191,33 +191,93 @@ export class Liabilitiesinfo {
       }
     });
   }
-  onChange(values: string | string[]): void {
-    this.selectedliabilities = Array.isArray(values) ? values : [values];
+  
+   onChange(values: string | string[]): void {
 
-    if (!this.selectedliabilities.includes('Existing Loans')) {
-      this.selectedloantype = [];
-      this.loans.clear();
-      this.loans.push(this.fb.group({
-        type: [''],
-        bankname: [''],
-        outstanding: ['', Validators.required],
-        emiamount: ['', Validators.required],
-        remtenure: ['', Validators.required],
-        title: ['']
-      }));
+    const newSelected = Array.isArray(values) ? values : [values];
+    // Detect if cleared all
+    const clearedAll = newSelected.length === 0;
+    if (clearedAll) {
+      // Clear all selections and reset form fully
+      this.selectedliabilities = [];
+      this.openIndex = [];
+      this.liabilityForm.reset();
+
+
+
+      // Clear all 'other' entries
+
+      while (this.other.length !== 0) {
+        this.other.removeAt(0);
+      }
+
+    } else {
+
+      // Partial or full selection
+      // Find deselected keys
+
+      const deselected = this.selectedliabilities.filter(k => !newSelected.includes(k));
+      // Find newly selected keys
+      const newlySelected = newSelected.filter(k => !this.selectedliabilities.includes(k));
+      this.selectedliabilities = newSelected;
+      // Update open accordions
+      this.openIndex = [];
+      this.selectedliabilities.forEach(val => {
+        const index = this.accordions.findIndex(a => a.key === val);
+        if (index !== -1) {
+          this.openIndex.push(index);
+        }
+
+      });
+
+
+
+      // Reset form groups for deselected keys only
+
+      deselected.forEach(key => {
+        const formKey = this.fieldMap[key]?.form;
+        if (!formKey) return;
+
+        const control = this.liabilityForm.get(formKey);
+        if (control instanceof FormGroup) {
+          control.reset();
+        } else if (control instanceof FormArray) {
+          if (formKey === 'other') {
+            control.clear();
+          } else {
+            control.clear();
+          }
+        }
+
+      });
+
+
+
+      // Initialize form groups for newly selected keys
+
+      this.selectedliabilities.forEach(key => {
+
+        const formKey = this.fieldMap[key]?.form;
+        if (!formKey) return;
+        const control = this.liabilityForm.get(formKey);
+        if (control instanceof FormGroup) {
+          if (Object.values(control.value).every(v => v === '' || v === null)) {
+            control.reset();
+
+          }
+
+        } else if (control instanceof FormArray) {
+          if (formKey === 'other') {
+            if (control.length === 0) {
+              control.push(this.createOther());
+
+            }
+          }
+        }
+
+      });
     }
 
-    this.selectedlibilitiesIds = this.selectedliabilities.flatMap(
-      group => this.groupIdMap[group] || []
-    );
-
-    this.openIndex = [];
-    this.selectedliabilities.forEach(val => {
-      const index = this.accordions.findIndex(a => a.key === val);
-      if (index !== -1) {
-        this.openIndex.push(index);
-      }
-    });
   }
 
   Selectedvalue(values: string | string[]) {
@@ -277,7 +337,7 @@ export class Liabilitiesinfo {
   // other Liabilities
   createOther(): FormGroup {
     return this.fb.group({
-      LiabilityType: ['', Validators.required],
+      LiabilityType: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(50)]],
       amount: ['', Validators.required],
       MonthlyRepaymentLimit: ['', Validators.required],
     });
@@ -727,8 +787,6 @@ export class Liabilitiesinfo {
 
     return groups.join(',') + decimalPart;
   }
-
-
 
   // Updated formatAmount - SAFE FOR LARGE NUMBERS
   formatAmount(event: any, controlName: string) {

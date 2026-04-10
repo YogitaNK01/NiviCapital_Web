@@ -186,7 +186,7 @@
         <div class="col">
           <div class="form-group mb-3">
             <app-inputfield type="flag" [required]="true" label="Tuition Fees (INR)" formControlName="tutionfees"
-              placeholder="₹ 40,20,337" helpText="Help text" name="tutionfees" [showPhonePrefix]="true" [maxlength]="10"
+              placeholder="₹ 0" helpText="Help text" name="tutionfees" [showPhonePrefix]="true" [maxlength]="10"
               [showPhonePrefixnumber]="false" (input)="handleAmountInput($event,'tutionfees')">
             </app-inputfield>
             <div class="text-danger" *ngIf="f['tutionfees'].touched && f['tutionfees'].invalid">
@@ -265,7 +265,7 @@
                 <!-- INR -->
                 <div class="col-lg-4 col-sm-12 mt-20">
                   <app-inputfield type="flag" [label]="expense.get('categoryLabel')?.value + ' (INR)'"
-                    formControlName="amountINR" placeholder="₹ 40,20,337" [showPhonePrefix]="true" [required]="true"
+                    formControlName="amountINR" placeholder="₹ 0" [showPhonePrefix]="true" [required]="true"
                     [showPhonePrefixnumber]="false" [maxlength]="10"
                     (input)="handleAmountInput($event,'amountINR',expense);main.restrictInput($event, 'decimal')">
                   </app-inputfield>
@@ -394,7 +394,7 @@
                 <!-- INR -->
                 <div class="col-lg-4 col-sm-12 mt-20">
                   <app-inputfield type="flag" [label]="expense.get('categoryLabel')?.value + '(INR)'"
-                    placeholder="₹ 40,20,337" [showPhonePrefix]="true" [showPhonePrefixnumber]="false"
+                    placeholder="₹ 0" [showPhonePrefix]="true" [showPhonePrefixnumber]="false"
                     formControlName="amountINR" [required]="true"
                     (input)="handleAmountInput($event,'amountINR',expense );main.restrictInput($event, 'decimal')">
                   </app-inputfield>

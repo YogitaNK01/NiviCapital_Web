@@ -1,4 +1,4 @@
-import { Component, Input, OnInit, ViewChild, OnDestroy, ChangeDetectionStrategy,ChangeDetectorRef } from '@angular/core';
+import { Component, Input, OnInit, ViewChild, OnDestroy, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Inputfield } from '../../systemdesign/inputfield/inputfield';
@@ -17,15 +17,15 @@ import { Main } from '../../../core/service/main';
 import { Messagebox } from '../../systemdesign/messagebox/messagebox';
 import { Msgboxservice } from '../../../core/service/msgboxservice';
 import { Subject } from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
+import { finalize, takeUntil } from 'rxjs/operators';
 import { Tables } from '../../systemdesign/tables/tables';
 import { TableData } from '../../../core/service/table-data';
 
 // Types & Interfaces for type safety
 interface UserData {
   id: string;
-  custId:string;
-  ncId:string
+  custId: string;
+  ncId: string
   firstName: string;
   lastName: string;
   mobile: string;
@@ -33,13 +33,13 @@ interface UserData {
   status: string;
   kycStatus: string;
   createdAt: number[];
-  
+
 }
 
 interface TransformedUserData {
   // id: string;
-  custId:string;
-  ncId:string
+  custId: string;
+  ncId: string
   firstName: string;
   lastName: string;
   mobile: string;
@@ -63,12 +63,12 @@ const STATUS_MAP: { [key: string]: string } = {
   'document issue': 'document issue'
 };
 
-const SEARCH_FIELDS = ['CIFID', 'CustomerName', 'mobile', 'email'];
+const SEARCH_FIELDS = ['custId', 'ncId', 'firstName', 'lastName', 'mobile', 'email'];
 
 @Component({
   selector: 'app-customer',
   imports: [CommonModule, FormsModule, MatTableModule, MatCheckboxModule, MatTabsModule, MatPaginatorModule,
-    MatSortModule, MatIconModule, RouterModule, HttpClientModule, Inputfield, Dropdown, Buttons,Tables],
+    MatSortModule, MatIconModule, RouterModule, HttpClientModule, Inputfield, Dropdown, Buttons, Tables],
   standalone: true,
   templateUrl: './customer.html',
   styleUrl: './customer.scss',
@@ -76,7 +76,7 @@ const SEARCH_FIELDS = ['CIFID', 'CustomerName', 'mobile', 'email'];
 })
 export class Customer implements OnInit, OnDestroy {
 
-    columns = [
+  columns = [
     {
       key: 'custId',
       label: 'CUSTID',
@@ -88,7 +88,7 @@ export class Customer implements OnInit, OnDestroy {
     },
     { key: 'ncId', label: 'NCID' },
     { key: 'firstName', label: 'First Name' },
-     { key: 'lastName', label: 'Last Name' },
+    { key: 'lastName', label: 'Last Name' },
     { key: 'mobile', label: 'Mobile' },
     { key: 'email', label: 'Email' },
     {
@@ -110,8 +110,8 @@ export class Customer implements OnInit, OnDestroy {
 
   ];
 
-showtable:boolean = true;
-nodata:boolean = false;
+  showtable: boolean = true;
+  nodata: boolean = false;
   private destroy$ = new Subject<void>();
 
   customerGrowth = '12% from last month';
@@ -148,6 +148,9 @@ nodata:boolean = false;
   selectedOptiontype: string = '';
   searchText: string = '';
 
+  AlluserData1: any[] = [];
+  fullData1: TransformedUserData[] = [];
+
   Kycstatus: DropdownOption[] = [
     { label: 'All', value: 'All' },
     { label: 'Completed', value: 'Completed' },
@@ -159,18 +162,20 @@ nodata:boolean = false;
   selecteduser: any;
   filteredData: TransformedUserData[] = [];
 
-allkyctype = 'All Types';
-allkycstatus = 'All KYC Status';
+  allkyctype = 'All Types';
+  allkycstatus = 'All KYC Status';
   kyctype: DropdownOption[] = [
     { label: 'Type 1', value: 'Type 1' },
     { label: 'Type 2', value: 'Type 2' },
     { label: 'Type 3', value: 'Type 3' },
   ];
-
-  constructor(private http: HttpClient, private router: Router, private service: Main, private msgBox: Msgboxservice,private cdr: ChangeDetectorRef, private tableDataService: TableData) { }
+  isLoading: boolean = false;
+  hidepagination: boolean = false;
+  constructor(private http: HttpClient, private router: Router, private service: Main, private msgBox: Msgboxservice, private cdr: ChangeDetectorRef, private tableDataService: TableData) { }
   ngOnInit(): void {
     this.loadallusers();
     this.updateVisiblePages();
+    this.alluserdata();
   }
 
   ngAfterViewInit(): void {
@@ -181,26 +186,33 @@ allkycstatus = 'All KYC Status';
   }
 
   private loadallusers(): void {
-     const page = this.currentPage - 1;
-    this.service.getAllUsers(page,this.pageSize)
-      .pipe(takeUntil(this.destroy$))
+    // this.isLoading = true;
+    this.hidepagination = true;
+    const page = this.currentPage - 1;
+    this.service.getAllUsers(page, this.pageSize)
+      .pipe(takeUntil(this.destroy$),
+
+        finalize(() => {
+          // this.isLoading = false;
+        })
+      )
       .subscribe({
         next: (response) => {
-          let resdate= response.data.content;
+          let resdate = response.data.content;
           this.totalItems = response.data.totalElements;
           this.totalPages = response.data.totalPages;
-          if(resdate.length == 0){
+          if (resdate.length == 0) {
             this.nodata = true;
           } else {
-          this.AlluserData = resdate;
-          this.fullData = this.tableDataService.transformUserData(resdate);
-          this.filteredData = this.fullData;
-          this.kycCompleted = this.tableDataService.calculateKycMetrics(resdate, this.totalItems);
-          this.dataSource.sort = this.sort;
-          this.updatePagedData();
+            this.AlluserData = resdate;
+            this.fullData = this.tableDataService.transformUserData(resdate);
+            this.filteredData = this.fullData;
+            this.kycCompleted = this.tableDataService.calculateKycMetrics(resdate, this.totalItems);
+            this.dataSource.sort = this.sort;
+            this.updatePagedData();
 
-          this.tableData = this.fullData; // Initialize tableData for filters
-          this.cdr.detectChanges();
+            this.tableData = this.fullData; // Initialize tableData for filters
+            this.cdr.detectChanges();
           }
         },
         error: (error) => {
@@ -208,7 +220,26 @@ allkycstatus = 'All KYC Status';
         }
       });
   }
-  
+
+  alluserdata(): void {
+    this.hidepagination = false;
+    const page = 0;
+    this.service.checkAllUsers()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (response) => {
+
+          let resdate = response.data.content;
+          this.AlluserData1 = resdate;
+          this.fullData1 = this.tableDataService.transformUserData(resdate);
+
+        },
+        error: (error) => {
+          console.error('Error fetching users:', error);
+          this.isLoading = false;
+        }
+      });
+  }
 
   getStatusClass(status: string) {
     return this.tableDataService.getStatus_Class(status);
@@ -246,11 +277,7 @@ allkycstatus = 'All KYC Status';
   formatDateOnly(dateArr: number[] | null | undefined): string {
     return this.tableDataService.formatDateOnly(dateArr);
   }
-//pagination methods
-  // get totalPages(): number {
-  //   const total = Math.ceil(this.totalItems / this.pageSize);
-  //   return isNaN(total) || total < 1 ? 1 : total;
-  // }
+
 
   onPageChange(page: any): void {
     if (page === '...') return;
@@ -263,7 +290,7 @@ allkycstatus = 'All KYC Status';
   }
 
   updatePagedData(): void {
-          this.dataSource.data = this.filteredData;
+    this.dataSource.data = this.filteredData;
 
   }
 
@@ -275,14 +302,27 @@ allkycstatus = 'All KYC Status';
   //search and filter methods
   onSearchChange(value: string): void {
     this.searchText = value.toLowerCase();
+
+    if (!this.searchText) {
+      this.currentPage = 1;
+      this.loadallusers();
+      return;
+    }
+
+
+    if (!this.fullData1 || this.fullData1.length === 0) {
+      this.alluserdata();
+    }
+
+
     this.filteredData = this.tableDataService.filterBySearch(
-      this.fullData,
+      this.fullData1,
       value, SEARCH_FIELDS
     );
 
     this.totalItems = this.filteredData.length;
     this.currentPage = 1;
-    this.updateVisiblePages();
+    // this.updateVisiblePages();
     this.updatePagedData();
   }
 
@@ -337,18 +377,18 @@ allkycstatus = 'All KYC Status';
     return this.selection.length > 0 && this.selection.length < this.dataSource.data.length;
   }
 
-  addcustomer(){
+  addcustomer() {
     console.log("add");
-    
+
     this.router.navigate(['admin/customer/checkcontact']);
   }
 
-  onEdit(data: any){
-    console.log("edit-------",data);
-    
+  onEdit(data: any) {
+    console.log("edit-------", data);
+
   }
-  
-  
+
+
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();

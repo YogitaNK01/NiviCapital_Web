@@ -380,7 +380,7 @@
                                 <div class="col-4" *ngIf="!isOtherSelectedcc(item)">
                                     <div class="form-group">
                                         <app-inputfield type="text" [required]="true" label="Credit Limit (INR)"
-                                            (input)="handleAmountInput($event,'cccreditLimit',item)" [required]="true"
+                                            (input)="main.restrictInput($event, 'number');formatAmountfromarray($event,'cccreditLimit',item)" [required]="true"
                                             formControlName="cccreditLimit" placeholder="Enter Value"
                                             helpText="Help text" name="cccreditLimit">
                                         </app-inputfield>
@@ -419,7 +419,7 @@
                                     <div class="col-6 mt-3">
                                         <div class="form-group">
                                             <app-inputfield type="text" [required]="true" label="Credit Limit (INR)"
-                                                (input)="handleAmountInput($event,'creditcard',item)" [required]="true"
+                                                (input)="main.restrictInput($event, 'number');formatAmountfromarray($event,'cccreditLimit',item)" [required]="true"
                                                 formControlName="cccreditLimit" placeholder="Enter Value"
                                                 helpText="Help text" name="cccreditLimit">
                                             </app-inputfield>
@@ -566,7 +566,7 @@
                                 <div class="col-lg-6 mt-20">
                                     <div class="form-group mb-3">
                                         <app-inputfield type="text" [required]="true" label="Credit Limit (INR)"
-                                            (input)="handleAmountInput($event,'creditLimit',item)" [required]="true"
+                                            (input)="main.restrictInput($event, 'number');formatAmountfromarray($event,'creditLimit',item)" [required]="true"
                                             formControlName="creditLimit" placeholder="Enter Value" helpText="Help text"
                                             name="creditLimit">
                                         </app-inputfield>
@@ -665,6 +665,13 @@
                                                 Liability Type is required
                                             </div>
 
+                                            <div *ngIf="item.get('LiabilityType')?.errors?.['minlength']">
+                                                Minimum 2 characters required
+                                            </div>
+
+                                            <div *ngIf="item.get('LiabilityType')?.errors?.['maxlength']">
+                                                Maximum 50 characters allowed
+                                            </div>
                                         </div>
 
                                     </div>
@@ -727,7 +734,7 @@
             <app-buttons type="button" label="Back" class="btn btncustomClass" [outline]="true" (click)="back()">
             </app-buttons>
             <app-buttons type="button" label="Next" class="btn btncustomClass" color="primary" (click)="next()"
-            [disabled]="isNextDisabled">
+                [disabled]="isNextDisabled">
             </app-buttons>
 
         </div>

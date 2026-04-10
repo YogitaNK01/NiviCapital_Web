@@ -9,6 +9,7 @@ import { Buttons } from '../../../systemdesign/buttons/buttons';
 import { Dropdown, DropdownOption } from '../../../systemdesign/dropdown/dropdown';
 import { Inputfield } from '../../../systemdesign/inputfield/inputfield';
 import { debounceTime } from 'rxjs/operators';
+import { Msgboxservice } from '../../../../core/service/msgboxservice';
 
 @Component({
   selector: 'app-monthlyexpenditureinfo',
@@ -30,7 +31,7 @@ export class Monthlyexpenditureinfo {
     { title: 'Transportation', alwaysOpen: true, key: 'Transportation' },
     { title: 'School Education Fees ', alwaysOpen: true, key: 'SchoolEducationFees' },
     { title: 'Medical/ Medicines', alwaysOpen: true, key: 'Medical' },
-    { title: 'Others', alwaysOpen: true, key: 'Others' },
+    { title: 'Other Recurring Expenses', alwaysOpen: true, key: 'Others' },
   ];
 
   @Input() avatarUrl = '';
@@ -94,7 +95,7 @@ export class Monthlyexpenditureinfo {
   totaltransportation = 0;
   totalother = 0;
   totalINRamt: any;
-  constructor(private fb: FormBuilder, public main: Main, private route: ActivatedRoute,
+  constructor(private fb: FormBuilder, public main: Main, private route: ActivatedRoute, private msgBox: Msgboxservice,
     private stepperService: Loanstepperservice, private formSvc: Loanformservice, private cd: ChangeDetectorRef) { }
 
 
@@ -170,7 +171,7 @@ export class Monthlyexpenditureinfo {
 
   }
 
-  onChange(values: string | string[]): void {
+  onChange1(values: string | string[]): void {
     this.selectedexpenditure = Array.isArray(values) ? values : [values];
 
     this.openIndex = [];
@@ -182,6 +183,99 @@ export class Monthlyexpenditureinfo {
       }
     });
   }
+
+  onChange(values: string | string[]): void {
+
+    const newSelected = Array.isArray(values) ? values : [values];
+    // Detect if cleared all
+    const clearedAll = newSelected.length === 0;
+    if (clearedAll) {
+      // Clear all selections and reset form fully
+      this.selectedexpenditure = [];
+      this.openIndex = [];
+      this.monthlyExpenditureForm.reset();
+
+
+
+      // Clear all 'other' entries
+
+      while (this.other.length !== 0) {
+        this.other.removeAt(0);
+      }
+
+    } else {
+
+      // Partial or full selection
+      // Find deselected keys
+
+      const deselected = this.selectedexpenditure.filter(k => !newSelected.includes(k));
+      // Find newly selected keys
+      const newlySelected = newSelected.filter(k => !this.selectedexpenditure.includes(k));
+
+      this.selectedexpenditure = newSelected;
+      // Update open accordions
+
+      this.openIndex = [];
+      this.selectedexpenditure.forEach(val => {
+        const index = this.accordions.findIndex(a => a.key === val);
+        if (index !== -1) {
+          this.openIndex.push(index);
+        }
+
+      });
+
+
+
+      // Reset form groups for deselected keys only
+
+      deselected.forEach(key => {
+        const formKey = this.fieldMap[key]?.form;
+        if (!formKey) return;
+
+        const control = this.monthlyExpenditureForm.get(formKey);
+        if (control instanceof FormGroup) {
+          control.reset();
+        } else if (control instanceof FormArray) {
+          if (formKey === 'other') {
+            control.clear();
+          } else {
+            control.clear();
+
+          }
+
+        }
+
+      });
+
+
+
+      // Initialize form groups for newly selected keys
+
+      this.selectedexpenditure.forEach(key => {
+
+        const formKey = this.fieldMap[key]?.form;
+        if (!formKey) return;
+        const control = this.monthlyExpenditureForm.get(formKey);
+        if (control instanceof FormGroup) {
+          if (Object.values(control.value).every(v => v === '' || v === null)) {
+            control.reset();
+
+          }
+
+        } else if (control instanceof FormArray) {
+          if (formKey === 'other') {
+            if (control.length === 0) {
+              control.push(this.createOther());
+
+            }
+          }
+        }
+
+      });
+    }
+
+  }
+
 
   onExpenseChange(values: string | string[]): void {
     this.selectedexpense = Array.isArray(values) ? values : [values];
@@ -204,61 +298,56 @@ export class Monthlyexpenditureinfo {
     console.log(this.monthlyExpenditureForm.value);
   }
 
-  removeAccordion1(key: string, index: number, event: Event) {
-
-    event.stopPropagation();
-
-    this.selectedexpenditure =
-      this.selectedexpenditure.filter(k => k !== key);
-
-    this.openIndex =
-      this.openIndex.filter(i => i !== index);
-
-    this.monthlyExpenditureForm.get(key)?.reset();
-
-  }
 
   removeAccordion(key: string, index: number, event: Event) {
+    this.msgBox.open({
+      title: 'Are you sure want to Remove',
+      message: '',
+      showCancel: true,
+      onOk: () => {
+        event.stopPropagation();
 
-    event.stopPropagation();
+        this.selectedexpenditure = this.selectedexpenditure.filter(k => k !== key);
 
-    this.selectedexpenditure = this.selectedexpenditure.filter(k => k !== key);
+        this.openIndex = this.openIndex.filter(i => i !== index);
 
-    this.openIndex = this.openIndex.filter(i => i !== index);
+        const formKey = this.fieldMap[key]?.form;
 
-    const formKey = this.fieldMap[key]?.form;
+        if (!formKey) return;
 
-    if (!formKey) return;
+        const control = this.monthlyExpenditureForm.get(formKey);
 
-    const control = this.monthlyExpenditureForm.get(formKey);
+        if (control instanceof FormGroup) {
+          control.reset(
+            Object.keys(control.controls).reduce((acc, k) => {
 
-    if (control instanceof FormGroup) {
-      control.reset(
-        Object.keys(control.controls).reduce((acc, k) => {
+              acc[k] = '';
 
-          acc[k] = '';
+              return acc;
 
-          return acc;
+            }, {} as any)
+          );
 
-        }, {} as any)
-      );
+        } else if (control instanceof FormArray) {
+          control.clear();
 
-    } else if (control instanceof FormArray) {
-      control.clear();
+          // if (formKey === 'other') {
+          //   control.push(this.createOther());
 
-      if (formKey === 'other') {
-        control.push(this.createOther());
+          // }
+           if (formKey === 'other') {
+            control.clear();
+          } else {
+            control.clear();
 
+          }
+        }
+        
+
+        this.cd.detectChanges();
       }
-    }
-
-    this.cd.detectChanges();
-
+    });
   }
-
-
-
-
 
   calculateGrandTotal() {
     const rent = this.getValue('rent.rentvalue');
@@ -621,12 +710,12 @@ export class Monthlyexpenditureinfo {
       }
 
       if (groupName === 'other') {
-        
-if (!groupValue || groupValue.length === 0) {
-        this.other.markAllAsTouched();
-        invalid = true;
-        return;
-      }
+
+        if (!groupValue || groupValue.length === 0) {
+          this.other.markAllAsTouched();
+          invalid = true;
+          return;
+        }
 
         groupValue.forEach((item: any, i: number) => {
           const type = item.type === 'Other' ? item.customType : item.type;

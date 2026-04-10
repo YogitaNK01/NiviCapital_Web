@@ -30,9 +30,11 @@ export class Datepickernew implements OnInit, ControlValueAccessor {
   @Input() disabled: boolean = false;
 
   @Input() required: boolean = false;
-  
+
   @Input() disablePastDates: boolean = false;
-   @Input()minDate: Date | null = null;
+  @Input() minDate: Date | null = null;
+  @Input() minyear: number = 1960;
+
 
   onChange = (_: any) => { };
   onTouched = () => { };
@@ -40,14 +42,28 @@ export class Datepickernew implements OnInit, ControlValueAccessor {
 
   ngOnInit() {
 
-  if (this.disablePastDates) {
-    const tomorrow = new Date();
-    tomorrow.setDate(tomorrow.getDate() + 1);
+    
+  const minYearDate = new Date(this.minyear, 0, 1); // 01-01-1960
+minYearDate.setHours(0, 0, 0, 0);
 
-    this.minDate = tomorrow;
+    // if (this.disablePastDates) {
+    //   const tomorrow = new Date();
+    //   tomorrow.setDate(tomorrow.getDate() + 1);
+
+    //   this.minDate = tomorrow;
+    // }
+
+if (this.disablePastDates) {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    this.minDate = today > minYearDate ? today : minYearDate;
+  } else {
+    this.minDate = minYearDate;
   }
 
-}
+
+  }
 
 
   writeValue(value: Date | null): void {

@@ -64,8 +64,8 @@
       <div class="db-title text-dp-2-bold">Customer Database</div>
       <div class="section-controls">
         <div class="search-box">
-          <app-inputfield label="Input Label" type="text" placeholder="Search for result" helpText="Help text" [showSearch]="true"
-            [showLabel]="false" [showHelpText]="false" (valueChange)="onSearchChange($event)"> >
+          <app-inputfield label="Input Label" type="text" placeholder="Search for result" helpText="Help text"
+            [showSearch]="true" [showLabel]="false" [showHelpText]="false" (valueChange)="onSearchChange($event)"> >
           </app-inputfield>
         </div>
 
@@ -73,50 +73,41 @@
 
 
         <div class="search-dropdown search-dropdown-status">
-          <app-dropdown class="menu-dropdown" [options]="Kycstatus" [(selectedValue)]="selectedstatus" [customStyle]="true"
-            placeholder="All KYC Status" (selectedValueChange)="getkycstatus($event)" >
+          <app-dropdown class="menu-dropdown" [options]="Kycstatus" [(selectedValue)]="selectedstatus"
+            [customStyle]="true" placeholder="All KYC Status" (selectedValueChange)="getkycstatus($event)">
           </app-dropdown>
         </div>
 
         <div class="search-dropdown search-dropdown-type">
-          <app-dropdown class="menu-dropdown" [options]="kyctype" [(selectedValue)]="selectedOptiontype" [placeholder]="'All Types'"
-            [customStyle]="true" (selectedValueChange)="getkyc_type($event)" >
+          <app-dropdown class="menu-dropdown" [options]="kyctype" [(selectedValue)]="selectedOptiontype"
+            [placeholder]="'All Types'" [customStyle]="true" (selectedValueChange)="getkyc_type($event)">
           </app-dropdown>
         </div>
 
 
         <div class="add-button">
-          <app-buttons label="Add Customer" class="btn btn-icon Add btncustomClass" [outline]="true" (click)="addcustomer()">
-            <img src="/assets/images/icons/addred.svg" alt="Add"  >
+          <app-buttons label="Add Customer" class="btn btn-icon Add btncustomClass" [outline]="true"
+            (click)="addcustomer()">
+            <img src="/assets/images/icons/addred.svg" alt="Add">
 
           </app-buttons>
         </div>
       </div>
     </div>
 
-    <!-- Table -->
-   
-    <!-- <app-tables
-  [columns]="columns"
-  [data]="filteredData"
-  [pageSize]="6">
-</app-tables> -->
 
-@if (!nodata) {
-  <app-tables
-    [columns]="columns"
-    [data]="filteredData"
-    [pageSize]="6"
-    [totalPages]="totalPages"
-  (pageChange)="onPageChange($event)">
-  </app-tables>
-} @else {
-  <div class="text-label text-center mt-4">
-    No Active Customer...
-  </div>
-}
+
+
+    @if (!nodata ) {
+    <app-tables [columns]="columns" [data]="filteredData" [pageSize]="6" [isLoading]="isLoading"
+      [totalPages]="totalPages" (pageChange)="onPageChange($event)" >
+    </app-tables>
+    } @else {
+    <div class="text-label text-center mt-4">
+      No Active Customer...
+    </div>
+    }
 
   </div>
-    
+
 </div>
-<!-- } -->

@@ -114,7 +114,7 @@ export class TableData {
     const lowerSearchText = searchText.toLowerCase();
     return data.filter(item =>
       searchFields.some(field =>
-        item[field]?.toString().toLowerCase().includes(lowerSearchText)
+        item[field]?.toString().toLowerCase().replace(/[\s,]/g, '').includes(lowerSearchText)
       )
     );
   }

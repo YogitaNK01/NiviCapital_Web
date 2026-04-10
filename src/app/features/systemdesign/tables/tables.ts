@@ -35,6 +35,9 @@ export class Tables implements OnChanges {
   @Input() data: any[] = [];
   @Input() pageSize: number = 6;
 
+  @Input() isLoading = false;
+   @Input() hidepagination = false;
+
   @Output() rowClick = new EventEmitter<any>();
 
   dataSource = new MatTableDataSource<any>();

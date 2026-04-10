@@ -18,7 +18,7 @@ import { TableColumn, Tables } from '../../systemdesign/tables/tables';
 import { takeUntil } from 'rxjs';
 import { TableData } from '../../../core/service/table-data';
 
-const SEARCH_FIELDS = ['CIFID', 'CustomerName', 'mobile', 'email'];
+const SEARCH_FIELDS = ['firstName', 'lastName', 'mobile', 'email','loantype','disbursedAmount','outstandingBalance','loanStatus'];
 
 @Component({
   selector: 'app-los-operation',
@@ -58,7 +58,11 @@ export class LosOperation {
    totalPages: number = 0;
   totalPagesArray: (number | string)[] = [];
   fullData: any[] = [];
+    fullData1: any[] = [];
+
   AlluserData: any[] = [];
+    AlluserData1: any[] = [];
+
 
   allLosData: any;
   destroy$ = new EventEmitter<void>();
@@ -143,6 +147,24 @@ private loadallusers(): void {
       });
   }
   
+ allLoandata(): void {
+    // this.hidepagination = false;
+   
+    this.service.AllLoan_Users()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (response) => {
+
+          let resdate = response.data.content;
+          this.AlluserData1 = resdate;
+          this.fullData1 = this.tableDataService.transformUserData(resdate);
+
+        },
+        error: (error) => {
+          console.error('Error fetching users:', error);
+        }
+      });
+  }
 
   getStatusClass(status: string) {
     return this.tableDataService.getStatus_Class(status);
@@ -233,10 +255,21 @@ private loadallusers(): void {
   //search from table
   onSearchChange(value: string) {
      this.searchText = value.toLowerCase();
+      if (!this.searchText) {
+      this.currentPage = 1;
+      this.loadallusers();
+      return;
+    }
+
+
+    if (!this.fullData1 || this.fullData1.length === 0) {
+      this.allLoandata();
+    }
+
+
     this.filteredData = this.tableDataService.filterBySearch(
-      this.fullData,
-      value,SEARCH_FIELDS
-      
+      this.fullData1,
+      value, SEARCH_FIELDS
     );
 
     this.totalItems = this.filteredData.length;

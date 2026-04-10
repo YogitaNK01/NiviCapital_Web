@@ -1,4 +1,4 @@
-<div class="table-container "  [class.no-border]="!data.length">
+<div class="table-container " [class.no-border]="isLoading && !data.length">
 
     <table mat-table [dataSource]="pagedData" table table-responsive w-100>
 
@@ -58,18 +58,37 @@
         </ng-container>
 
 
-        <!-- Rows -->
+        <!--header Rows -->
         <tr mat-header-row *matHeaderRowDef="displayedColumnKeys"></tr>
+
+        <!-- ✅ Spinner Row -->
+        <tr mat-row *ngIf="isLoading">
+            <td class="mat-cell table-loader" [attr.colspan]="displayedColumnKeys.length">
+                <div class="spinner"></div>
+            </td>
+
+        </tr>
+
+        <!-- ✅ No Data Row -->
+        <tr mat-row *ngIf="!isLoading && data.length === 0">
+
+            <td class="mat-cell text-center" [attr.colspan]="displayedColumnKeys.length">
+                No Active Customer...
+            </td>
+
+        </tr>
+
+        <!--data Rows -->
         <tr mat-row *matRowDef="let row; columns: displayedColumnKeys;"></tr>
 
     </table>
 
-   <div *ngIf="!data.length" class="text-dp-2-bold no-data-found text-center p-5">No Active Customer...</div>
+    <!-- <div *ngIf="!data.length" class="text-dp-2-bold no-data-found text-center p-5">No Active Customer...</div> -->
 
 </div>
 
 <!-- Pagination -->
-<div class="pagination" *ngIf="data.length">
+<div class="pagination" *ngIf="data.length" [hidden]="hidepagination">
     <button class="pagination-btn" (click)="onPageChange(currentPage - 1)" [disabled]="currentPage === 1">
         <img class="arrow-icon" src="/assets/images/icons/arrow-left-pg.svg" alt="Previous" height="20" width="20" />
     </button>

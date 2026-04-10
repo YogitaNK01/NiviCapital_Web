@@ -255,7 +255,7 @@ this.additionalinfoForm.get('maritalstatus')?.valueChanges.subscribe(value => {
       "objectName": this.objectName,
 
       "maritalStatus": formdata.maritalstatus.toUpperCase(),
-      "gender": this.gendercheckvalue == "Male" ? "M" : this.gendercheckvalue == "Female" ? "F" : 'T',
+      "gender": this.gendercheckvalue == "Male" ? "M" : this.gendercheckvalue == "Female" ? "F" : 'O',
 
       "numberOfDependents": formdata.dependents,
 

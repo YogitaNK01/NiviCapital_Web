@@ -265,3 +265,8 @@ color: $secondary-700;
     padding-left: 28px; 
   }
 }
+.disabled-link {
+  pointer-events: none;   
+  opacity: 0.5;          
+  cursor: not-allowed;
+}
