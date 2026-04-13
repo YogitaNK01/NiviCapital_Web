@@ -991,7 +991,7 @@ p {
 
 .accordion-item {
   width: 100% !important;
-  border: none;
+  // border: none;
 }
 
 .accordion-header {
@@ -1006,6 +1006,7 @@ p {
 .accordion-button.collapsed {
   min-height: 56px;
   padding: 16px 20px;
+  border: 1px solid $neutral-300;
 }
 
 

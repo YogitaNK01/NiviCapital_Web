@@ -692,7 +692,7 @@ export class Monthlyexpenditureinfo {
 
       if (groupName === 'utilities') {
         const map = {
-          utilityvalue1: 'TELEPHONE',
+          utilityvalue1: 'UTILITIES',
           utilityvalue2: 'UTILITIES'
         } as const
 
