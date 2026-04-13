@@ -624,7 +624,7 @@ export class Assetsinfo implements OnInit {
           }
           else
 
-            if (newlySelected.includes('Investments') === false) {
+            if (this.selectedAssets.includes('Investments') === false) {
               this.selectedInvestmentIds = [];
               this.selectInvestments = [];
               this.investmentsArray.clear();

@@ -635,9 +635,9 @@
                                 <!-- ================= ROW 2 ================= -->
                                 <!-- Amount (Normal banks only – SAME ROW) -->
                                 <div [class.col-6]="!isOtherSelectedbnpl(item)"
-                                    [class.col-4]="isOtherSelectedbnpl(item)">
+                                    [class.col-4]="isOtherSelectedbnpl(item)" [class.mt-20]="isOtherSelectedbnpl(item)">
                                     <div class="form-group mb-3">
-                                        <app-inputfield type="text" [required]="true" label="Outstanding Balance (INR)1"
+                                        <app-inputfield type="text" [required]="true" label="Outstanding Balance (INR)"
                                             (input)="handleAmountInput($event,'outstandingBalance',item)"
                                             [required]="true" formControlName="outstandingBalance"
                                             placeholder="Enter Value" helpText="Help text" name="outstandingBalance">
@@ -653,9 +653,9 @@
                                 </div>
 
                                 <div [class.col-6]="!isOtherSelectedbnpl(item)"
-                                    [class.col-4]="isOtherSelectedbnpl(item)">
+                                    [class.col-4]="isOtherSelectedbnpl(item)" [class.mt-20]="isOtherSelectedbnpl(item)">
                                     <div class="form-group mb-3">
-                                        <app-inputfield type="text" [required]="true" label="Credit Limit (INR)1"
+                                        <app-inputfield type="text" [required]="true" label="Credit Limit (INR)"
                                             (input)="main.restrictInput($event, 'number');formatAmountfromarray($event,'creditLimit',item)"
                                             [required]="true" formControlName="creditLimit" placeholder="Enter Value"
                                             helpText="Help text" name="creditLimit">
@@ -670,9 +670,9 @@
                                     </div>
                                 </div>
                                 <div [class.col-6]="!isOtherSelectedbnpl(item)"
-                                    [class.col-4]="isOtherSelectedbnpl(item)">
+                                    [class.col-4]="isOtherSelectedbnpl(item)" [class.mt-20]="isOtherSelectedbnpl(item)">
                                     <div class="form-group mb-3">
-                                        <app-inputfield type="text" [required]="true" label="Monthly EMI (INR)1"
+                                        <app-inputfield type="text" [required]="true" label="Monthly EMI (INR)"
                                             (input)="handleAmountInput($event,'monthlyEMI',item)" [required]="true"
                                             formControlName="monthlyEMI" placeholder="Enter Value" helpText="Help text"
                                             name="monthlyEMI">
@@ -688,7 +688,7 @@
                                 </div>
 
 
-                            
+
 
                                 <!-- <div class="col-lg-6 ">
                                     <div class="form-group mb-3">
@@ -837,7 +837,14 @@
                                             helpText="Help text" name="bankamt"
                                             (input)="handleAmountInput($event,'amount',item)">
                                         </app-inputfield>
+                                        <div class="text-danger"
+                                            *ngIf="item.get('amount')?.touched && item.get('amount')?.invalid">
+                                            <div *ngIf="item.get('amount')?.errors?.['required']">
+                                                Amount is required
+                                            </div>
 
+
+                                        </div>
 
                                     </div>
                                 </div>
@@ -848,7 +855,14 @@
                                             placeholder="Enter Value" helpText="Help text" name="bankamt"
                                             (input)="handleAmountInput($event,'MonthlyRepaymentLimit',item)">
                                         </app-inputfield>
+                                        <div class="text-danger"
+                                            *ngIf="item.get('MonthlyRepaymentLimit')?.touched && item.get('MonthlyRepaymentLimit')?.invalid">
+                                            <div *ngIf="item.get('MonthlyRepaymentLimit')?.errors?.['required']">
+                                                Monthly Repayment is required
+                                            </div>
 
+
+                                        </div>
 
                                     </div>
                                 </div>
