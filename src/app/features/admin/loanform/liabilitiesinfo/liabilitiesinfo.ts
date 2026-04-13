@@ -45,12 +45,7 @@ export class Liabilitiesinfo {
   @Input() avatarUrl = '';
   @Input() hasAvatar = false;
   maritalstatus: string = 'Marital Status';
-  liabilitiesCatagories: DropdownOption[] = [
-    // { label: 'Existing Loans', value: 'ExistingLoans', icon: '' },
-    // { label: 'Credit Card Outstanding', value: 'CreditCardOutstanding', icon: '' },
-    // { label: 'Buy Now Pay Later (BNPL)', value: 'BuyNowPayLater', icon: '' },
-    // { label: 'Other Liabilities', value: 'OtherLiabilities', icon: '' },
-  ];
+  liabilitiesCatagories: DropdownOption[] = [ ];
   selectedliabilities: string[] = [];
   selectedliabilities1: LiabilityOption[] = [];
   selectedlibilitiesIds: string[] = [];
@@ -65,18 +60,18 @@ export class Liabilitiesinfo {
   ];
 
 
-  fieldMap: any = {
-  ExistingLoans: { form: 'loans', api: 'Existing_Loans' },
-  CreditCardOutstanding: { form: 'creditcard', api: 'Credit_Card_Outstanding' },
-  BuyNowPayLater: { form: 'bnpl', api: 'Buy_Now_Pay_Later' },
-  OtherLiabilities: { form: 'other', api: 'Other_Liabilities' }
+ fieldMap: any = {
+  'EXISTING_LOAN': { form: 'loans', api: 'Existing_Loans' },
+  'CREDIT_CARD_OUTSTANDING': { form: 'creditcard', api: 'Credit_Card_Outstanding' },
+  'BNPL': { form: 'bnpl', api: 'Buy_Now_Pay_Later' },
+  'OTHER_LIABILITY': { form: 'other', api: 'Other_Liabilities' }
 };
-  private liabilityFormMap: Record<string, string> = {
-    'EXISTING_LOAN': 'loans',
-    'CREDIT_CARD_OUTSTANDING': 'creditcard',
-    'BNPL': 'bnpl',
-    'OTHER_LIABILITY': 'other'
-  };
+    private liabilityFormMap: Record<string, string> = {
+  'EXISTING_LOAN': 'loans',
+  'CREDIT_CARD_OUTSTANDING': 'creditcard',
+  'BNPL': 'bnpl',
+  'OTHER_LIABILITY': 'other'
+};
 
   selectedloantype: string[] = [];
   loanoptions: DropdownOption[] = [];
@@ -192,94 +187,6 @@ export class Liabilitiesinfo {
     });
   }
   
-   onChange(values: string | string[]): void {
-
-    const newSelected = Array.isArray(values) ? values : [values];
-    // Detect if cleared all
-    const clearedAll = newSelected.length === 0;
-    if (clearedAll) {
-      // Clear all selections and reset form fully
-      this.selectedliabilities = [];
-      this.openIndex = [];
-      this.liabilityForm.reset();
-
-
-
-      // Clear all 'other' entries
-
-      while (this.other.length !== 0) {
-        this.other.removeAt(0);
-      }
-
-    } else {
-
-      // Partial or full selection
-      // Find deselected keys
-
-      const deselected = this.selectedliabilities.filter(k => !newSelected.includes(k));
-      // Find newly selected keys
-      const newlySelected = newSelected.filter(k => !this.selectedliabilities.includes(k));
-      this.selectedliabilities = newSelected;
-      // Update open accordions
-      this.openIndex = [];
-      this.selectedliabilities.forEach(val => {
-        const index = this.accordions.findIndex(a => a.key === val);
-        if (index !== -1) {
-          this.openIndex.push(index);
-        }
-
-      });
-
-
-
-      // Reset form groups for deselected keys only
-
-      deselected.forEach(key => {
-        const formKey = this.fieldMap[key]?.form;
-        if (!formKey) return;
-
-        const control = this.liabilityForm.get(formKey);
-        if (control instanceof FormGroup) {
-          control.reset();
-        } else if (control instanceof FormArray) {
-          if (formKey === 'other') {
-            control.clear();
-          } else {
-            control.clear();
-          }
-        }
-
-      });
-
-
-
-      // Initialize form groups for newly selected keys
-
-      this.selectedliabilities.forEach(key => {
-
-        const formKey = this.fieldMap[key]?.form;
-        if (!formKey) return;
-        const control = this.liabilityForm.get(formKey);
-        if (control instanceof FormGroup) {
-          if (Object.values(control.value).every(v => v === '' || v === null)) {
-            control.reset();
-
-          }
-
-        } else if (control instanceof FormArray) {
-          if (formKey === 'other') {
-            if (control.length === 0) {
-              control.push(this.createOther());
-
-            }
-          }
-        }
-
-      });
-    }
-
-  }
-
   Selectedvalue(values: string | string[]) {
     const ids = Array.isArray(values) ? values : [values];
 
@@ -327,6 +234,7 @@ export class Liabilitiesinfo {
       outstandingBalance: ['', Validators.required],
       creditLimit: ['', Validators.required],
       monthlyEMI: ['', Validators.required],
+      title:['']
     });
   }
   addBNPL() {
@@ -406,6 +314,14 @@ export class Liabilitiesinfo {
     return found?.label === 'Other';
   }
 
+    //bnpl
+  isOtherSelectedbnpl(fd: AbstractControl): boolean {
+    const selectedId = fd.get('bnplbankName')?.value;
+    const found = this.selectLenders.find(b => b.value === selectedId);
+    return found?.label?.toLowerCase() === 'other';
+  }
+
+
   getlender() {
     this.formSvc.getalllenders().subscribe((res: any) => {
       const list = res.data ?? res;
@@ -419,17 +335,19 @@ export class Liabilitiesinfo {
     });
   }
   onlenderSelected(selectedId: any, fd: AbstractControl) {
-    const fg = fd as FormGroup;
+   
+fd.get('bnplbankName')?.setValue(selectedId);
 
-    const found = this.selectLenders.find(
-      (l: Bank_lenderOption) => l.value === selectedId
-    );
-    const bankLabel = found?.label ?? '';
-    this.selectedlendername = bankLabel;
+  const found = this.selectLenders.find(l => l.value === selectedId);
+  const bankLabel = found?.label?.toLowerCase();
 
-    const titleCtrl = fg.get('title');
+  const titleCtrl = fd.get('title');
 
-    if (bankLabel === 'Other') {
+    // const bankLabel = found?.label ?? '';
+    // this.selectedlendername = bankLabel;
+
+
+    if (bankLabel === 'other') {
       titleCtrl?.setValidators([Validators.required]);
     } else {
       titleCtrl?.clearValidators();
@@ -457,55 +375,7 @@ export class Liabilitiesinfo {
 
 
 
-  removeAccordion(key: any, index: number, event: Event) {
-    this.msgBox.open({
-      title: 'Are you sure want to Remove',
-      showCancel: true,
-      onOk: () => {
-        event.stopPropagation();
 
-        const code = key.code;
-
-        //  Remove from selected liabilities
-        this.selectedliabilities = this.selectedliabilities.filter(
-          (k: any) => k.code !== code
-        );
-        //  Close accordion
-        this.openIndex = this.openIndex.filter(i => i !== index);
-
-        // Clear correct FormArray
-        const formName = this.liabilityFormMap[code];
-        const control = formName ? this.liabilityForm.get(formName) : null;
-
-        if (control instanceof FormArray) {
-          control.clear();
-
-          //  Re-add empty row (CRITICAL)
-          switch (formName) {
-            case 'loans':
-              control.push(this.createLoan(''));
-              break;
-            case 'creditcard':
-              control.push(this.createCreditcard());
-              break;
-            case 'bnpl':
-              control.push(this.createBNPL());
-              break;
-            case 'other':
-              control.push(this.createOther());
-              break;
-          }
-        }
-
-        control?.markAsPristine();
-        control?.markAsUntouched();
-        control?.updateValueAndValidity();
-
-        this.cd.detectChanges();
-      },
-      message: ''
-    });
-  }
 
   handleEmptyAccordion(type: 'loantype' | 'creditcard' | 'bnpl' | 'other') {
     let array: FormArray;
@@ -540,49 +410,9 @@ export class Liabilitiesinfo {
       }
     }
   }
+ 
+
   removeitem1(index: number, type: 'loantype' | 'creditcard' | 'bnpl' | 'other') {
-
-
-    this.msgBox.open({
-      title: 'Are you sure want to Remove',
-      message: '',
-      showCancel: true,
-      onOk: () => {
-        if (type === 'loantype') {
-          const loanArray = this.loans;
-          const categoryToRemove = loanArray.at(index).get('type')?.value;
-
-          for (let i = loanArray.length - 1; i >= 0; i--) {
-            if (loanArray.at(i).get('type')?.value === categoryToRemove) {
-              loanArray.removeAt(i);
-            }
-          }
-
-          const livcategories = loanArray.controls.map(
-            ctrl => ctrl.get('type')?.value
-          );
-          this.selectedloantype = [...new Set(livcategories)];
-        }
-
-        if (type === 'creditcard') {
-          this.creditcard.removeAt(index);
-        }
-
-        if (type === 'bnpl') {
-          this.bnpl.removeAt(index);
-        }
-
-        if (type === 'other') {
-          this.other.removeAt(index);
-        }
-
-
-
-      }
-    });
-  }
-
-  removeitem(index: number, type: 'loantype' | 'creditcard' | 'bnpl' | 'other') {
     this.msgBox.open({
       title: 'Are you sure want to Remove',
       message: '',
@@ -608,7 +438,7 @@ export class Liabilitiesinfo {
     });
   }
 
-  alllibilitiy_type() {
+  alllibilitiy_type1() {
     this.formSvc.getAllLiabilities().subscribe((res: any) => {
       const list = res.data ?? res;
 
@@ -648,7 +478,38 @@ export class Liabilitiesinfo {
       // this.patchLiabilitiesData();
     });
   }
+alllibilitiy_type() {
+  this.formSvc.getAllLiabilities().subscribe((res: any) => {
+    const list = res.data ?? res;
 
+    this.groupIdMap = list.reduce((acc: any, item: any) => {
+      if (!acc[item.code]) {
+        acc[item.code] = [];
+      }
+      acc[item.code].push(item.id);
+      return acc;
+    }, {});
+
+    // ✅ FIX: Use CODE as value for dropdown
+    this.liabilitiesCatagories = list.map((a: any) => ({
+      value: a.code,  // ✅ CHANGED: was 'a' now 'a.code'
+      label: this.accordianTitle(a.code),
+      code: a.code
+    }));
+
+    // ✅ FIX: Use CODE as key for accordions
+    this.accordions = list.map((group: any) => ({
+      title: this.accordianTitle(group.code),
+      alwaysOpen: true,
+      key: group.code  // ✅ CHANGED: was 'group' now 'group.code'
+    }));
+
+    this.liabilityCodeMap = list.reduce((acc: any, item: any) => {
+      acc[item.code] = item.code;
+      return acc;
+    }, {});
+  });
+}
 
   formatTitle(text: string): string {
 
@@ -691,25 +552,7 @@ export class Liabilitiesinfo {
     });
   }
 
-  onLoanChange(values: string | string[]): void {
-    const groups = Array.isArray(values) ? values : [values];
-    this.selectedloantype = groups;
-
-    this.loans.clear();
-    // groups.forEach(type => {
-    //   this.loans.push(this.createLoan(type));
-    // });
-
-    groups.forEach(type => {
-      const loanGroup = this.createLoan(type);
-
-      // ✅ Enable bank dropdown AFTER loan type selection
-      loanGroup.get('showBank')?.setValue(true);
-
-      this.loans.push(loanGroup);
-    });
-
-  }
+ 
 
   Selectedloanvalue(values: string | string[]) {
     const ids = Array.isArray(values) ? values : [values];
@@ -1097,9 +940,197 @@ private hasValidOther(): boolean {
     return true; // disable if nothing valid
   }
 
+  
+  // ✅ 1. onLoanChange - COMPLETE REBUILD
+onLoanChange(values: string | string[]): void {
+  const groups = Array.isArray(values) ? values : [values];
+  this.selectedloantype = groups;
+
+  // COMPLETE CLEAR AND REBUILD
+  const loanArray = this.loans;
+  loanArray.clear();
+  
+  groups.forEach(typeId => {
+    const selectedOption = this.loanoptions.find(opt => opt.value === typeId);
+    const loanGroup = this.createLoan(selectedOption?.label || typeId);
+    loanGroup.get('showBank')?.setValue(true);
+    loanArray.push(loanGroup);
+  });
+  
+  this.cd.detectChanges();
+}
+
+removeAccordion(acc: any, index: number, $event: Event) {
+  $event.stopPropagation();
+  $event.preventDefault();
+  
+  this.msgBox.open({
+    title: 'Are you sure want to Remove',
+    message: '',  // ✅ REQUIRED - Add this line
+    showCancel: true,
+    onOk: () => {
+      const key = acc.key;
+      const title = acc.title;
+      
+      this.selectedliabilities = this.selectedliabilities.filter(k => k !== key && k !== title);
+      this.openIndex = this.openIndex.filter(i => i !== index);
+      
+      if (title.includes('Existing') || key.includes('Existing')) {
+        this.loans.clear();
+        this.selectedloantype = [];
+        if (this.selectedliabilities.some(k => k.includes('Existing'))) {
+          this.loans.push(this.createLoan(''));
+        }
+      } else if (title.includes('Credit') || key.includes('Credit')) {
+        this.creditcard.clear();
+        if (this.selectedliabilities.some(k => k.includes('Credit'))) {
+          this.creditcard.push(this.createCreditcard());
+        }
+      } else if (title.includes('Buy') || key.includes('BNPL')) {
+        this.bnpl.clear();
+        if (this.selectedliabilities.some(k => k.includes('BNPL'))) {
+          this.bnpl.push(this.createBNPL());
+        }
+      } else if (title.includes('Other') || key.includes('Other')) {
+        this.other.clear();
+        if (this.selectedliabilities.some(k => k.includes('Other'))) {
+          this.other.push(this.createOther());
+        }
+      }
+      
+      this.calculateGrandTotal();
+      this.cd.detectChanges();
+    }
+  });
+}
+
+
+
+// ✅ 2. removeitem - FULL LOAN RESET
+removeitem(index: number, type: 'loantype' | 'creditcard' | 'bnpl' | 'other') {
+  this.msgBox.open({
+    title: 'Are you sure want to Remove',
+    message: '',
+    showCancel: true,
+    onOk: () => {
+      switch (type) {
+        case 'loantype':
+          this.loans.removeAt(index);
+            this.resetLoanDropdownState();
+
+  break;
+          
+        case 'creditcard':
+          this.creditcard.removeAt(index);
+          break;
+        case 'bnpl':
+          this.bnpl.removeAt(index);
+          break;
+        case 'other':
+          this.other.removeAt(index);
+          break;
+      }
+      this.checkAndDeselectEmptyArray(type);
+      this.calculateGrandTotal();
+      this.cd.detectChanges();
+    }
+  });
+}
+
+// ✅ 3. NEW METHOD - RESET DROPDOWN STATE
+resetLoanDropdownState() {
+  // PRESERVE EXISTING VALUES - Don't clear selectedloantype
+  const currentLoanTypes = this.loans.controls
+    .map((control: any) => {
+      const typeLabel = control.get('type')?.value;
+      // Find matching option value
+      const option = this.loanoptions.find(opt => opt.label === typeLabel);
+      return option ? option.value : typeLabel;
+    })
+    .filter(Boolean);
+
+  // DON'T CLEAR - Just update to match remaining rows
+  this.selectedloantype = [...currentLoanTypes];
+  
+  //Force immediate detection
+  this.cd.detectChanges();
+}
+
+// 4. onChange - Handle Existing Loans properly
+onChange(values: string | string[]): void {
+  const selectedCodes = Array.isArray(values) ? values : [values];
+  
+  // Clear ALL form arrays
+  this.loans.clear();
+  this.creditcard.clear();
+  this.bnpl.clear();
+  this.other.clear();
+  
+  // ALSO CLEAR nested loan dropdown
+  this.selectedloantype = [];
+  
+  // Repopulate selected
+  selectedCodes.forEach(code => {
+    if (code.includes('Existing') || code === 'EXISTING_LOAN') {
+      this.loans.push(this.createLoan(''));
+    }
+    if (code.includes('Credit') || code === 'CREDIT_CARD_OUTSTANDING') {
+      this.creditcard.push(this.createCreditcard());
+    }
+    if (code.includes('BNPL') || code === 'BNPL') {
+      this.bnpl.push(this.createBNPL());
+    }
+    if (code.includes('Other') || code === 'OTHER_LIABILITY') {
+      this.other.push(this.createOther());
+    }
+  });
+  
+  this.selectedliabilities = selectedCodes;
+  this.openIndex = selectedCodes.map(code => 
+    this.accordions.findIndex(acc => acc.key === code || acc.title.includes(code))
+  ).filter(i => i !== -1);
+  
+  this.cd.detectChanges();
+}
+// 5 checkAndDeselectEmptyArray
+checkAndDeselectEmptyArray(type: 'loantype' | 'creditcard' | 'bnpl' | 'other') {
+  let isEmpty = false;
+  let accKey = '';
+  
+  switch (type) {
+    case 'loantype':
+      isEmpty = this.loans.length === 0;
+      accKey = 'ExistingLoans';
+      break;
+    case 'creditcard':
+      isEmpty = this.creditcard.length === 0;
+      accKey = 'CreditCardOutstanding';
+      break;
+    case 'bnpl':
+      isEmpty = this.bnpl.length === 0;
+      accKey = 'BuyNowPayLater';
+      break;
+    case 'other':
+      isEmpty = this.other.length === 0;
+      accKey = 'OtherLiabilities';
+      break;
+  }
+  
+  // ✅ FIX: If empty, remove from selectedliabilities
+  if (isEmpty) {
+    this.selectedliabilities = this.selectedliabilities.filter(k => k !== accKey);
+    
+    // Close accordion
+    const accIndex = this.accordions.findIndex(a => a.key === accKey || a.title.includes(accKey));
+    if (accIndex !== -1) {
+      this.openIndex = this.openIndex.filter(i => i !== accIndex);
+    }
+  }
+}
   next() {
     let form = this.liabilityForm.value
     console.log("form data Assets:", form);
+    console.log('selectedliabilities:', this.selectedliabilities);
     const items: any[] = [];
 
     let invalid = false;
@@ -1123,7 +1154,8 @@ private hasValidOther(): boolean {
     };
 
     //  EXISTING LOANS
-    if (this.selectedliabilities.some((l: any) => l.code === 'EXISTING_LOAN')) {
+    // if (this.selectedliabilities.some((l: any) => l.code === 'EXISTING_LOAN')) {
+    if (this.selectedliabilities.includes('EXISTING_LOAN')) {
 
       if (this.loans.length === 0) {
         invalid = true;
@@ -1147,7 +1179,8 @@ private hasValidOther(): boolean {
     }
 
     //  CREDIT CARD
-    if (this.selectedliabilities.some((l: any) => l.code === 'CREDIT_CARD_OUTSTANDING')) {
+    // if (this.selectedliabilities.some((l: any) => l.code === 'CREDIT_CARD_OUTSTANDING')) {
+     if (this.selectedliabilities.includes('CREDIT_CARD_OUTSTANDING')) {
       if (this.creditcard.length === 0) invalid = true;
 
       this.creditcard.controls.forEach((card: any) => {
@@ -1170,7 +1203,8 @@ private hasValidOther(): boolean {
 
 
     //  BNPL
-    if (this.selectedliabilities.some((l: any) => l.code === 'BNPL')) {
+    // if (this.selectedliabilities.some((l: any) => l.code === 'BNPL')) {
+    if (this.selectedliabilities.includes('BNPL')) {
       if (this.bnpl.length === 0) invalid = true;
 
       this.bnpl.controls.forEach((bnpl: any) => {
@@ -1183,14 +1217,16 @@ private hasValidOther(): boolean {
             bankName: bnpl.value.bnplbankName,
             outstandingBalanceInr: cleanAmount(bnpl.value.outstandingBalance),
             creditLimitInr: cleanAmount(bnpl.value.creditLimit),
-            monthlyEmiInr: cleanAmount(bnpl.value.monthlyEMI)
+            monthlyEmiInr: cleanAmount(bnpl.value.monthlyEMI),
+            ...(this.isOtherSelectedbnpl(bnpl) && { title: bnpl.value.title }),
+
           });
         }
       });
     }
 
     //  OTHER
-    if (this.selectedliabilities.some((l: any) => l.code === 'OTHER_LIABILITY')) {
+    if (this.selectedliabilities.includes('OTHER_LIABILITY')) {
       if (this.other.length === 0) invalid = true;
 
       this.other.controls.forEach((other: any) => {
@@ -1227,10 +1263,10 @@ private hasValidOther(): boolean {
           this.stepperService.next();
         }
       },
-      error: (err) => {
-        console.error('Submit failed:', err);
-        this.msgBox.open({ title: 'Submission failed', message: err.message });
-      }
+      // error: (err) => {
+      //   console.error('Submit failed:', err);
+      //   this.msgBox.open({ title: 'Submission failed', message: err.message });
+      // }
     });
 
   }

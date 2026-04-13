@@ -89,39 +89,46 @@ export class Assetsinfo implements OnInit {
   totalinvestment = 0;
 
   selectedbakname!: string;
-  invalidamt: boolean= false;;
+  invalidamt: boolean = false;;
 
   assetFieldMap: any = {
-  Gold: {
-    form: 'gold',
-    api: 'GOLD'
-  },
+    Gold: {
+      form: 'gold',
+      api: 'GOLD'
+    },
 
-  LiquidAssets: {
-    form: 'liquidAssets',
-    api: 'LIQUID_ASSETS'
-  },
+    LiquidAssets: {
+      form: 'liquidAssets',
+      api: 'LIQUID_ASSETS'
+    },
 
-  Properties: {
-    form: 'properties',
-    api: 'PROPERTIES'
-  },
+    Properties: {
+      form: 'properties',
+      api: 'PROPERTIES'
+    },
 
-  FixedDeposits: {
-    form: 'fixedDeposits',
-    api: 'FIXED_DEPOSITS'
-  },
+    FixedDeposits: {
+      form: 'fixedDeposits',
+      api: 'FIXED_DEPOSITS'
+    },
 
-  Investments: {
-    form: 'investments',
-    api: 'INVESTMENTS'
-  },
+    Investments: {
+      form: 'investments',
+      api: 'INVESTMENTS'
+    },
 
-  OtherAssets: {
-    form: 'otherassets',
-    api: 'OTHER_ASSETS'
-  }
-};
+    OtherAssets: {
+      form: 'otherassets',
+      api: 'OTHER_ASSETS'
+    }
+  };
+
+  investmentTypeMap = {
+    MutualFunds: 'MUTUAL_FUNDS',
+    Shares: 'EQUITY_SHARES',
+    Bonds: 'BONDS',
+    Others: 'OTHER_INVESTMENTS'
+  };
   constructor(private fb: FormBuilder, public main: Main, private route: ActivatedRoute, private msgBox: Msgboxservice,
     private stepperService: Loanstepperservice, private formSvc: Loanformservice, private cd: ChangeDetectorRef) { }
 
@@ -229,7 +236,7 @@ export class Assetsinfo implements OnInit {
     return this.fb.group({
       bankname: [''],
       title: [''],
-      bankamt: ['', [Validators.required,this.nonZeroValidator]],
+      bankamt: ['', [Validators.required, this.nonZeroValidator]],
       maturitydate: ['', [Validators.required, this.dateMinValidator(() => new Date())]]
     });
   }
@@ -244,14 +251,14 @@ export class Assetsinfo implements OnInit {
       return this.fb.group({
         type: [type, Validators.required],
         name: ['', Validators.required],
-        value: ['', [Validators.required,this.nonZeroValidator]]
+        value: ['', [Validators.required, this.nonZeroValidator]]
       });
     }
 
 
     return this.fb.group({
       type: [type, Validators.required],
-       value: ['', [Validators.required,this.nonZeroValidator]]
+      value: ['', [Validators.required, this.nonZeroValidator]]
     });
   }
 
@@ -526,54 +533,9 @@ export class Assetsinfo implements OnInit {
     console.log(this.assetsForm.value);
   }
 
-  onAssetChange11(values: string[] | string) {
-    const assets = Array.isArray(values) ? values : [];
 
-    this.selectedAssets = assets;
-    this.openIndex = [];
 
-    assets.forEach(asset => {
-      if (asset === 'GOLD' && !this.assetsForm.get('gold')) {
-        this.assetsForm.addControl(
-          'gold',
-          this.fb.group({ goldvalue: ['', Validators.required] })
-        );
-      }
-
-      if (asset === 'LIQUID' && !this.assetsForm.get('liquidAssets')) {
-        this.assetsForm.addControl(
-          'liquidAssets',
-          this.fb.group({
-            cashinhand: ['', Validators.required],
-            savingbalance: ['', Validators.required]
-          })
-        );
-      }
-
-      if (asset === 'PROPERTY' && !this.assetsForm.get('properties')) {
-        this.assetsForm.addControl(
-          'properties',
-          this.fb.array([this.createProperty()])
-        );
-      }
-    });
-  }
-  onAssetChange22(values: string | string[]): void {
-
-    const groups = Array.isArray(values) ? values : [values];
-
-    this.selectedAssets = groups;
-
-    this.openIndex = [];
-    this.selectedAssets.forEach(val => {
-      const index = this.accordions.findIndex(a => a.key === val);
-      if (index !== -1) {
-        this.openIndex.push(index);
-      }
-    });
-  }
-
-    onAssetChange(values: string | string[]): void {
+  onAssetChange(values: string | string[]): void {
 
     const newSelected = Array.isArray(values) ? values : [values];
     // Detect if cleared all
@@ -581,25 +543,33 @@ export class Assetsinfo implements OnInit {
     if (clearedAll) {
       // Clear all selections and reset form fully
       this.selectedAssets = [];
+      this.selectInvestments = [];
+      this.selectedInvestmentIds = [];
       this.openIndex = [];
+
+
+      this.investmentsArray.controls.forEach(ctrl => {
+        ctrl.reset(null, { emitEvent: false });
+      });
+      this.investmentsArray.clear();
+
+
       this.assetsForm.reset();
+      this.cd.detectChanges();
+      return;
 
 
 
-      // Clear all 'other' entries
 
-      // while (this.other.length !== 0) {
-      //   this.other.removeAt(0);
-      // }
 
     } else {
 
       const deselected = this.selectedAssets.filter(k => !newSelected.includes(k));
-    
+
       const newlySelected = newSelected.filter(k => !this.selectedAssets.includes(k));
 
       this.selectedAssets = newSelected;
-      
+
 
       this.openIndex = [];
       this.selectedAssets.forEach(val => {
@@ -642,26 +612,38 @@ export class Assetsinfo implements OnInit {
         const formKey = this.assetFieldMap[key]?.form;
         if (!formKey) return;
         const control = this.assetsForm.get(formKey);
+
+
+
         if (control instanceof FormGroup) {
-          if (Object.values(control.value).every(v => v === '' || v === null)) {
-            control.reset();
-
-          }
-
+          control.reset();
         } else if (control instanceof FormArray) {
           if (formKey === 'other') {
-            if (control.length === 0) {
-              control.push(this.createOther());
+            control.clear();
+
+          }
+          else
+
+            if (newlySelected.includes('Investments') === false) {
+              this.selectedInvestmentIds = [];
+              this.selectInvestments = [];
+              this.investmentsArray.clear();
+            }
+
+
+            else {
+
+              control.clear();
 
             }
-          }
+
         }
 
       });
     }
 
   }
-  
+
   allAssetCatagory() {
     this.formSvc.getAllAssets().subscribe((res: any) => {
       const list = res.data ?? res;
@@ -787,9 +769,6 @@ export class Assetsinfo implements OnInit {
     if (type === 'property') {
       this.selectedPropertyIds = ids;
     }
-    // else if (type === 'investment') {
-    //   this.selectedInvestmentIds = ids;
-    // }
 
     else {
       this.selectedownertype = ids;
@@ -797,16 +776,32 @@ export class Assetsinfo implements OnInit {
   }
 
   onchangeinvestment(selectedIds: any) {
-    if (!Array.isArray(selectedIds)) return;
+
+    if (!Array.isArray(selectedIds) || selectedIds.length === 0) {
+      this.investmentsArray.clear();
+      this.selectedInvestmentIds = [];
+      this.cd.detectChanges();
+      return;
+    }
+
+
+    if (selectedIds.length === 0) {
+      this.investmentsArray.clear();
+      console.log('Investments cleared');
+      return;
+    }
 
     // map ids → codes
     const selectedCodes: string[] = selectedIds
       .map(id => this.selectInvestments.find(x => x.value === id)?.code)
       .filter((code): code is string => typeof code === 'string');
 
-    const existingCodes = this.investmentsArray.value.map(
-      (v: any) => v.type
+
+
+    const existingCodes: string[] = this.investmentsArray.controls.map(
+      ctrl => ctrl.value?.type
     );
+
 
     //  Add newly selected
     selectedCodes.forEach(code => {
@@ -824,7 +819,7 @@ export class Assetsinfo implements OnInit {
         this.investmentsArray.removeAt(i);
       }
     }
-
+    this.cd.detectChanges();
     console.log('Investments shown:', this.investmentsArray.value);
   }
 
@@ -957,7 +952,7 @@ export class Assetsinfo implements OnInit {
 
     return total;
   }
- 
+
 
   // Add this getter to your component
   get isNextDisabled(): boolean {
@@ -1056,14 +1051,14 @@ export class Assetsinfo implements OnInit {
   };
 
   nonZeroValidator(control: any) {
-  const raw = control.value;
+    const raw = control.value;
 
-  if (!raw) return null;
+    if (!raw) return null;
 
-  const numeric = Number(raw.toString().replace(/,/g, ''));
+    const numeric = Number(raw.toString().replace(/,/g, ''));
 
-  return numeric === 0 ? { zeroNotAllowed: true } : null;
-}
+    return numeric === 0 ? { zeroNotAllowed: true } : null;
+  }
   patchAssetsData() {
     const data = this.formSvc.aseetsInfoData;
 
@@ -1201,7 +1196,7 @@ export class Assetsinfo implements OnInit {
         ...extra
       });
     };
-      const cleanAmount = (val: any) =>
+    const cleanAmount = (val: any) =>
       val ? Number(val.toString().replace(/,/g, '')) : 0;
 
     const markInvalid = (path: string) => {
@@ -1262,7 +1257,7 @@ export class Assetsinfo implements OnInit {
             console.log('Fixed Deposit true:'); return
 
           } else {
-            
+
             addItem('FIXED_DEPOSIT', ctrl.value.bankamt, {
               bankName: ctrl.value.bankname,
               ...(this.isOtherSelected(ctrl) && { title: ctrl.value.title }),
@@ -1330,8 +1325,7 @@ export class Assetsinfo implements OnInit {
         }
       });
     }
-    if (invalid || this.invalidamt === true) 
-      { console.log("invalid--"); return; }
+    if (invalid || this.invalidamt === true) { console.log("invalid--"); return; }
 
 
 

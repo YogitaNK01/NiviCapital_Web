@@ -36,7 +36,7 @@ export class Loanstepperservice {
 private buildSteps() {
   
    const baseSteps : Step[] = [
-    { label: 'Loan Info', route: 'loaninfo' },
+    { label: 'Loan Info', route: 'loaninfo' }, { label: 'Liabilities', route: 'liabilitiesinfo' },
     { label: 'General Info', route: 'genralinfo' },
     { label: 'Estimated Expense', route: 'expense' },
     { label: 'Additional Info', route: 'additionalinfo' },
