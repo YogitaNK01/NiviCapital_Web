@@ -31,7 +31,7 @@
       </div>
     </div>
 
-    <div class="step-body">
+    <div class="step-body" [class.border-none]="currentStep === 2">
 
 
       @if (currentStep === 0) {
@@ -227,7 +227,7 @@
       }
 
       @if (currentStep === 2) {
-      <div class="mobiledetails">
+      <div class="mobiledetails p-0">
         <app-uploadkyc (nextStep)="goToStep(3)" (prevstep)="back()" (ncid)="setKycId($event)"></app-uploadkyc>
       </div>
       }

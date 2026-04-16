@@ -2,7 +2,16 @@
 @use 'typography' as *;
 @use 'common' as *;
 
+.vh-container {
+    display: flex;
+    flex-direction: column;
+    height: 90vh;
+}
 
+.base-height {
+    flex: 1;
+    overflow: auto; 
+}
 
 .mt-20{
     margin-top: $spacing_9;;
@@ -50,4 +59,70 @@ background: rgba(179, 228, 253, 0.30);
 .hrclass{
     background: $neutral-300;
     margin:16px 0 0 0 ;
+}
+.education-box{
+ 
+padding:$spacing_14;
+align-self: stretch;
+border-radius: $border_radius_m;
+border: 1px solid $neutral-300;
+}
+
+
+
+.addcust-img-box {
+  display: flex;
+  padding: $spacing_7;
+  justify-content: space-between;
+  align-items: baseline;
+  align-self: stretch;
+  border-radius: $border_radius_rounded;
+  background: $secondary-50;
+
+  @media (max-width: 480px) {
+    padding: $spacing_4;
+
+  }
+}
+
+.addcust-img-box {
+  position: relative;
+  background: #d9e3ea;
+  border-radius: 30px;
+  padding: 12px 50px 12px 20px;
+  /* space for icons */
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  min-width: 280px;
+  width: 100%;
+}
+
+
+
+/* Icons container */
+.addcust-img-box .icons {
+  display: flex;
+  gap: 10px;
+}
+
+/* Hide view & download by default */
+.addcust-img-box .icons .view,
+.addcust-img-box .icons .download {
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.2s ease-in-out;
+}
+
+/* Always show delete icon */
+.addcust-img-box .icons .delete {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* On hover → show view & download */
+.addcust-img-box:hover .icons .view,
+.addcust-img-box:hover .icons .download {
+  opacity: 1;
+  visibility: visible;
 }

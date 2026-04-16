@@ -32,8 +32,11 @@ export class Datepickernew implements OnInit, ControlValueAccessor {
   @Input() required: boolean = false;
 
   @Input() disablePastDates: boolean = false;
+   @Input() disablefutureDates: boolean = false;
   @Input() minDate: Date | null = null;
   @Input() minyear: number = 1960;
+
+  @Input() maxDate: Date | null = null;
 
 
   onChange = (_: any) => { };
@@ -42,25 +45,28 @@ export class Datepickernew implements OnInit, ControlValueAccessor {
 
   ngOnInit() {
 
+    const minYearDate = new Date(this.minyear, 0, 1); // 01-01-1960
+    minYearDate.setHours(0, 0, 0, 0);
+
+
     
-  const minYearDate = new Date(this.minyear, 0, 1); // 01-01-1960
-minYearDate.setHours(0, 0, 0, 0);
+const yesterday = new Date();
+  yesterday.setDate(yesterday.getDate() - 1);
+  yesterday.setHours(23, 59, 59, 999);
 
-    // if (this.disablePastDates) {
-    //   const tomorrow = new Date();
-    //   tomorrow.setDate(tomorrow.getDate() + 1);
 
-    //   this.minDate = tomorrow;
-    // }
+    if (this.disablePastDates) {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
 
-if (this.disablePastDates) {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-
-    this.minDate = today > minYearDate ? today : minYearDate;
-  } else {
-    this.minDate = minYearDate;
-  }
+      this.minDate = today > minYearDate ? today : minYearDate;
+    } else  if (this.disablefutureDates) {
+      this.maxDate = yesterday;
+    }
+    else {
+      this.minDate = minYearDate;
+      
+    }
 
 
   }

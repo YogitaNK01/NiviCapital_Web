@@ -2,11 +2,20 @@ import { ChangeDetectorRef, Injectable } from '@angular/core';
 import { Router } from '@angular/router';
 import { Loanformservice } from '../service/loanformservice';
 import { BehaviorSubject } from 'rxjs';
+import { ShowOnDirtyErrorStateMatcher } from '@angular/material/core';
 
 interface Step {
   label: string;
   route: string;
+  
+ children?: {
+    id: string;
+    label: string;
+  }[];
+
 }
+
+
 @Injectable({
   providedIn: 'root'
 })
@@ -21,7 +30,11 @@ export class Loanstepperservice {
   issalaried: boolean = false;
 
 
-    //  steps: any[] = [];
+    
+
+private educationSubSteps: any[] = [];
+
+
 
       private stepsSubject = new BehaviorSubject<any[]>([]);
   public steps$ = this.stepsSubject.asObservable();
@@ -36,12 +49,18 @@ export class Loanstepperservice {
 private buildSteps() {
   
    const baseSteps : Step[] = [
-    { label: 'Loan Info', route: 'loaninfo' },
+    { label: 'Loan Info', route: 'loaninfo' },{ label: 'Income Details', route: 'incomeinfo' },
     { label: 'General Info', route: 'genralinfo' },
     { label: 'Estimated Expense', route: 'expense' },
     { label: 'Additional Info', route: 'additionalinfo' },
     { label: 'KYC', route: 'kycinfo' },
-    // { label: 'Education Details', route: 'educationinfo' },
+    
+// {
+//       label: 'Education Details',
+//       route: 'educationinfo',
+//       children: this.educationSubSteps   
+//     },
+
     
   ];
  const conditionalSteps: { label: string; route: string }[] = [];
@@ -74,6 +93,19 @@ get steps(): Step[] {
     return this.stepsSubject.getValue();
   }
   
+  
+setEducationSubSteps(data: any[]) {
+  
+ this.educationSubSteps = data.map(d => ({
+    id: d.qualificationId,
+    label: d.qualificationName
+  }));
+
+
+  this.buildSteps();
+}
+
+
 
   setLoanId(id1: string,id2: string,name:string,arn:string) {
     this.applicantId = id1;
@@ -101,6 +133,11 @@ get steps(): Step[] {
     const currentRoute = this.router.url.split('?')[0].split('/').pop();;
 
     const index = this.steps.findIndex(s => s.route === currentRoute);
+
+    
+ if (currentRoute === 'educationinfo') {
+    return; // stay on education section
+  }
 
     if (index < this.steps.length - 1  && index !== -1) {
       const nextRoute = this.steps[index + 1].route;

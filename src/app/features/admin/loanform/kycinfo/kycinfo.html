@@ -55,7 +55,7 @@
           <div class="col-lg-3 col-sm-12">
 
             <label class="text-label">Aadhaar_Card_front<span class="text-danger">*</span></label>
-            <div class="addcust-img-box" name="adhaarfront">
+            <div class="addcust-img-box mt-2" name="adhaarfront">
               <p class="text-label">{{aadhaarFrontFileName}}</p>
               <div class="icons">
                 <span (click)="viewImage(aadhaarFrontUrl)"><img src="/assets/images/icons/eyered.svg" alt="view"></span>
@@ -68,7 +68,7 @@
           <div class="col-lg-3 col-sm-12">
 
             <label class="text-label">Aadhaar_Card_Back<span class="text-danger">*</span></label>
-            <div class="addcust-img-box" name="adhaarback">
+            <div class="addcust-img-box mt-2" name="adhaarback">
               <p class="text-label">{{aadhaarBackFileName}}</p>
               <div class="icons">
                 <span (click)="viewImage(aadhaarBackUrl)"><img src="/assets/images/icons/eyered.svg" alt="view"></span>
@@ -88,7 +88,7 @@
           </div>
           <div class="col-lg-6 col-sm-12">
             <label class="text-label">PAN Card<span class="text-danger">*</span></label>
-            <div class="addcust-img-box" name="panimg">
+            <div class="addcust-img-box mt-2" name="panimg">
               <p class="text-label">{{panFileName}}</p>
               <div class="icons">
                 <span (click)="viewImage(panUrl)"><img src="/assets/images/icons/eyered.svg" alt="view"></span>
@@ -110,7 +110,7 @@
           <div class="col-lg-6 col-sm-12 ">
             @if(ispassport){
             <label class="text-label">Passport<span class="text-danger">*</span></label>
-            <div class="addcust-img-box">
+            <div class="addcust-img-box mt-2">
               <p class="text-label">{{passportFileName}}</p>
               <div class="icons">
                 <span (click)="viewImage(passportUrl)"><img src="/assets/images/icons/eyered.svg" alt="view"></span>
@@ -212,7 +212,7 @@
           @if(otherDocumentFileName){
           <div class="col-lg-6 col-sm-12 ">
             <label class="text-label">Supporting Document<span class="text-danger">*</span></label>
-            <div class="addcust-img-box">
+            <div class="addcust-img-box mt-2">
               <p class="text-label">{{otherDocumentFileName}}</p>
               <div class="icons">
                 <span (click)="viewImage(otherDocumentUrl)"><img src="/assets/images/icons/eyered.svg"

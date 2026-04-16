@@ -987,12 +987,17 @@ p {
 .accordion {
   flex: none;
   width: 100%;
+  
 }
 
 .accordion-item {
-  width: 100% !important;
-  // border: none;
+  width: 100%;
+  border: 1px solid $neutral-300;
+  border-radius: 12px;
+  overflow: hidden; 
+  background: $bg;
 }
+
 
 .accordion-header {
   width: 100% !important;
@@ -1006,21 +1011,28 @@ p {
 .accordion-button.collapsed {
   min-height: 56px;
   padding: 16px 20px;
-  border: 1px solid $neutral-300;
+  // border: 1px solid $neutral-300;
 }
 
 
 .accordion-button {
-  border-radius: $border-radius-s;
+  // border-radius: $border-radius-s;
   background: $bg;
   min-height: 56px; // important
   padding: 16px 20px; // restore header spacing
   display: flex;
   align-items: center;
   color: $secondary-text-dark;
-  ;
+  border: none !important;
+  border-radius: 0;
 }
 
+.accordion-button:focus {
+  // box-shadow: none;
+}
+.accordion-item:not(:has(.accordion-collapse.show)) {
+  border-radius: 12px;
+}
 
 .base-layout {
   width: 100%;

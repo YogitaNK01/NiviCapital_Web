@@ -246,7 +246,7 @@ export class Liabilitiesinfo {
   createOther(): FormGroup {
     return this.fb.group({
       LiabilityType: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(50)]],
-      amount: ['', Validators.required],
+      libamount: ['', Validators.required],
       MonthlyRepaymentLimit: ['', Validators.required],
     });
   }
@@ -412,31 +412,7 @@ fd.get('bnplbankName')?.setValue(selectedId);
   }
  
 
-  removeitem1(index: number, type: 'loantype' | 'creditcard' | 'bnpl' | 'other') {
-    this.msgBox.open({
-      title: 'Are you sure want to Remove',
-      message: '',
-      showCancel: true,
-      onOk: () => {
-        switch (type) {
-          case 'loantype':
-            this.loans.removeAt(index);
-            break;
-          case 'creditcard':
-            this.creditcard.removeAt(index);
-            break;
-          case 'bnpl':
-            this.bnpl.removeAt(index);
-            break;
-          case 'other':
-            this.other.removeAt(index);
-            break;
-        }
-        this.handleEmptyAccordion(type);
-        this.calculateGrandTotal();  // Recalc total
-      }
-    });
-  }
+
 
   alllibilitiy_type1() {
     this.formSvc.getAllLiabilities().subscribe((res: any) => {
@@ -566,7 +542,7 @@ alllibilitiy_type() {
     this.totalloans = this.calculateTotal('loans', 'outstanding');
     this.totalcc = this.calculateTotal('creditcard', 'ccoutstandingBalance');
     this.totalbnpl = this.calculateTotal('bnpl', 'outstandingBalance');
-    this.totalother = this.calculateTotal('other', 'amount');
+    this.totalother = this.calculateTotal('other', 'libamount');
 
     const total =
       this.totalloans +
@@ -597,11 +573,16 @@ alllibilitiy_type() {
 
   handleAmountInput(event: any, controlName: string, ctrl?: any) {
     this.main.restrictInput(event, 'decimal');
+    
     if (ctrl) {
       this.formatAmountfromarray(event, controlName, ctrl);
     } else {
       this.formatAmount(event, controlName);
     }
+
+ setTimeout(() => {
+    this.calculateGrandTotal();
+  });
 
 
   }
@@ -803,7 +784,7 @@ alllibilitiy_type() {
       }
 
       // ---------------- OTHER ----------------
-      if (!item.bankName && item.amount !== undefined) {
+      if (!item.bankName && item.libamount !== undefined) {
 
         this.selectedliabilities.push('OtherLiabilities');
 
@@ -811,8 +792,8 @@ alllibilitiy_type() {
 
         group.patchValue({
           LiabilityType: item.type,
-          amount: item.amount,
-          MonthlyRepaymentLimit: item.emi
+          libamount: item.libamount,
+          MonthlyRepaymentLimit: item.MonthlyRepaymentLimit
         });
 
         this.other.push(group);
@@ -877,8 +858,9 @@ private hasValidBNPL(): boolean {
 
 private hasValidOther(): boolean {
   return this.other.controls.some(c => 
-    c.get('amount')?.valid && 
-    c.get('LiabilityType')?.valid
+    c.get('libamount')?.valid && 
+    c.get('LiabilityType')?.valid &&
+    c.get('MonthlyRepaymentLimit')?.valid
   );
 }
   get isNextDisabled1(): boolean {
@@ -1237,7 +1219,7 @@ checkAndDeselectEmptyArray(type: 'loantype' | 'creditcard' | 'bnpl' | 'other') {
           items.push({
             liabilityType: "OTHER_LIABILITY",
             liabilityTypeText: other.value.LiabilityType,
-            amountInr: cleanAmount(other.value.amount),
+            amountInr: cleanAmount(other.value.libamount),
             monthlyRepaymentInr: cleanAmount(other.value.MonthlyRepaymentLimit)
           });
         }

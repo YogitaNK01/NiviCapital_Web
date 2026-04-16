@@ -774,13 +774,13 @@
                 <div class="mobiledetails d-flex w-100 flex-column ">
                     <div class="w-100 gap-3">
                         <div formArrayName="other">
-                            @for(item of getFormArray('other').controls; track $index; let i = $index){
+                            @for(item of other.controls; track item; let i = $index){
                             <div class="row common-details-box d-flex flex-row gap-0" [formGroupName]="i">
 
 
                                 <div class="text-dp-3-regular d-flex align-items-center justify-content-between">
                                     Liability {{ i + 1 }}
-                                    <span *ngIf="getFormArray('other').controls.length > 1"
+                                    <span *ngIf="other.length > 1"
                                         (click)="removeitem(i,'other')">
                                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
                                             viewBox="0 0 24 24" fill="none">
@@ -811,7 +811,7 @@
                                         <app-inputfield type="text" [required]="true" label="Liability Type"
                                             [required]="true" formControlName="LiabilityType"
                                             (input)="main.restrictInput($event,'text')"
-                                            placeholder="Enter Liability Type" helpText="Help text" name="bankamt">
+                                            placeholder="Enter Liability Type" helpText="Help text" name="LiabilityType">
                                         </app-inputfield>
                                         <div class="text-danger"
                                             *ngIf="item.get('LiabilityType')?.touched && item.get('LiabilityType')?.invalid">
@@ -833,13 +833,13 @@
                                 <div class="col">
                                     <div class="form-group mb-3">
                                         <app-inputfield type="text" [required]="true" label="Amount (INR)"
-                                            [required]="true" formControlName="amount" placeholder="Enter Value"
-                                            helpText="Help text" name="bankamt"
-                                            (input)="handleAmountInput($event,'amount',item)">
+                                            [required]="true" formControlName="libamount" placeholder="Enter Value"
+                                            helpText="Help text" name="libamount"
+                                            (input)="handleAmountInput($event,'libamount',item)">
                                         </app-inputfield>
                                         <div class="text-danger"
-                                            *ngIf="item.get('amount')?.touched && item.get('amount')?.invalid">
-                                            <div *ngIf="item.get('amount')?.errors?.['required']">
+                                            *ngIf="item.get('libamount')?.touched && item.get('libamount')?.invalid">
+                                            <div *ngIf="item.get('libamount')?.errors?.['required']">
                                                 Amount is required
                                             </div>
 
@@ -852,7 +852,7 @@
                                     <div class="form-group mb-3">
                                         <app-inputfield type="text" [required]="true" label="Monthly Repayment (INR)"
                                             [required]="true" formControlName="MonthlyRepaymentLimit"
-                                            placeholder="Enter Value" helpText="Help text" name="bankamt"
+                                            placeholder="Enter Value" helpText="Help text" name="MonthlyRepaymentLimit"
                                             (input)="handleAmountInput($event,'MonthlyRepaymentLimit',item)">
                                         </app-inputfield>
                                         <div class="text-danger"
@@ -869,7 +869,7 @@
 
 
                             </div>
-                            @if(i === getFormArray('other').length - 1 ) {
+                            @if(i === other.length - 1 ) {
                             <div class="row common-details-box pt-0 pb-0 ">
 
                                 <div class="form-group mb-3">

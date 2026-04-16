@@ -2,13 +2,13 @@
 @use 'typography' as *;
 @use 'common' as *;
 
-.kyc-form,
-.accordion,
-.accordion-item,
-.accordion-button,
-.accordion-collapse {
-  width: 100%!important;
-}
+// .kyc-form,
+// .accordion,
+// .accordion-item,
+// .accordion-button,
+// .accordion-collapse {
+//   width: 100%!important;
+// }
 
 
 .loan-heading{
@@ -45,7 +45,7 @@ height: 54px;
   margin-bottom: 20px;
 }
 .addresscheck {
-padding: $spacing_14 0  0 0;
+// padding: $spacing_14 0  0 0;
 }
 
 

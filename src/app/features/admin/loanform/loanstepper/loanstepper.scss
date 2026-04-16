@@ -12,10 +12,10 @@
 }
 
 .stepcls {
-  position: relative;
+  // position: relative;
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
+  // align-items: flex-start;
   gap: $spacing_6;
   align-self: stretch;
 }
@@ -23,7 +23,8 @@
 .step {
   position: relative;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
+  ;
   gap: $spacing_4;
   padding: 16px 0;
   cursor: pointer;
@@ -62,15 +63,22 @@
 
 /* Title */
 .title {
- 
+
   color: $secondary-900;
+}
+
+.text {
+  display: flex;
+  flex-direction: column;
+  padding-top: 6px; // Aligns title text vertically with the center of the circle
 }
 
 /* ACTIVE STEP */
 .step.active .circle {
   background: $secondary-50;
   border-color: $secondary-700;
-   color:  $secondary-700;;
+  color: $secondary-700;
+  ;
 }
 
 .step.active .title {
@@ -89,16 +97,23 @@
   border-left: 2px solid #1f4e79;
 }
 
+.step.completed + .step::before {
+  border-left: 2px solid #1f4e79;
+}
+
+
 /* UPCOMING STEP */
 .step.upcoming .circle {
   background: $secondary-50;
-  border-color:  $secondary-700;;
-  color:  $secondary-700;
-  
+  border-color: $secondary-700;
+  ;
+  color: $secondary-700;
+
 }
 
 .step.upcoming .title {
-  color: $secondary-700;;
+  color: $secondary-700;
+  ;
 }
 
 .step.disabled {
@@ -113,4 +128,50 @@
 
 .step.disabled .title {
   color: #c5d3df;
+}
+
+
+
+.sub-stepper {
+  position: relative;
+  margin-top: 8px;
+  // margin-left: 4px;        
+  display: flex;
+  flex-direction: column;
+  gap: 13px;
+}
+
+
+
+.sub-step {
+  position: relative;
+
+  font-size: 14px;
+  color: $secondary-700;
+  cursor: pointer;
+  line-height: 20px;
+  letter-spacing: 0.14px;
+
+  /* The Dot */
+  &::before {
+    content: '';
+    position: absolute;
+    left: -32px; // Position dot on the line
+    top: 6px;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background-color: $secondary-700;
+    z-index: 2;
+  }
+
+  &.active {
+    color: $secondary-900;
+    font-weight: 700;
+
+    &::before {
+      background-color: $secondary-900;
+      transform: scale(1.2);
+    }
+  }
 }

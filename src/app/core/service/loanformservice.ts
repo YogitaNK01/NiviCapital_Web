@@ -84,12 +84,7 @@ setValues(isAsset?: boolean, isIncome?: boolean, issalaried?: boolean) {
     );
   }
 
-  getEducation(): Observable<ApiResponse<any>> {
-    return this.http.get<ApiResponse<any>>(
-      `${this.baseUrl}/v1/masters/qualifications`,
-
-    );
-  }
+ 
 
   getlendingpartners(): Observable<ApiResponse<any>> {
     return this.http.get<ApiResponse<any>>(
@@ -282,6 +277,20 @@ setValues(isAsset?: boolean, isIncome?: boolean, issalaried?: boolean) {
     );
   }
 
+   // *************************Education *************************
+
+    getEducation(): Observable<ApiResponse<any>> {
+    return this.http.get<ApiResponse<any>>(
+      `${this.baseUrl}/v1/masters/qualifications`,
+
+    );
+  }
+   getselectedEducation(data:string): Observable<ApiResponse<any>> {
+    return this.http.get<ApiResponse<any>>(
+      `${this.baseUrl}/v1/masters/qualifications/${data}`,
+
+    );
+  }
 }
 
 

@@ -109,7 +109,7 @@
                                 placeholder="Enter Value" helpText="Help text" name="goldvalue">
                             </app-inputfield> -->
                             <app-inputfield type="text" [required]="true" label="Value INR" [required]="true"
-                                (input)=" main.restrictInput($event, 'decimal');formatAmount($event,'gold.goldvalue')"
+                                (input)=" main.restrictInput($event, 'decimal');formatAmount('gold.goldvalue')"
                                 formControlName="goldvalue" placeholder="Enter Value" helpText="Help text"
                                 name="goldvalue">
                             </app-inputfield>
@@ -137,7 +137,8 @@
                         <div class="form-group mb-3">
                             <app-inputfield type="text" [required]="true" label="Cash In Hand (INR)" [required]="true"
                                 formControlName="cashinhand" placeholder="Enter Value" helpText="Help text"
-                                (input)="main.restrictInput($event, 'decimal');formatAmount($event,'liquidAssets.cashinhand')"
+                                (input)="main.restrictInput($event, 'decimal');formatAmount('liquidAssets.cashinhand')"
+                                
                                 name="cashinhand">
                             </app-inputfield>
                             <div class="text-danger"
@@ -153,7 +154,7 @@
                         <div class="form-group mb-3">
                             <app-inputfield type="text" label="Savings Account Balance (INR)" [required]="true"
                                 placeholder="Enter Value" formControlName="savingbalance"
-                                (input)="main.restrictInput($event, 'decimal');formatAmount($event,'liquidAssets.savingbalance')"
+                                (input)="main.restrictInput($event, 'decimal');formatAmount('liquidAssets.savingbalance')"
                                 helpText="Help text" name="savingbalance">
                             </app-inputfield>
                             <div class="text-danger"

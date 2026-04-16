@@ -3,12 +3,24 @@
 @use 'common' as *;
 
 
+.vh-container {
+    display: flex;
+    flex-direction: column;
+    height: 90vh;
+}
 
+.base-height {
+    flex: 1;
+    overflow: auto; 
+}
+.text-datepicker{
+  font-weight: 500;
+}
 .mt-20{
     margin-top: $spacing_9;;
 }
 .blue-text{
-    color:$secondary-text;
+    color:$secondary-text-dark ;
 // font-weight: 700;
 }
 
@@ -25,7 +37,7 @@
   box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.05);
 }
 .table-head{
-  color: $secondary-700;
+  // color: $secondary-700;
 }
 
 .btncustomClass{
@@ -54,4 +66,23 @@ background: rgba(179, 228, 253, 0.30);
 .hrclass{
     background: $neutral-300;
     margin:16px 0 0 0 ;
+}
+.mobiledetails {
+
+  
+  align-items: center;
+  gap: $spacing_14;
+  align-self: stretch;
+  // max-width: 900px;
+  width: 100%;
+
+  @media (max-width:780px) {
+    align-items: stretch;
+    padding: $spacing_9;
+  }
+}
+
+::ng-deep app-dropdown .dropdown-container .dropdown-list {
+  max-height: 500px;
+  
 }

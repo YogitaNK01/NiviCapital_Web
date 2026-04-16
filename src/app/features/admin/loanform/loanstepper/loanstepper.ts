@@ -18,6 +18,10 @@ export class Loanstepper implements OnInit {
   custARN: string = '';
 
    completedSteps: Set<number> = new Set();
+   
+activeQualificationId!: string;
+
+
   constructor(public router: Router, public stepservice: Loanstepperservice,private route:ActivatedRoute,private stepperService:Loanstepperservice,private cdr: ChangeDetectorRef) {
  this.stepperService.steps$.subscribe(steps => {
       this.steps = steps;
@@ -84,6 +88,23 @@ isNextStep(index: number): boolean {
   isUpcoming(index: number): boolean {
     return index > this.currentIndex;
   }
+
+  
+openEducationSubStep(sub: any, event: Event) {
+  event.stopPropagation(); 
+
+  this.activeQualificationId = sub.id;
+
+  this.router.navigate(['/loanform/educationinfo'], {
+    queryParams: {
+        applicantId: this.applicantId,
+        applicationId: this.applicationId,
+        custName: this.custName,
+        custARN: this.custARN,
+      qualificationId: sub.id
+    }
+  });
+}
 
 
 }

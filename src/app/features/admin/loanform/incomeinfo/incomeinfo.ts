@@ -254,8 +254,9 @@ export class Incomeinfo {
     const doc = this.getDocumentByKey(key);
     return doc?.viewUrl || '';  // Use viewUrl!
   }
+  
 
-  get allRequiredFilesUploaded(): boolean {
+  get allRequiredFilesUploaded1(): boolean {
     if (this.loanformservice.issalaried) {
       return this.requiredDocs.every(key => !!this.getDocumentByKey(key));
     } else {
@@ -264,7 +265,43 @@ export class Incomeinfo {
     // return this.requiredDocs.every(key => !!this.getDocumentByKey(key));
   }
 
+get allRequiredFilesUploaded(): boolean {
+  const requiredValid = this.loanformservice.issalaried
+    ? this.requiredDocs.every(k => !!this.getDocumentByKey(k))
+    : this.requiredBusinessDocs.every(k => !!this.getDocumentByKey(k));
 
+  return this.isOtherSelected
+    ? requiredValid && this.isOtherDocumentValid()
+    : requiredValid;
+}
+
+
+
+get isOtherSelected(): boolean {
+  if (this.loanformservice.issalaried) {
+      return Array.isArray(this.otherIncomeSlots) && this.otherIncomeSlots.length > 0;
+
+  }
+return Array.isArray(this.otherBusinessSlots) && this.otherBusinessSlots.length > 0;
+}
+
+
+isOtherDocumentValid(): boolean {
+
+  if (this.loanformservice.issalaried) {
+    return this.otherIncomeSlots.every(slot =>
+      slot.title &&
+      slot.title.trim().length > 0 &&
+      !!this.getDocumentByKey(slot.title)
+    );
+  }
+
+  return this.otherBusinessSlots.every(slot =>
+    slot.title &&
+    slot.title.trim().length > 0 &&
+    !!this.getDocumentByKey(slot.title)
+  );
+}
   getDocumentByKeyold(key: string): Document | null {
     if (!this.allDocuments?.length) return null;
 
@@ -420,6 +457,17 @@ export class Incomeinfo {
     this.stepperService.previous();
   }
   next() {
+
+    
+//  if (!this.allRequiredFilesUploaded) {
+//     this.msgBox.open({
+//       title: 'Missing documents',
+//       message: 'Please upload all required documents before proceeding.'
+//     });
+//     return;
+//   }
+
+
     console.log('allRequiredFilesUploaded:', this.allRequiredFilesUploaded);
     if (this.allRequiredFilesUploaded) {
 

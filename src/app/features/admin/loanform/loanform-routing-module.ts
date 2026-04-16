@@ -15,6 +15,7 @@ import { Monthlyexpenditureinfo } from './monthlyexpenditureinfo/monthlyexpendit
 import { Referenceinfo } from './referenceinfo/referenceinfo';
 import { Coapplicantinfo } from './coapplicantinfo/coapplicantinfo';
 import { Summaryinfo } from './summaryinfo/summaryinfo';
+import { Edusection } from './educationinfo/edusection/edusection';
 
 const routes: Routes = [
   // {
@@ -32,7 +33,21 @@ const routes: Routes = [
       { path: 'expense', component: Estimateexpense },
       { path: 'additionalinfo', component: Additionalinfo },
       { path: 'kycinfo', component: Kycinfo },
-      { path: 'educationinfo', component: Educationinfo },
+      {
+        path: 'educationinfo', component: Educationinfo,
+
+        children: [
+          // {
+          //   path: '',
+          //   redirectTo: 'select',
+          //   pathMatch: 'full'
+          // },
+          {
+            path: 'edusection',
+            component: Edusection   // optional placeholder
+          },
+        ]
+      },
       { path: 'incomeinfo', component: Incomeinfo },
       { path: 'assetsinfo', component: Assetsinfo },
       { path: 'liabilitiesinfo', component: Liabilitiesinfo },
@@ -40,6 +55,10 @@ const routes: Routes = [
       { path: 'referenceinfo', component: Referenceinfo },
       // { path: 'coapplicantinfo', component: Coapplicantinfo },
       { path: 'summaryinfo', component: Summaryinfo },
+      {
+            path: 'edusection',
+            component: Edusection   // optional placeholder
+          },
     ]
   },
 

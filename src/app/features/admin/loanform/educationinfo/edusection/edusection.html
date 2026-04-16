@@ -1,82 +1,247 @@
-<div [formGroup]="group" class="row  d-flex  align-items-start pt-4 common-details-box d-flex flex-column">
-    <div class="row mt-20">
-        <app-inputfield type="text" formControlName="institutename" [required]="true" label="Institute Name"
-            placeholder="Select Institute Name" helpText="Help text" name="institutename">
-        </app-inputfield>
+<div class="vh-container">
+
+    <div class="base-layout base-height" [formGroup]="group">
+
+        <div class="header ">
+
+            <div class="text-datepicker blue-text d-flex flex-column gap-2 ">{{title}}
+                <div class="text-body-1 fw-normal">
+                    <span><svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 22 22"
+                            fill="none">
+                            <path
+                                d="M10.9997 20.1667C16.0413 20.1667 20.1663 16.0417 20.1663 11C20.1663 5.95833 16.0413 1.83333 10.9997 1.83333C5.95801 1.83333 1.83301 5.95833 1.83301 11C1.83301 16.0417 5.95801 20.1667 10.9997 20.1667Z"
+                                stroke="#25262F" stroke-width="1.28125" stroke-linecap="round"
+                                stroke-linejoin="round" />
+                            <path d="M11 7.33333V11.9167" stroke="#25262F" stroke-width="1.28125" stroke-linecap="round"
+                                stroke-linejoin="round" />
+                            <path d="M10.9961 14.6667H11.0043" stroke="#25262F" stroke-width="1.28125"
+                                stroke-linecap="round" stroke-linejoin="round" />
+                        </svg></span>
+                    Click the “Next” button to save your changes
+                </div>
+            </div>
+
+        </div>
+        <div class="row  d-flex  align-items-start flex-column education-box">
+
+            <div class="row mt-20">
+                <app-inputfield type="text" formControlName="institutename" [required]="true" label="Institute Name"
+                    placeholder="Select Institute Name" helpText="Help text" name="institutename">
+                </app-inputfield>
+            </div>
+            <div class="row mt-20">
+                <div class="col-lg-4 col-sm-12">
+                    <app-dropdown [options]="selectpassingyr" [placeholder]="'Select Year'" [required]="true"
+                        (selectedValueChange)="group.get('passingyear')?.setValue($event)" [avatarUrl]="avatarUrl"
+                        formControlName="passingyear" [hasAvatar]="hasAvatar" [label]="passingyear">
+                    </app-dropdown>
+                </div>
+                <div class="col-lg-4 col-sm-12">
+                    <app-inputfield type="number" formControlName="per_cgpa" [required]="true" label="Percentage / CGPA"
+                        placeholder="Enter Percentage" helpText="Help text" name="per_cgpa" min="0" max="100"
+                        step="0.01" suffix="%">
+                    </app-inputfield>
+
+
+                </div>
+                <div class="col-lg-4 col-sm-12">
+                    <app-dropdown [options]="selectlocation" [placeholder]="'Select Location'" [required]="true"
+                        (selectedValueChange)="group.get('location')?.setValue($event)" [avatarUrl]="avatarUrl"
+                        formControlName="location" [hasAvatar]="hasAvatar" [label]="location">
+                    </app-dropdown>
+                </div>
+            </div>
+
+
+            <div class="row ">
+                <div class="col-6">
+
+
+                    <div class="text-label fw-bold mt-20">Marksheet</div>
+
+
+                    <div class=" col-sm-12 mt-20" *ngFor="let m of [].constructor(marksheetCount); let i = index">
+
+                        @if(handleresponse && hasDocument('marksheet1')){
+                        <label class="text-label">Marksheet <span class="text-danger">*</span></label>
+                        <div class="addcust-img-box mt-2">
+                            <p class="text-label">{{ getDocumentName('marksheet1') }}</p>
+                            <div class="icons">
+                                <span class="view" (click)="viewImage(getDocumentUrl('marksheet1'))"><img
+                                        src="/assets/images/icons/eyered.svg" alt="view"></span>
+                                <span class="download"
+                                    (click)="downloadImage(getDocumentUrl('marksheet1'), getDocumentName('marksheet1'))"><img
+                                        src="/assets/images/icons/import-red.svg" alt="Download"></span>
+                                <span (click)="deleteImage('marksheet1')"><img src="/assets/images/icons/close.svg"
+                                        alt="Download"></span>
+                            </div>
+                        </div>
+
+                        } @else{
+                        <app-uploadbtn [config]="basicConfig" [uploadViaApi]="true" [required]="true" label="Marksheet "
+                            (uploadStarted)="onUploadStarted($event, 'marksheet1','_10TH','MARKSHEET')"
+                            [fileuploadresponse]="handleresponse">
+                        </app-uploadbtn>
+                        }
+
+                    </div>
+                </div>
+
+                <div class="col-6">
+                    <div class="text-label fw-bold mt-20">Passing / Leaving Certificate</div>
+                    <div class=" col-sm-12 mt-20">
+                        @if(handleresponse && hasDocument('LC')){
+                        <label class="text-label">Passing / Leaving Certificate <span
+                                class="text-danger">*</span></label>
+                        <div class="addcust-img-box mt-2">
+                            <p class="text-label">{{ getDocumentName('LC') }}</p>
+                            <div class="icons">
+                                <span class="view" (click)="viewImage(getDocumentUrl('LC'))"><img
+                                        src="/assets/images/icons/eyered.svg" alt="view"></span>
+                                <span class="download"
+                                    (click)="downloadImage(getDocumentUrl('LC'), getDocumentName('LC'))"><img
+                                        src="/assets/images/icons/import-red.svg" alt="Download"></span>
+                                <span (click)="deleteImage('LC')"><img src="/assets/images/icons/close.svg"
+                                        alt="Download"></span>
+                            </div>
+                        </div>
+
+                        } @else{
+                        <app-uploadbtn [config]="basicConfig" [uploadViaApi]="true" [required]="true"
+                            label="Passing / Leaving Certificate " formControlName="lc"
+                            (uploadStarted)="onUploadStarted($event, 'LC','_10TH','SCHOOL_LEAVING_CERT')"
+                            [fileuploadresponse]="handleresponse">
+                        </app-uploadbtn>
+                        }
+
+
+                    </div>
+                </div>
+            </div>
+            <hr class="hrclass">
+
+            <div class="row  d-flex flex-column">
+                <div class="text-label fw-bold mt-20">Other Documents</div>
+
+
+                <div class="row d-flex flex-column">
+
+                    <div class="row">
+                        @for (slot of otherDocuments; track slot.id) {
+
+                        <div class="row mt-20 row  d-flex  align-items-start ">
+
+
+                            <div class="col-lg-4 col-sm-12">
+
+                                <app-inputfield label="Title" [required]="true" placeholder="Enter text here"
+                                    (input)="main.restrictInput($event, 'text')" [maxlength]="25">
+                                </app-inputfield>
+
+                                <!-- <div class="text-danger" *ngIf="f['assettitle'].touched && f['assettitle'].invalid">
+
+                                    <div *ngIf="f['title'].errors?.['minlength']">
+                                        Minimum 2 characters required
+                                    </div>
+                                </div> -->
+                            </div>
+
+
+
+                            <div class="col-lg-4 col-sm-12 ">
+
+                                @if (handleresponse && getDocumentByKey(slot.title)) {
+
+                                <div class="addcust-img-box mt-4">
+                                    <p class="text-label">
+                                        {{ getDocumentName(slot.title) }}
+                                    </p>
+
+                                    <div class="icons">
+                                        <span class="view" (click)="viewImage(getDocumentUrl(slot.title))">
+                                            <img src="/assets/images/icons/eyered.svg">
+                                        </span>
+                                        <span class="download"
+                                            (click)="downloadImage(getDocumentUrl(slot.title),getDocumentName(slot.title))">
+                                            <img src="/assets/images/icons/import-red.svg">
+                                        </span>
+                                        <span class="delete" (click)="deleteImage(slot.title)">
+                                            <img src="/assets/images/icons/close.svg">
+                                        </span>
+                                    </div>
+                                </div>
+
+                                }
+                                @else {
+
+
+                                <app-uploadbtn label="Other Documents" [config]="basicConfig" [required]="true"
+                                    [disabled]="!slot.title && slot.title.trim().length === 0" [uploadViaApi]="true"
+                                    [fileuploadresponse]="handleresponse"
+                                    (uploadStarted)="onUploadStarted($event, slot.title, 'OTHER', 'OTHER')">
+                                </app-uploadbtn>
+
+                                }
+
+                            </div>
+
+
+                            <div class="col-lg-4 d-flex justify-content-end align-items-end mt-5">
+                                <span class="delete d-none d-lg-block">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                                        fill="none">
+                                        <path
+                                            d="M21 5.98047C17.67 5.65047 14.32 5.48047 10.98 5.48047C9 5.48047 7.02 5.58047 5.04 5.78047L3 5.98047"
+                                            stroke="#25262F" stroke-width="1.5" stroke-linecap="round"
+                                            stroke-linejoin="round" />
+                                        <path
+                                            d="M8.5 4.97L8.72 3.66C8.88 2.71 9 2 10.69 2H13.31C15 2 15.13 2.75 15.28 3.67L15.5 4.97"
+                                            stroke="#25262F" stroke-width="1.5" stroke-linecap="round"
+                                            stroke-linejoin="round" />
+                                        <path
+                                            d="M18.8484 9.14062L18.1984 19.2106C18.0884 20.7806 17.9984 22.0006 15.2084 22.0006H8.78844C5.99844 22.0006 5.90844 20.7806 5.79844 19.2106L5.14844 9.14062"
+                                            stroke="#25262F" stroke-width="1.5" stroke-linecap="round"
+                                            stroke-linejoin="round" />
+                                        <path d="M10.3281 16.5H13.6581" stroke="#25262F" stroke-width="1.5"
+                                            stroke-linecap="round" stroke-linejoin="round" />
+                                        <path d="M9.5 12.5H14.5" stroke="#25262F" stroke-width="1.5"
+                                            stroke-linecap="round" stroke-linejoin="round" />
+                                    </svg>
+                                </span>
+                            </div>
+
+                        </div>
+
+                        }
+                    </div>
+
+                    <!-- Add button -->
+                    <div class="col-lg-4 col-sm-12 mt-20">
+                        <app-buttons label="Add Other Document" class="btn btn-icon Add btncustomClass" [outline]="true"
+                            (click)="addotherdocuments()">
+
+                        </app-buttons>
+                    </div>
+                </div>
+
+            </div>
+        </div>
     </div>
-    <div class="row mt-20">
-        <div class="col-lg-4 col-sm-12">
-            <app-dropdown [options]="selectpassingyr" [placeholder]="'Select Year'" [required]="true"
-                (selectedValueChange)="group.get('passingyear')?.setValue($event)" [avatarUrl]="avatarUrl"
-                formControlName="passingyear" [hasAvatar]="hasAvatar" [label]="passingyear">
-            </app-dropdown>
+
+
+    <hr class="footer-hr-class">
+    <!-- <div class="loan-footerbtns row w-100  d-flex justify-content-between align-items-center">
+
+        <div class="col-lg-4 ">
+            <img src="../assets/images/icons/save.svg">
+            <span class="text-dp-3-regular mx-2 blue-text"> Save and Exit</span>
         </div>
-        <div class="col-lg-4 col-sm-12">
-             <app-inputfield type="number" formControlName="per_cgpa" [required]="true" label="Percentage / CGPA"
-            placeholder="Enter Percentage" helpText="Help text" name="per_cgpa"  min="0"
-      max="100"
-      step="0.01" suffix="%">
-        </app-inputfield>
-
-            
-        </div>
-        <div class="col-lg-4 col-sm-12">
-            <app-dropdown [options]="selectlocation" [placeholder]="'Select Location'" [required]="true"
-                (selectedValueChange)="group.get('location')?.setValue($event)" [avatarUrl]="avatarUrl"
-                formControlName="location" [hasAvatar]="hasAvatar" [label]="location">
-            </app-dropdown>
-        </div>
-    </div>
-    <div class=" mt-20 info-box">
-        <div class="col-lg-4 col-sm-12">
-            <p class="text-label">Upload the required documents listed below:</p>
-           
-                <ul *ngFor="let doc of documentConfig" class="mb-0">
-                    <li class="text-label"> {{ doc.label }} </li>
-                </ul>
-
-          
-
-        </div>
-    </div>
-
-    <div class="row ">
-        <div class="text-label fw-bold mt-20">Marksheet</div>
-
-        <hr class="hrclass">
-        <div class="col-lg-4 col-sm-12 mt-20" *ngFor="let m of [].constructor(marksheetCount); let i = index">
-            <app-uploadbtn [config]="basicConfig" (fileChange)="onFileChange($event, 'marksheet'+i)" [required]="true"
-                [label]="marksheetCount>2? 'Marksheet ' + (i+1) + ' Year'  : marksheetlabel" formControlName="marksheet">
-            </app-uploadbtn>
-        </div>
-    </div>
-
-    <div class="row " *ngIf="showLC">
-        <div class="text-label fw-bold mt-20">School Leaving Certificate</div>
-
-        <hr class="hrclass">
-        <div class="col-lg-4 col-sm-12 mt-20">
-            <app-uploadbtn [config]="basicConfig" (fileChange)="onFileChange($event, 'lc')" [required]="true"
-                label="School Leaving Certificate" formControlName="lc">
-            </app-uploadbtn>
-        </div>
-    </div>
-
-    <div class="row  d-flex flex-column">
-        <div class="text-label fw-bold mt-20">Other Documents</div>
-
-        <hr class="hrclass">
-        <div class="col-lg-4 col-sm-12 mt-20">
-            <app-uploadbtn [config]="basicConfig" (fileChange)="onFileChange($event,  'other')" [required]="true"
-                label="Other Documents">
-            </app-uploadbtn>
-        </div>
-        <div class="col-lg-4 col-sm-12 mt-20">
-            <app-buttons label="Add Other Document" class="btn btn-icon Add btncustomClass" [outline]="true"
-                (click)="addotherdocuments()">
-                <img src="/assets/images/icons/addred.svg" alt="Add">
-
+        <div class="col-lg-4  d-flex justify-content-end">
+            <app-buttons type="button" label="Back" class="btn btncustomClass" [outline]="true" (click)="back()">
             </app-buttons>
+            <app-buttons type="button" label="Next" class="btn btncustomClass" color="primary" (click)="next()" >
+            </app-buttons>
+
         </div>
-    </div>
+    </div> -->
 </div>

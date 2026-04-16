@@ -159,19 +159,24 @@ input {
 }
 
 
-// .stepper {
-//   display: flex;
-//   border-radius: 12px;
-//   border: 1px solid $neutral-300;
-//   box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.05);
-// }
+.stepper {
+  display: flex;
+  border-radius: 12px;
+  border: 1px solid $neutral-300;
+  box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.05);
+}
 
-.step-body , .stepper{
+.step-body {
   display: flex;
   border-radius: 12px;
   border: 1px solid $neutral-300;
   // box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.05);
 }
+
+.step-body.border-none {
+  border: none;
+}
+
 
 .step {
   flex: 1;

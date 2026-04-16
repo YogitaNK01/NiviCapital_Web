@@ -29,7 +29,7 @@ export class Inputfield implements ControlValueAccessor {
   //  @Input() label: string = '';
   @Input() placeholder: string = '';
   @Input() helpText: string = '';
-  @Input() type: 'text'  | 'password' | 'email' | 'search' | 'tel' | 'flag' | 'number' = 'text';
+  @Input() type: 'text'  | 'password' | 'email' | 'search' | 'tel' | 'flag' | 'number' | 'parsefloat' = 'text';
   @Input() state: 'default' | 'error' | 'success' = 'default';
   @Input() showSearch: boolean = false;
   @Input() showInfo: boolean = false;
