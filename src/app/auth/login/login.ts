@@ -57,15 +57,14 @@ export class Login {
     this.main.getLogin(inputobj).subscribe({
       next: (res) => {
         this.isLoading = false;
+           const lastLogin = res.lastLoginDateTime;
+
+        if (lastLogin) {
+          this.main.setLastLogin(lastLogin);
+        }
+        
         this.router.navigate(['admin/dashboard']);
-        // this.msgBox.open({
-        //   title: 'Success',
-        //   message: res.message || 'Login successful',
-        //   showCancel: false,
-        //   onOk: () => {
-        //     this.router.navigate(['admin/dashboard']);
-        //   }
-        // });
+       
       },
       error: (err) => {
         this.isLoading = false;

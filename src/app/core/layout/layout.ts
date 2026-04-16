@@ -79,7 +79,7 @@ export class Layout implements OnInit, OnDestroy {
 
 
 
-  constructor(private router: Router, private service: Main) {
+  constructor(private router: Router, public service: Main) {
     this.router.events
       .pipe(
         filter(event => event instanceof NavigationEnd),

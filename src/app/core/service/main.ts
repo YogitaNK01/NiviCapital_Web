@@ -1,5 +1,5 @@
 import { HttpClient } from '@angular/common/http';
-import { Injectable } from '@angular/core';
+import { computed, Injectable, signal } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 
@@ -51,15 +51,28 @@ export class Main {
   selectedUserId: string | null = null;
   docofselectedUser: any = null;
 
+  private _lastLogin = signal<string | null>(null);
+  lastLogin = computed(() => this._lastLogin());
+  
   constructor(private http: HttpClient) { }
 
-  getLogin(payload: LoginPayload): Observable<ApiResponse<any>> {
-    return this.http.post<ApiResponse<any>>(
+  getLogin(payload: LoginPayload): Observable<any> {
+    return this.http.post<any>(
       `${this.baseUrl}/admin/auth/login`,
       payload
     );
   }
+   setLastLogin(value: string) {
+    this._lastLogin.set(value);
+    localStorage.setItem('lastLogin', value); // ✅ optional persistence
+  }
 
+  loadLastLoginFromStorage() {
+    const stored = localStorage.getItem('lastLogin');
+    if (stored) {
+      this._lastLogin.set(stored);
+    }
+  }
  
   getAllUsers(page:number,size:number): Observable<ApiResponse<PageResponse<UserData>>> {
   return this.http.get<ApiResponse<PageResponse<UserData>>>(
@@ -115,6 +128,8 @@ export class Main {
     this.kycSubject.next(null);
     sessionStorage.removeItem('los');
     this.losSubject.next(null);
+     this._lastLogin.set(null);
+    localStorage.removeItem('lastLogin');
   }
 
   Logout(): Observable<ApiResponse<any>> {

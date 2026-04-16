@@ -994,7 +994,6 @@ p {
   width: 100%;
   border: 1px solid $neutral-300;
   border-radius: 12px;
-  overflow: hidden; 
   background: $bg;
 }
 
@@ -1002,7 +1001,9 @@ p {
 .accordion-header {
   width: 100% !important;
 }
-
+ .accordion-header .accordion-button.table-head{
+  border-radius: 12px;
+}
 
 .accordion-item:first-child .accordion-button {
   min-height: 56px;
@@ -1011,6 +1012,7 @@ p {
 .accordion-button.collapsed {
   min-height: 56px;
   padding: 16px 20px;
+  border-radius: 12px;
   // border: 1px solid $neutral-300;
 }
 

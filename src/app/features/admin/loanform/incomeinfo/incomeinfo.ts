@@ -332,7 +332,10 @@ isOtherDocumentValid(): boolean {
       );
     }
 
-    return doc || null;
+    return (
+    this.allDocuments.find(doc => doc.title === key) || null
+  );
+    // return doc || null;
   }
 
 
