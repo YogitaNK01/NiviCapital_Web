@@ -24,7 +24,6 @@
   position: relative;
   display: flex;
   align-items: flex-start;
-  ;
   gap: $spacing_4;
   padding: 16px 0;
   cursor: pointer;
@@ -35,11 +34,13 @@
   content: '';
   position: absolute;
   left: 16px;
-  top: -20px;
+  top: -30px;
   width: 2px;
   height: 100%;
+  //  height: calc(100% + 24px + 8px);
   border-left: 2px dashed $secondary-700;
   z-index: 0;
+   background: transparent;
 }
 
 .step:first-child::before {
@@ -59,6 +60,8 @@
   font-size: 13px;
   font-weight: 600;
   z-index: 1;
+   transition: all 0.3s ease;
+  // position: relative;
 }
 
 /* Title */
@@ -70,50 +73,106 @@
 .text {
   display: flex;
   flex-direction: column;
-  padding-top: 6px; // Aligns title text vertically with the center of the circle
+  padding-top: 6px; 
 }
 
 /* ACTIVE STEP */
-.step.active .circle {
-  background: $secondary-50;
-  border-color: $secondary-700;
-  color: $secondary-700;
-  ;
+// .step.active .circle {
+//   background: $secondary-50;
+//   border-color: $secondary-700;
+//   color: $secondary-700;
+//   ;
+// }
+
+// .step.active .title {
+//   color: $secondary-900;
+//   font-weight: 700;
+// }
+.step.active {
+  cursor: pointer;
+  
+  .circle {
+    background: $secondary-50;      // Light blue tint
+    border-color: $secondary-700;
+    color: $secondary-700;
+    // border-width: 2px;
+    // transform: scale(1.05);   // Slightly larger
+  }
+  
+  .title {
+    color: $secondary-900;
+    font-weight: 700;
+  }
+
+  &::before {
+  }
 }
 
-.step.active .title {
-  color: $secondary-900;
-  font-weight: 700;
-}
 
 /* COMPLETED STEP */
-.step.completed .circle {
-  background: #1f4e79;
-  border-color: #1f4e79;
-  color: white;
-}
+// .step.completed .circle {
+//   background: #1f4e79;
+//   border-color: #1f4e79;
+//   color: white;
+// }
 
-.step.completed::before {
-  border-left: 2px solid #1f4e79;
-}
+// .step.completed::before {
+//   border-left: 2px solid #1f4e79;
+// }
 
-.step.completed + .step::before {
-  border-left: 2px solid #1f4e79;
+// .step.completed + .step::before {
+//   border-left: 2px solid #1f4e79;
+// }
+.step.completed {
+  .circle {
+    background: #1f4e79;        
+    border-color: #1f4e79;
+    color: white;              
+    // box-shadow: 0 2px 8px rgba(31, 78, 121, 0.25);
+    
+    // svg {
+    //   width: 24px;
+    //   height: 24px;
+    // }
+  }
+  
+ 
+  &::before {
+    border-left: 2px solid #1f4e79 !important; // Solid dark blue
+   
+  }
 }
 
 
 /* UPCOMING STEP */
-.step.upcoming .circle {
-  background: $secondary-50;
-  border-color: $secondary-700;
-  ;
-  color: $secondary-700;
+// .step.upcoming .circle {
+//   background: $secondary-50;
+//   border-color: $secondary-700;
+//   ;
+//   color: $secondary-700;
 
-}
+// }
 
-.step.upcoming .title {
-  color: $secondary-700;
-  ;
+// .step.upcoming .title {
+//   color: $secondary-700;
+//   ;
+// }
+.step.upcoming {
+  // opacity: 0.85;
+  
+  .circle {
+    background: $secondary-50;
+    border-color:$secondary-700;;    
+    color: $secondary-700;          
+  }
+  
+  .title {
+    color:  $secondary-700;         
+  }
+  
+  &::before {
+    border-left: 2px dashed #d1d5db; 
+  }
 }
 
 .step.disabled {
@@ -131,7 +190,7 @@
 }
 
 
-
+// SUB-STEPPER (Education Details inner items)
 .sub-stepper {
   position: relative;
   margin-top: 8px;
@@ -175,3 +234,25 @@
     }
   }
 }
+
+/* =========================================================
+   SPECIAL CASES
+   ========================================================= */
+
+.step.completed + .step:not(.disabled)::before {
+  border-left: 2px solid #1f4e79 !important;
+}
+
+.step:last-child::after {
+}
+
+.step:focus-visible {
+  outline: none;
+  
+  .circle {
+    outline: 2px solid $accent_sec;
+    outline-offset: 2px;
+  }
+}
+
+

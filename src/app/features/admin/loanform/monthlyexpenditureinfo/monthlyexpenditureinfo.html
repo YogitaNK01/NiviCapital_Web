@@ -255,12 +255,9 @@
                             <div class="form-group mb-3">
 
 
-                                <!-- <app-dropdown [options]="otherExpenses" formControlName="type" name="type"
-                                    [placeholder]="'Select type'" [avatarUrl]="avatarUrl" [hasAvatar]="hasAvatar"
-                                    [label]="'Expense '+(i+1)">
-                                </app-dropdown> -->
+                              
                                 <app-inputfield type="text" [label]="'Expense '+(i+1)" formControlName="type"
-                                    name="type" placeholder="Enter name">
+                                    name="type" placeholder="Enter name" (input)="main.restrictInput($event,'text')">
                                 </app-inputfield>
                                 <div class="text-danger" *ngIf="item.get('type')?.touched && item.get('type')?.invalid">
                                     Type is required

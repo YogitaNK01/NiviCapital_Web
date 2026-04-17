@@ -411,7 +411,7 @@ export class Monthlyexpenditureinfo {
 
   }
 
-  formatIndian(x: string): string {
+  formatIndian1(x: string): string {
     const parts = x.split('.');
     const integerPart = parts[0];
     const decimalPart = parts[1] ? '.' + parts[1].substring(0, 2) : '';
@@ -437,6 +437,26 @@ export class Monthlyexpenditureinfo {
     return groups.join(',') + decimalPart;
   }
 
+  formatIndian(x: string): string {
+    const parts = x.split('.');
+    const integerPart = parts[0];
+    const decimalPart = parts[1] ? '.' + parts[1].substring(0, 2) : '';
+
+    if (!integerPart) return '';
+
+    const str = integerPart;
+    const len = str.length;
+
+    if (len <= 3) return str + decimalPart;
+
+    const lastThree = str.slice(-3);
+    let remaining = str.slice(0, -3);
+
+    // ✅ DO NOT trim zeros here
+    remaining = remaining.replace(/\B(?=(\d{2})+(?!\d))/g, ',');
+
+    return remaining + ',' + lastThree + decimalPart;
+  }
 
 
   // Updated formatAmount - SAFE FOR LARGE NUMBERS

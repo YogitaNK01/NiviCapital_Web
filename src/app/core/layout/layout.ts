@@ -93,6 +93,8 @@ export class Layout implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.checkScreenSize();
     window.addEventListener('resize', this.checkScreenSize.bind(this));
+        this.service.loadLastLoginFromStorage();
+
   }
 
   private checkScreenSize(): void {

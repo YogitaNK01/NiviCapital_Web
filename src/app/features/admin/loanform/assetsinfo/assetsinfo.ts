@@ -187,26 +187,29 @@ export class Assetsinfo implements OnInit {
     if (this.formSvc.aseetsInfoData) {
       this.patchAssetsData();
     }
-    this.assetsForm.get('gold.goldvalue')?.valueChanges.subscribe(() => {
-      this.calculateGrandTotal();
-    });
-    this.assetsForm.get('liquidAssets')?.valueChanges.subscribe(() => {
-      this.calculateGrandTotal();
-    });
-    this.assetsForm.get('properties')?.valueChanges.subscribe(() => {
-      this.calculateGrandTotal();
+      this.assetsForm.valueChanges.subscribe(() => {
+    this.calculateGrandTotal();
+  });
+    // this.assetsForm.get('gold.goldvalue')?.valueChanges.subscribe(() => {
+    //   this.calculateGrandTotal();
+    // });
+    // this.assetsForm.get('liquidAssets')?.valueChanges.subscribe(() => {
+    //   this.calculateGrandTotal();
+    // });
+    // this.assetsForm.get('properties')?.valueChanges.subscribe(() => {
+    //   this.calculateGrandTotal();
 
-    });
-    this.assetsForm.get('investments')?.valueChanges.subscribe(() => {
-      this.calculateGrandTotal();
-    });
-    this.assetsForm.get('fixedDeposits')?.valueChanges.subscribe(() => {
-      this.calculateGrandTotal();
-    });
+    // });
+    // this.assetsForm.get('investments')?.valueChanges.subscribe(() => {
+    //   this.calculateGrandTotal();
+    // });
+    // this.assetsForm.get('fixedDeposits')?.valueChanges.subscribe(() => {
+    //   this.calculateGrandTotal();
+    // });
 
-    this.assetsForm.get('otherassets')?.valueChanges.subscribe(() => {
-      this.calculateGrandTotal();
-    });
+    // this.assetsForm.get('otherassets')?.valueChanges.subscribe(() => {
+    //   this.calculateGrandTotal();
+    // });
 
     this.getbanks();
   }
