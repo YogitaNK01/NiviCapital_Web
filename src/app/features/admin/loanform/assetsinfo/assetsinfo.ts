@@ -123,23 +123,23 @@ export class Assetsinfo implements OnInit {
     }
   };
   assetFieldMap: any = {
-  'Gold': { form: 'gold', type: 'group' },
-  'Liquid Assets': { form: 'liquidAssets', type: 'group' },
-  'Property/Land Assets': { form: 'properties', type: 'array' },
-  'Fixed Deposit': { form: 'fixedDeposits', type: 'array' },
-  'Investments': { form: 'investments', type: 'array' },
-  'other': { form: 'otherassets', type: 'array' }
-};
+    'Gold': { form: 'gold', type: 'group' },
+    'Liquid Assets': { form: 'liquidAssets', type: 'group' },
+    'Property/Land Assets': { form: 'properties', type: 'array' },
+    'Fixed Deposit': { form: 'fixedDeposits', type: 'array' },
+    'Investments': { form: 'investments', type: 'array' },
+    'other': { form: 'otherassets', type: 'array' }
+  };
 
 
- ASSET_KEY_MAP: Record<string, string> = {
-  'Gold': 'gold',
-  'Liquid Assets': 'liquidAssets',
-  'Property/Land Assets': 'properties',
-  'Fixed Deposit': 'fixedDeposits',
-  'Investments': 'investments',
-  'Other Assets': 'otherassets'
-};
+  ASSET_KEY_MAP: Record<string, string> = {
+    'Gold': 'gold',
+    'Liquid Assets': 'liquidAssets',
+    'Property/Land Assets': 'properties',
+    'Fixed Deposit': 'fixedDeposits',
+    'Investments': 'investments',
+    'Other Assets': 'otherassets'
+  };
 
   investmentTypeMap = {
     MutualFunds: 'MUTUAL_FUNDS',
@@ -306,7 +306,7 @@ export class Assetsinfo implements OnInit {
   }
 
 
-  removeAccordion(key: string, index: number, event: Event) {
+  removeAccordion1(key: string, index: number, event: Event) {
     this.msgBox.open({
       title: 'Are you sure want to Remove',
       message: '',
@@ -373,9 +373,61 @@ export class Assetsinfo implements OnInit {
             this.otherassets.push(this.createOther());
             break;
         }
+
+        this.calculateGrandTotal();
+        this.cd.detectChanges();
       }
     })
   }
+  removeAccordion(key: string, index: number, event: Event) {
+  this.msgBox.open({
+    title: 'Are you sure want to Remove',
+    message: '',
+    showCancel: true,
+    onOk: () => {
+      event.stopPropagation();
+
+      this.selectedAssets = this.selectedAssets.filter(k => k !== key);
+      this.selectedAssets = [...this.selectedAssets];
+
+      this.openIndex = this.openIndex.filter(i => i !== index);
+
+      switch (key) {
+        case 'Gold':
+          this.resetGold();
+          break;
+
+        case 'Liquid Assets':
+          this.resetLiquidAssets();
+          break;
+
+        case 'Property/Land Assets':
+          this.properties.clear();
+          this.selectedPropertyIds = []; // ✅ already there
+          this.properties.push(this.createProperty());
+          break;
+
+        case 'Fixed Deposit':
+          this.fixedDeposits.clear();
+          this.fixedDeposits.push(this.createFD());
+          break;
+
+        case 'Investments':
+          this.investmentsArray.clear();
+          this.selectedInvestmentIds = []; // ✅ already there
+          break;
+
+        case 'other':
+          this.otherassets.clear();
+          this.otherassets.push(this.createOther());
+          break;
+      }
+
+      this.calculateGrandTotal();
+      this.cd.detectChanges();
+    }
+  });
+}
 
   resetGold() {
     this.assetsForm.setControl(
@@ -395,7 +447,7 @@ export class Assetsinfo implements OnInit {
       })
     );
   }
-  handleAmountInput(event: any, controlName: string, ctrl?: any) {
+  handleAmountInput1(event: any, controlName: string, ctrl?: any) {
     const fg = ctrl as FormGroup;
     const type: string = fg.get('type')?.value || '';
     const isMutualFund = type.toLowerCase().includes('mutual fund');
@@ -411,8 +463,30 @@ export class Assetsinfo implements OnInit {
       this.formatAmount1(event, controlName);
     }
 
+     setTimeout(() => {
+    this.calculateGrandTotal();
+    this.cd.detectChanges();
+  });
+  }
+handleAmountInput(event: any, controlName: string, ctrl?: any) {
+  const type: string = ctrl?.get?.('type')?.value || '';
+  const isMutualFund = type.toLowerCase().includes('mutual fund');
+  const decimalLimit = isMutualFund ? 4 : 2;
+
+  this.main.restrictInput(event, 'decimal', decimalLimit);
+
+  if (ctrl) {
+    this.formatAmountfromarray(event, controlName, ctrl);
+    ctrl.get(controlName)?.markAsTouched();
+  } else {
+    this.formatAmount1(event, controlName);
   }
 
+  setTimeout(() => {
+    this.calculateGrandTotal();
+    this.cd.detectChanges();
+  });
+}
 
   formatIndian1(x: string): string {
     const parts = x.split('.');
@@ -439,26 +513,26 @@ export class Assetsinfo implements OnInit {
 
     return groups.join(',') + decimalPart;
   }
-formatIndian(x: string): string {
-  const parts = x.split('.');
-  const integerPart = parts[0];
-  const decimalPart = parts[1] ? '.' + parts[1].substring(0, 2) : '';
+  formatIndian(x: string): string {
+    const parts = x.split('.');
+    const integerPart = parts[0];
+    const decimalPart = parts[1] ? '.' + parts[1].substring(0, 2) : '';
 
-  if (!integerPart) return '';
+    if (!integerPart) return '';
 
-  const str = integerPart;
-  const len = str.length;
+    const str = integerPart;
+    const len = str.length;
 
-  if (len <= 3) return str + decimalPart;
+    if (len <= 3) return str + decimalPart;
 
-  const lastThree = str.slice(-3);
-  let remaining = str.slice(0, -3);
+    const lastThree = str.slice(-3);
+    let remaining = str.slice(0, -3);
 
-  // ✅ DO NOT trim zeros here
-  remaining = remaining.replace(/\B(?=(\d{2})+(?!\d))/g, ',');
+    // ✅ DO NOT trim zeros here
+    remaining = remaining.replace(/\B(?=(\d{2})+(?!\d))/g, ',');
 
-  return remaining + ',' + lastThree + decimalPart;
-}
+    return remaining + ',' + lastThree + decimalPart;
+  }
 
 
   // Updated formatAmount - SAFE FOR LARGE NUMBERS
@@ -485,35 +559,35 @@ formatIndian(x: string): string {
     this.assetsForm.get(controlName)?.setValue(formatted, { emitEvent: false });
   }
 
-formatAmount(controlName: string) {
+  formatAmount(controlName: string) {
 
-  const control = this.assetsForm.get(controlName);
-  if (!control) return;
+    const control = this.assetsForm.get(controlName);
+    if (!control) return;
 
-  let value = control.value;
+    let value = control.value;
 
-  if (!value) {
-    control.setValue('', { emitEvent: false });
-    return;
+    if (!value) {
+      control.setValue('', { emitEvent: false });
+      return;
+    }
+
+    // remove commas & invalid chars
+    value = value.toString().replace(/,/g, '').replace(/[^0-9.]/g, '');
+
+    const parts = value.split('.');
+    const integerPart = parts[0];
+    const decimalPart = parts[1] ? '.' + parts[1].slice(0, 2) : '';
+
+    // ✅ zero safety
+    if (/^0+$/.test(integerPart)) {
+      control.setValue(integerPart + decimalPart, { emitEvent: false });
+      return;
+    }
+
+    const formatted = this.formatIndian(integerPart + decimalPart);
+
+    control.setValue(formatted, { emitEvent: false });
   }
-
-  // remove commas & invalid chars
-  value = value.toString().replace(/,/g, '').replace(/[^0-9.]/g, '');
-
-  const parts = value.split('.');
-  const integerPart = parts[0];
-  const decimalPart = parts[1] ? '.' + parts[1].slice(0, 2) : '';
-
-  // ✅ zero safety
-  if (/^0+$/.test(integerPart)) {
-    control.setValue(integerPart + decimalPart, { emitEvent: false });
-    return;
-  }
-
-  const formatted = this.formatIndian(integerPart + decimalPart);
-
-  control.setValue(formatted, { emitEvent: false });
-}
 
 
   // Updated formatAmountfromarray
@@ -550,26 +624,95 @@ formatAmount(controlName: string) {
   }
 
 
+  onAssetChange2(values: string | string[]): void {
+
+    const rawSelected = Array.isArray(values) ? values : [values];
+
+
+    const newSelected = rawSelected.map(v => this.normalizeToAccordionKey(v));
+
+    // const newSelected = Array.isArray(values) ? values : [values];
+
+    if (newSelected.length === 0) {
+      this.selectedAssets = [];
+      this.openIndex = [];
+      this.assetsForm.reset();
+
+      // restore defaults
+      this.properties.clear();
+      this.fixedDeposits.clear();
+      this.otherassets.clear();
+      this.investmentsArray.clear();
+
+      this.cd.detectChanges();
+      return;
+    }
+
+    const deselected = this.selectedAssets.filter(k => !newSelected.includes(k));
+    const newlySelected = newSelected.filter(k => !this.selectedAssets.includes(k));
+
+    this.selectedAssets = newSelected;
+
+    // ✅ Open accordions correctly
+    this.openIndex = this.selectedAssets
+      .map(val => this.accordions.findIndex(a => a.key === val))
+      .filter(i => i !== -1);
+
+    // ✅ Reset DESELECTED only
+    deselected.forEach(key => {
+      const config = this.assetFieldMap[key];
+      if (!config) return;
+
+      const control = this.assetsForm.get(config.form);
+
+      if (control instanceof FormGroup) {
+        control.reset();
+      }
+
+      if (control instanceof FormArray) {
+        control.clear();
+      }
+    });
+
+    // ✅ Initialize NEW selections with DEFAULT rows
+    this.selectedAssets.forEach(key => {
+      const config = this.assetFieldMap[key];
+      if (!config) return;
+
+      const control = this.assetsForm.get(config.form);
+
+      if (control instanceof FormArray && control.length === 0) {
+        if (key === 'Property/Land Assets') control.push(this.createProperty());
+        if (key === 'Fixed Deposit') control.push(this.createFD());
+        if (key === 'other') control.push(this.createOther());
+      }
+    });
+
+    this.cd.detectChanges();
+  }
+
 onAssetChange(values: string | string[]): void {
-
   const rawSelected = Array.isArray(values) ? values : [values];
-
-
-const newSelected = rawSelected.map(v => this.normalizeToAccordionKey(v));
-
-  // const newSelected = Array.isArray(values) ? values : [values];
+  const newSelected = rawSelected.map(v => this.normalizeToAccordionKey(v));
 
   if (newSelected.length === 0) {
     this.selectedAssets = [];
     this.openIndex = [];
-    this.assetsForm.reset();
 
-    // restore defaults
+    // ✅ Reset values WITHOUT destroying structure
+    this.assetsForm.get('gold')?.reset();
+    this.assetsForm.get('liquidAssets')?.reset();
     this.properties.clear();
     this.fixedDeposits.clear();
     this.otherassets.clear();
     this.investmentsArray.clear();
 
+    // ✅ FIX: Clear investment dropdown selection state
+    this.selectedInvestmentIds = [];
+    this.selectedPropertyIds = [];
+    this.selectedownertype = [];
+
+    this.calculateGrandTotal();
     this.cd.detectChanges();
     return;
   }
@@ -579,12 +722,11 @@ const newSelected = rawSelected.map(v => this.normalizeToAccordionKey(v));
 
   this.selectedAssets = newSelected;
 
-  // ✅ Open accordions correctly
   this.openIndex = this.selectedAssets
     .map(val => this.accordions.findIndex(a => a.key === val))
     .filter(i => i !== -1);
 
-  // ✅ Reset DESELECTED only
+  // Reset DESELECTED only
   deselected.forEach(key => {
     const config = this.assetFieldMap[key];
     if (!config) return;
@@ -594,14 +736,21 @@ const newSelected = rawSelected.map(v => this.normalizeToAccordionKey(v));
     if (control instanceof FormGroup) {
       control.reset();
     }
-
     if (control instanceof FormArray) {
       control.clear();
     }
+
+    // ✅ FIX: Clear inner dropdown state for deselected sections
+    if (key === 'Investments') {
+      this.selectedInvestmentIds = [];
+    }
+    if (key === 'Property/Land Assets') {
+      this.selectedPropertyIds = [];
+    }
   });
 
-  // ✅ Initialize NEW selections with DEFAULT rows
-   this.selectedAssets.forEach(key => {
+  // Initialize NEW selections
+  this.selectedAssets.forEach(key => {
     const config = this.assetFieldMap[key];
     if (!config) return;
 
@@ -614,124 +763,22 @@ const newSelected = rawSelected.map(v => this.normalizeToAccordionKey(v));
     }
   });
 
+  this.calculateGrandTotal();
   this.cd.detectChanges();
 }
-
-private normalizeToAccordionKey(code: string): string {
-  switch (code) {
-    case 'GOLD': return 'Gold';
-    case 'LIQUID': return 'Liquid Assets';
-    case 'PROPERTY': return 'Property/ Land Assets';
-    case 'FIXED_DEPOSIT': return 'Fixed Deposit';
-    case 'INVESTMENTS': return 'Investments';
-    case 'OTHER': return 'Other Assets';
-    default: return code;
-  }
-}
-
-  onAssetChange1(values: string | string[]): void {
-
-    const newSelected = Array.isArray(values) ? values : [values];
-    // Detect if cleared all
-    const clearedAll = newSelected.length === 0;
-    if (clearedAll) {
-      // Clear all selections and reset form fully
-      this.selectedAssets = [];
-      this.selectInvestments = [];
-      this.selectedInvestmentIds = [];
-      this.openIndex = [];
-
-
-      this.investmentsArray.controls.forEach(ctrl => {
-        ctrl.reset(null, { emitEvent: false });
-      });
-      this.investmentsArray.clear();
-      this.assetsForm.reset();
-      this.cd.detectChanges();
-      return;
-
+  private normalizeToAccordionKey(code: string): string {
+    switch (code) {
+      case 'GOLD': return 'Gold';
+      case 'LIQUID': return 'Liquid Assets';
+      case 'PROPERTY': return 'Property/ Land Assets';
+      case 'FIXED_DEPOSIT': return 'Fixed Deposit';
+      case 'INVESTMENTS': return 'Investments';
+      case 'OTHER': return 'Other Assets';
+      default: return code;
     }
-    // else {
-
-    const deselected = this.selectedAssets.filter(k => !newSelected.includes(k));
-
-    const newlySelected = newSelected.filter(k => !this.selectedAssets.includes(k));
-
-    this.selectedAssets = newSelected;
-
-
-    // this.openIndex = [];
-    // this.selectedAssets.forEach(val => {
-    //   const index = this.accordions.findIndex(a => a.key === val);
-    //   if (index !== -1) {
-    //     this.openIndex.push(index);
-    //   }
-
-    // });
-
-    this.openIndex = this.selectedAssets
-      .map(val => this.accordions.findIndex(a => a.key === val))
-      .filter(i => i !== -1);
-
-    // Reset form groups for deselected keys only
-
-    deselected.forEach(key => {
-      const formKey = this.assetFieldMap[key]?.form;
-      if (!formKey) return;
-
-      const control = this.assetsForm.get(formKey);
-      if (control instanceof FormGroup) {
-        control.reset();
-      } else if (control instanceof FormArray) {
-        if (formKey === 'other') {
-          control.clear();
-        } else {
-          control.clear();
-
-        }
-
-      }
-
-    });
-
-if (!this.selectedAssets.includes('Investments')) {
-    this.selectedInvestmentIds = [];
-    this.selectInvestments = [];
-    this.investmentsArray.clear();
   }
 
-
-
-    // Initialize form groups for newly selected keys
-
-    newlySelected.forEach(key => {
-
-      const formKey = this.assetFieldMap[key]?.form;
-      if (!formKey) return;
-      const control = this.assetsForm.get(formKey);
-
-
-
-      if (control instanceof FormGroup) {
-        control.reset();
-      } else if (control instanceof FormArray) {
-        if (formKey === 'other') {
-          control.clear();
-
-        } else {
-
-            control.clear();
-
-          }
-
-      }
-
-    });
-    this.cd.detectChanges();
-    // }
-
-  }
-
+  
   allAssetCatagory() {
     this.formSvc.getAllAssets().subscribe((res: any) => {
       const list = res.data ?? res;

@@ -429,7 +429,7 @@
                 <div class="row common-details-box d-flex flex-row ">
                     <div class="col">
                         <div class="form-group mb-3">
-                            <app-dropdown [options]="selectInvestments" [(selectedValue)]="selectedInvestmentIds"
+                            <app-dropdown [options]="selectInvestments" [(selectedValue)]="selectedInvestmentIds" 
                                 [placeholder]="'Select type'" [required]="true" [multiSelect]="true"
                                 (selectedValueChange)="onchangeinvestment($event)" [avatarUrl]="avatarUrl"
                                 [hasAvatar]="hasAvatar" [label]="'Select Type'">
