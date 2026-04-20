@@ -57,6 +57,8 @@ export class AddCustomer implements OnInit {
   isCounting = false;
   timerId: any;
 
+showMiddleNameError = false;
+
   steps = [
     {
       title: 'Add Customer',
@@ -132,6 +134,17 @@ export class AddCustomer implements OnInit {
 
   createcustId(data: NgForm) {
 
+        
+const isMiddleNameEmpty = !data.value.mname;
+  const isCheckboxUnchecked = !this.ismiddlename;
+
+  if (isMiddleNameEmpty && isCheckboxUnchecked) {
+    this.showMiddleNameError = true;
+    return;
+  }
+
+  this.showMiddleNameError = false;
+  
     if (data.invalid) {
       data.control.markAllAsTouched();
       return;
@@ -140,6 +153,9 @@ export class AddCustomer implements OnInit {
     if (!this.otpVerifiedOk) {
       return;
     }
+
+
+
 
     const payload1 = {
       ...data.value,

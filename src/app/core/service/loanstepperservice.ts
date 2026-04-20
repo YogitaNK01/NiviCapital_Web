@@ -180,28 +180,3 @@ setEducationSubSteps(data: any[]) {
 
 }
 
-// last componet submit
-// submitFinal() {
-
-//   const allData = this.stepperFormService.getAllData();
-
-//   console.log('All Steps Data:', allData);
-
-  
-// }
-//  steps1 = [
-//     { label: 'Loan Info', route: 'loaninfo' },
-    
-//     { label: 'General Info', route: 'genralinfo' },
-//     { label: 'Estimated Expense', route: 'expense' },
-//     { label: 'Additional Info', route: 'additionalinfo' },
-//     { label: 'KYC', route: 'kycinfo' },
-//     { label: 'Education Details', route: 'educationinfo' },
-//     { label: 'Income Details', route: 'incomeinfo' },
-//     { label: 'Assets', route: 'assetsinfo' },
-//     { label: 'Liabilities', route: 'liabilitiesinfo' },
-//      { label: 'Monthly Expenditure', route: 'monthlyexpinfo' },
-//     { label: 'Reference', route: 'referenceinfo' },
-//      { label: 'Co-Applicant', route: 'coapplicantinfo' },
-//       { label: 'Summary', route: 'summaryinfo' },
-//   ];

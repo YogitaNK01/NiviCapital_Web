@@ -20,6 +20,7 @@ import { Subject } from 'rxjs';
 import { finalize, takeUntil } from 'rxjs/operators';
 import { Tables } from '../../systemdesign/tables/tables';
 import { TableData } from '../../../core/service/table-data';
+import { Addcustomerservice } from '../../../core/service/addcustomerservice';
 
 // Types & Interfaces for type safety
 interface UserData {
@@ -171,11 +172,11 @@ export class Customer implements OnInit, OnDestroy {
   ];
   isLoading: boolean = false;
   hidepagination: boolean = false;
-  constructor(private http: HttpClient, private router: Router, private service: Main, private msgBox: Msgboxservice, private cdr: ChangeDetectorRef, private tableDataService: TableData) { }
+  constructor(private http: HttpClient, private router: Router, private service: Main, private msgBox: Msgboxservice, private cdr: ChangeDetectorRef, private tableDataService: TableData, private addcustomerservice: Addcustomerservice) { }
   ngOnInit(): void {
     this.loadallusers();
     this.updateVisiblePages();
-    this.alluserdata();
+    // this.alluserdata();
   }
 
   ngAfterViewInit(): void {
@@ -207,6 +208,8 @@ export class Customer implements OnInit, OnDestroy {
             this.AlluserData = resdate;
             this.fullData = this.tableDataService.transformUserData(resdate);
             this.filteredData = this.fullData;
+            console.log(this.filteredData);
+
             this.kycCompleted = this.tableDataService.calculateKycMetrics(resdate, this.totalItems);
             this.dataSource.sort = this.sort;
             this.updatePagedData();
@@ -221,25 +224,7 @@ export class Customer implements OnInit, OnDestroy {
       });
   }
 
-  alluserdata(): void {
-    this.hidepagination = false;
-    const page = 0;
-    this.service.checkAllUsers()
-      .pipe(takeUntil(this.destroy$))
-      .subscribe({
-        next: (response) => {
 
-          let resdate = response.data.content;
-          this.AlluserData1 = resdate;
-          this.fullData1 = this.tableDataService.transformUserData(resdate);
-
-        },
-        error: (error) => {
-          console.error('Error fetching users:', error);
-          this.isLoading = false;
-        }
-      });
-  }
 
   getStatusClass(status: string) {
     return this.tableDataService.getStatus_Class(status);
@@ -303,28 +288,72 @@ export class Customer implements OnInit, OnDestroy {
   onSearchChange(value: string): void {
     this.searchText = value.toLowerCase();
 
-    if (!this.searchText) {
-      this.currentPage = 1;
-      this.loadallusers();
+    
+ if (this.searchText.length === 0) {
+    this.nodata = false;
+    this.hidepagination = false;
+    this.currentPage = 1;
+
+    this.loadallusers();      // reload paginated list
+    this.cdr.detectChanges();
+    return;
+  }
+
+  
+    if (this.searchText.length !== 10) {
       return;
     }
 
+    let input = {
+      identifier: this.searchText,
+      type: "MOBILE"
 
-    if (!this.fullData1 || this.fullData1.length === 0) {
-      this.alluserdata();
     }
+    this.addcustomerservice.customersearch(input).subscribe({
+      next: (res) => {
+        console.log(res);
+
+         const row: TransformedUserData = {
+          custId: res.data.custId ?? '-',
+          ncId: res.data.ncId ?? '-',
+          firstName: res.data.firstName ?? '-',
+          lastName: res.data.lastName ?? '-',
+          mobile: res.data.mobile ?? '-',
+          email: res.data.email ?? '-',
+          status: res.data.status ?? '-',
+          kycStatus: res.data.kycStatus ?? '-',
+
+          createdAt: res.data.custId ?? '-',
+          userId: res.data.userInitiateId ?? '-'
+
+        };
 
 
-    this.filteredData = this.tableDataService.filterBySearch(
-      this.fullData1,
-      value, SEARCH_FIELDS
-    );
 
-    this.totalItems = this.filteredData.length;
-    this.currentPage = 1;
-    // this.updateVisiblePages();
-    this.updatePagedData();
+        this.filteredData = [row];
+
+        this.nodata = false;
+        this.hidepagination = true;   // hide pagination in search
+        this.cdr.detectChanges();
+
+
+        console.log('Search API Result displayed in table:', row);
+
+      
+
+
+
+      },
+      error: (err) => {
+        console.error("error msg", err);
+      }
+    })
+
+   
   }
+
+
+
 
   getkycstatus(value: any): void {
     const statusMap: { [key: string]: string } = {

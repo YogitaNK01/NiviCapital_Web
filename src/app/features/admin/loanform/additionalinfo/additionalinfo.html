@@ -69,7 +69,7 @@
                     </div>
 
                 </div>
-                
+
                 <div class="col-lg-4 col-sm-12 mt-20">
 
 
@@ -131,7 +131,7 @@
                     <app-inputfield formControlName="s_mname" label="Middle Name" placeholder="Middle Name"
                         (input)="main.restrictInput($event, 'text')" [disabled]="isspousemiddlename" [maxlength]="25">
                     </app-inputfield>
-                     <div class="text-danger" *ngIf="f['s_mname'].touched && f['s_mname'].invalid">
+                    <div class="text-danger" *ngIf="f['s_mname'].touched && f['s_mname'].invalid">
 
                         <div *ngIf="f['s_mname'].errors?.['minlength']">
                             Minimum 2 characters required
@@ -146,6 +146,13 @@
                     <app-checkbox [checked]="isspousemiddlename" [indeterminate]="false"
                         label="I don’t have middle name" (checkedChange)="onmiddlename($event)">
                     </app-checkbox>
+                    <div class="text-danger mt-1" *ngIf="
+       additionalinfoForm.get('maritalstatus')?.value === 'Married' &&
+       !isspousemiddlename && submitAttempted &&
+       !f['s_mname'].value
+     ">
+                        Please enter Middle Name or select the checkbox.
+                    </div>
                 </div>
 
 
@@ -181,7 +188,7 @@
                     <app-inputfield formControlName="f_fname" label="First Name" [required]="true"
                         placeholder="First Name" (input)="main.restrictInput($event, 'text')" [maxlength]="25">
                     </app-inputfield>
-                    <div class="text-danger" *ngIf="f['f_fname'].touched && f['f_fname'].invalid" >
+                    <div class="text-danger" *ngIf="f['f_fname'].touched && f['f_fname'].invalid">
 
                         <div *ngIf="f['f_fname'].errors?.['required']">
                             First name is required
@@ -207,7 +214,7 @@
                     <app-inputfield formControlName="f_mname" label="Middle Name" placeholder="Middle Name"
                         (input)="main.restrictInput($event, 'text')" [disabled]="isfathermiddlename" [maxlength]="25">
                     </app-inputfield>
-                     <div class="text-danger" *ngIf="f['f_mname'].touched && f['f_mname'].invalid">
+                    <div class="text-danger" *ngIf="f['f_mname'].touched && f['f_mname'].invalid">
 
                         <div *ngIf="f['f_mname'].errors?.['minlength']">
                             Minimum 2 characters required
@@ -222,6 +229,10 @@
                     <app-checkbox [checked]="isfathermiddlename" [indeterminate]="false"
                         label="I don’t have middle name" (checkedChange)="onfathermiddlename($event)">
                     </app-checkbox>
+                    <div class="text-danger mt-1" *ngIf="!isfathermiddlename && submitAttempted && !f['f_mname'].value">
+                        Please enter Middle Name or select the checkbox.
+                    </div>
+
                 </div>
 
 
@@ -284,7 +295,7 @@
                     <app-inputfield formControlName="m_mname" label="Middle Name" placeholder="Middle Name"
                         (input)="main.restrictInput($event, 'text')" [disabled]="ismothermiddlename" [maxlength]="25">
                     </app-inputfield>
-                     <div class="text-danger" *ngIf="f['m_mname'].touched && f['m_mname'].invalid">
+                    <div class="text-danger" *ngIf="f['m_mname'].touched && f['m_mname'].invalid">
 
                         <div *ngIf="f['m_mname'].errors?.['minlength']">
                             Minimum 2 characters required
@@ -298,6 +309,9 @@
                     <app-checkbox [checked]="ismothermiddlename" [indeterminate]="false"
                         label="I don’t have middle name" (checkedChange)="onmothermiddlename($event)">
                     </app-checkbox>
+                    <div class="text-danger mt-1" *ngIf="!ismothermiddlename && submitAttempted && !f['m_mname'].value">
+                        Please enter Middle Name or select the checkbox.
+                    </div>
                 </div>
 
 
@@ -350,10 +364,10 @@
         <app-buttons type="button" label="Back" class="btn btncustomClass" [outline]="true" (click)="back()">
         </app-buttons>
         <app-buttons type="button" label="Next" class="btn btncustomClass" color="primary" (click)="next()"
-            [disabled]="additionalinfoForm.invalid || (additionalinfoForm.get('maritalstatus')?.value == 'Married' && (!isspousemiddlename && !f['s_mname'].value ))|| (!isfathermiddlename && !f['f_mname'].value) || (!ismothermiddlename && !f['m_mname'].value )">
+            [disabled]="!canProceed && !submitAttempted">
         </app-buttons>
         <!-- <app-buttons type="button" label="Next" class="btn btncustomClass" color="primary" (click)="next()"
-            [disabled]="!additionalinfoForm.valid">
+            [disabled]="additionalinfoForm.invalid || (additionalinfoForm.get('maritalstatus')?.value == 'Married' && (!isspousemiddlename && !f['s_mname'].value ))|| (!isfathermiddlename && !f['f_mname'].value) || (!ismothermiddlename && !f['m_mname'].value )">
         </app-buttons> -->
 
     </div>

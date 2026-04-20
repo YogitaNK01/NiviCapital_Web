@@ -25,7 +25,7 @@ interface TransformedUserData {
   status: string;
   kycStatus: string;
   createdAt: number[];
-  // Id: string;
+  userId: string;
 }
 
 
@@ -85,7 +85,7 @@ export class Checkcontact implements OnInit {
 
 
   ];
-   isLoading: boolean = false;
+  isLoading: boolean = false;
 
   dataSource = new MatTableDataSource<any>([]);
   @ViewChild(MatPaginator) paginator!: MatPaginator;
@@ -129,7 +129,22 @@ export class Checkcontact implements OnInit {
           this.cd.detectChanges();
         } else if (res.message.includes("Existing customer found")) {
           this.isexistinguser = true;
-          this.loadallusers()
+          // this.loadallusers()
+          const row: TransformedUserData = {
+            custId: res.data.custId ?? '-',
+            ncId: res.data.ncId ?? '-',
+            firstName: res.data.firstName ?? '-',
+            lastName: res.data.lastName ?? '-',
+            mobile: res.data.mobile ?? '-',
+            email: res.data.email ?? '-',
+            status: res.data.status ?? '-',
+            kycStatus: res.data.kycStatus ?? '-',
+
+            createdAt: res.data.custId ?? '-',
+            userId: res.data.userInitiateId ?? '-'
+
+          };
+          this.filteredData = [row];
           this.cd.detectChanges();
         }
         this.searchLoading = false;
@@ -150,7 +165,7 @@ export class Checkcontact implements OnInit {
   }
 
   private loadallusers(): void {
- if (this.isLoading) {
+    if (this.isLoading) {
       return;
     }
 
@@ -160,7 +175,7 @@ export class Checkcontact implements OnInit {
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (response) => {
-           this.isLoading = false;
+          this.isLoading = false;
           let resdate = response.data.content;
           this.AlluserData = resdate;
           this.fullData = this.tableDataService.transformUserData(resdate);

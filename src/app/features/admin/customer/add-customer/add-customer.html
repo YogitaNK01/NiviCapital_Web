@@ -83,6 +83,11 @@
 
 
             </div>
+
+            <div class="text-danger mt-1" *ngIf="showMiddleNameError">
+              Please enter Middle Name or select the checkbox.
+            </div>
+
           </div>
 
           <div class="col-lg-4 col-sm-12  ">
@@ -132,8 +137,9 @@
 
               @if (otpsent && !otpVerifiedOk) {
               <div class="col-lg-6 col-sm-12 d-flex align-items-end justify-content-center ">
-                <app-otpsection [length]="6" (otpSubmit)="onOtpSubmit($event)" (timer)="onTimer($event)" [resetTrigger]="resetCounter"
-                  (otpVerifiedSuccess)="onOtpVerifiedSuccess($event)" required></app-otpsection>
+                <app-otpsection [length]="6" (otpSubmit)="onOtpSubmit($event)" (timer)="onTimer($event)"
+                  [resetTrigger]="resetCounter" (otpVerifiedSuccess)="onOtpVerifiedSuccess($event)"
+                  required></app-otpsection>
 
 
 
@@ -200,8 +206,9 @@
             <app-buttons label="Back " [outline]="true" class="btncustomClass primary "
               (click)="goTocontact()"></app-buttons>
 
-            <app-buttons type="submit" class="btn btncustomClass" [disabled]="!registerform.valid || (!mname.value && !ismiddlename) || !otpVerifiedOk"
-              color="primary" label="Next"></app-buttons>
+            <app-buttons type="submit" class="btn btncustomClass"
+              [disabled]="!registerform.valid  || !otpVerifiedOk" color="primary"
+              label="Next"></app-buttons>
 
           </div>
         </div>

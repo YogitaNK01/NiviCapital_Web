@@ -65,9 +65,17 @@ export class Additionalinfo implements OnInit {
   applicantId: any;
   profilePhotoUrl: any;
   objectName: any;
+
+
+  showMotherError = false;
+  showFatherError = false;
+  showSpouseError = false;
+  submitAttempted = false;
+
+
   constructor(private fb: FormBuilder, public main: Main, private route: ActivatedRoute, private stepperService: Loanstepperservice, private formSvc: Loanformservice) { }
   ngOnInit(): void {
-this.stepperService.rebuildSteps();
+    this.stepperService.rebuildSteps();
     this.route.queryParams.subscribe(params => {
 
       const applicantId = params['applicantId'];
@@ -85,9 +93,9 @@ this.stepperService.rebuildSteps();
       maritalstatus: ['', Validators.required,],
       gender: ['', Validators.required,],
       dependents: ['', [Validators.required]],
-      s_fname: ['', [ Validators.pattern('^[A-Za-z ]+$'), Validators.minLength(2), Validators.maxLength(25)]],
+      s_fname: ['', [Validators.pattern('^[A-Za-z ]+$'), Validators.minLength(2), Validators.maxLength(25)]],
       s_mname: ['', [Validators.pattern('^[A-Za-z ]+$'), Validators.minLength(2), Validators.maxLength(25)]],
-      s_lname: ['', [ Validators.pattern('^[A-Za-z ]+$'), Validators.minLength(2), Validators.maxLength(25)]],
+      s_lname: ['', [Validators.pattern('^[A-Za-z ]+$'), Validators.minLength(2), Validators.maxLength(25)]],
       f_fname: ['', [Validators.required, Validators.pattern('^[A-Za-z ]+$'), Validators.minLength(2), Validators.maxLength(25)]],
       f_mname: ['', [Validators.pattern('^[A-Za-z ]+$'), Validators.minLength(2), Validators.maxLength(25)]],
       f_lname: ['', [Validators.required, Validators.pattern('^[A-Za-z ]+$'), Validators.minLength(2), Validators.maxLength(25)]],
@@ -98,44 +106,44 @@ this.stepperService.rebuildSteps();
 
     });
 
-      if(this.formSvc.additionalInfoData){
+    if (this.formSvc.additionalInfoData) {
       this.patchAdditionalInfo();
     }
-  
-this.additionalinfoForm.get('maritalstatus')?.valueChanges.subscribe(value => {
 
-  const sFname = this.additionalinfoForm.get('s_fname');
-  const sLname = this.additionalinfoForm.get('s_lname');
+    this.additionalinfoForm.get('maritalstatus')?.valueChanges.subscribe(value => {
 
-  if (value === 'Married') {
+      const sFname = this.additionalinfoForm.get('s_fname');
+      const sLname = this.additionalinfoForm.get('s_lname');
 
-    sFname?.setValidators([
-      Validators.required,
-      Validators.pattern('^[A-Za-z ]+$'),
-      Validators.minLength(2),
-      Validators.maxLength(25)
-    ]);
+      if (value === 'Married') {
 
-    sLname?.setValidators([
-      Validators.required,
-      Validators.pattern('^[A-Za-z ]+$'),
-      Validators.minLength(2),
-      Validators.maxLength(25)
-    ]);
+        sFname?.setValidators([
+          Validators.required,
+          Validators.pattern('^[A-Za-z ]+$'),
+          Validators.minLength(2),
+          Validators.maxLength(25)
+        ]);
 
-  } else {
+        sLname?.setValidators([
+          Validators.required,
+          Validators.pattern('^[A-Za-z ]+$'),
+          Validators.minLength(2),
+          Validators.maxLength(25)
+        ]);
 
-    sFname?.clearValidators();
-    sLname?.clearValidators();
+      } else {
 
-    sFname?.setValue('');
-    sLname?.setValue('');
-  }
+        sFname?.clearValidators();
+        sLname?.clearValidators();
 
-  sFname?.updateValueAndValidity();
-  sLname?.updateValueAndValidity();
+        sFname?.setValue('');
+        sLname?.setValue('');
+      }
 
-});
+      sFname?.updateValueAndValidity();
+      sLname?.updateValueAndValidity();
+
+    });
   }
   get f() {
     return this.additionalinfoForm.controls;
@@ -163,13 +171,13 @@ this.additionalinfoForm.get('maritalstatus')?.valueChanges.subscribe(value => {
     console.log(result);
 
 
-    if (!result || !result.file)  {
-    this.profilePhotoUrl = null;
-    this.objectName = null;
-    this.additionalinfoForm.get('uploadphoto')?.setValue(null);
-    this.additionalinfoForm.get('uploadphoto')?.markAsTouched();
-    return;
-  }
+    if (!result || !result.file) {
+      this.profilePhotoUrl = null;
+      this.objectName = null;
+      this.additionalinfoForm.get('uploadphoto')?.setValue(null);
+      this.additionalinfoForm.get('uploadphoto')?.markAsTouched();
+      return;
+    }
     const fd = new FormData();
     fd.append('applicantId', this.applicantId);
     fd.append('file', result.file);
@@ -214,38 +222,70 @@ this.additionalinfoForm.get('maritalstatus')?.valueChanges.subscribe(value => {
   }
 
   patchAdditionalInfo() {
-  const data = this.formSvc.additionalInfoData;
+    const data = this.formSvc.additionalInfoData;
 
-  if (!data) return;
+    if (!data) return;
 
-  this.additionalinfoForm.patchValue({
-    uploadphoto: data.uploadphoto,
-    maritalstatus: data.maritalstatus,
-    gender: data.gender,
-    dependents: data.dependents,
+    this.additionalinfoForm.patchValue({
+      uploadphoto: data.uploadphoto,
+      maritalstatus: data.maritalstatus,
+      gender: data.gender,
+      dependents: data.dependents,
 
-    s_fname: data.s_fname,
-    s_mname: data.s_mname,
-    s_lname: data.s_lname,
+      s_fname: data.s_fname,
+      s_mname: data.s_mname,
+      s_lname: data.s_lname,
 
-    f_fname: data.f_fname,
-    f_mname: data.f_mname,
-    f_lname: data.f_lname,
+      f_fname: data.f_fname,
+      f_mname: data.f_mname,
+      f_lname: data.f_lname,
 
-    m_fname: data.m_fname,
-    m_mname: data.m_mname,
-    m_lname: data.m_lname
-  });
-}
+      m_fname: data.m_fname,
+      m_mname: data.m_mname,
+      m_lname: data.m_lname
+    });
+  }
+
+  get canProceed(): boolean {
+    const f = this.additionalinfoForm.value;
+
+    const fatherOk =
+      this.isfathermiddlename || !!f.f_mname;
+
+    const motherOk =
+      this.ismothermiddlename || !!f.m_mname;
+
+    const spouseOk =
+      this.additionalinfoForm.get('maritalstatus')?.value !== 'Married' ||
+      this.isspousemiddlename || !!f.s_mname;
+
+    return (
+      this.additionalinfoForm.valid &&
+      fatherOk &&
+      motherOk &&
+      spouseOk
+    );
+  }
+
   next() {
-  console.log("form--", this.additionalinfoForm.value);
-    if (!this.additionalinfoForm.valid) {
-      console.log("form invalid");
+    console.log("form--", this.additionalinfoForm.value);
+    let formdata = this.additionalinfoForm.value;
+    this.submitAttempted = true;
+
+
+
+    if (!this.canProceed) {
       return;
     }
 
-  
-    let formdata = this.additionalinfoForm.value;
+    if (this.additionalinfoForm.invalid) {
+      this.additionalinfoForm.markAllAsTouched();
+      return;
+    }
+
+
+
+
 
     let input =
 
@@ -280,7 +320,7 @@ this.additionalinfoForm.get('maritalstatus')?.valueChanges.subscribe(value => {
       next: (res) => {
         console.log(res);
         if (res.status == "success") {
-         this.formSvc.additionalInfoData = input;
+          this.formSvc.additionalInfoData = input;
           this.stepperService.next();
         }
 

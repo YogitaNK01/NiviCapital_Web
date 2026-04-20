@@ -89,7 +89,7 @@
   <div *ngIf="showHelperMessage" class="helper-text  " [class.error-text]="state === 'error'" [class.success-text]="state === 'success'">
     <span *ngIf="state === 'error'" >{{ errorMessage }}</span>
     <span *ngIf="state === 'success'">File uploaded successfully</span>
-    <span *ngIf="state === 'idle' &&  config.helperText" style="font-style: italic; color: #666771;">{{ config.helperText }}</span>
+    <span *ngIf="(state === 'idle' || state === 'disabled') &&  config.helperText " style="font-style: italic; color: #666771;">{{ config.helperText }}</span>
      
   </div>
 </div>

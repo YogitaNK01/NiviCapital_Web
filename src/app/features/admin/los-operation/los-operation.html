@@ -108,7 +108,7 @@
 
     <!-- Table -->
      
-    <!-- @if (!nodata) { -->
+    @if (!nodata) {
     <app-tables [columns]="columns" 
     [data]="filteredData" 
     [pageSize]="6" 
@@ -116,11 +116,11 @@
   (pageChange)="onPageChange($event)"
   [disableEditFn]="disableEditCondition">
     </app-tables>
-    <!-- } @else {
+    } @else {
   <div class="text-label text-center mt-4">
     No Active Customer...
   </div>
-} -->
+}
 
   </div>
 

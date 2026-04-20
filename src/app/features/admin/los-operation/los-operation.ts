@@ -17,9 +17,23 @@ import { Inputfield } from '../../systemdesign/inputfield/inputfield';
 import { TableColumn, Tables } from '../../systemdesign/tables/tables';
 import { takeUntil } from 'rxjs';
 import { TableData } from '../../../core/service/table-data';
+import { Addcustomerservice } from '../../../core/service/addcustomerservice';
 
-const SEARCH_FIELDS = ['firstName', 'lastName', 'mobile', 'email','loantype','disbursedAmount','outstandingBalance','loanStatus'];
+const SEARCH_FIELDS = ['firstName', 'lastName', 'mobile', 'email', 'loantype', 'disbursedAmount', 'outstandingBalance', 'loanStatus'];
 
+interface TransformedUserData {
+  // id: string;
+  custId: string;
+  ncId: string
+  firstName: string;
+  lastName: string;
+  mobile: string;
+  email: string;
+  status: string;
+  kycStatus: string;
+  createdAt: number[];
+  userId: string;
+}
 @Component({
   selector: 'app-los-operation',
   imports: [CommonModule, FormsModule, MatTableModule, MatCheckboxModule, MatTabsModule, MatPaginatorModule,
@@ -29,17 +43,17 @@ const SEARCH_FIELDS = ['firstName', 'lastName', 'mobile', 'email','loantype','di
 })
 export class LosOperation {
 
-   columns = [
-    
-   
+  columns = [
+
+
 
     { key: 'firstName', label: 'First Name' },
-     { key: 'lastName', label: 'Last Name' },
+    { key: 'lastName', label: 'Last Name' },
     { key: 'mobile', label: 'Mobile' },
     { key: 'email', label: 'Email ID' },
-     { key: 'loantype', label: 'Loan Type' },
-     { key: 'disbursedAmount', label: 'Disbursed Amount' },
-     { key: 'outstandingBalance', label: 'Outstanding Balance' },
+    { key: 'loantype', label: 'Loan Type' },
+    { key: 'disbursedAmount', label: 'Disbursed Amount' },
+    { key: 'outstandingBalance', label: 'Outstanding Balance' },
     {
       key: 'loanStatus',
       label: 'Loan Status',
@@ -48,20 +62,20 @@ export class LosOperation {
       transform: (row: any) => this.getStatusClass(row.loanStatus).text
     },
 
-    
+
 
   ];
 
   pageSize = 6;
   currentPage = 1;
   totalItems: number = 0;
-   totalPages: number = 0;
+  totalPages: number = 0;
   totalPagesArray: (number | string)[] = [];
   fullData: any[] = [];
-    fullData1: any[] = [];
+  fullData1: any[] = [];
 
   AlluserData: any[] = [];
-    AlluserData1: any[] = [];
+  AlluserData1: any[] = [];
 
 
   allLosData: any;
@@ -83,8 +97,8 @@ export class LosOperation {
   selectedOption2: string = '';
   selectedOption3: string = '';
 
-  AllTypes : string ='All';
-  
+  AllTypes: string = 'All';
+
   occupation: string = 'Current Occupation';
   Kycstatus: DropdownOption[] = [
     { label: 'All', value: 'All' },
@@ -94,11 +108,14 @@ export class LosOperation {
   ];
 
   kycCompleted: number | null = null;
- 
 
-  cards=Array(4)
 
-  constructor(public http: HttpClient, public router: Router, private service: Main, private cdr: ChangeDetectorRef,private tableDataService: TableData) { }
+  cards = Array(4)
+  nodata: boolean = false;
+  isLoading: boolean = false;
+  hidepagination: boolean = false;
+
+  constructor(public http: HttpClient, public router: Router, private service: Main, private cdr: ChangeDetectorRef, private tableDataService: TableData, private addcustomerservice: Addcustomerservice) { }
   // 
   ngOnInit(): void {
     this.loadallusers();
@@ -113,27 +130,27 @@ export class LosOperation {
     }, 100);
   }
 
- private hasData(data: any): boolean {
+  private hasData(data: any): boolean {
     return this.tableDataService.hasData(data);
   }
 
 
-  
+
   //-----------get table data from api----------------------------
 
-private loadallusers(): void {
-     const page = this.currentPage - 1;
-    this.service.getAllLoanUsers(page,this.pageSize)
+  private loadallusers(): void {
+    const page = this.currentPage - 1;
+    this.service.getAllLoanUsers(page, this.pageSize)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (response) => {
-          let resdate= response.data.content;
+          let resdate = response.data.content;
           this.totalItems = response.data.totalElements;
           this.totalPages = response.data.totalPages;
           this.AlluserData = resdate;
           this.fullData = this.tableDataService.transformUserData(resdate);
           this.filteredData = this.fullData;
-      
+
           this.kycCompleted = this.tableDataService.calculateKycMetrics(resdate, this.totalItems);
           this.dataSource.sort = this.sort;
           this.updatePagedData();
@@ -146,10 +163,10 @@ private loadallusers(): void {
         }
       });
   }
-  
- allLoandata(): void {
+
+  allLoandata(): void {
     // this.hidepagination = false;
-   
+
     this.service.AllLoan_Users()
       .pipe(takeUntil(this.destroy$))
       .subscribe({
@@ -173,14 +190,14 @@ private loadallusers(): void {
   formatDateOnly(dateArr: number[] | null | undefined): string {
     return this.tableDataService.formatDateOnly(dateArr);
   }
-  
-//pagination
+
+  //pagination
   updatePagedData(): void {
-    
+
     this.dataSource.data = this.filteredData;
   }
 
-   onPageChange(page: any): void {
+  onPageChange(page: any): void {
     if (page === '...') return;
     if (page < 1 || page > this.totalPages) return;
 
@@ -253,9 +270,76 @@ private loadallusers(): void {
   }
 
   //search from table
-  onSearchChange(value: string) {
-     this.searchText = value.toLowerCase();
-      if (!this.searchText) {
+  onSearchChange(value: string): void {
+    this.searchText = value.toLowerCase();
+
+
+    if (this.searchText.length === 0) {
+      this.nodata = false;
+      this.hidepagination = false;
+      this.currentPage = 1;
+
+      this.loadallusers();      // reload paginated list
+      this.cdr.detectChanges();
+      return;
+    }
+
+
+    if (this.searchText.length !== 10) {
+      return;
+    }
+
+    let input = {
+      identifier: this.searchText,
+      type: "MOBILE"
+
+    }
+    this.addcustomerservice.customersearch(input).subscribe({
+      next: (res) => {
+        console.log(res);
+
+
+
+        // ✅ Create table-compatible row from API response
+        const row: TransformedUserData = {
+          custId: res.data.custId ?? '-',
+          ncId: res.data.ncId ?? '-',
+          firstName: res.data.firstName ?? '-',
+          lastName: res.data.lastName ?? '-',
+          mobile: res.data.mobile ?? '-',
+          email: res.data.email ?? '-',
+          status: res.data.status ?? '-',
+          kycStatus: res.data.kycStatus ?? '-',
+
+          createdAt: res.data.custId ?? '-',
+          userId: res.data.userInitiateId ?? '-'
+
+        };
+
+
+
+        this.filteredData = [row];
+
+        this.nodata = false;
+        this.hidepagination = true;   // hide pagination in search
+        this.cdr.detectChanges();
+
+
+        console.log('Search API Result displayed in table:', row);
+
+      },
+      error: (err) => {
+        console.error("error msg", err);
+      }
+    })
+
+
+  }
+
+
+  onSearchChange1(value: string) {
+    this.searchText = value.toLowerCase();
+    if (!this.searchText) {
       this.currentPage = 1;
       this.loadallusers();
       return;
@@ -279,7 +363,7 @@ private loadallusers(): void {
   }
 
   //redirection to loan details page
-   getloandetails(id: string): void {
+  getloandetails(id: string): void {
     this.service.selectedUserId = id;
     this.service.getLosDetails(id)
       .pipe(takeUntil(this.destroy$))
@@ -304,7 +388,7 @@ private loadallusers(): void {
     }
   }
 
-   getkyc_type(value: any): void {
+  getkyc_type(value: any): void {
     // Implement type filtering logic
     const statusMap: { [key: string]: string } = {
       'completed': 'approved',
@@ -317,18 +401,18 @@ private loadallusers(): void {
     this.currentPage = 1;
     this.updateVisiblePages();
     this.updatePagedData();
-    
+
   }
 
   applyLoan() {
     this.router.navigate(['/admin/losoperation/newloan']);
   }
 
-//disable edit btn from row
+  //disable edit btn from row
   disableEditCondition = (row: any) => {
 
-  return true; 
+    return true;
 
- 
-};
+
+  };
 }
