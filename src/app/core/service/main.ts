@@ -64,7 +64,7 @@ export class Main {
   }
    setLastLogin(value: string) {
     this._lastLogin.set(value);
-    localStorage.setItem('lastLogin', value); // ✅ optional persistence
+    localStorage.setItem('lastLogin', value); 
   }
 
   loadLastLoginFromStorage() {

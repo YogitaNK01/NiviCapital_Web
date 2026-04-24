@@ -156,6 +156,16 @@ export class Checkcontact implements OnInit {
 
   }
 
+   getPhoneFieldState(phone: any): 'default' | 'error' | 'success' {
+  if (phone.touched && phone.invalid) {
+    return 'error';
+  }
+  if (this.norecordfound && phone.valid) {
+    return 'error';
+  }
+
+  return 'default';
+}
   addcustomer() {
     this.router.navigate(['/admin/customer/addcustomer'], { queryParams: { phone: this.mobilenumber, id: this.number_id } });
 

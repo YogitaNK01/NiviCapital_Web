@@ -10,7 +10,7 @@ import { Dropdown, DropdownOption } from '../../../systemdesign/dropdown/dropdow
 import { ActivatedRoute, Router } from '@angular/router';
 import { Loanstepperservice } from '../../../../core/service/loanstepperservice';
 import { Main } from '../../../../core/service/main';
-import {generalerrors} from './generalerror'
+import { generalerrors } from './generalerror'
 interface OptionItem {
   label: string;
   value: string;
@@ -26,9 +26,9 @@ interface OptionItem {
 })
 export class GeneralInfo implements OnInit {
 
- allerrors=generalerrors;
- currenterror =''
- 
+  allerrors = generalerrors;
+  currenterror = ''
+
   openIndex: number | null = 0;
   accordions = [
     { title: 'General Info ', alwaysOpen: true },
@@ -93,16 +93,21 @@ export class GeneralInfo implements OnInit {
 
   calculatedEndDate!: Date;
 
-  constructor(private fb: FormBuilder, private formSvc: Loanformservice, private router: Router, private stepperService: Loanstepperservice, private route: ActivatedRoute,) { }
+  isOtherstate = false;
+  isOtherUniversity = false;
+  isOthercoursetype = false;
+  isOthercoursename = false;
+
+  constructor(private fb: FormBuilder, private formSvc: Loanformservice, private router: Router, private stepperService: Loanstepperservice, private route: ActivatedRoute,public mainservice:Main) { }
   ngOnInit() {
     this.route.queryParams.subscribe(params => {
       if (params['applicantId']) {
         this.applicantId = params['applicantId'];
         this.applicationId = params['applicationId'];
-       this.custName = params['custName'];
+        this.custName = params['custName'];
         this.custARN = params['custARN'];
 
-        this.stepperService.setLoanId(this.applicantId, this.applicationId,this.custName,this.custARN);
+        this.stepperService.setLoanId(this.applicantId, this.applicationId, this.custName, this.custARN);
       }
     });
 
@@ -111,33 +116,26 @@ export class GeneralInfo implements OnInit {
     this.getOccupationdetails();
     this.getEducationdetails();
     this.getlendingpartnersdetails();
-    
-// const saved = localStorage.getItem('isasset');
-//   if (saved !== null) {
-//     const value = JSON.parse(saved);
-//     this.formSvc.isasset = value;
-//     this.checkboxasset = value ? 'Yes' : 'No';
-//   }
 
-//   const savedIncome = localStorage.getItem('isincome');
-//   if (savedIncome !== null) {
-//     const value = JSON.parse(savedIncome);
-//     this.formSvc.isincome = value;
-//   }
+
 
     this.stepperService.rebuildSteps();
     this.registerForm = this.fb.group({
 
       occupation: ['', Validators.required],
-      qualification: ['', Validators.required],
-      institutionName: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(100)]],
+      // qualification: ['', Validators.required],
+      // institutionName: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(100)]],
       state: ['', Validators.required],
+      otherstaetitle: [''],
       university: ['', Validators.required],
+      otherunititle: [''],
       coursetype: ['', Validators.required],
+      othercoursetypetitle: [''],
       coursename: ['', Validators.required],
-      courseduration: ['', Validators.required],
-      coursestartdate: ['', [Validators.required ,this.dateMinValidator(() => new Date())] ],
-      courseenddate: ['', [Validators.required ,this.dateMinValidator(() => this.calculatedEndDate)]],
+      othercoursenametitle: [''],
+      // courseduration: [''],
+      coursestartdate: ['', [Validators.required, this.dateMinValidator(() => new Date())]],
+      courseenddate: ['', [Validators.required, this.dateMinValidator(() => this.calculatedEndDate)]],
       checkedasset: [false, Validators.required],
       lendingpartner: ['', Validators.required],
 
@@ -147,33 +145,33 @@ export class GeneralInfo implements OnInit {
       this.calculateEndDate();
     });
 
-    this.registerForm.get('courseduration')?.valueChanges.subscribe(() => {
-      this.calculateEndDate();
-    });
+    // this.registerForm.get('courseduration')?.valueChanges.subscribe(() => {
+    //   this.calculateEndDate();
+    // });
     this.registerForm.get('checkedasset')?.valueChanges.subscribe(value => {
       console.log('Selected:', value);
       this.checkassetOnChange(value);
     });
 
-     if (this.formSvc.generalInfoData) {
-    this.registerForm.patchValue({
-      occupation: this.formSvc.generalInfoData.currentOccupationId,
-      qualification: this.formSvc.generalInfoData.lastQualificationId,
-      institutionName: this.formSvc.generalInfoData.lastInstitutionName,
-      state: this.formSvc.generalInfoData.stateId,
-      university: this.formSvc.generalInfoData.universityId,
-      coursename: this.formSvc.generalInfoData.courseId,
-      courseduration: this.formSvc.generalInfoData.courseDuration,
-      coursestartdate: this.formSvc.generalInfoData.courseStartDate,
-      courseenddate: this.formSvc.generalInfoData.courseEndDate,
-      lendingpartner: this.formSvc.generalInfoData.lendingPartnerId
-    });
+    if (this.formSvc.generalInfoData) {
+      this.registerForm.patchValue({
+        occupation: this.formSvc.generalInfoData.currentOccupationId,
+        qualification: this.formSvc.generalInfoData.lastQualificationId,
+        institutionName: this.formSvc.generalInfoData.lastInstitutionName,
+        state: this.formSvc.generalInfoData.stateId,
+        university: this.formSvc.generalInfoData.universityId,
+        coursename: this.formSvc.generalInfoData.courseId,
+        // courseduration: this.formSvc.generalInfoData.courseDuration,
+        coursestartdate: this.formSvc.generalInfoData.courseStartDate,
+        courseenddate: this.formSvc.generalInfoData.courseEndDate,
+        lendingpartner: this.formSvc.generalInfoData.lendingPartnerId
+      });
 
-  //  coursestartdate: new Date(this.formSvc.generalInfoData.courseStartDate)
-    this.checkboxasset = this.formSvc.generalInfoData.hasAssets ? "Yes" : "No";
-  }
+      //  coursestartdate: new Date(this.formSvc.generalInfoData.courseStartDate)
+      this.checkboxasset = this.formSvc.generalInfoData.hasAssets ? "Yes" : "No";
+    }
 
-  
+
   }
 
   get form() {
@@ -200,23 +198,23 @@ export class GeneralInfo implements OnInit {
 
   checkassetOnChange(event: any) {
     this.checkboxasset = event;
-     if(this.checkboxasset === 'Yes'){
+    if (this.checkboxasset === 'Yes') {
       this.formSvc.isasset = true;
       localStorage.setItem('isasset', JSON.stringify(this.formSvc.isasset));
-       this.stepperService.rebuildSteps();
+      this.stepperService.rebuildSteps();
 
-this.stepperService.setvalues(
-    this.formSvc.isasset,
-    this.formSvc.isincome,
-    this.formSvc.issalaried
-  );
-    }else{
+      this.stepperService.setvalues(
+        this.formSvc.isasset,
+        this.formSvc.isincome,
+        this.formSvc.issalaried
+      );
+    } else {
       this.formSvc.isasset = false;
       localStorage.setItem('isasset', JSON.stringify(this.formSvc.isasset));
       this.stepperService.rebuildSteps();
       this.stepperService.setvalues(this.formSvc.isasset, this.formSvc.isincome, this.formSvc.issalaried);
     }
-   
+
     console.log(event);
   }
   get f() {
@@ -235,24 +233,24 @@ this.stepperService.setvalues(
       // this.restoreDropdownLabels(this.registerForm.value);
     });
     setTimeout(() => {
-       let data = this.registerForm.get('occupation')?.valueChanges.subscribe(value => {
-      const selected = this.selectoccupation.find(o => o.value === value);
-      // this.occupationlabel = selected ? selected.label : 'Current Occupation';
-      this.formSvc.isincome = selected?.label === 'Employed' ? true :selected?.label === 'Self-employed' ? true : false;
-      console.log('Selected Occupation:', this.formSvc.isincome);
-      this.formSvc.issalaried = selected?.label === 'Employed' ? true : false;
-      this.stepperService.rebuildSteps();
-      
-this.stepperService.setvalues(
-      this.formSvc.isasset,this.formSvc.isincome,  this.formSvc.issalaried
-    );
+      let data = this.registerForm.get('occupation')?.valueChanges.subscribe(value => {
+        const selected = this.selectoccupation.find(o => o.value === value);
+        // this.occupationlabel = selected ? selected.label : 'Current Occupation';
+        this.formSvc.isincome = selected?.label === 'Employed' ? true : selected?.label === 'Self-employed' ? true : false;
+        console.log('Selected Occupation:', this.formSvc.isincome);
+        this.formSvc.issalaried = selected?.label === 'Employed' ? true : false;
+        this.stepperService.rebuildSteps();
 
-    });
+        this.stepperService.setvalues(
+          this.formSvc.isasset, this.formSvc.isincome, this.formSvc.issalaried
+        );
+
+      });
     }, 1000);
-   
+
 
     // console.log(data);
-    
+
   }
 
   getEducationdetails() {
@@ -324,12 +322,15 @@ this.stepperService.setvalues(
 
     const found = this.Australianstate.find(s => s.value === id);
     this.selectedStateLabel = found?.label ?? '';
+        this.isOtherstate = this.selectedStateLabel.toLowerCase().includes('other');
+
+
     this.AustralianUniversities = [];
     this.selectedUniLabel = '';
     this.registerForm.get('university')?.setValue(null);
 
     this.selectcourse = [];
-    this.selectedcoursetypeLabel='';
+    this.selectedcoursetypeLabel = '';
     this.registerForm.get('coursetype')?.setValue(null);
 
     this.selectcoursename = [];
@@ -356,8 +357,11 @@ this.stepperService.setvalues(
     const found = this.AustralianUniversities.find(s => s.value === id);
     this.selectedUniLabel = found?.label ?? '';
 
+    this.isOtherUniversity = this.selectedUniLabel.toLowerCase().includes('other');
+
+
     this.selectcourse = [];
-    this.selectedcoursetypeLabel='';
+    this.selectedcoursetypeLabel = '';
     this.registerForm.get('coursetype')?.setValue(null);
 
     this.selectcoursename = [];
@@ -384,6 +388,8 @@ this.stepperService.setvalues(
 
     const found = this.selectcourse.find(s => s.value === id);
     this.selectedcoursetypeLabel = found?.label ?? '';
+    this.isOthercoursetype = this.selectedcoursetypeLabel.toLowerCase().includes('other');
+
     this.selectcoursename = [];
     this.selectedcourseNameLabel = '';
     this.registerForm.get('coursename')?.setValue(null);
@@ -409,6 +415,9 @@ this.stepperService.setvalues(
 
     const found = this.selectcoursename.find(s => s.value === id);
     this.selectedcourseNameLabel = found?.label ?? '';
+    this.isOthercoursename = this.selectedcourseNameLabel.toLowerCase().includes('other');
+
+
     // this.selectcourse = [];
     // this.selectCourseType(id);
   }
@@ -419,7 +428,7 @@ this.stepperService.setvalues(
 
     if (!startDate || !duration) return;
 
-     if (duration.includes('4+')) {
+    if (duration.includes('4+')) {
       this.registerForm.patchValue(
         { courseenddate: null },
         { emitEvent: false }
@@ -435,56 +444,56 @@ this.stepperService.setvalues(
     const end = new Date(start);
     end.setFullYear(start.getFullYear() + years);
 
-     this.calculatedEndDate = end;
+    this.calculatedEndDate = end;
 
     this.registerForm.patchValue(
       { courseenddate: end },
       { emitEvent: false }
     );
-this.registerForm.get('courseenddate')?.updateValueAndValidity();
-   
+    this.registerForm.get('courseenddate')?.updateValueAndValidity();
+
   }
 
   dateMinValidator = (getMinDate: () => Date) => {
-  return (control: any) => {
-    const value = control.value;
-     const minDate = getMinDate();
+    return (control: any) => {
+      const value = control.value;
+      const minDate = getMinDate();
 
-    if (!value || !minDate) return null;
+      if (!value || !minDate) return null;
 
-    const selected = new Date(value);
-    const min = new Date(getMinDate());
+      const selected = new Date(value);
+      const min = new Date(getMinDate());
 
-   
-    selected.setHours(0, 0, 0, 0);
-    min.setHours(0, 0, 0, 0);
 
-    return selected < min ? { minDateError: true } : null;
-    // if (selected < min) {
-    //   return { minDateError: true };
-    // }
+      selected.setHours(0, 0, 0, 0);
+      min.setHours(0, 0, 0, 0);
 
-    // return null;
+      return selected < min ? { minDateError: true } : null;
+      // if (selected < min) {
+      //   return { minDateError: true };
+      // }
+
+      // return null;
+    };
   };
-};
 
   endDateValidator = () => {
-  return (control: any) => {
-    const endDate = control.value;
-    const minDate = this.calculatedEndDate;
+    return (control: any) => {
+      const endDate = control.value;
+      const minDate = this.calculatedEndDate;
 
-    if (!endDate || !minDate) return null;
+      if (!endDate || !minDate) return null;
 
-    const end = new Date(endDate);
-    const min = new Date(minDate);
+      const end = new Date(endDate);
+      const min = new Date(minDate);
 
-    if (end < min) {
-      return { invalidEndDate: true }; 
-    }
+      if (end < min) {
+        return { invalidEndDate: true };
+      }
 
-    return null;
+      return null;
+    };
   };
-};
 
   formatDate(date: any): string | null {
     if (!date) return null;
@@ -504,7 +513,6 @@ this.registerForm.get('courseenddate')?.updateValueAndValidity();
   back() {
     this.stepperService.previous();
   }
-  next1() { this.stepperService.next(); }
   next() {
     if (!this.registerForm.valid) {
       console.log("form invalid");
@@ -518,13 +526,13 @@ this.registerForm.get('courseenddate')?.updateValueAndValidity();
       "applicantId": this.applicantId,
 
       "currentOccupationId": formdata.occupation,
-      "lastQualificationId": formdata.qualification,
-      "lastInstitutionName": formdata.institutionName,
+      // "lastQualificationId": formdata.qualification,
+      // "lastInstitutionName": formdata.institutionName,
 
       "stateId": formdata.state,
       "universityId": formdata.university,
       "courseId": formdata.coursename,
-      "courseDuration": formdata.courseduration,
+      // "courseDuration": formdata.courseduration,
       "courseStartDate": this.formatDate(formdata.coursestartdate),
 
       "courseEndDate": this.formatDate(formdata.courseenddate),
@@ -540,9 +548,9 @@ this.registerForm.get('courseenddate')?.updateValueAndValidity();
         if (res.status == "success") {
 
           this.stepperService.next();
-           this.formSvc.generalInfoData = input;
+          this.formSvc.generalInfoData = input;
           this.stepperService.setStepData('genralinfo', formdata);
-       
+
           console.log("resp---", this.registerForm.value);
         }
 

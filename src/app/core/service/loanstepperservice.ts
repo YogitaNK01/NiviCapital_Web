@@ -32,8 +32,10 @@ export class Loanstepperservice {
 
     
 
-private educationSubSteps: any[] = [];
+private educationSubStepsInitialized = false;
 
+private educationSubSteps: any[] = [];
+private completedEducationSections = new Set<string>();
 
 
       private stepsSubject = new BehaviorSubject<any[]>([]);
@@ -50,16 +52,17 @@ private buildSteps() {
   
    const baseSteps : Step[] = [
     { label: 'Loan Info', route: 'loaninfo' },
-    { label: 'General Info', route: 'genralinfo' },
+    
+   { label: 'General Info', route: 'genralinfo' },
     { label: 'Estimated Expense', route: 'expense' },
     { label: 'Additional Info', route: 'additionalinfo' },
     { label: 'KYC', route: 'kycinfo' },
     
-// {
-//       label: 'Education Details',
-//       route: 'educationinfo',
-//       children: this.educationSubSteps   
-//     },
+ {
+      label: 'Education Details',
+      route: 'educationDetails',
+      children: this.educationSubSteps   
+    },
 
     
   ];
@@ -96,15 +99,30 @@ get steps(): Step[] {
   
 setEducationSubSteps(data: any[]) {
   
+  
+if (this.educationSubStepsInitialized) {
+    return;
+  }
+
  this.educationSubSteps = data.map(d => ({
     id: d.qualificationId,
-    label: d.qualificationName
+    label: d.qualificationName.includes('Others') ? d.qualificationName :  d.qualificationName.split('(')[0].trim()
   }));
 
+this.educationSubSteps.push({id:"0",label:"IELTS / PTE"})
+this.educationSubSteps.push({id:"1",label:"University Offer Letter"})
 
+this.educationSubStepsInitialized = true;
   this.buildSteps();
 }
 
+markEducationSectionComplete(step: string) {
+  this.completedEducationSections.add(step);
+}
+
+getCompletedEducationSections(): Set<string> {
+  return this.completedEducationSections;
+}
 
 
   setLoanId(id1: string,id2: string,name:string,arn:string) {
@@ -130,6 +148,28 @@ setEducationSubSteps(data: any[]) {
   }
   
   next() {
+  const cleanUrl = this.router.url.split('?')[0];
+  const lastSegment = cleanUrl.split('/').pop(); // could be 'educationinfo', 'educationDetails', etc.
+
+  // If you are inside education child route, treat current step as 'educationDetails'
+  const currentStepRoute = lastSegment === 'educationinfo' ? 'educationDetails' : lastSegment;
+
+  const index = this.steps.findIndex(s => s.route === currentStepRoute);
+  if (index === -1) return;
+
+  if (index < this.steps.length - 1) {
+    const nextRoute = this.steps[index + 1].route;
+    this.router.navigate(['/loanform', nextRoute], {
+      queryParams: {
+        applicantId: this.applicantId,
+        applicationId: this.applicationId,
+        custName: this.custName,
+        custARN: this.custARN
+      }
+    });
+  }
+}
+  next1() {
     const currentRoute = this.router.url.split('?')[0].split('/').pop();;
 
     const index = this.steps.findIndex(s => s.route === currentRoute);
@@ -147,7 +187,7 @@ setEducationSubSteps(data: any[]) {
     }
   }
 
-  previous() {
+  previous1() {
     const currentRoute = this.router.url.split('?')[0].split('/').pop();;
 
     const index = this.steps.findIndex(s => s.route === currentRoute);
@@ -159,7 +199,35 @@ setEducationSubSteps(data: any[]) {
         });
     }
   }
+previous() {
 
+  
+  const cleanUrl = this.router.url.split('?')[0];
+  const lastSegment = cleanUrl.split('/').pop(); 
+  const currentStepRoute =  (lastSegment === 'educationinfo' || lastSegment === 'edusection') ? 'educationDetails'  : lastSegment;
+
+  const steps = this.stepsSubject.getValue();   // IMPORTANT
+  const index = steps.findIndex(s => s.route === currentStepRoute);
+  if (index === -1) return;
+  
+
+  if (index > 0) {
+    const prevRoute = this.steps[index - 1].route;
+    this.router.navigate(['/loanform', prevRoute], {
+      queryParams: {
+        applicantId: this.applicantId,
+        applicationId: this.applicationId,
+        custName: this.custName,
+        custARN: this.custARN
+      }
+    });
+  }
+}
+resetEducationSubSteps() {
+  this.educationSubSteps = [];
+  this.educationSubStepsInitialized = false;
+  this.buildSteps();
+}
   private formData: any = {};
 
   setStepData(step: string, data: any) {

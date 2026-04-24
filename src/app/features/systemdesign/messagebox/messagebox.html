@@ -9,31 +9,148 @@
         <path d="M3 15L15 3" stroke="#F4F6FF" stroke-width="1.125" stroke-linecap="round" stroke-linejoin="round" />
       </svg></button>
 
-      <div class="d-flex flex-column msg-box-content">
-    <!-- Header -->
-    <div class="msgbox-header text-dp-3-bold ">
-      {{ title }}
-    </div>
+    <div class="d-flex flex-column msg-box-content">
+      <!-- Header -->
+      <!-- <div class=""> -->
+      <div class=" d-flex flex-column gap-3">
+        <div class="" *ngIf="showIcon"><svg xmlns="http://www.w3.org/2000/svg" width="75" height="75"
+            viewBox="0 0 75 75" fill="none">
+            <path d="M37.5 28.125V43.75" stroke="#E40010" stroke-width="4.6875" stroke-linecap="round"
+              stroke-linejoin="round" />
+            <path
+              d="M37.4983 66.9062H18.5608C7.71701 66.9062 3.18576 59.1562 8.43576 49.6875L18.1858 32.125L27.3733 15.625C32.9358 5.59375 42.0608 5.59375 47.6233 15.625L56.8108 32.1563L66.5608 49.7188C71.8108 59.1875 67.2483 66.9375 56.4358 66.9375H37.4983V66.9062Z"
+              stroke="#E40010" stroke-width="4.6875" stroke-linecap="round" stroke-linejoin="round" />
+            <path d="M37.4883 53.125H37.5163" stroke="#E40010" stroke-width="4.6875" stroke-linecap="round"
+              stroke-linejoin="round" />
+          </svg></div>
+        <div class="msgbox-header text-dp-3-bold pt-1"> {{ title }}</div>
+      </div>
+      <!-- </div> -->
 
-    <!-- Body -->
-    <div class="msgbox-body text-label-data">
-      {{ message }}
+      <!-- Body -->
+      <div class="msgbox-body text-dp-2-bold fw-normal" [innerHTML]="message" *ngIf="!showComparison">
+        <!-- {{ message }} -->
+
+      </div>
+      <div *ngIf="showComparison" class="comparison-container">
+
+        <p class="msgbox-body text-dp-2-bold fw-normal" [innerHTML]="message"></p>
+
+        <hr class="hrclass">
+        <!-- <div class="comparison-boxes">
+          <div class="row">
+            <div class="box-title">Current Section</div>
+            <div class="col comparison-box">
+
+              <ul>
+
+
+                <li *ngFor="let item of comparisonData?.currentSections" class="text-common">
+
+                  <span *ngIf="isSectionKept(item, comparisonData?.addingSection ?? '')">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none">
+                      <circle cx="12" cy="12" r="12" fill="#34A853" />
+                      <path d="M6 12L10 16L18 8" stroke="white" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round" />
+                    </svg>
+                  </span>
+
+                  <span *ngIf="!isSectionKept(item, comparisonData?.addingSection ?? '')">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none">
+                      <circle cx="12" cy="12" r="12" fill="#E0E0E0" />
+                      <path d="M8 8L16 16M16 8L8 16" stroke="#9CA3AF" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round" />
+                    </svg>
+                  </span>
+
+                  {{ item }}
+
+                </li>
+
+              </ul>
+            </div>
+            <div class="box-title">Adding New Section</div>
+            <div class="col comparison-box">
+
+              <div class="new-section">
+                {{ comparisonData?.addingSection }}
+              </div>
+            </div>
+          </div>
+
+        </div> -->
+
+        <div class="comparison-boxes">
+          <div class="row g-3">
+
+            <!-- COLUMN 1 -->
+            <div class="col-md-6 text-left d-flex flex-column gap-2">
+              <div class="text-label-data fw-normal ">Current Section</div>
+
+              <div class="comparison-box">
+                <ul class="list-unstyled d-flex flex-column gap-2">
+                  <!-- <li *ngFor="let item of comparisonData?.currentSections"
+                    class="text-common d-flex align-items-center gap-2">
+
+                    <span *ngIf="isSectionKept(item, comparisonData?.addingSection ?? '')">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none">
+                        <circle cx="12" cy="12" r="12" fill="#34A853" />
+                        <path d="M6 12L10 16L18 8" stroke="white" stroke-width="2" stroke-linecap="round"
+                          stroke-linejoin="round" />
+                      </svg>
+                    </span>
+
+                    <span *ngIf="!isSectionKept(item, comparisonData?.addingSection ?? '')">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none">
+                        <circle cx="12" cy="12" r="12" fill="#E0E0E0" />
+                        <path d="M8 8L16 16M16 8L8 16" stroke="#9CA3AF" stroke-width="2" stroke-linecap="round"
+                          stroke-linejoin="round" />
+                      </svg>
+                    </span>
+
+                    {{ item }}
+                  </li> -->
+
+                  <li *ngFor="let item of comparisonData?.currentSections"
+                    class="d-flex align-items-center gap-2 text-common">
+
+                    <ng-container *ngIf="shouldShowTick(item, comparisonData?.addingSection ?? ''); else crossIcon">
+                      <svg width="14" height="14" viewBox="0 0 24 24">
+                        <circle cx="12" cy="12" r="12" fill="#34A853" />
+                        <path d="M6 12L10 16L18 8" stroke="white" stroke-width="2" />
+                      </svg>
+                    </ng-container>
+
+                    <ng-template #crossIcon>
+                      <svg width="14" height="14" viewBox="0 0 24 24">
+                        <circle cx="12" cy="12" r="12" fill="#E0E0E0" />
+                        <path d="M8 8L16 16M16 8L8 16" stroke="#9CA3AF" stroke-width="2" />
+                      </svg>
+                    </ng-template>
+
+                    {{ item }}
+                  </li>
+                </ul>
+              </div>
+            </div>
+
+            <!-- COLUMN 2 -->
+            <div class="col-md-6 text-left d-flex flex-column gap-2">
+              <div class="text-label-data fw-normal text-left d-flex flex-column gap-2">Adding New Section</div>
+
+              <div class="text-common comparison-box">
+                • {{ comparisonData?.addingSection }}
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+
     </div>
-</div>
     <!-- Footer -->
     <div class="msgbox-footer w-100">
-      <!-- <button
-        *ngIf="showCancel"
-        class="btn btn-outline"
-        (click)="onCancel()">
-        {{ cancelText }}
-      </button>
-
-      <button
-        class="btn btn-primary"
-        (click)="onOk()">
-        {{ okText }}
-      </button> -->
 
 
       <app-buttons label="No" *ngIf="showCancel" class=" btn btn-outline btncustomClass btn-no-padding btn-label"
@@ -47,31 +164,7 @@
   </div>
 </div>
 
-<!-- ok btn -->
-<!-- <app-Messagebox
-  [visible]="showMsgBox"
-  message="Operation successful"
-  [showCancel]="false">
-</app-Messagebox> -->
 
-<!-- confirmation -->
-<!-- <app-Messagebox
-  title="Confirm Delete"
-  message="Are you sure you want to delete this record?"
-  okText="Yes"
-  cancelText="No"
-  (ok)="deleteRecord()">
-</app-Messagebox> -->
 
-<!-- all -->
-<!-- <app-Messagebox
-  [visible]="showMsgBox"
-  title="Modal Window"
-  message="Application EDU12456 has been successfully activated."
-  [showCancel]="true"
-  okText="OK"
-  cancelText="Cancel"
-  (ok)="onConfirm()"
-  (cancel)="onCancel()"
-  (close)="showMsgBox = false">
-</app-Messagebox> -->
+
+

@@ -270,7 +270,7 @@ ngOnChanges() {
   removeFile() {
     this.msgBox.open({
       title: 'Are you sure want to Remove',
-      message: '',
+      message: ``,
       showCancel: true,
       onOk: () => {
         this.state = 'idle';

@@ -2,7 +2,7 @@
 
     <table mat-table [dataSource]="pagedData" table table-responsive w-100>
 
-        <!-- ✅ Checkbox Column (FIRST COLUMN) -->
+        <!-- Checkbox Column (FIRST COLUMN) -->
         <ng-container matColumnDef="select">
             <th mat-header-cell *matHeaderCellDef>
                 <app-checkbox [checked]="isAllSelected()" [indeterminate]="isSomeSelected()"
@@ -15,7 +15,7 @@
             </td>
         </ng-container>
 
-        <!-- ✅ Dynamic Columns -->
+        <!-- Dynamic Columns -->
         <ng-container *ngFor="let col of columns" [matColumnDef]="col.key">
             <th mat-header-cell *matHeaderCellDef class="mat-header-label">{{ col.label }}</th>
 
@@ -61,7 +61,7 @@
         <!--header Rows -->
         <tr mat-header-row *matHeaderRowDef="displayedColumnKeys"></tr>
 
-        <!-- ✅ Spinner Row -->
+        <!-- Spinner Row -->
         <tr mat-row *ngIf="isLoading">
             <td class="mat-cell table-loader" [attr.colspan]="displayedColumnKeys.length">
                 <div class="spinner"></div>
@@ -69,7 +69,7 @@
 
         </tr>
 
-        <!-- ✅ No Data Row -->
+        <!-- No Data Row -->
         <tr mat-row *ngIf="!isLoading && data.length === 0">
 
             <td class="mat-cell text-center" [attr.colspan]="displayedColumnKeys.length">

@@ -144,155 +144,91 @@
                         <hr class="hrclass" *ngIf="loan.get('showBank')?.value">
 
                         <!-- ================= ROW 1 ================= -->
+                        <div class="container-fluid">
+                            <!-- Bank Name -->
+                            <div *ngIf="loan.get('showBank')?.value" [class.col-12]="!isOtherSelected(loan)"
+                                [class.col-6]="isOtherSelected(loan)">
+                                <div class="form-group">
 
-                        <!-- Bank Name -->
-                        <div *ngIf="loan.get('showBank')?.value" [class.col-12]="!isOtherSelected(loan)"
-                            [class.col-6]="isOtherSelected(loan)">
-                            <div class="form-group">
-
-                                <app-dropdown [options]="selectBanks" formControlName="bankname"
-                                    [placeholder]="'Select Bank Name'" [required]="true" [searchable]="true"
-                                    (selectedValueChange)="onBankSelected($event,loan)" [avatarUrl]="avatarUrl"
-                                    [hasAvatar]="hasAvatar" [label]="'Bank Name'">
-                                </app-dropdown>
-                            </div>
-                        </div>
-
-                        <!-- Title (ONLY when Other) -->
-                        <div class="col-6" *ngIf="isOtherSelected(loan)">
-                            <div class="form-group">
-                                <app-inputfield formControlName="title" label="Title" placeholder="Enter Title"
-                                    (input)="main.restrictInput($event,'text')" [required]="true">
-                                </app-inputfield>
-
-                                <div class="text-danger"
-                                    *ngIf="loan.get('title')?.touched && loan.get('title')?.invalid">
-                                    Title is required
+                                    <app-dropdown [options]="selectBanks" formControlName="bankname"
+                                        [placeholder]="'Select Bank Name'" [required]="true" [searchable]="true"
+                                        (selectedValueChange)="onBankSelected($event,loan)" [avatarUrl]="avatarUrl"
+                                        [hasAvatar]="hasAvatar" [label]="'Bank Name'">
+                                    </app-dropdown>
                                 </div>
                             </div>
-                        </div>
 
-
-
-                        <!-- ================= ROW 2 (Only when Other) ================= -->
-                        <!-- <ng-container *ngIf="isOtherSelected(loan)"> -->
-                        <div *ngIf="loan.get('showBank')?.value" class="row ">
-                            <div class="col-lg-4 mt-20">
-                                <div class="form-group mb-3">
-                                    <app-inputfield type="text" [required]="true" label="Outstanding Balance (INR)"
-                                        formControlName="outstanding" [required]="true" placeholder="Enter Value"
-                                        helpText="Help text" name="outstanding"
-                                        (input)="handleAmountInput($event,'outstanding',loan)">
+                            <!-- Title (ONLY when Other) -->
+                            <div class="col-6" *ngIf="isOtherSelected(loan)">
+                                <div class="form-group">
+                                    <app-inputfield formControlName="title" label="Title" placeholder="Enter Title"
+                                        (input)="main.restrictInput($event,'text')" [required]="true">
                                     </app-inputfield>
+
                                     <div class="text-danger"
-                                        *ngIf="loan.get('outstanding')?.touched && loan.get('outstanding')?.invalid">
-                                        <div *ngIf="loan.get('outstanding')?.errors?.['required']">
-                                            Amount is required
-                                        </div>
+                                        *ngIf="loan.get('title')?.touched && loan.get('title')?.invalid">
+                                        Title is required
                                     </div>
-
                                 </div>
                             </div>
-                            <div class="col-lg-4 mt-20">
-                                <div class="form-group mb-3">
-                                    <app-inputfield type="text" [required]="true" label="EMI Amount (INR)"
-                                        [required]="true" formControlName="emiamount" placeholder="Enter Value"
-                                        helpText="Help text" name="emiamount"
-                                        (input)="handleAmountInput($event,'emiamount',loan)">
-                                    </app-inputfield>
-                                    <div class="text-danger"
-                                        *ngIf="loan.get('emiamount')?.touched && loan.get('emiamount')?.invalid">
-                                        <div *ngIf="loan.get('emiamount')?.errors?.['required']">
-                                            EMI Amount is required
+
+
+
+                            <!-- ================= ROW 2 (Only when Other) ================= -->
+                            <!-- <ng-container *ngIf="isOtherSelected(loan)"> -->
+                            <div *ngIf="loan.get('showBank')?.value" class="row ">
+                                <div class="col-lg-4 mt-20">
+                                    <div class="form-group mb-3">
+                                        <app-inputfield type="text" [required]="true" label="Outstanding Balance (INR)"
+                                            formControlName="outstanding" [required]="true" placeholder="Enter Value"
+                                            helpText="Help text" name="outstanding"
+                                            (input)="handleAmountInput($event,'outstanding',loan)">
+                                        </app-inputfield>
+                                        <div class="text-danger"
+                                            *ngIf="loan.get('outstanding')?.touched && loan.get('outstanding')?.invalid">
+                                            <div *ngIf="loan.get('outstanding')?.errors?.['required']">
+                                                Amount is required
+                                            </div>
                                         </div>
-                                    </div>
 
+                                    </div>
                                 </div>
-                            </div>
-                            <div class="col-lg-4 mt-20">
-                                <div class="form-group mb-3">
-                                    <app-inputfield type="text" [required]="true" label="Remaining Tenure (Months)"
-                                        formControlName="remtenure" [required]="true" placeholder="Enter Value"
-                                        helpText="Help text" name="remtenure"
-                                        (input)="main.restrictInput($event,'number')">
-                                    </app-inputfield>
-                                    <div class="text-danger"
-                                        *ngIf="loan.get('remtenure')?.touched && loan.get('remtenure')?.invalid">
-                                        <div *ngIf="loan.get('remtenure')?.errors?.['required']">
-                                            Tenure is required
+                                <div class="col-lg-4 mt-20">
+                                    <div class="form-group mb-3">
+                                        <app-inputfield type="text" [required]="true" label="EMI Amount (INR)"
+                                            [required]="true" formControlName="emiamount" placeholder="Enter Value"
+                                            helpText="Help text" name="emiamount"
+                                            (input)="handleAmountInput($event,'emiamount',loan)">
+                                        </app-inputfield>
+                                        <div class="text-danger"
+                                            *ngIf="loan.get('emiamount')?.touched && loan.get('emiamount')?.invalid">
+                                            <div *ngIf="loan.get('emiamount')?.errors?.['required']">
+                                                EMI Amount is required
+                                            </div>
                                         </div>
+
                                     </div>
-
                                 </div>
-                            </div>
-                        </div>
+                                <div class="col-lg-4 mt-20">
+                                    <div class="form-group mb-3">
+                                        <app-inputfield type="text" [required]="true" label="Remaining Tenure (Months)"
+                                            formControlName="remtenure" [required]="true" placeholder="Enter Value"
+                                            helpText="Help text" name="remtenure"
+                                            (input)="main.restrictInput($event,'number')">
+                                        </app-inputfield>
+                                        <div class="text-danger"
+                                            *ngIf="loan.get('remtenure')?.touched && loan.get('remtenure')?.invalid">
+                                            <div *ngIf="loan.get('remtenure')?.errors?.['required']">
+                                                Tenure is required
+                                            </div>
+                                        </div>
 
-                        <!-- </ng-container> -->
-
-                        <!-- <div class="col-lg-12">
-                        <div class="form-group mb-3">
-                            <app-dropdown [options]="selectBanks" formControlName="bankname"
-                                [placeholder]="'Select Bank Name'" [required]="true" [searchable]="true"
-                                [avatarUrl]="avatarUrl" [hasAvatar]="hasAvatar" [label]="'Assets'">
-                            </app-dropdown>
-
-                            <div class="text-danger"
-                                *ngIf="loan.get('bankname')?.touched && loan.get('bankname')?.invalid">
-                                <div *ngIf="loan.get('bankname')?.errors?.['required']">
-                                    Bank name is required
+                                    </div>
                                 </div>
                             </div>
 
 
                         </div>
-                    </div>
-                    <div class="col-lg-4 mt-20">
-                        <div class="form-group mb-3">
-                            <app-inputfield type="text" [required]="true" label="Outstanding Balance (INR)"
-                                formControlName="outstanding" [required]="true" placeholder="Enter Value"
-                                helpText="Help text" name="outstanding"
-                                (input)="handleAmountInput($event,'outstanding',loan)">
-                            </app-inputfield>
-                            <div class="text-danger"
-                                *ngIf="loan.get('outstanding')?.touched && loan.get('outstanding')?.invalid">
-                                <div *ngIf="loan.get('outstanding')?.errors?.['required']">
-                                    Amount is required
-                                </div>
-                            </div>
-
-                        </div>
-                    </div>
-                    <div class="col-lg-4 mt-20">
-                        <div class="form-group mb-3">
-                            <app-inputfield type="text" [required]="true" label="EMI Amount (INR)" [required]="true"
-                                formControlName="emiamount" placeholder="Enter Value" helpText="Help text"
-                                name="emiamount" (input)="handleAmountInput($event,'emiamount',loan)">
-                            </app-inputfield>
-                            <div class="text-danger"
-                                *ngIf="loan.get('emiamount')?.touched && loan.get('emiamount')?.invalid">
-                                <div *ngIf="loan.get('emiamount')?.errors?.['required']">
-                                    EMI Amount is required
-                                </div>
-                            </div>
-
-                        </div>
-                    </div>
-                    <div class="col-lg-4 mt-20">
-                        <div class="form-group mb-3">
-                            <app-inputfield type="text" [required]="true" label="Remaining Tenure (Months)"
-                                formControlName="remtenure" [required]="true" placeholder="Enter Value"
-                                helpText="Help text" name="remtenure" (input)="main.restrictInput($event,'number')">
-                            </app-inputfield>
-                            <div class="text-danger"
-                                *ngIf="loan.get('remtenure')?.touched && loan.get('remtenure')?.invalid">
-                                <div *ngIf="loan.get('remtenure')?.errors?.['required']">
-                                    Tenure is required
-                                </div>
-                            </div>
-
-                        </div>
-                    </div> -->
-
                     </div>
                 </div>
             </ng-template>
@@ -454,121 +390,7 @@
                 </div>
             </ng-template>
 
-            <!-- <ng-template #buynowpaylaterTemplate let-i="index">
-                <div class="mobiledetails d-flex w-100 flex-column ">
-                    <div class="w-100 gap-3">
-                        <div formArrayName="bnpl">
-                            @for(item of getFormArray('bnpl').controls; track $index; let i = $index){
-                            <div class="row common-details-box d-flex flex-row gap-0" [formGroupName]="i">
 
-
-                                <div class="text-dp-3-regular d-flex align-items-center justify-content-between">
-                                    BNPL {{ i + 1 }}
-                                    <span *ngIf="getFormArray('bnpl').controls.length > 1"
-                                        (click)="removeitem(i,'bnpl')">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
-                                            viewBox="0 0 24 24" fill="none">
-                                            <path
-                                                d="M21 5.98047C17.67 5.65047 14.32 5.48047 10.98 5.48047C9 5.48047 7.02 5.58047 5.04 5.78047L3 5.98047"
-                                                stroke="#25262F" stroke-width="1.5" stroke-linecap="round"
-                                                stroke-linejoin="round" />
-                                            <path
-                                                d="M8.5 4.97L8.72 3.66C8.88 2.71 9 2 10.69 2H13.31C15 2 15.13 2.75 15.28 3.67L15.5 4.97"
-                                                stroke="#25262F" stroke-width="1.5" stroke-linecap="round"
-                                                stroke-linejoin="round" />
-                                            <path
-                                                d="M18.8484 9.14062L18.1984 19.2106C18.0884 20.7806 17.9984 22.0006 15.2084 22.0006H8.78844C5.99844 22.0006 5.90844 20.7806 5.79844 19.2106L5.14844 9.14062"
-                                                stroke="#25262F" stroke-width="1.5" stroke-linecap="round"
-                                                stroke-linejoin="round" />
-                                            <path d="M10.3281 16.5H13.6581" stroke="#25262F" stroke-width="1.5"
-                                                stroke-linecap="round" stroke-linejoin="round" />
-                                            <path d="M9.5 12.5H14.5" stroke="#25262F" stroke-width="1.5"
-                                                stroke-linecap="round" stroke-linejoin="round" />
-                                        </svg>
-                                    </span>
-                                </div>
-                                <hr class="hrclass">
-
-                                <div class="col-lg-6 ">
-                                    <div class="form-group mb-3">
-
-
-                                        <app-dropdown [options]="selectLenders" formControlName="bnplbankName"
-                                            [placeholder]="'Select Lender Name'" [required]="true" [searchable]="true"
-                                            (selectedValueChange)="onlenderSelected($event,item)"
-                                            [avatarUrl]="avatarUrl" [hasAvatar]="hasAvatar" [label]="'Lender Name'">
-                                        </app-dropdown>
-
-                                    </div>
-                                </div>
-                                <div class="col-lg-6 ">
-                                    <div class="form-group mb-3">
-                                        <app-inputfield type="text" [required]="true" label="Outstanding Balance (INR)"
-                                            (input)="handleAmountInput($event,'outstandingBalance',item)"
-                                            [required]="true" formControlName="outstandingBalance"
-                                            placeholder="Enter Value" helpText="Help text" name="outstandingBalance">
-                                        </app-inputfield>
-                                        <div class="text-danger"
-                                            *ngIf="item.get('outstandingBalance')?.touched && item.get('outstandingBalance')?.invalid">
-                                            <div *ngIf="item.get('outstandingBalance')?.errors?.['required']">
-                                                Outstanding Balance is required
-                                            </div>
-                                        </div>
-
-                                    </div>
-                                </div>
-                                <div class="col-lg-6 mt-20">
-                                    <div class="form-group mb-3">
-                                        <app-inputfield type="text" [required]="true" label="Credit Limit (INR)"
-                                            (input)="main.restrictInput($event, 'number');formatAmountfromarray($event,'creditLimit',item)" [required]="true"
-                                            formControlName="creditLimit" placeholder="Enter Value" helpText="Help text"
-                                            name="creditLimit">
-                                        </app-inputfield>
-                                        <div class="text-danger"
-                                            *ngIf="item.get('creditLimit')?.touched && item.get('creditLimit')?.invalid">
-                                            <div *ngIf="item.get('creditLimit')?.errors?.['required']">
-                                                Credit Limit is required
-                                            </div>
-                                        </div>
-
-                                    </div>
-                                </div>
-                                <div class="col-lg-6 mt-20">
-                                    <div class="form-group mb-3">
-                                        <app-inputfield type="text" [required]="true" label="Monthly EMI (INR)"
-                                            (input)="handleAmountInput($event,'monthlyEMI',item)" [required]="true"
-                                            formControlName="monthlyEMI" placeholder="Enter Value" helpText="Help text"
-                                            name="monthlyEMI">
-                                        </app-inputfield>
-                                        <div class="text-danger"
-                                            *ngIf="item.get('monthlyEMI')?.touched && item.get('monthlyEMI')?.invalid">
-                                            <div *ngIf="item.get('monthlyEMI')?.errors?.['required']">
-                                                Monthly EMI is required
-                                            </div>
-                                        </div>
-
-                                    </div>
-                                </div>
-
-                            </div>
-                            @if(i === getFormArray('bnpl').length - 1 ) {
-                            <div class="row common-details-box pt-0 pb-0 ">
-
-                                <div class="form-group mb-3">
-                                    <app-buttons label="Add Buy Now Pay Later (BNPL)"
-                                        class="btn btn-icon Add btncustomClass" [outline]="true"
-                                        (click)="addRow('bnpl', createBNPL.bind(this))">
-                                        <img src="/assets/images/icons/addred.svg">
-                                    </app-buttons>
-                                </div>
-                            </div>
-                            }
-
-                            }
-                        </div>
-                    </div>
-                </div>
-            </ng-template> -->
 
             <ng-template #buynowpaylaterTemplate let-i="index">
                 <div class="mobiledetails d-flex w-100 flex-column ">
@@ -780,8 +602,7 @@
 
                                 <div class="text-dp-3-regular d-flex align-items-center justify-content-between">
                                     Liability {{ i + 1 }}
-                                    <span *ngIf="other.length > 1"
-                                        (click)="removeitem(i,'other')">
+                                    <span *ngIf="other.length > 1" (click)="removeitem(i,'other')">
                                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
                                             viewBox="0 0 24 24" fill="none">
                                             <path
@@ -811,7 +632,8 @@
                                         <app-inputfield type="text" [required]="true" label="Liability Type"
                                             [required]="true" formControlName="LiabilityType"
                                             (input)="main.restrictInput($event,'text')"
-                                            placeholder="Enter Liability Type" helpText="Help text" name="LiabilityType">
+                                            placeholder="Enter Liability Type" helpText="Help text"
+                                            name="LiabilityType">
                                         </app-inputfield>
                                         <div class="text-danger"
                                             *ngIf="item.get('LiabilityType')?.touched && item.get('LiabilityType')?.invalid">

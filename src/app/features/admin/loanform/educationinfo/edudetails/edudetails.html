@@ -1,0 +1,103 @@
+<div class="vh-container">
+    <div class="base-layout base-height" *ngIf="!isChildActive">
+
+        <div class="header ">
+
+            <div class="text-datepicker blue-text d-flex flex-column gap-2 ">Education Details
+                <div class="text-body-1 fw-normal">
+                    <span><svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 22 22"
+                            fill="none">
+                            <path
+                                d="M10.9997 20.1667C16.0413 20.1667 20.1663 16.0417 20.1663 11C20.1663 5.95833 16.0413 1.83333 10.9997 1.83333C5.95801 1.83333 1.83301 5.95833 1.83301 11C1.83301 16.0417 5.95801 20.1667 10.9997 20.1667Z"
+                                stroke="#25262F" stroke-width="1.28125" stroke-linecap="round"
+                                stroke-linejoin="round" />
+                            <path d="M11 7.33333V11.9167" stroke="#25262F" stroke-width="1.28125" stroke-linecap="round"
+                                stroke-linejoin="round" />
+                            <path d="M10.9961 14.6667H11.0043" stroke="#25262F" stroke-width="1.28125"
+                                stroke-linecap="round" stroke-linejoin="round" />
+                        </svg></span>
+                    Click the “Next” button to save your changes
+                </div>
+            </div>
+
+        </div>
+
+        <div class="w-100 d-flex flex-column gap-3 pb-1">
+            <div class="table-head d-flex flex-column  ">Qualification Details</div>
+            <div [formGroup]="basicform" (ngSubmit)="submit()" class=" d-flex flex-column gap-3 pb-1 ">
+
+                <div class="row g-3">
+                    <div [ngClass]="{'col-6': isOtherQualification, 'col-12': !isOtherQualification  }">
+
+                        <app-dropdown [options]="seleactqualification" [placeholder]="'Last Qualification'"
+                            [required]="true" [searchable]="true" [label]="qualification"
+                            formControlName="qualification" name="qualification"
+                            (selectedValueChange)="Selectededucation($event);">
+                        </app-dropdown>
+                    </div>
+
+                    <div class="col-6" *ngIf="isOtherQualification">
+                        <div class="form-group">
+                            <app-inputfield formControlName="qualificationtitle" name="qualificationtitle"
+                                label="Other Qualification" placeholder="Enter Title" [required]="true">
+                            </app-inputfield>
+
+                            <div class="text-danger"
+                                *ngIf="basicform.get('qualificationtitle')?.touched && basicform.get('qualificationtitle')?.invalid">
+                                Title is required
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row g-3">
+                    <div [ngClass]="{'col-6': isOtherEducation, 'col-12': !isOtherEducation  }">
+
+
+
+                        <app-dropdown [options]="seleactInstitute" [placeholder]="'Last Qualification'"
+                            [required]="true" [searchable]="true" [label]="'Last Institution Name'"
+                            formControlName="institute" name="institute"
+                            (selectedValueChange)="SelectedInstitute($event);">
+                        </app-dropdown>
+                    </div>
+
+                    <div class="col-6" *ngIf="isOtherEducation">
+                        <div class="form-group">
+                            <app-inputfield formControlName="institutetitle" name="institutetitle"
+                                label="Other Institution Name" placeholder="Enter Institution Name" [required]="true">
+                            </app-inputfield>
+
+                            <div class="text-danger"
+                                *ngIf="basicform.get('institutetitle')?.touched && basicform.get('institutetitle')?.invalid">
+                                Title is required
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+    </div>
+    <!-- <router-outlet></router-outlet> -->
+    <router-outlet (activate)="onChildActivate()" (deactivate)="onChildDeactivate()"></router-outlet>
+
+    <div *ngIf="!isChildActive">
+        <hr class="footer-hr-class" *ngIf="!isChildActive">
+        <div class="loan-footerbtns row w-100  d-flex justify-content-between align-items-center">
+
+            <div class="col-lg-4 ">
+                <img src="../assets/images/icons/save.svg">
+                <span class="text-dp-3-regular mx-2 blue-text"> Save and Exit</span>
+            </div>
+            <div class="col-lg-4  d-flex justify-content-end">
+                <app-buttons type="button" label="Back" class="btn btncustomClass" [outline]="true" (click)="back()">
+                </app-buttons>
+                <app-buttons type="button" label="Next" class="btn btncustomClass" color="primary" (click)="next()"
+                    [disabled]="basicform.invalid">
+                </app-buttons>
+
+            </div>
+        </div>
+    </div>
+</div>

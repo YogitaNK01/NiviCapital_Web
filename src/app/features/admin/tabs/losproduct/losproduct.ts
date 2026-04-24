@@ -9,12 +9,10 @@ import { Component } from '@angular/core';
 export class Losproduct {
 
   viewImage(imagePath: string): void {
-    // ✅ Opens image in a new browser tab
     window.open(imagePath, '_blank');
   }
     downloadImage() {
 
-    // this.service.downloadDocs(this.service.docofselectedUser.id, data);
 
   }
   

@@ -232,7 +232,7 @@ export class Estimateexpense {
       });
 
       group.get('securityfrequency')?.valueChanges.subscribe(() => {
-        this.validateAmount(group); // ✅ Trigger validation on frequency change
+        this.validateAmount(group); 
 
       })
     });
@@ -319,7 +319,7 @@ export class Estimateexpense {
       });
 
       group.get('securityfrequency')?.valueChanges.subscribe(() => {
-        this.validateAmount(group); // ✅ This was missing!
+        this.validateAmount(group); 
       });
 
     });
@@ -404,6 +404,26 @@ export class Estimateexpense {
 
     return total;
   }
+
+  getAccordionTotal(index: number): string {
+  switch (index) {
+
+    case 0: // Education Fees
+      const tuition = Number(
+        this.expenseForm.get('tutionfees')?.value?.toString().replace(/,/g, '')
+      ) || 0;
+      return this.formatIndian(tuition.toString());
+
+    case 1: // Living Expense
+      return this.formatIndian(this.totalLivingINR.toString());
+
+    case 2: // Miscellaneous
+      return this.formatIndian(this.totalMiscINR.toString());
+
+    default:
+      return '0';
+  }
+}
 
   handleAmountInput1(event: any, controlName: string) {
     this.main.restrictInput(event, 'decimal');
@@ -596,7 +616,7 @@ validateAmount(group: FormGroup) {
 
     this.msgBox.open({
       title: 'Are you sure want to Remove',
-      message: '',
+      message: ``,
       showCancel: true,
       onOk: () => {
 

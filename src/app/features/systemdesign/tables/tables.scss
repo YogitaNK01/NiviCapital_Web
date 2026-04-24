@@ -126,7 +126,7 @@
   padding: 0 4px;
 }
 
-/* ✅ Responsive version */
+/* Responsive version */
 @media (max-width: 480px) {
   .pagination-btn:not(:first-child):not(:last-child) {
     display: none; /* hide middle buttons */

@@ -39,12 +39,10 @@ constructor( private service: Main) { }
 
 
   viewImage(imagePath: string): void {
-    // ✅ Opens image in a new browser tab
     window.open(imagePath, '_blank');
   }
   downloadImage(data: any) {
 
-    // this.service.downloadDocs(this.service.docofselectedUser.id, data);
 
   }
 

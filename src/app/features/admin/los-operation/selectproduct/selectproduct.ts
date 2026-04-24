@@ -101,7 +101,7 @@ export class Selectproduct implements OnInit {
   }
 
   tosuccess() {
-    console.log(this.formData,);
+    // console.log(this.formData,);
 
     let input = {
       "productId": this.formData.product,
@@ -150,7 +150,7 @@ export class Selectproduct implements OnInit {
       }
           )
         );
-        console.log("url---", url);
+        // console.log("url---", url);
 
 
          const finalUrl = this.locationStrategy.prepareExternalUrl(url);

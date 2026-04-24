@@ -123,7 +123,7 @@ export class Incomeinfo {
   removeOtherDocument(type: 'other' | 'otherbusiness', id: number): void {
      this.msgBox.open({
       title: 'Are you sure want to Remove',
-      message: '',
+      message: ``,
       showCancel: true,
       onOk: () => {
        
@@ -367,7 +367,7 @@ isOtherDocumentValid(): boolean {
   deleteImage(key: string): void {
     this.msgBox.open({
       title: 'Are you sure want to Remove',
-      message: '',
+      message: ``,
       showCancel: true,
       onOk: () => {
         const docToDelete = this.getDocumentByKey(key);
@@ -460,16 +460,6 @@ isOtherDocumentValid(): boolean {
     this.stepperService.previous();
   }
   next() {
-
-    
-//  if (!this.allRequiredFilesUploaded) {
-//     this.msgBox.open({
-//       title: 'Missing documents',
-//       message: 'Please upload all required documents before proceeding.'
-//     });
-//     return;
-//   }
-
 
     console.log('allRequiredFilesUploaded:', this.allRequiredFilesUploaded);
     if (this.allRequiredFilesUploaded) {

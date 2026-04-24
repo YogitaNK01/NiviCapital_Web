@@ -148,7 +148,12 @@
             (click)="toggle(i)">
 
             {{ acc.title }}
+            <span class="px-3 fw-bold">
+              ₹ {{ getAccordionTotal(i) }}
+            </span>
+
           </button>
+
         </h2>
 
 
@@ -232,7 +237,7 @@
                 <!-- @if(i === 0 || livingexpenses.at(i-1).get('category')?.value !== expense.get('category')?.value) { -->
 
                 <div class="text-label fw-bold d-flex align-items-center justify-content-between">
-                  {{ getCategoryLabel(expense.get('category')?.value) }} {{i+1}}
+                  {{ getCategoryLabel(expense.get('category')?.value) }}
                   <span (click)="removeexpense(i,'living')">
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
                       <path
@@ -361,7 +366,7 @@
 
                 <!-- @if(i === 0 || miscexpenses.at(i-1).get('category')?.value !== expense.get('category')?.value) { -->
                 <div class="text-label fw-bold d-flex align-items-center justify-content-between">
-                  {{ getmisCategoryLabel(expense.get('category')?.value) }} {{i+1}}
+                  {{ getmisCategoryLabel(expense.get('category')?.value) }}
                   <span (click)="removeexpense(i,'misc')">
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
                       <path
@@ -393,9 +398,9 @@
 
                 <!-- INR -->
                 <div class="col-lg-4 col-sm-12 mt-20">
-                  <app-inputfield type="flag" [label]="expense.get('categoryLabel')?.value + '(INR)'"
-                    placeholder="₹ 0" [showPhonePrefix]="true" [showPhonePrefixnumber]="false"
-                    formControlName="amountINR" [required]="true"
+                  <app-inputfield type="flag" [label]="expense.get('categoryLabel')?.value + '(INR)'" placeholder="₹ 0"
+                    [showPhonePrefix]="true" [showPhonePrefixnumber]="false" formControlName="amountINR"
+                    [required]="true"
                     (input)="handleAmountInput($event,'amountINR',expense );main.restrictInput($event, 'decimal')">
                   </app-inputfield>
 
@@ -406,7 +411,7 @@
                       Amount (INR) is required
                     </div>
 
-                  <div *ngIf="expense.get('amountINR')?.errors?.['exceedsLimit']">
+                    <div *ngIf="expense.get('amountINR')?.errors?.['exceedsLimit']">
                       Amount cannot exceed
                       ₹{{getFormattedLimit(expense.get('securityfrequency')?.value)}}
                       for {{getFrequencyLabel(expense.get('securityfrequency')?.value)}}

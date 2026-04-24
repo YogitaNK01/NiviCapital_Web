@@ -37,7 +37,6 @@ export class KycData implements OnInit {
 }
 
   viewImage(url: string): void {
-    // ✅ Opens image in a new browser tab
     window.open(url, '_blank');
   }
 }

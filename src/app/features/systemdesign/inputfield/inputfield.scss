@@ -38,7 +38,7 @@
   left: 0;
   top: 0;
   height: 100%;
-  width: 72px;                 // 👈 fixed width
+  width: 85px;                 
   display: flex;
   align-items: center;
   justify-content: center;
@@ -48,12 +48,12 @@
  padding: 14px 16px;
 }
 
-.input-prefix img {
+.input-prefix svg {
   width: 26px;
   height: 20px;
 }
 .input-field.has-prefix {
-  padding-left: 84px !important;  
+  padding-left: 94px !important;  
   // border: none;
   // border-radius: 0;
           

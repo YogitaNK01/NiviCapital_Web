@@ -193,11 +193,9 @@ export class Customerdetails {
   }
   downloadReport(): void {
     console.log('Downloading latest report...');
-    // Implement download logic here
   }
 
   viewImage(imagePath: string): void {
-    // ✅ Opens image in a new browser tab
     window.open(imagePath, '_blank');
   }
 

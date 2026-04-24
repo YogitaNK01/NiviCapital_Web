@@ -318,7 +318,6 @@ const isMiddleNameEmpty = !data.value.mname;
     this.otpState = "error";
   }
 
-  // ✅ message from API
   this.otpmsg = val.message;
 
 
@@ -350,7 +349,7 @@ const isMiddleNameEmpty = !data.value.mname;
     if (action === 'ToDashboard') {
        this.msgBox.open({
       title: 'Are you sure want to go to Dashboard?',
-      message: '',
+      message: ``,
       showCancel: true,
       onOk: () => {
        this.router.navigate(['/admin/customer']);

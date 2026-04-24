@@ -302,7 +302,7 @@ export class Monthlyexpenditureinfo {
   removeAccordion(key: string, index: number, event: Event) {
     this.msgBox.open({
       title: 'Are you sure want to Remove',
-      message: '',
+      message: ``,
       showCancel: true,
       onOk: () => {
         event.stopPropagation();
@@ -452,7 +452,7 @@ export class Monthlyexpenditureinfo {
     const lastThree = str.slice(-3);
     let remaining = str.slice(0, -3);
 
-    // ✅ DO NOT trim zeros here
+    // DO NOT trim zeros here
     remaining = remaining.replace(/\B(?=(\d{2})+(?!\d))/g, ',');
 
     return remaining + ',' + lastThree + decimalPart;
@@ -642,7 +642,7 @@ export class Monthlyexpenditureinfo {
       // Utilities
       if (groupName === 'utilities') {
         if (groupValue?.utilityvalue1 || groupValue?.utilityvalue2) {
-          return false; // ✅ enable Next
+          return false; // enable Next
         }
       }
 

@@ -318,7 +318,7 @@ export class Sanctionletter implements OnInit {
     return startY + totalHeight;
   }
 
-  // ✅ Send the generated PDF via API
+  // Send the generated PDF via API
   // sendSanctionLetter() {
   //   if (!this.generatedPdfBlob) {
   //     alert('Please generate the sanction letter first!');

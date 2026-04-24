@@ -35,7 +35,7 @@ export class Login {
     if (!form.valid) {
       this.msgBox.open({
         title: 'Validation Error',
-        message: 'Please fill in all required fields',
+        message: `Please fill in all required fields`,
         showCancel: false,
         onOk: () => { }
       });
@@ -70,7 +70,7 @@ export class Login {
         this.isLoading = false;
         this.msgBox.open({
           title: 'Login Error',
-          message: err.error?.message || 'Invalid credentials. Please try again.',
+          message: err.error?.message || `Invalid credentials. Please try again.`,
           showCancel: false,
           onOk: () => { }
         });

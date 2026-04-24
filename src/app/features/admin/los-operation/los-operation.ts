@@ -300,7 +300,6 @@ export class LosOperation {
 
 
 
-        // ✅ Create table-compatible row from API response
         const row: TransformedUserData = {
           custId: res.data.custId ?? '-',
           ncId: res.data.ncId ?? '-',

@@ -16,6 +16,7 @@ import { Referenceinfo } from './referenceinfo/referenceinfo';
 import { Coapplicantinfo } from './coapplicantinfo/coapplicantinfo';
 import { Summaryinfo } from './summaryinfo/summaryinfo';
 import { Edusection } from './educationinfo/edusection/edusection';
+import { Edudetails } from './educationinfo/edudetails/edudetails';
 
 const routes: Routes = [
   // {
@@ -34,7 +35,7 @@ const routes: Routes = [
       { path: 'additionalinfo', component: Additionalinfo },
       { path: 'kycinfo', component: Kycinfo },
       {
-        path: 'educationinfo', component: Educationinfo,
+        path: 'educationDetails', component: Edudetails,
 
         children: [
           // {
@@ -42,7 +43,12 @@ const routes: Routes = [
           //   redirectTo: 'select',
           //   pathMatch: 'full'
           // },
+         
           {
+            path: 'educationinfo',
+            component: Educationinfo   // optional placeholder
+          },
+           {
             path: 'edusection',
             component: Edusection   // optional placeholder
           },

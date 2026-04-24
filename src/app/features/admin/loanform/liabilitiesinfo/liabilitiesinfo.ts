@@ -384,19 +384,19 @@ export class Liabilitiesinfo {
     switch (type) {
       case 'loantype':
         array = this.loans;
-        accKey = 'Existing Loans';  // ✅ FIXED: Match accordion key
+        accKey = 'Existing Loans';  
         break;
       case 'creditcard':
         array = this.creditcard;
-        accKey = 'Credit Card Outstanding';  // ✅ FIXED
+        accKey = 'Credit Card Outstanding'; 
         break;
       case 'bnpl':
         array = this.bnpl;
-        accKey = 'Buy Now Pay Later (BNPL)';  // ✅ FIXED
+        accKey = 'Buy Now Pay Later (BNPL)';  
         break;
       case 'other':
         array = this.other;
-        accKey = 'Other Liabilities';  // ✅ FIXED
+        accKey = 'Other Liabilities';  
         break;
     }
 
@@ -466,18 +466,16 @@ export class Liabilitiesinfo {
         return acc;
       }, {});
 
-      // ✅ FIX: Use CODE as value for dropdown
       this.liabilitiesCatagories = list.map((a: any) => ({
-        value: a.code,  // ✅ CHANGED: was 'a' now 'a.code'
+        value: a.code,  
         label: this.accordianTitle(a.code),
         code: a.code
       }));
 
-      // ✅ FIX: Use CODE as key for accordions
       this.accordions = list.map((group: any) => ({
         title: this.accordianTitle(group.code),
         alwaysOpen: true,
-        key: group.code  // ✅ CHANGED: was 'group' now 'group.code'
+        key: group.code  
       }));
 
       this.liabilityCodeMap = list.reduce((acc: any, item: any) => {
@@ -626,7 +624,6 @@ export class Liabilitiesinfo {
     const lastThree = str.slice(-3);
     let remaining = str.slice(0, -3);
 
-    // ✅ DO NOT trim zeros here
     remaining = remaining.replace(/\B(?=(\d{2})+(?!\d))/g, ',');
 
     return remaining + ',' + lastThree + decimalPart;
@@ -674,7 +671,6 @@ export class Liabilitiesinfo {
     const integerPart = parts[0];
     const decimalPart = parts[1] ? '.' + parts[1].slice(0, 2) : '';
 
-    // ✅ zero safety
     if (/^0+$/.test(integerPart)) {
       control.setValue(integerPart + decimalPart, { emitEvent: false });
       return;
@@ -894,7 +890,6 @@ export class Liabilitiesinfo {
     return this.creditcard.controls.some(c =>
       c.get('ccoutstandingBalance')?.valid &&
       c.get('creditcardbankName')?.valid
-      // ✅ Ignore title validation for button enablement
     );
   }
 
@@ -928,7 +923,7 @@ export class Liabilitiesinfo {
           .toLowerCase()
       ) || [];
 
-    // ✅ Existing Loans
+    // Existing Loans
     if (labels.includes('existing loans')) {
       if (
         this.loans.length > 0 &&
@@ -938,7 +933,7 @@ export class Liabilitiesinfo {
       }
     }
 
-    // ✅ Credit Card
+    // Credit Card
     if (labels.includes('credit card outstanding')) {
       if (
         this.creditcard.length > 0 &&
@@ -948,7 +943,7 @@ export class Liabilitiesinfo {
       }
     }
 
-    // ✅ BNPL
+    // BNPL
     if (labels.includes('buy now pay later')) {
       if (
         this.bnpl.length > 0 &&
@@ -958,7 +953,7 @@ export class Liabilitiesinfo {
       }
     }
 
-    // ✅ Other Liabilities
+    // Other Liabilities
     if (labels.includes('other liabilities')) {
       if (
         this.other.length > 0 &&
@@ -972,7 +967,7 @@ export class Liabilitiesinfo {
   }
 
 
-  // ✅ 1. onLoanChange - COMPLETE REBUILD
+  // 1. onLoanChange - COMPLETE REBUILD
   onLoanChange1(values: string | string[]): void {
     const groups = Array.isArray(values) ? values : [values];
     this.selectedloantype = groups;
@@ -1035,7 +1030,7 @@ export class Liabilitiesinfo {
 
     this.msgBox.open({
       title: 'Are you sure want to Remove',
-      message: '',  // ✅ REQUIRED - Add this line
+      message: ``,  
       showCancel: true,
       onOk: () => {
         const key = acc.key;
@@ -1075,11 +1070,11 @@ export class Liabilitiesinfo {
 
 
 
-  // ✅ 2. removeitem - FULL LOAN RESET
+  // 2. removeitem - FULL LOAN RESET
   removeitem(index: number, type: 'loantype' | 'creditcard' | 'bnpl' | 'other') {
     this.msgBox.open({
       title: 'Are you sure want to Remove',
-      message: '',
+      message: ``,
       showCancel: true,
       onOk: () => {
         switch (type) {
@@ -1106,22 +1101,18 @@ export class Liabilitiesinfo {
     });
   }
 
-  // ✅ 3. NEW METHOD - RESET DROPDOWN STATE
+  // 3. NEW METHOD - RESET DROPDOWN STATE
   resetLoanDropdownState() {
-    // PRESERVE EXISTING VALUES - Don't clear selectedloantype
     const currentLoanTypes = this.loans.controls
       .map((control: any) => {
         const typeLabel = control.get('type')?.value;
-        // Find matching option value
         const option = this.loanoptions.find(opt => opt.label === typeLabel);
         return option ? option.value : typeLabel;
       })
       .filter(Boolean);
 
-    // DON'T CLEAR - Just update to match remaining rows
     this.selectedloantype = [...currentLoanTypes];
 
-    //Force immediate detection
     this.cd.detectChanges();
   }
 
@@ -1134,10 +1125,8 @@ export class Liabilitiesinfo {
     this.bnpl.clear();
     this.other.clear();
 
-    // ALSO CLEAR nested loan dropdown
     this.selectedloantype = [];
 
-    // Repopulate selected
     selectedCodes.forEach(code => {
       if (code.includes('Existing') || code === 'EXISTING_LOAN') {
         this.loans.push(this.createLoan(''));
@@ -1226,7 +1215,7 @@ export class Liabilitiesinfo {
         break;
     }
 
-    // ✅ FIX: If empty, remove from selectedliabilities
+    // FIX: If empty, remove from selectedliabilities
     if (isEmpty) {
       this.selectedliabilities = this.selectedliabilities.filter(k => k !== accKey);
 
@@ -1278,7 +1267,7 @@ export class Liabilitiesinfo {
         } else {
           items.push({
             liabilityType: "EXISTING_LOAN",
-            bankName: loan.value.bankname,
+            bankId: loan.value.bankname,
             ...(this.isOtherSelected(loan) && { title: loan.value.title }),
             outstandingBalanceInr: cleanAmount(loan.value.outstanding),
             emiAmountInr: cleanAmount(loan.value.emiamount),
@@ -1300,7 +1289,7 @@ export class Liabilitiesinfo {
         } else {
           items.push({
             liabilityType: 'CREDIT_CARD_OUTSTANDING',
-            bankName: card.value.creditcardbankName,
+            bankId: card.value.creditcardbankName,
             ...(this.isOtherSelectedcc(card) && { title: card.value.title }),
             outstandingBalanceInr: cleanAmount(card.value.ccoutstandingBalance),
             creditLimitInr: cleanAmount(card.value.cccreditLimit)
@@ -1324,7 +1313,7 @@ export class Liabilitiesinfo {
         } else {
           items.push({
             liabilityType: 'BNPL',
-            bankName: bnpl.value.bnplbankName,
+            bankId: bnpl.value.bnplbankName,
             outstandingBalanceInr: cleanAmount(bnpl.value.outstandingBalance),
             creditLimitInr: cleanAmount(bnpl.value.creditLimit),
             monthlyEmiInr: cleanAmount(bnpl.value.monthlyEMI),
@@ -1375,7 +1364,6 @@ export class Liabilitiesinfo {
       },
       // error: (err) => {
       //   console.error('Submit failed:', err);
-      //   this.msgBox.open({ title: 'Submission failed', message: err.message });
       // }
     });
 

@@ -15,7 +15,24 @@
       <path d="m21 21-4.35-4.35"></path>
     </svg> -->
     <div *ngIf="showPhonePrefix" class="input-prefix">
-    <img src="https://flagcdn.com/w20/in.webp" class="flag-icon" alt="flag">
+    <!-- <img src="https://flagcdn.com/w20/in.webp" class="flag-icon" alt="flag"> -->
+     <svg xmlns="http://www.w3.org/2000/svg" width="37" height="27" viewBox="0 0 37 27" fill="none">
+  <mask id="mask0_952_40792" style="mask-type:luminance" maskUnits="userSpaceOnUse" x="0" y="0" width="37" height="27">
+    <rect width="37" height="27" fill="white"/>
+  </mask>
+  <g mask="url(#mask0_952_40792)">
+    <path fill-rule="evenodd" clip-rule="evenodd" d="M0 0L0 27H37V0L0 0Z" fill="#F7FCFF"/>
+    <mask id="mask1_952_40792" style="mask-type:luminance" maskUnits="userSpaceOnUse" x="0" y="0" width="37" height="27">
+      <path fill-rule="evenodd" clip-rule="evenodd" d="M0 0L0 27H37V0L0 0Z" fill="white"/>
+    </mask>
+    <g mask="url(#mask1_952_40792)">
+      <path fill-rule="evenodd" clip-rule="evenodd" d="M0 0L0 9H37V0L0 0Z" fill="#FF8C1A"/>
+      <path fill-rule="evenodd" clip-rule="evenodd" d="M0 18L0 27H37V18H0Z" fill="#5EAA22"/>
+      <path fill-rule="evenodd" clip-rule="evenodd" d="M18.5 9C21.0543 9 23.125 11.0147 23.125 13.5C23.125 15.9853 21.0543 18 18.5 18C15.9457 18 13.875 15.9853 13.875 13.5C13.875 11.0147 15.9457 9 18.5 9ZM18.5 10.125C16.5843 10.125 15.0312 11.636 15.0312 13.5C15.0312 15.364 16.5843 16.875 18.5 16.875C20.4157 16.875 21.9688 15.364 21.9688 13.5C21.9688 11.636 20.4157 10.125 18.5 10.125Z" fill="#3D58DB"/>
+      <path fill-rule="evenodd" clip-rule="evenodd" d="M18.4937 14.4683L17.5295 17.9262L18.0941 14.3857L15.7677 17.1631L17.7636 14.152L14.4773 15.7686L17.5594 13.8078L13.8813 13.9841L17.5167 13.4125L14.0829 12.118L17.6429 13.0345L15.0472 10.493L17.9163 12.7391L16.6074 9.39012L18.2895 12.5774L18.4937 9L18.698 12.5774L20.3801 9.39012L19.0712 12.7391L21.9403 10.493L19.3445 13.0345L22.9045 12.118L19.4708 13.4125L23.1061 13.9841L19.4281 13.8078L22.5101 15.7686L19.2238 14.152L21.2197 17.1631L18.8933 14.3857L19.458 17.9262L18.4937 14.4683Z" fill="#3D58DB"/>
+    </g>
+  </g>
+</svg>
     <span *ngIf="showPhonePrefixnumber">+91</span>
     
   </div>
@@ -34,6 +51,11 @@
       [disabled]="disabled"
       class="input-field percent-input"
       [readonly]="readonly"
+      
+ [attr.min]="min"
+  [attr.max]="max"
+  [attr.step]="step"
+
       [ngClass]="{
         'has-left-icon': showSearch,
         'has-right-icon': showPasswordToggle || showStateIcon || showInfo || showSearch,

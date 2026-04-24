@@ -312,7 +312,7 @@ export class Assetsinfo implements OnInit {
   removeAccordion1(key: string, index: number, event: Event) {
     this.msgBox.open({
       title: 'Are you sure want to Remove',
-      message: '',
+      message: ``,
       showCancel: true,
       onOk: () => {
         event.stopPropagation();
@@ -385,7 +385,7 @@ export class Assetsinfo implements OnInit {
   removeAccordion(key: string, index: number, event: Event) {
   this.msgBox.open({
     title: 'Are you sure want to Remove',
-    message: '',
+    message: ``,
     showCancel: true,
     onOk: () => {
       event.stopPropagation();
@@ -406,7 +406,7 @@ export class Assetsinfo implements OnInit {
 
         case 'Property/Land Assets':
           this.properties.clear();
-          this.selectedPropertyIds = []; // ✅ already there
+          this.selectedPropertyIds = []; 
           this.properties.push(this.createProperty());
           break;
 
@@ -417,7 +417,7 @@ export class Assetsinfo implements OnInit {
 
         case 'Investments':
           this.investmentsArray.clear();
-          this.selectedInvestmentIds = []; // ✅ already there
+          this.selectedInvestmentIds = []; 
           break;
 
         case 'other':
@@ -531,7 +531,6 @@ handleAmountInput(event: any, controlName: string, ctrl?: any) {
     const lastThree = str.slice(-3);
     let remaining = str.slice(0, -3);
 
-    // ✅ DO NOT trim zeros here
     remaining = remaining.replace(/\B(?=(\d{2})+(?!\d))/g, ',');
 
     return remaining + ',' + lastThree + decimalPart;
@@ -581,7 +580,7 @@ handleAmountInput(event: any, controlName: string, ctrl?: any) {
     const integerPart = parts[0];
     const decimalPart = parts[1] ? '.' + parts[1].slice(0, 2) : '';
 
-    // ✅ zero safety
+   
     if (/^0+$/.test(integerPart)) {
       control.setValue(integerPart + decimalPart, { emitEvent: false });
       return;
@@ -656,12 +655,10 @@ handleAmountInput(event: any, controlName: string, ctrl?: any) {
 
     this.selectedAssets = newSelected;
 
-    // ✅ Open accordions correctly
     this.openIndex = this.selectedAssets
       .map(val => this.accordions.findIndex(a => a.key === val))
       .filter(i => i !== -1);
 
-    // ✅ Reset DESELECTED only
     deselected.forEach(key => {
       const config = this.assetFieldMap[key];
       if (!config) return;
@@ -677,7 +674,6 @@ handleAmountInput(event: any, controlName: string, ctrl?: any) {
       }
     });
 
-    // ✅ Initialize NEW selections with DEFAULT rows
     this.selectedAssets.forEach(key => {
       const config = this.assetFieldMap[key];
       if (!config) return;
@@ -702,7 +698,6 @@ onAssetChange(values: string | string[]): void {
     this.selectedAssets = [];
     this.openIndex = [];
 
-    // ✅ Reset values WITHOUT destroying structure
     this.assetsForm.get('gold')?.reset();
     this.assetsForm.get('liquidAssets')?.reset();
     this.properties.clear();
@@ -710,7 +705,6 @@ onAssetChange(values: string | string[]): void {
     this.otherassets.clear();
     this.investmentsArray.clear();
 
-    // ✅ FIX: Clear investment dropdown selection state
     this.selectedInvestmentIds = [];
     this.selectedPropertyIds = [];
     this.selectedownertype = [];
@@ -743,7 +737,6 @@ onAssetChange(values: string | string[]): void {
       control.clear();
     }
 
-    // ✅ FIX: Clear inner dropdown state for deselected sections
     if (key === 'Investments') {
       this.selectedInvestmentIds = [];
     }
@@ -964,7 +957,7 @@ onAssetChange(values: string | string[]): void {
   removeitem1(index: number, type: 'property' | 'fd' | 'other') {
     this.msgBox.open({
       title: 'Are you sure want to Remove',
-      message: '',
+      message: ``,
       showCancel: true,
       onOk: () => {
         if (type === 'property') {
@@ -1005,7 +998,7 @@ onAssetChange(values: string | string[]): void {
   removeitem(index: number, type: 'property' | 'fd' | 'other') {
     this.msgBox.open({
       title: 'Are you sure want to Remove',
-      message: '',
+      message: ``,
       showCancel: true,
       onOk: () => {
         switch (type) {
@@ -1397,7 +1390,7 @@ onAssetChange(values: string | string[]): void {
           } else {
 
             addItem('FIXED_DEPOSIT', ctrl.value.bankamt, {
-              bankName: ctrl.value.bankname,
+              bankId: ctrl.value.bankname,
               ...(this.isOtherSelected(ctrl) && { title: ctrl.value.title }),
               maturityDate: (ctrl.value.maturitydate).format('YYYY-MM-DD')
             });

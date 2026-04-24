@@ -25,7 +25,7 @@ export class Loanstepper implements OnInit {
   constructor(public router: Router, public stepservice: Loanstepperservice, private route: ActivatedRoute, private stepperService: Loanstepperservice, private cdr: ChangeDetectorRef) {
     this.stepperService.steps$.subscribe(steps => {
       this.steps = steps;
-      this.cdr.detectChanges(); // ✅ Force change detection
+      this.cdr.detectChanges(); // Force change detection
     });
   }
 
@@ -40,6 +40,14 @@ export class Loanstepper implements OnInit {
         this.custARN = params['custARN'];
 
         this.stepperService.setLoanId(this.applicantId, this.applicationId, this.custName, this.custARN);
+
+
+        this.route.queryParams.subscribe(params => {
+          if (params['qualificationlabel']) {
+            this.activeQualificationId = params['qualificationlabel'];
+          }
+        });
+
       }
     });
     this.router.events.subscribe(() => {
@@ -47,12 +55,8 @@ export class Loanstepper implements OnInit {
     });
   }
 
+
   get currentIndex1(): number {
-    const currentRoute = this.router.url.split('/').pop();
-    return this.steps.findIndex((s: { route: string | undefined; }) => s.route === currentRoute);
-  }
-  // You need this getter in TS:
-  get currentIndex(): number {
     try {
       const rawUrl = this.router.url;
       const pathOnly = rawUrl.split('?')[0];
@@ -61,7 +65,6 @@ export class Loanstepper implements OnInit {
 
       // console.log('Cleaned route:', currentRoute);
 
-      // Find matching step index
       const idx = this.steps?.findIndex((s: any) =>
         s.route === currentRoute ||
         s.route?.toLowerCase().includes(currentRoute.toLowerCase()) ||
@@ -73,20 +76,31 @@ export class Loanstepper implements OnInit {
       return 0;
     }
   }
+  get currentIndex(): number {
+    const cleanUrl = this.router.url.split('?')[0];
+    const lastSegment = cleanUrl.split('/').pop();
+
+    let logicalRoute = lastSegment;
+
+    // Treat education sub-pages as Education Details
+    if (lastSegment === 'educationinfo') {
+      logicalRoute = 'educationDetails';
+    }
+
+    const idx = this.steps.findIndex(
+      (s: any) => s.route === logicalRoute
+    );
+
+    return idx >= 0 ? idx : 0;
+  }
+
+
 
   isActive(route: string) {
     return this.router.url.includes(route);
   }
 
-  // goToStep(route: string) {
-  //   this.router.navigate(['/loanform', route]);
-  // }
 
-
-  canNavigateTo1(index: number): boolean {
-    const currentIdx = this.currentIndex;
-    return index <= currentIdx + 1;
-  }
   canNavigateTo(index: number): boolean {
     const currentIdx = this.currentIndex;
 
@@ -134,22 +148,92 @@ export class Loanstepper implements OnInit {
     return index > this.currentIndex;
   }
 
+  isSubStepperDisabled(parentIndex: number, subIndex: number): boolean {
+    if (this.isUpcoming(parentIndex)) {
+      return true;
+    }
 
-  openEducationSubStep(sub: any, event: Event) {
-    event.stopPropagation();
+    if (!this.activeQualificationId) {
+      return subIndex !== 0;
+    }
 
-    this.activeQualificationId = sub.id;
+    const parentStep = this.steps[parentIndex];
+    if (!parentStep?.children) return false;
 
-    this.router.navigate(['/loanform/educationinfo'], {
-      queryParams: {
-        applicantId: this.applicantId,
-        applicationId: this.applicationId,
-        custName: this.custName,
-        custARN: this.custARN,
-        qualificationId: sub.id
-      }
-    });
+    console.log(parentStep.children)
+    const activeIndex = parentStep.children.findIndex(
+      (c: any) => this.normalizeQualification(c.label) === this.activeQualificationId
+    );
+
+    return subIndex > activeIndex;
   }
 
 
+
+  openEducationSubStep(sub: any, event: Event) {
+    event.stopPropagation();
+    const stepKey = this.normalizeQualification(sub.label);
+    this.activeQualificationId = stepKey;
+
+    // this.router.navigate(['/loanform/educationinfo'], {
+    //   queryParams: {
+    //     applicantId: this.applicantId,
+    //     applicationId: this.applicationId,
+    //     custName: this.custName,
+    //     custARN: this.custARN,
+    //     qualificationId: sub.id,
+    //      qualificationlabel: sub.label,
+    //   },
+    //   queryParamsHandling: 'merge'
+    // });
+
+
+
+
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: {
+        qualificationlabel: stepKey,
+        qualificationId: sub.id
+      },
+      queryParamsHandling: 'merge'
+    });
+
+  }
+
+
+
+  normalizeQualification(name: string): string {
+    const lower = name.toLowerCase();
+
+    // School
+    if (lower === '10th') return '10th';
+    if (lower === '12th') return '12th';
+
+    // Diploma
+    if (lower.includes('diploma') || (lower.includes('diploma')&& lower.includes('10'))) return 'diploma10';
+    if (lower.includes('diploma') || ( lower.includes('diploma')&& lower.includes('12'))) return 'diploma12';
+
+    if (lower.includes('others') && lower.includes('after 12th')) return 'others12';
+    if (lower.includes('others') && lower.includes('diploma')) return 'othersdiploma';
+
+
+    // UG
+    if (lower.includes('undergraduate')) return 'ug';
+    // PG
+    if (lower.includes('postgraduate')) return 'pg';
+
+
+
+
+    // IELTS / PTE
+    if (lower.includes('ielts') || lower.includes('pte')) return 'ielts';
+
+    // Offer letter / Others
+    if (lower.includes('offer')) return 'offerletter';
+    if (lower.includes('others')) return 'others';
+
+    // console.warn('Unknown qualification:', name);
+    return 'others';
+  }
 }

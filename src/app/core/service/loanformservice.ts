@@ -285,6 +285,21 @@ setValues(isAsset?: boolean, isIncome?: boolean, issalaried?: boolean) {
 
     );
   }
+
+   getInstitutes(): Observable<ApiResponse<any>> {
+    return this.http.get<ApiResponse<any>>(
+      `${this.baseUrl}/v1/masters/institute-names`,
+
+    );
+  }
+   getAllCities(): Observable<ApiResponse<any>> {
+    return this.http.get<ApiResponse<any>>(
+      `${this.baseUrl}/v1/cities`,
+
+    );
+  }
+  
+
    getselectedEducation(data:string): Observable<ApiResponse<any>> {
     return this.http.get<ApiResponse<any>>(
       `${this.baseUrl}/v1/masters/qualifications/${data}`,

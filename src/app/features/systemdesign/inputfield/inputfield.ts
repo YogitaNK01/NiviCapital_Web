@@ -18,11 +18,11 @@ import { Buttons } from "../buttons/buttons";
   ]
 })
 export class Inputfield implements ControlValueAccessor {
-  // ✅ Text inputs
+  // Text inputs
   @Input() label: string = '';
   @Input() helpTextValue: string = '';
 
-  // ✅ Visibility toggles
+  // Visibility toggles
   @Input() showLabel: boolean = true;
   @Input() showHelpText: boolean = true;
 
@@ -49,6 +49,11 @@ export class Inputfield implements ControlValueAccessor {
   @Input() readonly: boolean = false;
 
   @Input() suffix: string = '';
+  
+@Input() min?: number;
+@Input() max?: number;
+@Input() step?: number;
+@Input() decimalPlaces?: number; 
 
   // NEW output
   @Output() rightButtonClick = new EventEmitter<void>();
@@ -83,6 +88,26 @@ export class Inputfield implements ControlValueAccessor {
   }
 
   onInputChange(value: string): void {
+
+    
+
+  if (this.type === 'number' && value !== '') {
+    let num = Number(value);
+
+    if (isNaN(num)) return;
+
+    if (this.decimalPlaces !== undefined) {
+      const regex = new RegExp(
+        `^\\d+(\\.\\d{0,${this.decimalPlaces}})?$`
+      );
+      if (!regex.test(value)) return;
+    }
+
+    if (this.min !== undefined && num < this.min) return;
+    if (this.max !== undefined && num > this.max) return;
+  }
+
+
     this.value = value;
     this.onChange(value);
     this.valueChange.emit(value);

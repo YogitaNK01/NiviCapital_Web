@@ -8,7 +8,7 @@
       active: isActive(s.route),
       completed: isCompleted(i),
       upcoming: isUpcoming(i)
-    }" (click)="canNavigateTo(i) && goToStep(s.route, i)">
+    }" (click)=" canNavigateTo(i) && goToStep(s.route, i)">
       <!-- (click)="!isUpcoming(i) && goToStep(s.route)" -->
 
       <!-- <div class="circle">{{ i + 1 | number:'2.0' }}</div> -->
@@ -26,12 +26,22 @@
         <div class="title text-body-1">{{ s.label }}</div>
 
 
+       
+
         <div *ngIf="s.children?.length" class="sub-stepper">
-          <div *ngFor="let sub of s.children" class="sub-step title text-body-1"
-            [class.active]="activeQualificationId === sub.id" (click)="openEducationSubStep(sub, $event)">
-            {{ sub.label }} 
-          </div>
-        </div>
+  <div
+    *ngFor="let sub of s.children; let subIndex = index"
+    class="sub-step title text-body-1"
+    [ngClass]="{
+      active: activeQualificationId === normalizeQualification(sub.label),
+      disabled: isSubStepperDisabled(i, subIndex)
+    }"
+    (click)="!isSubStepperDisabled(i, subIndex) && openEducationSubStep(sub, $event)"
+  >
+    {{ sub.label }}
+  </div>
+</div>
+
 
       </div>
 

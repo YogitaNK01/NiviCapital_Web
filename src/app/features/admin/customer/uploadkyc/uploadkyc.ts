@@ -127,7 +127,7 @@ export class Uploadkyc implements OnDestroy {
 
     this.msgBox.open({
       title: 'Are you sure want to go to Dashboard?',
-      message: '',
+      message: ``,
       showCancel: true,
       onOk: () => {
         this.prevstep.emit();

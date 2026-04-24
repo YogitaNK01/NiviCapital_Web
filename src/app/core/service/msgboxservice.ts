@@ -1,6 +1,10 @@
 import { Injectable,ApplicationRef,ComponentRef,EnvironmentInjector,createComponent } from '@angular/core';
 import { Messagebox } from '../../features/systemdesign/messagebox/messagebox';
 
+export interface SectionComparison {
+  currentSections: string[];
+  addingSection: string;
+}
 @Injectable({
   providedIn: 'root'
 })
@@ -21,7 +25,8 @@ export class Msgboxservice {
     cancelText?: string;
     onOk?: () => void;
     onCancel?: () => void;
-    
+    type?: 'default' | 'unsaved' | 'warning' | 'error' | 'success';
+    comparisonData?: SectionComparison;
   }) {
     this.close();
 
@@ -35,6 +40,8 @@ export class Msgboxservice {
     instance.showCancel = config.showCancel ?? true;
     instance.okText = config.okText ?? 'OK';
     instance.cancelText = config.cancelText ?? 'Cancel';
+    instance.type = config.type ?? 'default';
+    instance.comparisonData = config.comparisonData;
 
     instance.ok.subscribe(() => {
       config.onOk?.();

@@ -1,6 +1,6 @@
 <div class="app-container">
 
-  <!-- ✅ Sidebar Overlay for mobile -->
+  <!-- Sidebar Overlay for mobile -->
   <div class="sidebar-overlay" [class.show]="sidebarOpen" *ngIf="isMobile" (click)="toggleSidebar()"></div>
 
 
@@ -23,8 +23,8 @@
         </span>
         <span class="nav-label">{{ item.label }}</span>
         <span class="nav-icon-arrow">
-          <img *ngIf="sidebarOpen" src="/assets/images/icons/arrow-down.svg" alt="Expand" class="arrow-icon" height="15"
-            width="15" />
+          <!-- <img *ngIf="sidebarOpen" src="/assets/images/icons/arrow-down.svg" alt="Expand" class="arrow-icon" height="15"
+            width="15" /> -->
         </span>
       </a>
     </nav>
