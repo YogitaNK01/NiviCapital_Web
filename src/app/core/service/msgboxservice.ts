@@ -27,6 +27,7 @@ export class Msgboxservice {
     onCancel?: () => void;
     type?: 'default' | 'unsaved' | 'warning' | 'error' | 'success';
     comparisonData?: SectionComparison;
+    mode?: 'comparison' | 'required' | 'simple';
   }) {
     this.close();
 
@@ -42,11 +43,14 @@ export class Msgboxservice {
     instance.cancelText = config.cancelText ?? 'Cancel';
     instance.type = config.type ?? 'default';
     instance.comparisonData = config.comparisonData;
+     instance.mode = config.mode ?? 'simple';
 
-    instance.ok.subscribe(() => {
-      config.onOk?.();
-      this.close();
-    });
+   
+ instance.ok.subscribe(() => {
+    this.close();          
+    config.onOk?.();      
+  });
+
 
     instance.cancel.subscribe(() => {
       config.onCancel?.();

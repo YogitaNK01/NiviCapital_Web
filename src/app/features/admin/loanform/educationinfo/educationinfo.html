@@ -3,60 +3,49 @@
 
     @switch (activeEducation) {
     @case ('10th') {
-    <app-edusection [group]="educationForms['10th']" title="10th std" sectionType="school" 
-  [stepKey]="activeEducation"
-    [uploadedFiles]="uploadedFiles"
-    (fileSelected)="onFileSelectedFromSection($event)">
-  </app-edusection>
+    <app-edusection [group]="educationForms['10th']" title="10th std" sectionType="school" [stepKey]="activeEducation"
+        [uploadedFiles]="uploadedFiles" (fileSelected)="onFileSelectedFromSection($event)">
+    </app-edusection>
     }
 
     @case ('12th') {
-    <app-edusection [group]="educationForms['12th']" title="12th std" sectionType="school"
-    [stepKey]="activeEducation"
-    [uploadedFiles]="uploadedFiles"
-    (fileSelected)="onFileSelectedFromSection($event)">
+    <app-edusection [group]="educationForms['12th']" title="12th std" sectionType="school" [stepKey]="activeEducation"
+        [uploadedFiles]="uploadedFiles" (fileSelected)="onFileSelectedFromSection($event)">
     </app-edusection>
     }
 
     @case ('diploma10') {
-    <app-edusection [group]="educationForms.diploma10" title="Diploma (After 10th)" sectionType="diploma" 
-    [stepKey]="activeEducation"
-    [uploadedFiles]="uploadedFiles"
-    (fileSelected)="onFileSelectedFromSection($event)"/>
+    <app-edusection [group]="educationForms.diploma10" title="Diploma (After 10th)" sectionType="diploma"
+        [stepKey]="activeEducation" [uploadedFiles]="uploadedFiles"
+        (fileSelected)="onFileSelectedFromSection($event)" />
     }
 
     @case ('diploma12') {
-    <app-edusection [group]="educationForms.diploma12" title="Diploma (After 12th)" sectionType="diploma" 
-    [stepKey]="activeEducation"
-    [uploadedFiles]="uploadedFiles"
-    (fileSelected)="onFileSelectedFromSection($event)"/>
+    <app-edusection [group]="educationForms.diploma12" title="Diploma (After 12th)" sectionType="diploma"
+        [stepKey]="activeEducation" [uploadedFiles]="uploadedFiles"
+        (fileSelected)="onFileSelectedFromSection($event)" />
     }
 
     @case ('ug') {
-    <app-edusection [group]="educationForms.ug" title="Undergraduate" sectionType="bachelors" 
-    [stepKey]="activeEducation"
-    [uploadedFiles]="uploadedFiles"
-    (fileSelected)="onFileSelectedFromSection($event)"/>
+    <app-edusection [group]="educationForms.ug" title="Undergraduate" sectionType="bachelors"
+        [stepKey]="activeEducation" [uploadedFiles]="uploadedFiles"
+        (fileSelected)="onFileSelectedFromSection($event)" />
     }
 
     @case ('pg') {
-    <app-edusection [group]="educationForms.pg" title="Postgraduate" sectionType="bachelors"
-    [stepKey]="activeEducation"
-    [uploadedFiles]="uploadedFiles"
-    (fileSelected)="onFileSelectedFromSection($event)" />
+    <app-edusection [group]="educationForms.pg" title="Postgraduate" sectionType="bachelors" [stepKey]="activeEducation"
+        [uploadedFiles]="uploadedFiles" (fileSelected)="onFileSelectedFromSection($event)" />
     }
 
     @case ('others12') {
     <app-edusection [group]="educationForms.others12" title="Others (After 12th)" sectionType="others"
-    [stepKey]="activeEducation"
-    [uploadedFiles]="uploadedFiles"
-    (fileSelected)="onFileSelectedFromSection($event)" />
+        [stepKey]="activeEducation" [uploadedFiles]="uploadedFiles"
+        (fileSelected)="onFileSelectedFromSection($event)" />
     }
     @case ('othersdiploma') {
     <app-edusection [group]="educationForms.othersdiploma" title="Others (After Diploma)" sectionType="others"
-    [stepKey]="activeEducation"
-    [uploadedFiles]="uploadedFiles"
-    (fileSelected)="onFileSelectedFromSection($event)" />
+        [stepKey]="activeEducation" [uploadedFiles]="uploadedFiles"
+        (fileSelected)="onFileSelectedFromSection($event)" />
     }
 
     @case ('ielts') {
@@ -81,33 +70,50 @@
 
             <div class="col-lg-6 col-sm-12">
                 <app-inputfield type="text" [required]="true" label="Score" placeholder="Enter Score"
-                   [formControl]="educationForms['ielts'].get('score')">
+                    [formControl]="educationForms['ielts'].get('score')" (input)="main.restrictInput($event, 'number')">
                 </app-inputfield>
+                 <div class="text-danger" *ngIf="educationForms['ielts'].get('score').touched && educationForms['ielts'].get('score').invalid">
+
+                        <div *ngIf="educationForms['ielts'].get('score').errors?.['required']">
+                            score is required
+                        </div>
+
+                        
+
+                        <div *ngIf="educationForms['ielts'].get('score').errors?.['min']">
+                            Minimum 4 score required
+                        </div>
+
+                        <div *ngIf="educationForms['ielts'].get('score').errors?.['max']">
+                            Maximum 10 score allowed
+                        </div>
+
+                    </div>
+
             </div>
 
             <div class="col-lg-6 col-sm-12">
-               @if (hasLocalFile(activeEducation,'ielts')) {
-                        <label class="text-label">Passing / Leaving Certificate <span
-                                class="text-danger">*</span></label>
-                        <div class="addcust-img-box mt-2">
-                            <p class="text-label">{{ getLocalFileName(activeEducation,'ielts') }}</p>
-                            <div class="icons">
-                                <span class="view" (click)="viewLocal(activeEducation,'ielts')">
-                                    <img src="/assets/images/icons/eyered.svg" alt="view">
-                                </span>
-                                <span class="download" (click)="downloadLocal(activeEducation,'ielts' )"><img
-                                        src="/assets/images/icons/import-red.svg" alt="Download"></span>
-                                <span (click)="removeLocal(activeEducation,'ielts')">
-                                    <img src="/assets/images/icons/close.svg" alt="remove">
-                                </span>
-                            </div>
-                        </div>
+                @if (hasLocalFile(activeEducation,'ielts')) {
+                <label class="text-label">Passing / Leaving Certificate <span class="text-danger">*</span></label>
+                <div class="addcust-img-box mt-2">
+                    <p class="text-label">{{ getLocalFileName(activeEducation,'ielts') }}</p>
+                    <div class="icons">
+                        <span class="view" (click)="viewLocal(activeEducation,'ielts')">
+                            <img src="/assets/images/icons/eyered.svg" alt="view">
+                        </span>
+                        <span class="download" (click)="downloadLocal(activeEducation,'ielts' )"><img
+                                src="/assets/images/icons/import-red.svg" alt="Download"></span>
+                        <span (click)="removeLocal(activeEducation,'ielts')">
+                            <img src="/assets/images/icons/close.svg" alt="remove">
+                        </span>
+                    </div>
+                </div>
 
-                        } @else{
-                 <app-uploadbtn [config]="basicConfig" [uploadViaApi]="false" [required]="true"
-                                label="Upload Certificate " (fileChange)="onFileChange('ielts', 'ielts', $event)">
-                            </app-uploadbtn>
-                        }
+                } @else{
+                <app-uploadbtn [config]="basicConfig" [uploadViaApi]="false" [required]="true"
+                    label="Upload Certificate " (fileChange)="onFileChange('ielts', 'ielts', $event)">
+                </app-uploadbtn>
+                }
             </div>
         </div>
     </div>
@@ -132,60 +138,36 @@
 
         <div class="row d-flex align-items-start flex-column education-box">
             <div class="col-lg-4 col-sm-12">
-                 @if (hasLocalFile(activeEducation,'offerletter')) {
-                        <label class="text-label">Passing / Leaving Certificate <span
-                                class="text-danger">*</span></label>
-                        <div class="addcust-img-box mt-2">
-                            <p class="text-label">{{ getLocalFileName(activeEducation,'offerletter') }}</p>
-                            <div class="icons">
-                                <span class="view" (click)="viewLocal(activeEducation,'offerletter')">
-                                    <img src="/assets/images/icons/eyered.svg" alt="view">
-                                </span>
-                                <span class="download" (click)="downloadLocal(activeEducation,'offerletter' )"><img
-                                        src="/assets/images/icons/import-red.svg" alt="Download"></span>
-                                <span (click)="removeLocal(activeEducation,'offerletter')">
-                                    <img src="/assets/images/icons/close.svg" alt="remove">
-                                </span>
-                            </div>
-                        </div>
+                @if (hasLocalFile(activeEducation,'offerletter')) {
+                <label class="text-label">Passing / Leaving Certificate <span class="text-danger">*</span></label>
+                <div class="addcust-img-box mt-2">
+                    <p class="text-label">{{ getLocalFileName(activeEducation,'offerletter') }}</p>
+                    <div class="icons">
+                        <span class="view" (click)="viewLocal(activeEducation,'offerletter')">
+                            <img src="/assets/images/icons/eyered.svg" alt="view">
+                        </span>
+                        <span class="download" (click)="downloadLocal(activeEducation,'offerletter' )"><img
+                                src="/assets/images/icons/import-red.svg" alt="Download"></span>
+                        <span (click)="removeLocal(activeEducation,'offerletter')">
+                            <img src="/assets/images/icons/close.svg" alt="remove">
+                        </span>
+                    </div>
+                </div>
 
-                        } @else{
-                 <app-uploadbtn [config]="basicConfig" [uploadViaApi]="false" [required]="true"
-                                label="Offer Letter" (fileChange)="onFileChange('offerletter', 'offerletter', $event)">
-                            </app-uploadbtn>
-                        }
+                } @else{
+                <app-uploadbtn [config]="basicConfig" [uploadViaApi]="false" [required]="true" label="Offer Letter"
+                    (fileChange)="onFileChange('offerletter', 'offerletter', $event)">
+                </app-uploadbtn>
+                }
 
-               
+
             </div>
         </div>
     </div>
     }
 
     @default {
-    <!-- <ng-template #ieltsTemplate let-i="index">
-        <div class="row  d-flex  pt-4 ieltscls  ">
-            <div class="col-lg-4 col-sm-12">
-                <app-inputfield type="text" formControlName="score" [required]="true" label="Score"
-                    placeholder="Enter Score" helpText="Help text" name="Score">
-                </app-inputfield>
-            </div>
-            <div class="col-lg-4 col-sm-12">
-                <app-uploadbtn [config]="basicConfig" (fileChange)="onFileChange($event, 'score')" [required]="true"
-                    label="Upload Certificate">
-                </app-uploadbtn>
-            </div>
-        </div>
-    </ng-template>
 
-    <ng-template #offerletterTemplate let-i="index">
-        <div class="row  d-flex  align-items-start pt-4 common-details-box ">
-            <div class="col-lg-4 col-sm-12">
-                <app-uploadbtn [config]="basicConfig" (fileChange)="onFileChange($event, 'score')" [required]="true"
-                    label="Offer Letter">
-                </app-uploadbtn>
-            </div>
-        </div>
-    </ng-template> -->
     }
     }
 
@@ -204,13 +186,10 @@
         <div class="col-lg-4  d-flex justify-content-end">
             <app-buttons type="button" label="Back" class="btn btncustomClass" [outline]="true" (click)="back()">
             </app-buttons>
-            <app-buttons type="button" label="Next" class="btn btncustomClass" color="primary" (click)="next()" [disabled]="!canProceedToNext()">
+            <app-buttons type="button" label="Next" class="btn btncustomClass" color="primary" (click)="next()"
+                [disabled]="!canProceedToNext()">
             </app-buttons>
 
         </div>
     </div>
 </div>
-
-
-
-

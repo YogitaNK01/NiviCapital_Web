@@ -147,7 +147,7 @@ export class Educationinfo implements OnInit {
 
 
   constructor(private fb: FormBuilder, private stepperService: Loanstepperservice, private cd: ChangeDetectorRef, private formSvc: Loanformservice,
-    private route: ActivatedRoute, private router: Router, private msgbox: Msgboxservice) { }
+    private route: ActivatedRoute, private router: Router, private msgbox: Msgboxservice,public main:Main) { }
   ngOnInit(): void {
 
     this.route.queryParams.subscribe(params => {
@@ -178,7 +178,7 @@ export class Educationinfo implements OnInit {
       ug: this.createForm(),
       pg: this.createForm(),
       ielts: this.fb.group({
-        score: ['', Validators.required],
+        score: ['', [Validators.required,Validators.min(4),Validators.max(10)]],
         certificate: [null, Validators.required]
       }),
 

@@ -139,7 +139,7 @@ export class Edusection {
   selectedLocationID = '';
   selectedLocationLabel = '';
 
- 
+  isOtherEducation = false;
 
   constructor(private fb: FormBuilder, private stepperService: Loanstepperservice, private cd: ChangeDetectorRef, private route: ActivatedRoute,
     public main: Main, private msgBox: Msgboxservice, public loanformservice: Loanformservice) { }
@@ -205,16 +205,16 @@ export class Edusection {
       this.educationType = 'OTHER_AFTER_DIPLOMA';
     }
 
-    // this.group = this.fb.group({
+    this.group = this.fb.group({
 
     //   institutename: ['', Validators.required],
     //   passingyear: ['', Validators.required],
-    //   per_cgpa: ['', [Validators.required, this.percentageOrCgpaValidator()]],
+      per_cgpa: ['', [Validators.required, this.percentageOrCgpaValidator()]],
     //   location: ['', Validators.required],
     //   marksheet: ['', Validators.required],
     //   lc: ['', Validators.required],
 
-    // })
+    })
 
   }
 
@@ -229,8 +229,33 @@ export class Edusection {
     return this.educationType === 'DIPLOMA' || this.educationType === 'UNDERGRADUATE' || this.educationType === 'POSTGRADUATE';
   }
 
+percentageOrCgpaValidator() {
+  return (control: AbstractControl): ValidationErrors | null => {
+    const raw = control.value;
+    if (raw === null || raw === '') return null;
 
-  percentageOrCgpaValidator() {
+    const value = raw.toString();
+    const num = Number(value);
+
+    if (isNaN(num)) {
+      return { invalidNumber: true };
+    }
+
+    const isPercentage =
+      num >= 35 &&
+      num <= 100 &&
+      /^\d+(\.\d{1,2})?$/.test(value);
+
+    const isCgpa =
+      num >= 4 &&
+      num <= 10 &&
+      /^\d+(\.\d{1})?$/.test(value);
+
+    return isPercentage || isCgpa ? null : { invalidPerCgpa: true };
+  };
+}
+
+  percentageOrCgpaValidator1() {
     return (control: AbstractControl): ValidationErrors | null => {
       const value = control.value;
 
@@ -288,11 +313,16 @@ export class Edusection {
     this.selectedInstituteLabel = selected.map(s => s.label).join(', ');
     this.selectedInstituteID = selected.map(s => s.value).join(', ');
 
+
+    this.isOtherEducation = selected.some(
+      s => s.label.trim().toLowerCase() === 'other'
+    )
+
     this.group.get('institutename')?.setValue(this.selectedInstituteID);
 
   }
 
-  
+
   cityNames() {
     this.loanformservice.getAllCities().subscribe((res: any) => {
       const list = res.data ?? res;
@@ -304,7 +334,7 @@ export class Edusection {
       }));
     });
   }
-    SelectedCity(values: string | string[]) {
+  SelectedCity(values: string | string[]) {
     const ids = Array.isArray(values) ? values : [values];
 
     const selected = this.selectlocation.filter(s =>
@@ -444,10 +474,18 @@ export class Edusection {
   }
 
   removeLocalFile(doc: DocType, index?: number): void {
-    const key = this.buildKey(doc, index);
+    this.msgBox.open({
+      title: 'Are you sure want to Remove',
+      message: ``,
+      showCancel: true,
+      onOk: () => {
 
-    this.uploadedFiles[key] = null;
-    this.uploadedFiles = { ...this.uploadedFiles };
+        const key = this.buildKey(doc, index);
+
+        this.uploadedFiles[key] = null;
+        this.uploadedFiles = { ...this.uploadedFiles };
+      }
+    })
   }
   // ----------------------------------------------------------------------------
   onUploadStarted(
@@ -671,7 +709,7 @@ export class Edusection {
       index: doc.id,
       file: result.file,
       gropudata: {
-        title: doc.title  
+        title: doc.title
       }
     });
   }
@@ -699,7 +737,7 @@ export class Edusection {
   }
   removeOtherDocument(doc: { id: number; title: string; file: File | null }): void {
     this.msgBox.open({
-    
+
       title: 'Are you sure want to Remove',
       message: ``,
       showCancel: true,

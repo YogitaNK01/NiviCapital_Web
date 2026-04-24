@@ -306,8 +306,16 @@ setValues(isAsset?: boolean, isIncome?: boolean, issalaried?: boolean) {
 
     );
   }
-}
 
+ 
+  selectedqualification(data: any, id: string): Observable<ApiResponse<any>> {
+
+    return this.http.post<ApiResponse<any>>(
+      `${this.baseUrl}/v1/los/applications/${id}/save-last-qualification-details`,
+      data
+    );
+  }
+}
 
 // saveDraft() {
 //   const data = this.masterForm.value;

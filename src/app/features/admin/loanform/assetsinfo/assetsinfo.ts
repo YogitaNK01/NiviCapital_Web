@@ -1338,7 +1338,10 @@ onAssetChange(values: string | string[]): void {
     //  GOLD
     if (this.selectedAssets.includes('Gold')) {
       const val = form.gold?.goldvalue;
-      !val ? markInvalid('gold.goldvalue') : addItem('GOLD', val);
+      
+      !val ? markInvalid('gold.goldvalue') : addItem('GOLD', val, {
+        assetType :'GOLD'
+      });
     }
 
     //  LIQUID
@@ -1346,24 +1349,25 @@ onAssetChange(values: string | string[]): void {
       const cash = form.liquidAssets?.cashinhand;
       const savings = form.liquidAssets?.savingbalance;
 
-      !cash ? markInvalid('liquidAssets.cashinhand') : addItem('LIQUID_CASH', cash);
-      !savings ? markInvalid('liquidAssets.savingbalance') : addItem('LIQUID_CASH', savings);
+      !cash ? markInvalid('liquidAssets.cashinhand') : addItem('LIQUID_CASH', cash,{assetType :'Cash In Hand'} );
+      !savings ? markInvalid('liquidAssets.savingbalance') : addItem('LIQUID_CASH', savings,{assetType :'Savings Account Balance (INR)'});
     }
 
     //  PROPERTY (FormArray)
     if (this.selectedAssets.includes('Property/Land Assets')) {
       const arr = this.assetsForm.get('properties') as FormArray;
 
-      arr.controls.forEach((ctrl: any) => {
+      arr.controls.forEach((ctrl: any,index: number) => {
         if (ctrl.invalid) {
           ctrl.markAllAsTouched();
           invalid = true;
           console.log('properties true:');
         } else {
           addItem('PROPERTY', ctrl.value.marketval, {
-            propertyType: ctrl.value.propertytype,
+            propertyId: ctrl.value.propertytype,
             ownershipType: ctrl.value.ownershiptype,
-            location: ctrl.value.location
+            location: ctrl.value.location,
+            assetType :`Property ${index + 1}`
           });
         }
       });
@@ -1392,7 +1396,8 @@ onAssetChange(values: string | string[]): void {
             addItem('FIXED_DEPOSIT', ctrl.value.bankamt, {
               bankId: ctrl.value.bankname,
               ...(this.isOtherSelected(ctrl) && { title: ctrl.value.title }),
-              maturityDate: (ctrl.value.maturitydate).format('YYYY-MM-DD')
+              maturityDate: (ctrl.value.maturitydate).format('YYYY-MM-DD'),
+              assetType : `Fixed Deposit ${index + 1}`
             });
           }
         });
@@ -1410,8 +1415,6 @@ onAssetChange(values: string | string[]): void {
         invalid = true;
         // return;
       } else {
-
-
 
         arr.controls.forEach((ctrl: any) => {
           ctrl.markAllAsTouched();
@@ -1431,7 +1434,7 @@ onAssetChange(values: string | string[]): void {
             });
           }
           else {
-            addItem(type, amount);
+            addItem(type, amount,{assetType:type});
           }
         });
       }
@@ -1442,7 +1445,7 @@ onAssetChange(values: string | string[]): void {
     if (this.selectedAssets.includes('other')) {
       const arr = this.assetsForm.get('otherassets') as FormArray;
 
-      arr.controls.forEach((ctrl: any) => {
+      arr.controls.forEach((ctrl: any,) => {
         if (ctrl.invalid) {
           ctrl.markAllAsTouched();
           invalid = true;

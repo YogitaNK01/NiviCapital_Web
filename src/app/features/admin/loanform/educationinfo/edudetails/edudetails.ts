@@ -132,12 +132,47 @@ export class Edudetails {
   private getCurrentSections(): string[] {
     if (!this.educationdetails) return [];
 
-    return this.educationdetails.map((d: any) =>
+    const sections = this.educationdetails.map((d: any) =>
       d.qualificationName.includes('Others')
         ? d.qualificationName
         : d.qualificationName.split('(')[0].trim()
     );
+
+    sections.push("IELTS / PTE")
+    sections.push("University Offer Letter")
+    return sections;
   }
+
+  private getSectionRequiredList(newId: string): string[] {
+    const academic = this.getCurrentSections();
+
+    const filteredAcademic = academic.filter(
+      sec => sec !== 'IELTS / PTE' && sec !== 'University Offer Letter'
+    );
+
+    const adding = this.getAddingSectionLabel(newId);
+
+    const result: string[] = [];
+
+
+    filteredAcademic.forEach(sec => {
+      if (!result.includes(sec)) {
+        result.push(sec);
+      }
+    });
+
+
+    if (adding && !result.includes(adding)) {
+      result.push(adding);
+    }
+
+    // ✅ ALWAYS LAST
+    result.push('IELTS / PTE');
+    result.push('University Offer Letter');
+
+    return result;
+  }
+
 
   private getHighestQualification(): string {
     if (!this.educationdetails?.length) return '';
@@ -146,6 +181,7 @@ export class Edudetails {
       .qualificationName.split('(')[0]
       .trim();
   }
+
   private getAddingSectionLabel(newId: string): string {
     return (
       this.seleactqualification.find(q => q.value === newId)?.label || ''
@@ -162,12 +198,13 @@ export class Edudetails {
     }
 
     if (newId !== this.previousEducationId) {
-      
-    const addingLabel = this.getAddingSectionLabel(newId);
+
+      const addingLabel = this.getAddingSectionLabel(newId);
 
       this.msgbox.open({
         type: 'warning',
         title: 'Are you sure you want to change this?',
+        mode: 'comparison',
         message: `You originally selected ${this.getHighestQualification()} as your last qualification.<br>Adding a ${addingLabel} section will update your highest qualification.`,
         okText: 'Yes, Update',
         cancelText: 'No',
@@ -178,9 +215,9 @@ export class Edudetails {
 
 
         onOk: () => {
-          this.previousEducationId = newId;   
-          this.applyEducationChange(newId);
-          
+          this.openPostUpdateInfoPopup(newId, addingLabel);
+
+
         },
         onCancel: () => {
           this.basicform.patchValue({
@@ -191,6 +228,38 @@ export class Edudetails {
     }
   }
 
+  private openPostUpdateInfoPopup(newId: string, addingLabel: string) {
+    this.msgbox.open({
+      type: 'warning',
+      title: '',
+      mode: 'required',
+      message: `
+      You have updated your selection.<br>
+The following sections now need to be filled.
+    `,
+      okText: 'Proceed',
+      cancelText: 'No',
+      showCancel: true,
+
+      comparisonData: {
+        currentSections: this.getSectionRequiredList(newId),
+        addingSection: addingLabel
+      },
+
+
+      onOk: () => {
+        this.previousEducationId = newId;
+        this.applyEducationChange(newId);
+        this.navigateToFirstEducationStep(newId);
+      },
+
+      onCancel: () => {
+        this.basicform.patchValue({
+          qualification: this.previousEducationId
+        });
+      }
+    });
+  }
   private applyEducationChange(qualificationId: string) {
     this.selectedID = qualificationId;
 
@@ -201,6 +270,37 @@ export class Edudetails {
       this.stepperService.resetEducationSubSteps();
 
       this.stepperService.setEducationSubSteps(this.educationdetails);
+    });
+  }
+  private getRequiredSectionsAfterChange(newId: string): string[] {
+    const label = this.getAddingSectionLabel(newId).toLowerCase();
+
+    const base = ['10th std', '12th std'];
+
+    if (label.includes('diploma')) {
+      return [...base, 'Diploma'];
+    }
+
+    if (label.includes('undergraduate')) {
+      return [...base, 'Undergraduate'];
+    }
+
+    if (label.includes('postgraduate')) {
+      return [...base, 'Postgraduate'];
+    }
+
+    return base;
+  }
+  private navigateToFirstEducationStep(newId: string) {
+    const stepKey = this.normalizeQualification(
+      this.getAddingSectionLabel(newId)
+    );
+
+    this.router.navigate(['/loanform/educationinfo'], {
+      queryParams: {
+        qualificationlabel: stepKey
+      },
+      queryParamsHandling: 'merge'
     });
   }
 
@@ -219,15 +319,10 @@ export class Edudetails {
     if (lower.includes('others') && lower.includes('after 12th')) return 'others12';
     if (lower.includes('others') && lower.includes('diploma')) return 'othersdiploma';
 
-
-
     // UG
     if (lower.includes('undergraduate')) return 'ug';
     // PG
     if (lower.includes('postgraduate') && lower.includes('undergraduate')) return 'pg';
-
-
-
 
     // IELTS / PTE
     if (lower.includes('ielts') || lower.includes('pte')) return 'ielts';
@@ -277,7 +372,11 @@ export class Edudetails {
     this.selectedInstituteLabel = selected.map(s => s.label).join(', ');
     this.selectedInstituteID = selected.map(s => s.value).join(', ');
 
-    this.isOtherEducation = this.selectedInstituteLabel.toLowerCase().includes('other');
+    // this.isOtherEducation = this.selectedInstituteLabel.toLowerCase().includes('other');
+
+    this.isOtherEducation = selected.some(
+      s => s.label.trim().toLowerCase() === 'other'
+    )
 
 
   }
@@ -303,16 +402,38 @@ export class Edudetails {
 
     const qualificationId = this.basicform.value.qualification;
 
-    this.router.navigate(['educationinfo'], {
-      relativeTo: this.route,
-      queryParams: {
-        qualificationId: qualificationId,
-        applicantId: this.applicantId,
-        applicationId: this.applicationId,
-        custName: this.custName,
-        custARN: this.custARN,
+    let input =
+
+    {
+      "applicantId": this.applicantId,
+      "lastQualificationId": this.basicform.value.qualification,
+      "lastInstitutionId": this.basicform.value.institute
+    }
+
+    this.formSvc.selectedqualification(input, this.applicationId).subscribe({
+      next: (res) => {
+        console.log(res);
+        if (res.status == "success") {
+          this.router.navigate(['educationinfo'], {
+            relativeTo: this.route,
+            queryParams: {
+              qualificationId: qualificationId,
+              applicantId: this.applicantId,
+              applicationId: this.applicationId,
+              custName: this.custName,
+              custARN: this.custARN,
+            }
+          });
+        }
+
+      },
+      error: (err) => {
+        console.error("error msg", err);
       }
+
     });
+
+
 
   }
 }

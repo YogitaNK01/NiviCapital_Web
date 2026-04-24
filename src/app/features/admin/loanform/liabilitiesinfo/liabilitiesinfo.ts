@@ -96,6 +96,8 @@ export class Liabilitiesinfo {
   selectedLenderIds: string[] = [];
   selectedlendername!: string;
 
+  loanerror:boolean=false;
+
   constructor(private fb: FormBuilder, public main: Main, private route: ActivatedRoute, private msgBox: Msgboxservice,
     private stepperService: Loanstepperservice, private formSvc: Loanformservice, private cd: ChangeDetectorRef) { }
 
@@ -987,6 +989,13 @@ export class Liabilitiesinfo {
   }
   onLoanChange(values: string | string[]): void {
     const groups = Array.isArray(values) ? values : [values];
+
+    
+ if (values && (Array.isArray(values) ? values.length : true)) {
+    this.loanerror = false;
+  }
+
+
     this.selectedloantype = groups;
 
     const loanArray = this.loans;
@@ -1231,7 +1240,7 @@ export class Liabilitiesinfo {
     console.log("form data Assets:", form);
     console.log('selectedliabilities:', this.selectedliabilities);
     const items: any[] = [];
-
+    this.loanerror = false;
     let invalid = false;
 
     const addItem = (code: string, value: any, extra: any = null) => {
@@ -1250,6 +1259,7 @@ export class Liabilitiesinfo {
     const markInvalid = (path: string) => {
       this.liabilityForm.get(path)?.markAsTouched();
       invalid = true;
+      
     };
 
     //  EXISTING LOANS
@@ -1258,6 +1268,10 @@ export class Liabilitiesinfo {
 
       if (this.loans.length === 0) {
         invalid = true;
+      
+        this.loanerror= true;
+      } else{
+        this.loanerror= false;
       }
 
       this.loans.controls.forEach((loan: any) => {
@@ -1271,7 +1285,8 @@ export class Liabilitiesinfo {
             ...(this.isOtherSelected(loan) && { title: loan.value.title }),
             outstandingBalanceInr: cleanAmount(loan.value.outstanding),
             emiAmountInr: cleanAmount(loan.value.emiamount),
-            remainingTenureMonths: loan.value.remtenure
+            remainingTenureMonths: loan.value.remtenure,
+            liabilityTypeText:loan.value.type
           });
         }
       });
@@ -1282,7 +1297,7 @@ export class Liabilitiesinfo {
     if (this.selectedliabilities.includes('CREDIT_CARD_OUTSTANDING')) {
       if (this.creditcard.length === 0) invalid = true;
 
-      this.creditcard.controls.forEach((card: any) => {
+      this.creditcard.controls.forEach((card: any,index:number) => {
         if (card.invalid) {
           card.markAllAsTouched();
           invalid = true;
@@ -1292,7 +1307,8 @@ export class Liabilitiesinfo {
             bankId: card.value.creditcardbankName,
             ...(this.isOtherSelectedcc(card) && { title: card.value.title }),
             outstandingBalanceInr: cleanAmount(card.value.ccoutstandingBalance),
-            creditLimitInr: cleanAmount(card.value.cccreditLimit)
+            creditLimitInr: cleanAmount(card.value.cccreditLimit),
+            liabilityTypeText:`CREDIT_CARD_OUTSTANDING ${index + 1}`
           });
         }
       });
@@ -1306,7 +1322,7 @@ export class Liabilitiesinfo {
     if (this.selectedliabilities.includes('BNPL')) {
       if (this.bnpl.length === 0) invalid = true;
 
-      this.bnpl.controls.forEach((bnpl: any) => {
+      this.bnpl.controls.forEach((bnpl: any,index:number) => {
         if (bnpl.invalid) {
           bnpl.markAllAsTouched();
           invalid = true;
@@ -1318,7 +1334,7 @@ export class Liabilitiesinfo {
             creditLimitInr: cleanAmount(bnpl.value.creditLimit),
             monthlyEmiInr: cleanAmount(bnpl.value.monthlyEMI),
             ...(this.isOtherSelectedbnpl(bnpl) && { title: bnpl.value.title }),
-
+            liabilityTypeText:`BNPL ${index + 1}`
           });
         }
       });
@@ -1328,16 +1344,17 @@ export class Liabilitiesinfo {
     if (this.selectedliabilities.includes('OTHER_LIABILITY')) {
       if (this.other.length === 0) invalid = true;
 
-      this.other.controls.forEach((other: any) => {
+      this.other.controls.forEach((other: any,index:number) => {
         if (other.invalid) {
           other.markAllAsTouched();
           invalid = true;
         } else {
           items.push({
             liabilityType: "OTHER_LIABILITY",
-            liabilityTypeText: other.value.LiabilityType,
+            liabilityTypeText: other.value.LiabilityType + (index + 1),
             amountInr: cleanAmount(other.value.libamount),
-            monthlyRepaymentInr: cleanAmount(other.value.MonthlyRepaymentLimit)
+            monthlyRepaymentInr: cleanAmount(other.value.MonthlyRepaymentLimit),
+
           });
         }
       });

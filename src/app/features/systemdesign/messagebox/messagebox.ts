@@ -35,8 +35,7 @@ export class Messagebox {
   @Output() ok = new EventEmitter<void>();
   @Output() cancel = new EventEmitter<void>();
 
-  // @Input() comparisonData?: SectionComparison;
-  
+  @Input() mode: 'comparison' | 'required' | 'simple' = 'simple';
 @Input() comparisonData?: {
   currentSections: string[];
   addingSection: string;
@@ -128,8 +127,12 @@ private normalizeSectionLabel(label: string): string {
 }
 
  get showComparison(): boolean {
-    return !!this.comparisonData;
-  }
+  return this.mode === 'comparison';
+}
+
+get showRequired(): boolean {
+  return this.mode === 'required';
+}
 
   normalizeQualification(name: string): string {
     const lower = name.toLowerCase();

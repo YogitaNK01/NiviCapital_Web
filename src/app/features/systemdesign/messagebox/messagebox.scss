@@ -112,6 +112,7 @@
 .hrclass {
   background: $neutral-300;
   margin: 24px 0;
+  opacity: .050!important;
 }
 
 .comparison-container {
@@ -149,4 +150,11 @@
 
 .new-section {
   font-weight: 600;
+}
+
+.section-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);  
+  column-gap: 24px;
+  row-gap: 12px;
 }

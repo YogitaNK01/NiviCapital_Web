@@ -29,7 +29,7 @@
                 <div class="row g-3">
                     <div [ngClass]="{'col-6': isOtherQualification, 'col-12': !isOtherQualification  }">
 
-                        <app-dropdown [options]="seleactqualification" [placeholder]="'Last Qualification'"
+                        <app-dropdown [options]="seleactqualification" [placeholder]="'Select Last Qualification'"
                             [required]="true" [searchable]="true" [label]="qualification"
                             formControlName="qualification" name="qualification"
                             (selectedValueChange)="Selectededucation($event);">
@@ -54,7 +54,7 @@
 
 
 
-                        <app-dropdown [options]="seleactInstitute" [placeholder]="'Last Qualification'"
+                        <app-dropdown [options]="seleactInstitute" [placeholder]="'Select Last Insitution'"
                             [required]="true" [searchable]="true" [label]="'Last Institution Name'"
                             formControlName="institute" name="institute"
                             (selectedValueChange)="SelectedInstitute($event);">

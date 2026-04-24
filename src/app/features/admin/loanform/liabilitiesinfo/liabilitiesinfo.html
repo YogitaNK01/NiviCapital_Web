@@ -108,6 +108,9 @@
                                 [avatarUrl]="avatarUrl" [hasAvatar]="hasAvatar" [label]="'Select Loan type'">
                             </app-dropdown>
 
+                            <div class="text-danger" *ngIf="loanerror">
+                                <span>Please select loan type</span>
+                            </div>
                         </div>
                     </div>
                 </div>

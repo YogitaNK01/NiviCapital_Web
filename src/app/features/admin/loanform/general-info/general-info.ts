@@ -156,8 +156,8 @@ export class GeneralInfo implements OnInit {
     if (this.formSvc.generalInfoData) {
       this.registerForm.patchValue({
         occupation: this.formSvc.generalInfoData.currentOccupationId,
-        qualification: this.formSvc.generalInfoData.lastQualificationId,
-        institutionName: this.formSvc.generalInfoData.lastInstitutionName,
+        // qualification: this.formSvc.generalInfoData.lastQualificationId,
+        // institutionName: this.formSvc.generalInfoData.lastInstitutionName,
         state: this.formSvc.generalInfoData.stateId,
         university: this.formSvc.generalInfoData.universityId,
         coursename: this.formSvc.generalInfoData.courseId,
