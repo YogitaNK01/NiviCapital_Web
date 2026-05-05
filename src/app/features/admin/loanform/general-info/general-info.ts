@@ -163,21 +163,30 @@ export class GeneralInfo implements OnInit {
     });
 
     if (this.formSvc.generalInfoData) {
+
+      this.registerForm.patchValue({
+        checkedasset: this.formSvc.generalInfoData.hasAssets ? 'Yes' : 'No'
+      });
+
+
       this.registerForm.patchValue({
         occupation: this.formSvc.generalInfoData.currentOccupationId,
-        // qualification: this.formSvc.generalInfoData.lastQualificationId,
-        // institutionName: this.formSvc.generalInfoData.lastInstitutionName,
         state: this.formSvc.generalInfoData.stateId,
+        otherstaetitle: this.formSvc.generalInfoData.otherstaetitle ? this.formSvc.generalInfoData.otherstaetitle : '',
         university: this.formSvc.generalInfoData.universityId,
+        otherunititle: this.formSvc.generalInfoData.otherunititle ? this.formSvc.generalInfoData.otherunititle : '',
         coursename: this.formSvc.generalInfoData.courseId,
-        // courseduration: this.formSvc.generalInfoData.courseDuration,
+        othercoursenametitle: this.formSvc.generalInfoData.othercoursenametitle ? this.formSvc.generalInfoData.othercoursenametitle : '',
+        coursetype: this.formSvc.generalInfoData.courseId,
+        othercoursetypetitle: this.formSvc.generalInfoData.othercoursetypetitle ? this.formSvc.generalInfoData.othercoursetypetitle : '',
         coursestartdate: this.formSvc.generalInfoData.courseStartDate,
         courseenddate: this.formSvc.generalInfoData.courseEndDate,
         lendingpartner: this.formSvc.generalInfoData.lendingPartnerId
       });
 
-      //  coursestartdate: new Date(this.formSvc.generalInfoData.courseStartDate)
       this.checkboxasset = this.formSvc.generalInfoData.hasAssets ? "Yes" : "No";
+
+      // this.restoreCourseCascade(this.formSvc.generalInfoData);
     }
 
 
@@ -506,10 +515,10 @@ export class GeneralInfo implements OnInit {
       const end = new Date(endDate);
       const min = new Date(minDate);
 
-      
-end.setHours(0, 0, 0, 0);
-    min.setHours(0, 0, 0, 0);
-    return end <= min ? { invalidEndDate: true } : null;
+
+      end.setHours(0, 0, 0, 0);
+      min.setHours(0, 0, 0, 0);
+      return end <= min ? { invalidEndDate: true } : null;
 
     };
   };

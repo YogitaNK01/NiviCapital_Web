@@ -70,20 +70,25 @@
 
             <div class="col-lg-6 col-sm-12">
                 <app-inputfield type="text" [required]="true" label="Score" placeholder="Enter Score"
-                    [formControl]="educationForms['ielts'].get('score')" (blur)="educationForms['ielts'].get('score')?.markAsTouched()"
+                    [formControl]="educationForms['ielts'].get('score')"
+                    (blur)="educationForms['ielts'].get('score')?.markAsTouched()"
                     (input)="main.restrictInput($event, 'decimal' ,1)">
                 </app-inputfield>
-                <div class="text-danger"
-                    *ngIf="educationForms['ielts'].get('score').touched && educationForms['ielts'].get('score').invalid">
+                <div class="text-danger" *ngIf="educationForms['ielts'].get('score').touched && 
+(educationForms['ielts'].get('score')?.touched ||
+     educationForms['ielts'].get('score')?.dirty)
+">
 
                     <div *ngIf="educationForms['ielts'].get('score').errors?.['required']">
                         score is required
                     </div>
 
 
-                    <span *ngIf=" educationForms['ielts'].get('score')?.invalid && (educationForms['ielts'].get('score')?.touched || educationForms['ielts'].get('score')?.dirty) ">
-
-                        Enter a valid IELTS score (4.1 to 10.0)
+                    <span *ngIf="
+      educationForms['ielts'].get('score')?.errors?.['invalidIeltsScore'] &&
+      !educationForms['ielts'].get('score')?.errors?.['required']
+    ">
+                        Enter a valid IELTS score (4 to 10)
                     </span>
 
 

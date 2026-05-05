@@ -190,7 +190,7 @@ export class Educationinfo implements OnInit {
       diploma12: this.createForm(),
       ug: this.createForm(),
       pg: this.createForm(),
-      ielts: this.createForm(),
+      ielts: this.createIeltsForm(),
       // this.fb.group({
       //   score: ['', [Validators.required, Validators.min(4), Validators.max(10)]],
         
@@ -257,9 +257,14 @@ export class Educationinfo implements OnInit {
       marksheet: [null],
       lc: [null],
 
-      score: ['', [ this.ieltsScoreValidator()]],
+      // score: ['', [ this.ieltsScoreValidator()]],
     });
   }
+  createIeltsForm(): FormGroup {
+  return this.fb.group({
+    score: ['', [Validators.required, this.ieltsScoreValidator()]],
+  });
+}
 
  percentageOrCgpaValidator(): ValidatorFn {
   return (control: AbstractControl): ValidationErrors | null => {
@@ -308,9 +313,9 @@ ieltsScoreValidator(): ValidatorFn {
 
     const valueStr = value.toString();
 
-    // ✅ 4.1–10.0
+    //  4.0–10.0
     const isValid =
-      num >= 4.1 &&
+      num >= 4.0 &&
       num <= 10.0 &&
       /^\d+(\.\d{1})?$/.test(valueStr); // ✅ single decimal only
 
