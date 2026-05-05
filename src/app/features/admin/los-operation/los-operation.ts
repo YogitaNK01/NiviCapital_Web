@@ -291,7 +291,8 @@ export class LosOperation {
 
     let input = {
       identifier: this.searchText,
-      type: "MOBILE"
+      type: "MOBILE",
+      isSearch :true
 
     }
     this.addcustomerservice.customersearch(input).subscribe({

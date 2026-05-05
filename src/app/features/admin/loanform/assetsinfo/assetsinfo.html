@@ -176,7 +176,7 @@
                             @for(prop of properties.controls; track prop; let i = $index){
 
 
-                            <div class="row common-details-box d-flex flex-row gap-0 " [formGroupName]="i">
+                            <div class="row common-details-box d-flex flex-row gap-0 property-row " [formGroupName]="i">
 
                                 <div class="text-dp-3-regular d-flex align-items-center justify-content-between">
                                     Property {{ i + 1 }}
@@ -247,8 +247,7 @@
                                     <div class="form-group ">
                                         <app-inputfield type="text" [required]="true" label="Location / Address"
                                             [required]="true" placeholder="Enter Value" formControlName="location"
-                                            helpText="Help text" name="location"
-                                            (input)="main.restrictInput($event, 'text')">
+                                            helpText="Help text" name="location">
                                         </app-inputfield>
                                         <div class="text-danger"
                                             *ngIf="prop.get('location')?.touched && prop.get('location')?.invalid">

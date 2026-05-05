@@ -33,7 +33,7 @@
     }
 
     @case ('pg') {
-    <app-edusection [group]="educationForms.pg" title="Postgraduate" sectionType="bachelors" [stepKey]="activeEducation"
+    <app-edusection [group]="educationForms.pg" title="Postgraduate" sectionType="postgrad" [stepKey]="activeEducation"
         [uploadedFiles]="uploadedFiles" (fileSelected)="onFileSelectedFromSection($event)" />
     }
 
@@ -70,25 +70,32 @@
 
             <div class="col-lg-6 col-sm-12">
                 <app-inputfield type="text" [required]="true" label="Score" placeholder="Enter Score"
-                    [formControl]="educationForms['ielts'].get('score')" (input)="main.restrictInput($event, 'number')">
+                    [formControl]="educationForms['ielts'].get('score')" (blur)="educationForms['ielts'].get('score')?.markAsTouched()"
+                    (input)="main.restrictInput($event, 'decimal' ,1)">
                 </app-inputfield>
-                 <div class="text-danger" *ngIf="educationForms['ielts'].get('score').touched && educationForms['ielts'].get('score').invalid">
+                <div class="text-danger"
+                    *ngIf="educationForms['ielts'].get('score').touched && educationForms['ielts'].get('score').invalid">
 
-                        <div *ngIf="educationForms['ielts'].get('score').errors?.['required']">
-                            score is required
-                        </div>
-
-                        
-
-                        <div *ngIf="educationForms['ielts'].get('score').errors?.['min']">
-                            Minimum 4 score required
-                        </div>
-
-                        <div *ngIf="educationForms['ielts'].get('score').errors?.['max']">
-                            Maximum 10 score allowed
-                        </div>
-
+                    <div *ngIf="educationForms['ielts'].get('score').errors?.['required']">
+                        score is required
                     </div>
+
+
+                    <span *ngIf=" educationForms['ielts'].get('score')?.invalid && (educationForms['ielts'].get('score')?.touched || educationForms['ielts'].get('score')?.dirty) ">
+
+                        Enter a valid IELTS score (4.1 to 10.0)
+                    </span>
+
+
+                    <!-- <div *ngIf="educationForms['ielts'].get('score').errors?.['min']">
+                        Minimum 4 score required
+                    </div>
+
+                    <div *ngIf="educationForms['ielts'].get('score').errors?.['max']">
+                        Maximum 10 score allowed
+                    </div> -->
+
+                </div>
 
             </div>
 
@@ -186,7 +193,7 @@
         <div class="col-lg-4  d-flex justify-content-end">
             <app-buttons type="button" label="Back" class="btn btncustomClass" [outline]="true" (click)="back()">
             </app-buttons>
-            <app-buttons type="button" label="Next" class="btn btncustomClass" color="primary" (click)="next()"
+            <app-buttons type="button" label="Next" class="btn btncustomClass" color="primary" (click)=" next()"
                 [disabled]="!canProceedToNext()">
             </app-buttons>
 

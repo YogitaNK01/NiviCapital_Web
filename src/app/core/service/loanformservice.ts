@@ -17,37 +17,39 @@ export interface ApiResponse<T> {
   providedIn: 'root'
 })
 export class Loanformservice {
+ 
   form!: FormGroup;
   // private baseUrl = environment.apiBaseUrl;
   private baseUrl = "/nivicapsit/api";
 
   kycdetailsID: any;
 
-   isasset:boolean=false;
-  isincome:boolean=false;
-  issalaried:boolean=false;
-  
-  generalInfoData: any ;
-  estExpenseInfoData: any ;
-  additionalInfoData:any ;
-  kycInfoData: any ;
-  incomeInfoData: any ;
-  aseetsInfoData:any ;
-  liabilitiesInfoData: any ;
-  monthlyExpenditureData: any ;
-  referenceInfoData:any ;
-  educationInfoData:any;
+  isasset: boolean = false;
+  isincome: boolean = false;
+  issalaried: boolean = false;
+  coursetypeug: boolean = false;
 
-  constructor(private http: HttpClient,) { this.restoreFromStorage();}
+  generalInfoData: any;
+  estExpenseInfoData: any;
+  additionalInfoData: any;
+  kycInfoData: any;
+  incomeInfoData: any;
+  aseetsInfoData: any;
+  liabilitiesInfoData: any;
+  monthlyExpenditureData: any;
+  referenceInfoData: any;
+  educationInfoData: any;
 
-  
- restoreFromStorage() {
+  constructor(private http: HttpClient,) { this.restoreFromStorage(); }
+
+
+  restoreFromStorage() {
     this.isasset = JSON.parse(localStorage.getItem('isasset') || 'false');
     this.isincome = JSON.parse(localStorage.getItem('isincome') || 'false');
     this.issalaried = JSON.parse(localStorage.getItem('issalaried') || 'false');
   }
 
-setValues(isAsset?: boolean, isIncome?: boolean, issalaried?: boolean) {
+  setValues(isAsset?: boolean, isIncome?: boolean, issalaried?: boolean, coursetypeug?: boolean) {
     if (isAsset !== undefined) {
       this.isasset = isAsset;
       localStorage.setItem('isasset', JSON.stringify(isAsset));
@@ -61,6 +63,11 @@ setValues(isAsset?: boolean, isIncome?: boolean, issalaried?: boolean) {
     if (issalaried !== undefined) {
       this.issalaried = issalaried;
       localStorage.setItem('issalaried', JSON.stringify(issalaried));
+    }
+
+    if (coursetypeug !== undefined) {
+      this.coursetypeug = coursetypeug;
+      localStorage.setItem('coursetypeug', JSON.stringify(coursetypeug));
     }
   }
 
@@ -84,7 +91,7 @@ setValues(isAsset?: boolean, isIncome?: boolean, issalaried?: boolean) {
     );
   }
 
- 
+
 
   getlendingpartners(): Observable<ApiResponse<any>> {
     return this.http.get<ApiResponse<any>>(
@@ -204,7 +211,7 @@ setValues(isAsset?: boolean, isIncome?: boolean, issalaried?: boolean) {
 
   // ************************* Income   *************************
 
- uploadIncome(data: any, id: string): Observable<ApiResponse<any>> {
+  uploadIncome(data: any, id: string): Observable<ApiResponse<any>> {
 
     return this.http.post<ApiResponse<any>>(
       `${this.baseUrl}/v1/los/applications/${id}/documents/batch`,
@@ -239,9 +246,9 @@ setValues(isAsset?: boolean, isIncome?: boolean, issalaried?: boolean) {
       `${this.baseUrl}/v1/los/applications/bank-list`,
     )};
 
-    
 
-    // ************************* Liability   *************************
+
+  // ************************* Liability   *************************
 
   getAllLiabilities(): Observable<ApiResponse<any>> {
     return this.http.get<ApiResponse<any>>(
@@ -268,8 +275,8 @@ setValues(isAsset?: boolean, isIncome?: boolean, issalaried?: boolean) {
     );
   }
 
-   // ************************* Monthly Expenditure   *************************
-    MonthlyExpenditure(data: any, id: string): Observable<ApiResponse<any>> {
+  // ************************* Monthly Expenditure   *************************
+  MonthlyExpenditure(data: any, id: string): Observable<ApiResponse<any>> {
 
     return this.http.post<ApiResponse<any>>(
       `${this.baseUrl}/v1/los/applications/${id}/monthly-expenses`,
@@ -277,37 +284,37 @@ setValues(isAsset?: boolean, isIncome?: boolean, issalaried?: boolean) {
     );
   }
 
-   // *************************Education *************************
+  // *************************Education *************************
 
-    getEducation(): Observable<ApiResponse<any>> {
+  getEducation(): Observable<ApiResponse<any>> {
     return this.http.get<ApiResponse<any>>(
       `${this.baseUrl}/v1/masters/qualifications`,
 
     );
   }
 
-   getInstitutes(): Observable<ApiResponse<any>> {
+  getInstitutes(): Observable<ApiResponse<any>> {
     return this.http.get<ApiResponse<any>>(
       `${this.baseUrl}/v1/masters/institute-names`,
 
     );
   }
-   getAllCities(): Observable<ApiResponse<any>> {
+  getAllCities(): Observable<ApiResponse<any>> {
     return this.http.get<ApiResponse<any>>(
       `${this.baseUrl}/v1/cities`,
 
     );
   }
-  
 
-   getselectedEducation(data:string): Observable<ApiResponse<any>> {
+
+  getselectedEducation(data: string): Observable<ApiResponse<any>> {
     return this.http.get<ApiResponse<any>>(
       `${this.baseUrl}/v1/masters/qualifications/${data}`,
 
     );
   }
 
- 
+
   selectedqualification(data: any, id: string): Observable<ApiResponse<any>> {
 
     return this.http.post<ApiResponse<any>>(
@@ -315,6 +322,24 @@ setValues(isAsset?: boolean, isIncome?: boolean, issalaried?: boolean) {
       data
     );
   }
+  // *************************Reference *************************
+
+  saveReference(data: any, id: string): Observable<ApiResponse<any>> {
+
+    return this.http.post<ApiResponse<any>>(
+      `${this.baseUrl}/v1/los/applications/${id}/references`,
+      data
+    );
+  }
+    // *************************Summary *************************
+ 
+    getSummary(id:string): Observable<ApiResponse<any>> {
+    return this.http.get<ApiResponse<any>>(
+      `${this.baseUrl}/v1/los/applications/${id}/summary`,
+ 
+    );
+  }
+
 }
 
 // saveDraft() {

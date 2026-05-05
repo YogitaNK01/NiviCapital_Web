@@ -138,7 +138,7 @@
   align-self: stretch;
 
   border-radius: var(--border-radius-border-radius-m, 12px);
-  border: 1px solid var(--system-border-neutral-neutral_2, #E4E6F1);
+  border: 1px solid $neutral_border_2;
   background: var(--system-background-bg, #FFF);
   box-shadow: 0 4px 10px 0 rgba(226, 226, 226, 0.12);
 }

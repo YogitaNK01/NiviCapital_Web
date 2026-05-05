@@ -34,6 +34,10 @@
                             formControlName="qualification" name="qualification"
                             (selectedValueChange)="Selectededucation($event);">
                         </app-dropdown>
+                        <div class="text-danger" *ngIf="basicform.get('qualification')?.touched && basicform.get('qualification')?.errors?.['invalidEducation'] ">
+                            Selected qualification is not allowed for the chosen course type,Please update your last qualification
+                        </div>
+
                     </div>
 
                     <div class="col-6" *ngIf="isOtherQualification">

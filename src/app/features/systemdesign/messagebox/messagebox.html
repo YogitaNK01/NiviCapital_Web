@@ -32,7 +32,7 @@
         <!-- {{ message }} -->
 
       </div>
-      <div *ngIf="showComparison" class="comparison-container" >
+      <div *ngIf="showComparison" class="comparison-container">
 
         <p class="msgbox-body text-dp-2-bold fw-normal" [innerHTML]="message"></p>
 
@@ -78,12 +78,22 @@
 
             <!-- COLUMN 2 -->
             <div class="col-md-6 text-left d-flex flex-column gap-2">
-              <div class="text-label-data fw-normal text-left d-flex flex-column gap-2">Adding New Section</div>
+              <div class="text-label-data fw-normal text-left d-flex flex-column gap-2">
+                {{
+                comparisonData?.addingSection
+                ? 'Adding New Section'
+                : 'Removing Section'
+                }}
+              </div>
 
               <div class="text-common comparison-box">
-                • {{ comparisonData?.addingSection }}
+                • {{ (comparisonData?.addingSection) ? (comparisonData?.addingSection)
+                :((comparisonData?.removingSections)) }}
               </div>
             </div>
+
+
+
 
           </div>
         </div>

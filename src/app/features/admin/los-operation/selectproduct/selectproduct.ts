@@ -59,7 +59,7 @@ export class Selectproduct implements OnInit {
   ]
   formData: any = {};
   custId: string = '';
-  custName:string='';
+  custName: string = '';
   //checkbox-------------------
   isChecked_rb: boolean = false;
   SecurityTypechecked: string = '';
@@ -72,13 +72,13 @@ export class Selectproduct implements OnInit {
   issuccess: boolean = false;
 
 
-  constructor(private router: Router, private apiService: Addcustomerservice, private route: ActivatedRoute, private cd: ChangeDetectorRef,private locationStrategy: LocationStrategy) { }
+  constructor(private router: Router, private apiService: Addcustomerservice, private route: ActivatedRoute, private cd: ChangeDetectorRef, private locationStrategy: LocationStrategy) { }
   ngOnInit(): void {
     this.route.queryParams.subscribe(params => {
       if (params['custId']) {
         this.custId = params['custId'];
-         this.custName = params['custName'];
-
+        this.custName = params['custName'];
+        localStorage.setItem('custId', this.custId)
       }
     });
   }
@@ -118,8 +118,8 @@ export class Selectproduct implements OnInit {
         console.log(res);
 
         this.arnid = res?.data?.arn ?? '';
-         this.applicationId = res?.data?.applicationId ?? '';
-          this.applicantId = res?.data?.applicantId ?? '';
+        this.applicationId = res?.data?.applicationId ?? '';
+        this.applicantId = res?.data?.applicantId ?? '';
         this.issuccess = true;
         this.cd.detectChanges();
       },
@@ -135,28 +135,28 @@ export class Selectproduct implements OnInit {
   }
 
   handleSuccessAction(action: string) {
-      if (action === 'letsstart') {
+    if (action === 'letsstart') {
 
-        const url = this.router.serializeUrl(
-          this.router.createUrlTree(['/loanform/loaninfo'],
-            {
-        queryParams: {
-          applicationId: this.applicationId,
-          applicantId:this.applicantId,
-          custName:this.custName,
-          custARN:this.arnid
-        
-        }
-      }
-          )
-        );
-        // console.log("url---", url);
+      const url = this.router.serializeUrl(
+        this.router.createUrlTree(['/loanform/loaninfo'],
+          {
+            queryParams: {
+              applicationId: this.applicationId,
+              applicantId: this.applicantId,
+              custName: this.custName,
+              custARN: this.arnid
+
+            }
+          }
+        )
+      );
+      // console.log("url---", url);
 
 
-         const finalUrl = this.locationStrategy.prepareExternalUrl(url);
+      const finalUrl = this.locationStrategy.prepareExternalUrl(url);
 
-        window.open(window.location.origin + finalUrl, '_blank');
-      }
+      window.open(window.location.origin + finalUrl, '_blank');
     }
   }
-  
+}
+

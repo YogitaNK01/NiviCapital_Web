@@ -220,17 +220,10 @@
                 <!-- Course End Date* -->
                 <div class="col-lg-6 col-sm-12 mt-20">
                     <app-datepickernew formControlName="courseenddate" label="Course End Date" placeholder="DD/MM/YYYY"
-                        [disabled]="true" [disablePastDates]="true" [minDate]="calculatedEndDate" >
+                        [disabled]="!f['coursestartdate'].value" [disablePastDates]="true"  >
                     </app-datepickernew>
-
-
-
                     <div class="text-danger"
-                        *ngIf="f['courseenddate'].touched && f['courseenddate'].errors?.['minDateError']">
-
-                     
-                            End date must be after start date
-                        
+                        *ngIf="f['courseenddate'].touched && f['courseenddate'].errors?.['invalidEndDate']"> End date must be after start date 
                     </div>
 
                 </div>

@@ -19,7 +19,7 @@ export class Loanstepper implements OnInit {
 
   completedSteps: Set<number> = new Set();
 
-  activeQualificationId!: string;
+  activeQualificationId!: any;
 
 
   constructor(public router: Router, public stepservice: Loanstepperservice, private route: ActivatedRoute, private stepperService: Loanstepperservice, private cdr: ChangeDetectorRef) {
@@ -42,16 +42,22 @@ export class Loanstepper implements OnInit {
         this.stepperService.setLoanId(this.applicantId, this.applicationId, this.custName, this.custARN);
 
 
-        this.route.queryParams.subscribe(params => {
-          if (params['qualificationlabel']) {
-            this.activeQualificationId = params['qualificationlabel'];
-          }
-        });
+        // this.route.queryParams.subscribe(params => {
+        //   if (params['qualificationlabel']) {
+            this.activeQualificationId = params['qualificationlabel']?? undefined;
+        //   }
+        // });
 
       }
     });
     this.router.events.subscribe(() => {
-      this.cdr.detectChanges(); // Trigger re-render on navigation
+      // this.cdr.detectChanges(); 
+      const cleanUrl = this.router.url.split('?')[0];
+      if (!cleanUrl.includes('education')) {
+        this.activeQualificationId = undefined;
+        this.cdr.detectChanges();
+      }
+
     });
   }
 
@@ -149,23 +155,37 @@ export class Loanstepper implements OnInit {
   }
 
   isSubStepperDisabled(parentIndex: number, subIndex: number): boolean {
-    if (this.isUpcoming(parentIndex)) {
-      return true;
-    }
+    // if (this.isUpcoming(parentIndex)) {
+    //   return true;
+    // }
 
-    if (!this.activeQualificationId) {
-      return subIndex !== 0;
-    }
 
     const parentStep = this.steps[parentIndex];
     if (!parentStep?.children) return false;
 
-    console.log(parentStep.children)
-    const activeIndex = parentStep.children.findIndex(
-      (c: any) => this.normalizeQualification(c.label) === this.activeQualificationId
+
+    const stepKey = this.normalizeQualification(
+      parentStep.children[subIndex].label
     );
 
-    return subIndex > activeIndex;
+    
+ if (!this.isInsideEducation()) {
+    return true;
+  }
+
+
+ if (this.stepperService.isEducationStepCompleted(stepKey)) {
+    return false;
+  }
+
+    return true;
+
+
+    // const activeIndex = parentStep.children.findIndex(
+    //   (c: any) => this.normalizeQualification(c.label) === this.activeQualificationId
+    // );
+
+    // return subIndex > activeIndex;
   }
 
 
@@ -174,20 +194,6 @@ export class Loanstepper implements OnInit {
     event.stopPropagation();
     const stepKey = this.normalizeQualification(sub.label);
     this.activeQualificationId = stepKey;
-
-    // this.router.navigate(['/loanform/educationinfo'], {
-    //   queryParams: {
-    //     applicantId: this.applicantId,
-    //     applicationId: this.applicationId,
-    //     custName: this.custName,
-    //     custARN: this.custARN,
-    //     qualificationId: sub.id,
-    //      qualificationlabel: sub.label,
-    //   },
-    //   queryParamsHandling: 'merge'
-    // });
-
-
 
 
     this.router.navigate([], {
@@ -201,7 +207,12 @@ export class Loanstepper implements OnInit {
 
   }
 
-
+isInsideEducation(): boolean {
+  return (
+    this.router.url.includes('educationDetails') ||
+    this.router.url.includes('educationinfo')
+  );
+}
 
   normalizeQualification(name: string): string {
     const lower = name.toLowerCase();
@@ -211,20 +222,16 @@ export class Loanstepper implements OnInit {
     if (lower === '12th') return '12th';
 
     // Diploma
-    if (lower.includes('diploma') || (lower.includes('diploma')&& lower.includes('10'))) return 'diploma10';
-    if (lower.includes('diploma') || ( lower.includes('diploma')&& lower.includes('12'))) return 'diploma12';
+    if (lower.includes('diploma') || (lower.includes('diploma') && lower.includes('10'))) return 'diploma10';
+    if (lower.includes('diploma') || (lower.includes('diploma') && lower.includes('12'))) return 'diploma12';
 
     if (lower.includes('others') && lower.includes('after 12th')) return 'others12';
     if (lower.includes('others') && lower.includes('diploma')) return 'othersdiploma';
-
 
     // UG
     if (lower.includes('undergraduate')) return 'ug';
     // PG
     if (lower.includes('postgraduate')) return 'pg';
-
-
-
 
     // IELTS / PTE
     if (lower.includes('ielts') || lower.includes('pte')) return 'ielts';

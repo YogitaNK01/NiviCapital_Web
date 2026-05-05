@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, ViewChild } from '@angular/core';
 import { Buttons } from '../../../systemdesign/buttons/buttons';
-import { FormArray, FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { AbstractControl, FormArray, FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import { Loanformservice } from '../../../../core/service/loanformservice';
 import { Loanstepperservice } from '../../../../core/service/loanstepperservice';
@@ -11,6 +11,10 @@ import { Inputfield } from '../../../systemdesign/inputfield/inputfield';
 import { debounceTime, distinctUntilChanged, Subject } from 'rxjs';
 import { Addcustomerservice } from '../../../../core/service/addcustomerservice';
 import { Checkbox } from '../../../systemdesign/checkbox/checkbox';
+import * as bootstrap from 'bootstrap';
+import { Dropdown } from '../../../systemdesign/dropdown/dropdown';
+import { Successbox } from '../../customer/successbox/successbox';
+
 
 
 interface OptionItem {
@@ -20,7 +24,7 @@ interface OptionItem {
 
 @Component({
   selector: 'app-referenceinfo',
-  imports: [CommonModule, Buttons, ReactiveFormsModule, Inputfield, Checkbox],
+  imports: [CommonModule, Buttons, ReactiveFormsModule, Inputfield, Checkbox, FormsModule, Dropdown, Successbox],
   templateUrl: './referenceinfo.html',
   styleUrl: './referenceinfo.scss'
 })
@@ -36,10 +40,14 @@ export class Referenceinfo implements OnInit {
   isdata: boolean = false;
 
   private mobileSubject = new Subject<string>();
-  ismiddlename: boolean = false;
+  ismiddlename: boolean[] = [false, false];
 
   perStateSelectedOption: any;
   perCitySelectedOption: any;
+
+  selectedStateId: string[] = ['', ''];
+  selectedCityId: string[] = ['', ''];
+
 
   stateOptions: OptionItem[] = [];
   cityOptions: OptionItem[] = [];
@@ -50,30 +58,61 @@ export class Referenceinfo implements OnInit {
   perselectedCityId!: string;
   perselectedCityLabel!: string;
 
+  // mobileNumber:any;
+  popupStep = 1;
+  currentRefIndex = 0;
+  mobileNumber = '';
+  private modalInstance: bootstrap.Modal | null = null;
+
+
+  reference1Filled = false;
+  reference2Filled = false;
+  isSearchDone = false;
+
+  applicantId: any;
+  applicationId: any;
+
+  showmiddlenameError = false;
+  submitAttempted = false;
+  reference1Touched = false;
+  reference2Touched = false;
+
+  savedReferenceData: any[] = [{}, {}];
+
+  private successModalInstance: bootstrap.Modal | null = null;
+  @ViewChild('phone') phone!: any;
+
   constructor(private fb: FormBuilder, private stepperService: Loanstepperservice, private cd: ChangeDetectorRef, private loanformservice: Loanformservice,
     private router: Router, private route: ActivatedRoute, public main: Main, private apiservice: Addcustomerservice) { }
   ngOnInit(): void {
+
+    this.route.queryParams.subscribe(params => {
+
+      const applicantId = params['applicantId'];
+      const applicationId = params['applicationId'];
+
+      // Store in variables if needed
+      this.applicantId = applicantId;
+      this.applicationId = applicationId;
+
+    });
 
 
     this.referenceForm = this.fb.group({
       reference1: this.fb.array([this.createReferenceGroup()]),
       reference2: this.fb.array([this.createReferenceGroup()])
-    })
+    },
 
-    this.mobileSubject
-      .pipe(
-        debounceTime(100),
-        distinctUntilChanged()
-      )
-      .subscribe(value => {
-        if (value.length === 10) {
-          this.searchMobile(value);
-        }
-      });
-
-      if( this.loanformservice.referenceInfoData ){
-        this.patchReferenceData();
+      {
+        validators: this.referenceUniquenessValidator
       }
+    )
+
+
+    if (this.loanformservice.referenceInfoData) {
+      this.patchReferenceData();
+    }
+    this.states()
   }
 
 
@@ -101,10 +140,44 @@ export class Referenceinfo implements OnInit {
     const value = event.target.value;
     this.mobileSubject.next(value);
   }
-  onmiddlename(value: boolean): void {
-    this.ismiddlename = value;
+  onmiddlename(value: boolean) {
+    this.ismiddlename[this.currentRefIndex] = value;
+
+    const array = this.currentRefIndex === 0 ? this.reference1Array : this.reference2Array;
+    const mnameCtrl = array.at(0).get('mname');
+
+    if (value) {
+      // Checkbox is checked: Clear and disable the control
+      mnameCtrl?.setValue('');
+      mnameCtrl?.clearValidators();
+      mnameCtrl?.updateValueAndValidity();
+      mnameCtrl?.disable();
+    } else {
+      // Checkbox unchecked: Enable and require it again
+      mnameCtrl?.enable();
+      mnameCtrl?.setValidators([Validators.pattern('^[A-Za-z ]+$'), Validators.minLength(2), Validators.maxLength(25)]);
+      mnameCtrl?.updateValueAndValidity();
+    }
+  }
+  onmiddlename1(value: boolean) {
+    this.ismiddlename[this.currentRefIndex] = value;
+
+    const array =
+      this.currentRefIndex === 0
+        ? this.reference1Array
+        : this.reference2Array;
+
+    const mnameCtrl = array.at(0).get('mname');
+
+    if (value) {
+      mnameCtrl?.reset();
+      mnameCtrl?.disable();
+    } else {
+      mnameCtrl?.enable();
+    }
   }
   searchMobile(mobile: string) {
+    this.mobileNumber = mobile;
     let input = {
       identifier: mobile,
       type: "MOBILE"
@@ -112,27 +185,46 @@ export class Referenceinfo implements OnInit {
     }
 
     this.apiservice.customersearch(input).subscribe(res => {
-      if (res.message.includes('Existing customer found')) {
 
-        console.log('search mobile Result');
-      } else {
-        this.isdata = false;
+      const isExisting = res.message?.includes('Existing customer found');
+
+      this.isdata = !isExisting;
+
+      const currentArray =
+        this.currentRefIndex === 0 ? this.reference1Array : this.reference2Array;
+
+      if (currentArray.length === 0) {
+        currentArray.push(this.createReferenceGroup());
       }
+
+      currentArray.at(0).patchValue({
+        phone: mobile,
+        ...(isExisting ? res.data : {})
+      });
+
+      this.isSearchDone = true;
+      // this.popupStep = 2;
     });
+
+  }
+
+  goNext() {
+    this.popupStep = 2;
   }
 
   createReferenceGroup(): FormGroup {
     return this.fb.group({
-      fname: ['', Validators.required],
-      mname: ['', Validators.required],
-      lname: ['', Validators.required],
-      peraddressline1: ['', Validators.required],
-      peraddressline2: ['', Validators.required],
-      peraddressline3: [''],
-      percountry: ['', Validators.required],
-      perstate: ['', Validators.required],
-      percity: ['', Validators.required],
-      perpincode: ['', Validators.required],
+      fname: ['', [Validators.required, Validators.pattern('^[A-Za-z ]+$'), Validators.minLength(2), Validators.maxLength(25)]],
+      mname: ['', [Validators.pattern('^[A-Za-z ]+$'), Validators.minLength(2), Validators.maxLength(25)]],
+      lname: ['', [Validators.required, Validators.pattern('^[A-Za-z ]+$'), Validators.minLength(2), Validators.maxLength(25)]],
+      email: ['', [Validators.pattern('^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$'), Validators.minLength(10), Validators.maxLength(40)]],
+      peraddressline1: ['', [Validators.minLength(2), Validators.maxLength(255)]],
+      peraddressline2: ['', [Validators.minLength(2), Validators.maxLength(255)]],
+      peraddressline3: ['', [Validators.minLength(2), Validators.maxLength(255)]],
+      percountry: ['India'],
+      perstate: ['',],
+      percity: ['',],
+      perpincode: ['', [Validators.minLength(6), Validators.maxLength(6), this.invalidPincodeValidator]],
       phone: ['', Validators.required]
     });
   }
@@ -160,18 +252,36 @@ export class Referenceinfo implements OnInit {
 
   selectPerState(id: any) {
 
+
+    const refIndex = this.currentRefIndex;
+
+    this.selectedStateId[refIndex] = id;
+    this.selectedCityId[refIndex] = '';
+
+
     const found = this.stateOptions.find(s => s.value === id);
+    this.perselectedStateId = found?.value ?? ''
     this.perselectedStateLabel = found?.label ?? '';
+
+
+    const array =
+      this.currentRefIndex === 0
+        ? this.reference1Array
+        : this.reference2Array;
+
+    array.at(0).patchValue({
+      perstate: this.perselectedStateId
+    });
+
 
     this.perCitySelectedOption = null;
     this.perselectedCityId = '';
     this.perselectedCityLabel = '';
-
     this.cityOptions = [];
     this.loadPerCities(id);
   }
 
-  loadPerCities(id: any) {
+  loadPerCities(id: any,refIndex?: number) {
     this.main.getIndianstatescities(id).subscribe((res: any) => {
       const list = res.data ?? res;
 
@@ -179,14 +289,53 @@ export class Referenceinfo implements OnInit {
         value: c.id,
         label: c.name
       }));
+
+      
+ if (refIndex !== undefined) {
+      const array =
+        refIndex === 0 ? this.reference1Array : this.reference2Array;
+
+      this.selectedCityId[refIndex] =
+        array.at(0).value.percity || '';
+    }
+
     });
   }
 
   selectPerCity(id: any) {
 
+
+    const refIndex = this.currentRefIndex;
+
+    this.selectedCityId[refIndex] = id;
+
+
     const found = this.cityOptions.find(c => c.value === id);
+    this.perselectedCityId = found?.value ?? ''
+
     this.perselectedCityLabel = found?.label ?? '';
+
+
+    const array =
+      this.currentRefIndex === 0
+        ? this.reference1Array
+        : this.reference2Array;
+
+    array.at(0).patchValue({
+      percity: this.perselectedCityId
+    });
+
+
   }
+
+
+  invalidPincodeValidator(control: AbstractControl): ValidationErrors | null {
+    if (control.value === '000000') {
+      return { invalidPincode: true };
+    }
+    return null;
+  }
+
   toggle(index: number) {
     if (this.openIndex.includes(index)) {
       this.openIndex = this.openIndex.filter(i => i !== index);
@@ -200,105 +349,494 @@ export class Referenceinfo implements OnInit {
   }
 
   patchReferenceData() {
-  const data = this.loanformservice.referenceInfoData;
+    const data = this.loanformservice.referenceInfoData;
 
-  if (!data) return;
+    if (!data) return;
 
-  this.reference1Array.clear();
-  this.reference2Array.clear();
 
-  // ---------------- REFERENCE 1 ----------------
-  if (data.reference1 && data.reference1.length) {
-    data.reference1.forEach((item: any) => {
+    // ---------------- REFERENCE 1 ----------------
+    if (data.reference1 && data.reference1.length) {
+      data.reference1.forEach((item: any) => {
 
-      const group = this.createReferenceGroup();
+        const group = this.createReferenceGroup();
 
-      group.patchValue({
-        fname: item.fname,
-        mname: item.mname,
-        lname: item.lname,
-        peraddressline1: item.peraddressline1,
-        peraddressline2: item.peraddressline2,
-        peraddressline3: item.peraddressline3,
-        percountry: item.percountry,
-        perstate: item.perstate,
-        percity: item.percity,
-        perpincode: item.perpincode,
-        phone: item.phone
+        group.patchValue({
+          fname: item.fname,
+          mname: item.mname,
+          lname: item.lname,
+          peraddressline1: item.peraddressline1,
+          peraddressline2: item.peraddressline2,
+          peraddressline3: item.peraddressline3,
+          percountry: item.percountry,
+          perstate: item.perstate,
+          percity: item.percity,
+          perpincode: item.perpincode,
+          phone: item.phone
+        });
+
+        this.reference1Array.push(group);
       });
+    }
 
-      this.reference1Array.push(group);
+    // ---------------- REFERENCE 2 ----------------
+    if (data.reference2 && data.reference2.length) {
+      data.reference2.forEach((item: any) => {
+
+        const group = this.createReferenceGroup();
+
+        group.patchValue({
+          fname: item.fname,
+          mname: item.mname,
+          lname: item.lname,
+          peraddressline1: item.peraddressline1,
+          peraddressline2: item.peraddressline2,
+          peraddressline3: item.peraddressline3,
+          percountry: item.percountry,
+          perstate: item.perstate,
+          percity: item.percity,
+          perpincode: item.perpincode,
+          phone: item.phone
+        });
+
+        this.reference2Array.push(group);
+      });
+    }
+
+    if (this.reference1Array.length === 0) {
+      this.reference1Array.push(this.createReferenceGroup());
+    }
+
+    if (this.reference2Array.length === 0) {
+      this.reference2Array.push(this.createReferenceGroup());
+    }
+
+    this.cd.detectChanges();
+  }
+
+  onEmailChange() {
+
+    if (this.currentRefIndex === 1) {
+      this.reference2Touched = true;
+    }
+    if (this.currentRefIndex === 0) {
+      this.reference1Touched = true;
+    }
+    this.referenceForm.updateValueAndValidity({ emitEvent: true });
+
+  }
+  onMobileChange(value: string) {
+    this.mobileNumber = value;
+    if (this.currentRefIndex === 1) {
+      this.reference2Touched = true;
+    }
+    if (this.currentRefIndex === 0) {
+      this.reference1Touched = true;
+    }
+    const array =
+      this.currentRefIndex === 0
+        ? this.reference1Array
+        : this.reference2Array;
+
+    const phoneCtrl = array.at(0).get('phone');
+
+    if (phoneCtrl) {
+      phoneCtrl.setValue(value);
+      phoneCtrl.markAsTouched();
+      phoneCtrl.updateValueAndValidity({ emitEvent: true });
+    }
+
+    this.referenceForm.updateValueAndValidity({ emitEvent: true });
+  }
+
+  referenceUniquenessValidator1: ValidatorFn = (
+    control: AbstractControl
+  ): ValidationErrors | null => {
+
+    const ref1 = control.get('reference1') as FormArray;
+    const ref2 = control.get('reference2') as FormArray;
+
+    if (!ref1?.length || !ref2?.length) return null;
+
+    const r1 = ref1.at(0);
+    const r2 = ref2.at(0);
+
+    const phone1 = r1.get('phone')?.value;
+    const phone2 = r2.get('phone')?.value;
+    const email1 = r1.get('email')?.value;
+    const email2 = r2.get('email')?.value;
+
+    const errors: any = {};
+
+    if (phone1 && phone2 && phone1 === phone2) {
+      errors.samePhone = true;
+    }
+
+    if (
+      email1 && email2 &&
+      email1.trim().toLowerCase() === email2.trim().toLowerCase()
+    ) {
+      errors.sameEmail = true;
+    }
+
+    return Object.keys(errors).length ? errors : null;
+  };
+
+referenceUniquenessValidator: ValidatorFn = (control: AbstractControl): ValidationErrors | null => {
+  const ref1 = control.get('reference1') as FormArray;
+  const ref2 = control.get('reference2') as FormArray;
+
+  if (!ref1?.length || !ref2?.length) return null;
+
+  const r1 = ref1.at(0);
+  const r2 = ref2.at(0);
+
+  const emailCtrl1 = r1.get('email');
+  const emailCtrl2 = r2.get('email');
+
+  const email1 = emailCtrl1?.value?.trim().toLowerCase();
+  const email2 = emailCtrl2?.value?.trim().toLowerCase();
+
+  emailCtrl1?.setErrors(null);
+  emailCtrl2?.setErrors(null);
+
+  if (email1 && email2 && email1 === email2) {
+    emailCtrl1?.setErrors({ sameEmail: true });
+    emailCtrl2?.setErrors({ sameEmail: true });
+
+    return { sameEmail: true };
+  }
+
+  return null;
+};
+
+
+
+  // ==================== OPEN MODAL ====================
+  openModal(index: number = 0) {
+    this.currentRefIndex = index;
+     if (this.phone) {
+    this.phone.resetForm?.();           
+    this.phone.control?.markAsPristine();
+    this.phone.control?.markAsUntouched();
+  }
+    this.mobileNumber = '';
+    this.submitAttempted = false;
+    if (index === 1) {
+      this.reference2Touched = false;
+      this.ismiddlename[1] = false;
+    }
+
+    
+
+
+
+    const isAlreadySaved =
+      index === 0 ? this.reference1Filled : this.reference2Filled;
+
+    const currentArray =
+      index === 0 ? this.reference1Array : this.reference2Array;
+
+    if (isAlreadySaved && currentArray.at(0)?.value?.phone) {
+      this.popupStep = 2;
+      this.isSearchDone = true;
+      this.mobileNumber = currentArray.at(0).value.phone;
+
+      // const savedStateId = currentArray.at(0).value.perstate;
+      // const savedCityId = currentArray.at(0).value.percity;
+
+      this.selectedStateId[index] = currentArray.at(0).value.perstate || '';
+      this.selectedCityId[index] =  '';
+
+      this.perStateSelectedOption = this.selectedStateId[index];
+
+      if (this.selectedStateId[index]) {
+        this.loadPerCities(this.selectedStateId[index],index);
+
+        setTimeout(() => {
+          this.perCitySelectedOption = this.selectedCityId[index];
+        }, 300);
+      }
+
+    } else {
+      this.popupStep = 1;
+      this.mobileNumber = '';
+      this.isSearchDone = false;
+    }
+
+    this.isdata = false;
+
+
+    setTimeout(() => {
+      const modalElement = document.getElementById('referenceModal');
+      if (modalElement) {
+        this.modalInstance = new bootstrap.Modal(modalElement, {
+          backdrop: 'static',
+          keyboard: false
+        });
+        this.modalInstance.show();
+      }
+    }, 100);
+  }
+
+  // ==================== SEARCH BUTTON ====================
+  searchReference() {
+    if (this.mobileNumber.length !== 10) {
+      return;
+    }
+    this.searchMobile(this.mobileNumber);
+  }
+
+  // ==================== BACK TO MOBILE STEP ====================
+  backToMobileStep() {
+    this.popupStep = 1;
+  }
+
+  // ==================== SAVE REFERENCE ====================
+  saveReference() {
+    this.submitAttempted = true;
+    const isRef1 = this.currentRefIndex === 0;
+    const currentArray = isRef1
+      ? this.reference1Array
+      : this.reference2Array;
+
+    const group = currentArray.at(0);
+    const middleNameOk =
+      this.ismiddlename[this.currentRefIndex] ||
+      !!group.get('mname')?.value;
+
+    if (!middleNameOk) {
+      group.get('mname')?.markAsTouched();
+      return;
+    }
+    if (group.invalid) {
+      group.markAllAsTouched();
+      return;
+    }
+
+    currentArray.at(0).patchValue({
+      phone: this.mobileNumber,
+      // perstate: this.perselectedStateLabel,
+      // percity: this.perselectedCityLabel
+    });
+
+    if (!this.canSaveReference) {
+      currentArray.at(0).markAllAsTouched();
+      return;
+    }
+
+    this.savedReferenceData[this.currentRefIndex] = JSON.parse(JSON.stringify(currentArray.at(0).value));
+
+    console.log(`Reference  Saved:`, currentArray.at(0).value);
+    const custID = localStorage.getItem('custId')
+    const refForm = currentArray.at(0).value;
+
+    const input = {
+      reference: {
+        referenceType: isRef1 ? 'reference1' : 'reference2',
+        mobileNumber: refForm.phone,
+        firstName: refForm.fname,
+        middleName: refForm.mname,
+        lastName: refForm.lname,
+        emailId: refForm.email,
+        addressLine1: refForm.peraddressline1,
+        addressLine2: refForm.peraddressline2,
+        addressLine3: refForm.peraddressline3,
+        country: 'India',
+        state: this.perselectedStateLabel,
+        city: this.perselectedCityLabel,
+        pincode: refForm.perpincode,
+        customerCifId: custID,
+        isNewCustomer: this.isdata ? 1 : 0
+      }
+    };
+
+    this.loanformservice.saveReference(input, this.applicationId).subscribe({
+      next: (res: any) => {
+        if (res.status === 'success') {
+          if (isRef1) {
+            this.reference1Filled = true;
+          } else {
+            this.reference2Filled = true;
+          }
+
+          this.closeReferenceModalOnly();
+          setTimeout(() => {
+            const successEl = document.getElementById('successModal');
+            if (successEl) {
+              this.successModalInstance = new bootstrap.Modal(successEl, {
+                backdrop: 'static',
+                keyboard: false
+              });
+              this.successModalInstance.show();
+            }
+          }, 300);
+
+
+        }
+      }
     });
   }
+isFormChanged(): boolean {
+  const index = this.currentRefIndex;
 
-  // ---------------- REFERENCE 2 ----------------
-  if (data.reference2 && data.reference2.length) {
-    data.reference2.forEach((item: any) => {
+  const array =
+    index === 0 ? this.reference1Array : this.reference2Array;
 
-      const group = this.createReferenceGroup();
-
-      group.patchValue({
-        fname: item.fname,
-        mname: item.mname,
-        lname: item.lname,
-        peraddressline1: item.peraddressline1,
-        peraddressline2: item.peraddressline2,
-        peraddressline3: item.peraddressline3,
-        percountry: item.percountry,
-        perstate: item.perstate,
-        percity: item.percity,
-        perpincode: item.perpincode,
-        phone: item.phone
-      });
-
-      this.reference2Array.push(group);
-    });
-  }
-
-  if (this.reference1Array.length === 0) {
-    this.reference1Array.push(this.createReferenceGroup());
-  }
-
-  if (this.reference2Array.length === 0) {
-    this.reference2Array.push(this.createReferenceGroup());
-  }
-
-  this.cd.detectChanges();
+  return JSON.stringify(array.at(0).value) !==
+         JSON.stringify(this.savedReferenceData[index]);
 }
+
+
+  // ==================== CLOSE MODAL ====================
+  closeSuccessModal() {
+    if (this.successModalInstance) {
+      this.successModalInstance.hide();
+      this.successModalInstance = null;
+    }
+  }
+  closeModal() {
+    if (this.modalInstance) {
+      this.modalInstance.hide();
+      this.modalInstance = null;
+    }
+    if (this.phone) {
+      // this.phone.reset();
+      this.phone.resetForm?.();
+    }
+    this.referenceForm.reset();
+    this.reference1Array.clear();
+    this.reference2Array.clear();
+    this.reference1Array.push(this.createReferenceGroup());
+    this.reference2Array.push(this.createReferenceGroup());
+
+    this.popupStep = 1;
+    this.mobileNumber = '';
+    this.isSearchDone = false;
+    this.isdata = false;
+    this.submitAttempted = false;
+    this.reference2Touched = false;
+    this.ismiddlename = [false, false];
+    this.perStateSelectedOption = null;
+    this.perCitySelectedOption = null;
+    this.perselectedStateLabel = '';
+    this.perselectedCityLabel = '';
+    this.cityOptions = [];
+
+    this.referenceForm.updateValueAndValidity({ emitEvent: false });
+  }
+  closeReferenceModalOnly() {
+    if (this.modalInstance) {
+      this.modalInstance.hide();
+      this.modalInstance = null;
+    }
+
+    // DO NOT reset form or arrays here
+    this.popupStep = 1;
+    this.isSearchDone = false;
+    this.submitAttempted = false;
+  }
+
+  handleCloseModal() {
+    const isSaved =
+      this.currentRefIndex === 0
+        ? this.reference1Filled
+        : this.reference2Filled;
+
+    if (isSaved) {
+      this.closeReferenceModalOnly();
+    } else {
+      this.closeModal();
+    }
+  }
+
   back() {
     this.stepperService.previous();
   }
+  //disabled
+  get canSaveReference1(): boolean {
+    const array =
+      this.currentRefIndex === 0
+        ? this.reference1Array
+        : this.reference2Array;
 
-  next1() {
+    if (!array || !array.at(0)) return false;
 
-    this.stepperService.next();
+    const errors: any = {};
+
+    if (this.currentRefIndex === 1) {
+      if (this.referenceForm.hasError('sameEmail') || this.referenceForm.hasError('samePhone')
+      ) {
+        errors.sameEmail = true;
+        return false;
+      }
+    }
+
+    const group = array.at(0) as FormGroup;
+
+    const middleNameOk =
+      this.ismiddlename[this.currentRefIndex] ||
+      !!group.get('mname')?.value;
+
+
+    const fname = group.get('fname')?.value?.trim();
+    const lname = group.get('lname')?.value?.trim();
+    const phone = group.get('phone')?.value?.trim();
+
+    const hasSameEmail = this.referenceForm.hasError('sameEmail');
+
+    return (
+      (fname && lname && middleNameOk) || hasSameEmail
+    );
   }
+
+  get canSaveReference(): boolean {
+    const array = this.currentRefIndex === 0 ? this.reference1Array : this.reference2Array;
+    if (!array || !array.at(0)) return false;
+
+    const group = array.at(0) as FormGroup;
+
+    if (!group.valid) return false;
+
+    if (!this.ismiddlename[this.currentRefIndex]) {
+      const mname = group.get('mname')?.value?.trim();
+      if (!mname || mname.length < 2) return false;
+    }
+
+    if (this.currentRefIndex === 1) {
+      if (this.referenceForm.hasError('sameEmail')) return false;
+      if (this.referenceForm.hasError('samePhone')) return false;
+    }
+
+    return true;
+  }
+
   next() {
 
-  if (this.referenceForm.invalid) {
-    this.referenceForm.markAllAsTouched();
-    return;
+    this.stepperService.next();
+    // if (this.referenceForm.invalid) {
+    //   this.referenceForm.markAllAsTouched();
+    //   return;
+    // }
+
+    // const form = this.referenceForm.value;
+
+    // const payload = {
+    //   reference1: form.reference1,
+    //   reference2: form.reference2
+    // };
+
+    // console.log("REFERENCE PAYLOAD:", payload);
+
+    // this.loanformservice.saveReference(payload).subscribe({
+    //   next: (res: any) => {
+    //     if (res.status === 'success') {
+
+    //      
+    //       this.loanformservice.referenceInfoData = payload;
+
+    //       this.stepperService.next();
+    //     }
+    //   }
+    // });
   }
-
-  const form = this.referenceForm.value;
-
-  const payload = {
-    reference1: form.reference1,
-    reference2: form.reference2
-  };
-
-  console.log("REFERENCE PAYLOAD:", payload);
-
-  // this.loanformservice.saveReference(payload).subscribe({
-  //   next: (res: any) => {
-  //     if (res.status === 'success') {
-
-  //      
-  //       this.loanformservice.referenceInfoData = payload;
-
-  //       this.stepperService.next();
-  //     }
-  //   }
-  // });
-}
 }

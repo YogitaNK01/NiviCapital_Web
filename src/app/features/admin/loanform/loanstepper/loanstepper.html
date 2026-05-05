@@ -33,7 +33,7 @@
     *ngFor="let sub of s.children; let subIndex = index"
     class="sub-step title text-body-1"
     [ngClass]="{
-      active: activeQualificationId === normalizeQualification(sub.label),
+      active: activeQualificationId === normalizeQualification(sub.label) && (isActive('educationDetails') || isActive('educationinfo')),
       disabled: isSubStepperDisabled(i, subIndex)
     }"
     (click)="!isSubStepperDisabled(i, subIndex) && openEducationSubStep(sub, $event)"

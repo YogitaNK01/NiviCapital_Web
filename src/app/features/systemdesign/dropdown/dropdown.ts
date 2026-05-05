@@ -64,7 +64,7 @@ export class Dropdown implements OnChanges, ControlValueAccessor {
   @Output() selectedValueChange = new EventEmitter<string | string[]>();
 
   @Input() customStyle: boolean = false;
-
+private isCvaWrite = false;
   value: any = null;
   selectedLabeldata = '';
 
@@ -73,7 +73,8 @@ export class Dropdown implements OnChanges, ControlValueAccessor {
 
   constructor(private eRef: ElementRef) {}
 
-  ngOnChanges(changes: SimpleChanges) {
+  ngOnChanges1(changes: SimpleChanges) {
+     if (this.isCvaWrite) return;
   if (changes['selectedValue']) {
     const value = changes['selectedValue'].currentValue;
 
@@ -85,6 +86,27 @@ export class Dropdown implements OnChanges, ControlValueAccessor {
     } else {
       this.selectedValues = [];
     }
+  }
+}
+ngOnChanges(changes: SimpleChanges) {
+  if (this.isCvaWrite) return;
+
+  if (changes['selectedValue'] && changes['selectedValue'].currentValue !== undefined) {
+    const value = changes['selectedValue'].currentValue;
+
+    if (value !== this.value) {
+      this.value = value;
+
+      if (Array.isArray(value)) {
+        this.selectedValues = [...value];
+      } else {
+        this.selectedLabeldata = this.getLabelFromValue(value);
+      }
+    }
+  }
+
+  if (changes['options'] && this.value) {
+    this.selectedLabeldata = this.getLabelFromValue(this.value);
   }
 }
   toggleDropdown() {
@@ -119,13 +141,29 @@ export class Dropdown implements OnChanges, ControlValueAccessor {
   }
 
 
-writeValue(value: string | string[]): void {
+writeValue1(value: string | string[]): void {
   if (Array.isArray(value)) {
     this.selectedValues = [...value];
   } else {
     this.value = value;
     this.selectedLabeldata = this.getLabelFromValue(value);
   }
+}
+writeValue(value: string | string[]): void {
+  this.isCvaWrite = true;   
+
+  this.value = value;
+
+  if (Array.isArray(value)) {
+    this.selectedValues = [...value];
+  } else if (value) {
+    this.selectedLabeldata = this.getLabelFromValue(value);
+  } else {
+    this.selectedLabeldata = this.placeholder;
+  }
+
+  // allow next change detection cycle
+  setTimeout(() => (this.isCvaWrite = false));
 }
 
   getLabelFromValue(value: any): string {

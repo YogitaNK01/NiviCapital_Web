@@ -7,11 +7,25 @@
 
             <div class="accordion-item b-0" *ngFor="let acc of accordions; let i = index">
 
-                <h2 class="accordion-header">
+                <!-- <h2 class="accordion-header">
                     <button class="accordion-button table-head" [class.collapsed]="!openIndex.includes(i)" type="button"
                         (click)="toggle(i)">
 
                         {{ acc.title }}
+                    </button>
+                </h2> -->
+
+                <h2 class="accordion-header">
+                    <button class="accordion-button table-head d-flex justify-content-between align-items-center"
+                        [class.collapsed]="!openIndex.includes(i)" type="button" (click)="toggle(i)">
+
+                        <span class="flex-grow-1">{{ acc.title }}</span>
+                        <!-- <app-buttons type="button" label="Edit" class="btn btncustomClass" [outline]="true"></app-buttons> -->
+
+                        <!-- <span class="delete-icon px-2" (click)="removeAccordion(acc.key, i, $event)" (click)="removeAccordion(acc, i, $event)"> -->
+                        <span class="delete-icon px-2">
+
+                        </span>
                     </button>
                 </h2>
 
@@ -21,15 +35,51 @@
                     <div class="accordion-body p-0 ">
 
                         <ng-container *ngIf="i === 0">
-                            <ng-container *ngTemplateOutlet="refernce1Template; context:{index:i}">
+                            <ng-container *ngTemplateOutlet="generalTemplate; context:{index:i}">
                             </ng-container>
                         </ng-container>
 
                         <ng-container *ngIf="i === 1">
-                            <ng-container *ngTemplateOutlet="refernce2Template; context:{index:i}">
+                            <ng-container *ngTemplateOutlet="estexpenseTemplate; context:{index:i}">
                             </ng-container>
                         </ng-container>
 
+                        <ng-container *ngIf="i === 2">
+                            <ng-container *ngTemplateOutlet="additonalTemplate; context:{index:i}">
+                            </ng-container>
+                        </ng-container>
+
+                        <ng-container *ngIf="i === 3">
+                            <ng-container *ngTemplateOutlet="kycTemplate; context:{index:i}">
+                            </ng-container>
+                        </ng-container>
+                        <ng-container *ngIf="i === 4">
+                            <ng-container *ngTemplateOutlet="educationTemplate; context:{index:i}">
+                            </ng-container>
+                        </ng-container>
+
+                        <ng-container *ngIf="i === 5">
+                            <ng-container *ngTemplateOutlet="incomeTemplate; context:{index:i}">
+                            </ng-container>
+                        </ng-container>
+                        <ng-container *ngIf="i === 6">
+                            <ng-container *ngTemplateOutlet="assetsTemplate; context:{index:i}">
+                            </ng-container>
+                        </ng-container>
+
+                        <ng-container *ngIf="i === 7">
+                            <ng-container *ngTemplateOutlet="liabilitiesTemplate; context:{index:i}">
+                            </ng-container>
+                        </ng-container>
+                        <ng-container *ngIf="i === 8">
+                            <ng-container *ngTemplateOutlet="monthlyexpTemplate; context:{index:i}">
+                            </ng-container>
+                        </ng-container>
+
+                        <ng-container *ngIf="i === 9">
+                            <ng-container *ngTemplateOutlet="referenceTemplate; context:{index:i}">
+                            </ng-container>
+                        </ng-container>
 
 
 
@@ -40,7 +90,212 @@
 
         </div>
 
-        <ng-template #refernce1Template let-i="index">
+        <!-- <ng-template #generalTemplate let-i="index">
+
+            <div class="row common-details-box d-flex flex-row ">
+                <form [formGroup]="summaryForm">
+                    <div class="info-grid-img">
+                        <div class="info-item d-flex flex-column"
+                            *ngFor="let field of otherFields; trackBy: trackByKey">
+
+                            <label class="text-label">{{ field.label }}</label>
+
+
+                            <p class="text-label-data">
+                                {{ summaryForm.get(field.key)?.value || '-' }}
+                            </p>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+        </ng-template> -->
+
+
+
+        <ng-template #generalTemplate let-i="index">
+            <div class="row common-details-box d-flex flex-row">
+                <form [formGroup]="summaryForm">
+
+                    <!-- Current Occupation Section -->
+                    <div class="d-flex flex-column gap-3 pb-1">
+                        <div class="info-item d-flex flex-column">
+                            <label class="text-label">Current Occupation</label>
+
+                            <div class="text-label-data fw-bold">{{ currentOccupation }}</div>
+                        </div>
+
+
+                        <!-- Course Details Section -->
+                        <div>
+                            <label class="text-label fw-bold mb-2">Course Details</label>
+                            <hr class="hrclass" />
+                            <div class="info-grid-img">
+                                <div class="info-item d-flex flex-column" *ngFor="let field of courseDetailsFields">
+                                    <label class="text-label">{{ field.label }}</label>
+                                    <div class="text-label-data fw-bold">{{ field.value }}</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </form>
+            </div>
+        </ng-template>
+
+
+
+
+        <ng-template #estexpenseTemplate let-i="index">
+            <div class="row common-details-box d-flex flex-row">
+                <form [formGroup]="summaryForm">
+
+                    <label class="text-label fw-bold mb-2">Education Fees -₹ </label>
+                    <hr class="hrclass" />
+
+
+                    <div class="info-grid-img">
+                        <div class="info-item d-flex flex-column">
+                            <label class="text-label">Tuition Fees (INR)</label>
+                            <div class="text-label-data fw-bold">₹{{ educationFees?.tuitionInr | number }}</div>
+                        </div>
+
+                        <div class="info-item d-flex flex-column">
+                            <label class="text-label">Amount (AUD)</label>
+                            <div class="text-label-data fw-bold">${{ educationFees?.tuitionAud }}</div>
+                        </div>
+                    </div>
+
+
+                    <!-- Living Expenses Section -->
+                    <div class="d-flex flex-column gap-3 pb-1">
+                        <label class="text-label fw-bold mb-2">Living Expenses - ₹</label>
+                        <!-- <hr class="hrclass" /> -->
+
+                        <div *ngFor="let expense of livingExpenses" class="info-item d-flex flex-column gap-2 h-100">
+                            <hr class="hrclass" />
+                            <span><svg xmlns="http://www.w3.org/2000/svg" width="8" height="8" viewBox="0 0 8 8"
+                                    fill="none">
+                                    <circle cx="4" cy="4" r="4" fill="#2570A3" />
+                                </svg> <label class="text-label fw-bold px-3">{{ expense.name }}</label></span>
+
+                            <hr class="hrclass" />
+                            <div class="info-grid-img p-0">
+                                <div class="info-item d-flex flex-column">
+                                    <label class="text-label">Select Frequency</label>
+                                    <div class="text-label-data fw-bold">{{ expense.frequency | titlecase }}</div>
+                                </div>
+                                <div class="info-item d-flex flex-column">
+                                    <label class="text-label">Amount (INR)</label>
+                                    <div class="text-label-data fw-bold">₹{{ expense.amountInr | number }}</div>
+                                </div>
+                                <div class="info-item d-flex flex-column">
+                                    <label class="text-label">Amount (AUD)</label>
+                                    <div class="text-label-data fw-bold">${{ expense.amountAud }}</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+
+
+                    <!-- Miscellaneo Expenses Section -->
+                    <div class="d-flex flex-column gap-3 pb-1">
+                        <label class="text-label fw-bold mb-2">Miscellaneous Expenses - ₹</label>
+                        <!-- <hr class="hrclass" /> -->
+
+                        <div *ngFor="let expense of miscellaneousExpenses"
+                            class="info-item d-flex flex-column gap-2 h-100">
+                            <hr class="hrclass" />
+                            <span><svg xmlns="http://www.w3.org/2000/svg" width="8" height="8" viewBox="0 0 8 8"
+                                    fill="none">
+                                    <circle cx="4" cy="4" r="4" fill="#2570A3" />
+                                </svg> <label class="text-label fw-bold px-3">{{ expense.name }}</label></span>
+
+                            <hr class="hrclass" />
+                            <div class="info-grid-img p-0">
+                                <div class="info-item d-flex flex-column">
+                                    <label class="text-label">Select Frequency</label>
+                                    <div class="text-label-data fw-bold">{{ expense.frequency | titlecase }}</div>
+                                </div>
+                                <div class="info-item d-flex flex-column">
+                                    <label class="text-label">Amount (INR)</label>
+                                    <div class="text-label-data fw-bold">₹{{ expense.amountInr | number }}</div>
+                                </div>
+                                <div class="info-item d-flex flex-column">
+                                    <label class="text-label">Amount (AUD)</label>
+                                    <div class="text-label-data fw-bold">${{ expense.amountAud }}</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </form>
+            </div>
+        </ng-template>
+
+
+
+        <ng-template #additonalTemplate let-i="index">
+
+            <div class="row common-details-box d-flex flex-row">
+                <form [formGroup]="summaryForm">
+
+                    <!-- Main Applicant Section -->
+                    <div>
+                        <label class="text-label fw-bold mb-2">Main Applicant</label>
+                        <hr class="hrclass" />
+                        <div class="info-grid-img">
+                            <div *ngFor="let field of additionalInfoFields.mainApplicant"
+                                class="info-item d-flex flex-column">
+                                <label class="text-label">{{ field.label }}</label>
+                                <div class="text-label-data fw-bold">{{ field.value }}</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Spouse Details Section -->
+                    <div>
+                        <label class="text-label fw-bold mb-2">Spouse Details</label>
+                        <hr class="hrclass" />
+                        <div class="info-grid-img">
+                            <div *ngFor="let field of additionalInfoFields.spouse" class="info-item d-flex flex-column">
+                                <label class="text-label">{{ field.label }}</label>
+                                <div class="text-label-data fw-bold">{{ field.value }}</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Father's Details Section -->
+                    <div>
+                        <label class="text-label fw-bold mb-2">Father's Details</label>
+                        <hr class="hrclass" />
+                        <div class="info-grid-img">
+                            <div *ngFor="let field of additionalInfoFields.father" class="info-item d-flex flex-column">
+                                <label class="text-label">{{ field.label }}</label>
+                                <div class="text-label-data fw-bold">{{ field.value }}</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Mother's Details Section -->
+                    <div>
+                        <label class="text-label fw-bold mb-2">Mother's Details</label>
+                        <hr class="hrclass" />
+                        <div class="info-grid-img">
+                            <div *ngFor="let field of additionalInfoFields.mother" class="info-item d-flex flex-column">
+                                <label class="text-label">{{ field.label }}</label>
+                                <div class="text-label-data fw-bold">{{ field.value }}</div>
+                            </div>
+                        </div>
+                    </div>
+
+                </form>
+            </div>
+        </ng-template>
+
+
+        <ng-template #kycTemplate let-i="index">
 
             <div class="row common-details-box d-flex flex-row ">
                 <form [formGroup]="summaryForm">
@@ -60,49 +315,340 @@
             </div>
 
         </ng-template>
-        <ng-template #refernce2Template let-i="index">
+
+        <ng-template #educationTemplate let-i="index">
 
             <div class="row common-details-box d-flex flex-row ">
-                 <div class="info-grid-img ">
-      <div class="info-item d-flex flex-column">
-        <label class="text-label">First Name</label>
-        <p class="text-label-data">Rajesh</p>
-      </div>
-      <div class="info-item d-flex flex-column">
-        <label class="text-label">Middle Name</label>
-        <p class="text-label-data">-</p>
-      </div>
-      <div class="info-item d-flex flex-column">
-        <label class="text-label">Last Name</label>
-        <p class="text-label-data">Doe</p>
-      </div>
-      <div class="info-item d-flex flex-column">
-        <label class="text-label">Middle Name</label>
-        <p class="text-label-data">-</p>
-      </div>
-      <div class="info-item d-flex flex-column">
-        <label class="text-label">Last Name</label>
-        <p class="text-label-data">Doe</p>
-      </div>
-      <div class="info-item d-flex flex-column">
-        <label class="text-label">Middle Name</label>
-        <p class="text-label-data">-</p>
-      </div>
-      <div class="info-item d-flex flex-column">
-        <label class="text-label">Last Name</label>
-        <p class="text-label-data">Doe</p>
-      </div>
-      <div class="info-item d-flex flex-column">
-        <label class="text-label">Middle Name</label>
-        <p class="text-label-data">-</p>
-      </div>
-      <div class="info-item d-flex flex-column">
-        <label class="text-label">Last Name</label>
-        <p class="text-label-data">Doe</p>
-      </div>
-    </div> 
+                <form [formGroup]="summaryForm">
+                    <div class="info-grid-img">
+                        <div class="info-item d-flex flex-column"
+                            *ngFor="let field of otherFields; trackBy: trackByKey">
+
+                            <label class="text-label">{{ field.label }}</label>
+
+
+                            <p class="text-label-data">
+                                {{ summaryForm.get(field.key)?.value || '-' }}
+                            </p>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+        </ng-template>
+
+        <!-- <ng-template #incomeTemplate let-i="index">
+
+            <div class="row common-details-box d-flex flex-row ">
+                <form [formGroup]="summaryForm">
+                    <div class="info-grid-img">
+                        <div class="info-item d-flex flex-column"
+                            *ngFor="let field of otherFields; trackBy: trackByKey">
+
+                            <label class="text-label">{{ field.label }}</label>
+
+
+                            <p class="text-label-data">
+                                {{ summaryForm.get(field.key)?.value || '-' }}
+                            </p>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+        </ng-template> -->
+
+
+        <ng-template #incomeTemplate let-i="index">
+            <div class="row common-details-box d-flex flex-row">
+                <form [formGroup]="summaryForm">
+
+                    <!-- Occupation Details Header -->
+                    <div class="d-flex flex-column gap-3 pb-1">
+
+                        <label class="text-label fw-bold mb-2">Occupation Details</label>
+                        <hr class="hrclass" />
+
+                        <div class="info-grid-img">
+
+                            <!-- Dynamic rendering for each document type -->
+                            <ng-container *ngFor="let docType of documentTypes">
+                                <ng-container *ngIf="incomeDetails[docType.key]?.length">
+
+                                    <ng-container *ngFor="let doc of incomeDetails[docType.key]; let i = index">
+                                        <div class="info-item d-flex flex-column">
+                                            <label class="text-label">
+                                                {{ docType.label }} {{ docType.key === 'salarySlips' ? (i + 1) :
+                                                (docType.key === 'itrs' ? (i + 1) : '') }}
+                                            </label>
+                                            <div class="text-label-data fw-bold">
+                                                {{ doc.url || '-' }}
+                                            </div>
+                                        </div>
+                                    </ng-container>
+
+                                </ng-container>
+                            </ng-container>
+
+                        </div>
+                    </div>
+
+                </form>
             </div>
         </ng-template>
+
+
+
+
+        <!-- <ng-template #assetsTemplate let-i="index">
+
+            <div class="row common-details-box d-flex flex-row ">
+                <form [formGroup]="summaryForm">
+                    <div class="info-grid-img">
+                        <div class="info-item d-flex flex-column"
+                            *ngFor="let field of otherFields; trackBy: trackByKey">
+
+                            <label class="text-label">{{ field.label }}</label>
+
+
+                            <p class="text-label-data">
+                                {{ summaryForm.get(field.key)?.value || '-' }}
+                            </p>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+        </ng-template> -->
+
+
+        <ng-template #assetsTemplate let-i="index">
+            <div class="row common-details-box d-flex flex-row">
+                <form [formGroup]="summaryForm">
+
+                    <ng-container *ngFor="let section of assetsSections">
+
+                        <!-- Section Title -->
+                        <label class="text-label fw-bold mb-2 ">
+                            {{ section.sectionLabel }}
+                        </label>
+                        <hr class="hrclass" />
+
+                        <!-- Cards -->
+                        <ng-container *ngFor="let card of section.cards">
+
+                            <!-- Bullet title (Property / FD / Investment only) -->
+                            <span *ngIf="card.title">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="8" height="8">
+                                    <circle cx="4" cy="4" r="4" fill="#2570A3" />
+                                </svg>
+                                <label class="text-label fw-bold px-3">
+                                    {{ card.title }}
+                                </label>
+                            </span>
+                            <hr class="hrclass" />
+
+                            <div class="info-grid-img p-0 mt-2">
+
+                                <div *ngFor="let field of card.fields" class="info-item d-flex flex-column"
+                                    [class.col-12]="field.fullRow">
+                                    <label class="text-label">{{ field.label }}</label>
+
+                                    <div class="text-label-data fw-bold">
+                                        <ng-container *ngIf="field.isCurrency; else normal">
+                                            ₹{{ field.value | number }}
+                                        </ng-container>
+                                        <ng-template #normal>
+                                            {{ field.value }}
+                                        </ng-template>
+                                    </div>
+                                </div>
+
+                            </div>
+
+
+                        </ng-container>
+
+                    </ng-container>
+
+                </form>
+            </div>
+        </ng-template>
+
+
+
+        <ng-template #liabilitiesTemplate let-i="index">
+            <div class="row common-details-box d-flex flex-row">
+                <form [formGroup]="summaryForm">
+
+
+                    <ng-container *ngFor="let section of liabilitiesSections">
+
+                        <!-- Section Title -->
+                        <label class="text-label fw-bold mb-2 ">
+                            {{ section.sectionLabel }}
+                        </label>
+                        <hr class="hrclass" />
+
+                        <!-- Cards -->
+                        <ng-container *ngFor="let card of section.cards">
+
+                            <!-- Bullet title (Property / FD / Investment only) -->
+                            <span *ngIf="card.title">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="8" height="8">
+                                    <circle cx="4" cy="4" r="4" fill="#2570A3" />
+                                </svg>
+                                <label class="text-label fw-bold px-3">
+                                    {{ card.title }}
+                                </label>
+                            </span>
+                            <hr class="hrclass" />
+
+                            <div class="info-grid-img p-0 mt-2">
+
+                                <div *ngFor="let field of card.fields" class="info-item d-flex flex-column"
+                                    [class.col-12]="field.fullRow">
+                                    <label class="text-label">{{ field.label }}</label>
+
+                                    <div class="text-label-data fw-bold">
+                                        <ng-container *ngIf="field.isCurrency; else normal">
+                                            ₹{{ field.value | number }}
+                                        </ng-container>
+                                        <ng-template #normal>
+                                            {{ field.value }}
+                                        </ng-template>
+                                    </div>
+                                </div>
+
+                            </div>
+
+
+                        </ng-container>
+
+                    </ng-container>
+
+                </form>
+            </div>
+        </ng-template>
+
+
+
+
+
+
+        <!-- 
+        <ng-template #liabilitiesTemplate let-i="index">
+
+            <div class="row common-details-box d-flex flex-row ">
+                <form [formGroup]="summaryForm">
+                    <div class="info-grid-img">
+                        <div class="info-item d-flex flex-column"
+                            *ngFor="let field of otherFields; trackBy: trackByKey">
+
+                            <label class="text-label">{{ field.label }}</label>
+
+
+                            <p class="text-label-data">
+                                {{ summaryForm.get(field.key)?.value || '-' }}
+                            </p>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+        </ng-template> -->
+
+
+        <!-- <ng-template #monthlyexpTemplate let-i="index">
+
+            <div class="row common-details-box d-flex flex-row ">
+                <form [formGroup]="summaryForm">
+                    <div class="info-grid-img">
+                        <div class="info-item d-flex flex-column"
+                            *ngFor="let field of otherFields; trackBy: trackByKey">
+
+                            <label class="text-label">{{ field.label }}</label>
+
+
+                            <p class="text-label-data">
+                                {{ summaryForm.get(field.key)?.value || '-' }}
+                            </p>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </ng-template> -->
+
+        <ng-template #monthlyexpTemplate let-i="index">
+            <div class="row common-details-box d-flex flex-row">
+                <form [formGroup]="summaryForm">
+
+                    <div class="d-flex flex-column gap-3 pb-1">
+
+                        <ng-container *ngFor="let field of monthlyExpenditureFields">
+                            <div class="mb-3">
+                                <label class="text-label fw-bold">{{ field.label }}</label>
+                                <hr class="hrclass my-2" />
+                                <div class="info-item d-flex flex-column">
+                                    <!-- <label class="text-label">{{ monthlyExpenditure[field.key]?.name || '-' }}</label> -->
+                                    <label class="text-label">{{ getDisplayLabel(monthlyExpenditure[field.key]?.name)
+                                        }}</label>
+
+                                    <div class="text-label-data fw-bold">
+                                        {{ monthlyExpenditure[field.key]?.amountInr != null ?
+                                        (monthlyExpenditure[field.key].amountInr | number:'1.0-0') : '-' }}
+                                    </div>
+                                </div>
+                            </div>
+                        </ng-container>
+
+                        <!-- Other Recurring Expenses -->
+                        <div *ngIf="monthlyExpenditure.otherRecurringExpenses?.length > 0; else noOtherExpenses"
+                            class="mb-3">
+                            <label class="text-label fw-bold mb-1">Other Recurring Expenses</label>
+                            <hr class="hrclass my-2" />
+                            <div class="info-grid-img">
+                                <div class="info-item d-flex flex-column"
+                                    *ngFor="let expense of monthlyExpenditure.otherRecurringExpenses">
+                                    <label class="text-label">{{ expense.name || 'N/A' }}</label>
+                                    <div class="text-label-data fw-bold">
+                                        {{ expense.amountInr != null ? (expense.amountInr | number:'1.0-0') : '-' }}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <ng-template #noOtherExpenses>
+                            <!-- Optionally show nothing or a message if no other expenses -->
+                        </ng-template>
+
+                    </div>
+
+                </form>
+            </div>
+        </ng-template>
+
+        <ng-template #referenceTemplate let-i="index">
+
+            <div class="row common-details-box d-flex flex-row ">
+                <form [formGroup]="summaryForm">
+                    <div class="info-grid-img">
+                        <div class="info-item d-flex flex-column"
+                            *ngFor="let field of otherFields; trackBy: trackByKey">
+
+                            <label class="text-label">{{ field.label }}</label>
+
+
+                            <p class="text-label-data">
+                                {{ summaryForm.get(field.key)?.value || '-' }}
+                            </p>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+        </ng-template>
+
 
     </form>
 </div>

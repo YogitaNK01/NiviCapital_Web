@@ -60,3 +60,7 @@ padding: $spacing_16 $spacing_18;
   max-height: 500px;
   
 }
+
+.common-details-box + .common-details-box {
+  padding-top: 0 !important;   
+}

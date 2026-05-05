@@ -288,32 +288,33 @@ export class Customer implements OnInit, OnDestroy {
   onSearchChange(value: string): void {
     this.searchText = value.toLowerCase();
 
-    
- if (this.searchText.length === 0) {
-    this.nodata = false;
-    this.hidepagination = false;
-    this.currentPage = 1;
 
-    this.loadallusers();      // reload paginated list
-    this.cdr.detectChanges();
-    return;
-  }
+    if (this.searchText.length === 0) {
+      this.nodata = false;
+      this.hidepagination = false;
+      this.currentPage = 1;
 
-  
+      this.loadallusers();      // reload paginated list
+      this.cdr.detectChanges();
+      return;
+    }
+
+
     if (this.searchText.length !== 10) {
       return;
     }
 
     let input = {
       identifier: this.searchText,
-      type: "MOBILE"
+      type: "MOBILE",
+      isSearch :true
 
     }
     this.addcustomerservice.customersearch(input).subscribe({
       next: (res) => {
         console.log(res);
 
-         const row: TransformedUserData = {
+        const row: TransformedUserData = {
           custId: res.data.custId ?? '-',
           ncId: res.data.ncId ?? '-',
           firstName: res.data.firstName ?? '-',
@@ -339,7 +340,7 @@ export class Customer implements OnInit, OnDestroy {
 
         console.log('Search API Result displayed in table:', row);
 
-      
+
 
 
 
@@ -349,7 +350,7 @@ export class Customer implements OnInit, OnDestroy {
       }
     })
 
-   
+
   }
 
 

@@ -98,7 +98,7 @@ export class GeneralInfo implements OnInit {
   isOthercoursetype = false;
   isOthercoursename = false;
 
-  constructor(private fb: FormBuilder, private formSvc: Loanformservice, private router: Router, private stepperService: Loanstepperservice, private route: ActivatedRoute,public mainservice:Main) { }
+  constructor(private fb: FormBuilder, private formSvc: Loanformservice, private router: Router, private stepperService: Loanstepperservice, private route: ActivatedRoute, public mainservice: Main) { }
   ngOnInit() {
     this.route.queryParams.subscribe(params => {
       if (params['applicantId']) {
@@ -135,14 +135,23 @@ export class GeneralInfo implements OnInit {
       othercoursenametitle: [''],
       // courseduration: [''],
       coursestartdate: ['', [Validators.required, this.dateMinValidator(() => new Date())]],
-      courseenddate: ['', [Validators.required, this.dateMinValidator(() => this.calculatedEndDate)]],
+      courseenddate: ['', [Validators.required, this.endDateValidator()]],
       checkedasset: [false, Validators.required],
       lendingpartner: ['', Validators.required],
 
 
     });
-    this.registerForm.get('coursestartdate')?.valueChanges.subscribe(() => {
-      this.calculateEndDate();
+    this.registerForm.get('coursestartdate')?.valueChanges.subscribe((startDate) => {
+
+      if (!startDate) return;
+
+      const start = new Date(startDate);
+      start.setHours(0, 0, 0, 0);
+      this.calculatedEndDate = start;
+      const endCtrl = this.registerForm.get('courseenddate');
+      endCtrl?.reset();
+      endCtrl?.updateValueAndValidity();
+
     });
 
     // this.registerForm.get('courseduration')?.valueChanges.subscribe(() => {
@@ -322,7 +331,7 @@ export class GeneralInfo implements OnInit {
 
     const found = this.Australianstate.find(s => s.value === id);
     this.selectedStateLabel = found?.label ?? '';
-        this.isOtherstate = this.selectedStateLabel.toLowerCase().includes('other');
+    this.isOtherstate = this.selectedStateLabel.toLowerCase().includes('other');
 
 
     this.AustralianUniversities = [];
@@ -389,6 +398,16 @@ export class GeneralInfo implements OnInit {
     const found = this.selectcourse.find(s => s.value === id);
     this.selectedcoursetypeLabel = found?.label ?? '';
     this.isOthercoursetype = this.selectedcoursetypeLabel.toLowerCase().includes('other');
+    this.formSvc.coursetypeug = this.selectedcoursetypeLabel.includes('UG') ? true : false;
+
+    localStorage.setItem(
+      'coursetypeug',
+      JSON.stringify(this.formSvc.coursetypeug)
+    );
+
+    this.stepperService.setvalues(
+      this.formSvc.isasset, this.formSvc.isincome, this.formSvc.issalaried, this.formSvc.coursetypeug
+    );
 
     this.selectcoursename = [];
     this.selectedcourseNameLabel = '';
@@ -487,11 +506,11 @@ export class GeneralInfo implements OnInit {
       const end = new Date(endDate);
       const min = new Date(minDate);
 
-      if (end < min) {
-        return { invalidEndDate: true };
-      }
+      
+end.setHours(0, 0, 0, 0);
+    min.setHours(0, 0, 0, 0);
+    return end <= min ? { invalidEndDate: true } : null;
 
-      return null;
     };
   };
 

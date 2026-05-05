@@ -3,7 +3,8 @@ import { Messagebox } from '../../features/systemdesign/messagebox/messagebox';
 
 export interface SectionComparison {
   currentSections: string[];
-  addingSection: string;
+  addingSection: any;
+  removingSections:any;
 }
 @Injectable({
   providedIn: 'root'

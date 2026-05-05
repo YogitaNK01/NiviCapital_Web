@@ -1,440 +1,772 @@
-<div class="base-layout">
+<div class="vh-container">
+    <div class="base-layout base-height">
 
-
-    <form [formGroup]="referenceForm" (ngSubmit)="submit()" id="referenceForm" class="w-100 ">
-
-        <div class=" accordion d-flex flex-column gap-4 mb-4">
-
-            <div class="accordion-item b-0" *ngFor="let acc of accordions; let i = index">
-
-                <h2 class="accordion-header">
-                    <button class="accordion-button table-head" [class.collapsed]="!openIndex.includes(i)" type="button"
-                        (click)="toggle(i)">
-
-                        {{ acc.title }}<span *ngIf="acc" class="text-danger">*</span>
-                    </button>
-                </h2>
-
-
-                <div class="accordion-collapse collapse" [class.show]="openIndex.includes(i)">
-
-                    <div class="accordion-body p-0 ">
-
-                        <ng-container *ngIf="i === 0">
-                            <ng-container *ngTemplateOutlet="refernce1Template; context:{index:i}">
-                            </ng-container>
-                        </ng-container>
-
-                        <ng-container *ngIf="i === 1">
-                            <ng-container *ngTemplateOutlet="refernce2Template; context:{index:i}">
-                            </ng-container>
-                        </ng-container>
+        <form [formGroup]="referenceForm" (ngSubmit)="submit()" id="referenceForm" class="w-100 ">
 
 
 
+            <!-- Button to open popup (you can place this where your Reference fields were) -->
+            <div class="d-flex flex-column gap-3">
+                <button class="btn referencetitle" (click)="openModal(0)">
+                    <span class="text-common fw-bold blue-text">Reference 1<span class="text-danger">*</span></span>
+
+
+                    <span class="icons d-flex gap-4">
+                        <svg *ngIf="reference1Filled" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                            viewBox="0 0 24 24" fill="none">
+                            <path
+                                d="M12 22C17.5 22 22 17.5 22 12C22 6.5 17.5 2 12 2C6.5 2 2 6.5 2 12C2 17.5 6.5 22 12 22Z"
+                                stroke="#3B8439" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                            <path d="M7.75 12L10.58 14.83L16.25 9.17004" stroke="#3B8439" stroke-width="1.5"
+                                stroke-linecap="round" stroke-linejoin="round" />
+                        </svg>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
+                            <path
+                                d="M8.91016 19.92L15.4302 13.4C16.2002 12.63 16.2002 11.37 15.4302 10.6L8.91016 4.07996"
+                                stroke="#25262F" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round"
+                                stroke-linejoin="round" />
+                        </svg>
+                    </span>
+
+                </button>
+
+                <button class="btn referencetitle" (click)="openModal(1)">
+                    <span class="text-common fw-bold blue-text">Reference 2<span class="text-danger">*</span></span>
+
+                    <span class="icons d-flex gap-4">
+                        <svg *ngIf="reference2Filled" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                            viewBox="0 0 24 24" fill="none">
+                            <path
+                                d="M12 22C17.5 22 22 17.5 22 12C22 6.5 17.5 2 12 2C6.5 2 2 6.5 2 12C2 17.5 6.5 22 12 22Z"
+                                stroke="#3B8439" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                            <path d="M7.75 12L10.58 14.83L16.25 9.17004" stroke="#3B8439" stroke-width="1.5"
+                                stroke-linecap="round" stroke-linejoin="round" />
+                        </svg>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
+                            <path
+                                d="M8.91016 19.92L15.4302 13.4C16.2002 12.63 16.2002 11.37 15.4302 10.6L8.91016 4.07996"
+                                stroke="#25262F" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round"
+                                stroke-linejoin="round" />
+                        </svg>
+                    </span>
+                </button>
+            </div>
+
+
+            <!-- ==================== REFERENCE MODAL ==================== -->
+            <div class="modal fade" id="referenceModal" tabindex="-1" aria-hidden="true">
+                <div class="modal-dialog modal-fullscreen-md-down modal-dialog-centered reference-modal">
+
+                    <div class="modal-content">
+
+
+                        <button class="modal-close-btn" (click)="handleCloseModal()">
+                            <svg width="44" height="44" viewBox="0 0 48 48">
+                                <circle cx="24" cy="24" r="24" fill="#F33B48" />
+                                <path d="M16 16L32 32" stroke="white" stroke-width="3" />
+                                <path d="M32 16L16 32" stroke="white" stroke-width="3" />
+                            </svg>
+                        </button>
+
+
+                        <div class="modal-header">
+                            <h5 class="text-dp-3-bold fw-bold blue-text">
+                                Reference {{ currentRefIndex + 1 }} <span class="text-danger">*</span>
+                            </h5>
+
+                        </div>
+
+                        <div class="modal-body">
+
+                            <!-- Step 1: Mobile Number -->
+                            <div *ngIf="popupStep === 1" class="mobilepopup">
+
+                                <div class="w-100   gap-3">
+                                    <app-inputfield type="tel" name="phone" [required]="true" pattern="^[6-9][0-9]{9}$"
+                                        #phone="ngModel" label="Mobile Number" placeholder="Enter Mobile Number"
+                                        helpText="Help text" class="w-100" minlength="10" [maxlength]="10"
+                                        (ngModelChange)="onMobileChange($event)" [(ngModel)]="mobileNumber"
+                                        (input)="main.restrictInput($event, 'number')" [showPhonePrefix]="true"
+                                        [ngModelOptions]="{ standalone: true }"
+                                        [showPhonePrefixnumber]="true"></app-inputfield>
+
+                                    <div class="text-danger mt-1" *ngIf="phone.invalid && phone.touched">
+                                        <small *ngIf="phone.errors?.['required']">Phone number is required</small>
+                                        <small *ngIf="phone.errors?.['pattern']">Please enter a valid 10-digit phone
+                                            number</small>
+                                    </div>
+                                    <div class="text-danger mt-1 error"
+                                        *ngIf=" referenceForm.hasError('samePhone') && (reference2Touched  || reference1Touched ) ">
+                                        Phone number must be different from Reference 1
+                                    </div>
+
+
+                                    @if(isdata && !(referenceForm.hasError('samePhone'))) {
+                                    <div class=" mt-1 text-start">
+                                        <small class="text-body-2 fst-italic text-danger">This is new
+                                            customer</small>
+                                    </div>
+                                    }
+                                </div>
+
+
+                                <app-buttons type="button" [label]=" isSearchDone ? 'Next' : 'Search'"
+                                    (click)="!isSearchDone ? searchReference() : goNext()"
+                                    [disabled]="phone.invalid || !mobileNumber || referenceForm.hasError('samePhone')"
+                                    class="btn btncustomClass searchbtn" color="primary">
+                                </app-buttons>
+                            </div>
+
+                            <!-- Step 2: Full Form using your existing templates -->
+                            <div *ngIf="popupStep === 2">
+                                <ng-container *ngIf="currentRefIndex === 0">
+                                    <ng-container *ngTemplateOutlet="refernce1Template; context:{index: 0}">
+                                    </ng-container>
+                                </ng-container>
+
+                                <ng-container *ngIf="currentRefIndex === 1">
+                                    <ng-container *ngTemplateOutlet="refernce2Template; context:{index: 0}">
+                                    </ng-container>
+                                </ng-container>
+                            </div>
+
+                        </div>
+
+                        <!-- Footer only shows in Step 2 -->
+                        <div class="modal-footer d-flex justify-content-start" *ngIf="popupStep === 2">
+                            <app-buttons type="button" label="Save" class="btn btncustomClass" color="primary"
+                                (click)="saveReference()" [disabled]=" !canSaveReference || !isFormChanged() ">
+                            </app-buttons>
+
+
+                        </div>
 
                     </div>
                 </div>
-
             </div>
+
+
+
+
+            <ng-template #refernce1Template let-i="index">
+                <div formArrayName="reference1">
+
+
+                    <div *ngFor="let ref of reference1Array.controls; let i = index" [formGroupName]="i">
+
+
+
+                        <div class="row common-details-box1 d-flex flex-row ">
+
+                            <div class="row1  d-flex  common-details-box1 d-flex flex-column">
+
+                                <div class="row mt-20">
+                                    <div class="col-lg-4 col-sm-12 ">
+
+                                        <app-inputfield formControlName="fname" label="First Name" [required]="true"
+                                            placeholder="First Name" (input)="main.restrictInput($event, 'text')"
+                                            [maxlength]="25">
+                                        </app-inputfield>
+
+
+                                        <div class="text-danger" *ngIf="getRefControl('reference1', i, 'fname')?.touched 
+                                           && getRefControl('reference1', i, 'fname')?.invalid">
+
+                                            <div *ngIf="getRefControl('reference1', i, 'fname')?.errors?.['required']">
+                                                First name is required
+                                            </div>
+
+                                            <div *ngIf="getRefControl('reference1', i, 'fname')?.errors?.['pattern']">
+                                                Only alphabets are allowed
+                                            </div>
+
+                                            <div *ngIf="getRefControl('reference1', i, 'fname')?.errors?.['minlength']">
+                                                Minimum 2 characters required
+                                            </div>
+
+                                            <div *ngIf="getRefControl('reference1', i, 'fname')?.errors?.['maxlength']">
+                                                Maximum 25 characters allowed
+                                            </div>
+
+                                        </div>
+                                    </div>
+
+                                    <div class="col-lg-4 col-sm-12 ">
+
+                                        <app-inputfield formControlName="mname" label="Middle Name"
+                                            placeholder="Middle Name" (input)="main.restrictInput($event, 'text')"
+                                            [disabled]="ismiddlename[currentRefIndex]" [maxlength]="25">
+                                        </app-inputfield>
+
+                                        <div class="text-danger"
+                                            *ngIf="getRefControl('reference1', i, 'mname')?.touched && getRefControl('reference1', i, 'mname')?.invalid">
+
+                                            <!-- <div *ngIf="getRefControl('reference1', i, 'mname')?.errors?.['required']">
+                                                Middle name is required
+                                            </div> -->
+
+                                            <div *ngIf="getRefControl('reference1', i, 'mname')?.errors?.['pattern']">
+                                                Only alphabets are allowed
+                                            </div>
+
+                                            <div *ngIf="getRefControl('reference1', i, 'mname')?.errors?.['minlength']">
+                                                Minimum 2 characters required
+                                            </div>
+
+                                            <div *ngIf="getRefControl('reference1', i, 'mname')?.errors?.['maxlength']">
+                                                Maximum 25 characters allowed
+                                            </div>
+
+                                        </div>
+                                        <app-checkbox [checked]="ismiddlename[currentRefIndex]" [indeterminate]="false"
+                                            label="I don’t have middle name" (checkedChange)="onmiddlename($event)">
+                                        </app-checkbox>
+                                        <div class="text-danger mt-1"
+                                            *ngIf=" submitAttempted && !ismiddlename[currentRefIndex] && !getRefControl('reference1', i, 'mname')?.value">
+                                            Please enter Middle Name or select the checkbox.
+                                        </div>
+                                    </div>
+
+
+
+                                    <div class="col-lg-4 col-sm-12 ">
+
+                                        <app-inputfield formControlName="lname" label="Last Name" [required]="true"
+                                            placeholder="Last Name" (input)="main.restrictInput($event, 'text')"
+                                            [maxlength]="25">
+                                        </app-inputfield>
+                                        <div class="text-danger"
+                                            *ngIf="getRefControl('reference1', i, 'lname')?.touched && getRefControl('reference1', i, 'lname')?.invalid">
+
+                                            <div *ngIf="getRefControl('reference1', i, 'lname')?.errors?.['required']">
+                                                Last name is required
+                                            </div>
+
+                                            <div *ngIf="getRefControl('reference1', i, 'lname')?.errors?.['pattern']">
+                                                Only alphabets are allowed
+                                            </div>
+
+                                            <div *ngIf="getRefControl('reference1', i, 'lname')?.errors?.['minlength']">
+                                                Minimum 2 characters required
+                                            </div>
+
+                                            <div *ngIf="getRefControl('reference1', i, 'lname')?.errors?.['maxlength']">
+                                                Maximum 25 characters allowed
+                                            </div>
+
+                                        </div>
+
+                                    </div>
+                                </div>
+
+                                <div class="row mt-20">
+                                    <div class="col-lg-6 col-sm-12 ">
+                                        <app-inputfield type="text" formControlName="email" label="Email Id"
+                                            placeholder="Enter Email Id" helpText="Help text" name="email"
+                                            [minlength]="10" [maxlength]="40">
+                                        </app-inputfield>
+                                        <div class="text-danger"
+                                            *ngIf="getRefControl('reference1', i, 'email')?.touched && getRefControl('reference1', i, 'email')?.invalid">
+
+                                            <div *ngIf="getRefControl('reference1', i, 'email')?.errors?.['required']">
+                                                Email is required
+                                            </div>
+
+
+                                            <div
+                                                *ngIf="getRefControl('reference1', i, 'email')?.errors?.['pattern' ] && !getRefControl('reference1', i, 'email')?.errors?.['minlength']">
+                                                Please enter a valid email address</div>
+
+                                            <div *ngIf="getRefControl('reference1', i, 'email')?.errors?.['minlength']">
+                                                Please enter a valid email address between 10 and 40 characters
+                                            </div>
+                                            <!-- <div *ngIf="referenceForm.hasError('sameEmail') && getRefControl('reference1', i, 'email')?.value"
+                                                && reference1Touched>
+                                                Email must be different from Reference 2
+                                            </div> -->
+
+<div *ngIf="getRefControl('reference1', i, 'email')?.errors?.['sameEmail']">
+    Email must be different from Reference 2
+  </div>
+
+
+                                        </div>
+
+                                    </div>
+
+                                    <div class="col-lg-6 col-sm-12 ">
+
+                                        <app-inputfield type="text" formControlName="phone" [required]="true"
+                                            [readonly]="true" label="Mobile Number" placeholder="mobile"
+                                            helpText="Help text" name="phone">
+                                        </app-inputfield>
+                                        <app-checkbox [checked]="true" label="OTP is not Mandatory" [disabled]="true">
+                                        </app-checkbox>
+
+
+                                    </div>
+                                </div>
+
+                                <div class="row mt-20">
+                                    <app-inputfield type="text" formControlName="peraddressline1" label="Address Line 1"
+                                        placeholder="Address Line" helpText="Help text" [minlength]="2"
+                                        [maxlength]="255" name="peraddressline1">
+                                    </app-inputfield>
+                                    <div class="text-danger mt-1"
+                                        *ngIf=" getRefControl('reference1', i, 'peraddressline1')?.touched && getRefControl('reference1', i, 'peraddressline1')?.invalid  ">
+
+                                        <small
+                                            *ngIf="getRefControl('reference1', i, 'peraddressline1')?.errors?.['required']">
+                                            Address Line 1 is required
+                                        </small>
+                                        <small
+                                            *ngIf="getRefControl('reference1', i, 'peraddressline1')?.errors?.['minlength'] || getRefControl('reference1', i, 'peraddressline1')?.errors?.['maxlength']">
+                                            Address must be between 2 to 255 characters
+                                        </small>
+                                    </div>
+
+                                </div>
+                                <div class="row mt-20">
+                                    <app-inputfield type="text" formControlName="peraddressline2" label="Address Line 2"
+                                        placeholder="Address Line" helpText="Help text" [minlength]="2"
+                                        [maxlength]="255" name="peraddressline2">
+                                    </app-inputfield>
+                                    <div class="text-danger mt-1"
+                                        *ngIf=" getRefControl('reference1', i, 'peraddressline2')?.touched && getRefControl('reference1', i, 'peraddressline2')?.invalid  ">
+                                        <small
+                                            *ngIf="getRefControl('reference1', i, 'peraddressline2')?.errors?.['required']">
+                                            Address Line 2 is required
+                                        </small>
+                                        <small
+                                            *ngIf="getRefControl('reference1', i, 'peraddressline2')?.errors?.['minlength'] || getRefControl('reference1', i, 'peraddressline2')?.errors?.['maxlength']">
+                                            Address must be between 2 to 255 characters
+                                        </small>
+                                    </div>
+                                </div>
+                                <div class="row mt-20">
+                                    <app-inputfield type="text" formControlName="peraddressline3" label="Address Line 3"
+                                        [minlength]="2" [maxlength]="255" placeholder="Address Line"
+                                        helpText="Help text" name="peraddressline3">
+                                    </app-inputfield>
+                                    <div class="text-danger mt-1"
+                                        *ngIf=" getRefControl('reference1', i, 'peraddressline3')?.touched && getRefControl('reference1', i, 'peraddressline3')?.invalid  ">
+
+                                        <small
+                                            *ngIf="getRefControl('reference1', i, 'peraddressline3')?.errors?.['minlength'] || getRefControl('reference1', i, 'peraddressline3')?.errors?.['maxlength']">
+                                            Address must be between 2 to 255 characters
+                                        </small>
+                                    </div>
+                                </div>
+                                <div class="row mt-20">
+                                    <div class="col-lg-6 col-sm-12 ">
+                                        <app-inputfield type="text" [disabled]="true" label="Country"
+                                            placeholder="India" helpText="Help text" name="percountry">
+                                        </app-inputfield>
+
+                                    </div>
+
+                                    <div class="col-lg-6 col-sm-12 ">
+                                        <app-dropdown [options]="stateOptions" [placeholder]="'Select State'"
+                                            (selectedValueChange)="selectPerState($event)" [searchable]="true"
+                                            [selectedValue]="selectedStateId[currentRefIndex]" label="State"
+                                            name="state">
+                                        </app-dropdown>
+
+
+
+                                    </div>
+
+                                    <div class="col-lg-6 col-sm-12 mt-20">
+
+                                        <app-dropdown [options]="cityOptions" [placeholder]="'Select City'"
+                                            [selectedValue]="selectedCityId[currentRefIndex]" [searchable]="true"
+                                            (selectedValueChange)="selectPerCity($event)" label="City" name="city">
+                                        </app-dropdown>
+                                    </div>
+                                    <div class="col-lg-6 col-sm-12 mt-20">
+                                        <app-inputfield type="text" formControlName="perpincode"
+                                            (input)="main.restrictInput($event, 'number')" label="Pincode"
+                                            placeholder="Pincode" helpText="Help text" [maxlength]="6" [minlength]="6"
+                                            name="perpincode">
+                                        </app-inputfield>
+
+
+
+
+                                        <div class="text-danger mt-1"
+                                            *ngIf="getRefControl('reference1', i, 'perpincode')?.invalid && getRefControl('reference1', i, 'perpincode')?.touched">
+                                            <small
+                                                *ngIf="getRefControl('reference1', i, 'perpincode')?.errors?.['required']">Pin
+                                                Code is required</small>
+                                            <small
+                                                *ngIf="getRefControl('reference1', i, 'perpincode')?.errors?.['pattern'] && !getRefControl('reference1', i, 'perpincode')?.errors?.['minlength']">Only
+                                                numbers
+                                                allowed</small>
+                                            <small
+                                                *ngIf="getRefControl('reference1', i, 'perpincode')?.errors?.['minlength']">
+                                                Please enter a valid Pin Code
+                                            </small>
+
+                                            <small
+                                                *ngIf="getRefControl('reference1', i, 'perpincode')?.errors?.['maxlength']">
+                                                Please enter a valid Pin Code
+                                            </small>
+
+                                            <small
+                                                *ngIf="getRefControl('reference1', i, 'perpincode')?.errors?.['invalidPincode']">
+                                                Invalid Pin Code
+                                            </small>
+                                        </div>
+
+                                    </div>
+                                </div>
+
+
+                            </div>
+
+
+                        </div>
+                    </div>
+                </div>
+            </ng-template>
+
+            <ng-template #refernce2Template let-i="index">
+                <div formArrayName="reference2">
+                    <div *ngFor="let ref of reference2Array.controls; let i = index" [formGroupName]="i">
+
+                        <div class="row common-details-box1 d-flex flex-row ">
+
+                            <div class="row1  d-flex  common-details-box1 d-flex flex-column">
+
+                                <div class="row mt-20">
+                                    <div class="col-lg-4 col-sm-12 ">
+
+                                        <app-inputfield formControlName="fname" label="First Name" [required]="true"
+                                            placeholder="First Name" (input)="main.restrictInput($event, 'text')"
+                                            [maxlength]="25">
+                                        </app-inputfield>
+
+
+                                        <div class="text-danger" *ngIf="getRefControl('reference2', i, 'fname')?.touched 
+                                           && getRefControl('reference2', i, 'fname')?.invalid">
+
+                                            <div *ngIf="getRefControl('reference2', i, 'fname')?.errors?.['required']">
+                                                First name is required
+                                            </div>
+
+                                            <div *ngIf="getRefControl('reference2', i, 'fname')?.errors?.['pattern']">
+                                                Only alphabets are allowed
+                                            </div>
+
+                                            <div *ngIf="getRefControl('reference2', i, 'fname')?.errors?.['minlength']">
+                                                Minimum 2 characters required
+                                            </div>
+
+                                            <div *ngIf="getRefControl('reference2', i, 'fname')?.errors?.['maxlength']">
+                                                Maximum 25 characters allowed
+                                            </div>
+
+                                        </div>
+                                    </div>
+
+                                    <div class="col-lg-4 col-sm-12 ">
+
+                                        <app-inputfield formControlName="mname" label="Middle Name"
+                                            placeholder="Middle Name" (input)="main.restrictInput($event, 'text')"
+                                            [disabled]="ismiddlename[currentRefIndex]" [maxlength]="25">
+                                        </app-inputfield>
+
+                                        <div class="text-danger"
+                                            *ngIf="getRefControl('reference2', i, 'mname')?.touched && getRefControl('reference2', i, 'mname')?.invalid">
+
+                                            <div *ngIf="getRefControl('reference2', i, 'mname')?.errors?.['required']">
+                                                Middle name is required
+                                            </div>
+
+                                            <div *ngIf="getRefControl('reference2', i, 'mname')?.errors?.['pattern']">
+                                                Only alphabets are allowed
+                                            </div>
+
+                                            <div *ngIf="getRefControl('reference2', i, 'mname')?.errors?.['minlength']">
+                                                Minimum 2 characters required
+                                            </div>
+
+                                            <div *ngIf="getRefControl('reference2', i, 'mname')?.errors?.['maxlength']">
+                                                Maximum 25 characters allowed
+                                            </div>
+
+                                        </div>
+                                        <app-checkbox [checked]="ismiddlename[currentRefIndex]" [indeterminate]="false"
+                                            label="I don’t have middle name" (checkedChange)="onmiddlename($event)">
+                                        </app-checkbox>
+                                        <div class="text-danger mt-1"
+                                            *ngIf=" submitAttempted && !ismiddlename[currentRefIndex] && !getRefControl('reference2', i, 'mname')?.value">
+                                            Please enter Middle Name or select the checkbox.
+                                        </div>
+                                    </div>
+
+                                    <div class="col-lg-4 col-sm-12 ">
+
+                                        <app-inputfield formControlName="lname" label="Last Name" [required]="true"
+                                            placeholder="Last Name" (input)="main.restrictInput($event, 'text')"
+                                            [maxlength]="25">
+                                        </app-inputfield>
+                                        <div class="text-danger"
+                                            *ngIf="getRefControl('reference2', i, 'lname')?.touched && getRefControl('reference2', i, 'lname')?.invalid">
+
+                                            <div *ngIf="getRefControl('reference2', i, 'lname')?.errors?.['required']">
+                                                Last name is required
+                                            </div>
+
+                                            <div *ngIf="getRefControl('reference2', i, 'lname')?.errors?.['pattern']">
+                                                Only alphabets are allowed
+                                            </div>
+
+                                            <div *ngIf="getRefControl('reference2', i, 'lname')?.errors?.['minlength']">
+                                                Minimum 2 characters required
+                                            </div>
+
+                                            <div *ngIf="getRefControl('reference2', i, 'lname')?.errors?.['maxlength']">
+                                                Maximum 25 characters allowed
+                                            </div>
+
+                                        </div>
+
+                                    </div>
+                                </div>
+
+                                <div class="row mt-20">
+                                    <div class="col-lg-6 col-sm-12 ">
+                                        <app-inputfield type="text" formControlName="email" label="Email Id"
+                                            [minlength]="10" [maxlength]="40" (input)="onEmailChange()"
+                                            placeholder="Enter Email Id" helpText="Help text" name="email">
+                                        </app-inputfield>
+                                        <!-- <div class="text-danger"
+                                            *ngIf="getRefControl('reference2', i, 'email')?.touched && getRefControl('reference2', i, 'email')?.invalid"> -->
+                                        <div class="text-danger"
+                                            *ngIf="getRefControl('reference2', i, 'email')?.touched && (getRefControl('reference2', i, 'email')?.invalid || referenceForm.hasError('sameEmail'))">
+                                            <div *ngIf="getRefControl('reference2', i, 'email')?.errors?.['required']">
+                                                Email is required
+                                            </div>
+
+
+                                            <div
+                                                *ngIf="getRefControl('reference2', i, 'email')?.errors?.['pattern' ] && !getRefControl('reference2', i, 'email')?.errors?.['minlength']">
+                                                Please enter a valid email address</div>
+
+                                            <div *ngIf="getRefControl('reference2', i, 'email')?.errors?.['minlength']">
+                                                Please enter a valid email address between 10 and 40 characters
+                                            </div>
+
+                                            <!-- <div
+                                                *ngIf="referenceForm.hasError('sameEmail') && getRefControl('reference2', i, 'email')?.value && reference2Touched">
+                                                Email must be different from Reference 1
+                                            </div> -->
+
+                                            <div *ngIf="getRefControl('reference2', i, 'email')?.errors?.['sameEmail']">
+                                                Email must be different from Reference 1
+                                            </div>
+
+
+
+                                        </div>
+
+                                    </div>
+
+                                    <div class="col-lg-6 col-sm-12 ">
+
+                                        <app-inputfield type="text" formControlName="phone" [required]="true"
+                                            [readonly]="true" label="Mobile Number" placeholder="mobile"
+                                            helpText="Help text" name="phone">
+                                        </app-inputfield>
+                                        <app-checkbox [checked]="true" label="OTP is not Mandatory" [disabled]="true">
+                                        </app-checkbox>
+
+
+                                    </div>
+                                </div>
+
+                                <div class="row mt-20">
+                                    <app-inputfield type="text" formControlName="peraddressline1" label="Address Line 1"
+                                        placeholder="Address Line" helpText="Help text" [minlength]="2"
+                                        [maxlength]="255" name="peraddressline1">
+                                    </app-inputfield>
+                                    <div class="text-danger mt-1"
+                                        *ngIf=" getRefControl('reference2', i, 'peraddressline1')?.touched && getRefControl('reference2', i, 'peraddressline1')?.invalid  ">
+
+                                        <small
+                                            *ngIf="getRefControl('reference2', i, 'peraddressline1')?.errors?.['required']">
+                                            Address Line 1 is required
+                                        </small>
+                                        <small
+                                            *ngIf="getRefControl('reference2', i, 'peraddressline1')?.errors?.['minlength'] || getRefControl('reference2', i, 'peraddressline1')?.errors?.['maxlength']">
+                                            Address must be between 2 to 255 characters
+                                        </small>
+                                    </div>
+
+                                </div>
+                                <div class="row mt-20">
+                                    <app-inputfield type="text" formControlName="peraddressline2" label="Address Line 2"
+                                        placeholder="Address Line" helpText="Help text" [minlength]="2"
+                                        [maxlength]="255" name="peraddressline2">
+                                    </app-inputfield>
+                                    <div class="text-danger mt-1"
+                                        *ngIf=" getRefControl('reference2', i, 'peraddressline2')?.touched && getRefControl('reference2', i, 'peraddressline2')?.invalid  ">
+                                        <small
+                                            *ngIf="getRefControl('reference2', i, 'peraddressline2')?.errors?.['required']">
+                                            Address Line 2 is required
+                                        </small>
+                                        <small
+                                            *ngIf="getRefControl('reference2', i, 'peraddressline2')?.errors?.['minlength'] || getRefControl('reference2', i, 'peraddressline2')?.errors?.['maxlength']">
+                                            Address must be between 2 to 255 characters
+                                        </small>
+                                    </div>
+                                </div>
+                                <div class="row mt-20">
+                                    <app-inputfield type="text" formControlName="peraddressline3" label="Address Line 3"
+                                        [minlength]="2" [maxlength]="255" placeholder="Address Line"
+                                        helpText="Help text" name="peraddressline3">
+                                    </app-inputfield>
+                                    <div class="text-danger mt-1"
+                                        *ngIf=" getRefControl('reference2', i, 'peraddressline3')?.touched && getRefControl('reference2', i, 'peraddressline3')?.invalid  ">
+
+                                        <small
+                                            *ngIf="getRefControl('reference2', i, 'peraddressline3')?.errors?.['minlength'] || getRefControl('reference2', i, 'peraddressline3')?.errors?.['maxlength']">
+                                            Address must be between 2 to 255 characters
+                                        </small>
+                                    </div>
+                                </div>
+                                <div class="row mt-20">
+                                    <div class="col-lg-6 col-sm-12 ">
+                                        <app-inputfield type="text" [disabled]="true" label="Country"
+                                            placeholder="India" helpText="Help text" name="percountry">
+                                        </app-inputfield>
+
+                                    </div>
+
+                                    <div class="col-lg-6 col-sm-12 ">
+                                        <app-dropdown [options]="stateOptions" [placeholder]="'Select State'"
+                                            [searchable]="true" (selectedValueChange)="selectPerState($event)"
+                                            [selectedValue]="selectedStateId[currentRefIndex]" label="State"
+                                            name="state">
+                                        </app-dropdown>
+
+
+
+                                    </div>
+
+                                    <div class="col-lg-6 col-sm-12 mt-20">
+
+                                        <app-dropdown [options]="cityOptions" [placeholder]="'Select City'"
+                                            [selectedValue]="selectedCityId[currentRefIndex]" [searchable]="true"
+                                            (selectedValueChange)="selectPerCity($event)" label="City" name="city">
+                                        </app-dropdown>
+                                    </div>
+                                    <div class="col-lg-6 col-sm-12 mt-20">
+                                        <app-inputfield type="text" formControlName="perpincode"
+                                            (input)="main.restrictInput($event, 'number')" label="Pincode"
+                                            placeholder="Pincode" helpText="Help text" [maxlength]="6" [minlength]="6"
+                                            name="perpincode">
+                                        </app-inputfield>
+
+
+
+
+                                        <div class="text-danger mt-1"
+                                            *ngIf="getRefControl('reference2', i, 'perpincode')?.invalid && getRefControl('reference2', i, 'perpincode')?.touched">
+                                            <small
+                                                *ngIf="getRefControl('reference2', i, 'perpincode')?.errors?.['required']">Pin
+                                                Code is required</small>
+                                            <small
+                                                *ngIf="getRefControl('reference2', i, 'perpincode')?.errors?.['pattern'] && !getRefControl('reference2', i, 'perpincode')?.errors?.['minlength']">Only
+                                                numbers
+                                                allowed</small>
+                                            <small
+                                                *ngIf="getRefControl('reference2', i, 'perpincode')?.errors?.['minlength']">
+                                                Please enter a valid Pin Code
+                                            </small>
+
+                                            <small
+                                                *ngIf="getRefControl('reference2', i, 'perpincode')?.errors?.['maxlength']">
+                                                Please enter a valid Pin Code
+                                            </small>
+                                            <small
+                                                *ngIf="getRefControl('reference2', i, 'perpincode')?.errors?.['invalidPincode']">
+                                                Invalid Pin Code
+                                            </small>
+                                        </div>
+
+                                    </div>
+                                </div>
+
+
+                            </div>
+
+
+                        </div>
+                    </div>
+                </div>
+            </ng-template>
+        </form>
+    </div>
+
+
+
+
+    <hr class="footer-hr-class">
+    <div class="loan-footerbtns row w-100  d-flex justify-content-between align-items-center">
+
+        <div class="col-lg-4 ">
+            <img src="../assets/images/icons/save.svg">
+            <span class="text-dp-3-regular mx-2 blue-text"> Save and Exit</span>
+        </div>
+        <div class="col-lg-4  d-flex justify-content-end">
+            <app-buttons type="button" label="Back" class="btn btncustomClass" [outline]="true" (click)="back()">
+            </app-buttons>
+            <app-buttons type="button" label="Next" class="btn btncustomClass" color="primary" (click)="next()"
+                [disabled]="!reference2Filled && !reference2Filled">
+            </app-buttons>
+
 
         </div>
-
-        <ng-template #refernce1Template let-i="index">
-            <div formArrayName="reference1">
-
-
-                <div *ngFor="let ref of reference1Array.controls; let i = index" [formGroupName]="i">
-
-
-
-                    <div class="row common-details-box d-flex flex-row ">
-                        <div class="mobiledetails d-flex w-100 flex-column ">
-                            <div class="w-100   gap-3">
-                                <app-inputfield type="tel" name="phone" [required]="true" pattern="^[6-9][0-9]{9}$"
-                                    label="Mobile Number" placeholder="Enter Mobile Number" helpText="Help text"
-                                    class="w-100" minlength="10" [maxlength]="10"
-                                    (input)="main.restrictInput($event, 'number')" [showPhonePrefix]="true"
-                                    [showPhonePrefixnumber]="true"></app-inputfield>
-
-                                @if(isdata) {
-                                <div class=" mt-1 text-start">
-                                    <small class="text-body-2 fst-italic text-danger">This is new
-                                        customer</small>
-                                </div>
-                                }
-                            </div>
-                        </div>
-
-                        @if(!isdata){
-                        <div class="row  d-flex  align-items-start pt-4 common-details-box d-flex flex-column">
-
-                            <div class="row mt-20">
-                                <div class="col-lg-4 col-sm-12 ">
-
-                                    <app-inputfield formControlName="fname" label="First Name" [required]="true"
-                                        placeholder="First Name" (input)="main.restrictInput($event, 'text')"
-                                        [maxlength]="25">
-                                    </app-inputfield>
-
-
-                                    <div class="text-danger" *ngIf="getRefControl('reference1', i, 'fname')?.touched 
-            && getRefControl('reference1', i, 'fname')?.invalid">
-
-                                        <div *ngIf="getRefControl('reference1', i, 'fname')?.errors?.['required']">
-                                            First name is required
-                                        </div>
-
-                                        <div *ngIf="getRefControl('reference1', i, 'fname')?.errors?.['pattern']">
-                                            Only alphabets are allowed
-                                        </div>
-
-                                        <div *ngIf="getRefControl('reference1', i, 'fname')?.errors?.['minlength']">
-                                            Minimum 2 characters required
-                                        </div>
-
-                                        <div *ngIf="getRefControl('reference1', i, 'fname')?.errors?.['maxlength']">
-                                            Maximum 25 characters allowed
-                                        </div>
-
-                                    </div>
-                                </div>
-
-                                <div class="col-lg-4 col-sm-12 ">
-
-                                    <app-inputfield formControlName="mname" label="Middle Name" [required]="true"
-                                        placeholder="Middle Name" (input)="main.restrictInput($event, 'text')"
-                                        [maxlength]="25">
-                                    </app-inputfield>
-                                    <div class="text-danger"
-                                        *ngIf="getRefControl('reference1', i, 'mname')?.touched && getRefControl('reference1', i, 'mname')?.invalid">
-
-                                        <div *ngIf="getRefControl('reference1', i, 'mname')?.errors?.['required']">
-                                            First name is required
-                                        </div>
-
-                                        <div *ngIf="getRefControl('reference1', i, 'mname')?.errors?.['pattern']">
-                                            Only alphabets are allowed
-                                        </div>
-
-                                        <div *ngIf="getRefControl('reference1', i, 'mname')?.errors?.['minlength']">
-                                            Minimum 2 characters required
-                                        </div>
-
-                                        <div *ngIf="getRefControl('reference1', i, 'mname')?.errors?.['maxlength']">
-                                            Maximum 25 characters allowed
-                                        </div>
-
-                                    </div>
-                                    <app-checkbox [checked]="ismiddlename" [indeterminate]="false"
-                                        label="I don’t have middle name" (checkedChange)="onmiddlename($event)">
-                                    </app-checkbox>
-
-                                </div>
-
-                                <div class="col-lg-4 col-sm-12 ">
-
-                                    <app-inputfield formControlName="lname" label="Last Name" [required]="true"
-                                        placeholder="Last Name" (input)="main.restrictInput($event, 'text')"
-                                        [maxlength]="25">
-                                    </app-inputfield>
-                                    <div class="text-danger"
-                                        *ngIf="getRefControl('reference1', i, 'lname')?.touched && getRefControl('reference1', i, 'lname')?.invalid">
-
-                                        <div *ngIf="getRefControl('reference1', i, 'lname')?.errors?.['required']">
-                                            First name is required
-                                        </div>
-
-                                        <div *ngIf="getRefControl('reference1', i, 'lname')?.errors?.['pattern']">
-                                            Only alphabets are allowed
-                                        </div>
-
-                                        <div *ngIf="getRefControl('reference1', i, 'lname')?.errors?.['minlength']">
-                                            Minimum 2 characters required
-                                        </div>
-
-                                        <div *ngIf="getRefControl('reference1', i, 'lname')?.errors?.['maxlength']">
-                                            Maximum 25 characters allowed
-                                        </div>
-
-                                    </div>
-
-                                </div>
-                            </div>
-
-                            <div class="row mt-20">
-                                <div class="col-lg-6 col-sm-12 ">
-                                    <app-inputfield type="text" formControlName="percountry" [required]="true"
-                                        label="Country" placeholder="India" helpText="Help text" name="percountry">
-                                    </app-inputfield>
-                                </div>
-
-                                <div class="col-lg-6 col-sm-12 ">
-
-                                    <app-inputfield type="text" formControlName="perstate" [required]="true"
-                                        label="State" placeholder="State" helpText="Help text" name="perstate">
-                                    </app-inputfield>
-
-                                </div>
-                            </div>
-
-                            <div class="row mt-20">
-                                <app-inputfield type="text" formControlName="peraddressline1" [required]="true"
-                                    label="Address Line 1" placeholder="Address Line" helpText="Help text"
-                                    name="peraddressline1">
-                                </app-inputfield>
-                            </div>
-                            <div class="row mt-20">
-                                <app-inputfield type="text" formControlName="peraddressline2" [required]="true"
-                                    label="Address Line 2" placeholder="Address Line" helpText="Help text"
-                                    name="peraddressline2">
-                                </app-inputfield>
-                            </div>
-                            <div class="row mt-20">
-                                <app-inputfield type="text" formControlName="peraddressline3" label="Address Line 3"
-                                    placeholder="Address Line" helpText="Help text" name="peraddressline3">
-                                </app-inputfield>
-                            </div>
-                            <div class="row mt-20">
-                                <div class="col-lg-6 col-sm-12 ">
-                                    <app-inputfield type="text" formControlName="percountry" [required]="true"
-                                        label="Country" placeholder="India" helpText="Help text" name="percountry">
-                                    </app-inputfield>
-                                </div>
-
-                                <div class="col-lg-6 col-sm-12 ">
-
-                                    <app-inputfield type="text" formControlName="perstate" [required]="true"
-                                        label="State" placeholder="State" helpText="Help text" name="perstate">
-                                    </app-inputfield>
-
-                                </div>
-
-                                <div class="col-lg-6 col-sm-12 mt-20">
-                                    <app-inputfield type="text" formControlName="percity" [required]="true" label="City"
-                                        placeholder="City" helpText="Help text" name="percity">
-                                    </app-inputfield>
-                                </div>
-                                <div class="col-lg-6 col-sm-12 mt-20">
-                                    <app-inputfield type="text" formControlName="perpincode" [required]="true"
-                                        label="Pincode" placeholder="Pincode" helpText="Help text" name="perpincode">
-                                    </app-inputfield>
-                                </div>
-                            </div>
-
-
-                        </div>
-                        }
-
-                    </div>
-                </div>
-            </div>
-        </ng-template>
-
-        <ng-template #refernce2Template let-i="index">
-            <div formArrayName="reference2">
-                <div *ngFor="let ref of reference2Array.controls; let i = index" [formGroupName]="i">
-
-                    <div class="row common-details-box d-flex flex-row ">
-                        <div class="mobiledetails d-flex w-100 flex-column ">
-                            <div class="w-100   gap-3">
-                                <app-inputfield type="tel" name="phone" [required]="true" pattern="^[6-9][0-9]{9}$"
-                                    label="Mobile Number" placeholder="Enter Mobile Number" helpText="Help text"
-                                    class="w-100" minlength="10" [maxlength]="10"
-                                    (input)="main.restrictInput($event, 'number')" [showPhonePrefix]="true"
-                                    [showPhonePrefixnumber]="true"></app-inputfield>
-
-                                @if(isdata) {
-                                <div class=" mt-1 text-start">
-                                    <small class="text-body-2 fst-italic text-danger">This is new
-                                        customer</small>
-                                </div>
-                                }
-                            </div>
-                        </div>
-
-                        @if(!isdata){
-                        <div class="row  d-flex  align-items-start pt-4 common-details-box d-flex flex-column">
-
-                            <div class="row mt-20">
-                                <div class="col-lg-4 col-sm-12 ">
-
-                                    <app-inputfield formControlName="fname" label="First Name" [required]="true"
-                                        placeholder="First Name" (input)="main.restrictInput($event, 'text')"
-                                        [maxlength]="25">
-                                    </app-inputfield>
-
-
-                                    <div class="text-danger" *ngIf="getRefControl('reference2', i, 'fname')?.touched 
-            && getRefControl('reference2', i, 'fname')?.invalid">
-
-                                        <div *ngIf="getRefControl('reference2', i, 'fname')?.errors?.['required']">
-                                            First name is required
-                                        </div>
-
-                                        <div *ngIf="getRefControl('reference2', i, 'fname')?.errors?.['pattern']">
-                                            Only alphabets are allowed
-                                        </div>
-
-                                        <div *ngIf="getRefControl('reference2', i, 'fname')?.errors?.['minlength']">
-                                            Minimum 2 characters required
-                                        </div>
-
-                                        <div *ngIf="getRefControl('reference2', i, 'fname')?.errors?.['maxlength']">
-                                            Maximum 25 characters allowed
-                                        </div>
-
-                                    </div>
-                                </div>
-
-                                <div class="col-lg-4 col-sm-12 ">
-
-                                    <app-inputfield formControlName="mname" label="Middle Name" [required]="true"
-                                        placeholder="Middle Name" (input)="main.restrictInput($event, 'text')"
-                                        [maxlength]="25">
-                                    </app-inputfield>
-                                    <div class="text-danger"
-                                        *ngIf="getRefControl('reference2', i, 'mname')?.touched && getRefControl('reference2', i, 'mname')?.invalid">
-
-                                        <div *ngIf="getRefControl('reference2', i, 'mname')?.errors?.['required']">
-                                            First name is required
-                                        </div>
-
-                                        <div *ngIf="getRefControl('reference2', i, 'mname')?.errors?.['pattern']">
-                                            Only alphabets are allowed
-                                        </div>
-
-                                        <div *ngIf="getRefControl('reference2', i, 'mname')?.errors?.['minlength']">
-                                            Minimum 2 characters required
-                                        </div>
-
-                                        <div *ngIf="getRefControl('reference2', i, 'mname')?.errors?.['maxlength']">
-                                            Maximum 25 characters allowed
-                                        </div>
-
-                                    </div>
-                                    <app-checkbox [checked]="ismiddlename" [indeterminate]="false"
-                                        label="I don’t have middle name" (checkedChange)="onmiddlename($event)">
-                                    </app-checkbox>
-
-                                </div>
-
-                                <div class="col-lg-4 col-sm-12 ">
-
-                                    <app-inputfield formControlName="lname" label="Last Name" [required]="true"
-                                        placeholder="Last Name" (input)="main.restrictInput($event, 'text')"
-                                        [maxlength]="25">
-                                    </app-inputfield>
-                                    <div class="text-danger"
-                                        *ngIf="getRefControl('reference2', i, 'lname')?.touched && getRefControl('reference2', i, 'lname')?.invalid">
-
-                                        <div *ngIf="getRefControl('reference2', i, 'lname')?.errors?.['required']">
-                                            First name is required
-                                        </div>
-
-                                        <div *ngIf="getRefControl('reference2', i, 'lname')?.errors?.['pattern']">
-                                            Only alphabets are allowed
-                                        </div>
-
-                                        <div *ngIf="getRefControl('reference2', i, 'lname')?.errors?.['minlength']">
-                                            Minimum 2 characters required
-                                        </div>
-
-                                        <div *ngIf="getRefControl('reference2', i, 'lname')?.errors?.['maxlength']">
-                                            Maximum 25 characters allowed
-                                        </div>
-
-                                    </div>
-
-                                </div>
-                            </div>
-
-                            <div class="row mt-20">
-                                <div class="col-lg-6 col-sm-12 ">
-                                    <app-inputfield type="text" formControlName="percountry" [required]="true"
-                                        label="Country" placeholder="India" helpText="Help text" name="percountry">
-                                    </app-inputfield>
-                                </div>
-
-                                <div class="col-lg-6 col-sm-12 ">
-
-                                    <app-inputfield type="text" formControlName="perstate" [required]="true"
-                                        label="State" placeholder="State" helpText="Help text" name="perstate">
-                                    </app-inputfield>
-
-                                </div>
-                            </div>
-
-                            <div class="row mt-20">
-                                <app-inputfield type="text" formControlName="peraddressline1" [required]="true"
-                                    label="Address Line 1" placeholder="Address Line" helpText="Help text"
-                                    name="peraddressline1">
-                                </app-inputfield>
-                            </div>
-                            <div class="row mt-20">
-                                <app-inputfield type="text" formControlName="peraddressline2" [required]="true"
-                                    label="Address Line 2" placeholder="Address Line" helpText="Help text"
-                                    name="peraddressline2">
-                                </app-inputfield>
-                            </div>
-                            <div class="row mt-20">
-                                <app-inputfield type="text" formControlName="peraddressline3" label="Address Line 3"
-                                    placeholder="Address Line" helpText="Help text" name="peraddressline3">
-                                </app-inputfield>
-                            </div>
-                            <div class="row mt-20">
-                                <div class="col-lg-6 col-sm-12 ">
-                                    <app-inputfield type="text" formControlName="percountry" [required]="true"
-                                        label="Country" placeholder="India" helpText="Help text" name="percountry">
-                                    </app-inputfield>
-                                </div>
-
-                                <div class="col-lg-6 col-sm-12 ">
-
-                                    <app-inputfield type="text" formControlName="perstate" [required]="true"
-                                        label="State" placeholder="State" helpText="Help text" name="perstate">
-                                    </app-inputfield>
-
-                                </div>
-
-                                <div class="col-lg-6 col-sm-12 mt-20">
-                                    <app-inputfield type="text" formControlName="percity" [required]="true" label="City"
-                                        placeholder="City" helpText="Help text" name="percity">
-                                    </app-inputfield>
-                                </div>
-                                <div class="col-lg-6 col-sm-12 mt-20">
-                                    <app-inputfield type="text" formControlName="perpincode" [required]="true"
-                                        label="Pincode" placeholder="Pincode" helpText="Help text" name="perpincode">
-                                    </app-inputfield>
-                                </div>
-                            </div>
-
-
-                        </div>
-                        }
-
-                    </div>
-                </div>
-            </div>
-        </ng-template>
-    </form>
+    </div>
 </div>
 
+<!-- ================= SUCCESS MODAL ================= -->
+<div class="modal fade" id="successModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg success-modal">
+        <div class="modal-content p-4 text-center">
 
-<hr class="footer-hr-class">
-<div class="loan-footerbtns row w-100  d-flex justify-content-between align-items-center">
+            <button class="modal-close-btn" (click)="closeSuccessModal()">
+                <svg width="44" height="44" viewBox="0 0 48 48">
+                    <circle cx="24" cy="24" r="24" fill="#F33B48" />
+                    <path d="M16 16L32 32" stroke="white" stroke-width="3" />
+                    <path d="M32 16L16 32" stroke="white" stroke-width="3" />
+                </svg>
+            </button>
 
-    <div class="col-lg-4 ">
-        <img src="../assets/images/icons/save.svg">
-        <span class="text-dp-3-regular mx-2 blue-text"> Save and Exit</span>
-    </div>
-    <div class="col-lg-4  d-flex justify-content-end">
-        <app-buttons type="button" label="Back" class="btn btncustomClass" [outline]="true" (click)="back()">
-        </app-buttons>
-        <app-buttons type="button" label="Next" class="btn btncustomClass" color="primary" (click)="next()">
-        </app-buttons>
-        <!-- <app-buttons type="button" label="Next" class="btn btncustomClass" color="primary" (click)="next1()">
-    </app-buttons> -->
+            <div class="d-flex flex-column gap-4">
+                <div class="service-icon1"><svg xmlns="http://www.w3.org/2000/svg" width="120" height="120"
+                        viewBox="0 0 144 144" fill="none">
+                        <rect width="143.5" height="143.5" fill="white" />
+                        <path
+                            d="M71.7487 131.542C104.634 131.542 131.54 104.636 131.54 71.7502C131.54 38.8647 104.634 11.9585 71.7487 11.9585C38.8633 11.9585 11.957 38.8647 11.957 71.7502C11.957 104.636 38.8633 131.542 71.7487 131.542Z"
+                            stroke="#3B8439" stroke-width="4.90598" stroke-linecap="round" stroke-linejoin="round" />
+                        <path d="M46.3398 71.7501L63.2609 88.6712L97.1628 54.8291" stroke="#3B8439"
+                            stroke-width="4.90598" stroke-linecap="round" stroke-linejoin="round" />
+                    </svg>
+                </div>
 
+
+                <div class="product-info d-flex flex-column gap-3">
+                    <div class="text-header1-login text-success"> Reference {{ currentRefIndex + 1 }} Created
+                        Successfully!</div>
+                    <p class="text-label-data-head fw-normal">Your reference has been added successfully.
+                    </p>
+                </div>
+            </div>
+
+
+        </div>
     </div>
 </div>

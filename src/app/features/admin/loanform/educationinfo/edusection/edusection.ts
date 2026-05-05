@@ -114,6 +114,8 @@ export class Edusection {
 
   @Input() stepKey!: '10th' | '12th' | 'diploma10' | 'diploma12' | 'ug' | 'pg' | 'others' | 'others12' | 'othersdiploma';
 
+
+
   handleresponse: any;
 
   requiredDocs = ['salary1', 'salary2', 'salary3', 'Form16', 'oneyearbankstatement', 'ay1', 'ay2', 'ay3'];   // only required ones
@@ -190,7 +192,7 @@ export class Edusection {
     }
 
     if (this.sectionType === 'postgrad') {
-      this.marksheetCount = 2;
+      this.marksheetCount = 1;
       // this.showLC = false;
       this.educationType = 'POSTGRADUATE';
     }
@@ -205,16 +207,16 @@ export class Edusection {
       this.educationType = 'OTHER_AFTER_DIPLOMA';
     }
 
-    this.group = this.fb.group({
+    // this.group = this.fb.group({
 
-    //   institutename: ['', Validators.required],
-    //   passingyear: ['', Validators.required],
-      per_cgpa: ['', [Validators.required, this.percentageOrCgpaValidator()]],
-    //   location: ['', Validators.required],
-    //   marksheet: ['', Validators.required],
-    //   lc: ['', Validators.required],
+      // institutename: ['', Validators.required],
+      // passingyear: ['', Validators.required],
+      // per_cgpa: ['', [Validators.required, this.percentageOrCgpaValidator()]],
+      // location: ['', Validators.required],
+        // marksheet: ['', Validators.required],
+        // lc: ['', Validators.required],
 
-    })
+    // })
 
   }
 
@@ -222,63 +224,14 @@ export class Edusection {
     return this.getLevelFromTitle(this.title);
   }
   get isSchoolLevel(): boolean {
-    return this.educationType === '_10TH' || this.educationType === '_12TH' || this.educationType === 'OTHER_AFTER_12' || this.educationType === 'OTHER_AFTER_DIPLOMA';
+    return this.educationType === '_10TH' || this.educationType === '_12TH' || this.educationType === 'OTHER_AFTER_12' || this.educationType === 'OTHER_AFTER_DIPLOMA' || this.educationType === 'POSTGRADUATE';
   }
 
   get isHigherEducation(): boolean {
-    return this.educationType === 'DIPLOMA' || this.educationType === 'UNDERGRADUATE' || this.educationType === 'POSTGRADUATE';
+    return this.educationType === 'DIPLOMA' || this.educationType === 'UNDERGRADUATE' ;
   }
 
-percentageOrCgpaValidator() {
-  return (control: AbstractControl): ValidationErrors | null => {
-    const raw = control.value;
-    if (raw === null || raw === '') return null;
-
-    const value = raw.toString();
-    const num = Number(value);
-
-    if (isNaN(num)) {
-      return { invalidNumber: true };
-    }
-
-    const isPercentage =
-      num >= 35 &&
-      num <= 100 &&
-      /^\d+(\.\d{1,2})?$/.test(value);
-
-    const isCgpa =
-      num >= 4 &&
-      num <= 10 &&
-      /^\d+(\.\d{1})?$/.test(value);
-
-    return isPercentage || isCgpa ? null : { invalidPerCgpa: true };
-  };
-}
-
-  percentageOrCgpaValidator1() {
-    return (control: AbstractControl): ValidationErrors | null => {
-      const value = control.value;
-
-      if (value === null || value === '') return null;
-
-      const num = Number(value);
-      if (isNaN(num)) return { invalidNumber: true };
-
-
-      const isPercentage =
-        num >= 35 &&
-        num <= 100 &&
-        /^\d+(\.\d{1,2})?$/.test(value);
-
-
-      const isCgpa =
-        num >= 4 &&
-        num <= 10 &&
-        /^\d+(\.\d{1})?$/.test(value);
-
-      return isPercentage || isCgpa ? null : { invalidPerCgpa: true };
-    };
-  }
+ 
 
   private buildYearOptions(backYears: number): DropdownOption[] {
     const currentYear = new Date().getFullYear();
@@ -318,7 +271,14 @@ percentageOrCgpaValidator() {
       s => s.label.trim().toLowerCase() === 'other'
     )
 
-    this.group.get('institutename')?.setValue(this.selectedInstituteID);
+   
+const control = this.group.get('institutename');
+  control?.setValue(ids);
+  control?.markAsDirty();
+  control?.markAsTouched();
+  control?.updateValueAndValidity();
+
+
 
   }
 
@@ -344,7 +304,12 @@ percentageOrCgpaValidator() {
     this.selectedLocationLabel = selected.map(s => s.label).join(', ');
     this.selectedInstituteID = selected.map(s => s.value).join(', ');
 
-    this.group.get('location')?.setValue(this.selectedLocationLabel);
+    // this.group.get('location')?.setValue(this.selectedLocationLabel);
+
+ const control = this.group.get('location');
+  control?.setValue(this.selectedLocationLabel);
+  control?.markAsTouched();
+  control?.updateValueAndValidity();
 
   }
 
@@ -408,7 +373,6 @@ percentageOrCgpaValidator() {
 
     this.uploadedFiles[key] = result.file;
     this.uploadedFiles = { ...this.uploadedFiles };
-    console.log("this.group.value----------------", this.group.value);
 
     this.fileSelected.emit({
       step: this.stepKey,
@@ -487,6 +451,16 @@ percentageOrCgpaValidator() {
       }
     })
   }
+  // ---------
+
+  // Inside Edusection.ts class
+isMarksheetRequired(index: number): boolean {
+  if (this.sectionType === 'postgrad') return false;
+
+  if (this.sectionType === 'bachelors') return index < 2;
+
+  return index === 0;
+}
   // ----------------------------------------------------------------------------
   onUploadStarted(
     result: UploadResult, key: string,
@@ -716,11 +690,30 @@ percentageOrCgpaValidator() {
 
 
   removeOther(doc: any) {
-    const key = `others_${doc.id}`;
-    delete this.uploadedFiles[key];
+    this.msgBox.open({
 
-    this.otherDocuments = this.otherDocuments.filter(d => d.id !== doc.id);
-    this.uploadedFiles = { ...this.uploadedFiles };
+      title: 'Are you sure want to Remove',
+      message: ``,
+      showCancel: true,
+
+
+      onOk: () => {
+
+      
+        const key = `others_${doc.id}`;
+        this.uploadedFiles[key] = null;
+        this.uploadedFiles = { ...this.uploadedFiles };
+
+        const docToUpdate = this.otherDocuments.find(d => d.id === doc.id);
+
+        if (docToUpdate) {
+          docToUpdate.file = null;
+          this.otherDocuments = [...this.otherDocuments];
+        }
+
+
+      },
+    })
   }
 
   viewOther(doc: any) {

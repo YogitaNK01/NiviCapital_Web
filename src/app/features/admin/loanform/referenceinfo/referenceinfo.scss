@@ -2,6 +2,17 @@
 @use 'typography' as *;
 @use 'common' as *;
 
+.vh-container {
+  display: flex;
+  flex-direction: column;
+  height: 90vh;
+}
+
+.base-height {
+  flex: 1;
+  overflow: auto;
+}
+
 .sectiondata {
   border-radius: $border_radius_s;
   border: 1px solid $neutral-300;
@@ -32,13 +43,6 @@
   margin: 10px 0
 }
 
-// .accordion-item {
-//   //  min-height: auto;
-//   border-radius: $border_radius_m;
-//   border: $border_1 solid $neutral-300;
-//   //   background: $bg, ;
-//   box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.05);
-// }
 
 .table-head {
   color: $secondary-700;
@@ -50,7 +54,12 @@
   // max-width: 300px;
   padding: 2px 3px;
   height: 52px;
+
+
 }
+  .btncustomClass.searchbtn{
+    min-width: 250px!important;
+  }
 
 .country {
   display: flex;
@@ -82,4 +91,120 @@
     padding: $spacing_5
   }
 
+}
+
+.referencetitle {
+  display: flex;
+  padding: var(--spacing-spacing_9, 20px);
+  justify-content: space-between;
+  align-items: flex-start;
+  align-self: stretch;
+  border-radius: $border_radius_m;
+  border: 1px solid $neutral_border_2;
+  background: $bg;
+
+
+}
+
+// popup design
+.mobilepopup {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: $spacing_14;
+  align-self: stretch;
+}
+
+
+/* FULL SCREEN MODAL */
+.reference-modal {
+  max-width: 90vw;
+  width: 90vw;
+  height: 90vh;
+  // margin: auto;
+}
+
+.reference-modal .modal-content {
+  height: 100%;
+  border-radius: 16px;
+  overflow: visible;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+
+}
+
+/* HEADER */
+.reference-modal .modal-header {
+  border-bottom: 1px solid #e6e6e6;
+  padding: 24px 32px;
+}
+
+/* BODY */
+.reference-modal .modal-body {
+  padding: 29px $spacing_18 $spacing_18 $spacing_18;
+  // overflow-y: auto;
+  // flex: none!important;
+
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+
+}
+
+/* FOOTER */
+.reference-modal .modal-footer {
+  padding: 24px 32px;
+  border: none;
+}
+
+.reference-modal .modal-header,
+.reference-modal .modal-footer {
+  flex-shrink: 0;
+}
+
+.modal-close-btn {
+  position: absolute;
+  top: -18px;
+  right: -18px;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background-color: #f24848;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+  cursor: pointer;
+}
+
+
+
+:host ::ng-deep app-inputfield input[readonly] {
+  background-color: #f5f5f5;
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+//suceessbox
+.success {
+    text-align: center;
+
+    .card-body {
+        gap: $spacing_14;
+
+        @media(max-width:480px) {
+            gap: $spacing_9;
+
+           
+        }
+    }
+}
+.success-tick-icon {
+  width: 117px;
+  height: 117px;
+}
+
+.msg_data {
+    gap: $spacing_9;
 }
