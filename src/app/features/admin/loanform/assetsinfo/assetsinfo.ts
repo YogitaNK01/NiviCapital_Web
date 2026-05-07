@@ -1474,6 +1474,7 @@ onAssetChange(values: string | string[]): void {
         console.log("resp---", res);
         if (res.status == "success") {
           this.formSvc.aseetsInfoData = payload
+          this.stepperService.markStepCompleted('assetsinfo');
           this.patchAssetsData();
           this.stepperService.next();
         }

@@ -781,6 +781,7 @@ export class Monthlyexpenditureinfo {
         console.log("resp---", res);
         if (res.status == "success") {
           this.formSvc.monthlyExpenditureData = payload;
+          this.stepperService.markStepCompleted('monthlyexpinfo');
           this.stepperService.next();
         }
       }

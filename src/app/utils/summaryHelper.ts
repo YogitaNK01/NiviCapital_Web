@@ -11,10 +11,11 @@ export class SummaryHelper {
       { label: 'State', value: course.state || '' },
       { label: 'University Name', value: course.universityName || '' },
       { label: 'Course Type', value: course.courseType || '' },
-      { label: 'Duration (Years)', value: course.durationYears != null ? course.durationYears : '' },
+      // { label: 'Duration (Years)', value: course.durationYears != null ? course.durationYears : '' },
       { label: 'Course Name', value: course.courseName || '' },
-      { label: 'Start Date', value: course.startDate || '' },
-      { label: 'End Date', value: course.endDate || '' },
+      { label: 'Course Start Date', value: course.startDate || '' },
+      { label: 'Course End Date', value: course.endDate || '' },
+       { label: 'Do you have Assets?', value: course.endDate || '' },
       { label: 'Lending Partner', value: course.lendingPartner || '' }
     ];
 
@@ -41,9 +42,9 @@ static extractAdditionalInfo(additionalInfo: any) {
   // Define labels for each section
   const labels = {
     mainApplicant: [
+        { label: 'Gender', key: 'gender' },
+         { label: 'Marital Status', key: 'maritalStatus' },
       { label: 'Upload Applicant Photo', key: 'photoUrl' },
-      { label: 'Marital Status', key: 'maritalStatus' },
-      { label: 'Gender', key: 'gender' },
       { label: 'Number of Dependents', key: 'numberOfDependents' }
     ],
     spouse: [
@@ -240,7 +241,14 @@ static extractAssetsInfo(assets: any) {
       cards: [
         {
           fields: assets.liquidAssets.map((l: any) => ({
-            label: `${l.assetType} (INR)`,
+            label: `${l.assetType} `,
+            value: l.amountInr,
+            isCurrency: true
+          }))
+        },
+         {
+          fields: assets.liquidAssets.map((l: any) => ({
+            label: `${l.assetType} `,
             value: l.amountInr,
             isCurrency: true
           }))

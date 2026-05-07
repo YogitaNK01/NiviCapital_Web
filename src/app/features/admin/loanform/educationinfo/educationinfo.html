@@ -4,47 +4,50 @@
     @switch (activeEducation) {
     @case ('10th') {
     <app-edusection [group]="educationForms['10th']" title="10th std" sectionType="school" [stepKey]="activeEducation"
-        [uploadedFiles]="uploadedFiles" (fileSelected)="onFileSelectedFromSection($event)">
+        [uploadedFiles]="uploadedFiles" (fileSelected)="onFileSelectedFromSection($event)"
+        (otherDocAdded)="onOtherDocAdded($event)">
     </app-edusection>
     }
 
     @case ('12th') {
     <app-edusection [group]="educationForms['12th']" title="12th std" sectionType="school" [stepKey]="activeEducation"
-        [uploadedFiles]="uploadedFiles" (fileSelected)="onFileSelectedFromSection($event)">
+        [uploadedFiles]="uploadedFiles" (fileSelected)="onFileSelectedFromSection($event)"
+        (otherDocAdded)="onOtherDocAdded($event)">
     </app-edusection>
     }
 
     @case ('diploma10') {
     <app-edusection [group]="educationForms.diploma10" title="Diploma (After 10th)" sectionType="diploma"
-        [stepKey]="activeEducation" [uploadedFiles]="uploadedFiles"
+        [stepKey]="activeEducation" [uploadedFiles]="uploadedFiles" (otherDocAdded)="onOtherDocAdded($event)"
         (fileSelected)="onFileSelectedFromSection($event)" />
     }
 
     @case ('diploma12') {
     <app-edusection [group]="educationForms.diploma12" title="Diploma (After 12th)" sectionType="diploma"
-        [stepKey]="activeEducation" [uploadedFiles]="uploadedFiles"
+        [stepKey]="activeEducation" [uploadedFiles]="uploadedFiles" (otherDocAdded)="onOtherDocAdded($event)"
         (fileSelected)="onFileSelectedFromSection($event)" />
     }
 
     @case ('ug') {
     <app-edusection [group]="educationForms.ug" title="Undergraduate" sectionType="bachelors"
-        [stepKey]="activeEducation" [uploadedFiles]="uploadedFiles"
+        [stepKey]="activeEducation" [uploadedFiles]="uploadedFiles" (otherDocAdded)="onOtherDocAdded($event)"
         (fileSelected)="onFileSelectedFromSection($event)" />
     }
 
     @case ('pg') {
     <app-edusection [group]="educationForms.pg" title="Postgraduate" sectionType="postgrad" [stepKey]="activeEducation"
-        [uploadedFiles]="uploadedFiles" (fileSelected)="onFileSelectedFromSection($event)" />
+        [uploadedFiles]="uploadedFiles" (fileSelected)="onFileSelectedFromSection($event)"
+        (otherDocAdded)="onOtherDocAdded($event)" />
     }
 
     @case ('others12') {
     <app-edusection [group]="educationForms.others12" title="Others (After 12th)" sectionType="others"
-        [stepKey]="activeEducation" [uploadedFiles]="uploadedFiles"
+        [stepKey]="activeEducation" [uploadedFiles]="uploadedFiles" (otherDocAdded)="onOtherDocAdded($event)"
         (fileSelected)="onFileSelectedFromSection($event)" />
     }
     @case ('othersdiploma') {
     <app-edusection [group]="educationForms.othersdiploma" title="Others (After Diploma)" sectionType="others"
-        [stepKey]="activeEducation" [uploadedFiles]="uploadedFiles"
+        [stepKey]="activeEducation" [uploadedFiles]="uploadedFiles" (otherDocAdded)="onOtherDocAdded($event)"
         (fileSelected)="onFileSelectedFromSection($event)" />
     }
 
@@ -92,13 +95,7 @@
                     </span>
 
 
-                    <!-- <div *ngIf="educationForms['ielts'].get('score').errors?.['min']">
-                        Minimum 4 score required
-                    </div>
 
-                    <div *ngIf="educationForms['ielts'].get('score').errors?.['max']">
-                        Maximum 10 score allowed
-                    </div> -->
 
                 </div>
 

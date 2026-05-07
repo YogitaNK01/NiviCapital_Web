@@ -97,7 +97,7 @@
                                     </div>
                                     <div class="text-danger mt-1 error"
                                         *ngIf=" referenceForm.hasError('samePhone') && (reference2Touched  || reference1Touched ) ">
-                                        Phone number must be different from Reference 1
+                                        Phone number must be different from Reference <span>{{firstPhoneEnteredRef === 1 ? '1':'2'}}</span>
                                     </div>
 
 
@@ -505,6 +505,8 @@
                                         </div>
                                     </div>
 
+                                    
+
                                     <div class="col-lg-4 col-sm-12 ">
 
                                         <app-inputfield formControlName="lname" label="Last Name" [required]="true"
@@ -724,7 +726,7 @@
             <app-buttons type="button" label="Back" class="btn btncustomClass" [outline]="true" (click)="back()">
             </app-buttons>
             <app-buttons type="button" label="Next" class="btn btncustomClass" color="primary" (click)="next()"
-                [disabled]="!reference2Filled && !reference1Filled">
+                [disabled]="!reference2Filled || !reference1Filled">
             </app-buttons>
 
 

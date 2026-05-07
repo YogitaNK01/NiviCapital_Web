@@ -48,6 +48,7 @@ export class Edudetails {
   seleactInstitute: OptionItem[] = []
   selectedInstituteID = '';
   selectedInstituteLabel = '';
+  selectedQualificationLabel = ''
 
   educationdetails: any;
   qualificationId!: string;
@@ -61,18 +62,48 @@ export class Edudetails {
 
   educationOrder: Array<'10th' | '12th' | 'diploma10' | 'diploma12' | 'ug' | 'pg'> = ['10th', '12th', 'diploma10', 'diploma12', 'ug', 'pg'];
 
-  private qualificationRank: Record<string, number> = {
+  private educationRank: Record<string, number> = {
     '10th': 1,
     '12th': 2,
     'diploma10': 3,
     'diploma12': 4,
-    'ug12': 5,
+    'ug': 5,
     'ugdiploma': 6,
-    'pgafterug': 7,
-    'pgafterdiploma': 8,
-    'other12': 9,
-    'otherdiploma': 10,
+    'pg': 6,
+    'pgafterdiploma': 7,
+    'other12': 7,
+    'otherdiploma': 8,
+
+
+    //  '10th': 1,
+    //   '12th': 2,
+    //   'diploma': 3,
+    //   'ug': 4,
+    //   'pg': 5,
+    //   'others': 6
+
+
   };
+  private educationDisplayLabel: Record<string, string> = {
+    '10th': '10th',
+    '12th': '12th',
+    'diploma10': 'Diploma (After 10th)',
+    'diploma12': 'Diploma (After 12th)',
+    'ug': 'Undergraduate',
+    'pg': 'Postgraduate',
+    'others12': 'Others (After 12th)',
+    'othersdiploma': 'Others (After Diploma)'
+
+
+    // '10th': '10th',
+    //   '12th': '12th',
+    //   'diploma': 'Diploma',
+    //   'ug': 'Undergraduate',
+    //   'pg': 'Postgraduate',
+    //   'others': 'Others'
+
+  };
+
 
   educationForms: any = {};
   isChildRouteActive = false;
@@ -87,6 +118,7 @@ export class Edudetails {
 
 
   private previousEducationId: string | null = null;
+
 
 
   constructor(private fb: FormBuilder, private stepperService: Loanstepperservice, private cd: ChangeDetectorRef, private formSvc: Loanformservice, private msgbox: Msgboxservice,
@@ -167,11 +199,16 @@ export class Edudetails {
 
   }
   isOtherInstitute(fd: AbstractControl): boolean {
-    const selectedId = fd.get('qualification')?.value;
+    const selectedId = fd.get('institute')?.value;
     const found = this.seleactInstitute.find(b => b.value === selectedId);
     return found?.label === 'Other';
   }
 
+  isOtherQualifications(fd: AbstractControl): boolean {
+    const selectedId = fd.get('qualification')?.value;
+    const found = this.seleactInstitute.find(b => b.value === selectedId);
+    return found?.label === 'Other';
+  }
 
 
 
@@ -181,7 +218,7 @@ export class Edudetails {
     const sections = this.educationdetails.map((d: any) =>
       d.qualificationName.includes('Others')
         ? d.qualificationName
-        : d.qualificationName.split('(')[0].trim()
+        : d.qualificationName
     );
 
     sections.push("IELTS / PTE")
@@ -189,7 +226,7 @@ export class Edudetails {
     return sections;
   }
 
-  private getSectionRequiredList(newId: string): string[] {
+  private getSectionRequiredList1(newId: string): string[] {
     const academic = this.getCurrentSections();
 
     const filteredAcademic = academic.filter(
@@ -218,6 +255,41 @@ export class Edudetails {
 
     return result;
   }
+  private getSectionRequiredList(newQualificationId: string): string[] {
+    const newLabel = this.getAddingSectionLabel(newQualificationId);
+    const newKey = this.normalizeQualification(newLabel);
+    const newRank = this.educationRank[newKey];
+
+    const result: string[] = [];
+
+    const sectionMap = new Map<string, string>();
+
+    this.educationdetails.forEach((d: any) => {
+      const key = this.normalizeQualification(d.qualificationName);
+      const rank = this.educationRank[key];
+
+      if (rank && rank <= newRank) {
+        // result.push(d.qualificationName);
+        sectionMap.set(key, this.educationDisplayLabel[key]);
+      }
+    });
+
+    // if (!result.some(r => r.toLowerCase().includes(newLabel.toLowerCase()))) {
+    //   result.push(newLabel);
+    // }
+    // result.push('IELTS / PTE');
+    // result.push('University Offer Letter');
+    // return Array.from(new Set(result));
+
+
+    sectionMap.set(newKey, this.educationDisplayLabel[newKey]);
+
+    sectionMap.set('ielts', 'IELTS / PTE');
+    sectionMap.set('offer', 'University Offer Letter');
+
+    return Array.from(sectionMap.values());
+
+  }
 
 
   private getHighestQualification(): string {
@@ -237,6 +309,19 @@ export class Edudetails {
   Selectededucation(values: string | string[]) {
     const newId = Array.isArray(values) ? values[0] : values;
 
+    
+     const selected = this.seleactqualification.filter(s =>
+      newId.includes(s.value)
+    );
+
+    this.selectedQualificationLabel = selected.map(s => s.label).join(', ');
+
+    this.isOtherQualification = this.selectedQualificationLabel.toLowerCase().includes('other');
+
+    // this.isOtherEducation = selected.some(
+    //   s => s.label.trim().toLowerCase() === 'other'
+    // )
+
     if (!this.hasProceededOnce) {
       this.previousEducationId = newId;
       this.applyEducationChange(newId);
@@ -247,6 +332,12 @@ export class Edudetails {
       this.previousEducationId = newId;
       this.hasProceededOnce = true;
       this.applyEducationChange(newId);
+      return;
+    }
+
+    this.basicform.get('qualification')?.updateValueAndValidity();
+
+    if (this.basicform.get('qualification')?.hasError('invalidEducation')) {
       return;
     }
 
@@ -550,7 +641,7 @@ The following sections now need to be filled.
       const label =
         this.getAddingSectionLabel(control.value).toLowerCase();
 
-        //for UG - PG not allowed
+      //for UG - PG not allowed
       if (isUG) {
         if (
           label.includes('postgraduate (after undergraduate)') ||
@@ -559,14 +650,14 @@ The following sections now need to be filled.
           return { invalidEducation: true };
         }
       }
-        //for PG - 12th,diploma and others not allowed
+      //for PG - 12th,diploma and others not allowed
 
       if (!isUG) {
         if (
           label === '10th' ||
           label === '12th' ||
-          (label.includes('diploma') && label.includes('10th'))||
-          (label.includes('diploma ')  && label.includes('12th')) ||
+          (label.includes('diploma') && label.includes('10th')) ||
+          (label.includes('diploma ') && label.includes('12th')) ||
           label.includes('others')
         ) {
           return { invalidEducation: true };
@@ -607,8 +698,8 @@ The following sections now need to be filled.
       next: (res) => {
         console.log(res);
         if (res.status == "success") {
-          const firstStep = '10th'; 
-          
+          const firstStep = '10th';
+
           this.router.navigate(['educationinfo'], {
             relativeTo: this.route,
             queryParams: {

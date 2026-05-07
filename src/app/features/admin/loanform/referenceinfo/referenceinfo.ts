@@ -78,7 +78,7 @@ export class Referenceinfo implements OnInit {
   reference2Touched = false;
 
   savedReferenceData: any[] = [{}, {}];
-
+  firstPhoneEnteredRef: 1 | 2 | null = null;
   private successModalInstance: bootstrap.Modal | null = null;
   @ViewChild('phone') phone!: any;
 
@@ -281,7 +281,7 @@ export class Referenceinfo implements OnInit {
     this.loadPerCities(id);
   }
 
-  loadPerCities(id: any,refIndex?: number) {
+  loadPerCities(id: any, refIndex?: number) {
     this.main.getIndianstatescities(id).subscribe((res: any) => {
       const list = res.data ?? res;
 
@@ -290,14 +290,14 @@ export class Referenceinfo implements OnInit {
         label: c.name
       }));
 
-      
- if (refIndex !== undefined) {
-      const array =
-        refIndex === 0 ? this.reference1Array : this.reference2Array;
 
-      this.selectedCityId[refIndex] =
-        array.at(0).value.percity || '';
-    }
+      if (refIndex !== undefined) {
+        const array =
+          refIndex === 0 ? this.reference1Array : this.reference2Array;
+
+        this.selectedCityId[refIndex] =
+          array.at(0).value.percity || '';
+      }
 
     });
   }
@@ -428,9 +428,19 @@ export class Referenceinfo implements OnInit {
     this.mobileNumber = value;
     if (this.currentRefIndex === 1) {
       this.reference2Touched = true;
+
+      if (!this.firstPhoneEnteredRef && value.length === 10) {
+        this.firstPhoneEnteredRef = 2;
+      }
+
     }
     if (this.currentRefIndex === 0) {
       this.reference1Touched = true;
+
+      if (!this.firstPhoneEnteredRef && value.length === 10) {
+        this.firstPhoneEnteredRef = 1;
+      }
+
     }
     const array =
       this.currentRefIndex === 0
@@ -481,52 +491,65 @@ export class Referenceinfo implements OnInit {
     return Object.keys(errors).length ? errors : null;
   };
 
-referenceUniquenessValidator: ValidatorFn = (control: AbstractControl): ValidationErrors | null => {
-  const ref1 = control.get('reference1') as FormArray;
-  const ref2 = control.get('reference2') as FormArray;
+  referenceUniquenessValidator: ValidatorFn = (control: AbstractControl): ValidationErrors | null => {
+    const ref1 = control.get('reference1') as FormArray;
+    const ref2 = control.get('reference2') as FormArray;
 
-  if (!ref1?.length || !ref2?.length) return null;
+    if (!ref1?.length || !ref2?.length) return null;
+    const errors: any = {};
+    const r1 = ref1.at(0);
+    const r2 = ref2.at(0);
 
-  const r1 = ref1.at(0);
-  const r2 = ref2.at(0);
+    const phone1 = r1.get('phone')?.value;
+    const phone2 = r2.get('phone')?.value;
+    const emailCtrl1 = r1.get('email');
+    const emailCtrl2 = r2.get('email');
 
-  const emailCtrl1 = r1.get('email');
-  const emailCtrl2 = r2.get('email');
+    const email1 = emailCtrl1?.value?.trim().toLowerCase();
+    const email2 = emailCtrl2?.value?.trim().toLowerCase();
 
-  const email1 = emailCtrl1?.value?.trim().toLowerCase();
-  const email2 = emailCtrl2?.value?.trim().toLowerCase();
+    emailCtrl1?.setErrors(null);
+    emailCtrl2?.setErrors(null);
 
-  emailCtrl1?.setErrors(null);
-  emailCtrl2?.setErrors(null);
+    if (phone1 && phone2 && phone1 === phone2) {
+      errors.samePhone = true;
+    }
 
-  if (email1 && email2 && email1 === email2) {
-    emailCtrl1?.setErrors({ sameEmail: true });
-    emailCtrl2?.setErrors({ sameEmail: true });
 
-    return { sameEmail: true };
-  }
+    if (email1 && email2 && email1 === email2) {
+      errors.sameEmail = true;
+    }
 
-  return null;
-};
+    return Object.keys(errors).length ? errors : null;
+
+    // if (email1 && email2 && email1 === email2) {
+    //   emailCtrl1?.setErrors({ sameEmail: true });
+    //   emailCtrl2?.setErrors({ sameEmail: true });
+
+    //   return { sameEmail: true };
+    // }
+
+    // return null;
+  };
 
 
 
   // ==================== OPEN MODAL ====================
   openModal(index: number = 0) {
     this.currentRefIndex = index;
-     if (this.phone) {
-    this.phone.resetForm?.();           
-    this.phone.control?.markAsPristine();
-    this.phone.control?.markAsUntouched();
-  }
+    if (this.phone) {
+      this.phone.resetForm?.();
+      this.phone.control?.markAsPristine();
+      this.phone.control?.markAsUntouched();
+    }
     this.mobileNumber = '';
     this.submitAttempted = false;
     if (index === 1) {
       this.reference2Touched = false;
-      this.ismiddlename[1] = false;
+      // this.ismiddlename[1] = false;
     }
 
-    
+
 
 
 
@@ -541,16 +564,14 @@ referenceUniquenessValidator: ValidatorFn = (control: AbstractControl): Validati
       this.isSearchDone = true;
       this.mobileNumber = currentArray.at(0).value.phone;
 
-      // const savedStateId = currentArray.at(0).value.perstate;
-      // const savedCityId = currentArray.at(0).value.percity;
 
       this.selectedStateId[index] = currentArray.at(0).value.perstate || '';
-      this.selectedCityId[index] =  '';
+      this.selectedCityId[index] = '';
 
       this.perStateSelectedOption = this.selectedStateId[index];
 
       if (this.selectedStateId[index]) {
-        this.loadPerCities(this.selectedStateId[index],index);
+        this.loadPerCities(this.selectedStateId[index], index);
 
         setTimeout(() => {
           this.perCitySelectedOption = this.selectedCityId[index];
@@ -615,8 +636,7 @@ referenceUniquenessValidator: ValidatorFn = (control: AbstractControl): Validati
 
     currentArray.at(0).patchValue({
       phone: this.mobileNumber,
-      // perstate: this.perselectedStateLabel,
-      // percity: this.perselectedCityLabel
+      
     });
 
     if (!this.canSaveReference) {
@@ -676,15 +696,15 @@ referenceUniquenessValidator: ValidatorFn = (control: AbstractControl): Validati
       }
     });
   }
-isFormChanged(): boolean {
-  const index = this.currentRefIndex;
+  isFormChanged(): boolean {
+    const index = this.currentRefIndex;
 
-  const array =
-    index === 0 ? this.reference1Array : this.reference2Array;
+    const array =
+      index === 0 ? this.reference1Array : this.reference2Array;
 
-  return JSON.stringify(array.at(0).value) !==
-         JSON.stringify(this.savedReferenceData[index]);
-}
+    return JSON.stringify(array.at(0).value) !==
+      JSON.stringify(this.savedReferenceData[index]);
+  }
 
 
   // ==================== CLOSE MODAL ====================
@@ -811,32 +831,8 @@ isFormChanged(): boolean {
   }
 
   next() {
-
+    this.stepperService.markStepCompleted('referenceinfo');
     this.stepperService.next();
-    // if (this.referenceForm.invalid) {
-    //   this.referenceForm.markAllAsTouched();
-    //   return;
-    // }
 
-    // const form = this.referenceForm.value;
-
-    // const payload = {
-    //   reference1: form.reference1,
-    //   reference2: form.reference2
-    // };
-
-    // console.log("REFERENCE PAYLOAD:", payload);
-
-    // this.loanformservice.saveReference(payload).subscribe({
-    //   next: (res: any) => {
-    //     if (res.status === 'success') {
-
-    //      
-    //       this.loanformservice.referenceInfoData = payload;
-
-    //       this.stepperService.next();
-    //     }
-    //   }
-    // });
   }
 }

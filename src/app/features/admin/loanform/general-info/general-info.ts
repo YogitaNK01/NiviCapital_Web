@@ -93,6 +93,10 @@ export class GeneralInfo implements OnInit {
 
   calculatedEndDate!: Date;
 
+  
+statesLoaded = false;
+
+
   isOtherstate = false;
   isOtherUniversity = false;
   isOthercoursetype = false;
@@ -126,7 +130,7 @@ export class GeneralInfo implements OnInit {
       // qualification: ['', Validators.required],
       // institutionName: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(100)]],
       state: ['', Validators.required],
-      otherstaetitle: [''],
+      otherstatetitle: [''],
       university: ['', Validators.required],
       otherunititle: [''],
       coursetype: ['', Validators.required],
@@ -172,12 +176,12 @@ export class GeneralInfo implements OnInit {
       this.registerForm.patchValue({
         occupation: this.formSvc.generalInfoData.currentOccupationId,
         state: this.formSvc.generalInfoData.stateId,
-        otherstaetitle: this.formSvc.generalInfoData.otherstaetitle ? this.formSvc.generalInfoData.otherstaetitle : '',
+        otherstatetitle: this.formSvc.generalInfoData.otherStateName ,
         university: this.formSvc.generalInfoData.universityId,
-        otherunititle: this.formSvc.generalInfoData.otherunititle ? this.formSvc.generalInfoData.otherunititle : '',
+        otherunititle: this.formSvc.generalInfoData.otherUniversityName ,
         coursename: this.formSvc.generalInfoData.courseId,
-        othercoursenametitle: this.formSvc.generalInfoData.othercoursenametitle ? this.formSvc.generalInfoData.othercoursenametitle : '',
-        coursetype: this.formSvc.generalInfoData.courseId,
+        othercoursenametitle: this.formSvc.generalInfoData.otherCourseName,
+        coursetype: this.formSvc.generalInfoData.coursetype,
         othercoursetypetitle: this.formSvc.generalInfoData.othercoursetypetitle ? this.formSvc.generalInfoData.othercoursetypetitle : '',
         coursestartdate: this.formSvc.generalInfoData.courseStartDate,
         courseenddate: this.formSvc.generalInfoData.courseEndDate,
@@ -186,19 +190,60 @@ export class GeneralInfo implements OnInit {
 
       this.checkboxasset = this.formSvc.generalInfoData.hasAssets ? "Yes" : "No";
 
-      // this.restoreCourseCascade(this.formSvc.generalInfoData);
+      this.restoreDependentDropdowns(this.formSvc.generalInfoData);
     }
 
 
   }
 
+  private restoreDependentDropdowns(data: any) {
+  if (!data?.stateId) return;
+
+  this.registerForm.patchValue({
+    state: data.stateId,
+    otherstatetitle: data.otherStateName ?? ''
+  });
+  this.selectPerState(data.stateId);
+
+
+const found = this.Australianstate.find(s => s.value === data.stateId);
+  this.isOtherstate = found?.label?.toLowerCase().includes('other')?? false;;
+
+  this.formSvc.getAustralianstatescities(data.stateId).subscribe(res => {
+    this.AustralianUniversities = res.data.map((u: any) => ({
+      value: u.id,
+      label: u.universityName
+    }));
+
+    this.registerForm.patchValue({ university: data.universityId });
+    this.selecteduniversity(data.universityId);
+
+    this.formSvc.getCoursetype(data.universityId).subscribe(ct => {
+      this.selectcourse = ct.data.map((c: string) => ({
+        label: c,
+        value: c
+      }));
+
+      this.registerForm.patchValue({ coursetype: data.coursetype });
+      this.selectedcoursetype(data.coursetype);
+
+      this.formSvc.getCourseName(data.universityId, data.coursetype).subscribe(cn => {
+        this.selectcoursename = cn.data.map((c: any) => ({
+          value: c.id,
+          label: c.courseName
+        }));
+
+        this.registerForm.patchValue({ coursename: data.courseId });
+        this.selectedCoursename(data.courseId);
+      });
+    });
+  });
+}
+
   get form() {
     return this.formSvc.form.get('loanInfo') as FormGroup;
   }
 
-  saveDraft() {
-
-  }
   onSelectionChange(selectedkey: string, value: string) {
     this.formData[selectedkey] = value;
     console.log('Changed:', selectedkey, value);
@@ -248,7 +293,6 @@ export class GeneralInfo implements OnInit {
         label: s.occupationName,
 
       }));
-      // this.restoreDropdownLabels(this.registerForm.value);
     });
     setTimeout(() => {
       let data = this.registerForm.get('occupation')?.valueChanges.subscribe(value => {
@@ -280,12 +324,8 @@ export class GeneralInfo implements OnInit {
         label: s.qualificationName,
 
       }));
-      // this.restoreDropdownLabels(this.registerForm.value);
     });
   }
-
-
-
 
   getlendingpartnersdetails() {
     this.formSvc.getlendingpartners().subscribe((res: any) => {
@@ -296,7 +336,6 @@ export class GeneralInfo implements OnInit {
         label: s.partnerName,
         code: s.partnerCode
       }));
-      // this.restoreDropdownLabels(this.registerForm.value);
     });
   }
 
@@ -332,7 +371,14 @@ export class GeneralInfo implements OnInit {
         label: s.stateName,
         code: s.stateCode
       }));
-      // this.restoreDropdownLabels(this.registerForm.value);
+
+this.statesLoaded = true;
+
+    if (this.formSvc.generalInfoData) {
+      this.restoreDependentDropdowns(this.formSvc.generalInfoData);
+    }
+
+      
     });
   }
 
@@ -342,7 +388,7 @@ export class GeneralInfo implements OnInit {
     this.selectedStateLabel = found?.label ?? '';
     this.isOtherstate = this.selectedStateLabel.toLowerCase().includes('other');
 
-
+// if (!isRestore) {
     this.AustralianUniversities = [];
     this.selectedUniLabel = '';
     this.registerForm.get('university')?.setValue(null);
@@ -354,6 +400,7 @@ export class GeneralInfo implements OnInit {
     this.selectcoursename = [];
     this.selectedcourseNameLabel = '';
     this.registerForm.get('coursename')?.setValue(null);
+// }
     this.selectuniveristy(id);
   }
 
@@ -366,7 +413,6 @@ export class GeneralInfo implements OnInit {
         label: c.universityName,
         code: c.universityCode
       }));
-      // this.restoreDropdownLabels(this.registerForm.value);
     });
   }
 
@@ -399,7 +445,15 @@ export class GeneralInfo implements OnInit {
         label: course,
         value: course
       }));
-      // this.restoreDropdownLabels(this.registerForm.value);
+
+
+      const savedType = this.formSvc.generalInfoData?.coursetype;
+      if (savedType) {
+        this.registerForm.patchValue({ coursetype: savedType });
+        this.selectedcoursetype(savedType);
+      }
+
+
     });
   }
   selectedcoursetype(id: any) {
@@ -435,7 +489,13 @@ export class GeneralInfo implements OnInit {
         label: c.courseName,
         code: c.courseCode
       }));
-      // this.restoreDropdownLabels(this.registerForm.value);
+
+      const savedCourseId = this.formSvc.generalInfoData?.courseId;
+      if (savedCourseId) {
+        this.registerForm.patchValue({ coursename: savedCourseId });
+        this.selectedCoursename(savedCourseId);
+      }
+
     });
   }
 
@@ -548,7 +608,7 @@ export class GeneralInfo implements OnInit {
     }
 
     let formdata = this.registerForm.value;
-
+    console.log("formdata------", formdata);
     let input = {
       "applicationId": this.applicationId,
       "applicantId": this.applicantId,
@@ -558,8 +618,11 @@ export class GeneralInfo implements OnInit {
       // "lastInstitutionName": formdata.institutionName,
 
       "stateId": formdata.state,
+      "otherStateName":formdata.otherstatetitle,
       "universityId": formdata.university,
+      "otherUniversityName":formdata.otherunititle,
       "courseId": formdata.coursename,
+       "otherCourseName":formdata.othercoursenametitle,
       // "courseDuration": formdata.courseduration,
       "courseStartDate": this.formatDate(formdata.coursestartdate),
 
@@ -572,14 +635,16 @@ export class GeneralInfo implements OnInit {
     console.log(input);
     this.formSvc.submitGenralInfo(input, this.applicationId).pipe().subscribe({
       next: (res) => {
-        console.log("resp---", res);
+
         if (res.status == "success") {
 
           this.stepperService.next();
-          this.formSvc.generalInfoData = input;
+          // this.formSvc.generalInfoData = input;
+          this.formSvc.generalInfoData = {...input,coursetype: formdata.coursetype };
+          this.stepperService.markStepCompleted('genralinfo');
           this.stepperService.setStepData('genralinfo', formdata);
 
-          console.log("resp---", this.registerForm.value);
+
         }
 
       },

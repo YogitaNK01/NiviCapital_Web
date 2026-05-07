@@ -193,7 +193,7 @@ export class Educationinfo implements OnInit {
       ielts: this.createIeltsForm(),
       // this.fb.group({
       //   score: ['', [Validators.required, Validators.min(4), Validators.max(10)]],
-        
+
       // }),
 
       offerletter: this.fb.group({
@@ -203,6 +203,18 @@ export class Educationinfo implements OnInit {
       othersdiploma: this.createForm()
     }
 
+    if (this.selectedLabel.includes('postgraduate') || this.selectedLabel.includes('pg')) {
+      this.group.get('institutename')?.clearValidators();
+      this.group.get('passingyear')?.clearValidators();
+      this.group.get('per_cgpa')?.clearValidators();
+      this.group.get('location')?.clearValidators();
+
+      this.group.get('institutename')?.updateValueAndValidity();
+      this.group.get('passingyear')?.updateValueAndValidity();
+      this.group.get('per_cgpa')?.updateValueAndValidity();
+      this.group.get('location')?.updateValueAndValidity();
+    }
+    ``
     this.route.queryParams.subscribe(params => {
       const qualificationId = params['qualificationId'];
       if (!qualificationId) return;
@@ -261,67 +273,66 @@ export class Educationinfo implements OnInit {
     });
   }
   createIeltsForm(): FormGroup {
-  return this.fb.group({
-    score: ['', [Validators.required, this.ieltsScoreValidator()]],
-  });
-}
+    return this.fb.group({
+      score: ['', [Validators.required, this.ieltsScoreValidator()]],
+    });
+  }
 
- percentageOrCgpaValidator(): ValidatorFn {
-  return (control: AbstractControl): ValidationErrors | null => {
-    const value = control.value;
+  percentageOrCgpaValidator(): ValidatorFn {
+    return (control: AbstractControl): ValidationErrors | null => {
+      const value = control.value;
 
-    // ✅ Let `required` handle empty case
-    if (value === null || value === undefined || value === '') {
-      return null;
-    }
+      // ✅ Let `required` handle empty case
+      if (value === null || value === undefined || value === '') {
+        return null;
+      }
 
-    const num = Number(value);
-    if (isNaN(num)) {
-      return { invalidPerCgpa: true };
-    }
+      const num = Number(value);
+      if (isNaN(num)) {
+        return { invalidPerCgpa: true };
+      }
 
-    const valueStr = value.toString();
+      const valueStr = value.toString();
 
-    const isPercentage =
-      num >= 35 &&
-      num <= 100 &&
-      /^\d+(\.\d{1,2})?$/.test(valueStr);
+      const isPercentage =
+        num >= 35 &&
+        num <= 100 &&
+        /^\d+(\.\d{1,2})?$/.test(valueStr);
 
-    const isCgpa =
-      num >= 4 &&
-      num <= 10 &&
-      /^\d+(\.\d{1})?$/.test(valueStr);
+      const isCgpa =
+        num >= 4 &&
+        num <= 10 &&
+        /^\d+(\.\d{1})?$/.test(valueStr);
 
-    return isPercentage || isCgpa
-      ? null
-      : { invalidPerCgpa: true };
-  };
-}
-ieltsScoreValidator(): ValidatorFn {
-  return (control: AbstractControl): ValidationErrors | null => {
-    const value = control.value;
+      return isPercentage || isCgpa
+        ? null
+        : { invalidPerCgpa: true };
+    };
+  }
+  ieltsScoreValidator(): ValidatorFn {
+    return (control: AbstractControl): ValidationErrors | null => {
+      const value = control.value;
 
-    // ✅ Let required validator handle empty case
-    if (value === null || value === undefined || value === '') {
-      return null;
-    }
+      if (value === null || value === undefined || value === '') {
+        return null;
+      }
 
-    const num = Number(value);
-    if (isNaN(num)) {
-      return { invalidIeltsScore: true };
-    }
+      const num = Number(value);
+      if (isNaN(num)) {
+        return { invalidIeltsScore: true };
+      }
 
-    const valueStr = value.toString();
+      const valueStr = value.toString();
 
-    //  4.0–10.0
-    const isValid =
-      num >= 4.0 &&
-      num <= 10.0 &&
-      /^\d+(\.\d{1})?$/.test(valueStr); // ✅ single decimal only
+      //  4.0–10.0
+      const isValid =
+        num >= 4.0 &&
+        num <= 10.0 &&
+        /^\d+(\.\d{1})?$/.test(valueStr);
 
-    return isValid ? null : { invalidIeltsScore: true };
-  };
-}
+      return isValid ? null : { invalidIeltsScore: true };
+    };
+  }
 
   submit() {
 
@@ -421,7 +432,7 @@ ieltsScoreValidator(): ValidatorFn {
 
   requiredDocs(step: StepKey): RequiredDoc[] {
     //  PG → No documents required
-    if (step === 'pg') return [];
+    // if (step === 'pg') return [];
 
     //  UG → 2 marksheets + LC
     if (step === 'ug') {
@@ -476,9 +487,29 @@ ieltsScoreValidator(): ValidatorFn {
     this.hasUnsavedChanges = true;
 
     if (e.control === 'other') {
+      // this.otherDocMap[key] = {
+      //   title: e.gropudata?.title || 'Other Document'
+      // };
+
+
+      const key = `${e.step}_other_${e.index}`;
+
+      if (e.file === null && e.gropudata === null) {
+        delete this.otherDocMap[key];
+        delete this.uploadedFiles[key];
+
+        this.otherDocMap = { ...this.otherDocMap };
+        this.uploadedFiles = { ...this.uploadedFiles };
+        return;
+      }
+
       this.otherDocMap[key] = {
-        title: e.gropudata?.title || 'Other Document'
+        title: e.gropudata?.title ?? ''
       };
+      this.uploadedFiles[key] = e.file;
+
+
+
     }
 
     this.uploadedFiles = { ...this.uploadedFiles };
@@ -603,10 +634,20 @@ ieltsScoreValidator(): ValidatorFn {
   }
 
   removeLocal(level: EducationType, docType: DocType, index?: number): void {
-    const key = this.buildDocKey(level, docType, index);
-    this.uploadedFiles[key] = null;
-    this.uploadedFiles = { ...this.uploadedFiles };
-    this.cd.detectChanges();
+    this.msgbox.open({
+
+      title: 'Are you sure want to Remove',
+      message: ``,
+      showCancel: true,
+
+
+      onOk: () => {
+        const key = this.buildDocKey(level, docType, index);
+        this.uploadedFiles[key] = null;
+        this.uploadedFiles = { ...this.uploadedFiles };
+        this.cd.detectChanges();
+      }
+    });
   }
 
   hasLocalFile(level: EducationType, docType: DocType, index?: number): boolean {
@@ -743,8 +784,16 @@ ieltsScoreValidator(): ValidatorFn {
       return !!this.getFile(step, 'offerletter');
     }
 
-    //  Common fields must be valid
     if (form.invalid) return false;
+
+
+    const otherDocs = this.getOtherDocumentsForStep(step);
+
+
+    if (otherDocs.length > 0) {
+      const invalid = otherDocs.some(doc => !doc.title || !doc.file);
+      if (invalid) return false;
+    }
 
     //  Required documents check
     const reqDocs = this.requiredDocs(step);
@@ -753,35 +802,45 @@ ieltsScoreValidator(): ValidatorFn {
       !!this.getFile(step, doc.doc, doc.index)
     );
   }
-showValidationErrors(step: StepKey): void {
-  const form = this.educationForms[step] as FormGroup | undefined;
+  showValidationErrors(step: StepKey): void {
+    const form = this.educationForms[step] as FormGroup | undefined;
 
-  if (form) {
-    (Object.values(form.controls) as AbstractControl[]).forEach(control => {
-      control.markAsTouched();
-      control.updateValueAndValidity();
-    });
+    if (form) {
+      (Object.values(form.controls) as AbstractControl[]).forEach(control => {
+        control.markAsTouched();
+        control.updateValueAndValidity();
+      });
+    }
+
+    const missingDocs = this.requiredDocs(step).filter(doc =>
+      !this.getFile(step, doc.doc, doc.index)
+    );
+
+    let message = 'Please fill all required fields';
+
+    if (missingDocs.length) {
+      message += ' and upload required documents.';
+    } else {
+      message += '.';
+    }
+
+
   }
-
-  const missingDocs = this.requiredDocs(step).filter(doc =>
-    !this.getFile(step, doc.doc, doc.index)
-  );
-
-  let message = 'Please fill all required fields';
-
-  if (missingDocs.length) {
-    message += ' and upload required documents.';
-  } else {
-    message += '.';
+  private getOtherDocumentsForStep(step: StepKey) {
+    return Object.keys(this.otherDocMap)
+      .filter(key => key.startsWith(`${step}_other_`))
+      .map(key => ({
+        title: this.otherDocMap[key]?.title,
+        file: this.uploadedFiles[key]
+      }));
   }
+  onOtherDocAdded(rowId: number) {
+    const step = this.activeEducation as StepKey;
+    const key = `${step}_other_${rowId}`;
 
-  // this.msgbox.open({
-  //   type: 'warning',
-  //   title: 'Incomplete Information',
-  //   message,
-  //   okText: 'Got it'
-  // });
-}
+    this.otherDocMap[key] = { title: '' };
+    this.uploadedFiles[key] = null;
+  }
 
   next() {
     console.log("next---");
@@ -892,9 +951,9 @@ showValidationErrors(step: StepKey): void {
       fd.append('location', form.get('location')?.value);
 
 
-      if (step === 'pg') {
-        fd.append('files', JSON.stringify([]));
-      }
+      // if (step === 'pg') {
+      //   fd.append('files', '');
+      // }
 
 
     }
@@ -936,6 +995,7 @@ showValidationErrors(step: StepKey): void {
 
         }
         else {
+          this.stepperService.markStepCompleted('educationDetails');
           this.stepperService.next();
         }
       },

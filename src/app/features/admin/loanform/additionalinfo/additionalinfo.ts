@@ -96,13 +96,15 @@ export class Additionalinfo implements OnInit {
       s_fname: ['', [Validators.pattern('^[A-Za-z ]+$'), Validators.minLength(2), Validators.maxLength(25)]],
       s_mname: ['', [Validators.pattern('^[A-Za-z ]+$'), Validators.minLength(2), Validators.maxLength(25)]],
       s_lname: ['', [Validators.pattern('^[A-Za-z ]+$'), Validators.minLength(2), Validators.maxLength(25)]],
+      spouseNoMiddleName: [false],
       f_fname: ['', [Validators.required, Validators.pattern('^[A-Za-z ]+$'), Validators.minLength(2), Validators.maxLength(25)]],
       f_mname: ['', [Validators.pattern('^[A-Za-z ]+$'), Validators.minLength(2), Validators.maxLength(25)]],
       f_lname: ['', [Validators.required, Validators.pattern('^[A-Za-z ]+$'), Validators.minLength(2), Validators.maxLength(25)]],
+      fatherNoMiddleName: [false],
       m_fname: ['', [Validators.required, Validators.pattern('^[A-Za-z ]+$'), Validators.minLength(2), Validators.maxLength(25)]],
       m_mname: ['', [Validators.pattern('^[A-Za-z ]+$'), Validators.minLength(2), Validators.maxLength(25)]],
       m_lname: ['', [Validators.required, Validators.pattern('^[A-Za-z ]+$'), Validators.minLength(2), Validators.maxLength(25)]],
-
+      motherNoMiddleName: [false],
 
     });
 
@@ -226,25 +228,70 @@ export class Additionalinfo implements OnInit {
 
     if (!data) return;
 
+
     this.additionalinfoForm.patchValue({
       uploadphoto: data.uploadphoto,
-      maritalstatus: data.maritalstatus,
-      gender: data.gender,
-      dependents: data.dependents,
+      maritalstatus: data.maritalStatus ? data.maritalStatus.charAt(0) + data.maritalStatus.slice(1).toLowerCase() : '',
+      gender: data.gender == "M" ? "Male" : data.gender == "F" ? "Female" : 'O',
+      dependents: data.numberOfDependents,
 
-      s_fname: data.s_fname,
-      s_mname: data.s_mname,
-      s_lname: data.s_lname,
+      s_fname: data.spouseFirstName,
+      s_mname: data.spouseMiddleName,
+      s_lname: data.spouseLastName,
+      spouseNoMiddleName: data.spouseNoMiddleName,
+      f_fname: data.fatherFirstName,
+      f_mname: data.fatherMiddleName,
+      f_lname: data.fatherLastName,
+       fatherNoMiddleName: data.fatherNoMiddleName,
+      m_fname: data.motherFirstName,
+      m_mname: data.motherMiddleName,
+      m_lname: data.motherLastName,
+      motherNoMiddleName: data.motherNoMiddleName,
+     
+      
 
-      f_fname: data.f_fname,
-      f_mname: data.f_mname,
-      f_lname: data.f_lname,
-
-      m_fname: data.m_fname,
-      m_mname: data.m_mname,
-      m_lname: data.m_lname
     });
+    
+this.isfathermiddlename = !!data.fatherNoMiddleName;
+  this.ismothermiddlename = !!data.motherNoMiddleName;
+  this.isspousemiddlename = !!data.spouseNoMiddleName;
+
+  this.restoreMiddleNameState();
+
   }
+
+private restoreMiddleNameState() {
+  const form = this.additionalinfoForm;
+
+  if (form.get('motherNoMiddleName')?.value) {
+    form.get('m_mname')?.reset();
+    form.get('m_mname')?.disable();
+  }
+
+  if (form.get('fatherNoMiddleName')?.value) {
+    form.get('f_mname')?.reset();
+    form.get('f_mname')?.disable();
+  }
+
+  if (form.get('spouseNoMiddleName')?.value) {
+    form.get('s_mname')?.reset();
+    form.get('s_mname')?.disable();
+  }
+}
+ 
+onMotherNoMiddleNameChange(checked: boolean) {
+  const ctrl = this.additionalinfoForm.get('m_mname');
+  checked ? ctrl?.disable() : ctrl?.enable();
+}
+onFatherNoMiddleNameChange(checked: boolean) {
+  const ctrl = this.additionalinfoForm.get('f_mname');
+  checked ? ctrl?.disable() : ctrl?.enable();
+}
+onSpouseNoMiddleNameChange(checked: boolean) {
+  const ctrl = this.additionalinfoForm.get('s_mname');
+  checked ? ctrl?.disable() : ctrl?.enable();
+}
+
 
   get canProceed(): boolean {
     const f = this.additionalinfoForm.value;
@@ -321,6 +368,7 @@ export class Additionalinfo implements OnInit {
         console.log(res);
         if (res.status == "success") {
           this.formSvc.additionalInfoData = input;
+          this.stepperService.markStepCompleted('additionalinfo');
           this.stepperService.next();
         }
 

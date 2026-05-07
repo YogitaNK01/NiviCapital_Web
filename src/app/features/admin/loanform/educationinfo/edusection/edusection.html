@@ -31,7 +31,7 @@
 
 
 
-                    <app-dropdown [options]="seleactInstitute" [placeholder]="'Last Qualification'" [required]="true"
+                    <app-dropdown [options]="seleactInstitute" [placeholder]="'Select Institute Name'" [required]="!isPostGraduate"
                         [searchable]="true" [label]="'Institution Name'" formControlName="institutename"
                         name="institutename" >
                     </app-dropdown>
@@ -46,7 +46,7 @@
                 <div class="col-6" *ngIf="isOtherEducation">
                     <div class="form-group">
                         <app-inputfield formControlName="institutetitle" name="institutetitle"
-                            label="Other Institution Name" placeholder="Enter Institution Name" [required]="true">
+                            label="Other Institution Name" placeholder="Enter Institution Name" [required]="!isPostGraduate">
                         </app-inputfield>
 
                         <div class="text-danger"
@@ -60,7 +60,7 @@
             </div>
             <div class="row mt-20">
                 <div class="col-lg-4 col-sm-12">
-                    <app-dropdown [options]="selectpassingyr" [placeholder]="'Select Year'" [required]="true"
+                    <app-dropdown [options]="selectpassingyr" [placeholder]="'Select Year'" [required]="!isPostGraduate"
                          [avatarUrl]="avatarUrl"
                         formControlName="passingyear" [hasAvatar]="hasAvatar" [label]="passingyear">
                     </app-dropdown>
@@ -73,7 +73,7 @@
 
                 </div>
                 <div class="col-lg-4 col-sm-12">
-                    <app-inputfield type="number" formControlName="per_cgpa" [required]="true" label="Percentage / CGPA"
+                    <app-inputfield type="number" formControlName="per_cgpa" [required]="!isPostGraduate" label="Percentage / CGPA"
                         placeholder="Enter Percentage/CGPA" helpText="Help text" name="per_cgpa" [min]="0"
                          suffix="">
                     </app-inputfield>
@@ -98,7 +98,7 @@
 
                 </div>
                 <div class="col-lg-4 col-sm-12">
-                    <app-dropdown [options]="selectlocation" [placeholder]="'Select Location'" [required]="true"
+                    <app-dropdown [options]="selectlocation" [placeholder]="'Select Location'" [required]="!isPostGraduate"
                         [avatarUrl]="avatarUrl" formControlName="location" [searchable]="true"
                         [hasAvatar]="hasAvatar" label="Location">
                     </app-dropdown>
@@ -111,7 +111,7 @@
                 </div>
             </div>
 
-            <!-- 10th-12th pg-->
+            <!-- 10th-12th -->
             @if (isSchoolLevel) {
             <div class="row ">
                 <div class="col-6">
@@ -189,7 +189,7 @@
                 </div>
             </div> }
 
-            <!-- diploma ug   -->
+            <!-- diploma ug pg  -->
             @if (isHigherEducation) {
             <div class="row">
                 <div class="col-12">
@@ -267,7 +267,7 @@
 
 
 
-                        <app-uploadbtn [config]="basicConfig" [required]="true" label="Passing / Leaving Certificate "
+                        <app-uploadbtn [config]="basicConfig" [required]="!isPostGraduate" label="Passing / Leaving Certificate "
                             (fileChange)="onFileChange($event, educationType,'lc')">
                         </app-uploadbtn>
 
@@ -308,7 +308,7 @@
                                 </div> -->
                             </div>
 
-                            <div class=" other-doc-upload">
+                            <div class=" other-doc-upload" [ngClass]="slot.file ? 'mt-1' : 'mt-0'" >
 
                              @if (slot.file) {
                                 <div class="addcust-img-box mt-4">
@@ -367,7 +367,7 @@
                     <!-- Add button -->
                     <div class="col-lg-4 col-sm-12 mt-20 pt-2">
                         <app-buttons label="Add More Document" class="btn btn-icon Add btncustomClass" [outline]="true"
-                            (click)="addotherdocuments()">
+                            (click)="addotherdocuments()"  [disabled]="otherDocuments.length >= maxOtherDocuments">
  <img src="/assets/images/icons/addred.svg">
                         </app-buttons>
                     </div>

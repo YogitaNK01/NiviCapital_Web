@@ -37,6 +37,7 @@ export class Loanstepperservice {
 
   private educationSubSteps: any[] = [];
   private completedEducationSections = new Set<string>();
+  private completedSteps = new Set<string>();
   private formData: Record<string, any> = {};
 
   private stepsSubject = new BehaviorSubject<any[]>([]);
@@ -60,6 +61,11 @@ export class Loanstepperservice {
     const baseSteps: Step[] = [
       { label: 'Loan Info', route: 'loaninfo' },
       { label: 'General Info', route: 'genralinfo' },
+      //   {
+      //   label: 'Education Details',
+      //   route: 'educationDetails',
+      //   children: this.educationSubSteps
+      // },
       { label: 'Estimated Expense', route: 'expense' },
       { label: 'Additional Info', route: 'additionalinfo' },
       { label: 'KYC', route: 'kycinfo' },
@@ -99,7 +105,7 @@ export class Loanstepperservice {
     return this.stepsSubject.getValue();
   }
 
-
+  //-----------education steps ----------------
   setEducationSubSteps(data: any[]) {
 
 
@@ -138,6 +144,15 @@ export class Loanstepperservice {
 
   isEducationStepCompleted(step: string): boolean {
     return this.completedEducationSections.has(step);
+  }
+  //---------------all other steps --------------
+
+  markStepCompleted(route: string) {
+    this.completedSteps.add(route);
+  }
+
+  isStepCompleted(route: string): boolean {
+    return this.completedSteps.has(route);
   }
 
   setLoanId(id1: string, id2: string, name: string, arn: string) {

@@ -86,12 +86,12 @@
 
                     <div class="col-4" *ngIf="isOtherstate">
                         <div class="form-group">
-                            <app-inputfield formControlName="otherstaetitle" name="otherstaetitle" (input)="mainservice.restrictInput($event,'text')"
+                            <app-inputfield formControlName="otherstatetitle" name="otherstatetitle" (input)="mainservice.restrictInput($event,'text')"
                                 label="Other State Name" placeholder="Enter Title" [required]="true">
                             </app-inputfield>
 
                             <div class="text-danger"
-                                *ngIf="registerForm.get('otherstaetitle')?.touched && registerForm.get('otherstaetitle')?.invalid">
+                                *ngIf="registerForm.get('otherstatetitle')?.touched && registerForm.get('otherstatetitle')?.invalid">
                                 State Name is required
                             </div>
                         </div>

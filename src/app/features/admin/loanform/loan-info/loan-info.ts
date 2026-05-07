@@ -164,9 +164,7 @@ export class LoanInfo implements OnInit {
 
   }
 
-  submitForm1(data: NgForm) {
-    this.stepperService.next();
-  }
+  
   submitForm(data: NgForm) {
 
     if (!data.valid) {
@@ -192,7 +190,7 @@ export class LoanInfo implements OnInit {
       next: (data) => {
         console.log(data);
         if (data.status == "success") {
-
+this.stepperService.markStepCompleted('loaninfo');
           this.stepperService.next();
         }
 

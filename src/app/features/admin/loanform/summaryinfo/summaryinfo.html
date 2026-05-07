@@ -118,24 +118,25 @@
                 <form [formGroup]="summaryForm">
 
                     <!-- Current Occupation Section -->
-                    <div class="d-flex flex-column gap-3 pb-1">
+                    <div class="d-flex flex-column">
                         <div class="info-item d-flex flex-column">
                             <label class="text-label">Current Occupation</label>
 
-                            <div class="text-label-data fw-bold">{{ currentOccupation }}</div>
+                            <div class="text-label-data fw-bold">{{ currentOccupation == 'Employed' ? 'Salaried' :
+                                currentOccupation == 'Self-employed' ? 'Business' : currentOccupation }}</div>
                         </div>
 
 
                         <!-- Course Details Section -->
-                        <div>
-                            <label class="text-label fw-bold mb-2">Course Details</label>
-                            <hr class="hrclass" />
-                            <div class="info-grid-img">
-                                <div class="info-item d-flex flex-column" *ngFor="let field of courseDetailsFields">
-                                    <label class="text-label">{{ field.label }}</label>
-                                    <div class="text-label-data fw-bold">{{ field.value }}</div>
-                                </div>
+
+                        <label class="text-body-1 fw-bold mt-20">Course Details</label>
+                        <hr class="hrclass" />
+                        <div class="info-grid-img">
+                            <div class="info-item d-flex flex-column" *ngFor="let field of courseDetailsFields">
+                                <label class="text-label">{{ field.label }}</label>
+                                <div class="text-label-data fw-bold">{{ field.value }}</div>
                             </div>
+
                         </div>
                     </div>
 
@@ -153,83 +154,84 @@
                     <label class="text-label fw-bold mb-2">Education Fees -₹ </label>
                     <hr class="hrclass" />
 
+                    <div class="living-misc d-flex flex-column">
+                        <div class="info-grid-img mt-20">
+                            <div class="info-item d-flex flex-column">
+                                <label class="text-label">Tuition Fees (INR)</label>
+                                <div class="text-label-data fw-bold">₹{{ educationFees?.tuitionInr | number }}</div>
+                            </div>
 
-                    <div class="info-grid-img">
-                        <div class="info-item d-flex flex-column">
-                            <label class="text-label">Tuition Fees (INR)</label>
-                            <div class="text-label-data fw-bold">₹{{ educationFees?.tuitionInr | number }}</div>
+                            <div class="info-item d-flex flex-column">
+                                <label class="text-label">Amount (AUD)</label>
+                                <div class="text-label-data fw-bold">${{ educationFees?.tuitionAud }}</div>
+                            </div>
                         </div>
 
-                        <div class="info-item d-flex flex-column">
-                            <label class="text-label">Amount (AUD)</label>
-                            <div class="text-label-data fw-bold">${{ educationFees?.tuitionAud }}</div>
+
+                        <!-- Living Expenses Section -->
+                        <div class="d-flex flex-column">
+                            <label class="text-label fw-bold mb-2">Living Expenses - ₹</label>
+                            <!-- <hr class="hrclass" /> -->
+
+                            <div *ngFor="let expense of livingExpenses"
+                                class="info-item d-flex flex-column gap-2 h-100">
+                                <hr class="hrclass" />
+                                <span><svg xmlns="http://www.w3.org/2000/svg" width="8" height="8" viewBox="0 0 8 8"
+                                        fill="none">
+                                        <circle cx="4" cy="4" r="4" fill="#2570A3" />
+                                    </svg> <label class="text-label fw-bold px-3">{{ expense.name }}</label></span>
+
+                                <hr class="hrclass" />
+                                <div class="info-grid-img p-0">
+                                    <div class="info-item d-flex flex-column">
+                                        <label class="text-label">Select Frequency</label>
+                                        <div class="text-label-data fw-bold">{{ expense.frequency | titlecase }}</div>
+                                    </div>
+                                    <div class="info-item d-flex flex-column">
+                                        <label class="text-label">Amount (INR)</label>
+                                        <div class="text-label-data fw-bold">₹{{ expense.amountInr | number }}</div>
+                                    </div>
+                                    <div class="info-item d-flex flex-column">
+                                        <label class="text-label">Amount (AUD)</label>
+                                        <div class="text-label-data fw-bold">${{ expense.amountAud }}</div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-                    </div>
 
 
-                    <!-- Living Expenses Section -->
-                    <div class="d-flex flex-column gap-3 pb-1">
-                        <label class="text-label fw-bold mb-2">Living Expenses - ₹</label>
-                        <!-- <hr class="hrclass" /> -->
 
-                        <div *ngFor="let expense of livingExpenses" class="info-item d-flex flex-column gap-2 h-100">
-                            <hr class="hrclass" />
-                            <span><svg xmlns="http://www.w3.org/2000/svg" width="8" height="8" viewBox="0 0 8 8"
-                                    fill="none">
-                                    <circle cx="4" cy="4" r="4" fill="#2570A3" />
-                                </svg> <label class="text-label fw-bold px-3">{{ expense.name }}</label></span>
+                        <!-- Miscellaneo Expenses Section -->
+                        <div class="d-flex flex-column ">
+                            <label class="text-label fw-bold mb-2">Miscellaneous Expenses - ₹</label>
+                            <!-- <hr class="hrclass" /> -->
 
-                            <hr class="hrclass" />
-                            <div class="info-grid-img p-0">
-                                <div class="info-item d-flex flex-column">
-                                    <label class="text-label">Select Frequency</label>
-                                    <div class="text-label-data fw-bold">{{ expense.frequency | titlecase }}</div>
-                                </div>
-                                <div class="info-item d-flex flex-column">
-                                    <label class="text-label">Amount (INR)</label>
-                                    <div class="text-label-data fw-bold">₹{{ expense.amountInr | number }}</div>
-                                </div>
-                                <div class="info-item d-flex flex-column">
-                                    <label class="text-label">Amount (AUD)</label>
-                                    <div class="text-label-data fw-bold">${{ expense.amountAud }}</div>
+                            <div *ngFor="let expense of miscellaneousExpenses"
+                                class="info-item d-flex flex-column gap-2 h-100">
+                                <hr class="hrclass" />
+                                <span><svg xmlns="http://www.w3.org/2000/svg" width="8" height="8" viewBox="0 0 8 8"
+                                        fill="none">
+                                        <circle cx="4" cy="4" r="4" fill="#2570A3" />
+                                    </svg> <label class="text-label fw-bold px-3">{{ expense.name }}</label></span>
+
+                                <hr class="hrclass" />
+                                <div class="info-grid-img p-0">
+                                    <div class="info-item d-flex flex-column">
+                                        <label class="text-label">Select Frequency</label>
+                                        <div class="text-label-data fw-bold">{{ expense.frequency | titlecase }}</div>
+                                    </div>
+                                    <div class="info-item d-flex flex-column">
+                                        <label class="text-label">Amount (INR)</label>
+                                        <div class="text-label-data fw-bold">₹{{ expense.amountInr | number }}</div>
+                                    </div>
+                                    <div class="info-item d-flex flex-column">
+                                        <label class="text-label">Amount (AUD)</label>
+                                        <div class="text-label-data fw-bold">${{ expense.amountAud }}</div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-
-
-
-                    <!-- Miscellaneo Expenses Section -->
-                    <div class="d-flex flex-column gap-3 pb-1">
-                        <label class="text-label fw-bold mb-2">Miscellaneous Expenses - ₹</label>
-                        <!-- <hr class="hrclass" /> -->
-
-                        <div *ngFor="let expense of miscellaneousExpenses"
-                            class="info-item d-flex flex-column gap-2 h-100">
-                            <hr class="hrclass" />
-                            <span><svg xmlns="http://www.w3.org/2000/svg" width="8" height="8" viewBox="0 0 8 8"
-                                    fill="none">
-                                    <circle cx="4" cy="4" r="4" fill="#2570A3" />
-                                </svg> <label class="text-label fw-bold px-3">{{ expense.name }}</label></span>
-
-                            <hr class="hrclass" />
-                            <div class="info-grid-img p-0">
-                                <div class="info-item d-flex flex-column">
-                                    <label class="text-label">Select Frequency</label>
-                                    <div class="text-label-data fw-bold">{{ expense.frequency | titlecase }}</div>
-                                </div>
-                                <div class="info-item d-flex flex-column">
-                                    <label class="text-label">Amount (INR)</label>
-                                    <div class="text-label-data fw-bold">₹{{ expense.amountInr | number }}</div>
-                                </div>
-                                <div class="info-item d-flex flex-column">
-                                    <label class="text-label">Amount (AUD)</label>
-                                    <div class="text-label-data fw-bold">${{ expense.amountAud }}</div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
                 </form>
             </div>
         </ng-template>
@@ -243,20 +245,28 @@
 
                     <!-- Main Applicant Section -->
                     <div>
-                        <label class="text-label fw-bold mb-2">Main Applicant</label>
+                        <label class="text-label fw-bold">Main Applicant</label>
                         <hr class="hrclass" />
                         <div class="info-grid-img">
                             <div *ngFor="let field of additionalInfoFields.mainApplicant"
                                 class="info-item d-flex flex-column">
                                 <label class="text-label">{{ field.label }}</label>
-                                <div class="text-label-data fw-bold">{{ field.value }}</div>
+                                @if(field.label === 'Marital Status'){
+                                <div class="text-label-data fw-bold">{{field.value | titlecase}}</div>
+                                } @else if(field.label === 'Gender'){
+                                <div class="text-label-data fw-bold">{{field.value === 'M'?'Male' : field.value ===
+                                    'F'?'Female' : 'Third Gender'}}</div>
+                                } @else {
+                                <div class="text-label-data fw-bold">{{field.value}}</div>
+                                }
+                                <!-- <div class="text-label-data fw-bold">{{field.label === 'Marital Status'?(field.value | titlecase) : field.value }}</div> -->
                             </div>
                         </div>
                     </div>
 
                     <!-- Spouse Details Section -->
-                    <div>
-                        <label class="text-label fw-bold mb-2">Spouse Details</label>
+                    <div class="mt-20">
+                        <label class="text-label fw-bold ">Spouse Details</label>
                         <hr class="hrclass" />
                         <div class="info-grid-img">
                             <div *ngFor="let field of additionalInfoFields.spouse" class="info-item d-flex flex-column">
@@ -267,8 +277,8 @@
                     </div>
 
                     <!-- Father's Details Section -->
-                    <div>
-                        <label class="text-label fw-bold mb-2">Father's Details</label>
+                    <div class="mt-20">
+                        <label class="text-label fw-bold ">Father's Details</label>
                         <hr class="hrclass" />
                         <div class="info-grid-img">
                             <div *ngFor="let field of additionalInfoFields.father" class="info-item d-flex flex-column">
@@ -279,8 +289,8 @@
                     </div>
 
                     <!-- Mother's Details Section -->
-                    <div>
-                        <label class="text-label fw-bold mb-2">Mother's Details</label>
+                    <div class="mt-20">
+                        <label class="text-label fw-bold ">Mother's Details</label>
                         <hr class="hrclass" />
                         <div class="info-grid-img">
                             <div *ngFor="let field of additionalInfoFields.mother" class="info-item d-flex flex-column">
@@ -364,9 +374,9 @@
                 <form [formGroup]="summaryForm">
 
                     <!-- Occupation Details Header -->
-                    <div class="d-flex flex-column gap-3 pb-1">
+                    <div class="d-flex flex-column ">
 
-                        <label class="text-label fw-bold mb-2">Occupation Details</label>
+                        <label class="text-label fw-bold ">Occupation Details</label>
                         <hr class="hrclass" />
 
                         <div class="info-grid-img">
@@ -429,10 +439,10 @@
                     <ng-container *ngFor="let section of assetsSections">
 
                         <!-- Section Title -->
-                        <label class="text-label fw-bold mb-2 ">
+                        <label class="text-dp-2-bold fw-bold  ">
                             {{ section.sectionLabel }}
                         </label>
-                        <hr class="hrclass" />
+
 
                         <!-- Cards -->
                         <ng-container *ngFor="let card of section.cards">
@@ -442,13 +452,13 @@
                                 <svg xmlns="http://www.w3.org/2000/svg" width="8" height="8">
                                     <circle cx="4" cy="4" r="4" fill="#2570A3" />
                                 </svg>
-                                <label class="text-label fw-bold px-3">
+                                <label class="text-dp-2-bold  blue-text fw-bold px-3">
                                     {{ card.title }}
                                 </label>
                             </span>
                             <hr class="hrclass" />
 
-                            <div class="info-grid-img p-0 mt-2">
+                            <div class="info-grid-img p-0 mt-20">
 
                                 <div *ngFor="let field of card.fields" class="info-item d-flex flex-column"
                                     [class.col-12]="field.fullRow">
@@ -485,7 +495,7 @@
                     <ng-container *ngFor="let section of liabilitiesSections">
 
                         <!-- Section Title -->
-                        <label class="text-label fw-bold mb-2 ">
+                        <label class="text-dp-2-bold fw-bold  ">
                             {{ section.sectionLabel }}
                         </label>
                         <hr class="hrclass" />
@@ -498,13 +508,13 @@
                                 <svg xmlns="http://www.w3.org/2000/svg" width="8" height="8">
                                     <circle cx="4" cy="4" r="4" fill="#2570A3" />
                                 </svg>
-                                <label class="text-label fw-bold px-3">
+                                <label class="text-dp-2-bold fw-bold px-3 blue-text">
                                     {{ card.title }}
                                 </label>
                             </span>
                             <hr class="hrclass" />
 
-                            <div class="info-grid-img p-0 mt-2">
+                            <div class="info-grid-img p-0 mt-20">
 
                                 <div *ngFor="let field of card.fields" class="info-item d-flex flex-column"
                                     [class.col-12]="field.fullRow">
@@ -532,65 +542,17 @@
         </ng-template>
 
 
-
-
-
-
-        <!-- 
-        <ng-template #liabilitiesTemplate let-i="index">
-
-            <div class="row common-details-box d-flex flex-row ">
-                <form [formGroup]="summaryForm">
-                    <div class="info-grid-img">
-                        <div class="info-item d-flex flex-column"
-                            *ngFor="let field of otherFields; trackBy: trackByKey">
-
-                            <label class="text-label">{{ field.label }}</label>
-
-
-                            <p class="text-label-data">
-                                {{ summaryForm.get(field.key)?.value || '-' }}
-                            </p>
-                        </div>
-                    </div>
-                </form>
-            </div>
-
-        </ng-template> -->
-
-
-        <!-- <ng-template #monthlyexpTemplate let-i="index">
-
-            <div class="row common-details-box d-flex flex-row ">
-                <form [formGroup]="summaryForm">
-                    <div class="info-grid-img">
-                        <div class="info-item d-flex flex-column"
-                            *ngFor="let field of otherFields; trackBy: trackByKey">
-
-                            <label class="text-label">{{ field.label }}</label>
-
-
-                            <p class="text-label-data">
-                                {{ summaryForm.get(field.key)?.value || '-' }}
-                            </p>
-                        </div>
-                    </div>
-                </form>
-            </div>
-        </ng-template> -->
-
         <ng-template #monthlyexpTemplate let-i="index">
             <div class="row common-details-box d-flex flex-row">
                 <form [formGroup]="summaryForm">
 
-                    <div class="d-flex flex-column gap-3 pb-1">
+                    <div class="d-flex flex-column ">
 
                         <ng-container *ngFor="let field of monthlyExpenditureFields">
-                            <div class="mb-3">
-                                <label class="text-label fw-bold">{{ field.label }}</label>
-                                <hr class="hrclass my-2" />
+                            <div class="mt-20">
+                                <label class="text-dp-2-bold fw-bold">{{ field.label }}</label>
+                                <hr class="hrclass" />
                                 <div class="info-item d-flex flex-column">
-                                    <!-- <label class="text-label">{{ monthlyExpenditure[field.key]?.name || '-' }}</label> -->
                                     <label class="text-label">{{ getDisplayLabel(monthlyExpenditure[field.key]?.name)
                                         }}</label>
 
@@ -604,16 +566,18 @@
 
                         <!-- Other Recurring Expenses -->
                         <div *ngIf="monthlyExpenditure.otherRecurringExpenses?.length > 0; else noOtherExpenses"
-                            class="mb-3">
-                            <label class="text-label fw-bold mb-1">Other Recurring Expenses</label>
-                            <hr class="hrclass my-2" />
+                            class="">
+                            <label class="text-dp-2-bold fw-bold">Other Recurring Expenses</label>
+                            <hr class="hrclass" />
                             <div class="info-grid-img">
                                 <div class="info-item d-flex flex-column"
                                     *ngFor="let expense of monthlyExpenditure.otherRecurringExpenses">
+                                     <div class="mt-20">
                                     <label class="text-label">{{ expense.name || 'N/A' }}</label>
                                     <div class="text-label-data fw-bold">
                                         {{ expense.amountInr != null ? (expense.amountInr | number:'1.0-0') : '-' }}
                                     </div>
+                                </div>
                                 </div>
                             </div>
                         </div>

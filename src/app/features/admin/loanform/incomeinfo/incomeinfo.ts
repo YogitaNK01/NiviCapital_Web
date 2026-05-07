@@ -463,7 +463,7 @@ isOtherDocumentValid(): boolean {
 
     console.log('allRequiredFilesUploaded:', this.allRequiredFilesUploaded);
     if (this.allRequiredFilesUploaded) {
-
+  this.stepperService.markStepCompleted('incomeinfo');
       this.stepperService.next();
     }
   }

@@ -789,6 +789,7 @@ validateAmount(group: FormGroup) {
         console.log("resp---", res);
         if (res.status == "success") {
 this.loanformservice.estExpenseInfoData = input;
+this.stepperService.markStepCompleted('expense');
           this.stepperService.next();
         }
       }

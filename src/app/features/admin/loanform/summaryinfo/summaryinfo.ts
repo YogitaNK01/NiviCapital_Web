@@ -16,7 +16,7 @@ import { SummaryHelper } from '../../../../utils/summaryHelper';
 
 @Component({
   selector: 'app-summaryinfo',
-  imports: [CommonModule, ReactiveFormsModule,Inputfield,Buttons],
+  imports: [CommonModule, ReactiveFormsModule, Inputfield, Buttons],
   standalone: true,
   templateUrl: './summaryinfo.html',
   styleUrl: './summaryinfo.scss'
@@ -25,7 +25,7 @@ export class Summaryinfo {
 
   openIndex: number[] = [0];
   accordions = [
-    { title: 'General', alwaysOpen: true },
+    { title: 'General Info', alwaysOpen: true },
     { title: 'Estimated Expense', alwaysOpen: false },
     { title: 'Additional Info', alwaysOpen: false },
     { title: 'KYC', alwaysOpen: true },
@@ -40,107 +40,105 @@ export class Summaryinfo {
 
 
 
-currentOccupation = '';
-courseDetailsFields: { label: string; value: any }[] = [];
+  currentOccupation = '';
+  courseDetailsFields: { label: string; value: any }[] = [];
+
+  // estimatedExpense 
+
+  educationFees: { tuitionInr: number; tuitionAud: number } | null = null;
+
+  livingExpenses: Array<{
+    name: string;
+    frequency: string;
+    amountInr: number;
+    amountAud: number;
+  }> = [];
+
+  miscellaneousExpenses: Array<{
+    name: string;
+    frequency: string;
+    amountInr: number;
+    amountAud: number;
+  }> = [];
 
 
 
-// estimatedExpense 
-
-educationFees: { tuitionInr: number; tuitionAud: number } | null = null;
-
-livingExpenses: Array<{
-  name: string;
-  frequency: string;
-  amountInr: number;
-  amountAud: number;
-}> = [];
-
-miscellaneousExpenses: Array<{
-  name: string;
-  frequency: string;
-  amountInr: number;
-  amountAud: number;
-}> = [];
-
-
-
-additionalInfoFields: any = {
-  mainApplicant: [],
-  spouse: [],
-  father: [],
-  mother: []
-};
+  additionalInfoFields: any = {
+    mainApplicant: [],
+    spouse: [],
+    father: [],
+    mother: []
+  };
   otherFields = otherFields;
-    applicationId: any;
+  applicationId: any;
 
 
 
-    documentTypes = [
-  { key: 'salarySlips', label: 'Salary Slip' },
-  { key: 'form16', label: 'Form 16' },
-  { key: 'bankStatements', label: 'Bank Statement' },
-  { key: 'itrs', label: 'ITR' }
-];
+  documentTypes = [
+    { key: 'salarySlips', label: 'Salary Slip' },
+    { key: 'form16', label: 'Form 16' },
+    { key: 'bankStatements', label: 'Bank Statement' },
+    { key: 'itrs', label: 'ITR' }
+  ];
 
-incomeDetails: any = {
-  editUrl: '',
-  salarySlips: [],
-  bankStatements: [],
-  form16: [],
-  itrs: []
-};
-
-
-
-
-// Declare monthlyExpenditure property to hold API data
-monthlyExpenditure: any = {
-  totalMonthlyInr: 0,
-  rentHomeMaintenance: null,
-  groceriesHousehold: null,
-  utilitiesElectricityWaterGas: null,
-  transportation: null,
-  schoolEducationFees: null,
-  medicalMedicines: null,
-  otherRecurringExpenses: []
-};
-
-// Define the dynamic fields array for iteration in template
-monthlyExpenditureFields = [
-  { key: 'rentHomeMaintenance', label: 'Rent / Home Maintenance' },
-  { key: 'groceriesHousehold', label: 'Groceries and Household' },
-  { key: 'utilitiesElectricityWaterGas', label: 'Utilities / Bills (Electricity, Water, Gas)' },
-  { key: 'transportation', label: 'Transportation' },
-  { key: 'schoolEducationFees', label: 'School Education Fees' },
-  { key: 'medicalMedicines', label: 'Medical / Medicines' }
-];
+  incomeDetails: any = {
+    editUrl: '',
+    salarySlips: [],
+    bankStatements: [],
+    form16: [],
+    itrs: []
+  };
 
 
 
-assetsSections: any[] = [];
-liabilitiesSections: any[] = [];
+
+  // Declare monthlyExpenditure property to hold API data
+  monthlyExpenditure: any = {
+    totalMonthlyInr: 0,
+    rentHomeMaintenance: null,
+    groceriesHousehold: null,
+    utilitiesElectricityWaterGas: null,
+    transportation: null,
+    schoolEducationFees: null,
+    medicalMedicines: null,
+    otherRecurringExpenses: []
+  };
+
+  // Define the dynamic fields array for iteration in template
+  monthlyExpenditureFields = [
+    { key: 'rentHomeMaintenance', label: 'Rent / Home Maintenance' },
+    { key: 'groceriesHousehold', label: 'Groceries and Household' },
+    { key: 'utilitiesElectricityWaterGas', label: 'Utilities / Bills (Electricity, Water, Gas)' },
+    { key: 'transportation', label: 'Transportation' },
+    { key: 'schoolEducationFees', label: 'School Education Fees' },
+    { key: 'medicalMedicines', label: 'Medical / Medicines' }
+  ];
 
 
-  constructor(private fb: FormBuilder,  private formSvc: Loanformservice,private stepperService: Loanstepperservice, private cd: ChangeDetectorRef, private loanformservice: Loanformservice,
+
+  assetsSections: any[] = [];
+  liabilitiesSections: any[] = [];
+
+
+  constructor(private fb: FormBuilder, private formSvc: Loanformservice, private stepperService: Loanstepperservice, private cd: ChangeDetectorRef, private loanformservice: Loanformservice,
     private router: Router, private route: ActivatedRoute, public main: Main, private apiservice: Addcustomerservice) { }
 
   ngOnInit(): void {
 
-this.route.queryParams.subscribe(params => {
+    this.route.queryParams.subscribe(params => {
       if (params['applicantId']) {
         this.applicationId = params['applicationId'];
-                  //this.applicationId ="c6c3cb1d-4036-4903-8c95-fc4ae7e45031";
-                    // this.applicationId ="008aeaea-2b34-40cd-a040-65ef150726f7";
+        //this.applicationId ="c6c3cb1d-4036-4903-8c95-fc4ae7e45031";
+        // this.applicationId ="008aeaea-2b34-40cd-a040-65ef150726f7";
 
-        
+
 
       }
     });
 
     this.getSummarydetails()
     this.buildForm();
-   }
+  }
 
 
   trackByKey(index: number, field: any) {
@@ -161,7 +159,7 @@ this.route.queryParams.subscribe(params => {
   }
 
 
- getSummarydetails() {
+  getSummarydetails() {
     this.formSvc.getSummary(this.applicationId).subscribe(
       (res: any) => {
         if (res && res.status === 'success' && res.data) {
@@ -175,44 +173,44 @@ this.route.queryParams.subscribe(params => {
 
 
           // Extract Estimated Expense
-        const estimatedExpenseData = SummaryHelper.extractEstimatedExpense(data.estimatedExpense);
-        this.educationFees = estimatedExpenseData.educationFees;
-        this.livingExpenses = estimatedExpenseData.livingExpenses;
-        this.miscellaneousExpenses = estimatedExpenseData.miscellaneousExpenses;
+          const estimatedExpenseData = SummaryHelper.extractEstimatedExpense(data.estimatedExpense);
+          this.educationFees = estimatedExpenseData.educationFees;
+          this.livingExpenses = estimatedExpenseData.livingExpenses;
+          this.miscellaneousExpenses = estimatedExpenseData.miscellaneousExpenses;
 
-      
 
-        const additionalInfoData = SummaryHelper.extractAdditionalInfo(data.additionalInfo);
+
+          const additionalInfoData = SummaryHelper.extractAdditionalInfo(data.additionalInfo);
           this.additionalInfoFields = additionalInfoData;
 
-        this.incomeDetails = data.incomeDetails || {
-          editUrl: '',
-          salarySlips: [],
-          bankStatements: [],
-          form16: [],
-          itrs: []
-        };
+          this.incomeDetails = data.incomeDetails || {
+            editUrl: '',
+            salarySlips: [],
+            bankStatements: [],
+            form16: [],
+            itrs: []
+          };
 
 
-        this.monthlyExpenditure = res.data.monthlyExpenditure || this.monthlyExpenditure;
+          this.monthlyExpenditure = res.data.monthlyExpenditure || this.monthlyExpenditure;
 
-      const allFields = [
-        { key: 'rentHomeMaintenance', label: 'Rent / Home Maintenance' },
-        { key: 'groceriesHousehold', label: 'Groceries and Household' },
-        { key: 'utilitiesElectricityWaterGas', label: 'Utilities / Bills (Electricity, Water, Gas)' },
-        { key: 'transportation', label: 'Transportation' },
-        { key: 'schoolEducationFees', label: 'School Education Fees' },
-        { key: 'medicalMedicines', label: 'Medical / Medicines' }
-      ];
+          const allFields = [
+            { key: 'rentHomeMaintenance', label: 'Rent / Home Maintenance' },
+            { key: 'groceriesHousehold', label: 'Groceries and Household' },
+            { key: 'utilitiesElectricityWaterGas', label: 'Utilities / Bills (Electricity, Water, Gas)' },
+            { key: 'transportation', label: 'Transportation' },
+            { key: 'schoolEducationFees', label: 'School Education Fees' },
+            { key: 'medicalMedicines', label: 'Medical / Medicines' }
+          ];
 
-      this.monthlyExpenditureFields = allFields.filter(field => this.monthlyExpenditure[field.key] != null);
+          this.monthlyExpenditureFields = allFields.filter(field => this.monthlyExpenditure[field.key] != null);
 
 
 
-       this.assetsSections = SummaryHelper.extractAssetsInfo(res.data.assets);
+          this.assetsSections = SummaryHelper.extractAssetsInfo(res.data.assets);
 
-    
-        this.liabilitiesSections =SummaryHelper.extractLiabilitiesInfo(res.data.liabilities);
+
+          this.liabilitiesSections = SummaryHelper.extractLiabilitiesInfo(res.data.liabilities);
 
 
 
@@ -230,21 +228,21 @@ this.route.queryParams.subscribe(params => {
 
 
   labelDisplayMap: { [key: string]: string } = {
-  'GROCERIES HOUSEHOLD': 'Groceries and Household',
-  'RENT HOME MAINTENANCE': 'Rent / Home Maintenance',
-  'TRANSPORTATION': 'Transportation',
-  'SCHOOL EDUCATION FEES': 'School Education Fees',
-  'MEDICAL MEDICINES': 'Medical / Medicines',
-   'UTILITIES': 'Utilities',
-  'OTHER RECURRING EXPENSES': 'Other Recurring Expenses'
-};
+    'GROCERIES HOUSEHOLD': 'Groceries and Household',
+    'RENT HOME MAINTENANCE': 'Rent / Home Maintenance',
+    'TRANSPORTATION': 'Transportation',
+    'SCHOOL EDUCATION FEES': 'School Education Fees',
+    'MEDICAL MEDICINES': 'Medical / Medicines',
+    'UTILITIES': 'Utilities',
+    'OTHER RECURRING EXPENSES': 'Other Recurring Expenses'
+  };
 
-getDisplayLabel(rawName: string): string {
-  if (!rawName) return '-';
-  // Normalize key to uppercase trimmed for matching
-  const key = rawName.trim().toUpperCase();
-  return this.labelDisplayMap[key] || rawName;
-}
+  getDisplayLabel(rawName: string): string {
+    if (!rawName) return '-';
+    // Normalize key to uppercase trimmed for matching
+    const key = rawName.trim().toUpperCase();
+    return this.labelDisplayMap[key] || rawName;
+  }
 
 
 

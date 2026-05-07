@@ -1376,6 +1376,7 @@ export class Liabilitiesinfo {
         console.log("resp---", res);
         if (res.status == "success") {
           this.formSvc.liabilitiesInfoData = payload
+          this.stepperService.markStepCompleted('liabilitiesinfo');
           this.stepperService.next();
         }
       },

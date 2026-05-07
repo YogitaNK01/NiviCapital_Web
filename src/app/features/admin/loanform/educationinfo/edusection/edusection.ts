@@ -142,9 +142,11 @@ export class Edusection {
   selectedLocationLabel = '';
 
   isOtherEducation = false;
+  maxOtherDocuments = 5;
+  @Output() otherDocAdded = new EventEmitter<number>();
 
   constructor(private fb: FormBuilder, private stepperService: Loanstepperservice, private cd: ChangeDetectorRef, private route: ActivatedRoute,
-    public main: Main, private msgBox: Msgboxservice, public loanformservice: Loanformservice) { }
+  public main: Main, private msgBox: Msgboxservice, public loanformservice: Loanformservice) { }
 
   ngOnInit(): void {
 
@@ -192,7 +194,7 @@ export class Edusection {
     }
 
     if (this.sectionType === 'postgrad') {
-      this.marksheetCount = 1;
+      this.marksheetCount = 2;
       // this.showLC = false;
       this.educationType = 'POSTGRADUATE';
     }
@@ -209,12 +211,12 @@ export class Edusection {
 
     // this.group = this.fb.group({
 
-      // institutename: ['', Validators.required],
-      // passingyear: ['', Validators.required],
-      // per_cgpa: ['', [Validators.required, this.percentageOrCgpaValidator()]],
-      // location: ['', Validators.required],
-        // marksheet: ['', Validators.required],
-        // lc: ['', Validators.required],
+    // institutename: ['', Validators.required],
+    // passingyear: ['', Validators.required],
+    // per_cgpa: ['', [Validators.required, this.percentageOrCgpaValidator()]],
+    // location: ['', Validators.required],
+    // marksheet: ['', Validators.required],
+    // lc: ['', Validators.required],
 
     // })
 
@@ -224,14 +226,16 @@ export class Edusection {
     return this.getLevelFromTitle(this.title);
   }
   get isSchoolLevel(): boolean {
-    return this.educationType === '_10TH' || this.educationType === '_12TH' || this.educationType === 'OTHER_AFTER_12' || this.educationType === 'OTHER_AFTER_DIPLOMA' || this.educationType === 'POSTGRADUATE';
+    return this.educationType === '_10TH' || this.educationType === '_12TH' || this.educationType === 'OTHER_AFTER_12' || this.educationType === 'OTHER_AFTER_DIPLOMA' ;
   }
 
   get isHigherEducation(): boolean {
-    return this.educationType === 'DIPLOMA' || this.educationType === 'UNDERGRADUATE' ;
+    return this.educationType === 'DIPLOMA' || this.educationType === 'UNDERGRADUATE' || this.educationType === 'POSTGRADUATE';
   }
 
- 
+get isPostGraduate(): boolean {
+  return this.educationType === 'POSTGRADUATE';
+}
 
   private buildYearOptions(backYears: number): DropdownOption[] {
     const currentYear = new Date().getFullYear();
@@ -271,12 +275,12 @@ export class Edusection {
       s => s.label.trim().toLowerCase() === 'other'
     )
 
-   
-const control = this.group.get('institutename');
-  control?.setValue(ids);
-  control?.markAsDirty();
-  control?.markAsTouched();
-  control?.updateValueAndValidity();
+
+    const control = this.group.get('institutename');
+    control?.setValue(ids);
+    control?.markAsDirty();
+    control?.markAsTouched();
+    control?.updateValueAndValidity();
 
 
 
@@ -306,10 +310,10 @@ const control = this.group.get('institutename');
 
     // this.group.get('location')?.setValue(this.selectedLocationLabel);
 
- const control = this.group.get('location');
-  control?.setValue(this.selectedLocationLabel);
-  control?.markAsTouched();
-  control?.updateValueAndValidity();
+    const control = this.group.get('location');
+    control?.setValue(this.selectedLocationLabel);
+    control?.markAsTouched();
+    control?.updateValueAndValidity();
 
   }
 
@@ -325,17 +329,7 @@ const control = this.group.get('institutename');
 
     return 'OTHER';
   }
-  // onFileChange(result: UploadResult, key: string , type:'marksheet'| 'lc'): void {
-  //   if (!result?.file) {
-  //     this.uploadedFiles[key] = null;
-  //     return;
-  //   }
-
-  //   this.uploadedFiles[key] = result.file;
-  //   this.uploadedFiles = { ...this.uploadedFiles };
-  // }
-
-
+  
 
   hasLocal(doc: 'marksheet' | 'lc' | 'other', index?: number): boolean {
     return !!this.uploadedFiles?.[this.buildKey(doc, index)];
@@ -453,14 +447,15 @@ const control = this.group.get('institutename');
   }
   // ---------
 
-  // Inside Edusection.ts class
-isMarksheetRequired(index: number): boolean {
-  if (this.sectionType === 'postgrad') return false;
+  // required marksheet count
+  isMarksheetRequired(index: number): boolean {
+    if (this.sectionType === 'postgrad') return false;
 
-  if (this.sectionType === 'bachelors') return index < 2;
+    if (this.sectionType === 'bachelors') return index < 2;
 
-  return index === 0;
-}
+    return index === 0;
+  }
+
   // ----------------------------------------------------------------------------
   onUploadStarted(
     result: UploadResult, key: string,
@@ -655,15 +650,19 @@ isMarksheetRequired(index: number): boolean {
 
   addotherdocuments() {
 
-    // const id = ++this.slotCounter;
+    if (this.otherDocuments.length >= this.maxOtherDocuments) {
+      return;
+    }
+    const id = ++this.slotCounter;
     this.otherDocuments.push({
 
-      id: ++this.slotCounter,
+      id,
       title: '',
       file: null
 
 
     });
+    this.otherDocAdded.emit(id);
 
   }
   onOtherFileChange(result: UploadResult, doc: any) {
@@ -671,9 +670,9 @@ isMarksheetRequired(index: number): boolean {
 
     doc.file = result.file;
 
-    const key = `${this.stepKey}_other_${doc.id}`;
-    this.uploadedFiles[key] = result.file;
-    this.uploadedFiles = { ...this.uploadedFiles };
+    // const key = `${this.stepKey}_other_${doc.id}`;
+    // this.uploadedFiles[key] = result.file;
+    // this.uploadedFiles = { ...this.uploadedFiles };
 
     this.group.markAsDirty();
 
@@ -688,7 +687,7 @@ isMarksheetRequired(index: number): boolean {
     });
   }
 
-
+  //delete img
   removeOther(doc: any) {
     this.msgBox.open({
 
@@ -699,8 +698,9 @@ isMarksheetRequired(index: number): boolean {
 
       onOk: () => {
 
-      
-        const key = `others_${doc.id}`;
+
+        // const key = `others_${doc.id}`;
+        const key = `${this.stepKey}_other_${doc.id}`;
         this.uploadedFiles[key] = null;
         this.uploadedFiles = { ...this.uploadedFiles };
 
@@ -728,6 +728,7 @@ isMarksheetRequired(index: number): boolean {
     a.click();
     URL.revokeObjectURL(url);
   }
+  //delete other block (title +img)
   removeOtherDocument(doc: { id: number; title: string; file: File | null }): void {
     this.msgBox.open({
 
@@ -737,9 +738,9 @@ isMarksheetRequired(index: number): boolean {
 
 
       onOk: () => {
-        const key = `${this.stepKey}_other_${doc.id}`;
-        delete this.uploadedFiles[key];
-        this.uploadedFiles = { ...this.uploadedFiles };
+        // const key = `${this.stepKey}_other_${doc.id}`;
+        // delete this.uploadedFiles[key];
+        // this.uploadedFiles = { ...this.uploadedFiles };
 
         this.otherDocuments = this.otherDocuments.filter(d => d.id !== doc.id);
 
@@ -757,7 +758,18 @@ isMarksheetRequired(index: number): boolean {
       }
     });
   }
+  onOtherTitleChange(slot: any, event: Event) {
+    const value = (event.target as HTMLInputElement).value;
+    slot.title = value;
 
+    this.fileSelected.emit({
+      step: this.stepKey,
+      control: 'other',
+      index: slot.id,
+      file: slot.file,
+      gropudata: { title: value }
+    });
+  }
 
 
   back() {

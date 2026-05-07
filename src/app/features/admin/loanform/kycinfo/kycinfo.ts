@@ -221,6 +221,7 @@ this.stepperService.rebuildSteps();
     this.loanformservice.uploadpassport(fd, this.kycId).subscribe({
       next: (data) => {
         console.log(data);
+        this.stepperService.markStepCompleted('kycinfo');
          this.stepperService.next();
       },
       error: (error) => {

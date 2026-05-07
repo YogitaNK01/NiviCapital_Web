@@ -49,6 +49,12 @@ export class Loanstepper implements OnInit {
         // });
 
       }
+      
+ if (params['qualificationlabel']) {
+      this.activeQualificationId = params['qualificationlabel'];
+      this.cdr.detectChanges();
+    }
+
     });
     this.router.events.subscribe(() => {
       // this.cdr.detectChanges(); 
@@ -109,10 +115,15 @@ export class Loanstepper implements OnInit {
 
   canNavigateTo(index: number): boolean {
     const currentIdx = this.currentIndex;
-
+const step = this.steps[index];
     if (this.isCompleted(index)) {
       return true;
     }
+
+//  if (this.stepservice.isStepCompleted(step.route)) {
+//     return true;
+//   }
+
 
     if (index === currentIdx) {
       return true;
@@ -140,25 +151,32 @@ export class Loanstepper implements OnInit {
   isNextStep(index: number): boolean {
     return index === this.currentIndex + 1;
   }
-  isCompleted1(index: number): boolean {
-    return index < this.currentIndex;
-  }
+ 
+isCompleted1(index: number): boolean {
+  const step = this.steps[index];
+  return this.stepservice.isStepCompleted(step.route);
+}
+
   // In component.ts, temporarily add:
   isCompleted(index: number): boolean {
     const result = index < this.currentIndex;
-    // console.log(`Step ${index} [${this.steps[index]?.label}] completed: ${result} | Current Index: ${this.currentIndex}`);
     return result;
   }
 
   isUpcoming(index: number): boolean {
+    
+
+  // const step = this.steps[index];
+
+  // if (this.stepservice.isStepCompleted(step.route)) {
+  //   return false;
+  // }
+
     return index > this.currentIndex;
   }
 
   isSubStepperDisabled(parentIndex: number, subIndex: number): boolean {
-    // if (this.isUpcoming(parentIndex)) {
-    //   return true;
-    // }
-
+   
 
     const parentStep = this.steps[parentIndex];
     if (!parentStep?.children) return false;
@@ -169,9 +187,11 @@ export class Loanstepper implements OnInit {
     );
 
     
- if (!this.isInsideEducation()) {
-    return true;
+
+ if (this.activeQualificationId === stepKey) {
+    return false;
   }
+
 
 
  if (this.stepperService.isEducationStepCompleted(stepKey)) {
@@ -224,6 +244,7 @@ isInsideEducation(): boolean {
     // Diploma
     if (lower.includes('diploma') || (lower.includes('diploma') && lower.includes('10'))) return 'diploma10';
     if (lower.includes('diploma') || (lower.includes('diploma') && lower.includes('12'))) return 'diploma12';
+    //  if (lower.includes('diploma')) return 'diploma';
 
     if (lower.includes('others') && lower.includes('after 12th')) return 'others12';
     if (lower.includes('others') && lower.includes('diploma')) return 'othersdiploma';
