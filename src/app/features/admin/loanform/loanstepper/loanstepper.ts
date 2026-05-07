@@ -216,9 +216,19 @@ isCompleted1(index: number): boolean {
     this.activeQualificationId = stepKey;
 
 
-    this.router.navigate([], {
-      relativeTo: this.route,
+    // this.router.navigate([], {
+    
+this.router.navigate(
+    ['/loanform/educationinfo'],
+    {
+
+      // relativeTo: this.route,
       queryParams: {
+        
+applicantId: this.applicantId,
+        applicationId: this.applicationId,
+        custName: this.custName,
+        custARN: this.custARN,
         qualificationlabel: stepKey,
         qualificationId: sub.id
       },

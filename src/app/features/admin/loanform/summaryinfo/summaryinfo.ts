@@ -60,8 +60,8 @@ export class Summaryinfo {
     amountInr: number;
     amountAud: number;
   }> = [];
-
-
+totalEstimatedExpenseInr : any;
+totalEstimatedExpenseAud:any;
 
   additionalInfoFields: any = {
     mainApplicant: [],
@@ -72,6 +72,13 @@ export class Summaryinfo {
   otherFields = otherFields;
   applicationId: any;
 
+
+   KycInfoFields: any = {
+    identityAndResidency: [],
+    permanentAddress: [],
+    currentAddress: [],
+    
+  };
 
 
   documentTypes = [
@@ -88,8 +95,6 @@ export class Summaryinfo {
     form16: [],
     itrs: []
   };
-
-
 
 
   // Declare monthlyExpenditure property to hold API data
@@ -119,6 +124,12 @@ export class Summaryinfo {
   assetsSections: any[] = [];
   liabilitiesSections: any[] = [];
 
+ ReferenceInfoFields: any = {
+    identityAndResidency: [],
+    permanentAddress: [],
+    currentAddress: [],
+    
+  };
 
   constructor(private fb: FormBuilder, private formSvc: Loanformservice, private stepperService: Loanstepperservice, private cd: ChangeDetectorRef, private loanformservice: Loanformservice,
     private router: Router, private route: ActivatedRoute, public main: Main, private apiservice: Addcustomerservice) { }
@@ -128,11 +139,7 @@ export class Summaryinfo {
     this.route.queryParams.subscribe(params => {
       if (params['applicantId']) {
         this.applicationId = params['applicationId'];
-        //this.applicationId ="c6c3cb1d-4036-4903-8c95-fc4ae7e45031";
-        // this.applicationId ="008aeaea-2b34-40cd-a040-65ef150726f7";
-
-
-
+       
       }
     });
 
@@ -164,6 +171,8 @@ export class Summaryinfo {
       (res: any) => {
         if (res && res.status === 'success' && res.data) {
           const data = res.data;
+          this.totalEstimatedExpenseAud = data.totalEstimatedExpenseAud;
+          this.totalEstimatedExpenseInr = data.totalEstimatedExpenseInr;
 
           // Use helper methods to extract data
           const generalInfoData = SummaryHelper.extractGeneralInfo(data.generalInfo);
@@ -182,6 +191,9 @@ export class Summaryinfo {
 
           const additionalInfoData = SummaryHelper.extractAdditionalInfo(data.additionalInfo);
           this.additionalInfoFields = additionalInfoData;
+
+          const KYCInfoData = SummaryHelper.extractKYCInfo(data.kyc);
+          this.KycInfoFields = KYCInfoData;
 
           this.incomeDetails = data.incomeDetails || {
             editUrl: '',
@@ -212,7 +224,8 @@ export class Summaryinfo {
 
           this.liabilitiesSections = SummaryHelper.extractLiabilitiesInfo(res.data.liabilities);
 
-
+          const ReferenceInfoData = SummaryHelper.extractReferenceInfo(data.kyc);
+          this.ReferenceInfoFields = ReferenceInfoData;
 
           // Similarly for other sections:
           // this.estimatedExpense = estimatedExpenseData;

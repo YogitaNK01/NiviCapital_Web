@@ -198,20 +198,8 @@ export class Edudetails {
 
 
   }
-  isOtherInstitute(fd: AbstractControl): boolean {
-    const selectedId = fd.get('institute')?.value;
-    const found = this.seleactInstitute.find(b => b.value === selectedId);
-    return found?.label === 'Other';
-  }
 
-  isOtherQualifications(fd: AbstractControl): boolean {
-    const selectedId = fd.get('qualification')?.value;
-    const found = this.seleactInstitute.find(b => b.value === selectedId);
-    return found?.label === 'Other';
-  }
-
-
-
+//current selected section (1popup left box)
   private getCurrentSections(): string[] {
     if (!this.educationdetails) return [];
 
@@ -226,35 +214,7 @@ export class Edudetails {
     return sections;
   }
 
-  private getSectionRequiredList1(newId: string): string[] {
-    const academic = this.getCurrentSections();
-
-    const filteredAcademic = academic.filter(
-      sec => sec !== 'IELTS / PTE' && sec !== 'University Offer Letter'
-    );
-
-    const adding = this.getAddingSectionLabel(newId);
-
-    const result: string[] = [];
-
-
-    filteredAcademic.forEach(sec => {
-      if (!result.includes(sec)) {
-        result.push(sec);
-      }
-    });
-
-
-    if (adding && !result.includes(adding)) {
-      result.push(adding);
-    }
-
-
-    result.push('IELTS / PTE');
-    result.push('University Offer Letter');
-
-    return result;
-  }
+//all selected selection in 2nd popup
   private getSectionRequiredList(newQualificationId: string): string[] {
     const newLabel = this.getAddingSectionLabel(newQualificationId);
     const newKey = this.normalizeQualification(newLabel);
@@ -283,7 +243,6 @@ export class Edudetails {
 
 
     sectionMap.set(newKey, this.educationDisplayLabel[newKey]);
-
     sectionMap.set('ielts', 'IELTS / PTE');
     sectionMap.set('offer', 'University Offer Letter');
 
@@ -309,8 +268,8 @@ export class Edudetails {
   Selectededucation(values: string | string[]) {
     const newId = Array.isArray(values) ? values[0] : values;
 
-    
-     const selected = this.seleactqualification.filter(s =>
+
+    const selected = this.seleactqualification.filter(s =>
       newId.includes(s.value)
     );
 
@@ -390,6 +349,7 @@ export class Edudetails {
     // this.basicform.get('qualification')?.updateValueAndValidity();
 
   }
+  //new education is added (ug-pg)
   private showAdditionPopup(newId: string, addingLabel: string) {
     this.msgbox.open({
       type: 'warning',
@@ -426,7 +386,7 @@ export class Edudetails {
     });
   }
 
-
+//eduction is removed (pg-ug)
   private isRemovingQualification(
     currentLabel: string,
     newLabel: string
@@ -450,10 +410,12 @@ export class Edudetails {
       title: 'Are you sure you want to change this?',
       mode: 'comparison',
       message: `
-      You have updated your last qualification from
-      <b>${oldLabel}</b> to <b>${newLabel}</b>.<br>
-      As a result, the following sections will be removed.
-    `,
+      You originally selected ${oldLabel}as your last qualification.<br>
+      Adding a${newLabel} section will update your highest qualification.`,
+      // message: `You have updated your last qualification from
+      // <b>${oldLabel}</b> to <b>${newLabel}</b>.<br>
+      // As a result, the following sections will be removed.`
+
       okText: 'Yes, Update',
       cancelText: 'No',
 
@@ -481,6 +443,8 @@ export class Edudetails {
       }
     });
   }
+
+  
   //second confirmation popup
   private openPostUpdateInfoPopup1(newId: string, addingLabel: string) {
     this.msgbox.open({
@@ -563,13 +527,11 @@ The following sections now need to be filled.
     this.formSvc.getselectedEducation(qualificationId).subscribe(res => {
       this.educationdetails = res.data ?? res;
 
-      // reset flow (VERY IMPORTANT)
       this.stepperService.resetEducationSubSteps();
-
       this.stepperService.setEducationSubSteps(this.educationdetails);
     });
   }
-
+//after selecting new education start from first
   private navigateToFirstEducationStep(newId: string) {
     const stepKey = this.normalizeQualification(
       this.getAddingSectionLabel(newId)
@@ -583,7 +545,44 @@ The following sections now need to be filled.
     });
   }
 
+  //check selected qualification on the basis of ug-pg
+  qualificationVsCourseTypeValidator() {
+    return (control: AbstractControl): ValidationErrors | null => {
+      if (!control.value) return null;
 
+      const isUG = localStorage.getItem('coursetypeug') === 'true';
+
+      const label =
+        this.getAddingSectionLabel(control.value).toLowerCase();
+
+      //for UG - PG not allowed
+      if (isUG) {
+        if (
+          label.includes('postgraduate (after undergraduate)') ||
+          label.includes('postgraduate (after diploma and undergraduate)')
+        ) {
+          return { invalidEducation: true };
+        }
+      }
+      //for PG - 12th,diploma and others not allowed
+
+      if (!isUG) {
+        if (
+          label === '10th' ||
+          label === '12th' ||
+          (label.includes('diploma') && label.includes('10th')) ||
+          (label.includes('diploma ') && label.includes('12th')) ||
+          label.includes('others')
+        ) {
+          return { invalidEducation: true };
+        }
+      }
+
+      return null;
+    };
+  }
+
+  //label name change here
   normalizeQualification(name: string): string {
     const lower = name.toLowerCase();
 
@@ -629,44 +628,6 @@ The following sections now need to be filled.
     this.isChildRouteActive = false;
   }
 
-
-
-  //check selected qualification on the basis of ug-pg
-  qualificationVsCourseTypeValidator() {
-    return (control: AbstractControl): ValidationErrors | null => {
-      if (!control.value) return null;
-
-      const isUG = localStorage.getItem('coursetypeug') === 'true';
-
-      const label =
-        this.getAddingSectionLabel(control.value).toLowerCase();
-
-      //for UG - PG not allowed
-      if (isUG) {
-        if (
-          label.includes('postgraduate (after undergraduate)') ||
-          label.includes('postgraduate (after diploma and undergraduate)')
-        ) {
-          return { invalidEducation: true };
-        }
-      }
-      //for PG - 12th,diploma and others not allowed
-
-      if (!isUG) {
-        if (
-          label === '10th' ||
-          label === '12th' ||
-          (label.includes('diploma') && label.includes('10th')) ||
-          (label.includes('diploma ') && label.includes('12th')) ||
-          label.includes('others')
-        ) {
-          return { invalidEducation: true };
-        }
-      }
-
-      return null;
-    };
-  }
 
   submit() {
 

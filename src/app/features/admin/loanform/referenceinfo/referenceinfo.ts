@@ -508,8 +508,8 @@ export class Referenceinfo implements OnInit {
     const email1 = emailCtrl1?.value?.trim().toLowerCase();
     const email2 = emailCtrl2?.value?.trim().toLowerCase();
 
-    emailCtrl1?.setErrors(null);
-    emailCtrl2?.setErrors(null);
+    // emailCtrl1?.setErrors(null);
+    // emailCtrl2?.setErrors(null);
 
     if (phone1 && phone2 && phone1 === phone2) {
       errors.samePhone = true;
@@ -517,19 +517,25 @@ export class Referenceinfo implements OnInit {
 
 
     if (email1 && email2 && email1 === email2) {
-      errors.sameEmail = true;
+      // errors.sameEmail = true;
+
+      this.setMergedError(emailCtrl1, { sameEmail: true });
+      this.setMergedError(emailCtrl2, { sameEmail: true });
+      return { sameEmail: true };
+
     }
 
     return Object.keys(errors).length ? errors : null;
 
-    // if (email1 && email2 && email1 === email2) {
-    //   emailCtrl1?.setErrors({ sameEmail: true });
-    //   emailCtrl2?.setErrors({ sameEmail: true });
 
-    //   return { sameEmail: true };
-    // }
-
-    // return null;
+  };
+   setMergedError = (ctrl: AbstractControl | null, error: any) => {
+    if (!ctrl) return;
+    const existingErrors = ctrl.errors || {};
+    ctrl.setErrors(Object.keys(existingErrors).length || error ? {
+      ...existingErrors,
+      ...error
+    } : null);
   };
 
 
@@ -723,11 +729,25 @@ export class Referenceinfo implements OnInit {
       // this.phone.reset();
       this.phone.resetForm?.();
     }
-    this.referenceForm.reset();
-    this.reference1Array.clear();
-    this.reference2Array.clear();
-    this.reference1Array.push(this.createReferenceGroup());
-    this.reference2Array.push(this.createReferenceGroup());
+    // this.referenceForm.reset();
+    // this.reference1Array.clear();
+    // this.reference2Array.clear();
+    // this.reference1Array.push(this.createReferenceGroup());
+    // this.reference2Array.push(this.createReferenceGroup());
+
+    
+const index = this.currentRefIndex;
+  const array = index === 0 ? this.reference1Array : this.reference2Array;
+
+  const isSaved =
+    index === 0 ? this.reference1Filled : this.reference2Filled;
+
+  //  Only reset if NOT saved
+  if (!isSaved) {
+    array.clear();
+    array.push(this.createReferenceGroup());
+    this.savedReferenceData[index] = {};
+  }
 
     this.popupStep = 1;
     this.mobileNumber = '';
@@ -831,8 +851,11 @@ export class Referenceinfo implements OnInit {
   }
 
   next() {
-    this.stepperService.markStepCompleted('referenceinfo');
+    if(this.reference1Filled && this.reference2Filled ) {
+ this.stepperService.markStepCompleted('referenceinfo');
     this.stepperService.next();
+    }
+   
 
   }
 }

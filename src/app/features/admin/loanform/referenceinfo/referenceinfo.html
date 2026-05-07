@@ -97,7 +97,8 @@
                                     </div>
                                     <div class="text-danger mt-1 error"
                                         *ngIf=" referenceForm.hasError('samePhone') && (reference2Touched  || reference1Touched ) ">
-                                        Phone number must be different from Reference <span>{{firstPhoneEnteredRef === 1 ? '1':'2'}}</span>
+                                        Phone number must be different from Reference <span>{{firstPhoneEnteredRef === 1
+                                            ? '1':'2'}}</span>
                                     </div>
 
 
@@ -285,9 +286,9 @@
                                                 Email must be different from Reference 2
                                             </div> -->
 
-<div *ngIf="getRefControl('reference1', i, 'email')?.errors?.['sameEmail']">
-    Email must be different from Reference 2
-  </div>
+                                            <div *ngIf="getRefControl('reference1', i, 'email')?.errors?.['sameEmail']">
+                                                Email must be different from Reference 2
+                                            </div>
 
 
                                         </div>
@@ -505,7 +506,7 @@
                                         </div>
                                     </div>
 
-                                    
+
 
                                     <div class="col-lg-4 col-sm-12 ">
 

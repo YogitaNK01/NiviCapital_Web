@@ -151,7 +151,7 @@
             <div class="row common-details-box d-flex flex-row">
                 <form [formGroup]="summaryForm">
 
-                    <label class="text-label fw-bold mb-2">Education Fees -₹ </label>
+                    <label class="text-dp-2-bold fw-bold ">Education Fees -₹ {{totalEstimatedExpenseInr}}</label>
                     <hr class="hrclass" />
 
                     <div class="living-misc d-flex flex-column">
@@ -170,7 +170,7 @@
 
                         <!-- Living Expenses Section -->
                         <div class="d-flex flex-column">
-                            <label class="text-label fw-bold mb-2">Living Expenses - ₹</label>
+                            <label class="text-dp-2-bold fw-bold ">Living Expenses - ₹</label>
                             <!-- <hr class="hrclass" /> -->
 
                             <div *ngFor="let expense of livingExpenses"
@@ -203,7 +203,7 @@
 
                         <!-- Miscellaneo Expenses Section -->
                         <div class="d-flex flex-column ">
-                            <label class="text-label fw-bold mb-2">Miscellaneous Expenses - ₹</label>
+                            <label class="text-dp-2-bold fw-bold ">Miscellaneous Expenses - ₹</label>
                             <!-- <hr class="hrclass" /> -->
 
                             <div *ngFor="let expense of miscellaneousExpenses"
@@ -245,7 +245,7 @@
 
                     <!-- Main Applicant Section -->
                     <div>
-                        <label class="text-label fw-bold">Main Applicant</label>
+                        <label class="text-dp-2-bold fw-bold">Main Applicant</label>
                         <hr class="hrclass" />
                         <div class="info-grid-img">
                             <div *ngFor="let field of additionalInfoFields.mainApplicant"
@@ -259,14 +259,13 @@
                                 } @else {
                                 <div class="text-label-data fw-bold">{{field.value}}</div>
                                 }
-                                <!-- <div class="text-label-data fw-bold">{{field.label === 'Marital Status'?(field.value | titlecase) : field.value }}</div> -->
                             </div>
                         </div>
                     </div>
 
                     <!-- Spouse Details Section -->
                     <div class="mt-20">
-                        <label class="text-label fw-bold ">Spouse Details</label>
+                        <label class="text-dp-2-bold fw-bold ">Spouse Details</label>
                         <hr class="hrclass" />
                         <div class="info-grid-img">
                             <div *ngFor="let field of additionalInfoFields.spouse" class="info-item d-flex flex-column">
@@ -278,7 +277,7 @@
 
                     <!-- Father's Details Section -->
                     <div class="mt-20">
-                        <label class="text-label fw-bold ">Father's Details</label>
+                        <label class="text-dp-2-bold fw-bold ">Father's Details</label>
                         <hr class="hrclass" />
                         <div class="info-grid-img">
                             <div *ngFor="let field of additionalInfoFields.father" class="info-item d-flex flex-column">
@@ -290,7 +289,7 @@
 
                     <!-- Mother's Details Section -->
                     <div class="mt-20">
-                        <label class="text-label fw-bold ">Mother's Details</label>
+                        <label class="text-dp-2-bold fw-bold ">Mother's Details</label>
                         <hr class="hrclass" />
                         <div class="info-grid-img">
                             <div *ngFor="let field of additionalInfoFields.mother" class="info-item d-flex flex-column">
@@ -309,16 +308,42 @@
 
             <div class="row common-details-box d-flex flex-row ">
                 <form [formGroup]="summaryForm">
-                    <div class="info-grid-img">
-                        <div class="info-item d-flex flex-column"
-                            *ngFor="let field of otherFields; trackBy: trackByKey">
-
-                            <label class="text-label">{{ field.label }}</label>
 
 
-                            <p class="text-label-data">
-                                {{ summaryForm.get(field.key)?.value || '-' }}
-                            </p>
+                    <div class="d-flex mt-20 flex-column">
+                        <label class="text-dp-2-bold fw-bold">Identity & Residency</label>
+                        <hr class="hrclass" />
+                        <div class="info-grid-img">
+                            <div *ngFor="let field of KycInfoFields.identityAndResidency"
+                                class="info-item d-flex flex-column">
+                                <label class="text-label">{{ field.label }}</label>
+
+                                <div class="text-label-data fw-bold">{{field.value}}</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="d-flex flex-column mt-20">
+                        <label class="text-dp-2-bold fw-bold">Permanent Address</label>
+                        <hr class="hrclass" />
+                        <div class="info-grid-img">
+                            <div *ngFor="let field of KycInfoFields.permanentAddress"
+                                class="info-item d-flex flex-column">
+                                <label class="text-label">{{ field.label }}</label>
+
+                                <div class="text-label-data fw-bold">{{field.value}}</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="d-flex flex-column mt-20">
+                        <label class="text-dp-2-bold fw-bold">Current Address</label>
+                        <hr class="hrclass" />
+                        <div class="info-grid-img">
+                            <div *ngFor="let field of KycInfoFields.currentAddress"
+                                class="info-item d-flex flex-column">
+                                <label class="text-label">{{ field.label }}</label>
+
+                                <div class="text-label-data fw-bold">{{field.value}}</div>
+                            </div>
                         </div>
                     </div>
                 </form>
@@ -376,7 +401,7 @@
                     <!-- Occupation Details Header -->
                     <div class="d-flex flex-column ">
 
-                        <label class="text-label fw-bold ">Occupation Details</label>
+                        <label class="text-dp-2-bold fw-bold ">Occupation Details</label>
                         <hr class="hrclass" />
 
                         <div class="info-grid-img">
@@ -572,12 +597,12 @@
                             <div class="info-grid-img">
                                 <div class="info-item d-flex flex-column"
                                     *ngFor="let expense of monthlyExpenditure.otherRecurringExpenses">
-                                     <div class="mt-20">
-                                    <label class="text-label">{{ expense.name || 'N/A' }}</label>
-                                    <div class="text-label-data fw-bold">
-                                        {{ expense.amountInr != null ? (expense.amountInr | number:'1.0-0') : '-' }}
+                                    <div class="mt-20">
+                                        <label class="text-label">{{ expense.name || 'N/A' }}</label>
+                                        <div class="text-label-data fw-bold">
+                                            {{ expense.amountInr != null ? (expense.amountInr | number:'1.0-0') : '-' }}
+                                        </div>
                                     </div>
-                                </div>
                                 </div>
                             </div>
                         </div>
