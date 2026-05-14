@@ -134,6 +134,7 @@ export class Edusection {
   private slotCounter = 0;
 
   seleactInstitute: OptionItem[] = []
+  filteredInstitutes: any[] = [];
   selectedInstituteID = '';
   selectedInstituteLabel = '';
 
@@ -142,11 +143,12 @@ export class Edusection {
   selectedLocationLabel = '';
 
   isOtherEducation = false;
+  isOtherLocation = false;
   maxOtherDocuments = 5;
   @Output() otherDocAdded = new EventEmitter<number>();
 
   constructor(private fb: FormBuilder, private stepperService: Loanstepperservice, private cd: ChangeDetectorRef, private route: ActivatedRoute,
-  public main: Main, private msgBox: Msgboxservice, public loanformservice: Loanformservice) { }
+    public main: Main, private msgBox: Msgboxservice, public loanformservice: Loanformservice) { }
 
   ngOnInit(): void {
 
@@ -166,7 +168,13 @@ export class Edusection {
 
 
     });
-    this.getInstituteName();
+    // this.getInstituteName();
+
+    this.loanformservice.getInstitutesCached().subscribe(list => {
+      this.seleactInstitute = list;
+      this.filteredInstitutes = [...list];
+    });
+
     this.cityNames();
     this.selectpassingyr = this.buildYearOptions(20);
 
@@ -226,16 +234,16 @@ export class Edusection {
     return this.getLevelFromTitle(this.title);
   }
   get isSchoolLevel(): boolean {
-    return this.educationType === '_10TH' || this.educationType === '_12TH' || this.educationType === 'OTHER_AFTER_12' || this.educationType === 'OTHER_AFTER_DIPLOMA' ;
+    return this.educationType === '_10TH' || this.educationType === '_12TH' || this.educationType === 'OTHER_AFTER_12' || this.educationType === 'OTHER_AFTER_DIPLOMA';
   }
 
   get isHigherEducation(): boolean {
     return this.educationType === 'DIPLOMA' || this.educationType === 'UNDERGRADUATE' || this.educationType === 'POSTGRADUATE';
   }
 
-get isPostGraduate(): boolean {
-  return this.educationType === 'POSTGRADUATE';
-}
+  get isPostGraduate(): boolean {
+    return this.educationType === 'POSTGRADUATE';
+  }
 
   private buildYearOptions(backYears: number): DropdownOption[] {
     const currentYear = new Date().getFullYear();
@@ -248,17 +256,18 @@ get isPostGraduate(): boolean {
     return years;
   }
 
-  getInstituteName() {
-    this.loanformservice.getInstitutes().subscribe((res: any) => {
-      const list = res.data ?? res;
+  // getInstituteName() {
+  //   this.loanformservice.getInstitutes().subscribe((res: any) => {
+  //     const list = res.data ?? res;
 
-      this.seleactInstitute = list.map((s: any) => ({
-        value: s.id,
-        label: s.instituteName,
+  //     this.seleactInstitute = list.map((s: any) => ({
+  //       value: s.instituteName, //s.id,
+  //       label: s.instituteName,
 
-      }));
-    });
-  }
+  //     }));
+  //      this.filteredInstitutes = [...this.seleactInstitute];
+  //   });
+  // }
 
   SelectedInstitute(values: string | string[]) {
     const ids = Array.isArray(values) ? values : [values];
@@ -286,6 +295,31 @@ get isPostGraduate(): boolean {
 
   }
 
+  filterInstitutes(searchText: any) {
+    const value = searchText.trim().toLowerCase();
+
+    // Reset list when search is empty
+    if (!value) {
+      this.filteredInstitutes = [...this.seleactInstitute];
+      return;
+    }
+
+    //  Special case: user searching "other"
+    if (value === 'other') {
+      const otherItem = this.seleactInstitute.find(
+        item => item.label.toLowerCase() === 'other'
+      );
+
+      // Put "Other" at the top
+      this.filteredInstitutes = otherItem ? [otherItem] : [];
+      return;
+    }
+
+    //  Normal search
+    this.filteredInstitutes = this.seleactInstitute.filter(item =>
+      item.label.toLowerCase().includes(value)
+    );
+  }
 
   cityNames() {
     this.loanformservice.getAllCities().subscribe((res: any) => {
@@ -310,6 +344,10 @@ get isPostGraduate(): boolean {
 
     // this.group.get('location')?.setValue(this.selectedLocationLabel);
 
+    this.isOtherLocation = selected.some(
+      s => s.label.trim().toLowerCase() === 'other'
+    )
+
     const control = this.group.get('location');
     control?.setValue(this.selectedLocationLabel);
     control?.markAsTouched();
@@ -329,7 +367,7 @@ get isPostGraduate(): boolean {
 
     return 'OTHER';
   }
-  
+
 
   hasLocal(doc: 'marksheet' | 'lc' | 'other', index?: number): boolean {
     return !!this.uploadedFiles?.[this.buildKey(doc, index)];

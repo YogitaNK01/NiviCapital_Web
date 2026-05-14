@@ -93,8 +93,8 @@ export class GeneralInfo implements OnInit {
 
   calculatedEndDate!: Date;
 
-  
-statesLoaded = false;
+
+  statesLoaded = false;
 
 
   isOtherstate = false;
@@ -176,9 +176,9 @@ statesLoaded = false;
       this.registerForm.patchValue({
         occupation: this.formSvc.generalInfoData.currentOccupationId,
         state: this.formSvc.generalInfoData.stateId,
-        otherstatetitle: this.formSvc.generalInfoData.otherStateName ,
+        otherstatetitle: this.formSvc.generalInfoData.otherStateName,
         university: this.formSvc.generalInfoData.universityId,
-        otherunititle: this.formSvc.generalInfoData.otherUniversityName ,
+        otherunititle: this.formSvc.generalInfoData.otherUniversityName,
         coursename: this.formSvc.generalInfoData.courseId,
         othercoursenametitle: this.formSvc.generalInfoData.otherCourseName,
         coursetype: this.formSvc.generalInfoData.coursetype,
@@ -197,48 +197,48 @@ statesLoaded = false;
   }
 
   private restoreDependentDropdowns(data: any) {
-  if (!data?.stateId) return;
+    if (!data?.stateId) return;
 
-  this.registerForm.patchValue({
-    state: data.stateId,
-    otherstatetitle: data.otherStateName ?? ''
-  });
-  this.selectPerState(data.stateId);
+    this.registerForm.patchValue({
+      state: data.stateId,
+      otherstatetitle: data.otherStateName ?? ''
+    });
+    this.selectPerState(data.stateId);
 
 
-const found = this.Australianstate.find(s => s.value === data.stateId);
-  this.isOtherstate = found?.label?.toLowerCase().includes('other')?? false;;
+    const found = this.Australianstate.find(s => s.value === data.stateId);
+    this.isOtherstate = found?.label?.toLowerCase().includes('other') ?? false;;
 
-  this.formSvc.getAustralianstatescities(data.stateId).subscribe(res => {
-    this.AustralianUniversities = res.data.map((u: any) => ({
-      value: u.id,
-      label: u.universityName
-    }));
-
-    this.registerForm.patchValue({ university: data.universityId });
-    this.selecteduniversity(data.universityId);
-
-    this.formSvc.getCoursetype(data.universityId).subscribe(ct => {
-      this.selectcourse = ct.data.map((c: string) => ({
-        label: c,
-        value: c
+    this.formSvc.getAustralianstatescities(data.stateId).subscribe(res => {
+      this.AustralianUniversities = res.data.map((u: any) => ({
+        value: u.id,
+        label: u.universityName
       }));
 
-      this.registerForm.patchValue({ coursetype: data.coursetype });
-      this.selectedcoursetype(data.coursetype);
+      this.registerForm.patchValue({ university: data.universityId });
+      this.selecteduniversity(data.universityId);
 
-      this.formSvc.getCourseName(data.universityId, data.coursetype).subscribe(cn => {
-        this.selectcoursename = cn.data.map((c: any) => ({
-          value: c.id,
-          label: c.courseName
+      this.formSvc.getCoursetype(data.universityId).subscribe(ct => {
+        this.selectcourse = ct.data.map((c: string) => ({
+          label: c,
+          value: c
         }));
 
-        this.registerForm.patchValue({ coursename: data.courseId });
-        this.selectedCoursename(data.courseId);
+        this.registerForm.patchValue({ coursetype: data.coursetype });
+        this.selectedcoursetype(data.coursetype);
+
+        this.formSvc.getCourseName(data.universityId, data.coursetype).subscribe(cn => {
+          this.selectcoursename = cn.data.map((c: any) => ({
+            value: c.id,
+            label: c.courseName
+          }));
+
+          this.registerForm.patchValue({ coursename: data.courseId });
+          this.selectedCoursename(data.courseId);
+        });
       });
     });
-  });
-}
+  }
 
   get form() {
     return this.formSvc.form.get('loanInfo') as FormGroup;
@@ -372,13 +372,13 @@ const found = this.Australianstate.find(s => s.value === data.stateId);
         code: s.stateCode
       }));
 
-this.statesLoaded = true;
+      this.statesLoaded = true;
 
-    if (this.formSvc.generalInfoData) {
-      this.restoreDependentDropdowns(this.formSvc.generalInfoData);
-    }
+      if (this.formSvc.generalInfoData) {
+        this.restoreDependentDropdowns(this.formSvc.generalInfoData);
+      }
 
-      
+
     });
   }
 
@@ -388,7 +388,7 @@ this.statesLoaded = true;
     this.selectedStateLabel = found?.label ?? '';
     this.isOtherstate = this.selectedStateLabel.toLowerCase().includes('other');
 
-// if (!isRestore) {
+    // if (!isRestore) {
     this.AustralianUniversities = [];
     this.selectedUniLabel = '';
     this.registerForm.get('university')?.setValue(null);
@@ -400,7 +400,7 @@ this.statesLoaded = true;
     this.selectcoursename = [];
     this.selectedcourseNameLabel = '';
     this.registerForm.get('coursename')?.setValue(null);
-// }
+    // }
     this.selectuniveristy(id);
   }
 
@@ -588,7 +588,7 @@ this.statesLoaded = true;
 
     // If Moment
     if (date._isAMomentObject) {
-      return date.format('YYYY-MM-DD');
+      return date.format('DD/MM/YYYY');
     }
 
     // If JS Date
@@ -618,11 +618,11 @@ this.statesLoaded = true;
       // "lastInstitutionName": formdata.institutionName,
 
       "stateId": formdata.state,
-      "otherStateName":formdata.otherstatetitle,
+      "otherStateName": formdata.otherstatetitle,
       "universityId": formdata.university,
-      "otherUniversityName":formdata.otherunititle,
+      "otherUniversityName": formdata.otherunititle,
       "courseId": formdata.coursename,
-       "otherCourseName":formdata.othercoursenametitle,
+      "otherCourseName": formdata.othercoursenametitle,
       // "courseDuration": formdata.courseduration,
       "courseStartDate": this.formatDate(formdata.coursestartdate),
 
@@ -640,7 +640,13 @@ this.statesLoaded = true;
 
           this.stepperService.next();
           // this.formSvc.generalInfoData = input;
-          this.formSvc.generalInfoData = {...input,coursetype: formdata.coursetype };
+          this.formSvc.generalInfoData = { ...input, coursetype: formdata.coursetype };
+
+          localStorage.setItem(
+            'generalInfoData',
+            JSON.stringify(this.formSvc.generalInfoData)
+          );
+
           this.stepperService.markStepCompleted('genralinfo');
           this.stepperService.setStepData('genralinfo', formdata);
 

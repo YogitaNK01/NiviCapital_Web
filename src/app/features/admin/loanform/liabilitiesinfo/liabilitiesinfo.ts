@@ -1351,7 +1351,7 @@ export class Liabilitiesinfo {
         } else {
           items.push({
             liabilityType: "OTHER_LIABILITY",
-            liabilityTypeText: other.value.LiabilityType + (index + 1),
+            liabilityTypeText: other.value.LiabilityType ,
             amountInr: cleanAmount(other.value.libamount),
             monthlyRepaymentInr: cleanAmount(other.value.MonthlyRepaymentLimit),
 

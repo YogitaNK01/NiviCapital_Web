@@ -16,7 +16,7 @@ export class Loanstepper implements OnInit {
   applicationId: string = '';
   custName: string = '';
   custARN: string = '';
-
+completedEducationSections: Set<string> = new Set();
   completedSteps: Set<number> = new Set();
 
   activeQualificationId!: any;
@@ -27,6 +27,12 @@ export class Loanstepper implements OnInit {
       this.steps = steps;
       this.cdr.detectChanges(); // Force change detection
     });
+    
+const saved = sessionStorage.getItem('completedEducationSections');
+  if (saved) {
+    this.completedEducationSections = new Set(JSON.parse(saved));
+  }
+
   }
 
 
@@ -187,17 +193,12 @@ isCompleted1(index: number): boolean {
     );
 
     
-
- if (this.activeQualificationId === stepKey) {
-    return false;
-  }
-
-
-
  if (this.stepperService.isEducationStepCompleted(stepKey)) {
     return false;
   }
-
+if (this.activeQualificationId === stepKey) {
+    return false;
+  }
     return true;
 
 

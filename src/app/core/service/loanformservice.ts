@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 
-import { BehaviorSubject, Observable } from 'rxjs';
+import { BehaviorSubject, map, Observable, of, shareReplay, tap } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { HttpClient } from '@angular/common/http';
 
@@ -11,6 +11,11 @@ export interface ApiResponse<T> {
   message: string;
   errors: any;
   data: T;
+}
+interface OptionItem {
+  label: string;
+  value: string;
+  code?: string;
 }
 
 @Injectable({
@@ -29,6 +34,7 @@ export class Loanformservice {
   issalaried: boolean = false;
   coursetypeug: boolean = false;
 
+  loanInfoData: any;
   generalInfoData: any;
   estExpenseInfoData: any;
   additionalInfoData: any;
@@ -39,6 +45,11 @@ export class Loanformservice {
   monthlyExpenditureData: any;
   referenceInfoData: any;
   educationInfoData: any;
+
+  
+  private instituteCache: OptionItem[] | null = null;
+  private instituteRequest$!: Observable<OptionItem[]>;
+
 
   constructor(private http: HttpClient,) { this.restoreFromStorage(); }
 
@@ -285,6 +296,38 @@ export class Loanformservice {
   }
 
   // *************************Education *************************
+
+  
+getInstitutesCached(): Observable<OptionItem[]> {
+
+    //  1. Return cached data if already loaded
+    if (this.instituteCache) {
+      return of(this.instituteCache);
+    }
+
+    //  2. If API call already in progress, reuse it
+    if (this.instituteRequest$) {
+      return this.instituteRequest$;
+    }
+
+    //  3. Make API call ONCE
+    this.instituteRequest$ = this.http.get<any>(`${this.baseUrl}/v1/masters/institute-names`)
+      .pipe(
+        map(res =>
+          (res.data ?? res).map((s: any) => ({
+            value: s.id || s.instituteName,
+            label: s.instituteName
+          }))
+        ),
+        tap(data => {
+          this.instituteCache = data;     
+        }),
+        shareReplay(1)                     
+      );
+
+    return this.instituteRequest$;
+  }
+
 
   getEducation(): Observable<ApiResponse<any>> {
     return this.http.get<ApiResponse<any>>(

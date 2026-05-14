@@ -53,6 +53,7 @@ export class Dropdown implements OnChanges, ControlValueAccessor {
   @Input() required: boolean = false;
 
   @Output() selectionChange = new EventEmitter<any>();
+@Output() searchChange = new EventEmitter<string>();
 
   @Input() multiSelect = false;
   selectedValues: any[] = [];
@@ -135,9 +136,10 @@ ngOnChanges(changes: SimpleChanges) {
 
 
   get filteredOptions(): DropdownOption[] {
-    if (!this.searchable || !this.searchTerm) return this.options;
-    const lower = this.searchTerm.toLowerCase();
-    return this.options.filter(o => o.label.toLowerCase().includes(lower));
+    // if (!this.searchable || !this.searchTerm) return this.options;
+    // const lower = this.searchTerm.toLowerCase();
+    // return this.options.filter(o => o.label.toLowerCase().includes(lower));
+     return this.options;
   }
 
 
@@ -242,4 +244,9 @@ writeValue(value: string | string[]): void {
     return this.options.length &&
          this.selectedValues.length === this.options.length;
   }
+
+onSearchInput(value: string) {
+  this.searchChange.emit(value);
+}
+
 }

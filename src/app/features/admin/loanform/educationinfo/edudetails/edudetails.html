@@ -34,8 +34,10 @@
                             formControlName="qualification" name="qualification"
                             (selectedValueChange)="Selectededucation($event);">
                         </app-dropdown>
-                        <div class="text-danger" *ngIf="basicform.get('qualification')?.touched && basicform.get('qualification')?.errors?.['invalidEducation'] ">
-                            Selected qualification is not allowed for the chosen course type,Please update your last qualification
+                        <div class="text-danger"
+                            *ngIf="basicform.get('qualification')?.touched && basicform.get('qualification')?.errors?.['invalidEducation'] ">
+                            Selected qualification is not allowed for the chosen course type,Please update your last
+                            qualification
                         </div>
 
                     </div>
@@ -50,6 +52,15 @@
                                 *ngIf="basicform.get('qualificationtitle')?.touched && basicform.get('qualificationtitle')?.invalid">
                                 Title is required
                             </div>
+
+                            <div class="text-danger" *ngIf="basicform.get('qualificationtitle')?.errors?.['minlength']">
+                                Minimum 2 characters required
+                            </div>
+
+                            <div class="text-danger" *ngIf="basicform.get('qualificationtitle')?.errors?.['maxlength']">
+                                Maximum 100 characters allowed
+                            </div>
+
                         </div>
                     </div>
                 </div>
@@ -58,23 +69,43 @@
 
 
 
-                        <app-dropdown [options]="seleactInstitute" [placeholder]="'Select Last Insitution'"
+                        <app-dropdown [options]="filteredInstitutes" [placeholder]="'Select Last Insitution'"
                             [required]="true" [searchable]="true" [label]="'Last Institution Name'"
-                            formControlName="institute" name="institute"
+                            formControlName="institute" name="institute" (searchChange)="filterInstitutes($event)"
                             (selectedValueChange)="SelectedInstitute($event);">
                         </app-dropdown>
                     </div>
 
                     <div class="col-6" *ngIf="isOtherEducation">
                         <div class="form-group">
-                            <app-inputfield formControlName="institutetitle" name="institutetitle"
+                            <app-inputfield formControlName="institutetitle" name="institutetitle" [maxlength]="100"
                                 label="Other Institution Name" placeholder="Enter Institution Name" [required]="true">
                             </app-inputfield>
 
-                            <div class="text-danger"
-                                *ngIf="basicform.get('institutetitle')?.touched && basicform.get('institutetitle')?.invalid">
-                                Title is required
-                            </div>
+
+                            <ng-container
+                                *ngIf=" basicform.get('institutetitle')?.touched && basicform.get('institutetitle')?.invalid ">
+                                <div class="text-danger"
+                                    *ngIf="basicform.get('institutetitle')?.errors?.['required']; else minLen">
+                                    Title is required
+                                </div>
+
+                                <ng-template #minLen>
+                                    <div class="text-danger"
+                                        *ngIf="basicform.get('institutetitle')?.errors?.['minlength']; else maxLen">
+                                        Minimum 2 characters required
+                                    </div>
+                                </ng-template>
+
+                                <ng-template #maxLen>
+                                    <div class="text-danger"
+                                        *ngIf="basicform.get('institutetitle')?.errors?.['maxlength']">
+                                        Maximum 100 characters allowed
+                                    </div>
+                                </ng-template>
+                            </ng-container>
+
+
                         </div>
                     </div>
                 </div>

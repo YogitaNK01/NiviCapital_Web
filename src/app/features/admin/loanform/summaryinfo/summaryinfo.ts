@@ -26,14 +26,14 @@ export class Summaryinfo {
   openIndex: number[] = [0];
   accordions = [
     { title: 'General Info', alwaysOpen: true },
-    { title: 'Estimated Expense', alwaysOpen: false },
+    { title: 'Estimated Expense', alwaysOpen: false, amount: 0 },
     { title: 'Additional Info', alwaysOpen: false },
     { title: 'KYC', alwaysOpen: true },
     { title: 'Education Details', alwaysOpen: false },
     { title: 'Income Details', alwaysOpen: true },
-    { title: 'Assets', alwaysOpen: false },
-    { title: 'Liabilities', alwaysOpen: true },
-    { title: 'Monthly Expenditure', alwaysOpen: false },
+    { title: 'Assets', alwaysOpen: false, amount: 0 },
+    { title: 'Liabilities', alwaysOpen: true, amount: 0 },
+    { title: 'Monthly Expenditure', alwaysOpen: false, amount: 0 },
     { title: 'Reference', alwaysOpen: true },
   ];
   summaryForm!: FormGroup;
@@ -46,12 +46,15 @@ export class Summaryinfo {
   // estimatedExpense 
 
   educationFees: { tuitionInr: number; tuitionAud: number } | null = null;
-
   livingExpenses: Array<{
+    isGroup?: any;
+    children?: any;
     name: string;
     frequency: string;
     amountInr: number;
     amountAud: number;
+    description?: string;
+
   }> = [];
 
   miscellaneousExpenses: Array<{
@@ -59,9 +62,18 @@ export class Summaryinfo {
     frequency: string;
     amountInr: number;
     amountAud: number;
+    description?: string;
+    isGroup?: any;
+    children?: any;
   }> = [];
-totalEstimatedExpenseInr : any;
-totalEstimatedExpenseAud:any;
+  totalEstimatedExpenseInr: any;
+  totalEstimatedExpenseAud: any;
+  totalassetsval: any;
+  totalliabilities: any;
+  totalMonthlyExpenditure: any;
+  totalMiscellaneousExpense: any;
+  totalLivingExpense: any;
+
 
   additionalInfoFields: any = {
     mainApplicant: [],
@@ -73,11 +85,12 @@ totalEstimatedExpenseAud:any;
   applicationId: any;
 
 
-   KycInfoFields: any = {
+
+  KycInfoFields: any = {
     identityAndResidency: [],
     permanentAddress: [],
     currentAddress: [],
-    
+
   };
 
 
@@ -85,15 +98,26 @@ totalEstimatedExpenseAud:any;
     { key: 'salarySlips', label: 'Salary Slip' },
     { key: 'form16', label: 'Form 16' },
     { key: 'bankStatements', label: 'Bank Statement' },
-    { key: 'itrs', label: 'ITR' }
-  ];
+    { key: 'itrs', label: 'ITR' },
+    { key: 'otherIncome', label: 'Other Document Name' },
+    { key: 'otherBussinessincome', label: 'Other Business Income' },
 
+  ];
   incomeDetails: any = {
     editUrl: '',
     salarySlips: [],
     bankStatements: [],
     form16: [],
-    itrs: []
+    itrs: [],
+    otherIncome: []
+  };
+  incomeBusinessDetails: any = {
+    editUrl: '',
+    business_gst_1_year: [],
+    business_itr_3_years: [],
+    business_bank_statement_1_year: [],
+    business_finance_3_years: [],
+    otherBussinessincome: []
   };
 
 
@@ -106,9 +130,10 @@ totalEstimatedExpenseAud:any;
     transportation: null,
     schoolEducationFees: null,
     medicalMedicines: null,
-    otherRecurringExpenses: []
+    otherRecurringExpenses: [
+      { expenseName: '', amountInr: '' }
+    ]
   };
-
   // Define the dynamic fields array for iteration in template
   monthlyExpenditureFields = [
     { key: 'rentHomeMaintenance', label: 'Rent / Home Maintenance' },
@@ -116,7 +141,8 @@ totalEstimatedExpenseAud:any;
     { key: 'utilitiesElectricityWaterGas', label: 'Utilities / Bills (Electricity, Water, Gas)' },
     { key: 'transportation', label: 'Transportation' },
     { key: 'schoolEducationFees', label: 'School Education Fees' },
-    { key: 'medicalMedicines', label: 'Medical / Medicines' }
+    { key: 'medicalMedicines', label: 'Medical / Medicines' },
+    { key: 'otherRecurringExpenses', label: 'Other Recurring Expenses' }
   ];
 
 
@@ -124,11 +150,31 @@ totalEstimatedExpenseAud:any;
   assetsSections: any[] = [];
   liabilitiesSections: any[] = [];
 
- ReferenceInfoFields: any = {
-    identityAndResidency: [],
-    permanentAddress: [],
-    currentAddress: [],
-    
+  qualificationDetail: any = {
+    QualificationDetails: [],
+  };
+
+  EducationInfoFields: any = {
+    tenth: [],
+    twelfth: [],
+    diploma: [],
+    bachelors: [],
+    postgraduate: [],
+    ieltsPte: [],
+    offerLetter: []
+
+  };
+  educationSections = [
+    { title: '10th', key: 'tenth' },
+    { title: '12th', key: 'twelfth' },
+    { title: 'Undergraduate', key: 'bachelors' },
+    { title: 'Postgraduate', key: 'postgraduate' },
+  ];
+
+
+  ReferenceInfoFields: any = {
+
+
   };
 
   constructor(private fb: FormBuilder, private formSvc: Loanformservice, private stepperService: Loanstepperservice, private cd: ChangeDetectorRef, private loanformservice: Loanformservice,
@@ -139,7 +185,7 @@ totalEstimatedExpenseAud:any;
     this.route.queryParams.subscribe(params => {
       if (params['applicantId']) {
         this.applicationId = params['applicationId'];
-       
+
       }
     });
 
@@ -173,6 +219,8 @@ totalEstimatedExpenseAud:any;
           const data = res.data;
           this.totalEstimatedExpenseAud = data.totalEstimatedExpenseAud;
           this.totalEstimatedExpenseInr = data.totalEstimatedExpenseInr;
+          this.accordions[1].amount = this.totalEstimatedExpenseInr;
+
 
           // Use helper methods to extract data
           const generalInfoData = SummaryHelper.extractGeneralInfo(data.generalInfo);
@@ -186,6 +234,8 @@ totalEstimatedExpenseAud:any;
           this.educationFees = estimatedExpenseData.educationFees;
           this.livingExpenses = estimatedExpenseData.livingExpenses;
           this.miscellaneousExpenses = estimatedExpenseData.miscellaneousExpenses;
+          this.totalLivingExpense = data.estimatedExpense.totalLivingExpense;
+          this.totalMiscellaneousExpense = data.estimatedExpense.totalMiscExpense;
 
 
 
@@ -200,7 +250,17 @@ totalEstimatedExpenseAud:any;
             salarySlips: [],
             bankStatements: [],
             form16: [],
-            itrs: []
+            itrs: [],
+            otherIncome: []
+          };
+
+          this.incomeBusinessDetails = data.incomeBusinessDetails || {
+            editUrl: '',
+            business_gst_1_year: [],
+            business_itr_3_years: [],
+            business_bank_statement_1_year: [],
+            business_finance_3_years: [],
+            otherBussinessincome: []
           };
 
 
@@ -212,23 +272,39 @@ totalEstimatedExpenseAud:any;
             { key: 'utilitiesElectricityWaterGas', label: 'Utilities / Bills (Electricity, Water, Gas)' },
             { key: 'transportation', label: 'Transportation' },
             { key: 'schoolEducationFees', label: 'School Education Fees' },
-            { key: 'medicalMedicines', label: 'Medical / Medicines' }
+            { key: 'medicalMedicines', label: 'Medical / Medicines' },
+            //  { key: 'otherRecurringExpenses', label: 'Other Recurring Expenses' }
           ];
 
           this.monthlyExpenditureFields = allFields.filter(field => this.monthlyExpenditure[field.key] != null);
-
+          this.totalMonthlyExpenditure = res.data.monthlyExpenditure.totalMonthlyInr;
+          this.accordions[8].amount = this.totalMonthlyExpenditure;
 
 
           this.assetsSections = SummaryHelper.extractAssetsInfo(res.data.assets);
+          this.totalassetsval = res.data.assets.totalAssets;
+          this.accordions[6].amount = this.totalassetsval;
 
 
           this.liabilitiesSections = SummaryHelper.extractLiabilitiesInfo(res.data.liabilities);
+          this.totalliabilities = res.data.liabilities.totalLiabilities;
+          this.accordions[7].amount = this.totalliabilities;
 
-          const ReferenceInfoData = SummaryHelper.extractReferenceInfo(data.kyc);
+          const qualificationInfoData = SummaryHelper.extractQualificationInfo(data.qualificationDetail);
+          this.qualificationDetail = qualificationInfoData;
+
+          const educationInfoData = SummaryHelper.extractEducationInfo(data.educationDetails);
+          this.EducationInfoFields = educationInfoData;
+          this.educationSections = this.educationSections.filter(section => {
+            const fields = this.EducationInfoFields[section.key];
+
+            return fields?.some((field: any) => field.value && field.value !== '-');
+          });
+
+
+
+          const ReferenceInfoData = SummaryHelper.extractReferenceInfo(data.references);
           this.ReferenceInfoFields = ReferenceInfoData;
-
-          // Similarly for other sections:
-          // this.estimatedExpense = estimatedExpenseData;
 
           this.cd.detectChanges();
         }
@@ -256,10 +332,6 @@ totalEstimatedExpenseAud:any;
     const key = rawName.trim().toUpperCase();
     return this.labelDisplayMap[key] || rawName;
   }
-
-
-
-
 
 
 

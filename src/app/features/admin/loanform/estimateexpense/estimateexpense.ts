@@ -406,31 +406,31 @@ export class Estimateexpense {
   }
 
   getAccordionTotal(index: number): string {
-  switch (index) {
+    switch (index) {
 
-    case 0: // Education Fees
-      const tuition = Number(
-        this.expenseForm.get('tutionfees')?.value?.toString().replace(/,/g, '')
-      ) || 0;
-      return this.formatIndian(tuition.toString());
+      case 0: // Education Fees
+        const tuition = Number(
+          this.expenseForm.get('tutionfees')?.value?.toString().replace(/,/g, '')
+        ) || 0;
+        return this.formatIndian(tuition.toString());
 
-    case 1: // Living Expense
-      return this.formatIndian(this.totalLivingINR.toString());
+      case 1: // Living Expense
+        return this.formatIndian(this.totalLivingINR.toString());
 
-    case 2: // Miscellaneous
-      return this.formatIndian(this.totalMiscINR.toString());
+      case 2: // Miscellaneous
+        return this.formatIndian(this.totalMiscINR.toString());
 
-    default:
-      return '0';
+      default:
+        return '0';
+    }
   }
-}
 
   handleAmountInput1(event: any, controlName: string) {
     this.main.restrictInput(event, 'decimal');
     this.formatAmount(event, controlName);
   }
 
-   handleAmountInput(event: any, controlName: string, ctrl?: any) {
+  handleAmountInput(event: any, controlName: string, ctrl?: any) {
     this.main.restrictInput(event, 'decimal');
     if (ctrl) {
       this.formatAmount1(event, controlName, ctrl);
@@ -441,14 +441,14 @@ export class Estimateexpense {
 
   }
 
-  
+
   //format amount 2000000 to 20,00,000
   formatAmountold(event: any, controlName: string, index?: number, type?: 'living' | 'misc') {
 
     let value = event.target.value;
     if (!value) return;
     value = value.replace(/,/g, '');
-    
+
     value = value.replace(/[^0-9.]/g, '');
     const parts = value.split('.');
     if (parts.length > 2) {
@@ -501,7 +501,7 @@ export class Estimateexpense {
   }
 
 
-formatAmount(event: any, controlName: string) {
+  formatAmount(event: any, controlName: string) {
     let value = event.target.value;
     if (!value) return;
     value = value.replace(/,/g, '');
@@ -549,31 +549,31 @@ formatAmount(event: any, controlName: string) {
 
   }
 
-validateAmount(group: FormGroup) {
-  const amountStr = group.get('amountINR')?.value;  // "50,00,000"
-  const frequency = group.get('securityfrequency')?.value || 'Monthly';
-  
-  const cleanINR = Number(amountStr.toString().replace(/,/g, ''));  // 5000000
-  
-  const limits = {
-    'Weekly': 100000,     // → "1,00,000"
-    'Monthly': 5000000,   // → "50,00,000" 
-    'Yearly': 10000000    // → "1,00,00,000"
-  };
+  validateAmount(group: FormGroup) {
+    const amountStr = group.get('amountINR')?.value;  // "50,00,000"
+    const frequency = group.get('securityfrequency')?.value || 'Monthly';
 
-  const exceedsLimit = cleanINR > limits[frequency as keyof typeof limits];
-  
-  group.get('amountINR')?.setErrors(exceedsLimit ? { exceedsLimit: true } : null);
-}
+    const cleanINR = Number(amountStr.toString().replace(/,/g, ''));  // 5000000
+
+    const limits = {
+      'Weekly': 100000,     // → "1,00,000"
+      'Monthly': 5000000,   // → "50,00,000" 
+      'Yearly': 10000000    // → "1,00,00,000"
+    };
+
+    const exceedsLimit = cleanINR > limits[frequency as keyof typeof limits];
+
+    group.get('amountINR')?.setErrors(exceedsLimit ? { exceedsLimit: true } : null);
+  }
   getFormattedLimit(frequency: string): string {
-  const limits = {
-    'Weekly': 100000,
-    'Monthly': 5000000,
-    'Yearly': 10000000
-  };
-  const limit = limits[frequency as keyof typeof limits] || 5000000;
-  return this.formatIndian(limit.toString()); 
-}
+    const limits = {
+      'Weekly': 100000,
+      'Monthly': 5000000,
+      'Yearly': 10000000
+    };
+    const limit = limits[frequency as keyof typeof limits] || 5000000;
+    return this.formatIndian(limit.toString());
+  }
 
   getFrequencyLabel(frequency: string): string {
     return frequency || 'Monthly';
@@ -788,8 +788,8 @@ validateAmount(group: FormGroup) {
       next: (res) => {
         console.log("resp---", res);
         if (res.status == "success") {
-this.loanformservice.estExpenseInfoData = input;
-this.stepperService.markStepCompleted('expense');
+          this.loanformservice.estExpenseInfoData = input;
+          this.stepperService.markStepCompleted('expense');
           this.stepperService.next();
         }
       }

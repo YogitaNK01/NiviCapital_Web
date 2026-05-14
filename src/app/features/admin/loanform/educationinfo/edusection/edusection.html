@@ -26,59 +26,79 @@
 
             <div class="row mt-20">
 
-               
+
                 <div [ngClass]="{'col-6': isOtherEducation, 'col-12': !isOtherEducation  }">
 
 
 
-                    <app-dropdown [options]="seleactInstitute" [placeholder]="'Select Institute Name'" [required]="!isPostGraduate"
-                        [searchable]="true" [label]="'Institution Name'" formControlName="institutename"
-                        name="institutename" >
+                    <app-dropdown [options]="filteredInstitutes" [placeholder]="'Select Institute Name'"
+                        [required]="!isPostGraduate" [searchable]="true" [label]="'Institution Name'" (searchChange)="filterInstitutes($event)"
+                        formControlName="institutename" (selectedValueChange)="SelectedInstitute($event);"
+                        name="institutename">
                     </app-dropdown>
-                    <div class="text-danger" *ngIf="group.get('institutename')?.touched && group.get('institutename')?.invalid">
+                     
+
+                    <div class="text-danger"
+                        *ngIf="group.get('institutename')?.touched && group.get('institutename')?.invalid">
 
                         <span *ngIf="group.get('institutename')?.errors?.['required']">
                             Institute Name is required
                         </span>
-                        </div>
+                    </div>
                 </div>
 
                 <div class="col-6" *ngIf="isOtherEducation">
                     <div class="form-group">
                         <app-inputfield formControlName="institutetitle" name="institutetitle"
-                            label="Other Institution Name" placeholder="Enter Institution Name" [required]="!isPostGraduate">
+                            label="Other Institution Name" placeholder="Enter Institution Name"
+                            [required]="!isPostGraduate">
                         </app-inputfield>
 
-                        <div class="text-danger"
-                            *ngIf="group.get('institutetitle')?.touched && group.get('institutetitle')?.invalid">
-                            Title is required
-                        </div>
+                        <ng-container *ngIf=" group.get('institutetitle')?.touched && group.get('institutetitle')?.invalid ">
+                                    <div class="text-danger"
+                                        *ngIf="group.get('institutetitle')?.errors?.['required']; else minLen">
+                                        Title is required
+                                    </div>
+
+                                    <ng-template #minLen>
+                                        <div class="text-danger"
+                                            *ngIf="group.get('institutetitle')?.errors?.['minlength']; else maxLen">
+                                            Minimum 2 characters required
+                                        </div>
+                                    </ng-template>
+
+                                    <ng-template #maxLen>
+                                        <div class="text-danger"
+                                            *ngIf="group.get('institutetitle')?.errors?.['maxlength']">
+                                            Maximum 100 characters allowed
+                                        </div>
+                                    </ng-template>
+                                </ng-container>
                     </div>
                 </div>
 
 
             </div>
             <div class="row mt-20">
-                <div class="col-lg-4 col-sm-12">
+                <div [ngClass]="{'col-3': isOtherLocation, 'col-4': !isOtherLocation  }">
                     <app-dropdown [options]="selectpassingyr" [placeholder]="'Select Year'" [required]="!isPostGraduate"
-                         [avatarUrl]="avatarUrl"
-                        formControlName="passingyear" [hasAvatar]="hasAvatar" [label]="passingyear">
+                        [avatarUrl]="avatarUrl" formControlName="passingyear" [hasAvatar]="hasAvatar"
+                        [label]="passingyear">
                     </app-dropdown>
-                     <div class="text-danger" *ngIf="group.get('passingyear')?.touched && group.get('passingyear')?.invalid">
+                    <div class="text-danger"
+                        *ngIf="group.get('passingyear')?.touched && group.get('passingyear')?.invalid">
 
                         <span *ngIf="group.get('passingyear')?.errors?.['required']">
                             Passing year is required
                         </span>
-                        </div>
+                    </div>
 
                 </div>
-                <div class="col-lg-4 col-sm-12">
-                    <app-inputfield type="number" formControlName="per_cgpa" [required]="!isPostGraduate" label="Percentage / CGPA"
-                        placeholder="Enter Percentage/CGPA" helpText="Help text" name="per_cgpa" [min]="0"
-                         suffix="">
+                <div [ngClass]="{'col-3': isOtherLocation, 'col-4': !isOtherLocation  }">
+                    <app-inputfield type="number" formControlName="per_cgpa" [required]="!isPostGraduate"
+                        label="Percentage / CGPA" placeholder="Enter Percentage/CGPA" helpText="Help text"
+                        name="per_cgpa" [min]="0" suffix="">
                     </app-inputfield>
-
-
 
                     <div class="text-danger" *ngIf="group.get('per_cgpa')?.touched && group.get('per_cgpa')?.invalid">
 
@@ -94,20 +114,41 @@
                     </div>
 
 
-
-
                 </div>
-                <div class="col-lg-4 col-sm-12">
-                    <app-dropdown [options]="selectlocation" [placeholder]="'Select Location'" [required]="!isPostGraduate"
-                        [avatarUrl]="avatarUrl" formControlName="location" [searchable]="true"
-                        [hasAvatar]="hasAvatar" label="Location">
+                <div [ngClass]="{'col-3': isOtherLocation, 'col-4': !isOtherLocation  }">
+                    <app-dropdown [options]="selectlocation" [placeholder]="'Select Location'"
+                        [required]="!isPostGraduate" [avatarUrl]="avatarUrl" formControlName="location"
+                        [searchable]="true" (selectedValueChange)="SelectedCity($event);" [hasAvatar]="hasAvatar"
+                        label="Location">
                     </app-dropdown>
                     <div class="text-danger" *ngIf="group.get('location')?.touched && group.get('location')?.invalid">
 
                         <span *ngIf="group.get('location')?.errors?.['required']">
                             Location is required
                         </span>
+                    </div>
+                </div>
+                <div class="col-3" *ngIf="isOtherLocation">
+                    <div class="form-group">
+                        <app-inputfield formControlName="otherLocation" name="otherLocation"
+                            label="Other Location" placeholder="Enter Location Name"
+                            [required]="!isPostGraduate">
+                        </app-inputfield>
+
+                        <div class="text-danger"
+                            *ngIf="group.get('otherLocation')?.touched && group.get('otherLocation')?.invalid">
+                            Location is required
                         </div>
+                        <div class="text-danger"
+                                            *ngIf="group.get('otherLocation')?.errors?.['minlength']">
+                                            Minimum 2 characters required
+                                        </div>
+                        <div class="text-danger"
+                                            *ngIf="group.get('otherLocation')?.errors?.['maxlength']">
+                                            Maximum 100 characters allowed
+                                        </div>
+                    </div>
+
                 </div>
             </div>
 
@@ -180,7 +221,7 @@
 
                         } @else{
                         <app-uploadbtn [config]="basicConfig" [required]="true" label="Passing / Leaving Certificate "
-                             (fileChange)="onFileChange($event, educationType,'lc')">
+                            (fileChange)="onFileChange($event, educationType,'lc')">
                         </app-uploadbtn>
                         }
 
@@ -226,8 +267,8 @@
                             } @else {
 
 
-                            <app-uploadbtn [config]="basicConfig" [uploadViaApi]="false" [required]="isMarksheetRequired(i)"
-                                label="Marksheet {{ i + 1 }}"
+                            <app-uploadbtn [config]="basicConfig" [uploadViaApi]="false"
+                                [required]="isMarksheetRequired(i)" label="Marksheet {{ i + 1 }}"
                                 (fileChange)="onFileChange($event, educationType, 'marksheet',i)">
                             </app-uploadbtn>
 
@@ -267,7 +308,8 @@
 
 
 
-                        <app-uploadbtn [config]="basicConfig" [required]="!isPostGraduate" label="Passing / Leaving Certificate "
+                        <app-uploadbtn [config]="basicConfig" [required]="!isPostGraduate"
+                            label="Passing / Leaving Certificate "
                             (fileChange)="onFileChange($event, educationType,'lc')">
                         </app-uploadbtn>
 
@@ -295,9 +337,9 @@
 
                             <div class="other-doc-title">
 
-                                <app-inputfield label="Title" [required]="true" placeholder="Enter text here"
+                                <app-inputfield label="Title" [required]="educationType !== 'POSTGRADUATE'" placeholder="Enter text here"
                                     (input)="main.restrictInput($event, 'text');slot.title = $any($event.target).value"
-                                    [maxlength]="25">
+                                    [maxlength]="100">
                                 </app-inputfield>
 
                                 <!-- <div class="text-danger" *ngIf="f['assettitle'].touched && f['assettitle'].invalid">
@@ -308,9 +350,9 @@
                                 </div> -->
                             </div>
 
-                            <div class=" other-doc-upload" [ngClass]="slot.file ? 'mt-1' : 'mt-0'" >
+                            <div class=" other-doc-upload" [ngClass]="slot.file ? 'mt-1' : 'mt-0'">
 
-                             @if (slot.file) {
+                                @if (slot.file) {
                                 <div class="addcust-img-box mt-4">
                                     <p class="text-label">{{ slot.file.name }}</p>
 
@@ -329,7 +371,7 @@
                                     </div>
                                 </div>
                                 } @else {
-                                <app-uploadbtn [config]="basicConfig" [required]="true" label="Upload Document"
+                                <app-uploadbtn [config]="basicConfig" [required]="educationType !== 'POSTGRADUATE'" label="Upload Document"
                                     (fileChange)="onOtherFileChange($event, slot)">
                                 </app-uploadbtn>
                                 }
@@ -367,8 +409,8 @@
                     <!-- Add button -->
                     <div class="col-lg-4 col-sm-12 mt-20 pt-2">
                         <app-buttons label="Add More Document" class="btn btn-icon Add btncustomClass" [outline]="true"
-                            (click)="addotherdocuments()"  [disabled]="otherDocuments.length >= maxOtherDocuments">
- <img src="/assets/images/icons/addred.svg">
+                            (click)="addotherdocuments()" [disabled]="otherDocuments.length >= maxOtherDocuments">
+                            <img src="/assets/images/icons/addred.svg">
                         </app-buttons>
                     </div>
                 </div>

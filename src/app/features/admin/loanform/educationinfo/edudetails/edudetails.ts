@@ -46,6 +46,9 @@ export class Edudetails {
   selectedID = '';
 
   seleactInstitute: OptionItem[] = []
+
+  filteredInstitutes: any[] = [];
+
   selectedInstituteID = '';
   selectedInstituteLabel = '';
   selectedQualificationLabel = ''
@@ -74,33 +77,18 @@ export class Edudetails {
     'other12': 7,
     'otherdiploma': 8,
 
-
-    //  '10th': 1,
-    //   '12th': 2,
-    //   'diploma': 3,
-    //   'ug': 4,
-    //   'pg': 5,
-    //   'others': 6
-
-
   };
   private educationDisplayLabel: Record<string, string> = {
     '10th': '10th',
     '12th': '12th',
     'diploma10': 'Diploma (After 10th)',
     'diploma12': 'Diploma (After 12th)',
-    'ug': 'Undergraduate',
-    'pg': 'Postgraduate',
-    'others12': 'Others (After 12th)',
-    'othersdiploma': 'Others (After Diploma)'
-
-
-    // '10th': '10th',
-    //   '12th': '12th',
-    //   'diploma': 'Diploma',
-    //   'ug': 'Undergraduate',
-    //   'pg': 'Postgraduate',
-    //   'others': 'Others'
+    'ug': 'Undergraduate (After 12th)',
+    'ugdiploma': 'Undergraduate (After Diploma)',
+    'pg': 'Postgraduate (After Undergraduate)',
+    'pgafterdiploma': 'Postgraduate (After Diploma and Undergraduate)',
+    'other12': 'Others (After 12th)',
+    'otherdiploma': 'Others (After Diploma)'
 
   };
 
@@ -138,7 +126,13 @@ export class Edudetails {
 
 
     this.getEducationdetails();
-    this.getInstituteName();
+    // this.getInstituteName();
+
+    this.formSvc.getInstitutesCached().subscribe(list => {
+      this.seleactInstitute = list;
+      this.filteredInstitutes = [...list];
+    });
+
 
     this.selectedcoursetype = localStorage.getItem('coursetypeug') === 'true';
     console.log('aaaaaaaaaaaaa', this.selectedcoursetype)
@@ -146,13 +140,24 @@ export class Edudetails {
     this.basicform = this.fb.group({
       qualification: ['', [Validators.required, this.qualificationVsCourseTypeValidator()]],
       // qualification: ['', [Validators.required]],
-      qualificationtitle: [''],
+      qualificationtitle: ['',[Validators.minLength(2), Validators.maxLength(100)]],
       institute: ['', Validators.required],
-      institutetitle: ['']
+      institutetitle: ['', [Validators.minLength(2), Validators.maxLength(100)]]
     })
 
 
     this.hasProceededOnce = !!this.previousEducationId;
+
+
+    const savedQualificationId = this.previousEducationId
+      || this.route.snapshot.queryParams['qualificationId'];
+
+    if (savedQualificationId) {
+      this.formSvc.getselectedEducation(savedQualificationId).subscribe(res => {
+        this.educationdetails = res.data ?? res;
+      });
+    }
+
 
   }
 
@@ -168,17 +173,19 @@ export class Edudetails {
     });
   }
 
-  getInstituteName() {
-    this.formSvc.getInstitutes().subscribe((res: any) => {
-      const list = res.data ?? res;
+  // getInstituteName() {
+  //   this.formSvc.getInstitutes().subscribe((res: any) => {
+  //     const list = res.data ?? res;
 
-      this.seleactInstitute = list.map((s: any) => ({
-        value: s.id,
-        label: s.instituteName,
+  //     this.seleactInstitute = list.map((s: any) => ({
+  //       value: s.id,
+  //       label: s.instituteName,
 
-      }));
-    });
-  }
+  //     }));
+  //       this.filteredInstitutes = [...this.seleactInstitute];
+
+  //   });
+  // }
 
   SelectedInstitute(values: string | string[]) {
     const ids = Array.isArray(values) ? values : [values];
@@ -192,14 +199,44 @@ export class Edudetails {
 
     // this.isOtherEducation = this.selectedInstituteLabel.toLowerCase().includes('other');
 
-    this.isOtherEducation = selected.some(
-      s => s.label.trim().toLowerCase() === 'other'
-    )
+    // this.isOtherEducation = selected.some(
+    //   s => s.label.trim().toLowerCase() === 'other'
+    // )
+    if (this.selectedInstituteLabel.toLowerCase() === 'other') {
+      this.isOtherEducation = true;
+    } else {
+      this.isOtherEducation = false;
+    }
 
 
   }
 
-//current selected section (1popup left box)
+
+  filterInstitutes(searchText: any) {
+    const value = searchText.trim().toLowerCase();
+
+    if (!value) {
+      this.filteredInstitutes = [...this.seleactInstitute];
+      return;
+    }
+
+    if (value === 'other') {
+      const otherItem = this.seleactInstitute.find(
+        item => item.label.toLowerCase() === 'other'
+      );
+
+      this.filteredInstitutes = otherItem ? [otherItem] : [];
+      return;
+    }
+
+    //  Normal search
+    this.filteredInstitutes = this.seleactInstitute.filter(item =>
+      item.label.toLowerCase().includes(value)
+    );
+  }
+
+
+  //current selected section (1popup left box)
   private getCurrentSections(): string[] {
     if (!this.educationdetails) return [];
 
@@ -214,42 +251,77 @@ export class Edudetails {
     return sections;
   }
 
-//all selected selection in 2nd popup
+  //all selected selection in 2nd popup
+
+
   private getSectionRequiredList(newQualificationId: string): string[] {
+
     const newLabel = this.getAddingSectionLabel(newQualificationId);
     const newKey = this.normalizeQualification(newLabel);
-    const newRank = this.educationRank[newKey];
 
-    const result: string[] = [];
+    let path: string[] = [];
 
-    const sectionMap = new Map<string, string>();
+    switch (newKey) {
 
-    this.educationdetails.forEach((d: any) => {
-      const key = this.normalizeQualification(d.qualificationName);
-      const rank = this.educationRank[key];
+      case 'diploma10':
+        path = ['10th', 'diploma10'];
+        break;
 
-      if (rank && rank <= newRank) {
-        // result.push(d.qualificationName);
-        sectionMap.set(key, this.educationDisplayLabel[key]);
-      }
-    });
+      case '12th':
+        path = ['10th', '12th'];
+        break;
 
-    // if (!result.some(r => r.toLowerCase().includes(newLabel.toLowerCase()))) {
-    //   result.push(newLabel);
-    // }
-    // result.push('IELTS / PTE');
-    // result.push('University Offer Letter');
-    // return Array.from(new Set(result));
+      //  DIPLOMA AFTER 12TH
+      case 'diploma12':
+        path = ['10th', '12th', 'diploma12'];
+        break;
 
+      //  UG CASES
+      case 'ug':
+        if (newLabel.toLowerCase().includes('diploma')) {
+          // UG after diploma
+          path = ['10th', 'diploma10', 'ugdiploma'];
+        } else {
+          // UG after 12th
+          path = ['10th', '12th', 'ug'];
+        }
+        break;
 
-    sectionMap.set(newKey, this.educationDisplayLabel[newKey]);
-    sectionMap.set('ielts', 'IELTS / PTE');
-    sectionMap.set('offer', 'University Offer Letter');
+      //  PG CASES
+      case 'pg':
+        if (newLabel.toLowerCase().includes('diploma')) {
+          // PG after diploma + UG
+          path = ['10th', 'diploma10', 'ug', 'pgafterdiploma'];
+        } else {
+          // PG after UG
+          path = ['10th', '12th', 'ug', 'pg'];
+        }
+        break;
 
-    return Array.from(sectionMap.values());
+      //  OTHERS AFTER 12TH
+      case 'others12':
+        path = ['10th', '12th', 'others12'];
+        break;
 
+      //  OTHERS AFTER DIPLOMA
+      case 'othersdiploma':
+        path = ['10th', 'diploma10', 'othersdiploma'];
+        break;
+
+      //  DEFAULT (fallback safe)
+      default:
+        path = ['10th'];
+    }
+
+    //  Map to labels
+    const sections = path.map(key => this.educationDisplayLabel[key]);
+
+    //  Always append
+    sections.push('IELTS / PTE');
+    sections.push('University Offer Letter');
+
+    return sections;
   }
-
 
   private getHighestQualification(): string {
     if (!this.educationdetails?.length) return '';
@@ -297,6 +369,7 @@ export class Edudetails {
     this.basicform.get('qualification')?.updateValueAndValidity();
 
     if (this.basicform.get('qualification')?.hasError('invalidEducation')) {
+      // this.stepperService.resetEducationSubSteps();
       return;
     }
 
@@ -313,42 +386,39 @@ export class Edudetails {
     }
 
 
-    this.showAdditionPopup(newId, newLabel);
+    if (!this.educationdetails && this.previousEducationId) {
+      this.formSvc.getselectedEducation(this.previousEducationId).subscribe(res => {
+        this.educationdetails = res.data ?? res;
+
+        this.handleEducationChangeFlow(newId);
+      });
+      return;
+    }
+
+    // ✅ if already available
+    this.handleEducationChangeFlow(newId);
 
 
-
-    // if (newId !== this.previousEducationId) {
-
-    //   const addingLabel = this.getAddingSectionLabel(newId);
-
-    //   this.msgbox.open({
-    //     type: 'warning',
-    //     title: 'Are you sure you want to change this?',
-    //     mode: 'comparison',
-    //     message: `You originally selected ${this.getHighestQualification()} as your last qualification.<br>Adding a ${addingLabel} section will update your highest qualification.`,
-    //     okText: 'Yes, Update',
-    //     cancelText: 'No',
-    //     comparisonData: {
-    //       currentSections: this.getCurrentSections(),
-    //       addingSection: addingLabel
-    //     },
-
-
-    //     onOk: () => {
-    //       this.openPostUpdateInfoPopup(newId, addingLabel);
-
-
-    //     },
-    //     onCancel: () => {
-    //       this.basicform.patchValue({
-    //         qualification: this.previousEducationId
-    //       });
-    //     }
-    //   });
-    // }
-    // this.basicform.get('qualification')?.updateValueAndValidity();
+    // this.showAdditionPopup(newId, newLabel);
 
   }
+
+  private handleEducationChangeFlow(newId: string) {
+
+    if (newId === this.previousEducationId) return;
+
+    const currentLabel = this.getAddingSectionLabel(this.previousEducationId!);
+    const newLabel = this.getAddingSectionLabel(newId);
+
+    if (this.isRemovingQualification(currentLabel, newLabel)) {
+      this.showRemovalConfirmationPopup(newId, currentLabel, newLabel);
+      return;
+    }
+
+    this.showAdditionPopup(newId, newLabel);
+  }
+
+
   //new education is added (ug-pg)
   private showAdditionPopup(newId: string, addingLabel: string) {
     this.msgbox.open({
@@ -386,7 +456,7 @@ export class Edudetails {
     });
   }
 
-//eduction is removed (pg-ug)
+  //eduction is removed (pg-ug)
   private isRemovingQualification(
     currentLabel: string,
     newLabel: string
@@ -444,7 +514,7 @@ export class Edudetails {
     });
   }
 
-  
+
   //second confirmation popup
   private openPostUpdateInfoPopup1(newId: string, addingLabel: string) {
     this.msgbox.open({
@@ -522,6 +592,7 @@ The following sections now need to be filled.
   }
 
   private applyEducationChange(qualificationId: string) {
+    if (this.basicform.invalid) return;
     this.selectedID = qualificationId;
 
     this.formSvc.getselectedEducation(qualificationId).subscribe(res => {
@@ -531,7 +602,7 @@ The following sections now need to be filled.
       this.stepperService.setEducationSubSteps(this.educationdetails);
     });
   }
-//after selecting new education start from first
+  //after selecting new education start from first
   private navigateToFirstEducationStep(newId: string) {
     const stepKey = this.normalizeQualification(
       this.getAddingSectionLabel(newId)
@@ -652,7 +723,9 @@ The following sections now need to be filled.
     {
       "applicantId": this.applicantId,
       "lastQualificationId": this.basicform.value.qualification,
-      "lastInstitutionId": this.basicform.value.institute
+      'otherQualification': this.isOtherQualification ? this.basicform.value.qualificationtitle : '',
+      "lastInstitutionId": this.basicform.value.institute,
+      "otherInstitutionName": this.isOtherEducation ? this.basicform.value.institutetitle : ''
     }
 
     this.formSvc.selectedqualification(input, this.applicationId).subscribe({

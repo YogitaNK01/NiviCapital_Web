@@ -42,8 +42,13 @@ export class Loanstepperservice {
 
   private stepsSubject = new BehaviorSubject<any[]>([]);
   public steps$ = this.stepsSubject.asObservable();
+
+  private EDUCATION_PROGRESS_KEY = 'educationProgress';
+
+
   constructor(private formSvc: Loanformservice, private router: Router) {
     this.buildSteps();
+    this.restoreEducationProgress();
 
     const saved = localStorage.getItem('coursetypeug');
     if (saved !== null) {
@@ -109,9 +114,9 @@ export class Loanstepperservice {
   setEducationSubSteps(data: any[]) {
 
 
-    if (this.educationSubStepsInitialized) {
-      return;
-    }
+    // if (this.educationSubStepsInitialized) {
+    //   return;
+    // }
 
     this.educationSubSteps = data.map(d => ({
       id: d.qualificationId,
@@ -127,6 +132,12 @@ export class Loanstepperservice {
 
   markEducationSectionComplete(step: string) {
     this.completedEducationSections.add(step);
+    // this.saveEducationProgress();
+    sessionStorage.setItem(
+      'completedEducationSections',
+      JSON.stringify([...this.completedEducationSections])
+    );
+
   }
 
   getCompletedEducationSections(): Set<string> {
@@ -145,6 +156,23 @@ export class Loanstepperservice {
   isEducationStepCompleted(step: string): boolean {
     return this.completedEducationSections.has(step);
   }
+
+
+  private saveEducationProgress() {
+    sessionStorage.setItem(
+      this.EDUCATION_PROGRESS_KEY,
+      JSON.stringify([...this.completedEducationSections])
+    );
+  }
+
+  private restoreEducationProgress() {
+    const saved = sessionStorage.getItem(this.EDUCATION_PROGRESS_KEY);
+    if (saved) {
+      this.completedEducationSections = new Set(JSON.parse(saved));
+    }
+  }
+
+
   //---------------all other steps --------------
 
   markStepCompleted(route: string) {

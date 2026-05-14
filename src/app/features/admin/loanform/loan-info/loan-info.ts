@@ -102,6 +102,27 @@ export class LoanInfo implements OnInit {
         this.stepperService.setLoanId(this.applicantId, this.applicationId, this.custName, this.custARN);
       }
     });
+
+    
+
+  let data = this.loanformservice.loanInfoData;
+
+  if (!data) {
+    const storedData = localStorage.getItem('loanInfoData');
+    if (storedData) {
+      data = JSON.parse(storedData);
+      this.loanformservice.loanInfoData = data;
+    }
+  }
+
+  if (!data) return;
+      this.annual_Income = data.annualIncome;
+      this.rateOfInterest = data.interestRate;
+      this.loanAmount = data.requestedAmount;
+      this.tenure = data.requestedTenureMonths / 12;
+      this.paymentmode = data.modeOfPayment;
+      //  setTimeout(() => this.updateSliderBackground(), 0);
+    
   }
 
   limitLoanAmount(event: any, slider: any) {
@@ -164,7 +185,7 @@ export class LoanInfo implements OnInit {
 
   }
 
-  
+
   submitForm(data: NgForm) {
 
     if (!data.valid) {
@@ -190,7 +211,11 @@ export class LoanInfo implements OnInit {
       next: (data) => {
         console.log(data);
         if (data.status == "success") {
-this.stepperService.markStepCompleted('loaninfo');
+          this.loanformservice.loanInfoData = input;
+
+          localStorage.setItem( 'loanInfoData',JSON.stringify(input)  );
+
+          this.stepperService.markStepCompleted('loaninfo');
           this.stepperService.next();
         }
 

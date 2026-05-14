@@ -1,4 +1,8 @@
+import { COMMON_EDUCATION_FIELDS } from "../shared/config/custdetails.config";
+
 export class SummaryHelper {
+
+
 
   static extractGeneralInfo(generalInfo: any) {
     if (!generalInfo) return { currentOccupation: '', courseDetailsFields: [] };
@@ -23,19 +27,105 @@ export class SummaryHelper {
   }
 
 
+
+  static extractEstimatedExpense1(estimatedExpense: any) {
+    if (!estimatedExpense) {
+      return {
+        educationFees: null,
+        livingExpenses: [],
+        miscellaneousExpenses: []
+      };
+    }
+
+    const livingRaw = Array.isArray(estimatedExpense.livingExpenses)
+      ? estimatedExpense.livingExpenses
+      : [];
+
+    const miscRaw = Array.isArray(estimatedExpense.miscellaneousExpenses)
+      ? estimatedExpense.miscellaneousExpenses
+      : [];
+
+    //  Living
+    const otherLiving = livingRaw.filter((e: any) => e.name === 'Other Expense');
+    const livingWithoutOther = livingRaw.filter((e: any) => e.name !== 'Other Expense');
+
+    if (otherLiving.length) {
+      livingWithoutOther.push({
+        name: 'Other Expense',
+        isGroup: true,
+        children: otherLiving
+      });
+    }
+
+    //  Misc
+    const otherMisc = miscRaw.filter((e: any) => e.name === 'Other Expenses');
+    const miscWithoutOther = miscRaw.filter((e: any) => e.name !== 'Other Expenses');
+
+    if (otherMisc.length) {
+      miscWithoutOther.push({
+        name: 'Other Expenses',
+        isGroup: true,
+        children: otherMisc
+      });
+    }
+
+    return {
+      educationFees: estimatedExpense.educationFees || null,
+      livingExpenses: livingWithoutOther,
+      miscellaneousExpenses: miscWithoutOther
+    };
+  }
+
   static extractEstimatedExpense(estimatedExpense: any) {
-    if (!estimatedExpense) return {
+  if (!estimatedExpense) {
+    return {
       educationFees: null,
       livingExpenses: [],
       miscellaneousExpenses: []
     };
-
-    return {
-      educationFees: estimatedExpense.educationFees || null,
-      livingExpenses: Array.isArray(estimatedExpense.livingExpenses) ? estimatedExpense.livingExpenses : [],
-      miscellaneousExpenses: Array.isArray(estimatedExpense.miscellaneousExpenses) ? estimatedExpense.miscellaneousExpenses : []
-    };
   }
+
+  const livingRaw = Array.isArray(estimatedExpense.livingExpenses)
+    ? estimatedExpense.livingExpenses
+    : [];
+
+  const miscRaw = Array.isArray(estimatedExpense.miscellaneousExpenses)
+    ? estimatedExpense.miscellaneousExpenses
+    : [];
+
+  const isOther = (name: string) =>
+    name === 'Other Expense' || name === 'Other Expenses';
+
+  // ✅ Living
+  const otherLiving = livingRaw.filter((e: any) => isOther(e.name));
+  const livingWithoutOther = livingRaw.filter((e: any) => !isOther(e.name));
+
+  if (otherLiving.length) {
+    livingWithoutOther.push({
+      name: 'Other Expense',
+      isGroup: true,
+      children: otherLiving
+    });
+  }
+
+  // ✅ Misc
+  const otherMisc = miscRaw.filter((e: any) => isOther(e.name));
+  const miscWithoutOther = miscRaw.filter((e: any) => !isOther(e.name));
+
+  if (otherMisc.length) {
+    miscWithoutOther.push({
+      name: 'Other Expense',
+      isGroup: true,
+      children: otherMisc
+    });
+  }
+
+  return {
+    educationFees: estimatedExpense.educationFees || null,
+    livingExpenses: livingWithoutOther,
+    miscellaneousExpenses: miscWithoutOther
+  };
+}
 
 
   static extractAdditionalInfo(additionalInfo: any) {
@@ -45,7 +135,7 @@ export class SummaryHelper {
         { label: 'Gender', key: 'gender' },
         { label: 'Marital Status', key: 'maritalStatus' },
         { label: 'Upload Applicant Photo', key: 'photoUrl' },
-        { label: 'Number of Dependents', key: 'numberOfDependents' }
+        { label: 'Number of Dependents', key: 'numberofDependents' }
       ],
       spouse: [
         { label: 'First Name', key: 'firstName' },
@@ -175,73 +265,107 @@ export class SummaryHelper {
 
   }
 
-  static extractEducationInfo(kycInfo: any) {
+  static extractQualificationInfo(qualificationDetail: any) {
     const labels = {
       QualificationDetails: [
-        { label: 'Last Qualification', key: 'aadhaarNumber' },
-        { label: 'Other Qualification', key: 'aadhaarFrontUrl' },
-        { label: 'Last Institution Name', key: 'aadhaarBackUrl' },
-        { label: 'Other Institution Name', key: 'panNumber' },
+        { label: 'Last Qualification', key: 'lastQualification' },
+        { label: 'Other Qualification', key: 'otherQualification' },
+        { label: 'Last Institution Name', key: 'lastInstitution' },
+        { label: 'Other Institution Name', key: 'otherInstitutionName' },
 
       ],
-      permanentAddress: [
-        { label: 'Institute Name', key: 'addressLine' },
-        { label: 'Other Institute Name', key: 'addressLine1' },
-        { label: 'Year of Passing', key: 'addressLine2' },
-        { label: 'Percentage / CGPA', key: 'city' },
-        { label: 'Location', key: 'state' },
-        { label: 'Other Location', key: 'country' },
-        { label: 'Marksheet', key: 'pincode' },
-        { label: 'Leaving Certificate', key: 'pincode' },
-        { label: 'Other Document Name', key: 'pincode' },
-        { label: 'Other Document ', key: 'pincode' },
-
-
-      ],
-      IELTSPTE: [
-        { label: 'Address Line 1', key: 'addressLine' },
-        { label: 'Address Line 2', key: 'addressLine1' },
-        { label: 'Address Line 3', key: 'addressLine2' },
-        { label: 'City', key: 'city' },
-        { label: 'state', key: 'state' },
-        { label: 'Country', key: 'country' },
-        { label: 'Pincode', key: 'pincode' },
-      ],
-      UniversityOfferLetter: [
-        { label: 'Address Line 1', key: 'addressLine' },
-        { label: 'Address Line 2', key: 'addressLine1' },
-        { label: 'Address Line 3', key: 'addressLine2' },
-        { label: 'City', key: 'city' },
-        { label: 'state', key: 'state' },
-        { label: 'Country', key: 'country' },
-        { label: 'Pincode', key: 'pincode' },
-      ],
-
     };
+    const getValue = (data: any, key: string) => {
+      if (!data) return '-';
 
-    // Helper function to safely get value or fallback
-    const getValue = (obj: any, key: string) => {
+      const obj = Array.isArray(data) ? data[0] : data;
+
       if (!obj) return '-';
-      if (key.includes('url')) {
-        return obj[key] ? 'Photo.jpg' : 'No Photo';
-      }
-      return obj[key] || '-';
+
+      return obj[key] ?? '-';
     };
+    const values = {
+      QualificationDetails: labels.QualificationDetails.map(field => ({
+        label: field.label,
+        value: getValue(qualificationDetail, field.key)
+      })),
+
+    };
+
+    return values;
+
+  }
+
+  static extractEducationInfo(educationDetails: any) {
+    const labels = {
+
+      tenth: COMMON_EDUCATION_FIELDS,
+      twelfth: COMMON_EDUCATION_FIELDS,
+      bachelors: COMMON_EDUCATION_FIELDS,
+      postgraduate: COMMON_EDUCATION_FIELDS,
+
+      ieltsPte: [
+        { label: 'Score', key: 'score' },
+        { label: 'Certificate', key: 'marksheetUrl' },
+
+      ],
+      offerLetter: [
+        { label: 'Offer letter', key: 'offerLetter' },
+
+      ],
+
+    };
+
+    const getValue = (data: any, key: string) => {
+      if (!data) return '-';
+
+      const obj = Array.isArray(data) ? data[0] : data;
+
+      if (!obj) return '-';
+
+      if (key.toLowerCase().includes('url')) {
+        return obj[key] || '-';
+      }
+
+      return obj[key] ?? '-';
+    };
+
 
     // Extract values for each section based on labels
     const values = {
-      identityAndResidency: labels.QualificationDetails.map(field => ({
+
+      tenth: labels.tenth.map(field => ({
         label: field.label,
-        value: getValue(kycInfo?.identityAndResidency, field.key)
+        value: getValue(educationDetails?.tenth, field.key)
       })),
-     
-      IELTSPTE: labels.IELTSPTE.map(field => ({
+      twelfth: labels.twelfth.map(field => ({
         label: field.label,
-        value: getValue(kycInfo?.IELTSPTE, field.key)
+        value: getValue(educationDetails?.twelfth, field.key)
       })),
-      UniversityOfferLetter: labels.UniversityOfferLetter.map(field => ({
+      bachelors: labels.bachelors.map(field => ({
         label: field.label,
-        value: getValue(kycInfo?.UniversityOfferLetter, field.key)
+        value: getValue(educationDetails?.bachelors, field.key)
+      })),
+      postgraduate: labels.postgraduate.map(field => ({
+        label: field.label,
+        value: getValue(educationDetails?.postgraduate, field.key)
+      })),
+
+      //  twelfth: labels.twelfth.map(field => ({
+      //   label: field.label,
+      //   value: getValue(educationDetails?.twelfth, field.key)
+      // })),
+      //  twelfth: labels.twelfth.map(field => ({
+      //   label: field.label,
+      //   value: getValue(educationDetails?.twelfth, field.key)
+      // })),
+      ieltsPte: labels.ieltsPte.map(field => ({
+        label: field.label,
+        value: getValue(educationDetails?.ieltsPte, field.key)
+      })),
+      offerLetter: labels.offerLetter.map(field => ({
+        label: field.label,
+        value: getValue(educationDetails?.offerLetter, field.key)
       })),
 
     };
@@ -259,7 +383,9 @@ export class SummaryHelper {
       sections.push({
         sectionLabel: 'Existing Loans',
         cards: liabilities.existingLoans.map((loan: any, i: number) => ({
-          title: `Home Loan ${i + 1}`,
+          // title: `Home Loan ${i + 1}`,
+          title: `${loan.liabilityTypeText || 'Loan'} Loan`,
+
           fields: [
             { label: 'Bank / Lender', value: loan.bankLender },
             {
@@ -389,13 +515,6 @@ export class SummaryHelper {
               value: l.amountInr,
               isCurrency: true
             }))
-          },
-          {
-            fields: assets.liquidAssets.map((l: any) => ({
-              label: `${l.assetType} `,
-              value: l.amountInr,
-              isCurrency: true
-            }))
           }
         ]
       });
@@ -445,71 +564,54 @@ export class SummaryHelper {
         }))
       });
     }
+     /* ---------- OTHERS ---------- */
+    if (assets.otherAssets?.length) {
+      sections.push({
+        sectionLabel: 'Other Assets',
+        cards: assets.otherAssets.map((oa: any, i: number) => ({
+          title: `Asset ${i + 1}`,
+          fields: [
+            { label: 'Asset Type', value: oa.type },
+            { label: `${oa.type} (INR)`, value: oa.valueInr, isCurrency: true }
+          ]
+        }))
+      });
+    }
 
     return sections;
   }
 
-  static extractReferenceInfo(additionalInfo: any) {
-    // Define labels for each section
-    const labels = {
 
-      Reference1: [
-        { label: 'First Name', key: 'firstName' },
-        { label: 'Middle Name', key: 'middleName' },
-        { label: 'Last Name', key: 'lastName' },
-        { label: 'Email Id', key: 'email' },
-        { label: 'Mobile Number', key: 'phone' },
-        { label: 'Address Line 1', key: 'addressLine' },
-        { label: 'Address Line 2', key: 'addressLine1' },
-        { label: 'Address Line 3', key: 'addressLine2' },
-        { label: 'City', key: 'city' },
-        { label: 'state', key: 'state' },
-        { label: 'Country', key: 'country' },
-        { label: 'Pincode', key: 'pincode' },
-      ],
-      Reference2: [
-        { label: 'First Name', key: 'firstName' },
-        { label: 'Middle Name', key: 'middleName' },
-        { label: 'Last Name', key: 'lastName' },
-        { label: 'Email Id', key: 'email' },
-        { label: 'Mobile Number', key: 'phone' },
-        { label: 'Address Line 1', key: 'addressLine' },
-        { label: 'Address Line 2', key: 'addressLine1' },
-        { label: 'Address Line 3', key: 'addressLine2' },
-        { label: 'City', key: 'city' },
-        { label: 'state', key: 'state' },
-        { label: 'Country', key: 'country' },
-        { label: 'Pincode', key: 'pincode' },
-      ],
 
-    };
+  static extractReferenceInfo(references: any[]) {
 
-    // Helper function to safely get value or fallback
+    const labels = [
+      { label: 'First Name', key: 'firstName' },
+      { label: 'Middle Name', key: 'middleName' },
+      { label: 'Last Name', key: 'lastName' },
+      { label: 'Email Id', key: 'emailId' },
+      { label: 'Mobile Number', key: 'mobileNumber' },
+      { label: 'Address Line 1', key: 'addressLine1' },
+      { label: 'Address Line 2', key: 'addressLine2' },
+      { label: 'Address Line 3', key: 'addressLine3' },
+      { label: 'Country', key: 'country' },
+      { label: 'State', key: 'state' },
+      { label: 'City', key: 'city' },
+      { label: 'Pincode', key: 'pincode' }
+    ];
+
     const getValue = (obj: any, key: string) => {
-      if (!obj) return '-';
-      if (key === 'photoUrl') {
-        return obj[key] ? 'Photo.jpg' : 'No Photo';
-      }
-      return obj[key] || '-';
+      return obj?.[key] || '-';
     };
 
-    // Extract values for each section based on labels
-    const values = {
-
-      Reference1: labels.Reference1.map(field => ({
+    return references.map((ref, index) => ({
+      title: `Reference ${index + 1}`,
+      fields: labels.map(field => ({
         label: field.label,
-        value: getValue(additionalInfo?.Reference1, field.key)
-      })),
-      Reference2: labels.Reference2.map(field => ({
-        label: field.label,
-        value: getValue(additionalInfo?.Reference2, field.key)
-      })),
-
-    };
-
-    return values;
+        value: getValue(ref, field.key)
+      }))
+    }));
   }
-
 
   static toTitleCase(str: string): string {
     return str

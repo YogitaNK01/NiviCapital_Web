@@ -66,4 +66,19 @@ const address = [
 ];
 
 
+  // common-education-fields.ts
+export const COMMON_EDUCATION_FIELDS = [
+  { label: 'Institute Name', key: 'instituteName' },
+  { label: 'Other Institute Name', key: 'addressLine1' },
+  { label: 'Year of Passing', key: 'yearOfPassing' },
+  { label: 'Percentage / CGPA', key: 'percentageOrCgpa' },
+  { label: 'Location', key: 'location' },
+  { label: 'Other Location', key: 'otherLocation' },
+  { label: 'Marksheet', key: 'marksheetUrl' },
+  { label: 'Leaving Certificate', key: 'leavingCertificateUrl' },
+  { label: 'Other Document Name', key: 'otherDocumentName' },
+  { label: 'Other Document', key: 'otherDocumentUrl' },
+];
+
+
 export { piFields,otherFields,identity,address };

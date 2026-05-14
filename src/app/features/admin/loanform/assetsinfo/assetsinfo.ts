@@ -190,26 +190,7 @@ export class Assetsinfo implements OnInit {
       this.assetsForm.valueChanges.subscribe(() => {
     this.calculateGrandTotal();
   });
-    // this.assetsForm.get('gold.goldvalue')?.valueChanges.subscribe(() => {
-    //   this.calculateGrandTotal();
-    // });
-    // this.assetsForm.get('liquidAssets')?.valueChanges.subscribe(() => {
-    //   this.calculateGrandTotal();
-    // });
-    // this.assetsForm.get('properties')?.valueChanges.subscribe(() => {
-    //   this.calculateGrandTotal();
-
-    // });
-    // this.assetsForm.get('investments')?.valueChanges.subscribe(() => {
-    //   this.calculateGrandTotal();
-    // });
-    // this.assetsForm.get('fixedDeposits')?.valueChanges.subscribe(() => {
-    //   this.calculateGrandTotal();
-    // });
-
-    // this.assetsForm.get('otherassets')?.valueChanges.subscribe(() => {
-    //   this.calculateGrandTotal();
-    // });
+   
 
     this.getbanks();
   }
@@ -309,79 +290,7 @@ export class Assetsinfo implements OnInit {
   }
 
 
-  removeAccordion1(key: string, index: number, event: Event) {
-    this.msgBox.open({
-      title: 'Are you sure want to Remove',
-      message: ``,
-      showCancel: true,
-      onOk: () => {
-        event.stopPropagation();
-
-        this.selectedAssets = this.selectedAssets.filter(k => k !== key);
-        this.selectedAssets = [...this.selectedAssets];
-        // this.selectedAssetIds = this.selectedAssets.flatMap(
-        //   group => this.groupIdMap[group] || []
-        // );
-
-        this.openIndex = this.openIndex.filter(i => i !== index);
-
-        const formKeyMap: any = {
-          GOLD: 'gold',
-          LIQUID: 'liquidAssets',
-          PROPERTY: 'properties',
-          FIXED_DEPOSIT: 'fixedDeposits',
-          INVESTMENTS: 'investments',
-          OTHERS: 'otherassets'
-        };
-
-        // this.assetsForm.get(formKeyMap[key])?.reset();
-        const control = this.assetsForm.get(formKeyMap[key]);
-
-        if (control instanceof FormArray) {
-          control.clear();
-        } else if (control instanceof FormGroup) {
-          control.reset();
-        }
-
-
-
-        switch (key) {
-          case 'Gold':
-            this.resetGold();
-            break;
-
-          case 'Liquid Assets':
-            this.resetLiquidAssets();
-            break;
-
-          case 'Property/Land Assets':
-            this.properties.clear();
-            this.selectedPropertyIds = [];
-            this.properties.push(this.createProperty());
-
-            break;
-
-          case 'Fixed Deposit':
-            this.fixedDeposits.clear();
-            this.fixedDeposits.push(this.createFD());
-            break;
-
-          case 'Investments':
-            this.investmentsArray.clear();
-            this.selectedInvestmentIds = [];
-            break;
-
-          case 'other':
-            this.otherassets.clear();
-            this.otherassets.push(this.createOther());
-            break;
-        }
-
-        this.calculateGrandTotal();
-        this.cd.detectChanges();
-      }
-    })
-  }
+  
   removeAccordion(key: string, index: number, event: Event) {
   this.msgBox.open({
     title: 'Are you sure want to Remove',
@@ -876,7 +785,7 @@ onAssetChange(values: string | string[]): void {
 
         this.selectInvestments = list.map((s: any) => ({
           value: s.id,
-          label: s.code,
+          label: s.name,
           code: s.code
         }));
 
@@ -924,8 +833,8 @@ onAssetChange(values: string | string[]): void {
 
     // map ids → codes
     const selectedCodes: string[] = selectedIds
-      .map(id => this.selectInvestments.find(x => x.value === id)?.code)
-      .filter((code): code is string => typeof code === 'string');
+      .map(id => this.selectInvestments.find(x => x.value === id)?.label)
+      .filter((name): name is string => typeof name === 'string');
 
 
 
@@ -935,10 +844,10 @@ onAssetChange(values: string | string[]): void {
 
 
     //  Add newly selected
-    selectedCodes.forEach(code => {
-      if (!existingCodes.includes(code)) {
+    selectedCodes.forEach(name => {
+      if (!existingCodes.includes(name)) {
         this.investmentsArray.push(
-          this.createInvestment(code)
+          this.createInvestment(name)
         );
       }
     });
@@ -954,47 +863,7 @@ onAssetChange(values: string | string[]): void {
     console.log('Investments shown:', this.investmentsArray.value);
   }
 
-  removeitem1(index: number, type: 'property' | 'fd' | 'other') {
-    this.msgBox.open({
-      title: 'Are you sure want to Remove',
-      message: ``,
-      showCancel: true,
-      onOk: () => {
-        if (type === 'property') {
-          const loanArray = this.properties;
-          const categoryToRemove = loanArray.at(index).get('type')?.value;
-
-          for (let i = loanArray.length - 1; i >= 0; i--) {
-            if (loanArray.at(i).get('propertytype')?.value === categoryToRemove) {
-              if (loanArray.length === 1) return;
-              loanArray.removeAt(i);
-            }
-          }
-
-          const livcategories = loanArray.controls.map(
-            ctrl => ctrl.get('type')?.value
-          );
-          this.selectedAssets = [...new Set(livcategories)];
-        }
-
-        if (type === 'fd') {
-          if (this.fixedDeposits?.length > 0) {
-            this.fixedDeposits.removeAt(index);
-          }
-        }
-
-
-        if (type === 'other') {
-          if (this.otherassets?.length > 0) {
-            this.otherassets.removeAt(index);
-          }
-        }
-
-
-
-      }
-    });
-  }
+ 
   removeitem(index: number, type: 'property' | 'fd' | 'other') {
     this.msgBox.open({
       title: 'Are you sure want to Remove',
@@ -1354,7 +1223,7 @@ onAssetChange(values: string | string[]): void {
     }
 
     //  PROPERTY (FormArray)
-    if (this.selectedAssets.includes('Property/Land Assets')) {
+    if (this.selectedAssets.includes('Property/ Land Assets')) {
       const arr = this.assetsForm.get('properties') as FormArray;
 
       arr.controls.forEach((ctrl: any,index: number) => {
@@ -1425,7 +1294,7 @@ onAssetChange(values: string | string[]): void {
             return;
           }
 
-          const type = ctrl.value.type;
+          const type = ctrl.value.type == 'Mutual Funds' ? 'MUTUAL_FUNDS' : (ctrl.value.type).toUpperCase();
           const amount = ctrl.value.value;
 
           if (type === 'Others') {
@@ -1442,7 +1311,7 @@ onAssetChange(values: string | string[]): void {
 
 
     //  Other Assets
-    if (this.selectedAssets.includes('other')) {
+    if (this.selectedAssets.includes('Other')) {
       const arr = this.assetsForm.get('otherassets') as FormArray;
 
       arr.controls.forEach((ctrl: any,) => {

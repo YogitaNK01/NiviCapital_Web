@@ -32,6 +32,11 @@
   margin: 10px 0 20px 0;
 }
 
+.sub-hrclass {
+  background: $neutral-300;
+  margin: 16px 0 20px 0;
+}
+
 // .accordion-item {
 //   //  min-height: auto;
 //   border-radius: $border_radius_m;
@@ -50,6 +55,18 @@
   // max-width: 300px;
   padding: 2px 3px;
   height: 52px;
+}
+
+.editbtn {
+  display: flex;
+  // width: 100px;
+  height: 35px;
+  padding: 10px 0;
+  justify-content: center;
+  align-items: center;
+  // gap: 4px;
+  border-radius: $border-radius-s;
+
 }
 
 .country {
@@ -83,7 +100,14 @@
   }
 
 }
-.living-misc{
+
+.living-misc {
   display: flex;
   gap: 40px;
 }
+
+.accordion-button ,.accordion-button.collapsed {
+  padding: 10px 16px;
+}
+
+ 

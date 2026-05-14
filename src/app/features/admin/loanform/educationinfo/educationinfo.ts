@@ -151,7 +151,48 @@ export class Educationinfo implements OnInit {
   constructor(private fb: FormBuilder, private stepperService: Loanstepperservice, private cd: ChangeDetectorRef, private formSvc: Loanformservice,
     private route: ActivatedRoute, private router: Router, private msgbox: Msgboxservice, public main: Main) { }
   ngOnInit(): void {
+    //1.create forms for all education types
+    this.educationForms = {
+      '10th': this.createForm(),
+      '12th': this.createForm(),
+      diploma10: this.createForm(),
+      diploma12: this.createForm(),
+      ug: this.createForm(),
+      pg: this.createForm(),
+      ielts: this.createIeltsForm(),
+      offerletter: this.fb.group({
+        offerLetter: [null, Validators.required]
+      }),
+      others12: this.createForm(),
+      othersdiploma: this.createForm()
+    }
 
+    //  2. RESTORE FROM sessionStorage (refresh-safe)
+    const cached = sessionStorage.getItem('educationState');
+
+    // if (cached) {
+    //   const parsed = JSON.parse(cached);
+
+    //   this.educationFormState = parsed.forms || {};
+    //   this.activeEducation = parsed.active;
+
+
+    //   Object.keys(this.educationFormState).forEach(step => {
+    //     const form = this.educationForms[step];
+    //     if (form) {
+    //       form.patchValue(this.educationFormState[step], { emitEvent: false });
+    //     }
+    //   });
+
+    //   if (parsed.uploadedFiles) {
+    //     Object.keys(parsed.uploadedFiles).forEach(key => {
+    //       this.uploadedFiles[key] = parsed.uploadedFiles[key];
+    //     });
+    //   }
+
+    // }
+
+    //  3. QUERY PARAMS
     this.route.queryParams.subscribe(params => {
 
       const applicantId = params['applicantId'];
@@ -183,38 +224,22 @@ export class Educationinfo implements OnInit {
     this.getEducationdetails();
 
 
-    this.educationForms = {
-      '10th': this.createForm(),
-      '12th': this.createForm(),
-      diploma10: this.createForm(),
-      diploma12: this.createForm(),
-      ug: this.createForm(),
-      pg: this.createForm(),
-      ielts: this.createIeltsForm(),
-      // this.fb.group({
-      //   score: ['', [Validators.required, Validators.min(4), Validators.max(10)]],
 
-      // }),
-
-      offerletter: this.fb.group({
-        offerLetter: [null, Validators.required]
-      }),
-      others12: this.createForm(),
-      othersdiploma: this.createForm()
-    }
 
     if (this.selectedLabel.includes('postgraduate') || this.selectedLabel.includes('pg')) {
       this.group.get('institutename')?.clearValidators();
       this.group.get('passingyear')?.clearValidators();
       this.group.get('per_cgpa')?.clearValidators();
       this.group.get('location')?.clearValidators();
+      this.group.get('otherLocation')?.clearValidators();
 
       this.group.get('institutename')?.updateValueAndValidity();
       this.group.get('passingyear')?.updateValueAndValidity();
       this.group.get('per_cgpa')?.updateValueAndValidity();
       this.group.get('location')?.updateValueAndValidity();
+      this.group.get('otherLocation')?.updateValueAndValidity();
     }
-    ``
+
     this.route.queryParams.subscribe(params => {
       const qualificationId = params['qualificationId'];
       if (!qualificationId) return;
@@ -233,7 +258,7 @@ export class Educationinfo implements OnInit {
           this.isEducationFlowInitialized = true;
 
           if (!this.activeEducation) {
-            this.activeEducation = this.educationOrder[2];
+            this.activeEducation = this.educationOrder[0];
           }
 
         }
@@ -263,9 +288,11 @@ export class Educationinfo implements OnInit {
 
 
       institutename: ['', Validators.required],
+      institutetitle: ['', [Validators.minLength(2), Validators.maxLength(100)]],
       passingyear: ['', Validators.required],
       per_cgpa: ['', [Validators.required, this.percentageOrCgpaValidator()]],
       location: ['', Validators.required],
+      otherLocation: ['', [Validators.minLength(2), Validators.maxLength(100)]],
       marksheet: [null],
       lc: [null],
 
@@ -587,6 +614,11 @@ export class Educationinfo implements OnInit {
         emitEvent: false
       });
     }
+    if (saved.value?.otherLocation) {
+      form.get('otherLocation')?.setValue(saved.value.otherLocation, {
+        emitEvent: false
+      });
+    }
 
     if (saved.value?.passingyear) {
       form.get('passingyear')?.setValue(saved.value.passingyear, {
@@ -598,6 +630,31 @@ export class Educationinfo implements OnInit {
     form.updateValueAndValidity({ emitEvent: false });
   }
 
+  private hydrateEducationFromApi(details: any[]) {
+    details.forEach((item: any) => {
+      const step = this.normalizeQualification(item.qualificationName) as StepKey;
+      const form = this.educationForms[step];
+      if (!form) return;
+
+      form.patchValue({
+        institutename: item.instituteName,
+        passingyear: item.yearOfPassing,
+        per_cgpa: item.percentageCgpa,
+        location: item.location,
+        otherLocation: item.otherLocation
+      }, { emitEvent: false });
+
+      //  restore uploaded document info (only metadata)
+      if (item.documents) {
+        item.documents.forEach((doc: any, index: number) => {
+          const key = this.buildKey(step, this.normalizeDocType(doc.type), index);
+          this.uploadedFiles[key] = { name: doc.fileName } as any;
+        });
+      }
+    });
+
+    this.cd.detectChanges();
+  }
 
 
   getEducationGroup(key: string): FormGroup {
@@ -752,6 +809,22 @@ export class Educationinfo implements OnInit {
       }
     });
   }
+  private persistEducationState() {
+    sessionStorage.setItem(
+      'educationState',
+      JSON.stringify({
+        forms: this.educationFormState,
+        active: this.activeEducation,
+        uploadedFiles: Object.keys(this.uploadedFiles).reduce((acc, key) => {
+          const f = this.uploadedFiles[key];
+          if (f) {
+            acc[key] = { name: f.name };
+          }
+          return acc;
+        }, {} as any)
+      })
+    );
+  }
 
 
   //-----------------disable next btn --------------------
@@ -760,11 +833,6 @@ export class Educationinfo implements OnInit {
     const step = this.activeEducation as StepKey;
     const form = this.educationForms[step];
 
-    console.log(
-      'STEP:', step,
-      'FORM VALID:', form.valid,
-      'FORM VALUE:', form.value
-    );
 
     if (!form) return false;
 
@@ -841,6 +909,22 @@ export class Educationinfo implements OnInit {
     this.otherDocMap[key] = { title: '' };
     this.uploadedFiles[key] = null;
   }
+  //check for pg data
+  private hasPgData(form: FormGroup, step: StepKey): boolean {
+
+    const hasFormValue = Object.values(form.getRawValue() || {}).some(
+      v => v !== null && v !== undefined && v !== ''
+    );
+
+    // check uploaded files (required + other)
+    const hasFiles =
+      this.requiredDocs(step).some(r => this.getFile(step, r.doc, r.index)) ||
+      Object.keys(this.uploadedFiles).some(
+        key => key.startsWith(`${step}_`) && !!this.uploadedFiles[key]
+      );
+
+    return hasFormValue || hasFiles;
+  }
 
   next() {
     console.log("next---");
@@ -848,12 +932,33 @@ export class Educationinfo implements OnInit {
     const step = this.activeEducation as StepKey;
     const form = this.educationForms[step];
 
+    // 
+    if (step === 'pg' && !this.hasPgData(form, step)) {
+      const idx = this.educationOrder.indexOf(step);
+      const nextEducation = this.educationOrder[idx + 1];
+
+      this.activeEducation = nextEducation;
+      this.restoreFormState(this.activeEducation);
+
+      this.router.navigate([], {
+        relativeTo: this.route,
+        queryParams: {
+          qualificationlabel: nextEducation
+        },
+        queryParamsHandling: 'merge'
+      });
+
+      return;
+    }
+
+
 
     if (!this.canProceedToNext()) {
       this.showValidationErrors(step);
       return;
     }
     this.saveCurrentFormState();
+    this.persistEducationState();
 
     this.stepperService.setEducationStepData(
       step,
@@ -861,7 +966,11 @@ export class Educationinfo implements OnInit {
     );
 
 
-    this.stepperService.markEducationSectionComplete(step);
+    // this.stepperService.markEducationSectionComplete(step);
+    if (this.activeEducation) {
+  this.stepperService.markEducationSectionComplete(this.activeEducation);
+}
+
 
 
     const fd = new FormData();
@@ -949,6 +1058,7 @@ export class Educationinfo implements OnInit {
       fd.append('yearOfPassing', form.get('passingyear')?.value);
       fd.append('percentageCgpa', form.get('per_cgpa')?.value);
       fd.append('location', form.get('location')?.value);
+      fd.append('otherLocation', form.get('otherLocation')?.value);
 
 
       // if (step === 'pg') {

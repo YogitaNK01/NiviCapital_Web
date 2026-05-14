@@ -300,7 +300,7 @@
                 </div>
 
                 <!-- Description only for Other Expense -->
-                @if(getCategoryLabel(expense.get('category')?.value) === 'Other Expenses') {
+                @if(getCategoryLabel(expense.get('category')?.value) === 'Other Expense') {
                 <div class="col-12 mt-20">
                   <app-inputfield type="text" label="Expense Name" [required]="true" placeholder="Enter Here"
                     formControlName="description" name="description">
