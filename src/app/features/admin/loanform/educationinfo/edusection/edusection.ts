@@ -139,6 +139,7 @@ export class Edusection {
   selectedInstituteLabel = '';
 
   selectlocation: OptionItem[] = []
+  filteredlocation: any[] = [];
   selectedLocationID = '';
   selectedLocationLabel = '';
 
@@ -330,7 +331,10 @@ export class Edusection {
         label: s.name,
 
       }));
+      
+ this.filteredlocation = [...this.selectlocation];
     });
+    
   }
   SelectedCity(values: string | string[]) {
     const ids = Array.isArray(values) ? values : [values];
@@ -353,6 +357,32 @@ export class Edusection {
     control?.markAsTouched();
     control?.updateValueAndValidity();
 
+  }
+
+    filtercities(searchText: any) {
+    const value = searchText.trim().toLowerCase();
+
+    // Reset list when search is empty
+    if (!value) {
+      this.filteredlocation = [...this.selectlocation];
+      return;
+    }
+
+    //  Special case: user searching "other"
+    if (value === 'other') {
+      const otherItem = this.selectlocation.find(
+        item => item.label.toLowerCase() === 'other'
+      );
+
+      // Put "Other" at the top
+      this.filteredlocation = otherItem ? [otherItem] : [];
+      return;
+    }
+
+    //  Normal search
+    this.filteredlocation = this.selectlocation.filter(item =>
+      item.label.toLowerCase().includes(value)
+    );
   }
 
   getLevelFromTitle(title: string): EducationType {

@@ -76,7 +76,7 @@ export const COMMON_EDUCATION_FIELDS = [
   { label: 'Other Location', key: 'otherLocation' },
   { label: 'Marksheet', key: 'marksheetUrl' },
   { label: 'Leaving Certificate', key: 'leavingCertificateUrl' },
-  { label: 'Other Document Name', key: 'otherDocumentName' },
+  { label: 'Other Document Name', key: 'title' },
   { label: 'Other Document', key: 'otherDocumentUrl' },
 ];
 

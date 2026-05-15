@@ -308,6 +308,7 @@ this.stepperService.rebuildSteps();
         });
         this.kycdocumentsForm.disable();
         console.log(this.kycdocumentsForm.get('dob')?.disabled);
+         this.stepperService.markStepCompleted('genralinfo');
       },
       error: (err) => {
         console.error("error msg", err);

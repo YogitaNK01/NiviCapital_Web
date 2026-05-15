@@ -91,41 +91,11 @@ export class Assetsinfo implements OnInit {
   selectedbakname!: string;
   invalidamt: boolean = false;;
 
-  assetFieldMap1: any = {
-    Gold: {
-      form: 'gold',
-      api: 'GOLD'
-    },
 
-    LiquidAssets: {
-      form: 'liquidAssets',
-      api: 'LIQUID_ASSETS'
-    },
-
-    Properties: {
-      form: 'properties',
-      api: 'PROPERTIES'
-    },
-
-    FixedDeposits: {
-      form: 'fixedDeposits',
-      api: 'FIXED_DEPOSITS'
-    },
-
-    Investments: {
-      form: 'investments',
-      api: 'INVESTMENTS'
-    },
-
-    OtherAssets: {
-      form: 'otherassets',
-      api: 'OTHER_ASSETS'
-    }
-  };
   assetFieldMap: any = {
     'Gold': { form: 'gold', type: 'group' },
     'Liquid Assets': { form: 'liquidAssets', type: 'group' },
-    'Property/Land Assets': { form: 'properties', type: 'array' },
+    'Property/ Land Assets': { form: 'properties', type: 'array' },
     'Fixed Deposit': { form: 'fixedDeposits', type: 'array' },
     'Investments': { form: 'investments', type: 'array' },
     'other': { form: 'otherassets', type: 'array' }
@@ -135,7 +105,7 @@ export class Assetsinfo implements OnInit {
   ASSET_KEY_MAP: Record<string, string> = {
     'Gold': 'gold',
     'Liquid Assets': 'liquidAssets',
-    'Property/Land Assets': 'properties',
+    'Property/ Land Assets': 'properties',
     'Fixed Deposit': 'fixedDeposits',
     'Investments': 'investments',
     'Other Assets': 'otherassets'
@@ -227,7 +197,7 @@ export class Assetsinfo implements OnInit {
       propertytype: ['', Validators.required],
       ownershiptype: ['', Validators.required],
       marketval: ['', Validators.required],
-      location: ['', [Validators.required, Validators.pattern('^[A-Za-z ]+$'), Validators.minLength(2), Validators.maxLength(25)]]
+      location: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(100)]]
     });
   }
   addProperty() {
@@ -313,7 +283,7 @@ export class Assetsinfo implements OnInit {
           this.resetLiquidAssets();
           break;
 
-        case 'Property/Land Assets':
+        case 'Property/ Land Assets':
           this.properties.clear();
           this.selectedPropertyIds = []; 
           this.properties.push(this.createProperty());
@@ -535,73 +505,21 @@ handleAmountInput(event: any, controlName: string, ctrl?: any) {
   }
 
 
-  onAssetChange2(values: string | string[]): void {
-
-    const rawSelected = Array.isArray(values) ? values : [values];
-
-
-    const newSelected = rawSelected.map(v => this.normalizeToAccordionKey(v));
-
-    // const newSelected = Array.isArray(values) ? values : [values];
-
-    if (newSelected.length === 0) {
-      this.selectedAssets = [];
-      this.openIndex = [];
-      this.assetsForm.reset();
-
-      // restore defaults
-      this.properties.clear();
-      this.fixedDeposits.clear();
-      this.otherassets.clear();
-      this.investmentsArray.clear();
-
-      this.cd.detectChanges();
-      return;
-    }
-
-    const deselected = this.selectedAssets.filter(k => !newSelected.includes(k));
-    const newlySelected = newSelected.filter(k => !this.selectedAssets.includes(k));
-
-    this.selectedAssets = newSelected;
-
-    this.openIndex = this.selectedAssets
-      .map(val => this.accordions.findIndex(a => a.key === val))
-      .filter(i => i !== -1);
-
-    deselected.forEach(key => {
-      const config = this.assetFieldMap[key];
-      if (!config) return;
-
-      const control = this.assetsForm.get(config.form);
-
-      if (control instanceof FormGroup) {
-        control.reset();
-      }
-
-      if (control instanceof FormArray) {
-        control.clear();
-      }
-    });
-
-    this.selectedAssets.forEach(key => {
-      const config = this.assetFieldMap[key];
-      if (!config) return;
-
-      const control = this.assetsForm.get(config.form);
-
-      if (control instanceof FormArray && control.length === 0) {
-        if (key === 'Property/Land Assets') control.push(this.createProperty());
-        if (key === 'Fixed Deposit') control.push(this.createFD());
-        if (key === 'other') control.push(this.createOther());
-      }
-    });
-
-    this.cd.detectChanges();
-  }
+ 
 
 onAssetChange(values: string | string[]): void {
   const rawSelected = Array.isArray(values) ? values : [values];
   const newSelected = rawSelected.map(v => this.normalizeToAccordionKey(v));
+
+  
+ setTimeout(() => {
+    this.openIndex = this.selectedAssets
+      .map(val => this.accordions.findIndex(a => a.key === val))
+      .filter(i => i !== -1);
+
+    this.cd.detectChanges();
+  });
+
 
   if (newSelected.length === 0) {
     this.selectedAssets = [];
@@ -649,7 +567,7 @@ onAssetChange(values: string | string[]): void {
     if (key === 'Investments') {
       this.selectedInvestmentIds = [];
     }
-    if (key === 'Property/Land Assets') {
+    if (key === 'Property/ Land Assets') {
       this.selectedPropertyIds = [];
     }
   });
@@ -662,9 +580,9 @@ onAssetChange(values: string | string[]): void {
     const control = this.assetsForm.get(config.form);
 
     if (control instanceof FormArray && control.length === 0) {
-      if (key === 'Property/Land Assets') control.push(this.createProperty());
+      if (key === 'Property/ Land Assets') control.push(this.createProperty());
       if (key === 'Fixed Deposit') control.push(this.createFD());
-      if (key === 'other') control.push(this.createOther());
+      if (key === 'other' || key === 'Other Assets') control.push(this.createOther());
     }
   });
 
@@ -893,7 +811,7 @@ onAssetChange(values: string | string[]): void {
     switch (type) {
       case 'property':
         array = this.properties;
-        accKey = 'Property/Land Assets';  // Match your acc.key
+        accKey = 'Property/ Land Assets';  // Match your acc.key
         break;
       case 'fd':
         array = this.fixedDeposits;
@@ -969,7 +887,7 @@ onAssetChange(values: string | string[]): void {
     }
 
 
-    if (this.selectedAssets.includes('Property/Land Assets') && this.properties.length === 0) return true;
+    if (this.selectedAssets.includes('Property/ Land Assets') && this.properties.length === 0) return true;
 
     if (this.selectedAssets.includes('Fixed Deposit') && this.fixedDeposits.length === 0) return true;
     if (this.selectedAssets.includes('other') && this.otherassets.length === 0) return true;
@@ -1344,7 +1262,7 @@ onAssetChange(values: string | string[]): void {
         if (res.status == "success") {
           this.formSvc.aseetsInfoData = payload
           this.stepperService.markStepCompleted('assetsinfo');
-          this.patchAssetsData();
+          // this.patchAssetsData();
           this.stepperService.next();
         }
       }

@@ -46,7 +46,7 @@
     <div class="search-box">
       <img src="/assets/images/icons/search-normal.svg" alt="Search" class="search-icon" />
 
-      <input type="text" [(ngModel)]="searchTerm" placeholder="Search..." class="search-input" (input)="onSearchInput(searchTerm)" />
+      <input type="text" [(ngModel)]="searchTerm" placeholder="Search..." class="search-input" (input)="enableSearchEvent && onSearchInput(searchTerm)" />
 
       @if (searchTerm) {
       <img src="/assets/images/icons/close.svg" alt="Clear" class="clear-icon" (click)="searchTerm = ''" />

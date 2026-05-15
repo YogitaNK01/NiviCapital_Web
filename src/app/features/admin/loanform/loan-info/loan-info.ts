@@ -102,13 +102,27 @@ export class LoanInfo implements OnInit {
         this.stepperService.setLoanId(this.applicantId, this.applicationId, this.custName, this.custARN);
       }
     });
+ const currentUserKey = 'currentApplicantId';
+    const previousId = localStorage.getItem(currentUserKey);
 
+    if (previousId && previousId !== this.applicantId) {
+      Object.keys(localStorage).forEach(key => {
+        if (key.includes('_')) {  // cleaner approach
+          localStorage.removeItem(key);
+        }
+      });
+    }
+
+    localStorage.setItem(currentUserKey, this.applicantId);
     
 
   let data = this.loanformservice.loanInfoData;
 
   if (!data) {
-    const storedData = localStorage.getItem('loanInfoData');
+    // const storedData = localStorage.getItem('loanInfoData');
+     const key = `loanInfoData_${this.applicantId}`;
+      const storedData = localStorage.getItem(key);
+      
     if (storedData) {
       data = JSON.parse(storedData);
       this.loanformservice.loanInfoData = data;
@@ -212,8 +226,8 @@ export class LoanInfo implements OnInit {
         console.log(data);
         if (data.status == "success") {
           this.loanformservice.loanInfoData = input;
-
-          localStorage.setItem( 'loanInfoData',JSON.stringify(input)  );
+const key = `loanInfoData${this.applicantId}`;
+          localStorage.setItem( key,JSON.stringify(input)  );
 
           this.stepperService.markStepCompleted('loaninfo');
           this.stepperService.next();

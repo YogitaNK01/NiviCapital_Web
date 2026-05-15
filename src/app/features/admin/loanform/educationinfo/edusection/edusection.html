@@ -32,11 +32,11 @@
 
 
                     <app-dropdown [options]="filteredInstitutes" [placeholder]="'Select Institute Name'"
-                        [required]="!isPostGraduate" [searchable]="true" [label]="'Institution Name'" (searchChange)="filterInstitutes($event)"
-                        formControlName="institutename" (selectedValueChange)="SelectedInstitute($event);"
-                        name="institutename">
+                        [required]="!isPostGraduate" [searchable]="true" [label]="'Institution Name'"
+                        (searchChange)="filterInstitutes($event)" formControlName="institutename" [enableSearchEvent]="true"
+                        (selectedValueChange)="SelectedInstitute($event);" name="institutename">
                     </app-dropdown>
-                     
+
 
                     <div class="text-danger"
                         *ngIf="group.get('institutename')?.touched && group.get('institutename')?.invalid">
@@ -54,26 +54,26 @@
                             [required]="!isPostGraduate">
                         </app-inputfield>
 
-                        <ng-container *ngIf=" group.get('institutetitle')?.touched && group.get('institutetitle')?.invalid ">
-                                    <div class="text-danger"
-                                        *ngIf="group.get('institutetitle')?.errors?.['required']; else minLen">
-                                        Title is required
-                                    </div>
+                        <ng-container
+                            *ngIf=" group.get('institutetitle')?.touched && group.get('institutetitle')?.invalid ">
+                            <div class="text-danger"
+                                *ngIf="group.get('institutetitle')?.errors?.['required']; else minLen">
+                                Title is required
+                            </div>
 
-                                    <ng-template #minLen>
-                                        <div class="text-danger"
-                                            *ngIf="group.get('institutetitle')?.errors?.['minlength']; else maxLen">
-                                            Minimum 2 characters required
-                                        </div>
-                                    </ng-template>
+                            <ng-template #minLen>
+                                <div class="text-danger"
+                                    *ngIf="group.get('institutetitle')?.errors?.['minlength']; else maxLen">
+                                    Minimum 2 characters required
+                                </div>
+                            </ng-template>
 
-                                    <ng-template #maxLen>
-                                        <div class="text-danger"
-                                            *ngIf="group.get('institutetitle')?.errors?.['maxlength']">
-                                            Maximum 100 characters allowed
-                                        </div>
-                                    </ng-template>
-                                </ng-container>
+                            <ng-template #maxLen>
+                                <div class="text-danger" *ngIf="group.get('institutetitle')?.errors?.['maxlength']">
+                                    Maximum 100 characters allowed
+                                </div>
+                            </ng-template>
+                        </ng-container>
                     </div>
                 </div>
 
@@ -94,6 +94,7 @@
                     </div>
 
                 </div>
+
                 <div [ngClass]="{'col-3': isOtherLocation, 'col-4': !isOtherLocation  }">
                     <app-inputfield type="number" formControlName="per_cgpa" [required]="!isPostGraduate"
                         label="Percentage / CGPA" placeholder="Enter Percentage/CGPA" helpText="Help text"
@@ -115,9 +116,10 @@
 
 
                 </div>
+
                 <div [ngClass]="{'col-3': isOtherLocation, 'col-4': !isOtherLocation  }">
-                    <app-dropdown [options]="selectlocation" [placeholder]="'Select Location'"
-                        [required]="!isPostGraduate" [avatarUrl]="avatarUrl" formControlName="location"
+                    <app-dropdown [options]="filteredlocation" [placeholder]="'Select Location'"  (searchChange)="filtercities($event)" 
+                        [required]="!isPostGraduate" [avatarUrl]="avatarUrl" formControlName="location" [enableSearchEvent]="true"
                         [searchable]="true" (selectedValueChange)="SelectedCity($event);" [hasAvatar]="hasAvatar"
                         label="Location">
                     </app-dropdown>
@@ -130,23 +132,20 @@
                 </div>
                 <div class="col-3" *ngIf="isOtherLocation">
                     <div class="form-group">
-                        <app-inputfield formControlName="otherLocation" name="otherLocation"
-                            label="Other Location" placeholder="Enter Location Name"
-                            [required]="!isPostGraduate">
+                        <app-inputfield formControlName="otherLocation" name="otherLocation" label="Other Location"
+                            placeholder="Enter Location Name" [required]="!isPostGraduate">
                         </app-inputfield>
 
                         <div class="text-danger"
                             *ngIf="group.get('otherLocation')?.touched && group.get('otherLocation')?.invalid">
                             Location is required
                         </div>
-                        <div class="text-danger"
-                                            *ngIf="group.get('otherLocation')?.errors?.['minlength']">
-                                            Minimum 2 characters required
-                                        </div>
-                        <div class="text-danger"
-                                            *ngIf="group.get('otherLocation')?.errors?.['maxlength']">
-                                            Maximum 100 characters allowed
-                                        </div>
+                        <div class="text-danger" *ngIf="group.get('otherLocation')?.errors?.['minlength']">
+                            Minimum 2 characters required
+                        </div>
+                        <div class="text-danger" *ngIf="group.get('otherLocation')?.errors?.['maxlength']">
+                            Maximum 100 characters allowed
+                        </div>
                     </div>
 
                 </div>
@@ -337,7 +336,8 @@
 
                             <div class="other-doc-title">
 
-                                <app-inputfield label="Title" [required]="educationType !== 'POSTGRADUATE'" placeholder="Enter text here"
+                                <app-inputfield label="Title" [required]="educationType !== 'POSTGRADUATE'"
+                                    placeholder="Enter text here"
                                     (input)="main.restrictInput($event, 'text');slot.title = $any($event.target).value"
                                     [maxlength]="100">
                                 </app-inputfield>
@@ -371,8 +371,8 @@
                                     </div>
                                 </div>
                                 } @else {
-                                <app-uploadbtn [config]="basicConfig" [required]="educationType !== 'POSTGRADUATE'" label="Upload Document"
-                                    (fileChange)="onOtherFileChange($event, slot)">
+                                <app-uploadbtn [config]="basicConfig" [required]="educationType !== 'POSTGRADUATE'"
+                                    label="Upload Document" (fileChange)="onOtherFileChange($event, slot)">
                                 </app-uploadbtn>
                                 }
                             </div>

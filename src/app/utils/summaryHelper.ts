@@ -19,7 +19,7 @@ export class SummaryHelper {
       { label: 'Course Name', value: course.courseName || '' },
       { label: 'Course Start Date', value: course.startDate || '' },
       { label: 'Course End Date', value: course.endDate || '' },
-      { label: 'Do you have Assets?', value: course.endDate || '' },
+      { label: 'Do you have Assets?', value: (generalInfo.hasAssets ? 'Yes' : 'No')  },
       { label: 'Lending Partner', value: course.lendingPartner || '' }
     ];
 
@@ -96,7 +96,7 @@ export class SummaryHelper {
   const isOther = (name: string) =>
     name === 'Other Expense' || name === 'Other Expenses';
 
-  // ✅ Living
+  //  Living
   const otherLiving = livingRaw.filter((e: any) => isOther(e.name));
   const livingWithoutOther = livingRaw.filter((e: any) => !isOther(e.name));
 
@@ -108,7 +108,7 @@ export class SummaryHelper {
     });
   }
 
-  // ✅ Misc
+  //  Misc
   const otherMisc = miscRaw.filter((e: any) => isOther(e.name));
   const miscWithoutOther = miscRaw.filter((e: any) => !isOther(e.name));
 
@@ -301,6 +301,7 @@ export class SummaryHelper {
 
       tenth: COMMON_EDUCATION_FIELDS,
       twelfth: COMMON_EDUCATION_FIELDS,
+      diploma: COMMON_EDUCATION_FIELDS,
       bachelors: COMMON_EDUCATION_FIELDS,
       postgraduate: COMMON_EDUCATION_FIELDS,
 
@@ -316,20 +317,51 @@ export class SummaryHelper {
 
     };
 
+
+
     const getValue = (data: any, key: string) => {
-      if (!data) return '-';
+  if (!data) return '-';
 
-      const obj = Array.isArray(data) ? data[0] : data;
+  
+ if (typeof data === 'string') {
+    return key === 'offerLetter' ? data : '-';
+  }
 
-      if (!obj) return '-';
+  
+  // Handle array case
+  if (Array.isArray(data)) {
 
-      if (key.toLowerCase().includes('url')) {
-        return obj[key] || '-';
-      }
+    //  Handle marksheet
+    if (key === 'marksheetUrl') {
+      const marksheet = data.find(d => d.type === 'MARKSHEET');
+      return marksheet?.marksheetUrl || '-';
+    }
 
-      return obj[key] ?? '-';
-    };
+    //  Handle leaving certificate
+    if (key === 'leavingCertificateUrl') {
+      const lc = data.find(d => d.type === 'SCHOOL_LEAVING_CERT');
+      return lc?.marksheetUrl || '-'; 
+    }
 
+      if (key === 'otherDocumentUrl') {
+      const lc = data.find(d => d.type === 'OTHER');
+      return lc?.marksheetUrl || '-'; 
+    }
+
+    
+if (key === 'title') {
+      const otherDoc = data.find(d => d.type === 'OTHER');
+      return otherDoc?.title || '-';
+    }
+
+    //  Handle other fields (take first item)
+    const obj = data[0];
+    return obj?.[key] ?? '-';
+  }
+
+  // Handle single object
+  return data[key] ?? '-';
+};
 
     // Extract values for each section based on labels
     const values = {
@@ -342,6 +374,10 @@ export class SummaryHelper {
         label: field.label,
         value: getValue(educationDetails?.twelfth, field.key)
       })),
+      diploma: labels.diploma.map(field => ({
+        label: field.label,
+        value: getValue(educationDetails?.diploma, field.key)
+      })),
       bachelors: labels.bachelors.map(field => ({
         label: field.label,
         value: getValue(educationDetails?.bachelors, field.key)
@@ -350,15 +386,6 @@ export class SummaryHelper {
         label: field.label,
         value: getValue(educationDetails?.postgraduate, field.key)
       })),
-
-      //  twelfth: labels.twelfth.map(field => ({
-      //   label: field.label,
-      //   value: getValue(educationDetails?.twelfth, field.key)
-      // })),
-      //  twelfth: labels.twelfth.map(field => ({
-      //   label: field.label,
-      //   value: getValue(educationDetails?.twelfth, field.key)
-      // })),
       ieltsPte: labels.ieltsPte.map(field => ({
         label: field.label,
         value: getValue(educationDetails?.ieltsPte, field.key)

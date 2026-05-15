@@ -16,7 +16,7 @@ export class Loanstepper implements OnInit {
   applicationId: string = '';
   custName: string = '';
   custARN: string = '';
-completedEducationSections: Set<string> = new Set();
+  completedEducationSections: Set<string> = new Set();
   completedSteps: Set<number> = new Set();
 
   activeQualificationId!: any;
@@ -27,11 +27,11 @@ completedEducationSections: Set<string> = new Set();
       this.steps = steps;
       this.cdr.detectChanges(); // Force change detection
     });
-    
-const saved = sessionStorage.getItem('completedEducationSections');
-  if (saved) {
-    this.completedEducationSections = new Set(JSON.parse(saved));
-  }
+
+    const saved = sessionStorage.getItem('completedEducationSections');
+    if (saved) {
+      this.completedEducationSections = new Set(JSON.parse(saved));
+    }
 
   }
 
@@ -50,16 +50,22 @@ const saved = sessionStorage.getItem('completedEducationSections');
 
         // this.route.queryParams.subscribe(params => {
         //   if (params['qualificationlabel']) {
-            this.activeQualificationId = params['qualificationlabel']?? undefined;
+        // this.activeQualificationId = params['qualificationlabel'] ?? undefined;
+        this.activeQualificationId = this.normalizeQualification(
+  params['qualificationlabel'] || ''
+);
         //   }
         // });
 
       }
-      
- if (params['qualificationlabel']) {
-      this.activeQualificationId = params['qualificationlabel'];
-      this.cdr.detectChanges();
-    }
+
+      if (params['qualificationlabel']) {
+        // this.activeQualificationId = params['qualificationlabel'];
+        this.activeQualificationId = this.normalizeQualification(
+  params['qualificationlabel'] || ''
+);
+        this.cdr.detectChanges();
+      }
 
     });
     this.router.events.subscribe(() => {
@@ -119,16 +125,16 @@ const saved = sessionStorage.getItem('completedEducationSections');
   }
 
 
-  canNavigateTo(index: number): boolean {
+  canNavigateTo1(index: number): boolean {
     const currentIdx = this.currentIndex;
-const step = this.steps[index];
+    const step = this.steps[index];
     if (this.isCompleted(index)) {
       return true;
     }
 
-//  if (this.stepservice.isStepCompleted(step.route)) {
-//     return true;
-//   }
+    //  if (this.stepservice.isStepCompleted(step.route)) {
+    //     return true;
+    //   }
 
 
     if (index === currentIdx) {
@@ -137,6 +143,28 @@ const step = this.steps[index];
 
     return false;
   }
+  canNavigateTo(index: number): boolean {
+  const step = this.steps[index];
+
+  // ✅ allow if completed
+  if (this.stepservice.isStepCompleted(step.route)) {
+    return true;
+  }
+
+  // ✅ allow current step
+  if (index === this.currentIndex) {
+    return true;
+  }
+
+  // ✅ allow next step ONLY if previous is completed
+  const prevStep = this.steps[index - 1];
+  if (prevStep && this.stepservice.isStepCompleted(prevStep.route)) {
+    return true;
+  }
+
+  return false;
+}
+
 
   goToStep(route: string, index: number) {
     if (this.canNavigateTo(index)) {
@@ -157,32 +185,32 @@ const step = this.steps[index];
   isNextStep(index: number): boolean {
     return index === this.currentIndex + 1;
   }
- 
-isCompleted1(index: number): boolean {
-  const step = this.steps[index];
-  return this.stepservice.isStepCompleted(step.route);
-}
+
+  isCompleted(index: number): boolean {
+    const step = this.steps[index];
+    return this.stepservice.isStepCompleted(step.route);
+  }
 
   // In component.ts, temporarily add:
-  isCompleted(index: number): boolean {
+  isCompleted1(index: number): boolean {
     const result = index < this.currentIndex;
     return result;
   }
 
   isUpcoming(index: number): boolean {
-    
 
-  // const step = this.steps[index];
 
-  // if (this.stepservice.isStepCompleted(step.route)) {
-  //   return false;
-  // }
+    const step = this.steps[index];
+
+    if (this.stepservice.isStepCompleted(step.route)) {
+      return false;
+    }
 
     return index > this.currentIndex;
   }
 
-  isSubStepperDisabled(parentIndex: number, subIndex: number): boolean {
-   
+  isSubStepperDisabled1(parentIndex: number, subIndex: number): boolean {
+
 
     const parentStep = this.steps[parentIndex];
     if (!parentStep?.children) return false;
@@ -192,13 +220,13 @@ isCompleted1(index: number): boolean {
       parentStep.children[subIndex].label
     );
 
-    
- if (this.stepperService.isEducationStepCompleted(stepKey)) {
-    return false;
-  }
-if (this.activeQualificationId === stepKey) {
-    return false;
-  }
+
+    if (this.stepperService.isEducationStepCompleted(stepKey)) {
+      return false;
+    }
+    if (this.activeQualificationId === stepKey) {
+      return false;
+    }
     return true;
 
 
@@ -209,41 +237,81 @@ if (this.activeQualificationId === stepKey) {
     // return subIndex > activeIndex;
   }
 
+isSubStepperDisabled(parentIndex: number, subIndex: number): boolean {
+  
+  const parentStep = this.steps[parentIndex];
+  if (!parentStep?.children) return false;
 
+  const children = parentStep.children;
+
+  // find active index
+  const activeIndex = children.findIndex(
+    // (c: any) => this.normalizeQualification(c.label) === this.activeQualificationId
+    (c: any) => c.key === this.activeQualificationId
+  );
+
+  // ✅ allow all completed
+  const stepKey = children[subIndex].key;
+
+  if (this.stepperService.isEducationStepCompleted(stepKey)) {
+    return false;
+  }
+
+if (activeIndex === -1) {
+   return subIndex !== 0;
+  }
+
+  // ✅ allow current active
+  if (subIndex === activeIndex) {
+    return false;
+  }
+
+  // ✅ only allow previous ones
+  // return subIndex > activeIndex;
+
+  
+ if (subIndex < activeIndex) {
+    return false;
+  }
+
+  //  Future steps → disabled
+  return true;
+
+}
 
   openEducationSubStep(sub: any, event: Event) {
     event.stopPropagation();
-    const stepKey = this.normalizeQualification(sub.label);
+    const stepKey = sub.key;
     this.activeQualificationId = stepKey;
 
 
     // this.router.navigate([], {
-    
-this.router.navigate(
-    ['/loanform/educationinfo'],
-    {
 
-      // relativeTo: this.route,
-      queryParams: {
-        
-applicantId: this.applicantId,
-        applicationId: this.applicationId,
-        custName: this.custName,
-        custARN: this.custARN,
-        qualificationlabel: stepKey,
-        qualificationId: sub.id
-      },
-      queryParamsHandling: 'merge'
-    });
+    this.router.navigate(
+      ['/loanform/educationinfo'],
+      {
+
+        // relativeTo: this.route,
+        queryParams: {
+
+          applicantId: this.applicantId,
+          applicationId: this.applicationId,
+          custName: this.custName,
+          custARN: this.custARN,
+          qualificationlabel: stepKey,
+          qualificationId: sub.id
+        },
+        queryParamsHandling: 'merge'
+      });
 
   }
 
-isInsideEducation(): boolean {
-  return (
-    this.router.url.includes('educationDetails') ||
-    this.router.url.includes('educationinfo')
-  );
-}
+  isInsideEducation(): boolean {
+    return (
+      this.router.url.includes('educationDetails') ||
+      this.router.url.includes('educationinfo')
+    );
+  }
 
   normalizeQualification(name: string): string {
     const lower = name.toLowerCase();
@@ -253,9 +321,20 @@ isInsideEducation(): boolean {
     if (lower === '12th') return '12th';
 
     // Diploma
-    if (lower.includes('diploma') || (lower.includes('diploma') && lower.includes('10'))) return 'diploma10';
-    if (lower.includes('diploma') || (lower.includes('diploma') && lower.includes('12'))) return 'diploma12';
+    // if (lower.includes('diploma') || lower.includes('diploma10') || (lower.includes('diploma') && lower.includes('10'))) return 'diploma10';
+    // if (lower.includes('diploma') || lower.includes('diploma12') || (lower.includes('diploma') && lower.includes('12'))) return 'diploma12';
     //  if (lower.includes('diploma')) return 'diploma';
+    
+ //  Diploma AFTER 12th (check FIRST)
+  if (lower.includes('diploma') && lower.includes('12')) {
+    return 'diploma12';
+  }
+
+  //  Diploma AFTER 10th
+  if (lower.includes('diploma') && lower.includes('10')) {
+    return 'diploma10';
+  }
+
 
     if (lower.includes('others') && lower.includes('after 12th')) return 'others12';
     if (lower.includes('others') && lower.includes('diploma')) return 'othersdiploma';

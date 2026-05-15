@@ -100,7 +100,6 @@ export class Summaryinfo {
     { key: 'bankStatements', label: 'Bank Statement' },
     { key: 'itrs', label: 'ITR' },
     { key: 'otherIncome', label: 'Other Document Name' },
-    { key: 'otherBussinessincome', label: 'Other Business Income' },
 
   ];
   incomeDetails: any = {
@@ -111,12 +110,22 @@ export class Summaryinfo {
     itrs: [],
     otherIncome: []
   };
+   businessdocumentTypes = [
+    { key: 'business_finance_3_years', label: 'Year' },
+      { key: 'business_itr_3_years', label: 'ITR' },
+    { key: 'business_gst_1_year', label: '1 Year GST return' },
+    { key: 'business_bank_statement_1_year', label: '1 Year Bank Statement' },
+  
+    { key: 'otherBussinessincome', label: 'Other Document Name' },
+
+  ];
   incomeBusinessDetails: any = {
     editUrl: '',
     business_gst_1_year: [],
     business_itr_3_years: [],
     business_bank_statement_1_year: [],
     business_finance_3_years: [],
+    oneYearGstReturns:[],
     otherBussinessincome: []
   };
 
@@ -167,6 +176,7 @@ export class Summaryinfo {
   educationSections = [
     { title: '10th', key: 'tenth' },
     { title: '12th', key: 'twelfth' },
+     { title: 'Diploma', key: 'diploma' },
     { title: 'Undergraduate', key: 'bachelors' },
     { title: 'Postgraduate', key: 'postgraduate' },
   ];
@@ -185,11 +195,11 @@ export class Summaryinfo {
     this.route.queryParams.subscribe(params => {
       if (params['applicantId']) {
         this.applicationId = params['applicationId'];
-
+ this.getSummarydetails()
       }
     });
 
-    this.getSummarydetails()
+   
     this.buildForm();
   }
 
@@ -260,6 +270,7 @@ export class Summaryinfo {
             business_itr_3_years: [],
             business_bank_statement_1_year: [],
             business_finance_3_years: [],
+            oneYearGstReturns:[],
             otherBussinessincome: []
           };
 
@@ -333,7 +344,32 @@ export class Summaryinfo {
     return this.labelDisplayMap[key] || rawName;
   }
 
+hasArrayData(data: any, keys: string[]): boolean {
+  return keys.some(key => Array.isArray(data?.[key]) && data[key].length > 0);
+}
 
+hasIncomeData(): boolean {
+  const salariedKeys = [
+    'salarySlips',
+    'bankStatements',
+    'form16',
+    'itrs',
+    'otherIncome'
+  ];
+
+  const businessKeys = [
+    'business_gst_1_year',
+    'business_itr_3_years',
+    'business_bank_statement_1_year',
+    'business_finance_3_years',
+    'otherBussinessincome'
+  ];
+
+  return (
+    this.hasArrayData(this.incomeDetails, salariedKeys) ||
+    this.hasArrayData(this.incomeBusinessDetails, businessKeys)
+  );
+}
 
   submit() {
   }

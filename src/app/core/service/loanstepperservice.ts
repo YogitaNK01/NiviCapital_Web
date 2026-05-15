@@ -54,6 +54,12 @@ export class Loanstepperservice {
     if (saved !== null) {
       this.coursetypeug = JSON.parse(saved);
     }
+    
+const saved1 = localStorage.getItem(`completedSteps_${this.applicantId}`);
+  if (saved1) {
+    this.completedSteps = new Set(JSON.parse(saved1));
+  }
+
 
   }
   rebuildSteps() {
@@ -118,27 +124,90 @@ export class Loanstepperservice {
     //   return;
     // }
 
-    this.educationSubSteps = data.map(d => ({
-      id: d.qualificationId,
-      label: d.qualificationName.includes('Others') ? d.qualificationName : d.qualificationName.split('(')[0].trim()
-    }));
+    // this.educationSubSteps = data.map(d => ({
+      
+    //   id: d.qualificationId,
+    //   label: d.qualificationName.includes('Others') ? d.qualificationName : d.qualificationName.split('(')[0].trim()
+    // }));
 
-    this.educationSubSteps.push({ id: "0", label: "IELTS / PTE" })
-    this.educationSubSteps.push({ id: "1", label: "University Offer Letter" })
+    this.educationSubSteps = data.map(d => {
+  const name = d.qualificationName.toLowerCase();
+
+  let key = '';
+
+  if (name.includes('diploma') && name.includes('10')) {
+    key = 'diploma10';
+  } else if (name.includes('diploma') && name.includes('12')) {
+    key = 'diploma12';
+  } else if (name.includes('10th')) {
+    key = '10th';
+  } else if (name.includes('12th')) {
+    key = '12th';
+  }
+   else if (name.includes('others') && name.includes('12')) {
+    key = 'others12';
+
+  }
+   else if (name.includes('others') && name.includes('diploma')) {
+    key = 'othersdiploma';
+
+  }
+   else if (name.includes('Undergraduate') ) {
+    key = 'ug';
+
+  }
+   else if (name.includes('postgraduate') ) {
+    key = 'pg';
+
+  }
+  
+  return {
+    id: d.qualificationId,
+    label: d.qualificationName.split('(')[0].trim(), // UI label
+    key: key || d.qualificationName   
+  };
+});
+
+    this.educationSubSteps.push({ id: "0", label: "IELTS / PTE",key: "ielts" })
+    this.educationSubSteps.push({ id: "1", label: "University Offer Letter" ,key: "offerletter"})
 
     this.educationSubStepsInitialized = true;
     this.buildSteps();
   }
 
+
+private getEducationProgressKey(): string {
+  return `educationProgress_${this.applicantId}`;
+}
+
   markEducationSectionComplete(step: string) {
     this.completedEducationSections.add(step);
     // this.saveEducationProgress();
+    // sessionStorage.setItem(
+    //   'completedEducationSections',
+    //   JSON.stringify([...this.completedEducationSections])
+    // );
+
+if (this.applicantId) {
     sessionStorage.setItem(
-      'completedEducationSections',
+      this.getEducationProgressKey(),
       JSON.stringify([...this.completedEducationSections])
     );
+  }
 
   }
+  private restoreEducationProgress() {
+  if (!this.applicantId) return;
+
+  const saved = sessionStorage.getItem(this.getEducationProgressKey());
+
+  if (saved) {
+    this.completedEducationSections = new Set(JSON.parse(saved));
+  } else {
+    this.completedEducationSections = new Set();
+  }
+}
+
 
   getCompletedEducationSections(): Set<string> {
     return this.completedEducationSections;
@@ -160,24 +229,45 @@ export class Loanstepperservice {
 
   private saveEducationProgress() {
     sessionStorage.setItem(
-      this.EDUCATION_PROGRESS_KEY,
+      this.getEducationProgressKey(),
       JSON.stringify([...this.completedEducationSections])
     );
   }
 
-  private restoreEducationProgress() {
-    const saved = sessionStorage.getItem(this.EDUCATION_PROGRESS_KEY);
-    if (saved) {
-      this.completedEducationSections = new Set(JSON.parse(saved));
-    }
-  }
+ 
 
 
   //---------------all other steps --------------
 
+  private getCompletedStepsKey(): string {
+  return `completedSteps_${this.applicantId}`;
+}
+
   markStepCompleted(route: string) {
     this.completedSteps.add(route);
+    const key = `completedSteps_${this.applicantId}`;
+
+
+ if (this.applicantId) {
+    localStorage.setItem(
+      this.getCompletedStepsKey(),
+      JSON.stringify([...this.completedSteps])
+    );
   }
+
+  this.buildSteps();
+
+
+  }
+  restoreCompletedSteps() {
+  if (!this.applicantId) return;
+
+  const saved = localStorage.getItem(this.getCompletedStepsKey());
+
+  if (saved) {
+    this.completedSteps = new Set(JSON.parse(saved));
+  } else {
+    this}}
 
   isStepCompleted(route: string): boolean {
     return this.completedSteps.has(route);

@@ -254,6 +254,12 @@
                                             <div *ngIf="prop.get('location')?.errors?.['required']">
                                                 Location is required
                                             </div>
+                                             <div *ngIf="prop.get('location')?.errors?.['minlength']">
+                                                Minimum 2 characters required
+                                            </div>
+                                            <div *ngIf="prop.get('location')?.errors?.['maxlength']">
+                                                 Maximum 100 characters required
+                                            </div>
                                         </div>
                                     </div>
                                 </div>

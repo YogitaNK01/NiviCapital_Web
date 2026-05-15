@@ -53,6 +53,8 @@ export class Dropdown implements OnChanges, ControlValueAccessor {
   @Input() required: boolean = false;
 
   @Output() selectionChange = new EventEmitter<any>();
+
+  @Input() enableSearchEvent: boolean = false;
 @Output() searchChange = new EventEmitter<string>();
 
   @Input() multiSelect = false;
@@ -135,12 +137,25 @@ ngOnChanges(changes: SimpleChanges) {
   }
 
 
-  get filteredOptions(): DropdownOption[] {
+  get filteredOptions1(): DropdownOption[] {
     // if (!this.searchable || !this.searchTerm) return this.options;
     // const lower = this.searchTerm.toLowerCase();
     // return this.options.filter(o => o.label.toLowerCase().includes(lower));
      return this.options;
   }
+
+  get filteredOptions(): DropdownOption[] {
+
+  //  No filtering for normal dropdowns
+  if (this.enableSearchEvent) {
+    return this.options;
+  }
+
+  if (!this.searchable || !this.searchTerm) return this.options;
+    const lower = this.searchTerm.toLowerCase();
+    return this.options.filter(o => o.label.toLowerCase().includes(lower));
+}
+
 
 
 writeValue1(value: string | string[]): void {

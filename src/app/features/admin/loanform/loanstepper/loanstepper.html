@@ -26,9 +26,22 @@
         <div class="title text-body-1">{{ s.label }}</div>
 
 
-       
+<div *ngIf="s.children?.length" class="sub-stepper">
+  <div
+    *ngFor="let sub of s.children; let subIndex = index"
+    class="sub-step title text-body-1"
+    [ngClass]="{
+      active: activeQualificationId === normalizeQualification(sub.label) ,
+      disabled: isSubStepperDisabled(i, subIndex) &&  normalizeQualification(sub.label) !== activeQualificationId
 
-        <div *ngIf="s.children?.length" class="sub-stepper">
+    }"
+    (click)="!isSubStepperDisabled(i, subIndex) && openEducationSubStep(sub, $event)"
+  >
+    {{ sub.label }}
+  </div>
+</div>
+
+        <!-- <div *ngIf="s.children?.length" class="sub-stepper">
   <div
     *ngFor="let sub of s.children; let subIndex = index"
     class="sub-step title text-body-1"
@@ -40,7 +53,7 @@
   >
     {{ sub.label }}
   </div>
-</div>
+</div> -->
 
 
       </div>

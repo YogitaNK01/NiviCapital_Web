@@ -116,6 +116,25 @@ export class GeneralInfo implements OnInit {
     });
 
 
+
+    const currentUserKey = 'currentApplicantId';
+    const previousId = localStorage.getItem(currentUserKey);
+
+    if (previousId && previousId !== this.applicantId) {
+      Object.keys(localStorage).forEach(key => {
+        if (key.includes('_')) {  // cleaner approach
+          localStorage.removeItem(key);
+        }
+      });
+    }
+
+    localStorage.setItem(currentUserKey, this.applicantId);
+
+    // ✅ LOAD DATA HERE
+    // this.loadFromLocalStorage();
+
+
+
     this.states();
     this.getOccupationdetails();
     this.getEducationdetails();
@@ -165,6 +184,21 @@ export class GeneralInfo implements OnInit {
       console.log('Selected:', value);
       this.checkassetOnChange(value);
     });
+
+
+    let data = this.formSvc.generalInfoData;
+
+    if (!data) {
+      // const storedData = localStorage.getItem('generalInfoData');
+
+      const key = `generalInfoData_${this.applicantId}`;
+      const storedData = localStorage.getItem(key);
+
+      if (storedData) {
+        data = JSON.parse(storedData);
+        this.formSvc.generalInfoData = data;
+      }
+    }
 
     if (this.formSvc.generalInfoData) {
 
@@ -641,9 +675,9 @@ export class GeneralInfo implements OnInit {
           this.stepperService.next();
           // this.formSvc.generalInfoData = input;
           this.formSvc.generalInfoData = { ...input, coursetype: formdata.coursetype };
-
+          const key = `generalInfoData_${this.applicantId}`;
           localStorage.setItem(
-            'generalInfoData',
+            key,
             JSON.stringify(this.formSvc.generalInfoData)
           );
 
