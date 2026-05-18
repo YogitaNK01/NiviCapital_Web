@@ -110,6 +110,20 @@ export class Monthlyexpenditureinfo {
       this.applicantId = applicantId;
       this.applicationId = applicationId;
 
+      
+const key = `monthlyExpenditureData_${this.applicantId}`;
+    const saved = localStorage.getItem(key);
+
+    if (saved) {
+      this.formSvc.monthlyExpenditureData = JSON.parse(saved);
+    }
+
+    // ✅ AFTER restore → patch
+    if (this.formSvc.monthlyExpenditureData) {
+      this.patchMonthlyExpenditure();
+    }
+
+
     });
 
 
@@ -139,9 +153,7 @@ export class Monthlyexpenditureinfo {
     });
 
 
-    if (this.formSvc.monthlyExpenditureData) {
-      this.patchMonthlyExpenditure();
-    }
+   
 
     this.monthlyExpenditureForm.valueChanges
       .pipe(debounceTime(200))
@@ -171,18 +183,7 @@ export class Monthlyexpenditureinfo {
 
   }
 
-  onChange1(values: string | string[]): void {
-    this.selectedexpenditure = Array.isArray(values) ? values : [values];
 
-    this.openIndex = [];
-
-    this.selectedexpenditure.forEach(val => {
-      const index = this.accordions.findIndex(a => a.key === val);
-      if (index !== -1) {
-        this.openIndex.push(index);
-      }
-    });
-  }
 
   onChange(values: string | string[]): void {
 
@@ -335,14 +336,14 @@ export class Monthlyexpenditureinfo {
           //   control.push(this.createOther());
 
           // }
-           if (formKey === 'other') {
+          if (formKey === 'other') {
             control.clear();
           } else {
             control.clear();
 
           }
         }
-        
+
 
         this.cd.detectChanges();
       }
@@ -518,6 +519,7 @@ export class Monthlyexpenditureinfo {
 
     this.selectedexpenditure = [];
     this.other.clear();
+      this.monthlyExpenditureForm.setControl('other', this.fb.array([]));
 
     items.forEach((item: any) => {
 
@@ -584,7 +586,7 @@ export class Monthlyexpenditureinfo {
       }
 
       // ---------------- OTHER ----------------
-      this.monthlyExpenditureForm.setControl('other', this.fb.array([]));
+      // this.monthlyExpenditureForm.setControl('other', this.fb.array([]));
       if (item.expenseType === 'OTHER_RECURRING') {
         this.selectedexpenditure.push('Others');
 
@@ -595,7 +597,7 @@ export class Monthlyexpenditureinfo {
           customType: item.expenseTypeText,
           amount: item.amountInr
         });
-        this.other.clear()
+        // this.other.clear()
         this.other.push(group);
       }
       this.calculateGrandTotal();
@@ -614,7 +616,7 @@ export class Monthlyexpenditureinfo {
         this.openIndex.push(index);
       }
     });
-
+this.calculateGrandTotal();
     this.cd.detectChanges();
   }
 
@@ -712,9 +714,16 @@ export class Monthlyexpenditureinfo {
 
       if (groupName === 'utilities') {
         const map = {
-          utilityvalue1: 'UTILITIES',
-          utilityvalue2: 'UTILITIES'
-        } as const
+          utilityvalue1: {
+            type: 'UTILITIES',
+            text: 'Telephone and Internet bills'
+          },
+          utilityvalue2: {
+            type: 'UTILITIES',
+            text: 'Utilities (Electricity, Water, Gas)'
+          }
+        } as const;
+
 
         (Object.keys(map) as Array<keyof typeof map>).forEach(key => {
           const val = groupValue?.[key];
@@ -723,7 +732,9 @@ export class Monthlyexpenditureinfo {
             this.monthlyExpenditureForm.get(`utilities.${key}`)?.markAsTouched();
             invalid = true;
           } else {
-            addItem(map[key], val);
+            addItem(map[key].type, val, {
+              expenseTypeText: map[key].text
+            });
           }
         });
         return;
@@ -781,7 +792,13 @@ export class Monthlyexpenditureinfo {
         console.log("resp---", res);
         if (res.status == "success") {
           this.formSvc.monthlyExpenditureData = payload;
+          const key = `monthlyExpenditureData_${this.applicantId}`;
+localStorage.setItem(key, JSON.stringify(payload));
+
           this.stepperService.markStepCompleted('monthlyexpinfo');
+
+          this.stepperService.setStepData('monthlyexpinfo', this.monthlyExpenditureForm.getRawValue());
+
           this.stepperService.next();
         }
       }

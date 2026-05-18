@@ -138,7 +138,6 @@
                             <app-inputfield type="text" [required]="true" label="Cash In Hand (INR)" [required]="true"
                                 formControlName="cashinhand" placeholder="Enter Value" helpText="Help text"
                                 (input)="main.restrictInput($event, 'decimal');formatAmount('liquidAssets.cashinhand')"
-                                
                                 name="cashinhand">
                             </app-inputfield>
                             <div class="text-danger"
@@ -254,11 +253,11 @@
                                             <div *ngIf="prop.get('location')?.errors?.['required']">
                                                 Location is required
                                             </div>
-                                             <div *ngIf="prop.get('location')?.errors?.['minlength']">
+                                            <div *ngIf="prop.get('location')?.errors?.['minlength']">
                                                 Minimum 2 characters required
                                             </div>
                                             <div *ngIf="prop.get('location')?.errors?.['maxlength']">
-                                                 Maximum 100 characters required
+                                                Maximum 100 characters required
                                             </div>
                                         </div>
                                     </div>
@@ -434,7 +433,7 @@
                 <div class="row common-details-box d-flex flex-row ">
                     <div class="col">
                         <div class="form-group mb-3">
-                            <app-dropdown [options]="selectInvestments" [(selectedValue)]="selectedInvestmentIds" 
+                            <app-dropdown [options]="selectInvestments" [(selectedValue)]="selectedInvestmentIds"
                                 [placeholder]="'Select type'" [required]="true" [multiSelect]="true"
                                 (selectedValueChange)="onchangeinvestment($event)" [avatarUrl]="avatarUrl"
                                 [hasAvatar]="hasAvatar" [label]="'Select Type'">
@@ -454,49 +453,50 @@
                                 <app-inputfield type="text" [label]="inv.get('type')?.value + ' (INR)'"
                                     formControlName="value" placeholder="Enter value" [required]="true"
                                     (input)="handleAmountInput($event,'value',inv)" name="value">
-                                  
-                                </app-inputfield>
-                                  <div class="text-danger"
-                                        *ngIf="inv.get('value')?.touched && inv.get('value')?.invalid">
-                                        <div *ngIf="inv.get('value')?.errors?.['required']">
-                                            Amount is required
-                                        </div>
-                                        <div *ngIf="inv.get('value')?.errors?.['zeroNotAllowed']">
-                                            Amount cannot be zero  
-                                        </div>
 
+                                </app-inputfield>
+                                <div class="text-danger" *ngIf="inv.get('value')?.touched && inv.get('value')?.invalid">
+                                    <div *ngIf="inv.get('value')?.errors?.['required']">
+                                        Amount is required
                                     </div>
+                                    <div *ngIf="inv.get('value')?.errors?.['zeroNotAllowed']">
+                                        Amount cannot be zero
+                                    </div>
+
+                                </div>
                             </div>
                             <!-- </div> -->
                         </ng-container>
                         <ng-container *ngFor="let inv of investmentsArray.controls; let i = index" [formGroupName]="i">
+                            <div class="container-fluid">
+                                <div class="row mt-20" *ngIf="inv.get('type')?.value === 'Others'">
+                                    <div class="col-12 col-md-6">
 
-                            <div class="row mt-20" *ngIf="inv.get('type')?.value === 'Others'">
-                                <div class="col-12 col-md-6">
-
-                                    <app-inputfield type="text" label="Others" formControlName="name" [required]="true"
-                                        placeholder="Enter title" (input)="main.restrictInput($event, 'text')">
-                                    </app-inputfield>
+                                        <app-inputfield type="text" label="Others" formControlName="name"
+                                            [required]="true" placeholder="Enter title"
+                                            (input)="main.restrictInput($event, 'text')">
+                                        </app-inputfield>
 
 
 
-                                </div>
+                                    </div>
 
-                                <div class="col-12 col-md-6">
+                                    <div class="col-12 col-md-6">
 
-                                    <app-inputfield type="text" label="Amount (INR)" formControlName="value"
-                                        [required]="true" placeholder="Enter value" name="value"
-                                        (input)="handleAmountInput($event,'value',inv)">
-                                    </app-inputfield>
-                                    <div class="text-danger"
-                                        *ngIf="inv.get('value')?.touched && inv.get('value')?.invalid">
-                                        <div *ngIf="inv.get('value')?.errors?.['required']">
-                                            Amount is required
+                                        <app-inputfield type="text" label="Amount (INR)" formControlName="value"
+                                            [required]="true" placeholder="Enter value" name="value"
+                                            (input)="handleAmountInput($event,'value',inv)">
+                                        </app-inputfield>
+                                        <div class="text-danger"
+                                            *ngIf="inv.get('value')?.touched && inv.get('value')?.invalid">
+                                            <div *ngIf="inv.get('value')?.errors?.['required']">
+                                                Amount is required
+                                            </div>
+                                            <div *ngIf="inv.get('value')?.errors?.['zeroNotAllowed']">
+                                                Amount cannot be zero
+                                            </div>
+
                                         </div>
-                                        <div *ngIf="inv.get('value')?.errors?.['zeroNotAllowed']">
-                                            Amount cannot be zero  
-                                        </div>
-
                                     </div>
                                 </div>
                             </div>

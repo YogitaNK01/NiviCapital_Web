@@ -149,7 +149,8 @@
                         <!-- ================= ROW 1 ================= -->
                         <div class="container-fluid">
                             <!-- Bank Name -->
-                            <div *ngIf="loan.get('showBank')?.value" [class.col-12]="!isOtherSelected(loan)"
+                              <div class="row" *ngIf="loan.get('showBank')?.value">
+                            <div  [class.col-12]="!isOtherSelected(loan)"
                                 [class.col-6]="isOtherSelected(loan)">
                                 <div class="form-group">
 
@@ -174,7 +175,7 @@
                                     </div>
                                 </div>
                             </div>
-
+</div>
 
 
                             <!-- ================= ROW 2 (Only when Other) ================= -->

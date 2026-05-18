@@ -110,12 +110,12 @@ export class Summaryinfo {
     itrs: [],
     otherIncome: []
   };
-   businessdocumentTypes = [
+  businessdocumentTypes = [
     { key: 'business_finance_3_years', label: 'Year' },
-      { key: 'business_itr_3_years', label: 'ITR' },
+    { key: 'business_itr_3_years', label: 'ITR' },
     { key: 'business_gst_1_year', label: '1 Year GST return' },
     { key: 'business_bank_statement_1_year', label: '1 Year Bank Statement' },
-  
+
     { key: 'otherBussinessincome', label: 'Other Document Name' },
 
   ];
@@ -125,7 +125,7 @@ export class Summaryinfo {
     business_itr_3_years: [],
     business_bank_statement_1_year: [],
     business_finance_3_years: [],
-    oneYearGstReturns:[],
+    oneYearGstReturns: [],
     otherBussinessincome: []
   };
 
@@ -157,6 +157,7 @@ export class Summaryinfo {
 
 
   assetsSections: any[] = [];
+  isasset: boolean = false;
   liabilitiesSections: any[] = [];
 
   qualificationDetail: any = {
@@ -176,7 +177,7 @@ export class Summaryinfo {
   educationSections = [
     { title: '10th', key: 'tenth' },
     { title: '12th', key: 'twelfth' },
-     { title: 'Diploma', key: 'diploma' },
+    { title: 'Diploma', key: 'diploma' },
     { title: 'Undergraduate', key: 'bachelors' },
     { title: 'Postgraduate', key: 'postgraduate' },
   ];
@@ -187,6 +188,10 @@ export class Summaryinfo {
 
   };
 
+  filteredAccordions: any[] = [];
+  showIncome = false;
+  showAssets = false;
+
   constructor(private fb: FormBuilder, private formSvc: Loanformservice, private stepperService: Loanstepperservice, private cd: ChangeDetectorRef, private loanformservice: Loanformservice,
     private router: Router, private route: ActivatedRoute, public main: Main, private apiservice: Addcustomerservice) { }
 
@@ -195,13 +200,14 @@ export class Summaryinfo {
     this.route.queryParams.subscribe(params => {
       if (params['applicantId']) {
         this.applicationId = params['applicationId'];
- this.getSummarydetails()
+        this.getSummarydetails()
       }
     });
 
-   
+
     this.buildForm();
   }
+
 
 
   trackByKey(index: number, field: any) {
@@ -236,6 +242,27 @@ export class Summaryinfo {
           const generalInfoData = SummaryHelper.extractGeneralInfo(data.generalInfo);
           this.currentOccupation = generalInfoData.currentOccupation;
           this.courseDetailsFields = generalInfoData.courseDetailsFields;
+          this.isasset = this.courseDetailsFields.some((field: any) => field.label === 'Do you have Assets?' && field.value === 'Yes');
+
+          const occupation = this.currentOccupation?.toLowerCase();
+
+          this.showIncome =
+            occupation === 'employed' ||
+            occupation === 'self employed';
+
+          this.showAssets =
+            this.isasset === true &&
+            occupation !== 'housewife' &&
+            occupation !== 'housewife / homemaker';
+
+          this.filteredAccordions = this.accordions.filter(acc => {
+
+            if (acc.title === 'Income Details' && !this.showIncome) return false;
+
+            if (acc.title === 'Assets' && !this.showAssets) return false;
+
+            return true;
+          });
 
 
 
@@ -270,7 +297,7 @@ export class Summaryinfo {
             business_itr_3_years: [],
             business_bank_statement_1_year: [],
             business_finance_3_years: [],
-            oneYearGstReturns:[],
+            oneYearGstReturns: [],
             otherBussinessincome: []
           };
 
@@ -293,6 +320,8 @@ export class Summaryinfo {
 
 
           this.assetsSections = SummaryHelper.extractAssetsInfo(res.data.assets);
+          console.log("assetsSections",this.assetsSections);
+          
           this.totalassetsval = res.data.assets.totalAssets;
           this.accordions[6].amount = this.totalassetsval;
 
@@ -309,7 +338,13 @@ export class Summaryinfo {
           this.educationSections = this.educationSections.filter(section => {
             const fields = this.EducationInfoFields[section.key];
 
-            return fields?.some((field: any) => field.value && field.value !== '-');
+            // return fields?.some((field: any) => field.value && field.value !== '-');
+            return fields?.some((field: any) => {
+              if (field.key === 'marksheetUrl') {
+                return Array.isArray(field.value) && field.value.length > 0;
+              }
+              return field.value && field.value !== '-';
+            });
           });
 
 
@@ -344,31 +379,37 @@ export class Summaryinfo {
     return this.labelDisplayMap[key] || rawName;
   }
 
-hasArrayData(data: any, keys: string[]): boolean {
-  return keys.some(key => Array.isArray(data?.[key]) && data[key].length > 0);
-}
+  hasArrayData(data: any, keys: string[]): boolean {
+    return keys.some(key => Array.isArray(data?.[key]) && data[key].length > 0);
+  }
+  isArray(value: any): boolean {
+    return Array.isArray(value);
+  }
 
-hasIncomeData(): boolean {
-  const salariedKeys = [
-    'salarySlips',
-    'bankStatements',
-    'form16',
-    'itrs',
-    'otherIncome'
-  ];
+  hasIncomeData(): boolean {
+    const salariedKeys = [
+      'salarySlips',
+      'bankStatements',
+      'form16',
+      'itrs',
+      'otherIncome'
+    ];
 
-  const businessKeys = [
-    'business_gst_1_year',
-    'business_itr_3_years',
-    'business_bank_statement_1_year',
-    'business_finance_3_years',
-    'otherBussinessincome'
-  ];
+    const businessKeys = [
+      'business_gst_1_year',
+      'business_itr_3_years',
+      'business_bank_statement_1_year',
+      'business_finance_3_years',
+      'otherBussinessincome'
+    ];
 
-  return (
-    this.hasArrayData(this.incomeDetails, salariedKeys) ||
-    this.hasArrayData(this.incomeBusinessDetails, businessKeys)
-  );
+    return (
+      this.hasArrayData(this.incomeDetails, salariedKeys) ||
+      this.hasArrayData(this.incomeBusinessDetails, businessKeys)
+    );
+  }
+formatInr(value: number): string {
+  return new Intl.NumberFormat('en-IN').format(value);
 }
 
   submit() {

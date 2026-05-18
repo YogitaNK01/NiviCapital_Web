@@ -90,6 +90,28 @@ export class Incomeinfo {
       this.applicantId = applicantId;
       this.applicationId = applicationId;
 
+
+const stepData = this.stepperService.getStepData('incomeinfo');
+
+    if (stepData) {
+      this.uploadedrespfiles = stepData.uploadedFiles || [];
+      this.otherIncomeSlots = stepData.otherIncomeSlots || [];
+      this.otherBusinessSlots = stepData.otherBusinessSlots || [];
+
+      this.getAllDocuments();
+      this.restoreSlotsFromDocuments();
+      return; 
+    }
+
+      const key = `incomeDocs_${this.applicantId}`;
+      const stored = localStorage.getItem(key);
+
+      if (stored) {
+        this.uploadedrespfiles = JSON.parse(stored);
+        this.getAllDocuments();
+        this.restoreSlotsFromDocuments();
+      }
+
     });
 
     this.incomeForm = this.fb.group({
@@ -102,13 +124,7 @@ export class Incomeinfo {
     this.requiredBusinessDocs.forEach(k => this.uploadedFiles[k] = null);
 
 
-    // const stored = localStorage.getItem('income_uploaded_docs');
 
-    // if (stored) {
-    //   this.uploadedrespfiles = JSON.parse(stored);
-    //   this.getAllDocuments();
-    //   this.restoreSlotsFromDocuments(); // very important
-    // }
 
   }
 
@@ -121,18 +137,18 @@ export class Incomeinfo {
   }
 
   removeOtherDocument(type: 'other' | 'otherbusiness', id: number): void {
-     this.msgBox.open({
+    this.msgBox.open({
       title: 'Are you sure want to Remove',
       message: ``,
       showCancel: true,
       onOk: () => {
-       
+
 
         if (type === 'other') {
-      this.otherIncomeSlots = this.otherIncomeSlots.filter(slot => slot.id !== id);
-    } else {
-      this.otherBusinessSlots = this.otherBusinessSlots.filter(slot => slot.id !== id);
-    }
+          this.otherIncomeSlots = this.otherIncomeSlots.filter(slot => slot.id !== id);
+        } else {
+          this.otherBusinessSlots = this.otherBusinessSlots.filter(slot => slot.id !== id);
+        }
 
       }
     });
@@ -169,7 +185,7 @@ export class Incomeinfo {
     });
   }
 
-  
+
 
 
   onUploadStarted(
@@ -201,11 +217,8 @@ export class Incomeinfo {
         this.uploadedFiles = { ...  this.uploadedFiles }
 
 
-        // localStorage.setItem(
-        //   'income_uploaded_docs',
-        //   JSON.stringify(this.uploadedrespfiles)
-        // );
-
+        const key = `incomeDocs_${this.applicantId}`;
+        localStorage.setItem(key, JSON.stringify(this.uploadedrespfiles));
 
         this.getAllDocuments();
         // this.cd.detectChanges();
@@ -254,7 +267,7 @@ export class Incomeinfo {
     const doc = this.getDocumentByKey(key);
     return doc?.viewUrl || '';  // Use viewUrl!
   }
-  
+
 
   get allRequiredFilesUploaded1(): boolean {
     if (this.loanformservice.issalaried) {
@@ -265,43 +278,43 @@ export class Incomeinfo {
     // return this.requiredDocs.every(key => !!this.getDocumentByKey(key));
   }
 
-get allRequiredFilesUploaded(): boolean {
-  const requiredValid = this.loanformservice.issalaried
-    ? this.requiredDocs.every(k => !!this.getDocumentByKey(k))
-    : this.requiredBusinessDocs.every(k => !!this.getDocumentByKey(k));
+  get allRequiredFilesUploaded(): boolean {
+    const requiredValid = this.loanformservice.issalaried
+      ? this.requiredDocs.every(k => !!this.getDocumentByKey(k))
+      : this.requiredBusinessDocs.every(k => !!this.getDocumentByKey(k));
 
-  return this.isOtherSelected
-    ? requiredValid && this.isOtherDocumentValid()
-    : requiredValid;
-}
+    return this.isOtherSelected
+      ? requiredValid && this.isOtherDocumentValid()
+      : requiredValid;
+  }
 
 
 
-get isOtherSelected(): boolean {
-  if (this.loanformservice.issalaried) {
+  get isOtherSelected(): boolean {
+    if (this.loanformservice.issalaried) {
       return Array.isArray(this.otherIncomeSlots) && this.otherIncomeSlots.length > 0;
 
+    }
+    return Array.isArray(this.otherBusinessSlots) && this.otherBusinessSlots.length > 0;
   }
-return Array.isArray(this.otherBusinessSlots) && this.otherBusinessSlots.length > 0;
-}
 
 
-isOtherDocumentValid(): boolean {
+  isOtherDocumentValid(): boolean {
 
-  if (this.loanformservice.issalaried) {
-    return this.otherIncomeSlots.every(slot =>
+    if (this.loanformservice.issalaried) {
+      return this.otherIncomeSlots.every(slot =>
+        slot.title &&
+        slot.title.trim().length > 0 &&
+        !!this.getDocumentByKey(slot.title)
+      );
+    }
+
+    return this.otherBusinessSlots.every(slot =>
       slot.title &&
       slot.title.trim().length > 0 &&
       !!this.getDocumentByKey(slot.title)
     );
   }
-
-  return this.otherBusinessSlots.every(slot =>
-    slot.title &&
-    slot.title.trim().length > 0 &&
-    !!this.getDocumentByKey(slot.title)
-  );
-}
   getDocumentByKeyold(key: string): Document | null {
     if (!this.allDocuments?.length) return null;
 
@@ -333,9 +346,17 @@ isOtherDocumentValid(): boolean {
     }
 
     return (
-    this.allDocuments.find(doc => doc.title === key) || null
-  );
-    // return doc || null;
+      this.allDocuments.find(doc => doc.title === key) || null
+    );
+
+    // return this.allDocuments.find(doc =>
+    //     doc.type === key ||
+    //     doc.title === key ||
+    //     doc.fileName === key ||
+    //     doc.title?.includes(key) ||
+    //     doc.fileName?.includes(key)
+    //   ) || null;
+
   }
 
 
@@ -392,16 +413,40 @@ isOtherDocumentValid(): boolean {
           }
           return true;
         });
+        const keyLocal = `incomeDocs_${this.applicantId}`;
+        localStorage.setItem(keyLocal, JSON.stringify(this.uploadedrespfiles));
+
         this.cd.detectChanges();
 
-        // localStorage.setItem(
-        //   'income_uploaded_docs',
-        //   JSON.stringify(this.uploadedrespfiles)
-        // );
+
 
       }
     });
   }
+  restoreSlotsFromDocuments() {
+    let counter = 0;
+
+    this.allDocuments.forEach(doc => {
+      if (doc.type === 'OTHER') {
+        counter++;
+
+        if (this.loanformservice.issalaried) {
+          this.otherIncomeSlots.push({
+            id: counter,
+            key: `other_income_${counter}`,
+            title: doc.title || ''
+          });
+        } else {
+          this.otherBusinessSlots.push({
+            id: counter,
+            key: `other_business_${counter}`,
+            title: doc.title || ''
+          });
+        }
+      }
+    });
+  }
+
   private rebuildDocumentMap(): void {
     const docs = this.allDocuments || [];
     this.documentMap = docs.reduce((map, doc) => {
@@ -463,7 +508,21 @@ isOtherDocumentValid(): boolean {
 
     console.log('allRequiredFilesUploaded:', this.allRequiredFilesUploaded);
     if (this.allRequiredFilesUploaded) {
-  this.stepperService.markStepCompleted('incomeinfo');
+
+      const stepData = {
+        uploadedFiles: this.uploadedrespfiles,
+        otherIncomeSlots: this.otherIncomeSlots,
+        otherBusinessSlots: this.otherBusinessSlots
+      };
+
+      this.loanformservice.incomeInfoData = stepData;
+
+
+      const key = `IncomeInfoData_${this.applicantId}`;
+
+
+      this.stepperService.setStepData('incomeinfo', this.loanformservice.incomeInfoData);
+      this.stepperService.markStepCompleted('incomeinfo');
       this.stepperService.next();
     }
   }

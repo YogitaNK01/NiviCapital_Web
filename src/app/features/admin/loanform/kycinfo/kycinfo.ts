@@ -208,6 +208,8 @@ this.stepperService.rebuildSteps();
    this.passportmissing = false;
      
     if (this.passportUrl) {
+      this.stepperService.markStepCompleted('kycinfo');
+     
     this.stepperService.next();
     return;
   }
@@ -308,7 +310,8 @@ this.stepperService.rebuildSteps();
         });
         this.kycdocumentsForm.disable();
         console.log(this.kycdocumentsForm.get('dob')?.disabled);
-         this.stepperService.markStepCompleted('genralinfo');
+         this.stepperService.setStepData('kycinfo', formdata);
+         
       },
       error: (err) => {
         console.error("error msg", err);

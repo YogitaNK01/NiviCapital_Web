@@ -113,6 +113,13 @@ export class Liabilitiesinfo {
       this.applicantId = applicantId;
       this.applicationId = applicationId;
 
+       const key = `liabilitiesinfoData_${this.applicantId}`;
+    const savedData = localStorage.getItem(key);
+
+    if (savedData) {
+      this.formSvc.liabilitiesInfoData = JSON.parse(savedData);
+    }
+
     });
 
     this.liabilityForm = this.fb.group({
@@ -123,9 +130,7 @@ export class Liabilitiesinfo {
 
     });
 
-    if (this.formSvc.liabilitiesInfoData) {
-
-    }
+   
     this.liabilityForm.get('loans')?.valueChanges.subscribe(() => {
       this.calculateGrandTotal();
     });
@@ -453,7 +458,7 @@ export class Liabilitiesinfo {
       }, {});
       console.log("this.liabilityCodeMap--", this.liabilityCodeMap);
 
-      // this.patchLiabilitiesData();
+      
     });
   }
   alllibilitiy_type() {
@@ -485,6 +490,11 @@ export class Liabilitiesinfo {
         return acc;
       }, {});
     });
+
+    if(this.formSvc.liabilitiesInfoData){
+      this.patchLiabilitiesData();
+    }
+    this.cd.detectChanges();
   }
 
   formatTitle(text: string): string {
@@ -909,84 +919,11 @@ export class Liabilitiesinfo {
       c.get('MonthlyRepaymentLimit')?.valid
     );
   }
-  get isNextDisabled1(): boolean {
-
-    if (!this.selectedliabilities?.length) {
-      return true;
-    }
-
-    // normalize labels
-    const labels = this.selectedliabilityLabel
-      ?.split(',')
-      .map(l =>
-        l
-          .replace(/\(.*?\)/g, '')   // remove (BNPL)
-          .trim()
-          .toLowerCase()
-      ) || [];
-
-    // Existing Loans
-    if (labels.includes('existing loans')) {
-      if (
-        this.loans.length > 0 &&
-        this.loans.controls.some(ctrl => ctrl.valid)
-      ) {
-        return false;
-      }
-    }
-
-    // Credit Card
-    if (labels.includes('credit card outstanding')) {
-      if (
-        this.creditcard.length > 0 &&
-        this.creditcard.controls.some(ctrl => ctrl.valid)
-      ) {
-        return false;
-      }
-    }
-
-    // BNPL
-    if (labels.includes('buy now pay later')) {
-      if (
-        this.bnpl.length > 0 &&
-        this.bnpl.controls.some(ctrl => ctrl.valid)
-      ) {
-        return false;
-      }
-    }
-
-    // Other Liabilities
-    if (labels.includes('other liabilities')) {
-      if (
-        this.other.length > 0 &&
-        this.other.controls.some(ctrl => ctrl.valid)
-      ) {
-        return false;
-      }
-    }
-
-    return true; // disable if nothing valid
-  }
+ 
 
 
   // 1. onLoanChange - COMPLETE REBUILD
-  onLoanChange1(values: string | string[]): void {
-    const groups = Array.isArray(values) ? values : [values];
-    this.selectedloantype = groups;
-
-    // COMPLETE CLEAR AND REBUILD
-    const loanArray = this.loans;
-    loanArray.clear();
-
-    groups.forEach(typeId => {
-      const selectedOption = this.loanoptions.find(opt => opt.value === typeId);
-      const loanGroup = this.createLoan(selectedOption?.label || typeId);
-      loanGroup.get('showBank')?.setValue(true);
-      loanArray.push(loanGroup);
-    });
-
-    this.cd.detectChanges();
-  }
+ 
   onLoanChange(values: string | string[]): void {
     const groups = Array.isArray(values) ? values : [values];
 
@@ -1126,38 +1063,7 @@ export class Liabilitiesinfo {
   }
 
   // 4. onChange - Handle Existing Loans properly
-  onChange11(values: string | string[]): void {
-    const selectedCodes = Array.isArray(values) ? values : [values];
-
-    this.loans.clear();
-    this.creditcard.clear();
-    this.bnpl.clear();
-    this.other.clear();
-
-    this.selectedloantype = [];
-
-    selectedCodes.forEach(code => {
-      if (code.includes('Existing') || code === 'EXISTING_LOAN') {
-        this.loans.push(this.createLoan(''));
-      }
-      if (code.includes('Credit') || code === 'CREDIT_CARD_OUTSTANDING') {
-        this.creditcard.push(this.createCreditcard());
-      }
-      if (code.includes('BNPL') || code === 'BNPL') {
-        this.bnpl.push(this.createBNPL());
-      }
-      if (code.includes('Other') || code === 'OTHER_LIABILITY') {
-        this.other.push(this.createOther());
-      }
-    });
-
-    this.selectedliabilities = selectedCodes;
-    this.openIndex = selectedCodes.map(code =>
-      this.accordions.findIndex(acc => acc.key === code || acc.title.includes(code))
-    ).filter(i => i !== -1);
-
-    this.cd.detectChanges();
-  }
+  
   onChange(values: string | string[]): void {
     const selectedCodes = Array.isArray(values) ? values : [values];
 
@@ -1376,7 +1282,10 @@ export class Liabilitiesinfo {
         console.log("resp---", res);
         if (res.status == "success") {
           this.formSvc.liabilitiesInfoData = payload
+           const key = `liabilitiesinfoData_${this.applicantId}`;
+localStorage.setItem(key, JSON.stringify(payload));
           this.stepperService.markStepCompleted('liabilitiesinfo');
+            this.stepperService.setStepData('liabilitiesinfo', this.liabilityForm.getRawValue());
           this.stepperService.next();
         }
       },

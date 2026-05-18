@@ -86,6 +86,12 @@ export class Estimateexpense {
       this.applicantId = applicantId;
       this.applicationId = applicationId;
 
+       const key = `estimateExpenseData_${this.applicantId}`;
+    const savedData = localStorage.getItem(key);
+
+    if (savedData) {
+      this.loanformservice.estExpenseInfoData = JSON.parse(savedData);
+    }
     });
 
     this.expenseForm = this.fb.group({
@@ -99,9 +105,7 @@ export class Estimateexpense {
     this.livingexp();
     this.miscgexp();
 
-      if (this.loanformservice.estExpenseInfoData) {
-      this.patchExpenseData()
-    }
+    
 
     this.expenseForm.get('tutionfees')?.valueChanges.subscribe(() => {
       this.calculateINRtoAUD();
@@ -165,6 +169,9 @@ export class Estimateexpense {
         code: s.code
       }));
 
+        if (this.loanformservice.estExpenseInfoData) {
+      this.patchExpenseData()
+    }
     });
   }
 
@@ -180,7 +187,9 @@ export class Estimateexpense {
         label: s.name,
         code: s.code
       }));
-
+  if (this.loanformservice.estExpenseInfoData) {
+      this.patchExpenseData()
+    }
     });
   }
 
@@ -227,15 +236,26 @@ export class Estimateexpense {
       );
       group.get('amountAUD')?.disable();
 
-      group.get('amountINR')?.valueChanges.subscribe(() => {
-        this.validateAmount(group);
-      });
+      // group.get('amountINR')?.valueChanges.subscribe(() => {
+      //   this.validateAmount(group);
+      // });
 
-      group.get('securityfrequency')?.valueChanges.subscribe(() => {
-        this.validateAmount(group); 
+      // group.get('securityfrequency')?.valueChanges.subscribe(() => {
+      //   this.validateAmount(group); 
 
-      })
+      // })
     });
+    const amountCtrl = group.get('amountINR');
+const frequencyCtrl = group.get('securityfrequency');
+
+amountCtrl?.valueChanges.subscribe(() => {
+  this.validateAmount(group);
+});
+
+frequencyCtrl?.valueChanges.subscribe(() => {
+  this.validateAmount(group);
+});
+``
 
     return group;
 
@@ -671,11 +691,16 @@ export class Estimateexpense {
     if (!data) return;
 
     this.expenseForm.patchValue({
-      tutionfees: this.formatIndian(data.tuitionFeesInr)
+      tutionfees: this.formatIndian(data.tuitionFeesInr),
+      tutionfeesAUD: this.formatAustralian(data.tuitionFeesInr / 62.5)
+
     });
 
     this.livingexpenses.clear();
     this.miscexpenses.clear();
+
+this.selectedCategories = [];
+  this.selectedmisCategories = [];
 
     data.items.forEach((item: any) => {
 
@@ -698,7 +723,7 @@ export class Estimateexpense {
         }
       }
 
-      // 👉 Misc
+      //  Misc
       if (item.miscellaneousExpenseItemMasterId) {
 
         const group = this.createmiscExpense(item.miscellaneousExpenseItemMasterId);
@@ -718,8 +743,12 @@ export class Estimateexpense {
 
     });
 
+this.selectedCategories = [...new Set(this.selectedCategories)];
+  this.selectedmisCategories = [...new Set(this.selectedmisCategories)];
+
     this.calculateINRtoAUD();
     this.calculateGrandTotal();
+     this.cd.detectChanges();
   }
   capitalize(val: string): string {
     return val.charAt(0).toUpperCase() + val.slice(1).toLowerCase();
@@ -789,7 +818,10 @@ export class Estimateexpense {
         console.log("resp---", res);
         if (res.status == "success") {
           this.loanformservice.estExpenseInfoData = input;
+           const key = `estimateExpenseData_${this.applicantId}`;
+          localStorage.setItem(key, JSON.stringify(this.loanformservice.estExpenseInfoData));
           this.stepperService.markStepCompleted('expense');
+           this.stepperService.setStepData('expense', formdata);
           this.stepperService.next();
         }
       }

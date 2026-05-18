@@ -242,55 +242,55 @@ export class Additionalinfo implements OnInit {
       f_fname: data.fatherFirstName,
       f_mname: data.fatherMiddleName,
       f_lname: data.fatherLastName,
-       fatherNoMiddleName: data.fatherNoMiddleName,
+      fatherNoMiddleName: data.fatherNoMiddleName,
       m_fname: data.motherFirstName,
       m_mname: data.motherMiddleName,
       m_lname: data.motherLastName,
       motherNoMiddleName: data.motherNoMiddleName,
-     
-      
+
+
 
     });
-    
-this.isfathermiddlename = !!data.fatherNoMiddleName;
-  this.ismothermiddlename = !!data.motherNoMiddleName;
-  this.isspousemiddlename = !!data.spouseNoMiddleName;
 
-  this.restoreMiddleNameState();
+    this.isfathermiddlename = !!data.fatherNoMiddleName;
+    this.ismothermiddlename = !!data.motherNoMiddleName;
+    this.isspousemiddlename = !!data.spouseNoMiddleName;
+
+    this.restoreMiddleNameState();
 
   }
 
-private restoreMiddleNameState() {
-  const form = this.additionalinfoForm;
+  private restoreMiddleNameState() {
+    const form = this.additionalinfoForm;
 
-  if (form.get('motherNoMiddleName')?.value) {
-    form.get('m_mname')?.reset();
-    form.get('m_mname')?.disable();
+    if (form.get('motherNoMiddleName')?.value) {
+      form.get('m_mname')?.reset();
+      form.get('m_mname')?.disable();
+    }
+
+    if (form.get('fatherNoMiddleName')?.value) {
+      form.get('f_mname')?.reset();
+      form.get('f_mname')?.disable();
+    }
+
+    if (form.get('spouseNoMiddleName')?.value) {
+      form.get('s_mname')?.reset();
+      form.get('s_mname')?.disable();
+    }
   }
 
-  if (form.get('fatherNoMiddleName')?.value) {
-    form.get('f_mname')?.reset();
-    form.get('f_mname')?.disable();
+  onMotherNoMiddleNameChange(checked: boolean) {
+    const ctrl = this.additionalinfoForm.get('m_mname');
+    checked ? ctrl?.disable() : ctrl?.enable();
   }
-
-  if (form.get('spouseNoMiddleName')?.value) {
-    form.get('s_mname')?.reset();
-    form.get('s_mname')?.disable();
+  onFatherNoMiddleNameChange(checked: boolean) {
+    const ctrl = this.additionalinfoForm.get('f_mname');
+    checked ? ctrl?.disable() : ctrl?.enable();
   }
-}
- 
-onMotherNoMiddleNameChange(checked: boolean) {
-  const ctrl = this.additionalinfoForm.get('m_mname');
-  checked ? ctrl?.disable() : ctrl?.enable();
-}
-onFatherNoMiddleNameChange(checked: boolean) {
-  const ctrl = this.additionalinfoForm.get('f_mname');
-  checked ? ctrl?.disable() : ctrl?.enable();
-}
-onSpouseNoMiddleNameChange(checked: boolean) {
-  const ctrl = this.additionalinfoForm.get('s_mname');
-  checked ? ctrl?.disable() : ctrl?.enable();
-}
+  onSpouseNoMiddleNameChange(checked: boolean) {
+    const ctrl = this.additionalinfoForm.get('s_mname');
+    checked ? ctrl?.disable() : ctrl?.enable();
+  }
 
 
   get canProceed(): boolean {
@@ -368,7 +368,10 @@ onSpouseNoMiddleNameChange(checked: boolean) {
         console.log(res);
         if (res.status == "success") {
           this.formSvc.additionalInfoData = input;
+          const key = `additionalinfoData_${this.applicantId}`;
+          localStorage.setItem(key, JSON.stringify(this.formSvc.additionalInfoData));
           this.stepperService.markStepCompleted('additionalinfo');
+          this.stepperService.setStepData('additionalinfo', formdata);
           this.stepperService.next();
         }
 

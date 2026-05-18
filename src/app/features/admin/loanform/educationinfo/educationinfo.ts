@@ -1034,6 +1034,28 @@ export class Educationinfo implements OnInit {
 
       let fileIndex = reqDocs.length;
 
+     
+
+//  ADD EXTRA MARKSHEETS (after required ones)
+Object.keys(this.uploadedFiles)
+  .filter(key =>
+    key.startsWith(`${step}_marksheet_`)
+  )
+  .forEach(key => {
+    const file = this.uploadedFiles[key];
+    if (!file) return;
+
+    // ✅ avoid duplicating required marksheet1
+    const isRequired = key.includes('marksheet1') || key.includes('marksheet_0');
+    if (isRequired) return;
+
+    fd.append(`files[${fileIndex}].type`, 'MARKSHEET');
+    fd.append(`files[${fileIndex}].file`, file);
+
+    fileIndex++;
+  });
+
+
       Object.keys(this.uploadedFiles)
         .filter(key => key.startsWith(`${step}_other_`))
         .forEach(key => {
