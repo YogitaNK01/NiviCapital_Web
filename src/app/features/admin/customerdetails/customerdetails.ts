@@ -159,7 +159,7 @@ export class Customerdetails {
     var result: any;
     try {
       result = await this.aes.encrypt(this.kycData[0].aadhaarNumber);
-      console.log('✅ Encrypted Aadhaar:', result.ciphertext);
+      console.log('  Encrypted Aadhaar:', result.ciphertext);
       console.log('🔑 IV (Base64):', result.iv);
     } catch (error) {
       console.error('Encryption failed:', error);

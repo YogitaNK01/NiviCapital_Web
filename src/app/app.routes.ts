@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 import { Layout } from './core/layout/layout';
+import { authguardChildGuard, authguardGuard } from './core/guards/authguard-guard';
 
 export const routes: Routes = [
 
@@ -11,6 +12,9 @@ export const routes: Routes = [
 
     path: '',
     component: Layout,
+    canActivate: [authguardGuard],
+    canActivateChild: [authguardChildGuard],
+
     children: [
       {
         path: 'systemdesign',

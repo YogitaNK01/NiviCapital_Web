@@ -57,7 +57,7 @@ export class Incomeinfo {
   handleresponse: any;
 
   requiredDocs = ['salary1', 'salary2', 'salary3', 'Form16', 'oneyearbankstatement', 'ay1', 'ay2', 'ay3'];   // only required ones
-  requiredBusinessDocs = ['businessITR1', 'businessITR2', 'businessITR3', 'businessGST', 'businessBankstatement'];   // only required ones
+  requiredBusinessDocs = ['year1','year2','year3','businessITR1', 'businessITR2', 'businessITR3', 'businessGST', 'businessBankstatement'];   // only required ones
 
   optionalDocs = ['other'];
   uploadedFiles: Record<string, File | null> = {};

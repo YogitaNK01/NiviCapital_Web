@@ -1,5 +1,12 @@
 import { COMMON_EDUCATION_FIELDS } from "../shared/config/custdetails.config";
 
+
+type Field = {
+  label: string;
+  value: any;
+  isCurrency?: boolean; // ✅ optional property
+};
+
 export class SummaryHelper {
 
 
@@ -20,13 +27,13 @@ export class SummaryHelper {
 
       { label: 'Course Type', value: course.courseType },
       // { label: 'Duration (Years)', value: course.durationYears != null ? course.durationYears : '' },
-      { label: 'Course Name', value: course.courseName  },
+      { label: 'Course Name', value: course.courseName },
       { label: 'Other Course Name', value: course.otherCourseName || '' },
 
-      { label: 'Course Start Date', value: course.startDate  },
-      { label: 'Course End Date', value: course.endDate  },
+      { label: 'Course Start Date', value: course.startDate },
+      { label: 'Course End Date', value: course.endDate },
       { label: 'Do you have Assets?', value: (generalInfo.hasAssets ? 'Yes' : 'No') },
-      { label: 'Lending Partner', value: course.lendingPartner  }
+      { label: 'Lending Partner', value: course.lendingPartner }
     ].filter(field => field.value !== null && field.value !== '');
 
     return { currentOccupation, courseDetailsFields };
@@ -196,8 +203,63 @@ export class SummaryHelper {
   }
 
 
+static extractKYCInfo(kyc: any) {
+  if (!kyc) {
+    return {
+      identityAndResidency: [],
+      permanentAddress: [],
+      currentAddress: [],
+      otherAddress:[]
+    };
+  }
 
-  static extractKYCInfo(kycInfo: any) {
+  const permanent = kyc.permanentAddress || {};
+  const current = kyc.currentAddress || {};
+  const other = kyc.otherAddress || {};
+
+  const isPermanentPreferred = permanent.isPreferredAddress === 1;
+
+  const addressToShow = isPermanentPreferred ? other : current;
+
+  return {
+    identityAndResidency: this.mapIdentity(kyc.identityAndResidency),
+
+    permanentAddress: this.mapAddress(permanent),
+    
+ currentAddress: isPermanentPreferred
+      ? this.mapAddress(other)   
+      : this.mapAddress(current)
+
+  };
+}
+static mapIdentity(identity: any) {
+  if (!identity) return [];
+
+  return [
+   { label: 'Aadhaar Number',  value: identity.aadhaarNumber },
+        { label: 'Aadhaar Card Front',  value: identity.aadhaarFrontUrl },
+        { label: 'Aadhaar Card Back',  value: identity.aadhaarBackUrl },
+        { label: 'PAN Number',  value: identity.panNumber },
+        { label: 'PAN Card',  value: identity.panCardUrl },
+        { label: 'Passport',  value: identity.passportNumber },
+        { label: 'Passport ',  value: identity.passportUrl },
+        { label: 'Date Of Birth',  value: identity.dob }
+  ];
+}
+static mapAddress(addr: any) {
+  if (!addr) return [];
+
+  return [
+    { label: 'Address Line 1', value: addr.addressLine },
+    { label: 'Address Line 2', value: addr.addressLine1 },
+    { label: 'Address Line 3', value: addr.addressLine2 },
+    { label: 'City', value: addr.city },
+    { label: 'State', value: addr.state },
+    { label: 'Country', value: addr.country },
+    { label: 'Pincode', value: addr.pincode }
+  ];
+}
+  static extractKYCInfo1(kycInfo: any) {
     const labels = {
       identityAndResidency: [
         { label: 'Aadhaar Number', key: 'aadhaarNumber' },
@@ -255,7 +317,7 @@ export class SummaryHelper {
         label: field.label,
         value: getValue(kycInfo?.identityAndResidency, field.key)
       })).filter(field => field.value && field.value !== ''),
-      
+
       permanentAddress: labels.permanentAddress.map(field => ({
         label: field.label,
         value: getValue(kycInfo?.permanentAddress, field.key)
@@ -281,7 +343,8 @@ export class SummaryHelper {
         { label: 'Last Qualification', key: 'lastQualification' },
         { label: 'Other Qualification', key: 'otherQualification' },
         { label: 'Last Institution Name', key: 'lastInstitution' },
-        { label: 'Other Institution Name', key: 'otherInstitutionName' },
+        { label: 'Other Institution ', key: 'otherInstitutionName' },
+        { label: 'Other Institution Name', key: 'InstitutionName' },
 
       ],
     };
@@ -341,14 +404,14 @@ export class SummaryHelper {
       // Handle array case
       if (Array.isArray(data)) {
 
-       
+
 
         if (key === 'marksheetUrl') {
 
-          
- if (data[0]?.type === 'UPLOAD_CERTIFICATE') {
-    return data[0]?.marksheetUrl || '-';
-  }
+
+          if (data[0]?.type === 'UPLOAD_CERTIFICATE') {
+            return data[0]?.marksheetUrl || '-';
+          }
 
           const marksheets = data
             .filter(d => d.type === 'MARKSHEET')
@@ -441,12 +504,26 @@ export class SummaryHelper {
     if (liabilities.existingLoans?.length) {
       sections.push({
         sectionLabel: 'Existing Loans',
-        cards: liabilities.existingLoans.map((loan: any, i: number) => ({
+        cards: liabilities.existingLoans.map((loan: any, i: number) => {
           // title: `Home Loan ${i + 1}`,
-          title: `${loan.liabilityTypeText || 'Loan'} Loan`,
+          // title: `${loan.liabilityTypeText || 'Loan'} Loan`,
 
-          fields: [
-            { label: 'Bank / Lender', value: loan.bankLender },
+          const fields: Field[] = [
+            {
+              label: 'Bank / Lender',
+              // value: loan.bankLender
+              value: loan.bankLender === 'Other' ? 'Other' : loan.bankLender
+            },
+          ]
+
+          if (loan.bankLender === 'Other') {
+            fields.push({
+              label: 'Other Bank Name',
+              value: loan.title
+            });
+          }
+
+          fields.push(
             {
               label: 'Outstanding Balance (INR)',
               value: loan.outstandingBalanceInr,
@@ -460,9 +537,16 @@ export class SummaryHelper {
             {
               label: 'Remaining Tenure (Months)',
               value: loan.remainingTenureMonths
-            }
-          ]
-        }))
+            });
+
+          // ]
+
+          return {
+            title: `${loan.liabilityTypeText || 'Loan'} Loan`,
+            fields
+          };
+
+        })
       });
     }
 
@@ -470,10 +554,22 @@ export class SummaryHelper {
     if (liabilities.creditCardOutstanding?.length) {
       sections.push({
         sectionLabel: 'Credit Card Outstanding',
-        cards: liabilities.creditCardOutstanding.map((cc: any, i: number) => ({
-          title: `Credit Card ${i + 1}`,
-          fields: [
-            { label: 'Bank Name', value: cc.bankName },
+        cards: liabilities.creditCardOutstanding.map((cc: any, i: number) => {
+          // title: `Credit Card ${i + 1}`,
+          const fields: Field[] = [
+            {
+              label: 'Bank Name',
+              value: cc.bankName === 'Other' ? cc.title : cc.bankName
+            },
+          ];
+
+          if (cc.bankName === 'Other') {
+            fields.push({
+              label: 'Other Bank Name',
+              value: cc.title
+            });
+          }
+          fields.push(
             {
               label: 'Outstanding Balance (INR)',
               value: cc.outstandingBalanceInr,
@@ -483,9 +579,15 @@ export class SummaryHelper {
               label: 'Credit Limit (INR)',
               value: cc.creditLimitInr,
               isCurrency: true
-            }
-          ]
-        }))
+            })
+
+          return {
+            title: `Credit Card ${i + 1}`,
+            fields
+          };
+
+
+        })
       });
     }
 
@@ -493,15 +595,24 @@ export class SummaryHelper {
     if (liabilities.bnpl?.length) {
       sections.push({
         sectionLabel: 'Buy Now Pay Later (BNPL)',
-        cards: liabilities.bnpl.map((b: any, i: number) => ({
-          title: `BNPL ${i + 1}`,
-          fields: [
-            { label: 'Lender Name', value: b.lenderName },
-            {
-              label: 'Outstanding Balance (INR)',
-              value: b.outstandingBalanceInr,
-              isCurrency: true
-            },
+        cards: liabilities.bnpl.map((b: any, i: number) => {
+          // title: `BNPL ${i + 1}`,
+          const fields: Field[] = [
+            { label: 'Lender Name', value: b.lenderName },]
+
+
+          if (b.bankName === 'Other') {
+            fields.push({
+              label: 'Other Bank Name',
+              value: b.title
+            });
+          }
+
+          fields.push({
+            label: 'Outstanding Balance (INR)',
+            value: b.outstandingBalanceInr,
+            isCurrency: true
+          },
             {
               label: 'Credit Limit (INR)',
               value: b.creditLimitInr,
@@ -511,9 +622,14 @@ export class SummaryHelper {
               label: 'Monthly EMI (INR)',
               value: b.monthlyEmiInr,
               isCurrency: true
-            }
-          ]
-        }))
+            });
+
+          return {
+            title: `BNPL ${i + 1}`,
+            fields
+          };
+
+        })
       });
     }
 
@@ -632,9 +748,9 @@ export class SummaryHelper {
           fields: [
             // { label: 'Asset Type', value: oa.type },
             // { label: `${oa.type} (INR)`, value: oa.valueInr, isCurrency: true }
-            
-{ label: 'Asset Type', value: oa.assetType ?? oa.type ?? '-'},
-  { label: 'Value (INR)', value:  this.getAmount(oa), isCurrency: true} ]
+
+            { label: 'Asset Type', value: oa.assetType ?? oa.type ?? '-' },
+            { label: 'Value (INR)', value: this.getAmount(oa), isCurrency: true }]
         }))
       });
     }
@@ -642,7 +758,7 @@ export class SummaryHelper {
     return sections;
   }
 
- public static getAmount(x: any) {
+  public static getAmount(x: any) {
     return Number(x?.valueInr ?? x?.valueINR ?? x?.amountInr ?? 0);
   }
 

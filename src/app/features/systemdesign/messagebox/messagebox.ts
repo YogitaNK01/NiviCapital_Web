@@ -39,7 +39,7 @@ export class Messagebox {
 @Input() comparisonData?: {
   currentSections: string[];
   addingSection: string;
-  removingSections:string;
+  removingSections:string[];
 };
   private educationRankMap: Record<string, number> = {
   '10th': 1,

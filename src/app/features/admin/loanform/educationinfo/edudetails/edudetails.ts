@@ -87,11 +87,22 @@ export class Edudetails {
     'ugdiploma': 'Undergraduate (After Diploma)',
     'pg': 'Postgraduate (After Undergraduate)',
     'pgafterdiploma': 'Postgraduate (After Diploma and Undergraduate)',
-    'other12': 'Others (After 12th)',
-    'otherdiploma': 'Others (After Diploma)'
+    'others12': 'Others (After 12th)',
+    'othersdiploma': 'Others (After Diploma)'
 
   };
 
+  private qualificationFlowOrder = [
+    '12th',
+    'diploma (after 10th)',
+    'diploma (after 12th)',
+    'undergraduate (after 12th)',
+    'undergraduate (after diploma)',
+    'postgraduate (after undergraduate)',
+    'postgraduate (after diploma and undergraduate)',
+    'others (after 12th)',
+    'others (after diploma)'
+  ];
 
   educationForms: any = {};
   isChildRouteActive = false;
@@ -140,7 +151,7 @@ export class Edudetails {
     this.basicform = this.fb.group({
       qualification: ['', [Validators.required, this.qualificationVsCourseTypeValidator()]],
       // qualification: ['', [Validators.required]],
-      qualificationtitle: ['',[Validators.minLength(2), Validators.maxLength(100)]],
+      qualificationtitle: ['', [Validators.minLength(2), Validators.maxLength(100)]],
       institute: ['', Validators.required],
       institutetitle: ['', [Validators.minLength(2), Validators.maxLength(100)]]
     })
@@ -379,9 +390,10 @@ export class Edudetails {
 
     const currentLabel = this.getAddingSectionLabel(this.previousEducationId);
     const newLabel = this.getAddingSectionLabel(newId);
-
+    const currentId = this.previousEducationId!;
     if (this.isRemovingQualification(currentLabel, newLabel)) {
-      this.showRemovalConfirmationPopup(newId, currentLabel, newLabel);
+      const removed = this.getRemovedSections(currentId, newId);
+      this.showRemovalConfirmationPopup(newId, currentLabel, newLabel, removed);
       return;
     }
 
@@ -395,7 +407,7 @@ export class Edudetails {
       return;
     }
 
-    // ✅ if already available
+    //   if already available
     this.handleEducationChangeFlow(newId);
 
 
@@ -409,9 +421,11 @@ export class Edudetails {
 
     const currentLabel = this.getAddingSectionLabel(this.previousEducationId!);
     const newLabel = this.getAddingSectionLabel(newId);
+    const currentId = this.previousEducationId!;
 
     if (this.isRemovingQualification(currentLabel, newLabel)) {
-      this.showRemovalConfirmationPopup(newId, currentLabel, newLabel);
+      const removed = this.getRemovedSections(currentId, newId);
+      this.showRemovalConfirmationPopup(newId, currentLabel, newLabel, removed);
       return;
     }
 
@@ -457,7 +471,8 @@ export class Edudetails {
   }
 
   //eduction is removed (pg-ug)
-  private isRemovingQualification(
+
+  private isRemovingQualification1(
     currentLabel: string,
     newLabel: string
   ): boolean {
@@ -470,10 +485,61 @@ export class Edudetails {
 
     return false;
   }
+  private normalizeFlowLabel(label: string): string {
+    return (label || '')
+      .toLowerCase()
+      .replace(/\s+/g, ' ')
+      .trim();
+  }
+  private getRemovedSections(prevId: string, newId: string): string[] {
+    const currentList = this.getSectionRequiredList(prevId);
+    const newList = this.getSectionRequiredList(newId);
+
+    // These are always present in both flows (you always append them)
+    const alwaysKeep = new Set([
+      this.normalizeFlowLabel('IELTS / PTE'),
+      this.normalizeFlowLabel('University Offer Letter')
+    ]);
+
+    const newSet = new Set(newList.map(x => this.normalizeFlowLabel(x)));
+
+    return currentList
+      .filter(x => !alwaysKeep.has(this.normalizeFlowLabel(x)))       // ignore always steps
+      .filter(x => !newSet.has(this.normalizeFlowLabel(x)));          // keep only removed
+  }
+  private getCurrentSectionsForPopup(currentId: string): string[] {
+    return this.getSectionRequiredList(currentId);
+  }
+
+  private isRemovingQualification(currentLabel: string, newLabel: string): boolean {
+    const curr = this.normalizeFlowLabel(currentLabel);
+    const next = this.normalizeFlowLabel(newLabel);
+
+    const currIndex = this.qualificationFlowOrder.indexOf(curr);
+    const nextIndex = this.qualificationFlowOrder.indexOf(next);
+
+    // If either is not found in the list, fallback to your old logic OR treat as no-removal
+    if (currIndex === -1 || nextIndex === -1) {
+      // fallback (optional)
+      if (curr.includes('postgraduate') && (next.includes('undergraduate') || next.includes('diploma'))) return true;
+      if (curr.includes('undergraduate') && next.includes('diploma')) return true;
+
+      // IMPORTANT extra case: diploma after 12th -> diploma after 10th (should remove)
+      if (curr.includes('diploma') && curr.includes('12th') && next.includes('diploma') && next.includes('10th')) return true;
+
+      return false;
+    }
+
+    // ✅ If moving upwards in the flow list => removing
+    return nextIndex < currIndex;
+  }
+
+
   private showRemovalConfirmationPopup(
     newId: string,
     oldLabel: string,
-    newLabel: string
+    newLabel: string,
+    removedSections: string[]
   ) {
     this.msgbox.open({
       type: 'warning',
@@ -489,24 +555,31 @@ export class Edudetails {
       okText: 'Yes, Update',
       cancelText: 'No',
 
+      // comparisonData: {
+      //   currentSections: this.getCurrentSections(),
+      //   removingSections: [oldLabel],
+      //   addingSection: ''
+      // },
+
       comparisonData: {
-        currentSections: this.getCurrentSections(),
-        removingSections: [oldLabel],
-        addingSection: ''
+        currentSections: this.getCurrentSectionsForPopup(this.previousEducationId!), // ✅ stable
+        addingSection: '',
+        removingSections: removedSections  // ✅ pass correct array
       },
+
 
       onOk: () => {
 
 
         this.openPostUpdateInfoPopup(newId, {
           mode: 'remove',
-          removingLabels: [oldLabel]
+          removingLabels: removedSections //[oldLabel]
         });
 
       },
 
       onCancel: () => {
-        // ✅ rollback selection
+        //   rollback selection
         this.basicform.patchValue({
           qualification: this.previousEducationId
         });

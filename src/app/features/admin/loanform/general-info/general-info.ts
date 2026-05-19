@@ -130,17 +130,6 @@ export class GeneralInfo implements OnInit {
 
     localStorage.setItem(currentUserKey, this.applicantId);
 
-    // ✅ LOAD DATA HERE
-    // this.loadFromLocalStorage();
-
-
-
-    this.states();
-    this.getOccupationdetails();
-    this.getEducationdetails();
-    this.getlendingpartnersdetails();
-
-
 
     this.stepperService.rebuildSteps();
     this.registerForm = this.fb.group({
@@ -164,6 +153,11 @@ export class GeneralInfo implements OnInit {
 
 
     });
+    this.states();
+    this.getOccupationdetails();
+    this.getEducationdetails();
+    this.getlendingpartnersdetails();
+
     this.registerForm.get('coursestartdate')?.valueChanges.subscribe((startDate) => {
 
       if (!startDate) return;
@@ -217,8 +211,9 @@ export class GeneralInfo implements OnInit {
         othercoursenametitle: this.formSvc.generalInfoData.otherCourseName,
         coursetype: this.formSvc.generalInfoData.coursetype,
         othercoursetypetitle: this.formSvc.generalInfoData.othercoursetypetitle ? this.formSvc.generalInfoData.othercoursetypetitle : '',
-        coursestartdate: this.formSvc.generalInfoData.courseStartDate,
-        courseenddate: this.formSvc.generalInfoData.courseEndDate,
+
+        coursestartdate: this.parseDate(data.courseStartDate),
+        courseenddate: this.parseDate(data.courseEndDate),
         lendingpartner: this.formSvc.generalInfoData.lendingPartnerId
       });
 
@@ -274,6 +269,17 @@ export class GeneralInfo implements OnInit {
     });
   }
 
+  parseDate(dateStr: string): Date | null {
+    if (!dateStr) return null;
+
+    const parts = dateStr.split('/');
+
+    if (parts.length !== 3) return null;
+
+    const [day, month, year] = parts;
+
+    return new Date(+year, +month - 1, +day);
+  }
   get form() {
     return this.formSvc.form.get('loanInfo') as FormGroup;
   }
@@ -409,32 +415,47 @@ export class GeneralInfo implements OnInit {
       this.statesLoaded = true;
 
       if (this.formSvc.generalInfoData) {
-        this.restoreDependentDropdowns(this.formSvc.generalInfoData);
+
+        const data = this.formSvc.generalInfoData;
+
+
+        setTimeout(() => {
+          this.registerForm.patchValue({
+            state: data.stateId
+          });
+
+
+
+          this.selectPerState(data.stateId, true);
+        });
+
+
+        // this.restoreDependentDropdowns(this.formSvc.generalInfoData);
       }
 
 
     });
   }
 
-  selectPerState(id: any) {
+  selectPerState(id: any, isRestore: boolean = false) {
 
     const found = this.Australianstate.find(s => s.value === id);
     this.selectedStateLabel = found?.label ?? '';
     this.isOtherstate = this.selectedStateLabel.toLowerCase().includes('other');
 
-    // if (!isRestore) {
-    this.AustralianUniversities = [];
-    this.selectedUniLabel = '';
-    this.registerForm.get('university')?.setValue(null);
+    if (!isRestore) {
+      this.AustralianUniversities = [];
+      this.selectedUniLabel = '';
+      this.registerForm.get('university')?.setValue(null);
 
-    this.selectcourse = [];
-    this.selectedcoursetypeLabel = '';
-    this.registerForm.get('coursetype')?.setValue(null);
+      this.selectcourse = [];
+      this.selectedcoursetypeLabel = '';
+      this.registerForm.get('coursetype')?.setValue(null);
 
-    this.selectcoursename = [];
-    this.selectedcourseNameLabel = '';
-    this.registerForm.get('coursename')?.setValue(null);
-    // }
+      this.selectcoursename = [];
+      this.selectedcourseNameLabel = '';
+      this.registerForm.get('coursename')?.setValue(null);
+    }
     this.selectuniveristy(id);
   }
 

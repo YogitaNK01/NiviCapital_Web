@@ -118,7 +118,7 @@ const key = `monthlyExpenditureData_${this.applicantId}`;
       this.formSvc.monthlyExpenditureData = JSON.parse(saved);
     }
 
-    // ✅ AFTER restore → patch
+    //   AFTER restore → patch
     if (this.formSvc.monthlyExpenditureData) {
       this.patchMonthlyExpenditure();
     }

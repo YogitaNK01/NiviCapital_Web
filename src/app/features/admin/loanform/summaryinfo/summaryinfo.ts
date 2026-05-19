@@ -45,7 +45,7 @@ export class Summaryinfo {
 
   // estimatedExpense 
 
-  educationFees: { tuitionInr: number; tuitionAud: number } | null = null;
+  educationFees: { tuitionInr: any; tuitionAud: number } | null = null;
   livingExpenses: Array<{
     isGroup?: any;
     children?: any;
@@ -90,6 +90,7 @@ export class Summaryinfo {
     identityAndResidency: [],
     permanentAddress: [],
     currentAddress: [],
+    otherAddress:[]
 
   };
 

@@ -2,6 +2,7 @@ import { CommonModule } from '@angular/common';
 import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { Loanstepperservice } from '../../../../core/service/loanstepperservice';
+import { Loanformservice } from '../../../../core/service/loanformservice';
 
 @Component({
   selector: 'app-loanstepper',
@@ -16,22 +17,24 @@ export class Loanstepper implements OnInit {
   applicationId: string = '';
   custName: string = '';
   custARN: string = '';
-  completedEducationSections: Set<string> = new Set();
+  // completedEducationSections: Set<string> = new Set();
   completedSteps: Set<number> = new Set();
 
   activeQualificationId!: any;
+  educationdetails: any;
+  activeEducation: any;
+  private flowQualificationId: string | null = null;
 
 
-  constructor(public router: Router, public stepservice: Loanstepperservice, private route: ActivatedRoute, private stepperService: Loanstepperservice, private cdr: ChangeDetectorRef) {
+
+  constructor(public router: Router, public stepservice: Loanstepperservice, private route: ActivatedRoute, private stepperService: Loanstepperservice, private formSvc: Loanformservice, private cdr: ChangeDetectorRef) {
     this.stepperService.steps$.subscribe(steps => {
       this.steps = steps;
       this.cdr.detectChanges(); // Force change detection
     });
 
-    const saved = sessionStorage.getItem('completedEducationSections');
-    if (saved) {
-      this.completedEducationSections = new Set(JSON.parse(saved));
-    }
+    // const saved = sessionStorage.getItem('completedEducationSections');
+
 
   }
 
@@ -48,24 +51,38 @@ export class Loanstepper implements OnInit {
         this.stepperService.setLoanId(this.applicantId, this.applicationId, this.custName, this.custARN);
 
 
-        // this.route.queryParams.subscribe(params => {
-        //   if (params['qualificationlabel']) {
-        // this.activeQualificationId = params['qualificationlabel'] ?? undefined;
-        this.activeQualificationId = this.normalizeQualification(
-  params['qualificationlabel'] || ''
-);
-        //   }
-        // });
 
+        // this.activeQualificationId = this.normalizeQualification(
+        //   params['qualificationlabel'] || ''
+        // );
       }
+      // if (params['qualificationlabel']) {
+      //   this.activeQualificationId = params['qualificationlabel'];
+      //   this.cdr.detectChanges();
+      // }
 
-      if (params['qualificationlabel']) {
-        // this.activeQualificationId = params['qualificationlabel'];
-        this.activeQualificationId = this.normalizeQualification(
-  params['qualificationlabel'] || ''
-);
-        this.cdr.detectChanges();
-      }
+    const label = params['qualificationlabel'];
+    if (label) {
+      this.activeEducation = label;
+      this.cdr.detectChanges();
+    }
+
+    //  Only rebuild submenu if flow qualificationId changed
+    const qid = params['qualificationId'];
+    if (qid && qid !== this.flowQualificationId) {
+      this.flowQualificationId = qid;
+
+      this.formSvc.getselectedEducation(qid).subscribe(res => {
+        this.educationdetails = res.data ?? res;
+
+        //  build submenu ONCE for this flow
+        this.stepperService.setEducationSubSteps(this.educationdetails);
+      });
+    }
+ 
+
+    
+
 
     });
     this.router.events.subscribe(() => {
@@ -144,29 +161,56 @@ export class Loanstepper implements OnInit {
     return false;
   }
   canNavigateTo(index: number): boolean {
-  const step = this.steps[index];
+    const step = this.steps[index];
 
-  // ✅ allow if completed
-  if (this.stepservice.isStepCompleted(step.route)) {
-    return true;
+    //  allow if completed
+    if (this.stepservice.isStepCompleted(step.route)) {
+      return true;
+    }
+
+    //  allow current step
+    if (index === this.currentIndex) {
+      return true;
+    }
+
+    //  allow next step ONLY if previous is completed
+    const prevStep = this.steps[index - 1];
+    if (prevStep && this.stepservice.isStepCompleted(prevStep.route)) {
+      return true;
+    }
+
+    return false;
   }
-
-  // ✅ allow current step
-  if (index === this.currentIndex) {
-    return true;
-  }
-
-  // ✅ allow next step ONLY if previous is completed
-  const prevStep = this.steps[index - 1];
-  if (prevStep && this.stepservice.isStepCompleted(prevStep.route)) {
-    return true;
-  }
-
-  return false;
-}
 
 
   goToStep(route: string, index: number) {
+
+    const step = this.steps[index];
+
+    //  If education step → go to active child
+    if (route === 'educationDetails') {
+
+      
+this.router.navigate(
+      ['/loanform', 'educationDetails'],
+      {
+        queryParams: {
+          applicantId: this.applicantId,
+          applicationId: this.applicationId,
+          custName: this.custName,
+          custARN: this.custARN,
+        },
+
+        //  optional: remove child params so it never opens educationinfo
+        queryParamsHandling: 'merge'
+      }
+    );
+
+    return;
+
+    }
+
+
     if (this.canNavigateTo(index)) {
       console.log(` Navigating to ${route} (index ${index})`);
       this.router.navigate(['/loanform', route], {
@@ -216,17 +260,31 @@ export class Loanstepper implements OnInit {
     if (!parentStep?.children) return false;
 
 
-    const stepKey = this.normalizeQualification(
-      parentStep.children[subIndex].label
-    );
+    const children = parentStep.children;
+    const stepKey = children[subIndex].key;
+
+    // const stepKey = this.normalizeQualification(
+    //   parentStep.children[subIndex].label
+    // );
 
 
     if (this.stepperService.isEducationStepCompleted(stepKey)) {
       return false;
     }
-    if (this.activeQualificationId === stepKey) {
-      return false;
-    }
+    // if (this.activeQualificationId === stepKey) {
+    //   return false;
+    // }
+
+    const activeIndex = children.findIndex(
+      (c: any) => c.key === this.activeQualificationId
+    );
+
+    //  current → allowed
+    if (subIndex === activeIndex) return false;
+
+    //  previous → allowed
+    if (subIndex < activeIndex) return false;
+
     return true;
 
 
@@ -237,58 +295,61 @@ export class Loanstepper implements OnInit {
     // return subIndex > activeIndex;
   }
 
-isSubStepperDisabled(parentIndex: number, subIndex: number): boolean {
-  
-  const parentStep = this.steps[parentIndex];
-  if (!parentStep?.children) return false;
+  isSubStepperDisabled(parentIndex: number, subIndex: number): boolean {
 
-  const children = parentStep.children;
+    const parentStep = this.steps[parentIndex];
+    if (!parentStep?.children) return false;
 
-  // find active index
-  const activeIndex = children.findIndex(
-    // (c: any) => this.normalizeQualification(c.label) === this.activeQualificationId
-    (c: any) => c.key === this.activeQualificationId
-  );
+    const children = parentStep.children;
 
-  // ✅ allow all completed
-  const stepKey = children[subIndex].key;
+    // find active index
+    const activeIndex = children.findIndex(
+      // (c: any) => this.normalizeQualification(c.label) === this.activeQualificationId
+      (c: any) => c.key === this.activeQualificationId
+    );
 
-  if (this.stepperService.isEducationStepCompleted(stepKey)) {
-    return false;
+    //  allow all completed
+    const stepKey = children[subIndex].key;
+
+    if (this.stepperService.isEducationStepCompleted(stepKey)) {
+      return false;
+    }
+
+    if (activeIndex === -1) {
+      return subIndex !== 0;
+    }
+
+    //  allow current active
+    if (subIndex === activeIndex) {
+      return false;
+    }
+
+    //  only allow previous ones
+    // return subIndex > activeIndex;
+
+
+    if (subIndex < activeIndex) {
+      return false;
+    }
+
+    //  Future steps → disabled
+    return true;
+
   }
-
-if (activeIndex === -1) {
-   return subIndex !== 0;
-  }
-
-  // ✅ allow current active
-  if (subIndex === activeIndex) {
-    return false;
-  }
-
-  // ✅ only allow previous ones
-  // return subIndex > activeIndex;
-
-  
- if (subIndex < activeIndex) {
-    return false;
-  }
-
-  //  Future steps → disabled
-  return true;
-
-}
 
   openEducationSubStep(sub: any, event: Event) {
     event.stopPropagation();
     const stepKey = sub.key;
     this.activeQualificationId = stepKey;
 
+    const flowQualificationId = this.route.snapshot.queryParams['qualificationId'];
+
 
     // this.router.navigate([], {
 
     this.router.navigate(
-      ['/loanform/educationinfo'],
+      // ['/loanform/educationinfo'],
+      ['/loanform', 'educationDetails', 'educationinfo'],
       {
 
         // relativeTo: this.route,
@@ -299,10 +360,15 @@ if (activeIndex === -1) {
           custName: this.custName,
           custARN: this.custARN,
           qualificationlabel: stepKey,
-          qualificationId: sub.id
+          qualificationId: flowQualificationId
+          // qualificationId: sub.id
         },
         queryParamsHandling: 'merge'
+      })
+      .then(() => {
+        this.activeQualificationId = stepKey;
       });
+
 
   }
 
@@ -324,16 +390,16 @@ if (activeIndex === -1) {
     // if (lower.includes('diploma') || lower.includes('diploma10') || (lower.includes('diploma') && lower.includes('10'))) return 'diploma10';
     // if (lower.includes('diploma') || lower.includes('diploma12') || (lower.includes('diploma') && lower.includes('12'))) return 'diploma12';
     //  if (lower.includes('diploma')) return 'diploma';
-    
- //  Diploma AFTER 12th (check FIRST)
-  if (lower.includes('diploma') && lower.includes('12')) {
-    return 'diploma12';
-  }
 
-  //  Diploma AFTER 10th
-  if (lower.includes('diploma') && lower.includes('10')) {
-    return 'diploma10';
-  }
+    //  Diploma AFTER 12th (check FIRST)
+    if (lower.includes('diploma') && lower.includes('12')) {
+      return 'diploma12';
+    }
+
+    //  Diploma AFTER 10th
+    if (lower.includes('diploma') && lower.includes('10')) {
+      return 'diploma10';
+    }
 
 
     if (lower.includes('others') && lower.includes('after 12th')) return 'others12';
@@ -353,5 +419,9 @@ if (activeIndex === -1) {
 
     // console.warn('Unknown qualification:', name);
     return 'others';
+  }
+
+  get completedEducationSections() {
+    return this.stepservice.getCompletedEducationSections();
   }
 }

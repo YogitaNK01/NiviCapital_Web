@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, EventEmitter, Input, Output, ViewChild } from '@angular/core';
+import { ChangeDetectorRef, Component, EventEmitter, Input, Output, SimpleChanges, ViewChild } from '@angular/core';
 import { Buttons } from '../../../../systemdesign/buttons/buttons';
 import { CommonModule } from '@angular/common';
 import { AbstractControl, FormBuilder, FormGroup, ReactiveFormsModule, ValidationErrors, Validators } from '@angular/forms';
@@ -12,6 +12,7 @@ import { ActivatedRoute } from '@angular/router';
 import { Loanformservice } from '../../../../../core/service/loanformservice';
 import { Msgboxservice } from '../../../../../core/service/msgboxservice';
 import { Main } from '../../../../../core/service/main';
+import { combineLatest } from 'rxjs';
 
 interface Document {
   title: string;
@@ -151,6 +152,7 @@ export class Edusection {
   constructor(private fb: FormBuilder, private stepperService: Loanstepperservice, private cd: ChangeDetectorRef, private route: ActivatedRoute,
     public main: Main, private msgBox: Msgboxservice, public loanformservice: Loanformservice) { }
 
+
   ngOnInit(): void {
 
     this.route.queryParams.subscribe(params => {
@@ -171,65 +173,115 @@ export class Edusection {
     });
     // this.getInstituteName();
 
-    this.loanformservice.getInstitutesCached().subscribe(list => {
-      this.seleactInstitute = list;
-      this.filteredInstitutes = [...list];
-    });
+    // this.loanformservice.getInstitutesCached().subscribe(list => {
+    //   this.seleactInstitute = list;
+    //   this.filteredInstitutes = [...list];
+    //    this.restoreDropdownValues();
+    // });
+
+    
+combineLatest([
+    this.loanformservice.getInstitutesCached(),
+    this.loanformservice.getAllCities()
+  ]).subscribe(([inst, citiesRes]: any) => {
+
+    this.seleactInstitute = inst;
+    this.filteredInstitutes = [...inst];
+
+    const list = citiesRes.data ?? citiesRes;
+    this.selectlocation = list.map((c: any) => ({
+      value: c.id,
+      label: c.name
+    }));
+    this.filteredlocation = [...this.selectlocation];
+
+    // ✅ restore only after both lists exist
+    this.restoreDropdownValues();
+  });
+
 
     this.cityNames();
     this.selectpassingyr = this.buildYearOptions(20);
+    this.initSection();
+
+    // if (this.sectionType === 'school' && this.title.toLowerCase().includes('12')) {
+    //   this.marksheetCount = 1;
+    //   this.educationType = '_12TH';
+    // }
+    // else if (this.sectionType === 'school') {
+    //   this.marksheetCount = 1;
+    //   this.educationType = '_10TH';
+    // }
 
 
-    if (this.sectionType === 'school' && this.title.toLowerCase().includes('12')) {
-      this.marksheetCount = 1;
-      this.educationType = '_12TH';
-    }
-    else if (this.sectionType === 'school') {
-      this.marksheetCount = 1;
-      this.educationType = '_10TH';
-    }
+    // if (this.sectionType === 'diploma') {
+    //   this.marksheetCount = 3;
+    //   // this.showLC = false;
+    //   this.educationType = 'DIPLOMA';
+    // }
 
+    // if (this.sectionType === 'bachelors') {
+    //   this.marksheetCount = 4;
+    //   // this.showLC = false;
+    //   this.educationType = 'UNDERGRADUATE';
+    // }
 
-    if (this.sectionType === 'diploma') {
-      this.marksheetCount = 3;
-      // this.showLC = false;
-      this.educationType = 'DIPLOMA';
-    }
-
-    if (this.sectionType === 'bachelors') {
-      this.marksheetCount = 4;
-      // this.showLC = false;
-      this.educationType = 'UNDERGRADUATE';
-    }
-
-    if (this.sectionType === 'postgrad') {
-      this.marksheetCount = 2;
-      // this.showLC = false;
-      this.educationType = 'POSTGRADUATE';
-    }
-    if (this.sectionType === 'others' && this.title.toLowerCase().includes('after 12th')) {
-      this.marksheetCount = 1;
-      // this.showLC = false;
-      this.educationType = 'OTHER_AFTER_12';
-    }
-    if (this.sectionType === 'others' && this.title.toLowerCase().includes('diploma')) {
-      this.marksheetCount = 1;
-      // this.showLC = false;
-      this.educationType = 'OTHER_AFTER_DIPLOMA';
-    }
-
-    // this.group = this.fb.group({
-
-    // institutename: ['', Validators.required],
-    // passingyear: ['', Validators.required],
-    // per_cgpa: ['', [Validators.required, this.percentageOrCgpaValidator()]],
-    // location: ['', Validators.required],
-    // marksheet: ['', Validators.required],
-    // lc: ['', Validators.required],
-
-    // })
+    // if (this.sectionType === 'postgrad') {
+    //   this.marksheetCount = 2;
+    //   // this.showLC = false;
+    //   this.educationType = 'POSTGRADUATE';
+    // }
+    // if (this.sectionType === 'others' && this.title.toLowerCase().includes('after 12th')) {
+    //   this.marksheetCount = 1;
+    //   // this.showLC = false;
+    //   this.educationType = 'OTHER_AFTER_12';
+    // }
+    // if (this.sectionType === 'others' && this.title.toLowerCase().includes('diploma')) {
+    //   this.marksheetCount = 1;
+    //   // this.showLC = false;
+    //   this.educationType = 'OTHER_AFTER_DIPLOMA';
+    // }
 
   }
+  
+  
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['sectionType'] || changes['title'] || changes['stepKey']) {
+      this.initSection();      //   run every time step changes
+    }
+  }
+
+private initSection(): void {
+    // reset defaults
+    this.marksheetCount = 1;
+    this.showLC = false;
+
+    const t = (this.title || '').toLowerCase();
+
+    if (this.sectionType === 'school' && t.includes('12')) {
+      this.marksheetCount = 1;
+      this.educationType = '_12TH';
+    } else if (this.sectionType === 'school') {
+      this.marksheetCount = 1;
+      this.educationType = '_10TH';
+    } else if (this.sectionType === 'diploma') {
+      this.marksheetCount = 3;
+      this.educationType = 'DIPLOMA';
+    } else if (this.sectionType === 'bachelors') {
+      this.marksheetCount = 4;
+      this.educationType = 'UNDERGRADUATE';
+    } else if (this.sectionType === 'postgrad') {
+      this.marksheetCount = 2;
+      this.educationType = 'POSTGRADUATE';
+    } else if (this.sectionType === 'others' && t.includes('after 12th')) {
+      this.marksheetCount = 1;
+      this.educationType = 'OTHER_AFTER_12';
+    } else if (this.sectionType === 'others' && t.includes('diploma')) {
+      this.marksheetCount = 1;
+      this.educationType = 'OTHER_AFTER_DIPLOMA';
+    }
+  }
+
 
   get level(): EducationType {
     return this.getLevelFromTitle(this.title);
@@ -353,7 +405,8 @@ export class Edusection {
     )
 
     const control = this.group.get('location');
-    control?.setValue(this.selectedLocationLabel);
+    // control?.setValue(this.selectedLocationLabel);
+    control?.setValue(ids); 
     control?.markAsTouched();
     control?.updateValueAndValidity();
 
@@ -385,6 +438,42 @@ export class Edusection {
     );
   }
 
+  restoreDropdownValues() {
+
+  const step = this.stepKey;
+  const saved = this.group.value;
+
+  if (!saved) return;
+
+  //   Institute restore
+  if (saved.institutename) {
+    const found = this.seleactInstitute.find(i =>
+      i.value === saved.institutename
+    );
+
+    if (found) {
+      this.selectedInstituteLabel = found.label;
+      this.isOtherEducation = (found?.label ?? '').trim().toLowerCase() === 'other';
+      this.group.get('institutename')?.setValue(found.value,{ emitEvent: false });
+    }
+  }
+
+  //  Location restore
+  if (saved.location) {
+    const foundLoc = this.selectlocation.find(l =>
+      l.value === saved.location
+    );
+
+    if (foundLoc) {
+      this.selectedLocationLabel = foundLoc.label;
+      
+    this.isOtherLocation = (foundLoc?.label ?? '').trim().toLowerCase() === 'other';
+
+      this.group.get('location')?.setValue(foundLoc.value, { emitEvent: false });
+    }
+  }
+}
+
   getLevelFromTitle(title: string): EducationType {
     const t = (title || '').toLowerCase();
 
@@ -410,12 +499,20 @@ export class Edusection {
 
 
   buildKey(doc: DocType, index?: number): string {
-    return index
-      ? `${this.stepKey}_${doc}_${index}`
-      : `${this.stepKey}_${doc}`;
+    // return index
+    //   ? `${this.stepKey}_${doc}_${index}`
+    //   : `${this.stepKey}_${doc}`;
+    
+return index !== undefined
+    ? `${this.stepKey}_${doc}_${index}`
+    : `${this.stepKey}_${doc}`;
+
   }
   buildDocKey(level: EducationType, docType: DocType, index?: number): string {
-    return index ? `${level}_${docType}_${index}` : `${level}_${docType}`;
+    // return index ? `${level}_${docType}_${index}` : `${level}_${docType}`;
+    return index !== undefined
+      ? `${level}_${docType}_${index}`
+      : `${level}_${docType}`;
   }
 
 

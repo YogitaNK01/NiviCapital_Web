@@ -48,17 +48,17 @@ export class Loanstepperservice {
 
   constructor(private formSvc: Loanformservice, private router: Router) {
     this.buildSteps();
-    this.restoreEducationProgress();
+
 
     const saved = localStorage.getItem('coursetypeug');
     if (saved !== null) {
       this.coursetypeug = JSON.parse(saved);
     }
-    
-const saved1 = localStorage.getItem(`completedSteps_${this.applicantId}`);
-  if (saved1) {
-    this.completedSteps = new Set(JSON.parse(saved1));
-  }
+
+    const saved1 = localStorage.getItem(`completedSteps_${this.applicantId}`);
+    if (saved1) {
+      this.completedSteps = new Set(JSON.parse(saved1));
+    }
 
 
   }
@@ -72,12 +72,12 @@ const saved1 = localStorage.getItem(`completedSteps_${this.applicantId}`);
     const baseSteps: Step[] = [
       { label: 'Loan Info', route: 'loaninfo' },
       { label: 'General Info', route: 'genralinfo' },
-      //   {
-      //   label: 'Education Details',
-      //   route: 'educationDetails',
-      //   children: this.educationSubSteps
-      // },
-      { label: 'Estimated Expense', route: 'expense' },
+        {
+        label: 'Education Details',
+        route: 'educationDetails',
+        children: this.educationSubSteps
+      },
+      { label: 'Estimated Expense', route: 'expense' },{ label: 'Summary', route: 'summaryinfo' },
       { label: 'Additional Info', route: 'additionalinfo' },
       { label: 'KYC', route: 'kycinfo' },
 
@@ -125,60 +125,60 @@ const saved1 = localStorage.getItem(`completedSteps_${this.applicantId}`);
     // }
 
     // this.educationSubSteps = data.map(d => ({
-      
+
     //   id: d.qualificationId,
     //   label: d.qualificationName.includes('Others') ? d.qualificationName : d.qualificationName.split('(')[0].trim()
     // }));
 
     this.educationSubSteps = data.map(d => {
-  const name = d.qualificationName.toLowerCase();
+      const name = d.qualificationName.toLowerCase();
 
-  let key = '';
+      let key = '';
 
-  if (name.includes('diploma') && name.includes('10')) {
-    key = 'diploma10';
-  } else if (name.includes('diploma') && name.includes('12')) {
-    key = 'diploma12';
-  } else if (name.includes('10th')) {
-    key = '10th';
-  } else if (name.includes('12th')) {
-    key = '12th';
-  }
-   else if (name.includes('others') && name.includes('12')) {
-    key = 'others12';
+      if (name.includes('diploma') && name.includes('10')) {
+        key = 'diploma10';
+      } else if (name.includes('diploma') && name.includes('12')) {
+        key = 'diploma12';
+      } else if (name.includes('10th')) {
+        key = '10th';
+      } else if (name.includes('12th')) {
+        key = '12th';
+      }
+      else if (name.includes('others') && name.includes('12')) {
+        key = 'others12';
 
-  }
-   else if (name.includes('others') && name.includes('diploma')) {
-    key = 'othersdiploma';
+      }
+      else if (name.includes('others') && name.includes('diploma')) {
+        key = 'othersdiploma';
 
-  }
-   else if (name.includes('Undergraduate') ) {
-    key = 'ug';
+      }
+      else if (name.includes('undergraduate')) {
+        key = 'ug';
 
-  }
-   else if (name.includes('postgraduate') ) {
-    key = 'pg';
+      }
+      else if (name.includes('postgraduate')) {
+        key = 'pg';
 
-  }
-  
-  return {
-    id: d.qualificationId,
-    label: d.qualificationName.split('(')[0].trim(), // UI label
-    key: key || d.qualificationName   
-  };
-});
+      }
 
-    this.educationSubSteps.push({ id: "0", label: "IELTS / PTE",key: "ielts" })
-    this.educationSubSteps.push({ id: "1", label: "University Offer Letter" ,key: "offerletter"})
+      return {
+        id: d.qualificationId,
+        label: d.qualificationName.split('(')[0].trim(), // UI label
+        key: key || d.qualificationName
+      };
+    });
+
+    this.educationSubSteps.push({ id: "0", label: "IELTS / PTE", key: "ielts" })
+    this.educationSubSteps.push({ id: "1", label: "University Offer Letter", key: "offerletter" })
 
     this.educationSubStepsInitialized = true;
     this.buildSteps();
   }
 
 
-private getEducationProgressKey(): string {
-  return `educationProgress_${this.applicantId}`;
-}
+  private getEducationProgressKey(): string {
+    return `educationProgress_${this.applicantId}`;
+  }
 
   markEducationSectionComplete(step: string) {
     this.completedEducationSections.add(step);
@@ -188,25 +188,25 @@ private getEducationProgressKey(): string {
     //   JSON.stringify([...this.completedEducationSections])
     // );
 
-if (this.applicantId) {
-    sessionStorage.setItem(
-      this.getEducationProgressKey(),
-      JSON.stringify([...this.completedEducationSections])
-    );
-  }
+    if (this.applicantId) {
+      sessionStorage.setItem(
+        this.getEducationProgressKey(),
+        JSON.stringify([...this.completedEducationSections])
+      );
+    }
 
   }
   private restoreEducationProgress() {
-  if (!this.applicantId) return;
+    if (!this.applicantId) return;
 
-  const saved = sessionStorage.getItem(this.getEducationProgressKey());
+    const saved = sessionStorage.getItem(this.getEducationProgressKey());
 
-  if (saved) {
-    this.completedEducationSections = new Set(JSON.parse(saved));
-  } else {
-    this.completedEducationSections = new Set();
+    if (saved) {
+      this.completedEducationSections = new Set(JSON.parse(saved));
+    } else {
+      this.completedEducationSections = new Set();
+    }
   }
-}
 
 
   getCompletedEducationSections(): Set<string> {
@@ -234,40 +234,42 @@ if (this.applicantId) {
     );
   }
 
- 
+
 
 
   //---------------all other steps --------------
 
   private getCompletedStepsKey(): string {
-  return `completedSteps_${this.applicantId}`;
-}
+    return `completedSteps_${this.applicantId}`;
+  }
 
   markStepCompleted(route: string) {
     this.completedSteps.add(route);
     const key = `completedSteps_${this.applicantId}`;
 
 
- if (this.applicantId) {
-    localStorage.setItem(
-      this.getCompletedStepsKey(),
-      JSON.stringify([...this.completedSteps])
-    );
-  }
+    if (this.applicantId) {
+      localStorage.setItem(
+        this.getCompletedStepsKey(),
+        JSON.stringify([...this.completedSteps])
+      );
+    }
 
-  this.buildSteps();
+    this.buildSteps();
 
 
   }
   restoreCompletedSteps() {
-  if (!this.applicantId) return;
+    if (!this.applicantId) return;
 
-  const saved = localStorage.getItem(this.getCompletedStepsKey());
+    const saved = localStorage.getItem(this.getCompletedStepsKey());
 
-  if (saved) {
-    this.completedSteps = new Set(JSON.parse(saved));
-  } else {
-    this}}
+    if (saved) {
+      this.completedSteps = new Set(JSON.parse(saved));
+    } else {
+      //this
+    }
+  }
 
   isStepCompleted(route: string): boolean {
     return this.completedSteps.has(route);
@@ -278,6 +280,7 @@ if (this.applicantId) {
     this.applicationId = id2;
     this.custName = name;
     this.custARN = arn;
+    this.restoreEducationProgress();
     this.buildSteps();
   }
 

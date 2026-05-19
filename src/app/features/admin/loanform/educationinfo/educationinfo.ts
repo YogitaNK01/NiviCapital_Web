@@ -147,6 +147,8 @@ export class Educationinfo implements OnInit {
 
   private hasUnsavedChanges = false;
 
+private flowQualificationId: string | null = null;
+
 
   constructor(private fb: FormBuilder, private stepperService: Loanstepperservice, private cd: ChangeDetectorRef, private formSvc: Loanformservice,
     private route: ActivatedRoute, private router: Router, private msgbox: Msgboxservice, public main: Main) { }
@@ -206,18 +208,48 @@ export class Educationinfo implements OnInit {
 
       if (params['qualificationlabel']) {
         // this.activeEducation = params['qualificationlabel'];
+        // const step = params['qualificationlabel'] as StepKey;
+        // if (step) {
+        //   this.activeEducation = step;
+        //   this.restoreFormState(step);
+        //   const saved =
+        //     this.stepperService.getEducationStepData(step) ||
+        //     this.educationFormState[step];
+        //   if (saved) {
+        //     this.educationForms[step].patchValue(saved);
+        //   }
+        // }
+        
 
-        const step = params['qualificationlabel'] as StepKey;
-        this.activeEducation = step;
-        const saved =
-          this.stepperService.getEducationStepData(step) ||
-          this.educationFormState[step];
+    const step = params['qualificationlabel'] as StepKey;
+    if (step) {
+      this.activeEducation = step;
+      this.restoreFormState(step);
+    }
 
-        if (saved) {
-          this.educationForms[step].patchValue(saved);
+    //   build submenu only when flow qualificationId changes
+    const qid = params['qualificationId'];
+    if (qid && qid !== this.flowQualificationId) {
+      this.flowQualificationId = qid;
+
+      this.formSvc.getselectedEducation(qid).subscribe((res: any) => {
+        this.educationdetails = res.data ?? res;
+
+        //   ONLY ONCE per flow
+        this.stepperService.setEducationSubSteps(this.educationdetails);
+
+        if (!this.isEducationFlowInitialized) {
+          const orderFromApi = this.educationdetails.map((d: any) =>
+            this.normalizeQualification(d.qualificationName)
+          );
+
+          this.educationOrder = [...new Set([...orderFromApi, 'ielts', 'offerletter'])];
+          this.isEducationFlowInitialized = true;
         }
+      });
+    }
 
-      }
+   }
 
     });
 
@@ -309,7 +341,7 @@ export class Educationinfo implements OnInit {
     return (control: AbstractControl): ValidationErrors | null => {
       const value = control.value;
 
-      // ✅ Let `required` handle empty case
+    
       if (value === null || value === undefined || value === '') {
         return null;
       }
@@ -507,7 +539,9 @@ export class Educationinfo implements OnInit {
     fg?.get(e.control)?.updateValueAndValidity();
 
     const normalizedDoc = this.normalizeDocType(e.control);
-    const key = this.buildKey(e.step, normalizedDoc, e.index ?? 0);
+    const idx = e.control === 'marksheet' ? (e.index ?? 0) : undefined;
+     const key = this.buildKey(e.step, normalizedDoc, idx);
+    // const key = this.buildKey(e.step, normalizedDoc, e.index ?? 0);
 
     // const key = this.buildKey(e.step, e.control, e.index);
     this.uploadedFiles[key] = e.file;
@@ -559,76 +593,50 @@ export class Educationinfo implements OnInit {
 
 
 
-  back1() {
 
-    if (!this.isEducationFlowInitialized) {
-      this.stepperService.previous();
-      return;
-    }
-
-    const index = this.educationOrder.indexOf(this.activeEducation);
-    if (index > 0) {
-      const prevEducation = this.educationOrder[index - 1];
-      this.activeEducation = prevEducation;
-
-      this.router.navigate([], {
-        relativeTo: this.route,
-        queryParams: {
-          qualificationlabel: prevEducation
-        },
-        queryParamsHandling: 'merge'
-      });
-      return;
-    }
-
-    this.router.navigate(
-      ['/loanform/educationDetails'],
-      {
-        queryParams: {
-          applicantId: this.applicantId,
-          applicationId: this.applicationId,
-          custName: this.custName,
-          custARN: this.custARN
-        }
-      }
-    );
-
-  }
   //resotre form data
   restoreFormState(step: StepKey) {
     const form = this.educationForms[step];
-    const saved = this.educationFormState[step];
+    const saved = this.educationFormState[step] || this.stepperService.getEducationStepData(step);;
 
     if (!form || !saved) return;
 
-    form.patchValue(saved.value, { emitEvent: false });
+    form.patchValue(saved, { emitEvent: false });
 
-    if (saved.value?.institutename) {
-      form.get('institutename')?.setValue(saved.value.institutename, {
-        emitEvent: false
-      });
-    }
+    
+setTimeout(() => {
+    this.cd.detectChanges();
+  });
 
-    if (saved.value?.location) {
-      form.get('location')?.setValue(saved.value.location, {
-        emitEvent: false
-      });
-    }
-    if (saved.value?.otherLocation) {
-      form.get('otherLocation')?.setValue(saved.value.otherLocation, {
-        emitEvent: false
-      });
-    }
+    // if (saved.value?.institutename) {
+    //   form.get('institutename')?.setValue(saved.value.institutename, {
+    //     emitEvent: false
+    //   });
+    // }
 
-    if (saved.value?.passingyear) {
-      form.get('passingyear')?.setValue(saved.value.passingyear, {
-        emitEvent: false
-      });
-    }
+    // if (saved.value?.location) {
+    //   form.get('location')?.setValue(saved.value.location, {
+    //     emitEvent: false
+    //   });
+    // }
+    // if (saved.value?.otherLocation) {
+    //   form.get('otherLocation')?.setValue(saved.value.otherLocation, {
+    //     emitEvent: false
+    //   });
+    // }
 
+    // if (saved.value?.passingyear) {
+    //   form.get('passingyear')?.setValue(saved.value.passingyear, {
+    //     emitEvent: false
+    //   });
+    // }
+    form.markAsDirty();
     form.markAsPristine();
     form.updateValueAndValidity({ emitEvent: false });
   }
+
+
+
 
   private hydrateEducationFromApi(details: any[]) {
     details.forEach((item: any) => {
@@ -743,7 +751,9 @@ export class Educationinfo implements OnInit {
 
     marksheets.at(semIndex).setValue(event.file);
   }
-
+  private getEducationProgressKey(): string {
+    return `educationProgress_${this.applicantId}`;
+  }
 
   // back btn functionality
 
@@ -774,6 +784,11 @@ export class Educationinfo implements OnInit {
 
     if (form) {
       this.educationFormState[step] = form.getRawValue();
+      this.stepperService.setEducationStepData(
+        step,
+        form.getRawValue()
+      );
+
     }
   }
   private performEducationBack() {
@@ -967,9 +982,17 @@ export class Educationinfo implements OnInit {
 
 
     // this.stepperService.markEducationSectionComplete(step);
-    if (this.activeEducation) {
-  this.stepperService.markEducationSectionComplete(this.activeEducation);
-}
+
+    this.stepperService.markEducationSectionComplete(step);
+
+    //   ALSO mark ALL previous steps as completed
+    const index = this.educationOrder.indexOf(step);
+
+    for (let i = 0; i <= index; i++) {
+      const prevStep = this.educationOrder[i];
+      this.stepperService.markEducationSectionComplete(prevStep);
+    }
+
 
 
 
@@ -1034,26 +1057,26 @@ export class Educationinfo implements OnInit {
 
       let fileIndex = reqDocs.length;
 
-     
 
-//  ADD EXTRA MARKSHEETS (after required ones)
-Object.keys(this.uploadedFiles)
-  .filter(key =>
-    key.startsWith(`${step}_marksheet_`)
-  )
-  .forEach(key => {
-    const file = this.uploadedFiles[key];
-    if (!file) return;
 
-    // ✅ avoid duplicating required marksheet1
-    const isRequired = key.includes('marksheet1') || key.includes('marksheet_0');
-    if (isRequired) return;
+      //  ADD EXTRA MARKSHEETS (after required ones)
+      Object.keys(this.uploadedFiles)
+        .filter(key =>
+          key.startsWith(`${step}_marksheet_`)
+        )
+        .forEach(key => {
+          const file = this.uploadedFiles[key];
+          if (!file) return;
 
-    fd.append(`files[${fileIndex}].type`, 'MARKSHEET');
-    fd.append(`files[${fileIndex}].file`, file);
+         
+          const isRequired = key.includes('marksheet1') || key.includes('marksheet_0');
+          if (isRequired) return;
 
-    fileIndex++;
-  });
+          fd.append(`files[${fileIndex}].type`, 'MARKSHEET');
+          fd.append(`files[${fileIndex}].file`, file);
+
+          fileIndex++;
+        });
 
 
       Object.keys(this.uploadedFiles)

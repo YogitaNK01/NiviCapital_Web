@@ -26,7 +26,7 @@
         <div class="title text-body-1">{{ s.label }}</div>
 
 
-<div *ngIf="s.children?.length" class="sub-stepper">
+<!-- <div *ngIf="s.children?.length" class="sub-stepper">
   <div
     *ngFor="let sub of s.children; let subIndex = index"
     class="sub-step title text-body-1"
@@ -39,21 +39,27 @@
   >
     {{ sub.label }}
   </div>
-</div>
+</div> -->
 
-        <!-- <div *ngIf="s.children?.length" class="sub-stepper">
+
+<div *ngIf="s.children?.length" class="sub-stepper">
   <div
     *ngFor="let sub of s.children; let subIndex = index"
     class="sub-step title text-body-1"
-    [ngClass]="{
-      active: activeQualificationId === normalizeQualification(sub.label) && (isActive('educationDetails') || isActive('educationinfo')),
-      disabled: isSubStepperDisabled(i, subIndex)
-    }"
+    
+[ngClass]="{
+    active: activeQualificationId === sub.key,
+    completed: stepservice.isEducationStepCompleted(sub.key),
+    disabled: isSubStepperDisabled(i, subIndex) && sub.key !== activeQualificationId
+  }"
+
     (click)="!isSubStepperDisabled(i, subIndex) && openEducationSubStep(sub, $event)"
   >
     {{ sub.label }}
   </div>
-</div> -->
+</div>
+
+ 
 
 
       </div>

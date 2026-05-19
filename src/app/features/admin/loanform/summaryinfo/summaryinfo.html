@@ -58,8 +58,9 @@
                                 <ng-container *ngTemplateOutlet="educationTemplate; context:{index:i}">
                                 </ng-container>
                             </ng-container>
-
-                            <ng-container *ngTemplateOutlet="incomeTemplate; context:{index:i}">
+                            <ng-container *ngIf="i === 5">
+                                <ng-container *ngTemplateOutlet="incomeTemplate; context:{index:i}">
+                                </ng-container>
                             </ng-container>
 
                             <ng-container *ngIf="i === 6">
@@ -95,7 +96,8 @@
 
             <ng-template #generalTemplate let-i="index">
                 <div class="row common-details-box d-flex flex-row">
-                    <form [formGroup]="summaryForm">
+                    <div>
+                      
 
                         <!-- Current Occupation Section -->
                         <div class="d-flex flex-column">
@@ -119,7 +121,8 @@
                             </div>
                         </div>
 
-                    </form>
+                        <!-- </form> -->
+                    </div>
                 </div>
             </ng-template>
 
@@ -128,8 +131,8 @@
 
             <ng-template #estexpenseTemplate let-i="index">
                 <div class="row common-details-box d-flex flex-row">
-                    <form [formGroup]="summaryForm">
-
+                   
+                    <div>
                         <label class="text-dp-2-bold fw-bold ">Education Fees -₹ {{formatInr(totalEstimatedExpenseInr )
                             }}</label>
                         <hr class="hrclass" />
@@ -138,14 +141,14 @@
                             <div class="info-grid-img ">
                                 <div class="info-item d-flex flex-column">
                                     <label class="text-label">Tuition Fees (INR)</label>
-                                    <div class="text-label-data fw-bold">₹{{ educationFees?.tuitionInr
+                                    <div class="text-label-data fw-bold">₹{{formatInr(educationFees?.tuitionInr)
                                         }}
                                     </div>
                                 </div>
 
                                 <div class="info-item d-flex flex-column">
                                     <label class="text-label">Amount (AUD)</label>
-                                    <div class="text-label-data fw-bold">${{ educationFees?.tuitionAud |
+                                    <div class="text-label-data fw-bold">{{ educationFees?.tuitionAud |
                                         currency:'AUD':'symbol-narrow':'1.0-0':'en-AU' }}</div>
                                 </div>
                             </div>
@@ -355,7 +358,8 @@
 
                             </div>
                         </div>
-                    </form>
+                    </div>
+                    
                 </div>
             </ng-template>
 
@@ -364,7 +368,8 @@
             <ng-template #additonalTemplate let-i="index">
 
                 <div class="row common-details-box d-flex flex-row">
-                    <form [formGroup]="summaryForm">
+                    <div class="">
+                        
 
                         <!-- Main Applicant Section -->
                         <div>
@@ -387,7 +392,7 @@
                         </div>
 
                         <!-- Spouse Details Section -->
-                        <div class="mt-20">
+                        <div class="mt-20" *ngIf="additionalInfoFields.spouse.length > 0">
                             <label class="text-dp-2-bold fw-bold ">Spouse Details</label>
                             <hr class="hrclass" />
                             <div class="info-grid-img">
@@ -425,7 +430,8 @@
                             </div>
                         </div>
 
-                    </form>
+                        
+                    </div>
                 </div>
             </ng-template>
 
@@ -433,8 +439,8 @@
             <ng-template #kycTemplate let-i="index">
 
                 <div class="row common-details-box d-flex flex-row ">
-                    <form [formGroup]="summaryForm">
-
+                  
+                    <div>
 
                         <div class="d-flex mt-20 flex-column">
                             <label class="text-dp-2-bold fw-bold">Identity & Residency</label>
@@ -472,7 +478,20 @@
                                 </div>
                             </div>
                         </div>
-                    </form>
+                        <div class="d-flex flex-column mt-20">
+                            <label class="text-dp-2-bold fw-bold">Other Address</label>
+                            <hr class="hrclass" />
+                            <div class="info-grid-img">
+                                <div *ngFor="let field of KycInfoFields.otherAddress"
+                                    class="info-item d-flex flex-column">
+                                    <label class="text-label">{{ field.label }}</label>
+
+                                    <div class="text-label-data fw-bold">{{field.value}}</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
                 </div>
 
             </ng-template>
@@ -480,7 +499,8 @@
             <ng-template #educationTemplate let-i="index">
 
                 <div class="row common-details-box d-flex flex-row ">
-                    <form [formGroup]="summaryForm">
+                  
+                    <div>
                         <div>
                             <label class="text-dp-2-bold fw-bold">Qualification Details</label>
                             <hr class="hrclass" />
@@ -578,7 +598,7 @@
 
                                 <ng-container *ngFor="let field of EducationInfoFields[section.key]">
 
-                                    <!-- ✅ NORMAL FIELD -->
+                                    <!--   NORMAL FIELD -->
                                     <ng-container *ngIf="field.key !== 'marksheetUrl'">
 
                                         <div class="info-item d-flex flex-column">
@@ -588,7 +608,7 @@
                                             </div>
                                         </div>
 
-                                        <!-- ✅ INSERT MARKSHEET RIGHT AFTER LOCATION -->
+                                        <!--   INSERT MARKSHEET RIGHT AFTER LOCATION -->
                                         <ng-container *ngIf="field.key.includes('location')">
                                             <!-- <ng-container *ngIf="field.key === 'otherLocation'"> -->
 
@@ -596,7 +616,7 @@
 
                                                 <ng-container *ngIf="f.key === 'marksheetUrl'">
 
-                                                    <!-- ✅ MULTIPLE MARKSHEETS -->
+                                                    <!--   MULTIPLE MARKSHEETS -->
                                                     <ng-container *ngIf="isArray(f.value); else singleMarksheet">
 
                                                         <div *ngFor="let file of f.value; let i = index"
@@ -648,7 +668,7 @@
 
                                     <ng-container *ngIf="field.key === 'marksheetUrl'">
 
-                                        <!-- ✅ MULTIPLE -->
+                                        <!--   MULTIPLE -->
                                         <ng-container *ngIf="isArray(field.value); else singleMarksheet">
 
                                             <div *ngFor="let file of field.value; let i = index"
@@ -668,7 +688,7 @@
 
                                         </ng-container>
 
-                                        <!-- ✅ SINGLE -->
+                                        <!--   SINGLE -->
                                         <ng-template #singleMarksheet>
                                             <div class="info-item d-flex flex-column">
                                                 <label class="text-label">Marksheet</label>
@@ -716,7 +736,8 @@
                                 </div>
                             </div>
                         </div>
-                    </form>
+                      
+                    </div>
                 </div>
 
             </ng-template>
@@ -725,8 +746,8 @@
 
             <ng-template #incomeTemplate let-i="index">
                 <div class="row common-details-box d-flex flex-row">
-                    <form [formGroup]="summaryForm">
-
+                    
+                    <div>
                         <!-- Occupation Details Header -->
                         <div class="d-flex flex-column ">
 
@@ -852,80 +873,79 @@
 
                             </div>
                         </div>
-
-                    </form>
+                    </div>
+                    
                 </div>
             </ng-template>
 
 
 
             <ng-template #assetsTemplate let-i="index">
-                <div class="row common-details-box d-flex flex-row">
-                    <form [formGroup]="summaryForm">
-                    <ng-container *ngIf="assetsSections.length > 0">
-                        <ng-container *ngFor="let section of assetsSections">
-                            <div
-                                [ngClass]="{'mt-20': section.sectionLabel !== 'Gold' && section.sectionLabel !== 'Liquid Assets'}">
-                                <!-- Section Title -->
-                                <label class="text-dp-2-bold fw-bold  ">
-                                    {{ section.sectionLabel }}
-                                </label>
-                                <hr class="hrclass" />
+                <div class="row common-details-box d-flex flex-row" *ngIf="assetsSections?.length">
+                 <div>
+                    <ng-container *ngFor="let section of assetsSections">
+                        <div
+                            [ngClass]="{'mt-20': section.sectionLabel !== 'Gold' && section.sectionLabel !== 'Liquid Assets'}">
+                            <!-- Section Title -->
+                            <label class="text-dp-2-bold fw-bold  ">
+                                {{ section.sectionLabel }}
+                            </label>
+                            <hr class="hrclass" />
+                        </div>
+                        <!-- Cards -->
+                        <ng-container *ngFor="let card of section.cards">
+
+                            <!-- Bullet title (Property / FD / Investment only) -->
+                            <div class="mt-20">
+                                <span *ngIf="card.title">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="8" height="8">
+                                        <circle cx="4" cy="4" r="4" fill="#2570A3" />
+                                    </svg>
+                                    <label class="text-dp-2-bold  blue-text fw-bold px-3">
+                                        {{ card.title }}
+                                    </label>
+                                </span>
                             </div>
-                            <!-- Cards -->
-                            <ng-container *ngFor="let card of section.cards">
+                            <hr class="hrclass"
+                                *ngIf="section.sectionLabel !== 'Gold' && section.sectionLabel !== 'Liquid Assets'" />
 
-                                <!-- Bullet title (Property / FD / Investment only) -->
-                                <div class="mt-20">
-                                    <span *ngIf="card.title">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="8" height="8">
-                                            <circle cx="4" cy="4" r="4" fill="#2570A3" />
-                                        </svg>
-                                        <label class="text-dp-2-bold  blue-text fw-bold px-3">
-                                            {{ card.title }}
-                                        </label>
-                                    </span>
-                                </div>
-                                <hr class="hrclass"
-                                    *ngIf="section.sectionLabel !== 'Gold' && section.sectionLabel !== 'Liquid Assets'" />
+                            <div class="info-grid-img p-0 ">
 
-                                <div class="info-grid-img p-0 ">
+                                <div *ngFor="let field of card.fields" class="info-item d-flex flex-column"
+                                    [class.col-12]="field.fullRow">
+                                    <label class="text-label">{{ field.label }}</label>
 
-                                    <div *ngFor="let field of card.fields" class="info-item d-flex flex-column"
-                                        [class.col-12]="field.fullRow">
-                                        <label class="text-label">{{ field.label }}</label>
-
-                                        <div class="text-label-data fw-bold">
-                                            <ng-container *ngIf="field.isCurrency; else normal">
-                                                ₹{{ formatInr(field.value) }}
-                                            </ng-container>
-                                            <ng-template #normal>
-                                                {{ field.value }}
-                                            </ng-template>
+                                    <div class="text-label-data fw-bold">
+                                        <ng-container *ngIf="field.isCurrency; else normal">
+                                            ₹{{ formatInr(field.value) }}
+                                        </ng-container>
+                                        <ng-template #normal>
+                                            {{ field.value }}
+                                        </ng-template>
 
 
 
 
-                                        </div>
                                     </div>
-
                                 </div>
 
+                            </div>
 
-                            </ng-container>
 
                         </ng-container>
+
                     </ng-container>
-                    </form>
+                   </div>
                 </div>
             </ng-template>
 
 
 
-            <ng-template #liabilitiesTemplate let-i="index">
-                <div class="row common-details-box d-flex flex-row">
-                    <form [formGroup]="summaryForm">
 
+            <ng-template #liabilitiesTemplate let-i="index">
+                <div class="row common-details-box d-flex flex-row" *ngIf="liabilitiesSections?.length">
+                    
+                    <div>
 
                         <ng-container *ngFor="let section of liabilitiesSections;let i=index">
 
@@ -975,130 +995,119 @@
                             </ng-container>
 
                         </ng-container>
-
-                    </form>
+                    </div>
+                   
                 </div>
             </ng-template>
 
 
             <ng-template #monthlyexpTemplate let-i="index">
                 <div class="row common-details-box d-flex flex-row">
-                    <form [formGroup]="summaryForm">
+                   
 
-                        <div class="d-flex flex-column ">
+                    <div class="d-flex flex-column ">
 
 
 
-                            <!--  If it is multiple (ARRAY like utilities) -->
-                            <ng-container *ngFor="let field of monthlyExpenditureFields; let i = index">
+                        <!--  If it is multiple (ARRAY like utilities) -->
+                        <ng-container *ngFor="let field of monthlyExpenditureFields; let i = index">
 
-                                <div [ngClass]="{ 'mt-0': i === 0, 'mt-20': i !== 0 }">
+                            <div [ngClass]="{ 'mt-0': i === 0, 'mt-20': i !== 0 }">
 
-                                    <!-- ✅ Section Title -->
-                                    <label class="text-dp-2-bold fw-bold">{{ field.label }}</label>
-                                    <hr class="hrclass" />
+                                <!--   Section Title -->
+                                <label class="text-dp-2-bold fw-bold">{{ field.label }}</label>
+                                <hr class="hrclass" />
 
-                                    <!-- ✅ ARRAY CASE (like utilities) -->
-                                    <ng-container *ngIf="isArray(monthlyExpenditure[field.key]); else singleItem">
+                                <!--   ARRAY CASE (like utilities) -->
+                                <ng-container *ngIf="isArray(monthlyExpenditure[field.key]); else singleItem">
 
-                                        <div class="info-grid-img mt-10">
+                                    <div class="info-grid-img mt-10">
 
-                                            <div *ngFor="let item of monthlyExpenditure[field.key]"
-                                                class="info-item d-flex flex-column">
+                                        <div *ngFor="let item of monthlyExpenditure[field.key]"
+                                            class="info-item d-flex flex-column">
 
-                                                <label class="text-label">
-                                                    {{ getDisplayLabel(item.name) }}
-                                                </label>
-
-                                                <div class="text-label-data fw-bold">
-                                                    {{ item.amountInr != null
-                                                    ? (item.amountInr )
-                                                    : '-' }}
-                                                </div>
-
-                                            </div>
-
-                                        </div>
-
-                                    </ng-container>
-
-                                    <!-- ✅ SINGLE OBJECT CASE -->
-                                    <ng-template #singleItem>
-                                        <div class="info-item d-flex flex-column">
                                             <label class="text-label">
-                                                {{ getDisplayLabel(monthlyExpenditure[field.key]?.name) }}
+                                                {{ getDisplayLabel(item.name) }}
                                             </label>
 
                                             <div class="text-label-data fw-bold">
-                                                {{ monthlyExpenditure[field.key]?.amountInr != null ?
-                                                '₹' + formatInr(monthlyExpenditure[field.key].amountInr) :
-                                                '-' }}
+                                                {{ item.amountInr != null
+                                                ? (item.amountInr )
+                                                : '-' }}
                                             </div>
-                                        </div>
-                                    </ng-template>
 
-                                </div>
-
-                            </ng-container>
-
-
-
-                            <!-- Other Recurring Expenses -->
-                            <div *ngIf="monthlyExpenditure.otherRecurringExpenses?.length > 0; else noOtherExpenses">
-                                <label class="text-dp-2-bold fw-bold">Other Recurring Expenses</label>
-                                <hr class="hrclass" />
-
-                                <div class="" *ngFor="let expense of monthlyExpenditure.otherRecurringExpenses">
-                                    <!-- <div class="mt-20"> -->
-
-
-                                    <div class="info-grid-img  mt-20">
-                                        <div class="info-item d-flex flex-column">
-                                            <label class="text-label">Expense Name</label>
-                                            <label class="text-label-data fw-bold">{{ expense.name }}</label>
                                         </div>
 
-                                        <div class="info-item d-flex flex-column">
+                                    </div>
 
-                                            <label class="text-label"> Amount (INR)</label>
-                                            <label class="text-label-data fw-bold"> {{ expense.amountInr!= null ?
-                                                '₹' + formatInr(expense.amountInr) : '-'
-                                                }}</label>
+                                </ng-container>
 
+                                <!--   SINGLE OBJECT CASE -->
+                                <ng-template #singleItem>
+                                    <div class="info-item d-flex flex-column">
+                                        <label class="text-label">
+                                            {{ getDisplayLabel(monthlyExpenditure[field.key]?.name) }}
+                                        </label>
 
+                                        <div class="text-label-data fw-bold">
+                                            {{ monthlyExpenditure[field.key]?.amountInr != null ?
+                                            '₹' + formatInr(monthlyExpenditure[field.key].amountInr) :
+                                            '-' }}
                                         </div>
                                     </div>
-                                    <!-- </div> -->
+                                </ng-template>
 
-                                </div>
                             </div>
 
-                            <ng-template #noOtherExpenses>
-                                <!-- Optionally show nothing or a message if no other expenses -->
-                            </ng-template>
+                        </ng-container>
 
+
+
+                        <!-- Other Recurring Expenses -->
+                        <div *ngIf="monthlyExpenditure.otherRecurringExpenses?.length > 0; else noOtherExpenses">
+                            <label class="text-dp-2-bold fw-bold">Other Recurring Expenses</label>
+                            <hr class="hrclass" />
+
+                            <div class="" *ngFor="let expense of monthlyExpenditure.otherRecurringExpenses">
+                                <!-- <div class="mt-20"> -->
+
+
+                                <div class="info-grid-img  mt-20">
+                                    <div class="info-item d-flex flex-column">
+                                        <label class="text-label">Expense Name</label>
+                                        <label class="text-label-data fw-bold">{{ expense.name }}</label>
+                                    </div>
+
+                                    <div class="info-item d-flex flex-column">
+
+                                        <label class="text-label"> Amount (INR)</label>
+                                        <label class="text-label-data fw-bold"> {{ expense.amountInr!= null ?
+                                            '₹' + formatInr(expense.amountInr) : '-'
+                                            }}</label>
+
+
+                                    </div>
+                                </div>
+                                <!-- </div> -->
+
+                            </div>
                         </div>
 
-                    </form>
+                        <ng-template #noOtherExpenses>
+                            <!-- Optionally show nothing or a message if no other expenses -->
+                        </ng-template>
+
+                    </div>
+
+                    
                 </div>
             </ng-template>
 
             <ng-template #referenceTemplate let-i="index">
 
                 <div class="row common-details-box d-flex flex-row ">
-                    <form [formGroup]="summaryForm">
-                        <!-- <div class="info-grid-img">
-                        <div class="info-item d-flex flex-column"
-                            *ngFor="let field of ReferenceInfoFields; trackBy: trackByKey">
 
-                            <label class="text-label">{{ field.label }}</label>
-
-
-                            <p class="text-label-data">
-                                {{ summaryForm.get(field.key)?.value || '-' }}
-                            </p>
-                        </div>
-                    </div> -->
+                    <div>
 
                         <ng-container *ngFor="let ref of ReferenceInfoFields;let i = index">
 
@@ -1122,8 +1131,8 @@
                             </div>
 
                         </ng-container>
-
-                    </form>
+                    </div>
+                    
                 </div>
 
             </ng-template>

@@ -45,21 +45,31 @@
                     <div class="col-6" *ngIf="isOtherQualification">
                         <div class="form-group">
                             <app-inputfield formControlName="qualificationtitle" name="qualificationtitle"
-                                label="Other Qualification" placeholder="Enter Title" [required]="true">
+                                [maxlength]="100" label="Other Qualification" placeholder="Enter Title"
+                                [required]="true">
                             </app-inputfield>
 
-                            <div class="text-danger"
-                                *ngIf="basicform.get('qualificationtitle')?.touched && basicform.get('qualificationtitle')?.invalid">
-                                Title is required
+                            <div class="text-danger" *ngIf="basicform.get('qualificationtitle')?.touched">
+
+                                <div class="text-danger"
+                                    *ngIf="basicform.get('qualificationtitle')?.errors?.['required']">
+                                    Title is required
+                                </div>
+
+                                <div class="text-danger"
+                                    *ngIf="!basicform.get('qualificationtitle')?.errors?.['required']  && basicform.get('qualificationtitle')?.errors?.['minlength']">
+                                   Qualification name must be 2–100 characters
+                                </div>
+
+
+                                <div *ngIf="!basicform.get('qualificationtitle')?.errors?.['required'] 
+                                         && !basicform.get('qualificationtitle')?.errors?.['minlength']
+                                         && basicform.get('qualificationtitle')?.errors?.['maxlength']">
+                                    Maximum 100 characters allowed
+                                </div>
+
                             </div>
 
-                            <div class="text-danger" *ngIf="basicform.get('qualificationtitle')?.errors?.['minlength']">
-                                Minimum 2 characters required
-                            </div>
-
-                            <div class="text-danger" *ngIf="basicform.get('qualificationtitle')?.errors?.['maxlength']">
-                                Maximum 100 characters allowed
-                            </div>
 
                         </div>
                     </div>
@@ -83,27 +93,27 @@
                             </app-inputfield>
 
 
-                            <ng-container
-                                *ngIf=" basicform.get('institutetitle')?.touched && basicform.get('institutetitle')?.invalid ">
-                                <div class="text-danger"
-                                    *ngIf="basicform.get('institutetitle')?.errors?.['required']; else minLen">
+                            <div class="text-danger" *ngIf="basicform.get('institutetitle')?.touched">
+
+                                <div class="text-danger" *ngIf="basicform.get('institutetitle')?.errors?.['required']">
                                     Title is required
                                 </div>
 
-                                <ng-template #minLen>
-                                    <div class="text-danger"
-                                        *ngIf="basicform.get('institutetitle')?.errors?.['minlength']; else maxLen">
-                                        Minimum 2 characters required
-                                    </div>
-                                </ng-template>
+                                <div class="text-danger"
+                                    *ngIf="!basicform.get('institutetitle')?.errors?.['required']  && basicform.get('institutetitle')?.errors?.['minlength']">
+                                    Institution name must be 2–100 characters
+                                </div>
 
-                                <ng-template #maxLen>
-                                    <div class="text-danger"
-                                        *ngIf="basicform.get('institutetitle')?.errors?.['maxlength']">
-                                        Maximum 100 characters allowed
-                                    </div>
-                                </ng-template>
-                            </ng-container>
+
+                                <div *ngIf="!basicform.get('institutetitle')?.errors?.['required'] 
+                                         && !basicform.get('institutetitle')?.errors?.['minlength']
+                                         && basicform.get('institutetitle')?.errors?.['maxlength']">
+                                    Maximum 100 characters allowed
+                                </div>
+
+                            </div>
+
+                          
 
 
                         </div>

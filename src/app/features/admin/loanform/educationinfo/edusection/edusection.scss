@@ -133,15 +133,15 @@ border: 1px solid $neutral-300;
 }
 
 .other-doc-title {
-  flex: 1.2;            // ✅ grows naturally
+  flex: 1.2;            //   grows naturally
 }
 
 .other-doc-upload {
-  flex: 1.2;          // ✅ slightly wider than title
+  flex: 1.2;          //   slightly wider than title
 }
 
 .other-doc-delete {
-  flex: 0 0 auto;     // ✅ fixed size
+  flex: 0 0 auto;     //   fixed size
   cursor: pointer;
   padding-bottom: 10px;
    margin-right: -50px;
