@@ -147,7 +147,7 @@ export class Educationinfo implements OnInit {
 
   private hasUnsavedChanges = false;
 
-private flowQualificationId: string | null = null;
+  private flowQualificationId: string | null = null;
 
 
   constructor(private fb: FormBuilder, private stepperService: Loanstepperservice, private cd: ChangeDetectorRef, private formSvc: Loanformservice,
@@ -168,31 +168,31 @@ private flowQualificationId: string | null = null;
       others12: this.createForm(),
       othersdiploma: this.createForm()
     }
+    0    // 2.
+    Object.keys(this.educationForms).forEach(step => {
+      const form = this.educationForms[step] as FormGroup;
 
-    //  2. RESTORE FROM sessionStorage (refresh-safe)
-    const cached = sessionStorage.getItem('educationState');
+      form.valueChanges.subscribe(() => {
+        if (this.activeEducation === step) {
+          const raw = form.getRawValue();
 
-    // if (cached) {
-    //   const parsed = JSON.parse(cached);
+          this.educationFormState[step] = {
+            ...raw,
+            institutename: this.normalizeDropdownValue(raw.institutename),
+            location: this.normalizeDropdownValue(raw.location),
+            passingyear: this.normalizeDropdownValue(raw.passingyear),
+          };
 
-    //   this.educationFormState = parsed.forms || {};
-    //   this.activeEducation = parsed.active;
+          this.stepperService.setEducationStepData(
+            step,
+            this.educationFormState[step]
+          );
 
+          this.saveEducationStateToLocalStorage();
+        }
+      });
+    });
 
-    //   Object.keys(this.educationFormState).forEach(step => {
-    //     const form = this.educationForms[step];
-    //     if (form) {
-    //       form.patchValue(this.educationFormState[step], { emitEvent: false });
-    //     }
-    //   });
-
-    //   if (parsed.uploadedFiles) {
-    //     Object.keys(parsed.uploadedFiles).forEach(key => {
-    //       this.uploadedFiles[key] = parsed.uploadedFiles[key];
-    //     });
-    //   }
-
-    // }
 
     //  3. QUERY PARAMS
     this.route.queryParams.subscribe(params => {
@@ -205,58 +205,54 @@ private flowQualificationId: string | null = null;
       this.applicationId = applicationId;
 
 
-
+      // this.restoreEducationStateFromLocalStorage();
       if (params['qualificationlabel']) {
-        // this.activeEducation = params['qualificationlabel'];
-        // const step = params['qualificationlabel'] as StepKey;
-        // if (step) {
-        //   this.activeEducation = step;
-        //   this.restoreFormState(step);
-        //   const saved =
-        //     this.stepperService.getEducationStepData(step) ||
-        //     this.educationFormState[step];
-        //   if (saved) {
-        //     this.educationForms[step].patchValue(saved);
-        //   }
-        // }
-        
 
-    const step = params['qualificationlabel'] as StepKey;
-    if (step) {
-      this.activeEducation = step;
-      this.restoreFormState(step);
-    }
-
-    //   build submenu only when flow qualificationId changes
-    const qid = params['qualificationId'];
-    if (qid && qid !== this.flowQualificationId) {
-      this.flowQualificationId = qid;
-
-      this.formSvc.getselectedEducation(qid).subscribe((res: any) => {
-        this.educationdetails = res.data ?? res;
-
-        //   ONLY ONCE per flow
-        this.stepperService.setEducationSubSteps(this.educationdetails);
-
-        if (!this.isEducationFlowInitialized) {
-          const orderFromApi = this.educationdetails.map((d: any) =>
-            this.normalizeQualification(d.qualificationName)
-          );
-
-          this.educationOrder = [...new Set([...orderFromApi, 'ielts', 'offerletter'])];
-          this.isEducationFlowInitialized = true;
+        const step = params['qualificationlabel'] as StepKey;
+        if (step) {
+          this.activeEducation = step;
+          this.restoreFormState(step);
         }
-      });
-    }
 
-   }
+        //   build submenu only when flow qualificationId changes
+        const qid = params['qualificationId'];
+        if (qid && qid !== this.flowQualificationId) {
+          this.flowQualificationId = qid;
+
+          this.formSvc.getselectedEducation(qid).subscribe((res: any) => {
+            this.educationdetails = res.data ?? res;
+
+            //   ONLY ONCE per flow
+            this.stepperService.setEducationSubSteps(this.educationdetails);
+
+            if (!this.isEducationFlowInitialized) {
+              const orderFromApi = this.educationdetails.map((d: any) =>
+                this.normalizeQualification(d.qualificationName)
+              );
+
+              this.educationOrder = [...new Set([...orderFromApi, 'ielts', 'offerletter'])];
+              this.isEducationFlowInitialized = true;
+              this.saveEducationStateToLocalStorage();
+            }
+
+            // ✅ after API
+            this.restoreEducationStateFromLocalStorage();
+
+            if (step) {
+              this.activeEducation = step;
+
+              setTimeout(() => {
+                this.restoreFormState(step);
+              }, 200);
+            }
+          });
+        }
+
+      }
 
     });
 
     this.getEducationdetails();
-
-
-
 
     if (this.selectedLabel.includes('postgraduate') || this.selectedLabel.includes('pg')) {
       this.group.get('institutename')?.clearValidators();
@@ -272,33 +268,33 @@ private flowQualificationId: string | null = null;
       this.group.get('otherLocation')?.updateValueAndValidity();
     }
 
-    this.route.queryParams.subscribe(params => {
-      const qualificationId = params['qualificationId'];
-      if (!qualificationId) return;
+    // this.route.queryParams.subscribe(params => {
+    //   const qualificationId = params['qualificationId'];
+    //   if (!qualificationId) return;
 
-      this.selectedID = qualificationId;
+    //   this.selectedID = qualificationId;
 
-      this.formSvc.getselectedEducation(qualificationId).subscribe((res: any) => {
-        this.educationdetails = res.data ?? res;
+    //   this.formSvc.getselectedEducation(qualificationId).subscribe((res: any) => {
+    //     this.educationdetails = res.data ?? res;
 
-        if (!this.isEducationFlowInitialized) {
-          const orderFromApi = this.educationdetails.map((d: any) =>
-            this.normalizeQualification(d.qualificationName)
-          );
+    //     if (!this.isEducationFlowInitialized) {
+    //       const orderFromApi = this.educationdetails.map((d: any) =>
+    //         this.normalizeQualification(d.qualificationName)
+    //       );
 
-          this.educationOrder = [...new Set([...orderFromApi, 'ielts', 'offerletter'])];
-          this.isEducationFlowInitialized = true;
+    //       this.educationOrder = [...new Set([...orderFromApi, 'ielts', 'offerletter'])];
+    //       this.isEducationFlowInitialized = true;
 
-          if (!this.activeEducation) {
-            this.activeEducation = this.educationOrder[0];
-          }
+    //       if (!this.activeEducation) {
+    //         this.activeEducation = this.educationOrder[0];
+    //       }
 
-        }
-        this.stepperService.setEducationSubSteps(this.educationdetails);
+    //     }
+    //     this.stepperService.setEducationSubSteps(this.educationdetails);
 
 
-      });
-    });
+    //   });
+    // });
   }
 
   toggle(index: number) {
@@ -341,7 +337,7 @@ private flowQualificationId: string | null = null;
     return (control: AbstractControl): ValidationErrors | null => {
       const value = control.value;
 
-    
+
       if (value === null || value === undefined || value === '') {
         return null;
       }
@@ -520,6 +516,10 @@ private flowQualificationId: string | null = null;
     const key = this.buildKey(step, doc1, index ?? 0);
     this.uploadedFiles[key] = result?.file ?? null;
     this.uploadedFiles = { ...this.uploadedFiles };
+
+    this.saveCurrentFormState();
+    this.saveEducationStateToLocalStorage();
+
     this.cd.detectChanges();
   }
 
@@ -540,7 +540,7 @@ private flowQualificationId: string | null = null;
 
     const normalizedDoc = this.normalizeDocType(e.control);
     const idx = e.control === 'marksheet' ? (e.index ?? 0) : undefined;
-     const key = this.buildKey(e.step, normalizedDoc, idx);
+    const key = this.buildKey(e.step, normalizedDoc, idx);
     // const key = this.buildKey(e.step, normalizedDoc, e.index ?? 0);
 
     // const key = this.buildKey(e.step, e.control, e.index);
@@ -561,6 +561,8 @@ private flowQualificationId: string | null = null;
 
         this.otherDocMap = { ...this.otherDocMap };
         this.uploadedFiles = { ...this.uploadedFiles };
+        this.saveCurrentFormState();
+        this.saveEducationStateToLocalStorage();
         return;
       }
 
@@ -574,6 +576,10 @@ private flowQualificationId: string | null = null;
     }
 
     this.uploadedFiles = { ...this.uploadedFiles };
+
+    this.saveCurrentFormState();
+    this.saveEducationStateToLocalStorage();
+
     console.log("this.uploadedFiles---------", this.uploadedFiles);
 
     this.cd.detectChanges();
@@ -603,66 +609,38 @@ private flowQualificationId: string | null = null;
 
     form.patchValue(saved, { emitEvent: false });
 
-    
-setTimeout(() => {
-    this.cd.detectChanges();
-  });
 
-    // if (saved.value?.institutename) {
-    //   form.get('institutename')?.setValue(saved.value.institutename, {
-    //     emitEvent: false
-    //   });
-    // }
+    setTimeout(() => {
+      this.cd.detectChanges();
+    });
 
-    // if (saved.value?.location) {
-    //   form.get('location')?.setValue(saved.value.location, {
-    //     emitEvent: false
-    //   });
-    // }
-    // if (saved.value?.otherLocation) {
-    //   form.get('otherLocation')?.setValue(saved.value.otherLocation, {
-    //     emitEvent: false
-    //   });
-    // }
-
-    // if (saved.value?.passingyear) {
-    //   form.get('passingyear')?.setValue(saved.value.passingyear, {
-    //     emitEvent: false
-    //   });
-    // }
     form.markAsDirty();
     form.markAsPristine();
     form.updateValueAndValidity({ emitEvent: false });
+
+
+    // const patchedValue = {
+    //   ...saved,
+    //   institutename: this.normalizeDropdownValue(saved?.institutename),
+    //   location: this.normalizeDropdownValue(saved?.location),
+    //   passingyear: this.normalizeDropdownValue(saved?.passingyear),
+    // };
+
+    // form.patchValue(patchedValue, { emitEvent: false });
+
+    // setTimeout(() => {
+    //   form.get('institutename')?.setValue(patchedValue.institutename, { emitEvent: false });
+    //   form.get('location')?.setValue(patchedValue.location, { emitEvent: false });
+    //   form.get('passingyear')?.setValue(patchedValue.passingyear, { emitEvent: false });
+
+    //   form.markAsPristine();
+    //   form.updateValueAndValidity({ emitEvent: false });
+    //   this.cd.detectChanges();
+    // }, 300);
+
   }
 
 
-
-
-  private hydrateEducationFromApi(details: any[]) {
-    details.forEach((item: any) => {
-      const step = this.normalizeQualification(item.qualificationName) as StepKey;
-      const form = this.educationForms[step];
-      if (!form) return;
-
-      form.patchValue({
-        institutename: item.instituteName,
-        passingyear: item.yearOfPassing,
-        per_cgpa: item.percentageCgpa,
-        location: item.location,
-        otherLocation: item.otherLocation
-      }, { emitEvent: false });
-
-      //  restore uploaded document info (only metadata)
-      if (item.documents) {
-        item.documents.forEach((doc: any, index: number) => {
-          const key = this.buildKey(step, this.normalizeDocType(doc.type), index);
-          this.uploadedFiles[key] = { name: doc.fileName } as any;
-        });
-      }
-    });
-
-    this.cd.detectChanges();
-  }
 
 
   getEducationGroup(key: string): FormGroup {
@@ -790,6 +768,26 @@ setTimeout(() => {
       );
 
     }
+    // if (form) {
+
+    //   const raw = form.getRawValue();
+
+    //   const normalized = {
+    //     ...raw,
+    //     institutename: this.normalizeDropdownValue(raw.institutename),
+    //     location: this.normalizeDropdownValue(raw.location),
+    //     passingyear: this.normalizeDropdownValue(raw.passingyear),
+    //   };
+
+    //   this.educationFormState[step] = normalized;
+
+    //   this.stepperService.setEducationStepData(
+    //     step,
+    //     normalized
+    //   );
+
+    //   this.saveEducationStateToLocalStorage();
+    // }
   }
   private performEducationBack() {
 
@@ -941,6 +939,138 @@ setTimeout(() => {
     return hasFormValue || hasFiles;
   }
 
+  private getEducationStateKey(): string {
+    return `educationState_${this.applicantId}`;
+  }
+
+  private saveEducationStateToLocalStorage() {
+    if (!this.applicantId) return;
+
+    const forms: Record<string, any> = {};
+
+    Object.keys(this.educationForms).forEach(step => {
+
+      
+       const form = this.educationForms[step];
+      if (form) {
+        forms[step] = form.getRawValue();
+      }
+
+      //       const form = this.educationForms[step];
+      //       if (form) {
+
+      //  const raw = form.getRawValue();
+
+      //     forms[step] = {
+      //       ...raw,
+      //       institutename: this.normalizeDropdownValue(raw.institutename),
+      //       location: this.normalizeDropdownValue(raw.location),
+      //       passingyear: this.normalizeDropdownValue(raw.passingyear),
+      //     };
+      // }
+
+      // const currentForm = this.educationForms[step];
+      // const raw = currentForm?.getRawValue();
+      // const savedState = this.educationFormState[step];
+      // const data = savedState || raw;
+
+      // if (!data) return;
+
+      // forms[step] = {
+      //   ...data,
+      //   institutename: this.normalizeDropdownValue(data?.institutename),
+      //   location: this.normalizeDropdownValue(data?.location),
+      //   passingyear: this.normalizeDropdownValue(data?.passingyear),
+      // };
+
+
+    });
+
+    const uploadedFileMeta: Record<string, any> = {};
+
+    Object.keys(this.uploadedFiles).forEach(key => {
+      const file: any = this.uploadedFiles[key];
+
+      if (file) {
+        uploadedFileMeta[key] = {
+          name: file.name || file.fileName || '',
+          uploaded: !(file instanceof File)
+        };
+      }
+    });
+
+    const payload = {
+      activeEducation: this.activeEducation,
+      educationFormState: forms,
+      uploadedFileMeta,
+      otherDocMap: this.otherDocMap,
+      educationOrder: this.educationOrder
+    };
+
+    localStorage.setItem(this.getEducationStateKey(), JSON.stringify(payload));
+  }
+  private restoreEducationStateFromLocalStorage() {
+    if (!this.applicantId) return;
+
+    const saved = localStorage.getItem(this.getEducationStateKey());
+    if (!saved) return;
+
+    const parsed = JSON.parse(saved);
+
+    this.educationFormState = parsed.educationFormState || {};
+    this.otherDocMap = parsed.otherDocMap || {};
+
+    if (parsed.educationOrder?.length) {
+      this.educationOrder = parsed.educationOrder;
+    }
+
+    if (parsed.activeEducation) {
+      this.activeEducation = parsed.activeEducation;
+    }
+
+    Object.keys(this.educationFormState).forEach(step => {
+      const form = this.educationForms[step];
+
+      if (form) {
+        const savedValue = this.educationFormState[step];
+
+        const patchedValue = {
+          ...savedValue,
+          institutename: this.normalizeDropdownValue(savedValue?.institutename),
+          location: this.normalizeDropdownValue(savedValue?.location),
+          passingyear: this.normalizeDropdownValue(savedValue?.passingyear),
+        };
+
+        // form.patchValue(patchedValue, {
+        //   emitEvent: false
+        // });
+
+        this.educationFormState = parsed.educationFormState || {};
+        this.otherDocMap = parsed.otherDocMap || {};
+
+        if (parsed.activeEducation) {
+          this.activeEducation = parsed.activeEducation;
+        }
+      }
+    });
+
+    if (parsed.uploadedFileMeta) {
+      Object.keys(parsed.uploadedFileMeta).forEach(key => {
+        this.uploadedFiles[key] = parsed.uploadedFileMeta[key] as any;
+      });
+
+      this.uploadedFiles = { ...this.uploadedFiles };
+    }
+
+    this.cd.detectChanges();
+  }
+  private normalizeDropdownValue(value: any): any {
+    if (Array.isArray(value)) {
+      return value.length ? value[0] : '';
+    }
+
+    return value ?? '';
+  }
   next() {
     console.log("next---");
 
@@ -977,11 +1107,11 @@ setTimeout(() => {
 
     this.stepperService.setEducationStepData(
       step,
+      // this.educationFormState[step]
       this.educationForms[step].getRawValue()
     );
 
 
-    // this.stepperService.markEducationSectionComplete(step);
 
     this.stepperService.markEducationSectionComplete(step);
 
@@ -997,7 +1127,6 @@ setTimeout(() => {
 
 
     const fd = new FormData();
-
     const subcategory = this.stepToSubcategory[step];
 
     fd.append('category', 'EDUCATION');
@@ -1028,7 +1157,6 @@ setTimeout(() => {
         return;
       }
 
-
       // if (file) {
       fd.append('files[0].type', 'UPLOAD_CERTIFICATE');
       fd.append('files[0].file', file);
@@ -1058,7 +1186,6 @@ setTimeout(() => {
       let fileIndex = reqDocs.length;
 
 
-
       //  ADD EXTRA MARKSHEETS (after required ones)
       Object.keys(this.uploadedFiles)
         .filter(key =>
@@ -1068,7 +1195,7 @@ setTimeout(() => {
           const file = this.uploadedFiles[key];
           if (!file) return;
 
-         
+
           const isRequired = key.includes('marksheet1') || key.includes('marksheet_0');
           if (isRequired) return;
 
@@ -1097,19 +1224,11 @@ setTimeout(() => {
           fileIndex++;
         });
 
-
-
       fd.append('instituteName', form.get('institutename')?.value);
       fd.append('yearOfPassing', form.get('passingyear')?.value);
       fd.append('percentageCgpa', form.get('per_cgpa')?.value);
       fd.append('location', form.get('location')?.value);
       fd.append('otherLocation', form.get('otherLocation')?.value);
-
-
-      // if (step === 'pg') {
-      //   fd.append('files', '');
-      // }
-
 
     }
 
@@ -1122,7 +1241,13 @@ setTimeout(() => {
 
     this.formSvc.uploadIncome(fd, this.applicationId).subscribe({
       next: (res) => {
-        // reqDocs.forEach(r => this.uploadedFiles[this.buildKey(step, r.doc)] = null);
+
+
+        this.hasUnsavedChanges = false;
+
+        this.saveCurrentFormState();
+        this.saveEducationStateToLocalStorage();
+
         this.uploadedFiles = { ...this.uploadedFiles };
         this.cd.detectChanges();
         const idx = this.educationOrder.indexOf(step);

@@ -8,7 +8,7 @@ type MessageType = 'default' | 'unsaved' | 'warning' | 'error' | 'success';
 
 export interface SectionComparison {
   currentSections: string[];
-  addingSection: string;
+  addingSections: string;
 }
 
 @Component({
@@ -38,8 +38,8 @@ export class Messagebox {
   @Input() mode: 'comparison' | 'required' | 'simple' = 'simple';
 @Input() comparisonData?: {
   currentSections: string[];
-  addingSection: string;
-  removingSections:string[];
+  addingSections?: string[];
+  removingSections?:string[];
 };
   private educationRankMap: Record<string, number> = {
   '10th': 1,
@@ -91,9 +91,9 @@ constructor(private stepperService:Loanstepperservice){}
     }
   }
 
-  isSectionKept(section: string, addingSection: string): boolean {
+  isSectionKept(section: string, addingSections: string): boolean {
   const current = this.normalizeSectionLabel(section);
-  const adding = this.normalizeSectionLabel(addingSection);
+  const adding = this.normalizeSectionLabel(addingSections);
 
   const currentRank = this.educationRankMap[current] ?? 999;
   const addingRank = this.educationRankMap[adding] ?? 999;
@@ -108,10 +108,33 @@ isSectionCompleted(sectionLabel: string): boolean {
     .has(stepKey);
 }
 
-shouldShowTick(section: string, addingSection: string): boolean {
+shouldShowTick(section: string, addingSections: string): boolean {
   const filled = this.isSectionCompleted(section);
-  const kept = this.isSectionKept(section, addingSection);
+  const kept = this.isSectionKept(section, addingSections);
   return filled && kept;
+}
+shouldShowTick1(section: string, addingSections: string[]): boolean {
+
+  const filled = this.isSectionCompleted(section);
+
+  if (!addingSections || addingSections.length === 0) {
+    return filled; // removing mode
+  }
+
+  const addingSection = addingSections[0];
+
+  
+if (typeof addingSection !== 'string') {
+    return filled;
+  }
+
+  const sectionKey = this.normalizeQualification(section);
+  const addingKey = this.normalizeQualification(addingSection);
+
+  const sectionRank = this.educationRankMap[sectionKey] ?? 999;
+  const addingRank = this.educationRankMap[addingKey] ?? 999;
+
+  return filled && sectionRank <= addingRank;
 }
 
 private normalizeSectionLabel(label: string): string {

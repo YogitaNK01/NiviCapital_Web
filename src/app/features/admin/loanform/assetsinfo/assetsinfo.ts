@@ -125,13 +125,14 @@ export class Assetsinfo implements OnInit {
       this.applicantId = applicantId;
       this.applicationId = applicationId;
 
-      
-  const key = `assetsinfoData_${this.applicantId}`;
-    const savedData = localStorage.getItem(key);
 
-    if (savedData) {
-      this.formSvc.aseetsInfoData = JSON.parse(savedData);
-    }
+      const key = `assetsinfoData_${this.applicantId}`;
+      const savedData = localStorage.getItem(key);
+
+      if (savedData) {
+        this.formSvc.aseetsInfoData = JSON.parse(savedData);
+         this.stepperService.markStepCompleted('assetsinfo');
+      }
 
     });
 
@@ -206,7 +207,7 @@ export class Assetsinfo implements OnInit {
   createFD(): FormGroup {
     return this.fb.group({
       bankname: [''],
-      title: [''],
+      description: [''],
       bankamt: ['', [Validators.required, this.nonZeroValidator]],
       maturitydate: ['', [Validators.required, this.dateMinValidator(() => new Date())]]
     });
@@ -928,7 +929,7 @@ export class Assetsinfo implements OnInit {
     const bankLabel = found?.label ?? '';
     this.selectedbakname = bankLabel;
 
-    const titleCtrl = fg.get('title');
+    const titleCtrl = fg.get('description');
 
     if (bankLabel === 'Other') {
       titleCtrl?.setValidators([Validators.required]);
@@ -1193,7 +1194,12 @@ export class Assetsinfo implements OnInit {
 
             addItem('FIXED_DEPOSIT', ctrl.value.bankamt, {
               bankId: ctrl.value.bankname,
-              ...(this.isOtherSelected(ctrl) && { title: ctrl.value.title }),
+              // ...(this.isOtherSelected(ctrl) && { description: ctrl.value.description }),
+
+              ...(this.isOtherSelected(ctrl) && ctrl.value.description?.trim()
+                ? { description: ctrl.value.description }
+                : {}),
+
               maturityDate: (ctrl.value.maturitydate).format('YYYY-MM-DD'),
               assetType: `Fixed Deposit ${index + 1}`
             });

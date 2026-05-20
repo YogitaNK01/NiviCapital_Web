@@ -108,6 +108,7 @@ const stepData = this.stepperService.getStepData('incomeinfo');
 
       if (stored) {
         this.uploadedrespfiles = JSON.parse(stored);
+         this.stepperService.markStepCompleted('incomeinfo');
         this.getAllDocuments();
         this.restoreSlotsFromDocuments();
       }

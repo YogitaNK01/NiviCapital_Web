@@ -61,27 +61,27 @@ export class Loanstepper implements OnInit {
       //   this.cdr.detectChanges();
       // }
 
-    const label = params['qualificationlabel'];
-    if (label) {
-      this.activeEducation = label;
-      this.cdr.detectChanges();
-    }
+      const label = params['qualificationlabel'];
+      if (label) {
+        this.activeEducation = label;
+        this.cdr.detectChanges();
+      }
 
-    //  Only rebuild submenu if flow qualificationId changed
-    const qid = params['qualificationId'];
-    if (qid && qid !== this.flowQualificationId) {
-      this.flowQualificationId = qid;
+      //  Only rebuild submenu if flow qualificationId changed
+      const qid = params['qualificationId'];
+      if (qid && qid !== this.flowQualificationId) {
+        this.flowQualificationId = qid;
 
-      this.formSvc.getselectedEducation(qid).subscribe(res => {
-        this.educationdetails = res.data ?? res;
+        this.formSvc.getselectedEducation(qid).subscribe(res => {
+          this.educationdetails = res.data ?? res;
 
-        //  build submenu ONCE for this flow
-        this.stepperService.setEducationSubSteps(this.educationdetails);
-      });
-    }
- 
+          //  build submenu ONCE for this flow
+          this.stepperService.setEducationSubSteps(this.educationdetails);
+        });
+      }
 
-    
+
+
 
 
     });
@@ -94,6 +94,10 @@ export class Loanstepper implements OnInit {
       }
 
     });
+    
+this.stepperService.restoreCompletedSteps(); 
+  this.stepperService.rebuildSteps();
+
   }
 
 
@@ -190,23 +194,23 @@ export class Loanstepper implements OnInit {
     //  If education step → go to active child
     if (route === 'educationDetails') {
 
-      
-this.router.navigate(
-      ['/loanform', 'educationDetails'],
-      {
-        queryParams: {
-          applicantId: this.applicantId,
-          applicationId: this.applicationId,
-          custName: this.custName,
-          custARN: this.custARN,
-        },
 
-        //  optional: remove child params so it never opens educationinfo
-        queryParamsHandling: 'merge'
-      }
-    );
+      this.router.navigate(
+        ['/loanform', 'educationDetails'],
+        {
+          queryParams: {
+            applicantId: this.applicantId,
+            applicationId: this.applicationId,
+            custName: this.custName,
+            custARN: this.custARN,
+          },
 
-    return;
+          //  optional: remove child params so it never opens educationinfo
+          queryParamsHandling: 'merge'
+        }
+      );
+
+      return;
 
     }
 

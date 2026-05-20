@@ -109,9 +109,22 @@ export class Referenceinfo implements OnInit {
     )
 
 
-    if (this.loanformservice.referenceInfoData) {
-      this.patchReferenceData();
-    }
+    const key = `referenceinfoData_${this.applicantId}`;
+const storedData = localStorage.getItem(key);
+
+if (!this.loanformservice.referenceInfoData && storedData) {
+  this.loanformservice.referenceInfoData = JSON.parse(storedData);
+}
+
+if (this.loanformservice.referenceInfoData) {
+  this.patchReferenceData();
+
+  this.reference1Filled = this.loanformservice.referenceInfoData.reference1Filled || false;
+  this.reference2Filled = this.loanformservice.referenceInfoData.reference2Filled || false;
+
+  this.stepperService.markStepCompleted('referenceinfo');
+}
+
     this.states()
   }
 
@@ -348,7 +361,7 @@ export class Referenceinfo implements OnInit {
   submit() {
   }
 
-  patchReferenceData() {
+  patchReferenceData1() {
     const data = this.loanformservice.referenceInfoData;
 
     if (!data) return;
@@ -413,6 +426,38 @@ export class Referenceinfo implements OnInit {
     this.cd.detectChanges();
   }
 
+  patchReferenceData() {
+  const data = this.loanformservice.referenceInfoData;
+  if (!data) return;
+
+  // ✅ clear first
+  this.reference1Array.clear();
+  this.reference2Array.clear();
+
+  // ---------------- REFERENCE 1 ----------------
+  if (data.reference1?.length) {
+    data.reference1.forEach((item: any) => {
+      const group = this.createReferenceGroup();
+      group.patchValue(item);
+      this.reference1Array.push(group);
+    });
+  } else {
+    this.reference1Array.push(this.createReferenceGroup());
+  }
+
+  // ---------------- REFERENCE 2 ----------------
+  if (data.reference2?.length) {
+    data.reference2.forEach((item: any) => {
+      const group = this.createReferenceGroup();
+      group.patchValue(item);
+      this.reference2Array.push(group);
+    });
+  } else {
+    this.reference2Array.push(this.createReferenceGroup());
+  }
+
+  this.cd.detectChanges();
+}
   onEmailChange() {
 
     if (this.currentRefIndex === 1) {
@@ -529,7 +574,7 @@ export class Referenceinfo implements OnInit {
 
 
   };
-   setMergedError = (ctrl: AbstractControl | null, error: any) => {
+  setMergedError = (ctrl: AbstractControl | null, error: any) => {
     if (!ctrl) return;
     const existingErrors = ctrl.errors || {};
     ctrl.setErrors(Object.keys(existingErrors).length || error ? {
@@ -642,7 +687,7 @@ export class Referenceinfo implements OnInit {
 
     currentArray.at(0).patchValue({
       phone: this.mobileNumber,
-      
+
     });
 
     if (!this.canSaveReference) {
@@ -735,19 +780,19 @@ export class Referenceinfo implements OnInit {
     // this.reference1Array.push(this.createReferenceGroup());
     // this.reference2Array.push(this.createReferenceGroup());
 
-    
-const index = this.currentRefIndex;
-  const array = index === 0 ? this.reference1Array : this.reference2Array;
 
-  const isSaved =
-    index === 0 ? this.reference1Filled : this.reference2Filled;
+    const index = this.currentRefIndex;
+    const array = index === 0 ? this.reference1Array : this.reference2Array;
 
-  //  Only reset if NOT saved
-  if (!isSaved) {
-    array.clear();
-    array.push(this.createReferenceGroup());
-    this.savedReferenceData[index] = {};
-  }
+    const isSaved =
+      index === 0 ? this.reference1Filled : this.reference2Filled;
+
+    //  Only reset if NOT saved
+    if (!isSaved) {
+      array.clear();
+      array.push(this.createReferenceGroup());
+      this.savedReferenceData[index] = {};
+    }
 
     this.popupStep = 1;
     this.mobileNumber = '';
@@ -851,11 +896,24 @@ const index = this.currentRefIndex;
   }
 
   next() {
-    if(this.reference1Filled && this.reference2Filled ) {
- this.stepperService.markStepCompleted('referenceinfo');
-    this.stepperService.next();
-    }
+    if (this.reference1Filled && this.reference2Filled) {
+
+      const payload = {
+        reference1: this.reference1Array.getRawValue(),
+        reference2: this.reference2Array.getRawValue(),
+        reference1Filled: this.reference1Filled,
+        reference2Filled: this.reference2Filled
+      };
+
    
+      this.loanformservice.referenceInfoData = payload;
+      const key = `referenceinfoData_${this.applicantId}`;
+      localStorage.setItem(key, JSON.stringify(payload));
+      this.stepperService.markStepCompleted('referenceinfo');
+      this.stepperService.setStepData('referenceinfo', payload);
+      this.stepperService.next();
+    }
+
 
   }
 }

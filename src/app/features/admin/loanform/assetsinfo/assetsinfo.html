@@ -331,12 +331,12 @@
                                 <!-- Title (ONLY when Other) -->
                                 <div class="col-6" *ngIf="isOtherSelected(fd)">
                                     <div class="form-group">
-                                        <app-inputfield formControlName="title" label="Title" placeholder="Enter Title"
+                                        <app-inputfield formControlName="description" label="Title" placeholder="Enter Title"
                                             [required]="true">
                                         </app-inputfield>
 
                                         <div class="text-danger"
-                                            *ngIf="fd.get('title')?.touched && fd.get('title')?.invalid">
+                                            *ngIf="fd.get('description')?.touched && fd.get('description')?.invalid">
                                             Title is required
                                         </div>
                                     </div>

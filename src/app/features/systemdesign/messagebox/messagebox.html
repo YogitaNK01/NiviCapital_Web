@@ -46,12 +46,13 @@
               <div class="text-label-data fw-normal ">Current Section</div>
 
               <div class="comparison-box">
-                <ul class="list-unstyled d-flex flex-column gap-2">
+                <ul class="list-unstyled d-flex flex-column gap-2 text-start">
 
                   <li *ngFor="let item of comparisonData?.currentSections"
-                    class="d-flex align-items-center gap-2 text-common">
+                    class="section-row gap-2 text-common">
 
-                    <ng-container *ngIf="shouldShowTick(item, comparisonData?.addingSection ?? ''); else crossIcon">
+                    <!-- <ng-container *ngIf="shouldShowTick(item, comparisonData?.addingSection ?? ''); else crossIcon"> -->
+                        <ng-container *ngIf="shouldShowTick1(item, comparisonData?.addingSections || []); else crossIcon">
                       <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
                         <path
                           d="M12 2C6.49 2 2 6.49 2 12C2 17.51 6.49 22 12 22C17.51 22 22 17.51 22 12C22 6.49 17.51 2 12 2ZM16.78 9.7L11.11 15.37C10.97 15.51 10.78 15.59 10.58 15.59C10.38 15.59 10.19 15.51 10.05 15.37L7.22 12.54C6.93 12.25 6.93 11.77 7.22 11.48C7.51 11.19 7.99 11.19 8.28 11.48L10.58 13.78L15.72 8.64C16.01 8.35 16.49 8.35 16.78 8.64C17.07 8.93 17.07 9.4 16.78 9.7Z"
@@ -70,7 +71,7 @@
                       </svg>
                     </ng-template>
 
-                    {{ item }}
+                    <span class="section-text">{{ item }}</span>
                   </li>
                 </ul>
               </div>
@@ -80,15 +81,32 @@
             <div class="col-md-6 text-left d-flex flex-column gap-2">
               <div class="text-label-data fw-normal text-left d-flex flex-column gap-2">
                 {{
-                comparisonData?.addingSection
+               comparisonData?.addingSections?.length
                 ? 'Adding New Section'
                 : 'Removing Section'
                 }}
               </div>
 
-              <div class="text-common comparison-box">
+              <!-- <div class="text-common comparison-box">
                 • {{ (comparisonData?.addingSection) ? (comparisonData?.addingSection)
                 :((comparisonData?.removingSections)) }}
+              </div> -->
+              <div class="text-common comparison-box">
+
+                <!-- ✅ ADDING -->
+                <ng-container *ngIf="comparisonData?.addingSections?.length; else removingTpl">
+                  <div *ngFor="let item of comparisonData?.addingSections">
+                    • {{ item }}
+                  </div>
+                </ng-container>
+
+                <!-- ✅ REMOVING -->
+                <ng-template #removingTpl>
+                  <div *ngFor="let item of comparisonData?.removingSections">
+                    • {{ item }}
+                  </div>
+                </ng-template>
+
               </div>
             </div>
 
@@ -117,13 +135,15 @@
               <div class="text-label-data fw-normal ">Section required</div>
 
               <div class="comparison-box">
-                <ul class="list-unstyled  section-grid">
+                <ul class="list-unstyled  section-grid text-start">
 
 
                   <li *ngFor="let item of comparisonData?.currentSections"
-                    class="d-flex align-items-center1 gap-2 text-common">
+                    class="section-row  text-common">
 
-                    <ng-container *ngIf="shouldShowTick(item, comparisonData?.addingSection ?? ''); else crossIcon">
+                    <!-- <ng-container *ngIf="shouldShowTick(item, comparisonData?.addingSection ?? ''); else crossIcon"> -->
+                      <ng-container *ngIf="shouldShowTick1(item, comparisonData?.addingSections || []); else crossIcon"> 
+
                       <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
                         <path
                           d="M12 2C6.49 2 2 6.49 2 12C2 17.51 6.49 22 12 22C17.51 22 22 17.51 22 12C22 6.49 17.51 2 12 2ZM16.78 9.7L11.11 15.37C10.97 15.51 10.78 15.59 10.58 15.59C10.38 15.59 10.19 15.51 10.05 15.37L7.22 12.54C6.93 12.25 6.93 11.77 7.22 11.48C7.51 11.19 7.99 11.19 8.28 11.48L10.58 13.78L15.72 8.64C16.01 8.35 16.49 8.35 16.78 8.64C17.07 8.93 17.07 9.4 16.78 9.7Z"
@@ -142,7 +162,8 @@
                       </svg>
                     </ng-template>
 
-                    {{ item }}
+                   <span class="section-text">{{ item }}</span>
+
                   </li>
                 </ul>
               </div>

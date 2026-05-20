@@ -147,7 +147,7 @@ export class SummaryHelper {
       mainApplicant: [
         { label: 'Gender', key: 'gender' },
         { label: 'Marital Status', key: 'maritalStatus' },
-        { label: 'Upload Applicant Photo', key: 'photoUrl' },
+        { label: 'Upload Applicant Photo', key: 'fileName' },
         { label: 'Number of Dependents', key: 'numberofDependents' }
       ],
       spouse: [
@@ -203,62 +203,70 @@ export class SummaryHelper {
   }
 
 
-static extractKYCInfo(kyc: any) {
-  if (!kyc) {
+  static extractKYCInfo(kyc: any) {
+    if (!kyc) {
+      return {
+        identityAndResidency: [],
+        permanentAddress: [],
+        currentAddress: [],
+        otherAddress: [],
+         secondAddress: [],
+        showOther: false
+      };
+    }
+
+    const permanent = kyc.permanentAddress || {};
+    const current = kyc.currentAddress || {};
+    const other = kyc.otherAddress || {};
+
+    const isPermanentPreferred = permanent.isPreferredAddress === 1;
+
+    
+
     return {
-      identityAndResidency: [],
-      permanentAddress: [],
-      currentAddress: [],
-      otherAddress:[]
+      identityAndResidency: this.mapIdentity(kyc.identityAndResidency),
+
+      permanentAddress: this.mapAddress(permanent),
+
+  
+
+secondAddress: isPermanentPreferred
+      ? this.mapAddress(other)
+      : this.mapAddress(current),
+
+
+    showOther: isPermanentPreferred
+
+
     };
   }
+  static mapIdentity(identity: any) {
+    if (!identity) return [];
 
-  const permanent = kyc.permanentAddress || {};
-  const current = kyc.currentAddress || {};
-  const other = kyc.otherAddress || {};
+    return [
+      { label: 'Aadhaar Number', value: identity.aadhaarNumber },
+      { label: 'Aadhaar Card Front', value: identity.aadhaarFrontUrl },
+      { label: 'Aadhaar Card Back', value: identity.aadhaarBackUrl },
+      { label: 'PAN Number', value: identity.panNumber },
+      { label: 'PAN Card', value: identity.panCardUrl },
+      { label: 'Passport', value: identity.passportNumber },
+      { label: 'Passport ', value: identity.passportUrl },
+      { label: 'Date Of Birth', value: identity.dob }
+    ];
+  }
+  static mapAddress(addr: any) {
+    if (!addr) return [];
 
-  const isPermanentPreferred = permanent.isPreferredAddress === 1;
-
-  const addressToShow = isPermanentPreferred ? other : current;
-
-  return {
-    identityAndResidency: this.mapIdentity(kyc.identityAndResidency),
-
-    permanentAddress: this.mapAddress(permanent),
-    
- currentAddress: isPermanentPreferred
-      ? this.mapAddress(other)   
-      : this.mapAddress(current)
-
-  };
-}
-static mapIdentity(identity: any) {
-  if (!identity) return [];
-
-  return [
-   { label: 'Aadhaar Number',  value: identity.aadhaarNumber },
-        { label: 'Aadhaar Card Front',  value: identity.aadhaarFrontUrl },
-        { label: 'Aadhaar Card Back',  value: identity.aadhaarBackUrl },
-        { label: 'PAN Number',  value: identity.panNumber },
-        { label: 'PAN Card',  value: identity.panCardUrl },
-        { label: 'Passport',  value: identity.passportNumber },
-        { label: 'Passport ',  value: identity.passportUrl },
-        { label: 'Date Of Birth',  value: identity.dob }
-  ];
-}
-static mapAddress(addr: any) {
-  if (!addr) return [];
-
-  return [
-    { label: 'Address Line 1', value: addr.addressLine },
-    { label: 'Address Line 2', value: addr.addressLine1 },
-    { label: 'Address Line 3', value: addr.addressLine2 },
-    { label: 'City', value: addr.city },
-    { label: 'State', value: addr.state },
-    { label: 'Country', value: addr.country },
-    { label: 'Pincode', value: addr.pincode }
-  ];
-}
+    return [
+      { label: 'Address Line 1', value: addr.addressLine },
+      { label: 'Address Line 2', value: addr.addressLine1 },
+      { label: 'Address Line 3', value: addr.addressLine2 },
+      { label: 'City', value: addr.city },
+      { label: 'State', value: addr.state },
+      { label: 'Country', value: addr.country },
+      { label: 'Pincode', value: addr.pincode }
+    ];
+  }
   static extractKYCInfo1(kycInfo: any) {
     const labels = {
       identityAndResidency: [
@@ -715,14 +723,33 @@ static mapAddress(addr: any) {
     if (assets.fixedDeposits?.length) {
       sections.push({
         sectionLabel: 'Fixed Deposit',
-        cards: assets.fixedDeposits.map((fd: any, i: number) => ({
-          title: `FD ${i + 1}`,
-          fields: [
-            { label: 'Bank Name', value: fd.bankName },
+        cards: assets.fixedDeposits.map((fd: any, i: number) => {
+          // title: `FD ${i + 1}`,
+          const fields: Field[] = [
+            {
+              label: 'Bank Name',
+              value: fd.bankName === 'Other' ? fd.description : fd.bankName
+            },
+          ];
+
+          if (fd.bankName === 'Other') {
+            fields.push({
+              label: 'Other Bank Name',
+              value: fd.description
+            });
+          }
+          fields.push(
+
+            // { label: 'Bank Name', value: fd.bankName },
             { label: 'Amount (INR)', value: fd.amountInr, isCurrency: true },
-            { label: 'Maturity Date', value: fd.maturityDate }
-          ]
-        }))
+            { label: 'Maturity Date', value: fd.maturityDate })
+
+          return {
+            title: `FD ${i + 1}`,
+            fields
+          };
+
+        })
       });
     }
 

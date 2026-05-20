@@ -155,6 +155,7 @@ export class Edudetails {
       institute: ['', Validators.required],
       institutetitle: ['', [Validators.minLength(2), Validators.maxLength(100)]]
     })
+this.restoreEducationBasic();
 
 
     this.hasProceededOnce = !!this.previousEducationId;
@@ -219,7 +220,7 @@ export class Edudetails {
       this.isOtherEducation = false;
     }
 
-
+this.saveEducationBasic();
   }
 
 
@@ -338,8 +339,7 @@ export class Edudetails {
     if (!this.educationdetails?.length) return '';
 
     return this.educationdetails[this.educationdetails.length - 1]
-      .qualificationName.split('(')[0]
-      .trim();
+      .qualificationName;
   }
 
   private getAddingSectionLabel(newId: string): string {
@@ -409,7 +409,7 @@ export class Edudetails {
 
     //   if already available
     this.handleEducationChangeFlow(newId);
-
+this.saveEducationBasic();
 
     // this.showAdditionPopup(newId, newLabel);
 
@@ -429,12 +429,12 @@ export class Edudetails {
       return;
     }
 
-    this.showAdditionPopup(newId, newLabel);
+    this.showAdditionPopup(newId, [newLabel]);
   }
 
 
   //new education is added (ug-pg)
-  private showAdditionPopup(newId: string, addingLabel: string) {
+  private showAdditionPopup(newId: string, addingLabel: string[]) {
     this.msgbox.open({
       type: 'warning',
       title: 'Are you sure you want to change this?',
@@ -449,8 +449,8 @@ export class Edudetails {
 
       comparisonData: {
         currentSections: this.getCurrentSections(),
-        addingSection: addingLabel,
-        removingSections: ''
+        addingSections: addingLabel,
+        removingSections: []
       },
 
       onOk: () => {
@@ -558,12 +558,12 @@ export class Edudetails {
       // comparisonData: {
       //   currentSections: this.getCurrentSections(),
       //   removingSections: [oldLabel],
-      //   addingSection: ''
+      //   addingSections: ''
       // },
 
       comparisonData: {
         currentSections: this.getCurrentSectionsForPopup(this.previousEducationId!), // ✅ stable
-        addingSection: '',
+        addingSections: [],
         removingSections: removedSections  // ✅ pass correct array
       },
 
@@ -589,44 +589,12 @@ export class Edudetails {
 
 
   //second confirmation popup
-  private openPostUpdateInfoPopup1(newId: string, addingLabel: string) {
-    this.msgbox.open({
-      type: 'warning',
-      title: '',
-      mode: 'required',
-      message: `
-      You have updated your selection.<br>
-The following sections now need to be filled.
-    `,
-      okText: 'Proceed',
-      cancelText: 'No',
-      showCancel: true,
-
-      comparisonData: {
-        currentSections: this.getSectionRequiredList(newId),
-        addingSection: addingLabel,
-        removingSections: ''
-      },
-
-
-      onOk: () => {
-        this.previousEducationId = newId;
-        this.applyEducationChange(newId);
-        this.navigateToFirstEducationStep(newId);
-      },
-
-      onCancel: () => {
-        this.basicform.patchValue({
-          qualification: this.previousEducationId
-        });
-      }
-    });
-  }
+ 
   private openPostUpdateInfoPopup(
     newId: string,
     options: {
       mode: 'add' | 'remove';
-      addingLabel?: string;
+      addingLabel?: string[];
       removingLabels?: string[];
     }
   ) {
@@ -646,8 +614,8 @@ The following sections now need to be filled.
 
       comparisonData: {
         currentSections: this.getSectionRequiredList(newId),
-        addingSection: isAdd ? options.addingLabel : '',
-        removingSections: !isAdd ? options.removingLabels : ''
+        addingSections: isAdd ? options.addingLabel : [],
+        removingSections: !isAdd ? options.removingLabels : []
       },
 
       onOk: () => {
@@ -738,14 +706,15 @@ The following sections now need to be filled.
     if (lower.includes('diploma') && lower.includes('10')) return 'diploma10';
     if (lower.includes('diploma') && lower.includes('12')) return 'diploma12';
 
+    //others
     if (lower.includes('others') && lower.includes('after 12th')) return 'others12';
     if (lower.includes('others') && lower.includes('diploma')) return 'othersdiploma';
+ // PG
+    if ((lower.includes('postgraduate')) || (lower.includes('postgraduate') && lower.includes('undergraduate'))) return 'pg';
 
     // UG
     if (lower.includes('undergraduate') || (lower.includes('undergraduate') && lower.includes('after 12th'))) return 'ug';
-    // PG
-    if ((lower.includes('postgraduate')) || (lower.includes('postgraduate') && lower.includes('undergraduate'))) return 'pg';
-
+   
     // IELTS / PTE
     if (lower.includes('ielts') || lower.includes('pte')) return 'ielts';
 
@@ -782,7 +751,48 @@ The following sections now need to be filled.
     this.stepperService.previous();
   }
 
+private getEducationBasicKey(): string {
+  return `educationBasic_${this.applicantId}`;
+}
 
+private saveEducationBasic() {
+  if (!this.applicantId || !this.basicform) return;
+
+  localStorage.setItem(
+    this.getEducationBasicKey(),
+    JSON.stringify({
+      form: this.basicform.getRawValue(),
+      selectedQualificationLabel: this.selectedQualificationLabel,
+      selectedInstituteLabel: this.selectedInstituteLabel,
+      isOtherQualification: this.isOtherQualification,
+      isOtherEducation: this.isOtherEducation,
+      previousEducationId: this.previousEducationId,
+      hasProceededOnce: this.hasProceededOnce
+    })
+  );
+}
+
+private restoreEducationBasic() {
+  if (!this.applicantId || !this.basicform) return;
+
+  const saved = localStorage.getItem(this.getEducationBasicKey());
+  if (!saved) return;
+
+  const parsed = JSON.parse(saved);
+
+  this.basicform.patchValue(parsed.form || {}, {
+    emitEvent: false
+  });
+
+  this.selectedQualificationLabel = parsed.selectedQualificationLabel || '';
+  this.selectedInstituteLabel = parsed.selectedInstituteLabel || '';
+  this.isOtherQualification = !!parsed.isOtherQualification;
+  this.isOtherEducation = !!parsed.isOtherEducation;
+  this.previousEducationId = parsed.previousEducationId || null;
+  this.hasProceededOnce = !!parsed.hasProceededOnce;
+
+  this.cd.detectChanges();
+}
   next() {
     if (this.basicform.invalid) return;
 

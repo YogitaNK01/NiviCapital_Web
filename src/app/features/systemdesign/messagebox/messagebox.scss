@@ -158,3 +158,19 @@
   column-gap: 24px;
   row-gap: 12px;
 }
+
+.section-row {
+  display: grid;
+  grid-template-columns: 24px 1fr;
+  gap: 8px;
+  align-items: start;
+}
+.section-text {
+  line-height: 1.4;
+  word-break: break-word;
+  white-space: normal;
+}
+li svg {
+  flex-shrink: 0;
+  margin-top: 3px;   // small adjustment for visual alignment
+}

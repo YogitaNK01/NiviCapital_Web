@@ -126,6 +126,7 @@ export class LoanInfo implements OnInit {
     if (storedData) {
       data = JSON.parse(storedData);
       this.loanformservice.loanInfoData = data;
+       this.stepperService.markStepCompleted('loaninfo');
     }
   }
 

@@ -191,6 +191,7 @@ export class GeneralInfo implements OnInit {
       if (storedData) {
         data = JSON.parse(storedData);
         this.formSvc.generalInfoData = data;
+        this.stepperService.markStepCompleted('genralinfo');
       }
     }
 

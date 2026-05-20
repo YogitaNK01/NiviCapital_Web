@@ -65,6 +65,7 @@ export class Additionalinfo implements OnInit {
   applicantId: any;
   profilePhotoUrl: any;
   objectName: any;
+  fileName: any;
 
 
   showMotherError = false;
@@ -107,6 +108,21 @@ export class Additionalinfo implements OnInit {
       motherNoMiddleName: [false],
 
     });
+
+    let data = this.formSvc.additionalInfoData;
+
+    if (!data) {
+      
+
+      const key = `additionalinfoData_${this.applicantId}`;
+      const storedData = localStorage.getItem(key);
+
+      if (storedData) {
+        data = JSON.parse(storedData);
+        this.formSvc.additionalInfoData = data;
+        this.stepperService.markStepCompleted('additionalinfo');
+      }
+    }
 
     if (this.formSvc.additionalInfoData) {
       this.patchAdditionalInfo();
@@ -176,6 +192,7 @@ export class Additionalinfo implements OnInit {
     if (!result || !result.file) {
       this.profilePhotoUrl = null;
       this.objectName = null;
+      this.fileName=null;
       this.additionalinfoForm.get('uploadphoto')?.setValue(null);
       this.additionalinfoForm.get('uploadphoto')?.markAsTouched();
       return;
@@ -189,6 +206,7 @@ export class Additionalinfo implements OnInit {
         console.log(res);
         this.profilePhotoUrl = res.data.publicUrl;
         this.objectName = res.data.objectName;
+        this.fileName=res.data.fileName;
 
         this.additionalinfoForm.patchValue({
           uploadphoto: this.profilePhotoUrl
@@ -339,6 +357,7 @@ export class Additionalinfo implements OnInit {
     {
       "applicantId": this.applicantId,
       "profilePhotoUrl": this.profilePhotoUrl,
+      "fileName": this.fileName,
       "objectName": this.objectName,
 
       "maritalStatus": formdata.maritalstatus.toUpperCase(),

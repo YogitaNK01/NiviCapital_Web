@@ -91,6 +91,7 @@ export class Estimateexpense {
 
     if (savedData) {
       this.loanformservice.estExpenseInfoData = JSON.parse(savedData);
+      this.stepperService.markStepCompleted('expense');
     }
     });
 

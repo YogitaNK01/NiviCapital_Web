@@ -116,12 +116,15 @@ const key = `monthlyExpenditureData_${this.applicantId}`;
 
     if (saved) {
       this.formSvc.monthlyExpenditureData = JSON.parse(saved);
+      this.stepperService.markStepCompleted('monthlyexpinfo');
     }
 
     //   AFTER restore → patch
+     setTimeout(() => {
     if (this.formSvc.monthlyExpenditureData) {
       this.patchMonthlyExpenditure();
     }
+  });
 
 
     });
@@ -528,7 +531,7 @@ const key = `monthlyExpenditureData_${this.applicantId}`;
         this.selectedexpenditure.push('RentHomeMaintenance');
 
         this.monthlyExpenditureForm.get('rent')?.patchValue({
-          rentvalue: item.amountInr
+          rentvalue: this.formatIndian(item.amountInr.toString())
         });
       }
 
@@ -537,7 +540,7 @@ const key = `monthlyExpenditureData_${this.applicantId}`;
         this.selectedexpenditure.push('GroceriesandHousehold');
 
         this.monthlyExpenditureForm.get('grocery')?.patchValue({
-          groceryvalue: item.amountInr
+          groceryvalue: this.formatIndian(item.amountInr.toString())
         });
       }
 
@@ -546,7 +549,7 @@ const key = `monthlyExpenditureData_${this.applicantId}`;
         this.selectedexpenditure.push('Utilities');
 
         this.monthlyExpenditureForm.get('utilities')?.patchValue({
-          utilityvalue1: item.amountInr
+          utilityvalue1: this.formatIndian(item.amountInr.toString())
         });
       }
 
@@ -554,7 +557,7 @@ const key = `monthlyExpenditureData_${this.applicantId}`;
         this.selectedexpenditure.push('Utilities');
 
         this.monthlyExpenditureForm.get('utilities')?.patchValue({
-          utilityvalue2: item.amountInr
+          utilityvalue2: this.formatIndian(item.amountInr.toString())
         });
       }
 
@@ -563,7 +566,7 @@ const key = `monthlyExpenditureData_${this.applicantId}`;
         this.selectedexpenditure.push('Transportation');
 
         this.monthlyExpenditureForm.get('transportation')?.patchValue({
-          transportationvalue: item.amountInr
+          transportationvalue: this.formatIndian(item.amountInr.toString())
         });
       }
 
@@ -572,7 +575,7 @@ const key = `monthlyExpenditureData_${this.applicantId}`;
         this.selectedexpenditure.push('SchoolEducationFees');
 
         this.monthlyExpenditureForm.get('SchoolFees')?.patchValue({
-          SchoolFeesvalue: item.amountInr
+          SchoolFeesvalue: this.formatIndian(item.amountInr.toString())
         });
       }
 
@@ -581,7 +584,7 @@ const key = `monthlyExpenditureData_${this.applicantId}`;
         this.selectedexpenditure.push('Medical');
 
         this.monthlyExpenditureForm.get('MedicalMedicines')?.patchValue({
-          MedicalMedicinesvalue: item.amountInr
+          MedicalMedicinesvalue: this.formatIndian(item.amountInr.toString())
         });
       }
 
@@ -595,7 +598,7 @@ const key = `monthlyExpenditureData_${this.applicantId}`;
         group.patchValue({
           type: this.getOtherType(item.expenseTypeText),
           customType: item.expenseTypeText,
-          amount: item.amountInr
+          amount: this.formatIndian(item.amountInr.toString())
         });
         // this.other.clear()
         this.other.push(group);

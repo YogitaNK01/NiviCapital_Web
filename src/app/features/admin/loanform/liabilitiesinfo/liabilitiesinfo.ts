@@ -96,7 +96,7 @@ export class Liabilitiesinfo {
   selectedLenderIds: string[] = [];
   selectedlendername!: string;
 
-  loanerror:boolean=false;
+  loanerror: boolean = false;
 
   constructor(private fb: FormBuilder, public main: Main, private route: ActivatedRoute, private msgBox: Msgboxservice,
     private stepperService: Loanstepperservice, private formSvc: Loanformservice, private cd: ChangeDetectorRef) { }
@@ -113,12 +113,13 @@ export class Liabilitiesinfo {
       this.applicantId = applicantId;
       this.applicationId = applicationId;
 
-       const key = `liabilitiesinfoData_${this.applicantId}`;
-    const savedData = localStorage.getItem(key);
+      const key = `liabilitiesinfoData_${this.applicantId}`;
+      const savedData = localStorage.getItem(key);
 
-    if (savedData) {
-      this.formSvc.liabilitiesInfoData = JSON.parse(savedData);
-    }
+      if (savedData) {
+        this.formSvc.liabilitiesInfoData = JSON.parse(savedData);
+        this.stepperService.markStepCompleted('liabilitiesinfo');
+      }
 
     });
 
@@ -130,7 +131,7 @@ export class Liabilitiesinfo {
 
     });
 
-   
+
     this.liabilityForm.get('loans')?.valueChanges.subscribe(() => {
       this.calculateGrandTotal();
     });
@@ -152,6 +153,14 @@ export class Liabilitiesinfo {
     this.getloantype();
     this.getbanks();
     this.getlender();
+
+    setTimeout(() => {
+      if (this.formSvc.liabilitiesInfoData) {
+        this.patchLiabilitiesData();
+      }
+    }, 500);
+    // this.loadAllDependencies();
+
   }
 
   get loans(): FormArray {
@@ -207,11 +216,15 @@ export class Liabilitiesinfo {
 
   //existing loans
   createLoan(type: string): FormGroup {
-    const selected = this.loanoptions.find(l => l.value === type);
+    const selected1 = this.loanoptions.find(l => l.value === type);
+
+    const selected = this.loanoptions.find((l: any) =>
+      l.value === type || l.label === type || l.code === type
+    );
 
     return this.fb.group({
       type: [selected?.label || type],
-      showBank: [false],
+      showBank: [true],
       bankname: ['', Validators.required],
       outstanding: ['', Validators.required],
       emiamount: ['', Validators.required],
@@ -391,19 +404,19 @@ export class Liabilitiesinfo {
     switch (type) {
       case 'loantype':
         array = this.loans;
-        accKey = 'Existing Loans';  
+        accKey = 'Existing Loans';
         break;
       case 'creditcard':
         array = this.creditcard;
-        accKey = 'Credit Card Outstanding'; 
+        accKey = 'Credit Card Outstanding';
         break;
       case 'bnpl':
         array = this.bnpl;
-        accKey = 'Buy Now Pay Later (BNPL)';  
+        accKey = 'Buy Now Pay Later (BNPL)';
         break;
       case 'other':
         array = this.other;
-        accKey = 'Other Liabilities';  
+        accKey = 'Other Liabilities';
         break;
     }
 
@@ -458,7 +471,7 @@ export class Liabilitiesinfo {
       }, {});
       console.log("this.liabilityCodeMap--", this.liabilityCodeMap);
 
-      
+
     });
   }
   alllibilitiy_type() {
@@ -474,7 +487,7 @@ export class Liabilitiesinfo {
       }, {});
 
       this.liabilitiesCatagories = list.map((a: any) => ({
-        value: a.code,  
+        value: a.code,
         label: this.accordianTitle(a.code),
         code: a.code
       }));
@@ -482,19 +495,21 @@ export class Liabilitiesinfo {
       this.accordions = list.map((group: any) => ({
         title: this.accordianTitle(group.code),
         alwaysOpen: true,
-        key: group.code  
+        key: group.code
       }));
 
       this.liabilityCodeMap = list.reduce((acc: any, item: any) => {
         acc[item.code] = item.code;
         return acc;
       }, {});
+      if (this.formSvc.liabilitiesInfoData) {
+        this.patchLiabilitiesData();
+      }
+      this.cd.detectChanges();
+
     });
 
-    if(this.formSvc.liabilitiesInfoData){
-      this.patchLiabilitiesData();
-    }
-    this.cd.detectChanges();
+
   }
 
   formatTitle(text: string): string {
@@ -587,7 +602,7 @@ export class Liabilitiesinfo {
     if (ctrl) {
       this.formatAmountfromarray(event, controlName, ctrl);
     } else {
-      this.formatAmount( controlName);
+      this.formatAmount(controlName);
     }
 
     setTimeout(() => {
@@ -775,6 +790,17 @@ export class Liabilitiesinfo {
   formatIndian1(x: string): string {
     return new Intl.NumberFormat('en-IN').format(Number(x));
   }
+  private getLoanTypeValue(savedType: string): string {
+    if (!savedType) return '';
+
+    const found = this.loanoptions.find((opt: any) =>
+      opt.value === savedType ||
+      opt.label === savedType ||
+      opt.code === savedType
+    );
+
+    return found?.value || savedType;
+  }
   patchLiabilitiesData() {
     const data = this.formSvc.liabilitiesInfoData;
 
@@ -783,6 +809,7 @@ export class Liabilitiesinfo {
     const items = data.items;
 
     this.selectedliabilities = [];
+    this.selectedloantype = [];
     this.loans.clear();
     this.creditcard.clear();
     this.bnpl.clear();
@@ -791,66 +818,106 @@ export class Liabilitiesinfo {
     items.forEach((item: any) => {
 
       // ---------------- EXISTING LOANS ----------------
-      if (item.type && item.bankName && item.emi !== undefined && item.tenure) {
+      // if (item.liabilityType === 'EXISTING_LOAN') {
 
-        this.selectedliabilities.push('ExistingLoans');
+      //   this.selectedliabilities.push('EXISTING_LOAN');
 
-        const group = this.createLoan(item.type);
+      //   const group = this.createLoan(item.liabilityType);
+
+      //   group.patchValue({
+      //     type: item.liabilityType,
+      //     bankname: item.bankId,
+      //     outstanding: this.formatIndian(item.outstandingBalanceInr.toString()),
+      //     emiamount: this.formatIndian(item.emiAmountInr.toString()),
+      //     remtenure: item.remainingTenureMonths
+      //   });
+
+      //   this.loans.push(group);
+      // }
+
+
+
+      if (item.liabilityType === 'EXISTING_LOAN') {
+
+        this.selectedliabilities.push('EXISTING_LOAN');
+
+        //  this is the child dropdown value
+        const loanTypeValue = this.getLoanTypeValue(item.liabilityTypeText);
+
+        //  patch selected loan type dropdown
+        if (loanTypeValue) {
+          this.selectedloantype.push(loanTypeValue);
+        }
+
+        const selectedLoan = this.loanoptions.find((opt: any) =>
+          opt.value === loanTypeValue ||
+          opt.label === item.liabilityTypeText ||
+          opt.code === item.liabilityTypeText
+        );
+
+        const group = this.createLoan(loanTypeValue);
 
         group.patchValue({
-          type: item.type,
-          bankname: item.bankName,
-          outstanding: item.outstanding,
-          emiamount: item.emi,
-          remtenure: item.tenure
+          type: selectedLoan?.label || item.liabilityTypeText,
+          showBank: true,
+
+          //  saved key is bankId, not bankName
+          bankname: item.bankId,
+
+          outstanding: this.formatIndian(item.outstandingBalanceInr?.toString() || '0'),
+          emiamount: this.formatIndian(item.emiAmountInr?.toString() || '0'),
+          remtenure: item.remainingTenureMonths,
+          title: item.title || ''
         });
 
         this.loans.push(group);
       }
 
-      if (item.type === 'CREDIT_CARD') {
+      if (item.liabilityType === 'CREDIT_CARD_OUTSTANDING') {
 
-        this.selectedliabilities.push('CreditCardOutstanding');
+        this.selectedliabilities.push('CREDIT_CARD_OUTSTANDING');
 
         const group = this.createCreditcard();
 
         group.patchValue({
-          creditcardbankName: item.bankName,
-          ccoutstandingBalance: item.outstanding,
-          creditLimit: item.limit
+          creditcardbankName: item.bankId,
+          ccoutstandingBalance: this.formatIndian(item.outstandingBalanceInr.toString()),
+          cccreditLimit: this.formatIndian(item.creditLimitInr.toString())
+
+
         });
 
         this.creditcard.push(group);
       }
 
       // ---------------- BNPL ----------------
-      if (item.type === 'BNPL') {
+      if (item.liabilityType === 'BNPL') {
 
-        this.selectedliabilities.push('BuyNowPayLater');
+        this.selectedliabilities.push('BNPL');
 
         const group = this.createBNPL();
 
         group.patchValue({
-          bnplbankName: item.bankName,
-          outstandingBalance: item.outstanding,
-          creditLimit: item.limit,
-          monthlyEMI: item.emi
+          bnplbankName: item.bankId,
+          outstandingBalance: this.formatIndian(item.outstandingBalanceInr.toString()),
+          creditLimit: this.formatIndian(item.creditLimitInr.toString()),
+          monthlyEMI: this.formatIndian(item.monthlyEmiInr.toString())
         });
 
         this.bnpl.push(group);
       }
 
       // ---------------- OTHER ----------------
-      if (!item.bankName && item.libamount !== undefined) {
+      if (item.liabilityType === 'OTHER_LIABILITY') {
 
-        this.selectedliabilities.push('OtherLiabilities');
+        this.selectedliabilities.push('OTHER_LIABILITY');
 
         const group = this.createOther();
 
         group.patchValue({
-          LiabilityType: item.type,
-          libamount: item.libamount,
-          MonthlyRepaymentLimit: item.MonthlyRepaymentLimit
+          LiabilityType: item.liabilityTypeText,
+          libamount: this.formatIndian(item.amountInr.toString()),
+          MonthlyRepaymentLimit: this.formatIndian(item.monthlyRepaymentInr.toString())
         });
 
         this.other.push(group);
@@ -919,18 +986,18 @@ export class Liabilitiesinfo {
       c.get('MonthlyRepaymentLimit')?.valid
     );
   }
- 
+
 
 
   // 1. onLoanChange - COMPLETE REBUILD
- 
+
   onLoanChange(values: string | string[]): void {
     const groups = Array.isArray(values) ? values : [values];
 
-    
- if (values && (Array.isArray(values) ? values.length : true)) {
-    this.loanerror = false;
-  }
+
+    if (values && (Array.isArray(values) ? values.length : true)) {
+      this.loanerror = false;
+    }
 
 
     this.selectedloantype = groups;
@@ -976,7 +1043,7 @@ export class Liabilitiesinfo {
 
     this.msgBox.open({
       title: 'Are you sure want to Remove',
-      message: ``,  
+      message: ``,
       showCancel: true,
       onOk: () => {
         const key = acc.key;
@@ -1063,7 +1130,7 @@ export class Liabilitiesinfo {
   }
 
   // 4. onChange - Handle Existing Loans properly
-  
+
   onChange(values: string | string[]): void {
     const selectedCodes = Array.isArray(values) ? values : [values];
 
@@ -1165,7 +1232,7 @@ export class Liabilitiesinfo {
     const markInvalid = (path: string) => {
       this.liabilityForm.get(path)?.markAsTouched();
       invalid = true;
-      
+
     };
 
     //  EXISTING LOANS
@@ -1174,10 +1241,10 @@ export class Liabilitiesinfo {
 
       if (this.loans.length === 0) {
         invalid = true;
-      
-        this.loanerror= true;
-      } else{
-        this.loanerror= false;
+
+        this.loanerror = true;
+      } else {
+        this.loanerror = false;
       }
 
       this.loans.controls.forEach((loan: any) => {
@@ -1192,7 +1259,7 @@ export class Liabilitiesinfo {
             outstandingBalanceInr: cleanAmount(loan.value.outstanding),
             emiAmountInr: cleanAmount(loan.value.emiamount),
             remainingTenureMonths: loan.value.remtenure,
-            liabilityTypeText:loan.value.type
+            liabilityTypeText: loan.value.type
           });
         }
       });
@@ -1203,7 +1270,7 @@ export class Liabilitiesinfo {
     if (this.selectedliabilities.includes('CREDIT_CARD_OUTSTANDING')) {
       if (this.creditcard.length === 0) invalid = true;
 
-      this.creditcard.controls.forEach((card: any,index:number) => {
+      this.creditcard.controls.forEach((card: any, index: number) => {
         if (card.invalid) {
           card.markAllAsTouched();
           invalid = true;
@@ -1214,7 +1281,7 @@ export class Liabilitiesinfo {
             ...(this.isOtherSelectedcc(card) && { title: card.value.title }),
             outstandingBalanceInr: cleanAmount(card.value.ccoutstandingBalance),
             creditLimitInr: cleanAmount(card.value.cccreditLimit),
-            liabilityTypeText:`CREDIT_CARD_OUTSTANDING ${index + 1}`
+            liabilityTypeText: `CREDIT_CARD_OUTSTANDING ${index + 1}`
           });
         }
       });
@@ -1228,7 +1295,7 @@ export class Liabilitiesinfo {
     if (this.selectedliabilities.includes('BNPL')) {
       if (this.bnpl.length === 0) invalid = true;
 
-      this.bnpl.controls.forEach((bnpl: any,index:number) => {
+      this.bnpl.controls.forEach((bnpl: any, index: number) => {
         if (bnpl.invalid) {
           bnpl.markAllAsTouched();
           invalid = true;
@@ -1240,7 +1307,7 @@ export class Liabilitiesinfo {
             creditLimitInr: cleanAmount(bnpl.value.creditLimit),
             monthlyEmiInr: cleanAmount(bnpl.value.monthlyEMI),
             ...(this.isOtherSelectedbnpl(bnpl) && { title: bnpl.value.title }),
-            liabilityTypeText:`BNPL ${index + 1}`
+            liabilityTypeText: `BNPL ${index + 1}`
           });
         }
       });
@@ -1250,14 +1317,14 @@ export class Liabilitiesinfo {
     if (this.selectedliabilities.includes('OTHER_LIABILITY')) {
       if (this.other.length === 0) invalid = true;
 
-      this.other.controls.forEach((other: any,index:number) => {
+      this.other.controls.forEach((other: any, index: number) => {
         if (other.invalid) {
           other.markAllAsTouched();
           invalid = true;
         } else {
           items.push({
             liabilityType: "OTHER_LIABILITY",
-            liabilityTypeText: other.value.LiabilityType ,
+            liabilityTypeText: other.value.LiabilityType,
             amountInr: cleanAmount(other.value.libamount),
             monthlyRepaymentInr: cleanAmount(other.value.MonthlyRepaymentLimit),
 
@@ -1282,10 +1349,10 @@ export class Liabilitiesinfo {
         console.log("resp---", res);
         if (res.status == "success") {
           this.formSvc.liabilitiesInfoData = payload
-           const key = `liabilitiesinfoData_${this.applicantId}`;
-localStorage.setItem(key, JSON.stringify(payload));
+          const key = `liabilitiesinfoData_${this.applicantId}`;
+          localStorage.setItem(key, JSON.stringify(payload));
           this.stepperService.markStepCompleted('liabilitiesinfo');
-            this.stepperService.setStepData('liabilitiesinfo', this.liabilityForm.getRawValue());
+          this.stepperService.setStepData('liabilitiesinfo', this.liabilityForm.getRawValue());
           this.stepperService.next();
         }
       },

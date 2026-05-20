@@ -14,7 +14,7 @@ interface Step {
   }[];
 
 }
-
+type StepperType = 'MAIN' | 'CO_APPLICANT';
 
 @Injectable({
   providedIn: 'root'
@@ -30,7 +30,10 @@ export class Loanstepperservice {
   issalaried: boolean = false;
   coursetypeug: boolean = false;
 
+  
 
+
+private stepperType: StepperType = 'MAIN';
 
 
   private educationSubStepsInitialized = false;
@@ -45,6 +48,8 @@ export class Loanstepperservice {
 
   private EDUCATION_PROGRESS_KEY = 'educationProgress';
 
+  private completedStepsKey = 'loan_completed_steps';
+
 
   constructor(private formSvc: Loanformservice, private router: Router) {
     this.buildSteps();
@@ -55,7 +60,10 @@ export class Loanstepperservice {
       this.coursetypeug = JSON.parse(saved);
     }
 
-    const saved1 = localStorage.getItem(`completedSteps_${this.applicantId}`);
+    // const saved1 = localStorage.getItem(`completedSteps_${this.applicantId}`);
+    
+  const saved1 = localStorage.getItem(this.completedStepsKey);
+
     if (saved1) {
       this.completedSteps = new Set(JSON.parse(saved1));
     }
@@ -77,15 +85,15 @@ export class Loanstepperservice {
         route: 'educationDetails',
         children: this.educationSubSteps
       },
-      { label: 'Estimated Expense', route: 'expense' },{ label: 'Summary', route: 'summaryinfo' },
+      { label: 'Estimated Expense', route: 'expense' },
       { label: 'Additional Info', route: 'additionalinfo' },
       { label: 'KYC', route: 'kycinfo' },
 
-      {
-        label: 'Education Details',
-        route: 'educationDetails',
-        children: this.educationSubSteps
-      },
+      // {
+      //   label: 'Education Details',
+      //   route: 'educationDetails',
+      //   children: this.educationSubSteps
+      // },
 
 
     ];
@@ -116,19 +124,14 @@ export class Loanstepperservice {
     return this.stepsSubject.getValue();
   }
 
+  
+setStepperType(type: StepperType) {
+  this.stepperType = type;
+}
+
   //-----------education steps ----------------
   setEducationSubSteps(data: any[]) {
 
-
-    // if (this.educationSubStepsInitialized) {
-    //   return;
-    // }
-
-    // this.educationSubSteps = data.map(d => ({
-
-    //   id: d.qualificationId,
-    //   label: d.qualificationName.includes('Others') ? d.qualificationName : d.qualificationName.split('(')[0].trim()
-    // }));
 
     this.educationSubSteps = data.map(d => {
       const name = d.qualificationName.toLowerCase();
@@ -182,14 +185,10 @@ export class Loanstepperservice {
 
   markEducationSectionComplete(step: string) {
     this.completedEducationSections.add(step);
-    // this.saveEducationProgress();
-    // sessionStorage.setItem(
-    //   'completedEducationSections',
-    //   JSON.stringify([...this.completedEducationSections])
-    // );
+   
 
     if (this.applicantId) {
-      sessionStorage.setItem(
+      localStorage.setItem(
         this.getEducationProgressKey(),
         JSON.stringify([...this.completedEducationSections])
       );
@@ -199,7 +198,7 @@ export class Loanstepperservice {
   private restoreEducationProgress() {
     if (!this.applicantId) return;
 
-    const saved = sessionStorage.getItem(this.getEducationProgressKey());
+    const saved = localStorage.getItem(this.getEducationProgressKey());
 
     if (saved) {
       this.completedEducationSections = new Set(JSON.parse(saved));
@@ -228,7 +227,7 @@ export class Loanstepperservice {
 
 
   private saveEducationProgress() {
-    sessionStorage.setItem(
+    localStorage.setItem(
       this.getEducationProgressKey(),
       JSON.stringify([...this.completedEducationSections])
     );
@@ -240,7 +239,8 @@ export class Loanstepperservice {
   //---------------all other steps --------------
 
   private getCompletedStepsKey(): string {
-    return `completedSteps_${this.applicantId}`;
+    // return `completedSteps_${this.applicantId}`;
+    return `${this.stepperType}_completedSteps_${this.applicantId}`;
   }
 
   markStepCompleted(route: string) {

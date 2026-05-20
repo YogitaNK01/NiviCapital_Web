@@ -24,17 +24,18 @@ import { SummaryHelper } from '../../../../utils/summaryHelper';
 export class Summaryinfo {
 
   openIndex: number[] = [0];
+  openKeys: string[] = ['general'];
   accordions = [
-    { title: 'General Info', alwaysOpen: true },
-    { title: 'Estimated Expense', alwaysOpen: false, amount: 0 },
-    { title: 'Additional Info', alwaysOpen: false },
-    { title: 'KYC', alwaysOpen: true },
-    { title: 'Education Details', alwaysOpen: false },
-    { title: 'Income Details', alwaysOpen: true },
-    { title: 'Assets', alwaysOpen: false, amount: 0 },
-    { title: 'Liabilities', alwaysOpen: true, amount: 0 },
-    { title: 'Monthly Expenditure', alwaysOpen: false, amount: 0 },
-    { title: 'Reference', alwaysOpen: true },
+    { key: 'general', title: 'General Info', alwaysOpen: true },
+    { key: 'expense', title: 'Estimated Expense', alwaysOpen: false, amount: 0 },
+    { key: 'additional', title: 'Additional Info', alwaysOpen: false },
+    { key: 'kyc', title: 'KYC', alwaysOpen: true },
+    { key: 'education', title: 'Education Details', alwaysOpen: false },
+    { key: 'income', title: 'Income Details', alwaysOpen: true },
+    { key: 'assets', title: 'Assets', alwaysOpen: false, amount: 0 },
+    { key: 'liabilities', title: 'Liabilities', alwaysOpen: true, amount: 0 },
+    { key: 'monthly', title: 'Monthly Expenditure', alwaysOpen: false, amount: 0 },
+    { key: 'reference', title: 'Reference', alwaysOpen: true },
   ];
   summaryForm!: FormGroup;
 
@@ -83,14 +84,15 @@ export class Summaryinfo {
   };
   otherFields = otherFields;
   applicationId: any;
-
+  isEmployed = false;
+  isSelfEmployed = false;
 
 
   KycInfoFields: any = {
     identityAndResidency: [],
     permanentAddress: [],
     currentAddress: [],
-    otherAddress:[]
+    otherAddress: []
 
   };
 
@@ -192,7 +194,7 @@ export class Summaryinfo {
   filteredAccordions: any[] = [];
   showIncome = false;
   showAssets = false;
-
+  showMonthly = false;
   constructor(private fb: FormBuilder, private formSvc: Loanformservice, private stepperService: Loanstepperservice, private cd: ChangeDetectorRef, private loanformservice: Loanformservice,
     private router: Router, private route: ActivatedRoute, public main: Main, private apiservice: Addcustomerservice) { }
 
@@ -214,18 +216,30 @@ export class Summaryinfo {
   trackByKey(index: number, field: any) {
     return field.key;
   }
+  trackByAccordion(index: number, acc: any) {
+    return acc.key;
+  }
+
 
   buildForm() {
     const group: { [key: string]: FormControl } = {};
     this.summaryForm = new FormGroup(group);
   }
-  toggle(index: number) {
+  toggle1(index: number) {
     if (this.openIndex.includes(index)) {
       this.openIndex = this.openIndex.filter(i => i !== index);
     } else {
       this.openIndex.push(index);
     }
     this.cd.detectChanges();
+  }
+
+  toggle(key: string) {
+    if (this.openKeys.includes(key)) {
+      this.openKeys = this.openKeys.filter(k => k !== key);
+    } else {
+      this.openKeys.push(key);
+    }
   }
 
 
@@ -245,11 +259,13 @@ export class Summaryinfo {
           this.courseDetailsFields = generalInfoData.courseDetailsFields;
           this.isasset = this.courseDetailsFields.some((field: any) => field.label === 'Do you have Assets?' && field.value === 'Yes');
 
-          const occupation = this.currentOccupation?.toLowerCase();
+          const occupation = this.normalizeOccupation(this.currentOccupation);
 
-          this.showIncome =
-            occupation === 'employed' ||
-            occupation === 'self employed';
+
+
+          this.isEmployed = occupation === 'employed';
+          this.isSelfEmployed = occupation === 'self employed' || occupation === 'Self-employed';
+          this.showIncome = this.isEmployed || this.isSelfEmployed;
 
           this.showAssets =
             this.isasset === true &&
@@ -258,9 +274,11 @@ export class Summaryinfo {
 
           this.filteredAccordions = this.accordions.filter(acc => {
 
-            if (acc.title === 'Income Details' && !this.showIncome) return false;
 
-            if (acc.title === 'Assets' && !this.showAssets) return false;
+            if (acc.key === 'income' && !this.showIncome) return false;
+            if (acc.key === 'assets' && !this.showAssets) return false;
+           
+
 
             return true;
           });
@@ -303,8 +321,9 @@ export class Summaryinfo {
           };
 
 
-          this.monthlyExpenditure = res.data.monthlyExpenditure || this.monthlyExpenditure;
-
+          // this.monthlyExpenditure = res.data.monthlyExpenditure || this.monthlyExpenditure;
+          this.monthlyExpenditure = { ...this.monthlyExpenditure, ...(res.data.monthlyExpenditure || {}) };
+        
           const allFields = [
             { key: 'rentHomeMaintenance', label: 'Rent / Home Maintenance' },
             { key: 'groceriesHousehold', label: 'Groceries and Household' },
@@ -315,14 +334,17 @@ export class Summaryinfo {
             //  { key: 'otherRecurringExpenses', label: 'Other Recurring Expenses' }
           ];
 
-          this.monthlyExpenditureFields = allFields.filter(field => this.monthlyExpenditure[field.key] != null);
+          // this.monthlyExpenditureFields = allFields.filter(field => this.monthlyExpenditure[field.key] != null);
+          this.monthlyExpenditureFields = allFields.filter(field =>
+            this.hasMonthlyValue(this.monthlyExpenditure[field.key])
+          );
           this.totalMonthlyExpenditure = res.data.monthlyExpenditure.totalMonthlyInr;
           this.accordions[8].amount = this.totalMonthlyExpenditure;
 
 
           this.assetsSections = SummaryHelper.extractAssetsInfo(res.data.assets);
-          console.log("assetsSections",this.assetsSections);
-          
+          console.log("assetsSections", this.assetsSections);
+
           this.totalassetsval = res.data.assets.totalAssets;
           this.accordions[6].amount = this.totalassetsval;
 
@@ -362,6 +384,10 @@ export class Summaryinfo {
     );
   }
 
+private hasOtherRecurring(expenses: any[]): boolean {
+  return Array.isArray(expenses) &&
+    expenses.some(e => (e?.name || e?.expenseName) && e?.amountInr != null && e?.amountInr !== '');
+}
 
   labelDisplayMap: { [key: string]: string } = {
     'GROCERIES HOUSEHOLD': 'Groceries and Household',
@@ -409,10 +435,36 @@ export class Summaryinfo {
       this.hasArrayData(this.incomeBusinessDetails, businessKeys)
     );
   }
-formatInr(value: number): string {
-  return new Intl.NumberFormat('en-IN').format(value);
-}
+  formatInr(value: number): string {
+    return new Intl.NumberFormat('en-IN').format(value);
+  }
+  private normalizeOccupation(value: string): string {
+    return (value || '')
+      .toLowerCase()
+      .trim()
+      .replace(/[_-]/g, ' ')
+      .replace(/\s+/g, ' ');
+  }
+  private hasMonthlyValue(val: any): boolean {
+    if (val == null) return false;
+
+    if (Array.isArray(val)) return val.length > 0;
+
+    if (typeof val === 'object') {
+      const amount = val.amountInr;
+      const name = val.name;
+      return (amount != null && amount !== '' && Number(amount) !== 0) || !!name;
+    }
+
+    return val !== '';
+  }
 
   submit() {
+  }
+  back(){
+
+  }
+  next(){
+    
   }
 }
