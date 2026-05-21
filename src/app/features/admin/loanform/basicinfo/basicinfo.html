@@ -1,0 +1,217 @@
+<div class="base-layout" [ngClass]="{'coapplicant-layout': isCoApplicant}">
+
+    <div class="accordion d-flex flex-column gap-4 mb-4">
+
+        <div class="accordion-item b-0" *ngFor="let acc of accordions; let i = index">
+
+            <h2 class="accordion-header">
+                <button class="accordion-button table-head" [class.collapsed]="openIndex !== i" type="button"
+                    (click)="toggle(i)">
+                    {{ acc.title }}
+                </button>
+            </h2>
+
+            <div class="accordion-collapse collapse" [class.show]="openIndex === i">
+
+                <div class="accordion-body p-0" *ngIf="openIndex === i">
+
+                    <ng-container *ngIf="i === 0">
+                        <ng-container *ngTemplateOutlet="basicinfoTemplate; context:{index:i}">
+                        </ng-container>
+                    </ng-container>
+
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+    <ng-template #basicinfoTemplate let-i="index">
+
+        <form [formGroup]="registerForm" (ngSubmit)="createcustId()" class="common-details-box d-flex flex-column">
+
+            <div class="row w-100 mb-3">
+                <!-- first name -->
+                <div class="col-lg-4 col-sm-12 mt-20">
+                    <app-inputfield formControlName="fname" label="First Name" [required]="true"
+                        placeholder="First Name" (input)="main.restrictInput($event, 'text')" [maxlength]="25">
+                    </app-inputfield>
+                    <div class="text-danger" *ngIf="f['fname'].touched && f['fname'].invalid">
+
+                        <div *ngIf="f['fname'].errors?.['required']">
+                            First name is required
+                        </div>
+
+                        <div *ngIf="f['fname'].errors?.['pattern']">
+                            Only alphabets are allowed
+                        </div>
+
+                        <div *ngIf="f['fname'].errors?.['minlength']">
+                            Minimum 2 characters required
+                        </div>
+
+                        <div *ngIf="f['fname'].errors?.['maxlength']">
+                            Maximum 25 characters allowed
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- middle name -->
+                <div class="col-lg-4 col-sm-12 mt-20">
+                    <app-inputfield formControlName="mname" label="Middle Name" placeholder="Middle Name"
+                        (input)="main.restrictInput($event, 'text')" [disabled]="ismiddlename" [maxlength]="25">
+                    </app-inputfield>
+                    <div class="text-danger" *ngIf="f['mname'].touched && f['mname'].invalid">
+
+                        <div *ngIf="f['mname'].errors?.['minlength']">
+                            Minimum 2 characters required
+                        </div>
+
+                        <div *ngIf="f['mname'].errors?.['maxlength']">
+                            Maximum 25 characters allowed
+                        </div>
+
+                    </div>
+
+                    <app-checkbox [checked]="ismiddlename" [indeterminate]="false" label="I don’t have middle name"
+                        (checkedChange)="onCheckboxChange($event)">
+                    </app-checkbox>
+                    <!-- <div class="text-danger mt-1" *ngIf="!ismiddlename && submitAttempted && !f['mname'].value">
+                    Please enter Middle Name or select the checkbox.
+                </div> -->
+                    <div class="text-danger mt-1" *ngIf="!ismiddlename && !f['mname'].value">
+                        <!-- Please enter Middle Name or select the checkbox. -->
+                    </div>
+
+                </div>
+
+                <!-- last name -->
+                <div class="col-lg-4 col-sm-12 mt-20">
+                    <app-inputfield formControlName="lname" label="Last Name" [required]="true" placeholder="Last Name"
+                        (input)="main.restrictInput($event, 'text')" [maxlength]="25">
+                    </app-inputfield>
+                    <div class="text-danger" *ngIf="f['lname'].touched && f['lname'].invalid">
+
+                        <div *ngIf="f['lname'].errors?.['required']">
+                            Last name is required
+                        </div>
+
+                        <div *ngIf="f['lname'].errors?.['pattern']">
+                            Only alphabets are allowed
+                        </div>
+
+                        <div *ngIf="f['lname'].errors?.['minlength']">
+                            Minimum 2 characters required
+                        </div>
+
+                        <div *ngIf="f['lname'].errors?.['maxlength']">
+                            Maximum 25 characters allowed
+                        </div>
+
+                    </div>
+                </div>
+
+
+              
+
+                <div class="d-flex flex-column"
+                    [ngClass]="otpsent ? 'col-lg-12 col-sm-12 d-flex gap-3' : 'col-lg-12 col-sm-12'">
+                    <div class="d-flex gap-3">
+                        <div class="phone-wrapper d-flex align-items-end gap-3"
+                            [ngClass]="{'w-50': otpsent, 'w-100': !otpsent,'success-phone': otpVerifiedOk }">
+                            <div [ngClass]="!otpsent ? 'w-100' : 'w-100'">
+                               
+                                <app-inputfield type="tel" formControlName="phone" name="phone" [required]="true" pattern="^[6-9][0-9]{9}$"
+                                    label="Mobile Number" placeholder="Enter Mobile Number" helpText="Help text"
+                                    class="w-100" minlength="10" [maxlength]="10" [readonly]="!otpsent || !otpVerifiedOk"
+                                    (input)="main.restrictInput($event, 'number')" 
+                                    [showPhonePrefix]="true" [showPhonePrefixnumber]="true"
+                                    [rightButtonText]="!otpsent && !otpVerifiedOk ? 'Send OTP' : ''"
+                                    (rightButtonClick)="sendOtp()" [state]="otpState" 
+                                   ></app-inputfield>
+
+                            </div>
+                            <div *ngIf="!otpsent" class="d-flex">
+
+                                <app-buttons label="Send OTP" class="btncustomClass primary" [outline]="true"
+                                    style="width: 135px;" (click)="sendOtp()"></app-buttons>
+                            </div>
+                        </div>
+
+                        @if (otpsent && !otpVerifiedOk) {
+                        <div class="col-lg-6 col-sm-12 d-flex align-items-end justify-content-center ">
+                            <app-otpsection [length]="6" (otpSubmit)="onOtpSubmit($event)" (timer)="onTimer($event)"
+                                [resetTrigger]="resetCounter" (otpVerifiedSuccess)="onOtpVerifiedSuccess($event)"
+                                required></app-otpsection>
+
+
+
+                        </div>
+                        }
+                    </div>
+
+                    <div class="text-danger" *ngIf="f['phone'].touched && f['phone'].invalid">
+                        <div *ngIf="f['phone'].errors?.['required']">
+                            phone is required
+                        </div>
+                    </div>
+                </div>
+
+                @if (otpsent && !otpVerifiedOk) {
+                <div class="row">
+                    <div class="col-6"></div>
+
+                    <div class="col-6">
+                        <div class="text-danger mt-1 text-start">
+                            <small *ngIf="otpmsg">{{otpmsg}}</small>
+                        </div>
+                        <div class="text-label-data otp-inline d-flex align-items-center">
+                            <span class="text-label-data">Resend code in</span>
+                            <span class="text-label-data resend-timer mx-2"> {{ formatTime(resendSeconds) }}</span>
+                            <span class="resend-link text-dp-3-regular" (click)="resendOtp()"
+                                [class.disabled]=" isCounting">
+                                Resend OTP
+                            </span>
+                        </div>
+                    </div>
+                </div>}
+
+                <!-- Email -->
+                <div class="col-lg-12 mt-20 col-sm-12">
+                    <app-inputfield type="text" formControlName="email" label="Email Id" [minlength]="10"
+                        [maxlength]="40" placeholder="Enter Email Id" helpText="Help text" name="email">
+                    </app-inputfield>
+
+                    <div class="text-danger" *ngIf="f['email'].touched && f['email'].invalid">
+                        <div *ngIf="f['email'].errors?.['required']">
+                            Email is required
+                        </div>
+
+                        <div *ngIf="f['email'].errors?.['pattern'] && !f['email'].errors?.['minlength']">
+                            Please enter a valid email address
+                        </div>
+
+                        <div *ngIf="f['email'].errors?.['minlength']">
+                            Please enter a valid email address between 10 and 40 characters
+                        </div>
+
+                        <div *ngIf="f['email'].errors?.['maxlength']">
+                            Please enter a valid email address between 10 and 40 characters
+                        </div>
+
+
+                    </div>
+                </div>
+            </div>
+            <!-- Buttons -->
+            <!-- <button type="submit" [disabled]="registerForm.invalid || !otpVerifiedOk">
+                Next
+            </button> -->
+
+        </form>
+
+    </ng-template>
+</div>
+

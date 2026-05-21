@@ -95,7 +95,7 @@
 
 .referencetitle {
   display: flex;
-  padding: var(--spacing-spacing_9, 20px);
+  padding: $spacing_9;
   justify-content: space-between;
   align-items: flex-start;
   align-self: stretch;

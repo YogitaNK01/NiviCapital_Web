@@ -17,6 +17,9 @@ import { Coapplicantinfo } from './coapplicantinfo/coapplicantinfo';
 import { Summaryinfo } from './summaryinfo/summaryinfo';
 import { Edusection } from './educationinfo/edusection/edusection';
 import { Edudetails } from './educationinfo/edudetails/edudetails';
+import { Coappdashboard } from './coapplicantinfo/coappdashboard/coappdashboard';
+import { Coappstepper } from './coapplicantinfo/coappstepper/coappstepper';
+import { Basicinfo } from './basicinfo/basicinfo';
 
 const routes: Routes = [
   // {
@@ -38,17 +41,11 @@ const routes: Routes = [
         path: 'educationDetails', component: Edudetails,
 
         children: [
-          // {
-          //   path: '',
-          //   redirectTo: 'select',
-          //   pathMatch: 'full'
-          // },
-         
           {
             path: 'educationinfo',
             component: Educationinfo   // optional placeholder
           },
-           {
+          {
             path: 'edusection',
             component: Edusection   // optional placeholder
           },
@@ -59,12 +56,35 @@ const routes: Routes = [
       { path: 'liabilitiesinfo', component: Liabilitiesinfo },
       { path: 'monthlyexpinfo', component: Monthlyexpenditureinfo },
       { path: 'referenceinfo', component: Referenceinfo },
-      // { path: 'coapplicantinfo', component: Coapplicantinfo },
+      {
+        path: 'co-applicantdetails', component: Coappdashboard,
+        children: [
+
+          {
+            path: 'coapplicantinfo',
+            component: Coapplicantinfo,
+            children: [
+              { path: '', redirectTo: 'co-basicinfo', pathMatch: 'full' },
+              { path: 'co-basicinfo', component: Basicinfo },
+              { path: 'co-general', component: GeneralInfo },
+              { path: 'co-additional', component: Additionalinfo },
+              { path: 'co-kyc', component: Kycinfo },
+              { path: 'co-income', component: Incomeinfo },
+              { path: 'co-assets', component: Assetsinfo },
+              { path: 'co-liabilities', component: Liabilitiesinfo },
+              { path: 'co-monthly-exp', component: Monthlyexpenditureinfo },
+              { path: 'co-summary', component: Summaryinfo }
+            ]
+
+          },
+
+        ]
+      },
       { path: 'summaryinfo', component: Summaryinfo },
       {
-            path: 'edusection',
-            component: Edusection   // optional placeholder
-          },
+        path: 'edusection',
+        component: Edusection   // optional placeholder
+      },
     ]
   },
 

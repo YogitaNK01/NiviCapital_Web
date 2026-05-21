@@ -857,7 +857,7 @@ p {
   gap: $spacing_4;
   flex-shrink: 0;
   align-self: stretch;
-  background: #E4F0F6;
+  background: $secondary-50;
   min-width: 200px;
 
   @media (max-width: 480px) {
@@ -1067,11 +1067,18 @@ p {
 .base-layout {
   width: 100%;
   display: flex;
-  min-width: 1606px;
-  padding: var(--spacing-spacing_19, 44px) var(--spacing-spacing_18, 40px);
+  // min-width: 1606px;
+  min-width: auto;
+  padding: $spacing_19 $spacing_18;
   flex-direction: column;
   align-items: flex-start;
-  gap: var(--spacing-spacing_14, 30px);
+  gap: $spacing_14;
+
+  
+&.coapplicant-layout {
+    padding: 44px 0 0 0;
+  }
+
 }
 
 .common-details-box {

@@ -1,0 +1,71 @@
+@use 'variables' as *;
+@use 'typography' as *;
+@use 'common' as *;
+
+.horizontal-stepper {
+  display: flex;
+  border-radius: 12px;
+  border: 1px solid $neutral-300;
+  // box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.05);
+}
+
+.stepper .step:first-child {
+  border-bottom-left-radius: 12px;
+}
+
+/* LAST STEP */
+.stepper .step:last-child {
+  border-bottom-right-radius: 12px;
+}
+
+.step-body {
+  display: flex;
+  // border-radius: 12px;
+  // border: 1px solid $neutral-300;
+  // box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.05);
+}
+
+.step-body.border-none {
+  border: none;
+}
+
+
+.step {
+  flex: 1;
+  display: flex;
+  padding: $spacing_9;
+  align-items: center;
+  gap: $spacing_4;
+  cursor: pointer;
+  position: relative;
+}
+
+.step.disabled {
+  pointer-events: none;
+  opacity: 0.5;
+}
+.step.active,
+.step.completed {
+  font-weight: 700;
+  border-bottom: 3.5px solid $accent_sec;
+  border-bottom: 3px solid $secondary_border_4;
+background:$secondary-50;
+}
+
+.step.completed {
+  border-bottom: 3.5px solid $accent_sec;
+  pointer-events: none;
+  cursor: not-allowed;
+
+}
+
+.step-content {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing_2;
+  color: $neutral-text-secondary;
+}
+
+.step-title {
+  color: $secondary-text-dark;
+}

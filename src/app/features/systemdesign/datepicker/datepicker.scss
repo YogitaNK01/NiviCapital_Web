@@ -120,7 +120,7 @@
 .calendars-container {
   
   display: flex;
-padding: var(--spacing-spacing_5, 12px) 12px var(--spacing-spacing_7, 16px) 12px;
+padding: $spacing_5 $spacing_7;
 flex-direction: column;
 align-items: center;
 align-self: stretch;

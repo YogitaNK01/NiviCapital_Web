@@ -364,7 +364,7 @@
 .no-data-container{
   display: flex;
 width: 740px;
-padding: var(--spacing-spacing_23, 60px);
+padding: $spacing_23;
 flex-direction: column;
 align-items: center;
 gap: 41px;

@@ -109,7 +109,17 @@ ngOnChanges(changes: SimpleChanges) {
   }
 
   if (changes['options'] && this.value) {
-    this.selectedLabeldata = this.getLabelFromValue(this.value);
+    // this.selectedLabeldata = this.getLabelFromValue(this.value);
+    
+ const match = this.options.find(opt =>
+    opt.value === this.value || opt.label === this.value
+  );
+
+  if (match) {
+    this.selectedLabeldata = match.label;
+    this.value = match.value; // normalize
+  }
+
   }
 }
   toggleDropdown() {
@@ -166,7 +176,7 @@ writeValue1(value: string | string[]): void {
     this.selectedLabeldata = this.getLabelFromValue(value);
   }
 }
-writeValue(value: string | string[]): void {
+writeValue2(value: string | string[]): void {
   this.isCvaWrite = true;   
 
   this.value = value;
@@ -182,11 +192,53 @@ writeValue(value: string | string[]): void {
   // allow next change detection cycle
   setTimeout(() => (this.isCvaWrite = false));
 }
+writeValue(value: any): void {
+  this.isCvaWrite = true;
 
-  getLabelFromValue(value: any): string {
+  if (!value) {
+    this.value = null;
+    this.selectedLabeldata = this.placeholder;
+    setTimeout(() => (this.isCvaWrite = false));
+    return;
+  }
+
+  // ✅ MULTI SELECT
+  if (Array.isArray(value)) {
+    this.selectedValues = [...value];
+  } else {
+    this.value = value;
+
+    // ✅ try to match option using value OR label
+    const match = this.options?.find(opt =>
+      opt.value === value || opt.label === value
+    );
+
+    if (match) {
+      this.selectedLabeldata = match.label;
+      this.value = match.value; // normalize
+    } else {
+      // ✅ fallback if options not loaded yet
+      this.selectedLabeldata = value;
+    }
+  }
+
+  setTimeout(() => (this.isCvaWrite = false));
+}
+
+
+  getLabelFromValue1(value: any): string {
     const match = this.options?.find(opt => opt.value === value);
     return match ? match.label : this.placeholder || '';
   }
+  getLabelFromValue(value: any): string {
+  if (!this.options?.length || !value) return this.placeholder;
+
+  const match = this.options.find(opt =>
+    opt.value === value || opt.label === value
+  );
+
+  return match ? match.label : value; // ✅ fallback to raw value
+}
 
   registerOnChange(fn: any): void {
     this.onChange = fn;

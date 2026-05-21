@@ -1,18 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { CoApplicant } from './co-applicant';
+import { Coappstepper } from './coappstepper';
 
-describe('CoApplicant', () => {
-  let component: CoApplicant;
-  let fixture: ComponentFixture<CoApplicant>;
+describe('Coappstepper', () => {
+  let component: Coappstepper;
+  let fixture: ComponentFixture<Coappstepper>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [CoApplicant]
+      imports: [Coappstepper]
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(CoApplicant);
+    fixture = TestBed.createComponent(Coappstepper);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

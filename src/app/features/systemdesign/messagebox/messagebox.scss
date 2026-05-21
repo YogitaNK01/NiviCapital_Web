@@ -130,7 +130,7 @@
 .comparison-box {
 
   display: flex;
-  padding: var(--spacing-spacing_11, 24px);
+  padding: $spacing_11;
   flex-direction: column;
   justify-content: center;
   align-items: flex-start;

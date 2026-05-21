@@ -79,7 +79,7 @@ private stepperType: StepperType = 'MAIN';
 
     const baseSteps: Step[] = [
       { label: 'Loan Info', route: 'loaninfo' },
-      { label: 'General Info', route: 'genralinfo' },
+      { label: 'General Info', route: 'genralinfo' },{ label: 'Co-Applicant', route: 'co-applicantdetails' },
         {
         label: 'Education Details',
         route: 'educationDetails',
@@ -111,7 +111,7 @@ private stepperType: StepperType = 'MAIN';
       { label: 'Liabilities', route: 'liabilitiesinfo' },
       { label: 'Monthly Expenditure', route: 'monthlyexpinfo' },
       { label: 'Reference', route: 'referenceinfo' },
-      // { label: 'Co-Applicant', route: 'coapplicantinfo' },
+      // { label: 'Co-Applicant', route: 'Coappdashboard' },
       { label: 'Summary', route: 'summaryinfo' }
     ];
     // console.log('📋 Final Steps:', finalSteps);

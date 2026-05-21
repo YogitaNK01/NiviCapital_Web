@@ -5,7 +5,7 @@
 .page-card {
   display: flex;
   // width: 1606px;
-  padding: var(--spacing-spacing_19, 44px) var(--spacing-spacing_18, 40px);
+  padding: $spacing_19 $spacing_18;
   flex-direction: column;
   gap: 30px;
 
@@ -94,11 +94,11 @@
 
 .summary-card {
   display: flex;
-  padding: var(--spacing-spacing_9, 20px);
+  padding: $spacing_9;
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  gap: var(--spacing-spacing_5, 12px);
+  gap: $spacing_5;
   flex: 1 0 0;
   align-self: stretch;
   border-radius: 12px;
