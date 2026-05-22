@@ -132,7 +132,7 @@
                 </div>
                 <div class="col-3" *ngIf="isOtherLocation">
                     <div class="form-group">
-                        <app-inputfield formControlName="otherLocation" name="otherLocation" label="Other Location"
+                        <app-inputfield formControlName="otherLocation" name="otherLocation" label="Other Location" [maxlength]="100"
                             placeholder="Enter Location Name" [required]="!isPostGraduate">
                         </app-inputfield>
 

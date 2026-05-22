@@ -315,8 +315,8 @@ getInstitutesCached(): Observable<OptionItem[]> {
       .pipe(
         map(res =>
           (res.data ?? res).map((s: any) => ({
-            // value: s.id || s.instituteName,
-             value: s.instituteName,
+            value: s.id ,
+            //  value: s.instituteName,
             label: s.instituteName
           }))
         ),

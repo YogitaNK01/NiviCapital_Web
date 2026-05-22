@@ -338,7 +338,7 @@
                                             </div>
                                             <div class="info-item d-flex flex-column">
                                                 <label class="text-label">Amount (AUD)</label>
-                                                <div class="text-label-data fw-bold">AUD {{ expense.amountAud |
+                                                <div class="text-label-data fw-bold"> {{ expense.amountAud |
                                                     currency:'AUD':'symbol-narrow':'1.0-0':'en-AU' }}</div>
                                             </div>
                                         </div>
@@ -511,8 +511,9 @@
                             </div>
                         </div>
                         <div class="d-flex flex-column mt-20">
-                            <label class="text-dp-2-bold fw-bold"> {{ KycInfoFields.showOther ? 'Other Address' :
-                                'Current Address' }}</label>
+                            <!-- <label class="text-dp-2-bold fw-bold"> {{ KycInfoFields.showOther ? 'Other Address' :
+                                'Current Address' }}</label> -->
+                                 <label class="text-dp-2-bold fw-bold">Current Address</label>
                             <hr class="hrclass" />
                             <div class="info-grid-img">
                                 <div *ngFor="let field of KycInfoFields.secondAddress"
@@ -553,81 +554,8 @@
                             <label class="text-dp-2-bold fw-bold">{{ section.title }}</label>
                             <hr class="hrclass" />
 
-                            <!-- <div class="info-grid-img">
-                                <div *ngFor="let field of EducationInfoFields[section.key]"
-                                    class="info-item d-flex flex-column">
-                                    <label class="text-label">{{ field.label }}</label>
-                                   
-                                    <div class="text-label-data fw-bold">
-
-                                       
-                                        <ng-container *ngIf="field.key === 'marksheetUrl'">
-
-                                          
-
-                                            <ng-container *ngIf="isArray(field.value); else singleMarksheet">
-
-                                                <div *ngFor="let file of field.value; let i = index"
-                                                    class="info-item d-flex flex-column">
-
-                                                    <div class="text-label">
-                                                        {{ i + 1 }} Year Marksheet
-                                                    </div>
-
-                                                    <div>
-                                                        <a>
-                                                            {{ file.split('/').pop() }}
-                                                        </a>
-                                                    </div>
-                                                </div>
-
-                                            </ng-container>
-
-                                            <ng-template #singleMarksheet>
-                                                <div class="info-item d-flex flex-column">
-                                                    <label class="text-label">Marksheet</label>
-
-                                                    <div class="text-label-data fw-bold">
-                                                        <a [href]="field.value" target="_blank">
-                                                            {{ field.value.split('/').pop() }}
-                                                        </a>
-                                                    </div>
-                                                </div>
-                                            </ng-template>
-
-
-                                        </ng-container>
-
-
-                                        <ng-container *ngIf="field.key !== 'marksheetUrl'">
-                                            {{ field.value || '-' }}
-                                        </ng-container>
-
-                                    </div>
-
-
-                                </div>
-                            </div> -->
-                            <!-- 
-                            <div class="info-grid-img">
-
-                              
-                                <ng-container *ngFor="let field of EducationInfoFields[section.key]">
-
-                                    <ng-container *ngIf="field.key !== 'marksheetUrl'">
-
-                                        <div class="info-item d-flex flex-column">
-                                            <label class="text-label">{{ field.label }}</label>
-                                            <div class="text-label-data fw-bold">
-                                                {{ field.value || '-' }}
-                                            </div>
-                                        </div>
-
-                                    </ng-container>
-
-                                </ng-container>
-
-                            </div> -->
+                         
+                          
                             <div class="info-grid-img">
 
                                 <ng-container *ngFor="let field of EducationInfoFields[section.key]">
@@ -643,7 +571,7 @@
                                         </div>
 
                                         <!--   INSERT MARKSHEET RIGHT AFTER LOCATION -->
-                                        <ng-container *ngIf="field.key.includes('location')">
+                                        <ng-container *ngIf="field.key === 'location'">
                                             <!-- <ng-container *ngIf="field.key === 'otherLocation'"> -->
 
                                             <ng-container *ngFor="let f of EducationInfoFields[section.key]">
@@ -696,13 +624,13 @@
                             </div>
 
 
-                            <div class="info-grid-img mt-10">
+                            <!-- <div class="info-grid-img mt-10">
 
                                 <ng-container *ngFor="let field of EducationInfoFields[section.key]">
 
                                     <ng-container *ngIf="field.key === 'marksheetUrl'">
 
-                                        <!--   MULTIPLE -->
+                                      
                                         <ng-container *ngIf="isArray(field.value); else singleMarksheet">
 
                                             <div *ngFor="let file of field.value; let i = index"
@@ -722,7 +650,7 @@
 
                                         </ng-container>
 
-                                        <!--   SINGLE -->
+                                
                                         <ng-template #singleMarksheet>
                                             <div class="info-item d-flex flex-column">
                                                 <label class="text-label">Marksheet</label>
@@ -738,7 +666,7 @@
 
                                 </ng-container>
 
-                            </div>
+                            </div> -->
 
                         </div>
 
@@ -777,116 +705,7 @@
             </ng-template>
 
 
-            <!-- 
-            <ng-template #incomeTemplate let-i="index">
-                <div class="row common-details-box d-flex flex-row">
-
-                    <div>
-                        <div class="d-flex flex-column ">
-
-                            <div class="info-grid-img">
-
-                               
-                                 
-                                <ng-container *ngFor="let docType of documentTypes">
-                                    <ng-container *ngIf="incomeDetails[docType.key]?.length">
-
-                                        <ng-container *ngFor="let doc of incomeDetails[docType.key]; let i = index">
-
-                                            <ng-container *ngIf="docType.key === 'otherIncome'; else normalIncomeDoc">
-
-                                                <div class="info-item d-flex flex-column">
-                                                    <label class="text-label">Other Document Name</label>
-                                                    <div class="text-label-data fw-bold">
-                                                        {{ doc.name || '-' }}
-                                                    </div>
-                                                </div>
-
-                                                <div class="info-item d-flex flex-column">
-                                                    <label class="text-label">Other Document</label>
-                                                    <div class="text-label-data fw-bold">
-                                                        {{ doc.url || '-' }}
-                                                    </div>
-                                                </div>
-
-                                            </ng-container>
-
-                                            <ng-template #normalIncomeDoc>
-                                                <div class="info-item d-flex flex-column">
-                                                    <label class="text-label">
-                                                        {{ docType.label }}
-                                                        {{
-                                                        docType.key === 'salarySlips' || docType.key === 'itrs'
-                                                        ? (i + 1)
-                                                        : ''
-                                                        }}
-                                                    </label>
-
-                                                    <div class="text-label-data fw-bold">
-                                                        {{ doc.url || '-' }}
-                                                    </div>
-                                                </div>
-                                            </ng-template>
-                                        </ng-container>
-
-                                    </ng-container>
-                                </ng-container>
-                                <ng-container *ngFor="let docType of businessdocumentTypes">
-                                    <ng-container *ngIf="incomeBusinessDetails[docType.key]?.length">
-
-                                        <ng-container
-                                            *ngFor="let doc of incomeBusinessDetails[docType.key]; let i = index">
-
-
-
-                                            <ng-container *ngIf="docType.key === 'otherIncome'; else normalbusinessDoc">
-
-                                                <div class="info-item d-flex flex-column">
-                                                    <label class="text-label">Other Document Name</label>
-                                                    <div class="text-label-data fw-bold">
-                                                        {{ doc.name || '-' }}
-                                                    </div>
-                                                </div>
-
-                                                <div class="info-item d-flex flex-column">
-                                                    <label class="text-label">Other Document</label>
-                                                    <div class="text-label-data fw-bold">
-                                                        {{ doc.url || '-' }}
-                                                    </div>
-                                                </div>
-
-                                            </ng-container>
-
-                                            <ng-template #normalbusinessDoc>
-                                                <div class="info-item d-flex flex-column">
-                                                    <label class="text-label">
-                                                        {{ docType.label }}
-                                                        {{
-                                                        docType.key === 'business_itr_3_years' || docType.key ===
-                                                        'business_finance_3_years'
-                                                        ? (i + 1)
-                                                        : ''
-                                                        }}
-                                                    </label>
-
-                                                    <div class="text-label-data fw-bold">
-                                                        {{ doc.url || '-' }}
-                                                    </div>
-                                                </div>
-                                            </ng-template>
-                                           
-
-                                        </ng-container>
-
-                                    </ng-container>
-                                </ng-container>
-
-                            </div>
-                        </div>
-                    </div>
-
-                </div>
-            </ng-template> -->
+           
 
             <ng-template #incomeTemplate>
                 <div class="row common-details-box d-flex flex-row">

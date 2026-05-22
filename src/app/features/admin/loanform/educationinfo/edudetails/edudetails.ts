@@ -441,7 +441,7 @@ this.saveEducationBasic();
       mode: 'comparison',
       message: `
       You originally selected ${this.getHighestQualification()} as your last qualification.<br>
-      Adding a <b>${addingLabel}</b> section will update your highest qualification.
+      Adding a ${addingLabel} section will update your highest qualification.
     `,
       okText: 'Yes, Update',
       cancelText: 'No',
