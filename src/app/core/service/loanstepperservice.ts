@@ -80,20 +80,16 @@ private stepperType: StepperType = 'MAIN';
     const baseSteps: Step[] = [
       { label: 'Loan Info', route: 'loaninfo' },
       { label: 'General Info', route: 'genralinfo' },
-        {
-        label: 'Education Details',
-        route: 'educationDetails',
-        children: this.educationSubSteps
-      },
+        
       { label: 'Estimated Expense', route: 'expense' },
       { label: 'Additional Info', route: 'additionalinfo' },
       { label: 'KYC', route: 'kycinfo' },
 
-      // {
-      //   label: 'Education Details',
-      //   route: 'educationDetails',
-      //   children: this.educationSubSteps
-      // },
+      {
+        label: 'Education Details',
+        route: 'educationDetails',
+        children: this.educationSubSteps
+      },
 
 
     ];

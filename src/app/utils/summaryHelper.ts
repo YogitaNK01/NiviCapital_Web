@@ -210,32 +210,33 @@ export class SummaryHelper {
         permanentAddress: [],
         currentAddress: [],
         otherAddress: [],
-         secondAddress: [],
+        secondAddress: [],
         showOther: false
       };
     }
-
+    const identity = kyc.identityAndResidency || {};
     const permanent = kyc.permanentAddress || {};
     const current = kyc.currentAddress || {};
     const other = kyc.otherAddress || {};
 
-    const isPermanentPreferred = permanent.isPreferredAddress === 1;
+    // const isPermanentPreferred = permanent.isPreferredAddress === 1;
+    const isPermanentPreferred = identity.isOtherAddress === 1;
 
-    
+
 
     return {
       identityAndResidency: this.mapIdentity(kyc.identityAndResidency),
 
-      permanentAddress: this.mapAddress(permanent),
-
-  
-
-secondAddress: isPermanentPreferred
-      ? this.mapAddress(other)
-      : this.mapAddress(current),
+      permanentAddress: this.mapAddress(permanent, 'permanent'),
 
 
-    showOther: isPermanentPreferred
+
+      secondAddress: isPermanentPreferred
+        ? this.mapAddress(other, 'other')
+        : this.mapAddress(current, 'current'),
+
+
+      showOther: isPermanentPreferred
 
 
     };
@@ -254,94 +255,37 @@ secondAddress: isPermanentPreferred
       { label: 'Date Of Birth', value: identity.dob }
     ];
   }
-  static mapAddress(addr: any) {
+  static mapAddress(addr: any, type: 'permanent' | 'current' | 'other' = 'current') {
     if (!addr) return [];
 
-    return [
+    const baseFields = [
       { label: 'Address Line 1', value: addr.addressLine },
       { label: 'Address Line 2', value: addr.addressLine1 },
       { label: 'Address Line 3', value: addr.addressLine2 },
       { label: 'City', value: addr.city },
       { label: 'State', value: addr.state },
       { label: 'Country', value: addr.country },
-      { label: 'Pincode', value: addr.pincode }
+      { label: 'Pincode', value: addr.pincode },
+
     ];
-  }
-  static extractKYCInfo1(kycInfo: any) {
-    const labels = {
-      identityAndResidency: [
-        { label: 'Aadhaar Number', key: 'aadhaarNumber' },
-        { label: 'Aadhaar Card Front', key: 'aadhaarFrontUrl' },
-        { label: 'Aadhaar Card Back', key: 'aadhaarBackUrl' },
-        { label: 'PAN Number', key: 'panNumber' },
-        { label: 'PAN Card', key: 'panCardUrl' },
-        { label: 'Passport', key: 'passportNumber' },
-        { label: 'Passport ', key: 'passportUrl' },
-        { label: 'Date Of Birth', key: 'dob' }
-      ],
-      permanentAddress: [
-        { label: 'Address Line 1', key: 'addressLine' },
-        { label: 'Address Line 2', key: 'addressLine1' },
-        { label: 'Address Line 3', key: 'addressLine2' },
-        { label: 'City', key: 'city' },
-        { label: 'state', key: 'state' },
-        { label: 'Country', key: 'country' },
-        { label: 'Pincode', key: 'pincode' },
 
-      ],
-      currentAddress: [
-        { label: 'Address Line 1', key: 'addressLine' },
-        { label: 'Address Line 2', key: 'addressLine1' },
-        { label: 'Address Line 3', key: 'addressLine2' },
-        { label: 'City', key: 'city' },
-        { label: 'state', key: 'state' },
-        { label: 'Country', key: 'country' },
-        { label: 'Pincode', key: 'pincode' },
-      ],
-      otherAddress: [
-        { label: 'Address Line 1', key: 'addressLine' },
-        { label: 'Address Line 2', key: 'addressLine1' },
-        { label: 'Address Line 3', key: 'addressLine2' },
-        { label: 'City', key: 'city' },
-        { label: 'state', key: 'state' },
-        { label: 'Country', key: 'country' },
-        { label: 'Pincode', key: 'pincode' },
-      ],
-
+    const supportingDoc = {
+      label: 'Supporting Document',
+      value: addr.supportingDocumentUrl
     };
 
-    // Helper function to safely get value or fallback
-    const getValue = (obj: any, key: string) => {
-      if (!obj) return '-';
-      if (key.includes('url')) {
-        return obj[key] ? 'Photo.jpg' : 'No Photo';
-      }
-      return obj[key] || '';
-    };
 
-    // Extract values for each section based on labels
-    const values = {
-      identityAndResidency: labels.identityAndResidency.map(field => ({
-        label: field.label,
-        value: getValue(kycInfo?.identityAndResidency, field.key)
-      })).filter(field => field.value && field.value !== ''),
 
-      permanentAddress: labels.permanentAddress.map(field => ({
-        label: field.label,
-        value: getValue(kycInfo?.permanentAddress, field.key)
-      })).filter(field => field.value && field.value !== ''),
-      currentAddress: labels.currentAddress.map(field => ({
-        label: field.label,
-        value: getValue(kycInfo?.currentAddress, field.key)
-      })).filter(field => field.value && field.value !== ''),
-      otherAddress: labels.otherAddress.map(field => ({
-        label: field.label,
-        value: getValue(kycInfo?.otherAddress, field.key)
-      })).filter(field => field.value && field.value !== ''),
+    if (type === 'permanent' || type === 'current') {
+      return baseFields;
+    }
+    if (type === 'other') {
+      return [supportingDoc, ...baseFields];
+    }
 
-    };
+    return [...baseFields, supportingDoc];
 
-    return values;
+
 
   }
 
@@ -405,20 +349,17 @@ secondAddress: isPermanentPreferred
 
 
       if (typeof data === 'string') {
-        return key === 'offerLetter' ? data : '-';
+        return key === 'offerLetter' ? data : '';
       }
 
 
       // Handle array case
       if (Array.isArray(data)) {
 
-
-
         if (key === 'marksheetUrl') {
 
-
           if (data[0]?.type === 'UPLOAD_CERTIFICATE') {
-            return data[0]?.marksheetUrl || '-';
+            return data[0]?.marksheetUrl || '';
           }
 
           const marksheets = data
@@ -426,30 +367,67 @@ secondAddress: isPermanentPreferred
             .map(d => d.marksheetUrl)
             .filter(Boolean);
 
+
+
+          // const marksheets = [
+          //   ...new Set(
+          //     data
+          //       .filter(d => d.type === 'MARKSHEET')
+          //       .map(d => d.marksheetUrl?.trim())
+          //       .filter(Boolean)
+          //   )
+          // ];
+
+
           //  For 10th & 12th → return single string
           if (marksheets.length <= 1) {
-            return marksheets[0] || '-';
+            return marksheets[0] || '';
           }
-
+          console.log("marksheets-------", marksheets)
           //  For diploma/UG/PG → return array
+          // return marksheets;
           return marksheets;
         }
 
         //  Handle leaving certificate
         if (key === 'leavingCertificateUrl') {
           const lc = data.find(d => d.type === 'SCHOOL_LEAVING_CERT');
-          return lc?.marksheetUrl || '-';
+          return lc?.marksheetUrl || '';
         }
 
         if (key === 'otherDocumentUrl') {
           const lc = data.find(d => d.type === 'OTHER');
-          return lc?.marksheetUrl || '-';
+          return lc?.marksheetUrl || '';
+
+          // const otherDocs = [
+          //   ...new Set(
+          //     data
+          //       .filter(d => d.type === 'OTHER')
+          //       .map(d => d.marksheetUrl?.trim())
+          //       .filter(Boolean)
+          //   )
+          // ];
+
+          // return otherDocs.length ? otherDocs.join(', ') : '';
+
         }
 
 
         if (key === 'title') {
           const otherDoc = data.find(d => d.type === 'OTHER');
-          return otherDoc?.title || '-';
+          return otherDoc?.title || '';
+
+          // const titles = [
+          //   ...new Set(
+          //     data
+          //       .filter(d => d.type === 'OTHER')
+          //       .map(d => d.title?.trim())
+          //       .filter(Boolean)
+          //   )
+          // ];
+
+          // return titles.length ? titles.join(', ') : '';
+
         }
 
         //  Handle other fields (take first item)
@@ -461,33 +439,35 @@ secondAddress: isPermanentPreferred
       return data[key] || '';
     };
 
+
+
     // Extract values for each section based on labels
     const values = {
 
       tenth: labels.tenth.map(field => ({
         label: field.label, key: field.key,
         value: getValue(educationDetails?.tenth, field.key)
-      })).filter(field => field.value && field.value !== ''),
+      })).filter(field => field.value && field.value !== '' && field.value !== '-'),
 
       twelfth: labels.twelfth.map(field => ({
         label: field.label, key: field.key,
         value: getValue(educationDetails?.twelfth, field.key)
-      })).filter(field => field.value && field.value !== ''),
+      })).filter(field => field.value && field.value !== '' && field.value !== '-'),
 
       diploma: labels.diploma.map(field => ({
         label: field.label, key: field.key,
         value: getValue(educationDetails?.diploma, field.key)
-      })).filter(field => field.value && field.value !== ''),
+      })).filter(field => field.value && field.value !== '' && field.value !== '-'),
 
       bachelors: labels.bachelors.map(field => ({
         label: field.label, key: field.key,
         value: getValue(educationDetails?.bachelors, field.key)
-      })).filter(field => field.value && field.value !== ''),
+      })).filter(field => field.value && field.value !== '' && field.value !== '-'),
 
       postgraduate: labels.postgraduate.map(field => ({
         label: field.label, key: field.key,
         value: getValue(educationDetails?.postgraduate, field.key)
-      })).filter(field => field.value && field.value !== ''),
+      })).filter(field => field.value && field.value !== '' && field.value !== '-'),
 
       ieltsPte: labels.ieltsPte.map(field => ({
         label: field.label, key: field.key,
@@ -609,9 +589,9 @@ secondAddress: isPermanentPreferred
             { label: 'Lender Name', value: b.lenderName },]
 
 
-          if (b.bankName === 'Other') {
+          if (b.lenderName === 'Other') {
             fields.push({
-              label: 'Other Bank Name',
+              label: 'Other Lender Name',
               value: b.title
             });
           }
