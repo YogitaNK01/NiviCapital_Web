@@ -20,6 +20,7 @@ import { Edudetails } from './educationinfo/edudetails/edudetails';
 import { Coappdashboard } from './coapplicantinfo/coappdashboard/coappdashboard';
 import { Coappstepper } from './coapplicantinfo/coappstepper/coappstepper';
 import { Basicinfo } from './basicinfo/basicinfo';
+import { Uploadkyc } from '../customer/uploadkyc/uploadkyc';
 
 const routes: Routes = [
   // {
@@ -64,16 +65,16 @@ const routes: Routes = [
             path: 'coapplicantinfo',
             component: Coapplicantinfo,
             children: [
-              { path: '', redirectTo: 'co-basicinfo', pathMatch: 'full' },
+              // { path: '', redirectTo: 'co-basicinfo', pathMatch: 'full' },
               { path: 'co-basicinfo', component: Basicinfo },
-              { path: 'co-general', component: GeneralInfo },
-              { path: 'co-additional', component: Additionalinfo },
-              { path: 'co-kyc', component: Kycinfo },
-              { path: 'co-income', component: Incomeinfo },
-              { path: 'co-assets', component: Assetsinfo },
-              { path: 'co-liabilities', component: Liabilitiesinfo },
-              { path: 'co-monthly-exp', component: Monthlyexpenditureinfo },
-              { path: 'co-summary', component: Summaryinfo }
+              { path: 'co-generalinfo', component: GeneralInfo },
+              { path: 'co-additionalinfo', component: Additionalinfo },
+              { path: 'co-kyc', component: Uploadkyc },
+              { path: 'co-incomeinfo', component: Incomeinfo },
+              { path: 'co-assetsinfo', component: Assetsinfo },
+              { path: 'co-liabilitiesinfo', component: Liabilitiesinfo },
+              { path: 'co-monthlyexpinfo', component: Monthlyexpenditureinfo },
+              { path: 'co-summaryinfo', component: Summaryinfo }
             ]
 
           },

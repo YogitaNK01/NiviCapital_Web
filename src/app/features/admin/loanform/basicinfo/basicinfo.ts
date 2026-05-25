@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectorRef, Component } from '@angular/core';
+import { ChangeDetectorRef, Component, Input } from '@angular/core';
 import { Inputfield } from '../../../systemdesign/inputfield/inputfield';
 import { Buttons } from '../../../systemdesign/buttons/buttons';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
@@ -8,11 +8,14 @@ import { Checkbox } from '../../../systemdesign/checkbox/checkbox';
 import { interval, Subscription } from 'rxjs';
 import { Addcustomerservice } from '../../../../core/service/addcustomerservice';
 import { Otpsection } from '../../customer/otpsection/otpsection';
-import { Route, Router } from '@angular/router';
+import { ActivatedRoute, Route, Router } from '@angular/router';
+import { Loanformservice } from '../../../../core/service/loanformservice';
+import { Loanstepper } from '../loanstepper/loanstepper';
+import { Loanstepperservice } from '../../../../core/service/loanstepperservice';
 
 @Component({
   selector: 'app-basicinfo',
-  imports: [CommonModule, Inputfield, Buttons, ReactiveFormsModule,Checkbox,Otpsection],
+  imports: [CommonModule, Inputfield, Buttons, ReactiveFormsModule, Checkbox, Otpsection],
   standalone: true,
   templateUrl: './basicinfo.html',
   styleUrl: './basicinfo.scss'
@@ -30,9 +33,9 @@ export class Basicinfo {
   sendotpId: any
   otpmsg: any;
   otpState: any;
- prefillPhone: any;
+   prefillPhone: any;
 
-   timeLeft = 0;
+  timeLeft = 0;
   timerSub?: Subscription;
   otpVerified = false;
   isOtpComplete: boolean = false
@@ -44,16 +47,25 @@ export class Basicinfo {
 
   ismiddlename = false;
   showMiddleNameError = false;
-  submitAttempted=false;
+  submitAttempted = false;
   registerForm!: FormGroup;
 
-  isCoApplicant:boolean=false;
+  isCoApplicant: boolean = false;
+  // @Input() prefillPhone: string = '';
 
-  constructor(private fb: FormBuilder, public main: Main,private addcustomerservice: Addcustomerservice,private cd: ChangeDetectorRef,private router:Router) { }
+  constructor(private fb: FormBuilder, public main: Main, private addcustomerservice: Addcustomerservice, private cd: ChangeDetectorRef, 
+    private router: Router, private loanform: Loanformservice,private stepperService : Loanstepperservice,private route:ActivatedRoute) { }
 
 
   ngOnInit(): void {
     this.isCoApplicant = this.router.url.includes('co-applicant');
+     this.route.queryParams.subscribe(params => {
+      if (params['id']) {
+       
+        this.sendotpId = params['id'];
+        
+      }
+    });
     this.registerForm = this.fb.group({
       fname: ['', [
         Validators.required,
@@ -87,6 +99,14 @@ export class Basicinfo {
       ]]
     });
 
+
+    if (this.loanform.coapppmobile) {
+      this.registerForm.patchValue({
+        phone: this.loanform.coapppmobile
+      });
+      this.prefillPhone = this.loanform.coapppmobile;
+    }
+
   }
   get f() {
     return this.registerForm.controls;
@@ -94,13 +114,13 @@ export class Basicinfo {
 
   onCheckboxChange(value: boolean) {
     this.ismiddlename = value;
-const mname = this.registerForm.get('mname');
-  if (value) {
-    mname?.disable();
-    mname?.setValue('');
-  } else {
-    mname?.enable();
-  }
+    const mname = this.registerForm.get('mname');
+    if (value) {
+      mname?.disable();
+      mname?.setValue('');
+    } else {
+      mname?.enable();
+    }
 
   }
 
@@ -176,7 +196,7 @@ const mname = this.registerForm.get('mname');
       .padStart(2, '0')}`;
   }
 
-   onTimer(timeLeft: number) {
+  onTimer(timeLeft: number) {
     console.log('Time left:', timeLeft);
     this.timeLeft = timeLeft;
   }
@@ -188,20 +208,20 @@ const mname = this.registerForm.get('mname');
 
   }
 
-    onOtpVerifiedSuccess(val: any) {
+  onOtpVerifiedSuccess(val: any) {
     console.log("onOtpVerifiedSuccess--", val);
 
     // this.otpVerifiedOk = val;
 
     if (val.status === "success") {
-    this.otpVerifiedOk = true;
-    this.otpState = "success";
-  } else {
-    this.otpVerifiedOk = false;
-    this.otpState = "error";
-  }
+      this.otpVerifiedOk = true;
+      this.otpState = "success";
+    } else {
+      this.otpVerifiedOk = false;
+      this.otpState = "error";
+    }
 
-  this.otpmsg = val.message;
+    this.otpmsg = val.message;
 
 
     setTimeout(() => {
@@ -209,11 +229,20 @@ const mname = this.registerForm.get('mname');
     }, 1000);
   }
 
- 
+
   toggle(i: number) {
     this.openIndex = this.openIndex === i ? null : i;
   }
   submit() { }
-  back() { }
-  next() { }
+  back() {
+  this.loanform.coappStep = 1; 
+  this.router.navigate(['../coapplicantinfo']);
+}
+  next() { 
+    
+// if (this.registerForm.invalid) return;
+ this.stepperService.next();
+  // this.router.navigate(['../co-general']);
+
+  }
 }

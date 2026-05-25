@@ -9,7 +9,7 @@ import { Radiobuttons } from '../../../systemdesign/radiobuttons/radiobuttons';
 import { Uploadbtn, UploadConfig, UploadResult } from '../../../systemdesign/uploadbtn/uploadbtn';
 import { Loanstepperservice } from '../../../../core/service/loanstepperservice';
 import { Loanformservice } from '../../../../core/service/loanformservice';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { Main } from '../../../../core/service/main';
 import { Msgboxservice } from '../../../../core/service/msgboxservice';
 
@@ -77,9 +77,11 @@ export class Incomeinfo {
   private slotCounter = 0;
   newOtherBusinessTitle: string = '';
 
+   isCoApplicant: boolean = false;
 
-  constructor(private fb: FormBuilder, private stepperService: Loanstepperservice, private cd: ChangeDetectorRef, private msgBox: Msgboxservice, public loanformservice: Loanformservice, private route: ActivatedRoute, public main: Main) { }
+  constructor(private fb: FormBuilder, private stepperService: Loanstepperservice,private router:Router, private cd: ChangeDetectorRef, private msgBox: Msgboxservice, public loanformservice: Loanformservice, private route: ActivatedRoute, public main: Main) { }
   ngOnInit(): void {
+      this.isCoApplicant = this.router.url.includes('co-applicant');
     this.stepperService.rebuildSteps();
     this.route.queryParams.subscribe(params => {
 

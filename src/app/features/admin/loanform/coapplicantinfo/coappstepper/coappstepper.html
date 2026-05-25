@@ -8,17 +8,13 @@
        }"
        (click)="goToStep(step, i)">
 
-   
 <!-- (click)="canNavigate(i) && goToStep(step, i)" -->
 
-
     <div class="text-dp-3-regular step-content">{{ step.label }}</div>
-
-   
   </div>
 </div>
  <div class="step-body">
-  <div class="container-fluid">
-    <router-outlet></router-outlet>
+  <div class="container-fluid p-0">
+    <router-outlet ></router-outlet>
  </div></div>
 </div>

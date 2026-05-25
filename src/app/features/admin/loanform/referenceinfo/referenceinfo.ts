@@ -81,11 +81,13 @@ export class Referenceinfo implements OnInit {
   firstPhoneEnteredRef: 1 | 2 | null = null;
   private successModalInstance: bootstrap.Modal | null = null;
   @ViewChild('phone') phone!: any;
+  
+ isCoApplicant: boolean = false;
 
   constructor(private fb: FormBuilder, private stepperService: Loanstepperservice, private cd: ChangeDetectorRef, private loanformservice: Loanformservice,
     private router: Router, private route: ActivatedRoute, public main: Main, private apiservice: Addcustomerservice) { }
   ngOnInit(): void {
-
+  this.isCoApplicant = this.router.url.includes('co-applicant');
     this.route.queryParams.subscribe(params => {
 
       const applicantId = params['applicantId'];

@@ -79,21 +79,21 @@ private stepperType: StepperType = 'MAIN';
 
     const baseSteps: Step[] = [
       { label: 'Loan Info', route: 'loaninfo' },
-      { label: 'General Info', route: 'genralinfo' },{ label: 'Co-Applicant', route: 'co-applicantdetails' },
-        {
-        label: 'Education Details',
-        route: 'educationDetails',
-        children: this.educationSubSteps
-      },
-      { label: 'Estimated Expense', route: 'expense' },
-      { label: 'Additional Info', route: 'additionalinfo' },
-      { label: 'KYC', route: 'kycinfo' },
-
-      // {
+      { label: 'General Info', route: 'genralinfo' },
+      //   {
       //   label: 'Education Details',
       //   route: 'educationDetails',
       //   children: this.educationSubSteps
       // },
+      { label: 'Estimated Expense', route: 'expense' },
+      { label: 'Additional Info', route: 'additionalinfo' },
+      { label: 'KYC', route: 'kycinfo' },
+
+      {
+        label: 'Education Details',
+        route: 'educationDetails',
+        children: this.educationSubSteps
+      },
 
 
     ];
@@ -114,17 +114,22 @@ private stepperType: StepperType = 'MAIN';
       // { label: 'Co-Applicant', route: 'Coappdashboard' },
       { label: 'Summary', route: 'summaryinfo' }
     ];
-    // console.log('📋 Final Steps:', finalSteps);
+    
     this.stepsSubject.next(finalSteps);
 
   }
 
 
-  get steps(): Step[] {
-    return this.stepsSubject.getValue();
-  }
+  // get steps(): Step[] {
+  //   return this.stepsSubject.getValue();
+  // }
 
-  
+  get steps(): Step[] {
+  return this.stepperType === 'CO_APPLICANT'
+    ? this.coAppSteps
+    : this.stepsSubject.getValue();
+}
+
 setStepperType(type: StepperType) {
   this.stepperType = type;
 }
@@ -298,7 +303,7 @@ setStepperType(type: StepperType) {
     return { isAsset: this.formSvc.isasset, isIncome: this.formSvc.isincome, issalaried: this.formSvc.issalaried, coursetypeug: this.formSvc.coursetypeug };
   }
 
-  next() {
+  next1() {
     const cleanUrl = this.router.url.split('?')[0];
     const lastSegment = cleanUrl.split('/').pop(); // could be 'educationinfo', 'educationDetails', etc.
 
@@ -320,37 +325,64 @@ setStepperType(type: StepperType) {
       });
     }
   }
-  next1() {
-    const currentRoute = this.router.url.split('?')[0].split('/').pop();;
+  
+next() {
+    const cleanUrl = this.router.url.split('?')[0];
+    
+  const segments = cleanUrl.split('/').filter(Boolean);
+  let lastSegment = segments.at(-1) || '';
 
-    const index = this.steps.findIndex(s => s.route === currentRoute);
+  let currentStepRoute = lastSegment;
+
+  
+ if (lastSegment === 'educationinfo') {
+    currentStepRoute = 'educationDetails';
+  }
+
+  //  Co-applicant child route case: /coapplicantinfo/co-basicinfo
+  // if (lastSegment.startsWith('co-')) {
+  //   lastSegment = segments.at(-2) || lastSegment; //  'coapplicantinfo'
+  // }
 
 
-    if (currentRoute === 'educationinfo') {
-      return; // stay on education section
-    }
 
-    if (index < this.steps.length - 1 && index !== -1) {
+    const routeMap: Record<string, string> = {
+  educationinfo: 'educationDetails',
+  coapplicantinfo: 'co-applicantdetails'
+};
+
+// const currentStepRoute = routeMap[lastSegment] || lastSegment;
+
+  const steps = this.steps; 
+
+
+    const index1 = this.steps.findIndex(s => s.route === currentStepRoute);
+    const index = steps.findIndex(s => s.route === currentStepRoute);
+    if (index === -1) return;
+
+    if (index < this.steps.length - 1) {
       const nextRoute = this.steps[index + 1].route;
-      this.router.navigate(['/loanform', nextRoute], {
-        queryParams: { applicantId: this.applicantId, applicationId: this.applicationId, custName: this.custName, custARN: this.custARN }
+
+      
+const basePath =
+      this.stepperType === 'CO_APPLICANT'
+        ? ['/loanform', 'co-applicantdetails', 'coapplicantinfo']
+        : ['/loanform'];
+
+
+      // this.router.navigate(['/loanform', nextRoute], {
+         this.router.navigate([...basePath, nextRoute], {
+        queryParams: {
+          applicantId: this.applicantId,
+          applicationId: this.applicationId,
+          custName: this.custName,
+          custARN: this.custARN
+        }
       });
     }
   }
-
+  
   previous1() {
-    const currentRoute = this.router.url.split('?')[0].split('/').pop();;
-
-    const index = this.steps.findIndex(s => s.route === currentRoute);
-
-    if (index > 0) {
-      const prevRoute = this.steps[index - 1].route;
-      this.router.navigate(['/loanform', prevRoute], {
-        queryParams: { applicantId: this.applicantId, applicationId: this.applicationId, custName: this.custName, custARN: this.custARN }
-      });
-    }
-  }
-  previous() {
 
 
     const cleanUrl = this.router.url.split('?')[0];
@@ -374,6 +406,68 @@ setStepperType(type: StepperType) {
       });
     }
   }
+
+previous() {
+
+
+    const cleanUrl = this.router.url.split('?')[0];
+   
+ const segments = cleanUrl.split('/').filter(Boolean);
+  const lastSegment = segments.at(-1) || '';
+
+
+ 
+  let currentStepRoute = lastSegment;
+
+  // MAIN education child route
+  if (lastSegment === 'educationinfo') {
+    currentStepRoute = 'educationDetails';
+  }
+
+
+    const steps = this.steps;
+
+  
+    // const steps = this.stepsSubject.getValue();   
+    const index = steps.findIndex(s => s.route === currentStepRoute);
+    if (index === -1) return;
+
+
+    if (index > 0) {
+      const prevRoute = this.steps[index - 1].route;
+
+      
+ const basePath =
+      this.stepperType === 'CO_APPLICANT'
+        ? ['/loanform', 'co-applicantdetails', 'coapplicantinfo']
+        : ['/loanform'];
+
+
+      // this.router.navigate(['/loanform', prevRoute], {
+        this.router.navigate([...basePath, prevRoute], {
+        queryParams: {
+          applicantId: this.applicantId,
+          applicationId: this.applicationId,
+          custName: this.custName,
+          custARN: this.custARN
+        }
+      });
+    }
+    
+ else if (this.stepperType === 'CO_APPLICANT') {
+    // ✅ go back to mobile screen when at first step
+      this.router.navigate(['/loanform', 'co-applicantdetails'], {
+      queryParams: {
+        applicantId: this.applicantId,
+        applicationId: this.applicationId,
+custName: this.custName,
+        custARN: this.custARN
+
+      }
+    });
+  }
+
+  }
   resetEducationSubSteps() {
     this.educationSubSteps = [];
     this.educationSubStepsInitialized = false;
@@ -395,6 +489,26 @@ setStepperType(type: StepperType) {
   clear() {
     this.formData = {};
   }
+// -------------------co applicant-----------------------------
+
+private coAppSteps: Step[] = [
+  { label: 'Basic Info', route: 'co-basicinfo' },
+  { label: 'General Info', route: 'co-generalinfo' },
+  { label: 'Additional Info', route: 'co-additionalinfo' },
+   { label: 'KYC', route: 'co-kyc' },
+  { label: 'Income Details', route: 'co-incomeinfo' },
+  { label: 'Assets', route: 'co-assetsinfo' },
+  { label: 'Liabilities', route: 'co-liabilitiesinfo' },
+  { label: 'Monthly Expenditure', route: 'co-monthlyexpinfo' },
+  { label: 'Summary', route: 'co-summaryinfo' }
+];
+
+
+
+
+
+
+
 
 }
 

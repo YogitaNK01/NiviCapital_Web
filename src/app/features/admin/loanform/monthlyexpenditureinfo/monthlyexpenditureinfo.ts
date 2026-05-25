@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { ChangeDetectorRef, Component, Input } from '@angular/core';
 import { ReactiveFormsModule, FormGroup, FormBuilder, Validators, FormArray, AbstractControl } from '@angular/forms';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { Loanformservice } from '../../../../core/service/loanformservice';
 import { Loanstepperservice } from '../../../../core/service/loanstepperservice';
 import { Main } from '../../../../core/service/main';
@@ -95,11 +95,14 @@ export class Monthlyexpenditureinfo {
   totaltransportation = 0;
   totalother = 0;
   totalINRamt: any;
-  constructor(private fb: FormBuilder, public main: Main, private route: ActivatedRoute, private msgBox: Msgboxservice,
+
+   isCoApplicant: boolean = false;
+  constructor(private fb: FormBuilder, public main: Main, private route: ActivatedRoute, private msgBox: Msgboxservice,private router:Router,
     private stepperService: Loanstepperservice, private formSvc: Loanformservice, private cd: ChangeDetectorRef) { }
 
 
   ngOnInit(): void {
+      this.isCoApplicant = this.router.url.includes('co-applicant');
     this.stepperService.rebuildSteps();
     this.route.queryParams.subscribe(params => {
 
@@ -110,21 +113,21 @@ export class Monthlyexpenditureinfo {
       this.applicantId = applicantId;
       this.applicationId = applicationId;
 
-      
-const key = `monthlyExpenditureData_${this.applicantId}`;
-    const saved = localStorage.getItem(key);
 
-    if (saved) {
-      this.formSvc.monthlyExpenditureData = JSON.parse(saved);
-      this.stepperService.markStepCompleted('monthlyexpinfo');
-    }
+      const key = `monthlyExpenditureData_${this.applicantId}`;
+      const saved = localStorage.getItem(key);
 
-    //   AFTER restore → patch
-     setTimeout(() => {
-    if (this.formSvc.monthlyExpenditureData) {
-      this.patchMonthlyExpenditure();
-    }
-  });
+      if (saved) {
+        this.formSvc.monthlyExpenditureData = JSON.parse(saved);
+        this.stepperService.markStepCompleted('monthlyexpinfo');
+      }
+
+      //   AFTER restore → patch
+      setTimeout(() => {
+        if (this.formSvc.monthlyExpenditureData) {
+          this.patchMonthlyExpenditure();
+        }
+      });
 
 
     });
@@ -156,7 +159,7 @@ const key = `monthlyExpenditureData_${this.applicantId}`;
     });
 
 
-   
+
 
     this.monthlyExpenditureForm.valueChanges
       .pipe(debounceTime(200))
@@ -522,7 +525,7 @@ const key = `monthlyExpenditureData_${this.applicantId}`;
 
     this.selectedexpenditure = [];
     this.other.clear();
-      this.monthlyExpenditureForm.setControl('other', this.fb.array([]));
+    this.monthlyExpenditureForm.setControl('other', this.fb.array([]));
 
     items.forEach((item: any) => {
 
@@ -619,7 +622,7 @@ const key = `monthlyExpenditureData_${this.applicantId}`;
         this.openIndex.push(index);
       }
     });
-this.calculateGrandTotal();
+    this.calculateGrandTotal();
     this.cd.detectChanges();
   }
 
@@ -796,7 +799,7 @@ this.calculateGrandTotal();
         if (res.status == "success") {
           this.formSvc.monthlyExpenditureData = payload;
           const key = `monthlyExpenditureData_${this.applicantId}`;
-localStorage.setItem(key, JSON.stringify(payload));
+          localStorage.setItem(key, JSON.stringify(payload));
 
           this.stepperService.markStepCompleted('monthlyexpinfo');
 

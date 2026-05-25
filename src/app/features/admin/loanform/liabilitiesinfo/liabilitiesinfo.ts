@@ -4,7 +4,7 @@ import { AbstractControl, FormArray, FormBuilder, FormGroup, ReactiveFormsModule
 import { Buttons } from '../../../systemdesign/buttons/buttons';
 import { Dropdown, DropdownOption } from '../../../systemdesign/dropdown/dropdown';
 import { Inputfield } from '../../../systemdesign/inputfield/inputfield';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { Loanformservice } from '../../../../core/service/loanformservice';
 import { Loanstepperservice } from '../../../../core/service/loanstepperservice';
 import { Main } from '../../../../core/service/main';
@@ -97,12 +97,13 @@ export class Liabilitiesinfo {
   selectedlendername!: string;
 
   loanerror: boolean = false;
-
-  constructor(private fb: FormBuilder, public main: Main, private route: ActivatedRoute, private msgBox: Msgboxservice,
+ isCoApplicant: boolean = false;
+  constructor(private fb: FormBuilder, public main: Main, private route: ActivatedRoute, private msgBox: Msgboxservice,private router:Router,
     private stepperService: Loanstepperservice, private formSvc: Loanformservice, private cd: ChangeDetectorRef) { }
 
 
   ngOnInit(): void {
+      this.isCoApplicant = this.router.url.includes('co-applicant');
     this.stepperService.rebuildSteps();
     this.route.queryParams.subscribe(params => {
 

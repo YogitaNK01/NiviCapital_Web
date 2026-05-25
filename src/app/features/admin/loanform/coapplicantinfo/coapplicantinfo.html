@@ -10,39 +10,32 @@
           You currently have no co-applicants. Minimum 1 co-applicant is mandatory to complete your application. You can
           add more as well.
         </div>
+
+
         <!-- STEP 1 Mobile number  -->
-        <div *ngIf="mobileSubmitted">
-          <form #registerform="ngForm" (ngSubmit)="searchnumber(registerform)" id="registerform"
-            class="mobiledetails d-flex w-100 flex-column ">
-            <div class="w-100 d-flex align-items-end  gap-3">
-              <div class="flex-grow-1">
-                <app-inputfield type="tel" name="phone" ngModel [required]="true" pattern="^[6-9][0-9]{9}$"
-                  label="Mobile Number" placeholder="Enter Mobile Number" helpText="Help text" class="w-100"
-                  minlength="10" [maxlength]="10" #phone="ngModel" (input)="service.restrictInput($event, 'number')"
-                  [(ngModel)]="prefillPhone" [showPhonePrefix]="true" [showPhonePrefixnumber]="true"
-                  [state]="getPhoneFieldState(phone)"></app-inputfield>
+        <div *ngIf="!mobileSubmitted">
 
+          <div class="w-100 d-flex align-items-end  gap-3">
+            <div class="flex-grow-1">
+              <app-inputfield type="tel" name="phone" ngModel [required]="true" pattern="^[6-9][0-9]{9}$"
+                label="Mobile Number" placeholder="Enter Mobile Number" helpText="Help text" class="w-100"
+                minlength="10" [maxlength]="10" #phone="ngModel" (input)="service.restrictInput($event, 'number')"
+                [(ngModel)]="prefillPhone" [showPhonePrefix]="true" [showPhonePrefixnumber]="true"
+                [state]="getPhoneFieldState(phone)"></app-inputfield>
 
-              </div>
 
             </div>
 
-            <!-- <div class="text-danger mt-1" *ngIf="phone.invalid && phone.touched">
-                <small *ngIf="phone.errors?.['required']">Phone number is required</small>
-                <small *ngIf="phone.errors?.['pattern']">Please enter a valid 10-digit phone number</small>
-            </div>
-            <div class="text-danger mt-1" *ngIf="norecordfound && phone.valid">
-                <small>No Record Found</small>
-            </div> -->
+          </div>
 
-          </form>
 
         </div>
 
         <!-- STEP 2  co-applicant steppers-->
-        <div *ngIf="!mobileSubmitted">
+         
+        <div *ngIf="mobileSubmitted">
           <app-coappstepper></app-coappstepper>
-          <!-- <router-outlet></router-outlet> -->
+
         </div>
 
       </div>
@@ -51,7 +44,7 @@
   </div>
 
   <hr class="footer-hr-class">
-  <div class="loan-footerbtns row w-100  d-flex justify-content-between align-items-center">
+  <div class="loan-footerbtns row w-100  d-flex justify-content-between align-items-center" *ngIf="!mobileSubmitted">
 
     <div class="col-lg-4 ">
       <img src="../assets/images/icons/save.svg">
@@ -60,7 +53,8 @@
     <div class="col-lg-4  d-flex justify-content-end">
       <app-buttons type="button" label="Back" class="btn btncustomClass" [outline]="true" (click)="back()">
       </app-buttons>
-      <app-buttons type="button" label="Next" class="btn btncustomClass" color="primary" (click)=" next()">
+      <app-buttons type="button" label="Next" class="btn btncustomClass" color="primary" (click)=" next()"
+        [disabled]="!isPhoneValid() || searchLoading">
       </app-buttons>
 
     </div>

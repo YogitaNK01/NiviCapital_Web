@@ -2,7 +2,7 @@ import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, OnInit } from '@angular/core';
 import { Buttons } from '../../../systemdesign/buttons/buttons';
 import { AbstractControl, FormArray, FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { Loanformservice } from '../../../../core/service/loanformservice';
 import { Loanstepperservice } from '../../../../core/service/loanstepperservice';
 import { Main } from '../../../../core/service/main';
@@ -110,11 +110,14 @@ export class Assetsinfo implements OnInit {
     Bonds: 'BONDS',
     Others: 'OTHER_INVESTMENTS'
   };
+
+   isCoApplicant: boolean = false;
   constructor(private fb: FormBuilder, public main: Main, private route: ActivatedRoute, private msgBox: Msgboxservice,
-    private stepperService: Loanstepperservice, private formSvc: Loanformservice, private cd: ChangeDetectorRef) { }
+    private stepperService: Loanstepperservice, private formSvc: Loanformservice, private cd: ChangeDetectorRef,private router:Router ) { }
 
 
   ngOnInit(): void {
+      this.isCoApplicant = this.router.url.includes('co-applicant');
     this.stepperService.rebuildSteps();
     this.route.queryParams.subscribe(params => {
 

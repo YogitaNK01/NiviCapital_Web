@@ -46,6 +46,19 @@ export class Loanformservice {
   referenceInfoData: any;
   educationInfoData: any;
 
+  co_generalInfoData: any;
+  co_estExpenseInfoData: any;
+  co_additionalInfoData: any;
+  co_kycInfoData: any;
+  co_incomeInfoData: any;
+  co_aseetsInfoData: any;
+  co_liabilitiesInfoData: any;
+  co_monthlyExpenditureData: any;
+  co_referenceInfoData: any;
+  co_educationInfoData: any;
+
+  coapppmobile :any;
+  coappStep: number = 1
   
   private instituteCache: OptionItem[] | null = null;
   private instituteRequest$!: Observable<OptionItem[]>;

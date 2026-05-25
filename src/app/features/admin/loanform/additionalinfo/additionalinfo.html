@@ -1,4 +1,4 @@
-<div class="base-layout">
+<div class="base-layout" [ngClass]="{'coapplicant-layout': isCoApplicant}">
 
 
 
@@ -33,25 +33,10 @@
 
         <form [formGroup]="additionalinfoForm" (ngSubmit)="submit()" class="common-details-box d-flex flex-column">
 
+           <div class=" container-fluid">
             <div class="row">
 
-                <div class="col-lg-4 col-sm-12 ">
-                    <app-uploadbtn [config]="basicConfig" formControlName="uploadphoto"
-                        (fileChange)="onFileChange($event, 'applicantphoto')" label="Upload Applicant Photo">
-                    </app-uploadbtn>
-
-                </div>
-                <div class="col-lg-4 col-sm-12 ">
-                    <app-dropdown [options]="marital_status" [placeholder]="maritalstatus"
-                        formControlName="maritalstatus" [required]="true"
-                        (selectedValueChange)="additionalinfoForm.get('maritalstatus')?.setValue($event)"
-                        [avatarUrl]="avatarUrl" [hasAvatar]="hasAvatar" [label]="maritalstatus">
-                    </app-dropdown>
-
-
-
-                </div>
-                <div class="col-lg-4 col-sm-12 ">
+                   <div class="col-lg-4 col-sm-12 ">
                     <div class="dropdown-label1 all-label ">Gender<span class="text-danger">*</span></div>
                     <div class="d-flex flex-row">
                         <app-radiobuttons name="optionsGroup" (checkedChange)="gendercheck('Male')" label="Male"
@@ -69,6 +54,25 @@
                     </div>
 
                 </div>
+
+                <div class="col-lg-4 col-sm-12 ">
+                    <app-dropdown [options]="marital_status" [placeholder]="maritalstatus"
+                        formControlName="maritalstatus" [required]="true"
+                        (selectedValueChange)="additionalinfoForm.get('maritalstatus')?.setValue($event)"
+                        [avatarUrl]="avatarUrl" [hasAvatar]="hasAvatar" [label]="maritalstatus">
+                    </app-dropdown>
+
+
+
+                </div>
+                <div class="col-lg-4 col-sm-12 ">
+                    <app-uploadbtn [config]="basicConfig" formControlName="uploadphoto"
+                        (fileChange)="onFileChange($event, 'applicantphoto')" label="Upload Applicant Photo">
+                    </app-uploadbtn>
+
+                </div>
+
+             
 
                 <div class="col-lg-4 col-sm-12 mt-20">
 
@@ -344,7 +348,7 @@
 
 
             </div>
-
+</div>
 
 
 

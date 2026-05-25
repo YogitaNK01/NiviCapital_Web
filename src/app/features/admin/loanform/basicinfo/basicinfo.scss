@@ -32,3 +32,71 @@
   max-height: 500px;
   
 }
+
+.phone-wrapper {
+  flex: 1;
+}
+
+.otp-side {
+  min-width: 260px;
+  display: flex;
+  align-items: flex-end;
+}
+
+.success-phone input {
+  border: 1px solid #28a745 !important;
+  background: #f6fff8;
+
+}
+
+
+
+.phone-otp-row {
+  display: flex;
+  gap: 16px;
+  width: 100%;
+}
+
+.phone-col,
+.otp-side {
+  flex: 1;
+  /* each takes equal width */
+  width: 50%;
+}
+
+.otp-side {
+  display: flex;
+  gap: 6px;
+  width: 50%;
+}
+
+.resend-timer {
+   width: 60px;
+  color: $secondary-700;
+  font-weight: 700 !important;
+}
+
+.resend-link {
+  cursor: pointer;
+  color: $primary_text, ;
+  font-weight: 700;
+  text-decoration-line: underline;
+
+}
+
+.resend-link.disabled {
+  pointer-events: none;
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+@media (max-width: 768px) {
+  .phone-otp-row {
+    flex-direction: column;
+  }
+
+  .phone-col,
+  .otp-side {
+    width: 100%;
+  }
+}

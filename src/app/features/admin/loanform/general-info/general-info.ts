@@ -102,6 +102,25 @@ export class GeneralInfo implements OnInit {
   isOthercoursetype = false;
   isOthercoursename = false;
 
+  //coapplicant 
+  isCoApplicant: boolean = false;
+  coapp_registerForm!: FormGroup;
+
+  selectAnnualIncome: DropdownOption[] = [
+    { label: '0-5 Lakhs', value: '0-5 Lakhs', icon: '' },
+    { label: '5-10 Lakhs', value: '5-10 Lakhs', icon: '' },
+    { label: '10-20 Lakhs', value: '10-20 Lakhs', icon: '' },
+    { label: '20-30 Lakhs', value: '20-30 Lakhs', icon: '' },
+    { label: '30-40 Lakhs', value: '30-40 Lakhs', icon: '' },
+    { label: '40-50 Lakhs', value: '40-50 Lakhs', icon: '' },
+    { label: '50-75 Lakhs', value: '50-75 Lakhs', icon: '' },
+    { label: '75 Lakhs - 1 Crore', value: '75 Lakhs - 1 Crore', icon: '' },
+    { label: '1 Crore & Above', value: '1 Crore & Above', icon: '' },
+    { label: 'No Income', value: 'No Income', icon: '' },
+
+  ]
+
+
   constructor(private fb: FormBuilder, private formSvc: Loanformservice, private router: Router, private stepperService: Loanstepperservice, private route: ActivatedRoute, public mainservice: Main) { }
   ngOnInit() {
     this.route.queryParams.subscribe(params => {
@@ -114,7 +133,7 @@ export class GeneralInfo implements OnInit {
         this.stepperService.setLoanId(this.applicantId, this.applicationId, this.custName, this.custARN);
       }
     });
-
+    this.isCoApplicant = this.router.url.includes('co-applicant');
 
 
     const currentUserKey = 'currentApplicantId';
@@ -122,7 +141,7 @@ export class GeneralInfo implements OnInit {
 
     if (previousId && previousId !== this.applicantId) {
       Object.keys(localStorage).forEach(key => {
-        if (key.includes('_')) {  // cleaner approach
+        if (key.includes('_')) {
           localStorage.removeItem(key);
         }
       });
@@ -132,6 +151,7 @@ export class GeneralInfo implements OnInit {
 
 
     this.stepperService.rebuildSteps();
+
     this.registerForm = this.fb.group({
 
       occupation: ['', Validators.required],
@@ -153,11 +173,22 @@ export class GeneralInfo implements OnInit {
 
 
     });
-    this.states();
-    this.getOccupationdetails();
-    this.getEducationdetails();
-    this.getlendingpartnersdetails();
 
+
+    this.coapp_registerForm = this.fb.group({
+
+      occupation: ['', Validators.required],
+      annualincome: ['', Validators.required],
+      relationship: ['', Validators.required],
+      checkedasset: [false, Validators.required],
+    });
+
+    this.getOccupationdetails();
+    if (!this.isCoApplicant) {
+      this.states();
+      this.getEducationdetails();
+      this.getlendingpartnersdetails();
+    }
     this.registerForm.get('coursestartdate')?.valueChanges.subscribe((startDate) => {
 
       if (!startDate) return;
@@ -171,59 +202,108 @@ export class GeneralInfo implements OnInit {
 
     });
 
-    // this.registerForm.get('courseduration')?.valueChanges.subscribe(() => {
-    //   this.calculateEndDate();
+
+    const key = this.isCoApplicant
+      ? `generalInfo_coapp_${this.applicantId}`
+      : `generalInfo_main_${this.applicantId}`;
+
+    const storedData = localStorage.getItem(key);
+    let parsed: any = null;
+    if (storedData) {
+      parsed = JSON.parse(storedData);
+
+
+      if (!parsed.currentOccupationId) {
+        parsed = {
+          ...parsed,
+          currentOccupationId: parsed.occupation,
+          stateId: parsed.state,
+          universityId: parsed.university,
+          courseId: parsed.coursename,
+          hasAssets: parsed.checkedasset === 'Yes',
+
+        };
+      }
+
+
+      if (this.isCoApplicant) {
+        // this.coapp_registerForm.patchValue(parsed);
+        this.coapp_registerForm.patchValue({
+
+          occupation: parsed.currentOccupationId,
+          checkedasset: parsed.hasAssets ? 'Yes' : 'No',
+        });
+      } else {
+        // this.registerForm.patchValue(parsed);
+
+        this.registerForm.patchValue({
+
+          occupation: parsed.currentOccupationId,
+          checkedasset: parsed.hasAssets ? 'Yes' : 'No',
+          coursestartdate: this.parseDate(parsed.courseStartDate),
+          courseenddate: this.parseDate(parsed.courseEndDate),
+          lendingpartner: parsed.lendingPartnerId
+
+        });
+
+        this.registerForm.get('checkedasset')?.setValue(parsed.hasAssets ? 'Yes' : 'No');
+
+        this.restoreDependentDropdowns(parsed); // ✅ this handles university/courses
+      }
+
+      this.checkboxasset = parsed.hasAssets ? "Yes" : "No";
+
+    }
+
+
+
+
+
+    // this.registerForm.get('checkedasset')?.valueChanges.subscribe(value => {
+    //   console.log('Selected:', value);
+    //   this.checkassetOnChange(value);
     // });
-    this.registerForm.get('checkedasset')?.valueChanges.subscribe(value => {
-      console.log('Selected:', value);
+    this.activeForm.get('checkedasset')?.valueChanges.subscribe(value => {
       this.checkassetOnChange(value);
     });
 
 
-    let data = this.formSvc.generalInfoData;
 
-    if (!data) {
-      // const storedData = localStorage.getItem('generalInfoData');
+    // let data = this.formSvc.generalInfoData || parsed;
 
-      const key = `generalInfoData_${this.applicantId}`;
-      const storedData = localStorage.getItem(key);
+    // if (this.formSvc.generalInfoData && !this.isCoApplicant) {
 
-      if (storedData) {
-        data = JSON.parse(storedData);
-        this.formSvc.generalInfoData = data;
-        this.stepperService.markStepCompleted('genralinfo');
-      }
-    }
-
-    if (this.formSvc.generalInfoData) {
-
-      this.registerForm.patchValue({
-        checkedasset: this.formSvc.generalInfoData.hasAssets ? 'Yes' : 'No'
-      });
+    //   this.registerForm.patchValue({
+    //     checkedasset: this.formSvc.generalInfoData.hasAssets ? 'Yes' : 'No'
+    //   });
 
 
-      this.registerForm.patchValue({
-        occupation: this.formSvc.generalInfoData.currentOccupationId,
-        state: this.formSvc.generalInfoData.stateId,
-        otherstatetitle: this.formSvc.generalInfoData.otherStateName,
-        university: this.formSvc.generalInfoData.universityId,
-        otherunititle: this.formSvc.generalInfoData.otherUniversityName,
-        coursename: this.formSvc.generalInfoData.courseId,
-        othercoursenametitle: this.formSvc.generalInfoData.otherCourseName,
-        coursetype: this.formSvc.generalInfoData.coursetype,
-        othercoursetypetitle: this.formSvc.generalInfoData.othercoursetypetitle ? this.formSvc.generalInfoData.othercoursetypetitle : '',
+    //   this.registerForm.patchValue({
+    //     occupation: this.formSvc.generalInfoData.currentOccupationId,
+    //     state: this.formSvc.generalInfoData.stateId,
+    //     otherstatetitle: this.formSvc.generalInfoData.otherStateName,
+    //     university: this.formSvc.generalInfoData.universityId,
+    //     otherunititle: this.formSvc.generalInfoData.otherUniversityName,
+    //     coursename: this.formSvc.generalInfoData.courseId,
+    //     othercoursenametitle: this.formSvc.generalInfoData.otherCourseName,
+    //     coursetype: this.formSvc.generalInfoData.coursetype,
+    //     othercoursetypetitle: this.formSvc.generalInfoData.othercoursetypetitle ? this.formSvc.generalInfoData.othercoursetypetitle : '',
 
-        coursestartdate: this.parseDate(data.courseStartDate),
-        courseenddate: this.parseDate(data.courseEndDate),
-        lendingpartner: this.formSvc.generalInfoData.lendingPartnerId
-      });
+    //     coursestartdate: this.parseDate(data.courseStartDate),
+    //     courseenddate: this.parseDate(data.courseEndDate),
+    //     lendingpartner: this.formSvc.generalInfoData.lendingPartnerId
+    //   });
 
-      this.checkboxasset = this.formSvc.generalInfoData.hasAssets ? "Yes" : "No";
+    //   this.checkboxasset = this.formSvc.generalInfoData.hasAssets ? "Yes" : "No";
 
-      this.restoreDependentDropdowns(this.formSvc.generalInfoData);
-    }
+    //   this.restoreDependentDropdowns(this.formSvc.generalInfoData);
+    // }
 
 
+
+  }
+  get activeForm(): FormGroup {
+    return this.isCoApplicant ? this.coapp_registerForm : this.registerForm;
   }
 
   private restoreDependentDropdowns(data: any) {
@@ -657,7 +737,93 @@ export class GeneralInfo implements OnInit {
   back() {
     this.stepperService.previous();
   }
+
+  //main applicant data
+  saveMainApplicant(formdata: any) {
+    let input = {
+      "applicationId": this.applicationId,
+      "applicantId": this.applicantId,
+      "currentOccupationId": formdata.occupation,
+      "stateId": formdata.state,
+      "otherStateName": formdata.otherstatetitle,
+      "universityId": formdata.university,
+      "otherUniversityName": formdata.otherunititle,
+      "courseId": formdata.coursename,
+      "otherCourseName": formdata.othercoursenametitle,
+      "courseStartDate": this.formatDate(formdata.coursestartdate),
+      "courseEndDate": this.formatDate(formdata.courseenddate),
+      "hasAssets": this.checkboxasset == "Yes" ? true : false,
+      "lendingPartnerId": formdata.lendingpartner,
+    }
+
+    this.formSvc.submitGenralInfo(input, this.applicationId).subscribe(res => {
+      if (res.status === "success") {
+
+
+        this.stepperService.next();
+
+        this.formSvc.generalInfoData = { ...input, coursetype: formdata.coursetype };
+        const key = `generalInfoData_${this.applicantId}`;
+        localStorage.setItem(
+          `generalInfo_main_${this.applicantId}`,
+          JSON.stringify(this.formSvc.generalInfoData)
+        );
+
+        this.stepperService.markStepCompleted('genralinfo');
+        this.stepperService.setStepData('genralinfo', formdata);
+
+      }
+    });
+  }
+
+  //coapplicant data
+
+  saveCoApplicant(formdata: any) {
+    const input = {
+      applicationId: this.applicationId,
+      applicantId: this.applicantId,
+      occupation: formdata.occupation,
+      annualIncome: formdata.annualincome,
+      relationship: formdata.relationship,
+      hasAssets: this.checkboxasset === "Yes",
+    };
+
+    // Call separate API if required
+    console.log("Co-Applicant Data:", input);
+
+
+
+    this.stepperService.next();
+    this.formSvc.co_generalInfoData = { ...input, coursetype: formdata.coursetype };
+    const key = `generalInfoData_${this.applicantId}`;
+    localStorage.setItem(
+      `generalInfo_coapp_${this.applicantId}`,
+      JSON.stringify(this.formSvc.co_generalInfoData)
+    );
+
+    // this.stepperService.markStepCompleted('genralinfo');
+    // this.stepperService.setStepData('genralinfo', formdata);
+
+
+
+  }
+
   next() {
+    const form = this.activeForm;
+
+    if (!form.valid) {
+      console.log("form invalid");
+      return;
+    }
+
+    if (this.isCoApplicant) {
+      this.saveCoApplicant(form.value);
+    } else {
+      this.saveMainApplicant(form.value);
+    }
+  }
+
+  next1() {
     if (!this.registerForm.valid) {
       console.log("form invalid");
       return;

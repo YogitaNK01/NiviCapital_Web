@@ -1,4 +1,4 @@
-<div class="base-layout">
+<div class="base-layout" [ngClass]="{'coapplicant-layout': isCoApplicant}">
     <form [formGroup]="incomeForm" (ngSubmit)="submit()" id="kycForm" class="w-100">
 
         <div class="accordion d-flex flex-column gap-4 mb-4">

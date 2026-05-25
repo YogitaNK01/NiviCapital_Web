@@ -9,7 +9,7 @@ import { Dropdown } from "../../../systemdesign/dropdown/dropdown";
 import { Checkbox } from "../../../systemdesign/checkbox/checkbox";
 import { Buttons } from "../../../systemdesign/buttons/buttons";
 import { Addcustomerservice } from '../../../../core/service/addcustomerservice';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { Loanformservice } from '../../../../core/service/loanformservice';
 import moment from 'moment';
 import { Msgboxservice } from '../../../../core/service/msgboxservice';
@@ -100,9 +100,12 @@ export class Uploadkyc implements OnDestroy {
   editUserData: any = {};
   dobValid = false;
   dobTouched = false;
-  constructor(public main: Main, private addcustomerservice: Addcustomerservice, private route: ActivatedRoute, private loanservice: Loanformservice, private msgBox: Msgboxservice) { }
+
+  isCoApplicant:boolean = false;
+  constructor(public main: Main, private addcustomerservice: Addcustomerservice, private route: ActivatedRoute, private loanservice: Loanformservice, private msgBox: Msgboxservice,private router:Router) { }
 
   ngOnInit(): void {
+     this.isCoApplicant = this.router.url.includes('co-applicant');
     this.states();
     const cifDetails = sessionStorage.getItem('cifdetails');
     this.userid = this.safeParse(cifDetails);
@@ -118,6 +121,8 @@ export class Uploadkyc implements OnDestroy {
     }
     this.requiredDocs.forEach(k => this.uploadedFiles[k] = null);
     this.optionalDocs.forEach(k => this.uploadedFiles[k] = null);
+
+
 
   }
 

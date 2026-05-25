@@ -1,4 +1,4 @@
-<div class="base-layout">
+<div class="base-layout" [ngClass]="{'coapplicant-layout': isCoApplicant}">
 
     <div class="accordion d-flex flex-column gap-4 mb-4">
 
@@ -15,10 +15,16 @@
 
                 <div class="accordion-body p-0" *ngIf="openIndex === i">
 
-                    <ng-container *ngIf="i === 0">
+                    <!-- <ng-container *ngIf="i === 0">
                         <ng-container *ngTemplateOutlet="identityTemplate; context:{index:i}">
                         </ng-container>
+                    </ng-container> -->
+
+                    <ng-container *ngIf="i === 0">
+                        <ng-container
+                            *ngTemplateOutlet="isCoApplicant ? coapplicantTemplate : identityTemplate"></ng-container>
                     </ng-container>
+                    
 
                 </div>
             </div>
@@ -30,174 +36,165 @@
     <ng-template #identityTemplate let-i="index">
 
         <form [formGroup]="registerForm" (ngSubmit)="submit()" class="common-details-box d-flex flex-column">
- <div class="container-fluid">
-            <div class="row">
+            <div class="container-fluid">
+                <div class="row">
 
-                <!-- <div class="text-label fw-bold ">Last Qualification Details</div> -->
-                <div class="col-lg-12 col-sm-12 mt-20">
-                    <app-dropdown [options]="selectoccupation" [placeholder]="'Select Current Occupation'"
-                        [required]="true" (selectedValueChange)="registerForm.get('occupation')?.setValue($event)"
-                        [avatarUrl]="avatarUrl" formControlName="occupation" [hasAvatar]="hasAvatar"
-                        [label]="occupationlabel">
-                    </app-dropdown>
+                    <!-- <div class="text-label fw-bold ">Last Qualification Details</div> -->
+                    <div class="col-lg-12 col-sm-12 mt-20">
+                        <app-dropdown [options]="selectoccupation" [placeholder]="'Select Current Occupation'"
+                            [required]="true" (selectedValueChange)="registerForm.get('occupation')?.setValue($event)"
+                            [avatarUrl]="avatarUrl" formControlName="occupation" [hasAvatar]="hasAvatar"
+                            [label]="occupationlabel">
+                        </app-dropdown>
 
-                </div>
-                
-
-               
-
-
-                <div class="text-label fw-bold mt-20">Course Details</div>
-                <!-- Country NAME -->
-                <!-- <div class="col-lg-6 col-sm-12 mt-20">
-                    <app-inputfield type="text" [required]="true" label="Country" [required]="true"
-                        placeholder="Australia" helpText="Help text" [disabled]="true" name="country">
-                    </app-inputfield>
-
-                </div>
-
-             
-                <div class="col-lg-6 col-sm-12 mt-20">
-                    <app-dropdown [options]="Australianstate" [placeholder]="'Select '+state" [required]="true"
-                        (selectedValueChange)="selectPerState($event)" [avatarUrl]="avatarUrl" formControlName="state"
-                        [hasAvatar]="hasAvatar" [label]="state" [searchable]="true">
-                    </app-dropdown>
-                </div> -->
-
-
-
-                <div class="col-lg-12 col-sm-12 mt-20">
-                     <div class="row g-3">
-                          <div [ngClass]="{'col-4': isOtherstate, 'col-6': !isOtherstate  }">
-
-                         <app-inputfield type="text" [required]="true" label="Country" [required]="true"
-                        placeholder="Australia" helpText="Help text" [disabled]="true" name="country">
-                    </app-inputfield>
                     </div>
 
 
-                    <div [ngClass]="{'col-4': isOtherstate, 'col-6': !isOtherstate  }">
 
-                         <app-dropdown [options]="Australianstate" [placeholder]="'Select '+state" [required]="true"
-                        (selectedValueChange)="selectPerState($event)" [avatarUrl]="avatarUrl" formControlName="state"
-                        [hasAvatar]="hasAvatar" [label]="state" [searchable]="true">
-                    </app-dropdown>
-                    </div>
 
-                    <div class="col-4" *ngIf="isOtherstate">
-                        <div class="form-group">
-                            <app-inputfield formControlName="otherstatetitle" name="otherstatetitle" (input)="mainservice.restrictInput($event,'text')"
-                                label="Other State Name" placeholder="Enter Title" [required]="true">
-                            </app-inputfield>
 
-                            <div class="text-danger"
-                                *ngIf="registerForm.get('otherstatetitle')?.touched && registerForm.get('otherstatetitle')?.invalid">
-                                State Name is required
+                    <div class="text-label fw-bold mt-20">Course Details</div>
+                    <!-- Country NAME -->
+
+                    <div class="col-lg-12 col-sm-12 mt-20">
+                        <div class="row g-3">
+                            <div [ngClass]="{'col-4': isOtherstate, 'col-6': !isOtherstate  }">
+
+                                <app-inputfield type="text" [required]="true" label="Country" [required]="true"
+                                    placeholder="Australia" helpText="Help text" [disabled]="true" name="country">
+                                </app-inputfield>
+                            </div>
+
+
+                            <div [ngClass]="{'col-4': isOtherstate, 'col-6': !isOtherstate  }">
+
+                                <app-dropdown [options]="Australianstate" [placeholder]="'Select '+state"
+                                    [required]="true" (selectedValueChange)="selectPerState($event)"
+                                    [avatarUrl]="avatarUrl" formControlName="state" [hasAvatar]="hasAvatar"
+                                    [label]="state" [searchable]="true">
+                                </app-dropdown>
+                            </div>
+
+                            <div class="col-4" *ngIf="isOtherstate">
+                                <div class="form-group">
+                                    <app-inputfield formControlName="otherstatetitle" name="otherstatetitle"
+                                        (input)="mainservice.restrictInput($event,'text')" label="Other State Name"
+                                        placeholder="Enter Title" [required]="true">
+                                    </app-inputfield>
+
+                                    <div class="text-danger"
+                                        *ngIf="registerForm.get('otherstatetitle')?.touched && registerForm.get('otherstatetitle')?.invalid">
+                                        State Name is required
+                                    </div>
+                                </div>
                             </div>
                         </div>
+
                     </div>
-                </div>
 
-                </div>
-
-                <!-- University NAME -->
-                <div class="col-lg-12 col-sm-12 mt-20">
-                    <!-- <app-dropdown [options]="AustralianUniversities" [placeholder]="'Select '+university"
+                    <!-- University NAME -->
+                    <div class="col-lg-12 col-sm-12 mt-20">
+                        <!-- <app-dropdown [options]="AustralianUniversities" [placeholder]="'Select '+university"
                         [required]="true" (selectedValueChange)="selecteduniversity($event)" [avatarUrl]="avatarUrl"
                         formControlName="university" [hasAvatar]="hasAvatar" [label]="university" [searchable]="true">
                     </app-dropdown> -->
 
-                    <div class="row g-3">
-                    <div [ngClass]="{'col-6': isOtherUniversity, 'col-12': !isOtherUniversity  }">
+                        <div class="row g-3">
+                            <div [ngClass]="{'col-6': isOtherUniversity, 'col-12': !isOtherUniversity  }">
 
-                        <app-dropdown [options]="AustralianUniversities" [placeholder]="'Select '+university"
-                            [required]="true" (selectedValueChange)="selecteduniversity($event)" [avatarUrl]="avatarUrl"
-                            formControlName="university" [hasAvatar]="hasAvatar" [label]="university"
-                            [searchable]="true">
-                        </app-dropdown>
-                    </div>
+                                <app-dropdown [options]="AustralianUniversities" [placeholder]="'Select '+university"
+                                    [required]="true" (selectedValueChange)="selecteduniversity($event)"
+                                    [avatarUrl]="avatarUrl" formControlName="university" [hasAvatar]="hasAvatar"
+                                    [label]="university" [searchable]="true">
+                                </app-dropdown>
+                            </div>
 
-                    <div class="col-6" *ngIf="isOtherUniversity">
-                        <div class="form-group">
-                            <app-inputfield formControlName="otherunititle" name="otherunititle" (input)="mainservice.restrictInput($event,'text')"
-                                label="Other university Name" placeholder="Enter Title" [required]="true">
-                            </app-inputfield>
+                            <div class="col-6" *ngIf="isOtherUniversity">
+                                <div class="form-group">
+                                    <app-inputfield formControlName="otherunititle" name="otherunititle"
+                                        (input)="mainservice.restrictInput($event,'text')" label="Other university Name"
+                                        placeholder="Enter Title" [required]="true">
+                                    </app-inputfield>
 
-                            <div class="text-danger"
-                                *ngIf="registerForm.get('otherunititle')?.touched && registerForm.get('otherunititle')?.invalid">
-                                university Name is required
+                                    <div class="text-danger"
+                                        *ngIf="registerForm.get('otherunititle')?.touched && registerForm.get('otherunititle')?.invalid">
+                                        university Name is required
+                                    </div>
+                                </div>
                             </div>
                         </div>
+
                     </div>
-                </div>
 
-                </div>
-                
 
-                <!-- course type -->
-                <div class="col-lg-12 col-sm-12 mt-20">
-                    <!-- <app-dropdown [options]="selectcourse" [placeholder]="'Select '+coursetype" [required]="true"
+                    <!-- course type -->
+                    <div class="col-lg-12 col-sm-12 mt-20">
+                        <!-- <app-dropdown [options]="selectcourse" [placeholder]="'Select '+coursetype" [required]="true"
                         (selectedValueChange)="selectedcoursetype($event)" [avatarUrl]="avatarUrl"
                         formControlName="coursetype" [hasAvatar]="hasAvatar" [label]="coursetype">
                     </app-dropdown> -->
 
-                     <div class="row g-3">
-                    <div [ngClass]="{'col-6': isOthercoursetype, 'col-12': !isOthercoursetype  }">
+                        <div class="row g-3">
+                            <div [ngClass]="{'col-6': isOthercoursetype, 'col-12': !isOthercoursetype  }">
 
-                        <app-dropdown [options]="selectcourse" [placeholder]="'Select '+coursetype" [required]="true"
-                        (selectedValueChange)="selectedcoursetype($event)" [avatarUrl]="avatarUrl"
-                        formControlName="coursetype" [hasAvatar]="hasAvatar" [label]="coursetype">
-                    </app-dropdown>
-                    </div>
+                                <app-dropdown [options]="selectcourse" [placeholder]="'Select '+coursetype"
+                                    [required]="true" (selectedValueChange)="selectedcoursetype($event)"
+                                    [avatarUrl]="avatarUrl" formControlName="coursetype" [hasAvatar]="hasAvatar"
+                                    [label]="coursetype">
+                                </app-dropdown>
+                            </div>
 
-                    <div class="col-6" *ngIf="isOthercoursetype">
-                        <div class="form-group">
-                            <app-inputfield formControlName="othercoursetypetitle" name="othercoursetypetitle" (input)="mainservice.restrictInput($event,'text')"
-                                label="Other Course Type Name" placeholder="Enter Title" [required]="true">
-                            </app-inputfield>
+                            <div class="col-6" *ngIf="isOthercoursetype">
+                                <div class="form-group">
+                                    <app-inputfield formControlName="othercoursetypetitle" name="othercoursetypetitle"
+                                        (input)="mainservice.restrictInput($event,'text')"
+                                        label="Other Course Type Name" placeholder="Enter Title" [required]="true">
+                                    </app-inputfield>
 
-                            <div class="text-danger"
-                                *ngIf="registerForm.get('othercoursetypetitle')?.touched && registerForm.get('othercoursetypetitle')?.invalid">
-                                Course Type Name is required
+                                    <div class="text-danger"
+                                        *ngIf="registerForm.get('othercoursetypetitle')?.touched && registerForm.get('othercoursetypetitle')?.invalid">
+                                        Course Type Name is required
+                                    </div>
+                                </div>
                             </div>
                         </div>
+
                     </div>
-                </div>
-                
-                </div>
-                <!-- course name -->
-                <div class="col-lg-12 col-sm-12 mt-20">
-                    <!-- <app-dropdown [options]="selectcoursename" [placeholder]="'Select '+coursename" [required]="true"
+                    <!-- course name -->
+                    <div class="col-lg-12 col-sm-12 mt-20">
+                        <!-- <app-dropdown [options]="selectcoursename" [placeholder]="'Select '+coursename" [required]="true"
                         (selectedValueChange)="selectedCoursename($event)" [avatarUrl]="avatarUrl" [searchable]="true"
                         formControlName="coursename" [hasAvatar]="hasAvatar" [label]="coursename">
                     </app-dropdown> -->
 
-                      <div class="row g-3">
-                    <div [ngClass]="{'col-6': isOthercoursename, 'col-12': !isOthercoursename  }">
+                        <div class="row g-3">
+                            <div [ngClass]="{'col-6': isOthercoursename, 'col-12': !isOthercoursename  }">
 
-                          <app-dropdown [options]="selectcoursename" [placeholder]="'Select '+coursename" [required]="true"
-                        (selectedValueChange)="selectedCoursename($event)" [avatarUrl]="avatarUrl" [searchable]="true"
-                        formControlName="coursename" [hasAvatar]="hasAvatar" [label]="coursename">
-                    </app-dropdown>
-                    </div>
+                                <app-dropdown [options]="selectcoursename" [placeholder]="'Select '+coursename"
+                                    [required]="true" (selectedValueChange)="selectedCoursename($event)"
+                                    [avatarUrl]="avatarUrl" [searchable]="true" formControlName="coursename"
+                                    [hasAvatar]="hasAvatar" [label]="coursename">
+                                </app-dropdown>
+                            </div>
 
-                    <div class="col-6" *ngIf="isOthercoursename">   
-                        <div class="form-group">
-                            <app-inputfield formControlName="othercoursenametitle" name="othercoursenametitle" (input)="mainservice.restrictInput($event,'text')"
-                                label="Other Course Name" placeholder="Enter Title" [required]="true">
-                            </app-inputfield>
+                            <div class="col-6" *ngIf="isOthercoursename">
+                                <div class="form-group">
+                                    <app-inputfield formControlName="othercoursenametitle" name="othercoursenametitle"
+                                        (input)="mainservice.restrictInput($event,'text')" label="Other Course Name"
+                                        placeholder="Enter Title" [required]="true">
+                                    </app-inputfield>
 
-                            <div class="text-danger"
-                                *ngIf="registerForm.get('othercoursenametitle')?.touched && registerForm.get('othercoursenametitle')?.invalid">
-                                Course Name is required
+                                    <div class="text-danger"
+                                        *ngIf="registerForm.get('othercoursenametitle')?.touched && registerForm.get('othercoursenametitle')?.invalid">
+                                        Course Name is required
+                                    </div>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                </div>
 
-                </div>
-                <!-- Course Duration -->
-                <!-- <div class="col-lg-6 col-sm-12 mt-20">
+                    </div>
+                    <!-- Course Duration -->
+                    <!-- <div class="col-lg-6 col-sm-12 mt-20">
                     <app-dropdown [options]="selectcourseduration" [placeholder]="'Select '+courseduration"
                         [required]="true" (selectedValueChange)="registerForm.get('courseduration')?.setValue($event)"
                         [avatarUrl]="avatarUrl" formControlName="courseduration" [hasAvatar]="hasAvatar"
@@ -207,62 +204,122 @@
 
 
 
-                <!-- Course Start Date* -->
-                <div class="col-lg-6 col-sm-12 mt-20">
-                    <app-datepickernew formControlName="coursestartdate" label="Course Start Date"
-                        placeholder="DD/MM/YYYY" [disablePastDates]="true">
-                    </app-datepickernew>
-                    <div class="text-danger"
-                        *ngIf="f['coursestartdate'].touched && f['coursestartdate'].errors?.['minDateError']">
-                        Start date cannot be in the past
-                    </div>
-                </div>
-                <!-- Course End Date* -->
-                <div class="col-lg-6 col-sm-12 mt-20">
-                    <app-datepickernew formControlName="courseenddate" label="Course End Date" placeholder="DD/MM/YYYY"
-                        [disabled]="!f['coursestartdate'].value" [disablePastDates]="true"  >
-                    </app-datepickernew>
-                    <div class="text-danger"
-                        *ngIf="f['courseenddate'].touched && f['courseenddate'].errors?.['invalidEndDate']"> End date must be after start date 
-                    </div>
-
-                </div>
-
-                <!-- Do you have Assets? -->
-                <div class="col-lg-12 mt-20">
-                    <div class=" d-flex flex-column">
-
-                        <div class="dropdown-label1 all-label ">Do you have Assets?<span class="text-danger">*</span>
-                        </div>
-                        <div class="d-flex flex-row">
-                            <app-radiobuttons name="optionsGroup1" label="Yes" value="Yes"
-                                formControlName="checkedasset" (checkedChange)="checkassetOnChange('Yes')">
-                            </app-radiobuttons>
-
-
-                            <app-radiobuttons name="optionsGroup1" (checkedChange)="checkassetOnChange('No')" label="No"
-                                value="No" formControlName="checkedasset">
-                            </app-radiobuttons>
+                    <!-- Course Start Date* -->
+                    <div class="col-lg-6 col-sm-12 mt-20">
+                        <app-datepickernew formControlName="coursestartdate" label="Course Start Date"
+                            placeholder="DD/MM/YYYY" [disablePastDates]="true">
+                        </app-datepickernew>
+                        <div class="text-danger"
+                            *ngIf="f['coursestartdate'].touched && f['coursestartdate'].errors?.['minDateError']">
+                            Start date cannot be in the past
                         </div>
                     </div>
-                </div>
+                    <!-- Course End Date* -->
+                    <div class="col-lg-6 col-sm-12 mt-20">
+                        <app-datepickernew formControlName="courseenddate" label="Course End Date"
+                            placeholder="DD/MM/YYYY" [disabled]="!f['coursestartdate'].value" [disablePastDates]="true">
+                        </app-datepickernew>
+                        <div class="text-danger"
+                            *ngIf="f['courseenddate'].touched && f['courseenddate'].errors?.['invalidEndDate']"> End
+                            date must be after start date
+                        </div>
 
-                <!-- Lending Partner -->
-                <div class="col-lg-12 col-sm-12 mt-20">
-                    <app-dropdown [options]="selectlendingpartner" [placeholder]="'Select '+lendingpartner"
-                        [required]="true" (selectedValueChange)="registerForm.get('lendingpartner')?.setValue($event)"
-                        [avatarUrl]="avatarUrl" formControlName="lendingpartner" [hasAvatar]="hasAvatar"
-                        [label]="lendingpartner">
-                    </app-dropdown>
+                    </div>
+
+                    <!-- Do you have Assets? -->
+                    <div class="col-lg-12 mt-20">
+                        <div class=" d-flex flex-column">
+
+                            <div class="dropdown-label1 all-label ">Do you have Assets?<span
+                                    class="text-danger">*</span>
+                            </div>
+                            <div class="d-flex flex-row">
+                                <app-radiobuttons name="optionsGroup1" label="Yes" value="Yes"
+                                    formControlName="checkedasset" (checkedChange)="checkassetOnChange('Yes')">
+                                </app-radiobuttons>
+
+
+                                <app-radiobuttons name="optionsGroup1" (checkedChange)="checkassetOnChange('No')"
+                                    label="No" value="No" formControlName="checkedasset">
+                                </app-radiobuttons>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Lending Partner -->
+                    <div class="col-lg-12 col-sm-12 mt-20">
+                        <app-dropdown [options]="selectlendingpartner" [placeholder]="'Select '+lendingpartner"
+                            [required]="true"
+                            (selectedValueChange)="registerForm.get('lendingpartner')?.setValue($event)"
+                            [avatarUrl]="avatarUrl" formControlName="lendingpartner" [hasAvatar]="hasAvatar"
+                            [label]="lendingpartner">
+                        </app-dropdown>
+                    </div>
                 </div>
             </div>
-</div>
 
 
 
         </form>
 
     </ng-template>
+
+    <ng-template #coapplicantTemplate let-i="index">
+
+        <form [formGroup]="coapp_registerForm" (ngSubmit)="submit()" class="common-details-box d-flex flex-column">
+            <div class="container-fluid">
+                <div class="row">
+
+                    <!-- <div class="text-label fw-bold ">Last Qualification Details</div> -->
+                    <div class="col-lg-4 col-sm-12 mt-20">
+                        <app-dropdown [options]="selectoccupation" [placeholder]="'Select Current Occupation'"
+                            [required]="true"
+                            (selectedValueChange)="coapp_registerForm.get('occupation')?.setValue($event)"
+                            [avatarUrl]="avatarUrl" formControlName="occupation" [hasAvatar]="hasAvatar"
+                            [label]="occupationlabel">
+                        </app-dropdown>
+
+                    </div>
+                    <div class="col-lg-4 col-sm-12 mt-20">
+                        <app-dropdown [options]="selectAnnualIncome" [placeholder]="'Select Annual Income'"
+                            [required]="true"
+                            (selectedValueChange)="coapp_registerForm.get('annualincome')?.setValue($event)"
+                            [avatarUrl]="avatarUrl" formControlName="annualincome" [hasAvatar]="hasAvatar"
+                            [label]="'Annual Income'">
+                        </app-dropdown>
+
+                    </div>
+                    <div class="col-lg-4 col-sm-12 mt-20">
+                        <app-dropdown [options]="selectoccupation" [placeholder]="'Select Relation'" [required]="true"
+                            (selectedValueChange)="coapp_registerForm.get('relationship')?.setValue($event)"
+                            [avatarUrl]="avatarUrl" formControlName="relationship" [hasAvatar]="hasAvatar"
+                            [label]="'Relation with Applicant'">
+                        </app-dropdown>
+
+                    </div>
+                    <div class="col-lg-12 mt-20">
+                        <div class=" d-flex flex-column">
+
+                            <div class="dropdown-label1 all-label ">Do you have Assets?<span
+                                    class="text-danger">*</span>
+                            </div>
+                            <div class="d-flex flex-row">
+                                <app-radiobuttons name="optionsGroup1" label="Yes" value="Yes"
+                                    formControlName="checkedasset" (checkedChange)="checkassetOnChange('Yes')">
+                                </app-radiobuttons>
+
+
+                                <app-radiobuttons name="optionsGroup1" (checkedChange)="checkassetOnChange('No')"
+                                    label="No" value="No" formControlName="checkedasset">
+                                </app-radiobuttons>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </ng-template>
+
 </div>
 <hr class="footer-hr-class">
 <div class="loan-footerbtns row w-100  d-flex justify-content-between align-items-center">
@@ -274,9 +331,10 @@
     <div class="col-lg-4  d-flex justify-content-end">
         <app-buttons type="button" label="Back" class="btn btncustomClass" [outline]="true" (click)="back()">
         </app-buttons>
-        <!-- <app-buttons type="button" label="Next" class="btn btncustomClass" color="primary" (click)="next1()" ></app-buttons> -->
+        <!-- <app-buttons type="button" label="Next" class="btn btncustomClass" color="primary" (click)="next()"
+            [disabled]="!registerForm.valid || !checkboxasset"> </app-buttons> -->
         <app-buttons type="button" label="Next" class="btn btncustomClass" color="primary" (click)="next()"
-            [disabled]="!registerForm.valid || !checkboxasset"> </app-buttons>
+            [disabled]="!activeForm.valid || !checkboxasset"> </app-buttons>
 
     </div>
 </div>

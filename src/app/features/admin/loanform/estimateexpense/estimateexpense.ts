@@ -71,11 +71,12 @@ export class Estimateexpense {
   amtlimit: boolean = false;
   amountErrors: { [key: string]: boolean } = {};
 
-
+ isCoApplicant: boolean = false;
   constructor(private fb: FormBuilder, private stepperService: Loanstepperservice, private cd: ChangeDetectorRef, private loanformservice: Loanformservice,
     private router: Router, private route: ActivatedRoute, public main: Main, private msgBox: Msgboxservice) { }
 
   ngOnInit(): void {
+      this.isCoApplicant = this.router.url.includes('co-applicant');
     this.stepperService.rebuildSteps();
     this.route.queryParams.subscribe(params => {
 

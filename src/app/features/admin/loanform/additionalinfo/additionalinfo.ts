@@ -10,7 +10,7 @@ import { Main } from '../../../../core/service/main';
 import { Inputfield } from '../../../systemdesign/inputfield/inputfield';
 import { Loanstepperservice } from '../../../../core/service/loanstepperservice';
 import { Loanformservice } from '../../../../core/service/loanformservice';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 
 @Component({
   selector: 'app-additionalinfo',
@@ -73,9 +73,11 @@ export class Additionalinfo implements OnInit {
   showSpouseError = false;
   submitAttempted = false;
 
+  isCoApplicant: boolean = false;
 
-  constructor(private fb: FormBuilder, public main: Main, private route: ActivatedRoute, private stepperService: Loanstepperservice, private formSvc: Loanformservice) { }
+  constructor(private fb: FormBuilder, public main: Main, private route: ActivatedRoute, private router: Router, private stepperService: Loanstepperservice, private formSvc: Loanformservice) { }
   ngOnInit(): void {
+    this.isCoApplicant = this.router.url.includes('co-applicant');
     this.stepperService.rebuildSteps();
     this.route.queryParams.subscribe(params => {
 
@@ -112,20 +114,38 @@ export class Additionalinfo implements OnInit {
     let data = this.formSvc.additionalInfoData;
 
     if (!data) {
-      
 
-      const key = `additionalinfoData_${this.applicantId}`;
+
+      const key = this.isCoApplicant
+        ? `additionalinfo_coapp_${this.applicantId}`
+        : `additionalinfo_main_${this.applicantId}`;
+
       const storedData = localStorage.getItem(key);
+
+      // const key = `additionalinfoData_${this.applicantId}`;
+      // const storedData = localStorage.getItem(key);
 
       if (storedData) {
         data = JSON.parse(storedData);
-        this.formSvc.additionalInfoData = data;
+        // this.formSvc.additionalInfoData = data;
+
+        if (this.isCoApplicant) {
+          this.formSvc.co_additionalInfoData = data;
+        } else {
+          this.formSvc.additionalInfoData = data;
+        }
+
         this.stepperService.markStepCompleted('additionalinfo');
       }
     }
 
-    if (this.formSvc.additionalInfoData) {
-      this.patchAdditionalInfo();
+    // if (this.formSvc.additionalInfoData) {
+    //   this.patchAdditionalInfo();
+    // }
+    if (this.isCoApplicant) {
+      this.patchAdditionalInfo(this.formSvc.co_additionalInfoData);
+    } else {
+      this.patchAdditionalInfo(this.formSvc.additionalInfoData);
     }
 
     this.additionalinfoForm.get('maritalstatus')?.valueChanges.subscribe(value => {
@@ -192,7 +212,7 @@ export class Additionalinfo implements OnInit {
     if (!result || !result.file) {
       this.profilePhotoUrl = null;
       this.objectName = null;
-      this.fileName=null;
+      this.fileName = null;
       this.additionalinfoForm.get('uploadphoto')?.setValue(null);
       this.additionalinfoForm.get('uploadphoto')?.markAsTouched();
       return;
@@ -206,7 +226,7 @@ export class Additionalinfo implements OnInit {
         console.log(res);
         this.profilePhotoUrl = res.data.publicUrl;
         this.objectName = res.data.objectName;
-        this.fileName=res.data.fileName;
+        this.fileName = res.data.fileName;
 
         this.additionalinfoForm.patchValue({
           uploadphoto: this.profilePhotoUrl
@@ -241,16 +261,20 @@ export class Additionalinfo implements OnInit {
     this.stepperService.previous();
   }
 
-  patchAdditionalInfo() {
-    const data = this.formSvc.additionalInfoData;
+  patchAdditionalInfo(data: any) {
+    // const data = this.formSvc.additionalInfoData;
 
     if (!data) return;
 
+const genderValue =
+  data.gender == "M" ? "Male" :
+  data.gender == "F" ? "Female" : "Third Gender";
 
     this.additionalinfoForm.patchValue({
+      
       uploadphoto: data.uploadphoto,
       maritalstatus: data.maritalStatus ? data.maritalStatus.charAt(0) + data.maritalStatus.slice(1).toLowerCase() : '',
-      gender: data.gender == "M" ? "Male" : data.gender == "F" ? "Female" : 'O',
+      // gender: data.gender == "M" ? "Male" : data.gender == "F" ? "Female" : 'O',
       dependents: data.numberOfDependents,
 
       s_fname: data.spouseFirstName,
@@ -269,6 +293,10 @@ export class Additionalinfo implements OnInit {
 
 
     });
+    
+this.additionalinfoForm.get('gender')?.setValue(genderValue);
+this.gendercheck(genderValue);
+
 
     this.isfathermiddlename = !!data.fatherNoMiddleName;
     this.ismothermiddlename = !!data.motherNoMiddleName;
@@ -387,8 +415,22 @@ export class Additionalinfo implements OnInit {
         console.log(res);
         if (res.status == "success") {
           this.formSvc.additionalInfoData = input;
-          const key = `additionalinfoData_${this.applicantId}`;
+          // const key = `additionalinfoData_${this.applicantId}`;
+
+          const key = this.isCoApplicant
+            ? `additionalinfo_coapp_${this.applicantId}`
+            : `additionalinfo_main_${this.applicantId}`;
+
           localStorage.setItem(key, JSON.stringify(this.formSvc.additionalInfoData));
+
+
+          if (this.isCoApplicant) {
+            this.formSvc.co_additionalInfoData = input;
+          } else {
+            this.formSvc.additionalInfoData = input;
+          }
+
+
           this.stepperService.markStepCompleted('additionalinfo');
           this.stepperService.setStepData('additionalinfo', formdata);
           this.stepperService.next();

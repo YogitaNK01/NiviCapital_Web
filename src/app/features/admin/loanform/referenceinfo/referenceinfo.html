@@ -1,4 +1,4 @@
-<div class="vh-container">
+<div class="vh-container" [ngClass]="{'coapplicant-layout': isCoApplicant}">
     <div class="base-layout base-height">
 
         <form [formGroup]="referenceForm" (ngSubmit)="submit()" id="referenceForm" class="w-100 ">

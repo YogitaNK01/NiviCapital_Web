@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectorRef, Component } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { Button } from 'bootstrap';
 import { Buttons } from '../../../../systemdesign/buttons/buttons';
 import { Router, ActivatedRoute, RouterOutlet } from '@angular/router';
@@ -14,7 +14,7 @@ import { TableData } from '../../../../../core/service/table-data';
   templateUrl: './coappdashboard.html',
   styleUrl: './coappdashboard.scss'
 })
-export class Coappdashboard {
+export class Coappdashboard implements OnInit {
 applicantId: any;
 applicationId: any
   custName: any;
@@ -23,15 +23,12 @@ applicationId: any
    constructor(public service: Main, private router: Router, private addcustomerservice: Addcustomerservice,
     private route: ActivatedRoute, private cd: ChangeDetectorRef) { }
 
-    ngonInit(){
+    ngOnInit(){
       this.route.queryParams.subscribe(params => {
 
-      const applicantId = params['applicantId'];
-      const applicationId = params['applicationId'];
-
       // Store in variables if needed
-      this.applicantId = applicantId;
-      this.applicationId = applicationId;
+      this.applicantId = params['applicantId'];;
+      this.applicationId = params['applicationId'];
       this.custName = params['custName'];
       this.arnid = params['custARN'];
 
@@ -42,13 +39,14 @@ applicationId: any
   this.router.navigate(
     ['coapplicantinfo'],
     {
+      relativeTo: this.route,
       queryParams: {
         applicantId: this.applicantId,
         applicationId: this.applicationId,
         custName: this.custName,
               custARN: this.arnid
       },
-      relativeTo: this.route,queryParamsHandling: 'preserve' 
+      // queryParamsHandling: 'merge' 
     }
   );
 
