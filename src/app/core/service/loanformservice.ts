@@ -44,8 +44,11 @@ export class Loanformservice {
   liabilitiesInfoData: any;
   monthlyExpenditureData: any;
   referenceInfoData: any;
+   educationdetailsData: any;
   educationInfoData: any;
 
+
+  co_basicInfoData: any;
   co_generalInfoData: any;
   co_estExpenseInfoData: any;
   co_additionalInfoData: any;
@@ -396,30 +399,26 @@ getInstitutesCached(): Observable<OptionItem[]> {
  
     );
   }
+ // ************************* Save and Exit data *************************
+
+  saveandExit(data: any): Observable<ApiResponse<any>> {
+
+    return this.http.post<ApiResponse<any>>(
+      `${this.baseUrl}/v1/los/draft/save`,
+      data
+    );
+  }
+
+  // *************************Summary *************************
+
+  
+    getSavedData(id1:string,id2:string,sectionkey:string): Observable<ApiResponse<any>> {
+    return this.http.get<ApiResponse<any>>(
+      `${this.baseUrl}/v1/los/draft/get?applicationId=${id1}&applicantId=${id2}&sectionKey=${sectionkey}`,
+ 
+    );
+  }
 
 }
 
-// saveDraft() {
-//   const data = this.masterForm.value;
-//   this.api.saveDraft(data).subscribe();
-// }
-
-// this.api.getDraft().subscribe(data => {
-//   this.masterForm.patchValue(data);
-// });
-
-// goNext() {
-//   const stepGroup = this.masterForm.get('loanInfo');
-
-//   if (stepGroup?.invalid) {
-//     stepGroup.markAllAsTouched();
-//     return;
-//   }
-
-//   this.router.navigate(['../generalinfo']);
-// }
-
-// onFile(e) {
-//   const file = e.target.files[0];
-//   this.form.get('panFile')?.setValue(file);
-// }
+// http://192.168.5.42:8080/nivicapsit/api/v1/los/draft/get?applicationId=d9a99523-5eda-4d07-a654-fd92fa6c9d37&applicantId=48958838-2fb7-46ca-b299-852ef8e46e8d&sectionKey=BATCH_UPLOAD

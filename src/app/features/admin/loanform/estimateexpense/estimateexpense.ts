@@ -71,15 +71,21 @@ export class Estimateexpense {
   amtlimit: boolean = false;
   amountErrors: { [key: string]: boolean } = {};
 
- isCoApplicant: boolean = false;
+  isCoApplicant: boolean = false;
+
+  livingLoaded = false;
+  miscLoaded = false;
+  pendingSavedExpense: any = null;
+  lastSavedPayload: any = null;
+
   constructor(private fb: FormBuilder, private stepperService: Loanstepperservice, private cd: ChangeDetectorRef, private loanformservice: Loanformservice,
     private router: Router, private route: ActivatedRoute, public main: Main, private msgBox: Msgboxservice) { }
 
-  ngOnInit(): void {
-      this.isCoApplicant = this.router.url.includes('co-applicant');
+  async ngOnInit() {
+    this.isCoApplicant = this.router.url.includes('co-applicant');
     this.stepperService.rebuildSteps();
-    this.route.queryParams.subscribe(params => {
-
+    // this.route.queryParams.subscribe(params => {
+      const params = this.route.snapshot.queryParams;
       const applicantId = params['applicantId'];
       const applicationId = params['applicationId'];
 
@@ -87,14 +93,28 @@ export class Estimateexpense {
       this.applicantId = applicantId;
       this.applicationId = applicationId;
 
-       const key = `estimateExpenseData_${this.applicantId}`;
-    const savedData = localStorage.getItem(key);
+      // const key = `estimateExpenseData_${this.applicantId}`;
+      // const savedData = localStorage.getItem(key);
 
-    if (savedData) {
-      this.loanformservice.estExpenseInfoData = JSON.parse(savedData);
-      this.stepperService.markStepCompleted('expense');
+      // if (savedData) {
+      //   this.loanformservice.estExpenseInfoData = JSON.parse(savedData);
+      //   this.stepperService.markStepCompleted('expense');
+      // }
+    // });
+    // Reset localStorage if applicant changed
+    const currentUserKey = 'currentApplicantId';
+    const previousId = localStorage.getItem(currentUserKey);
+
+    if (previousId && previousId !== this.applicantId) {
+      Object.keys(localStorage).forEach(key => {
+        if (key.includes('_')) {
+          localStorage.removeItem(key);
+        }
+      });
     }
-    });
+
+    localStorage.setItem(currentUserKey, this.applicantId);
+    this.stepperService.rebuildSteps();
 
     this.expenseForm = this.fb.group({
 
@@ -107,7 +127,7 @@ export class Estimateexpense {
     this.livingexp();
     this.miscgexp();
 
-    
+
 
     this.expenseForm.get('tutionfees')?.valueChanges.subscribe(() => {
       this.calculateINRtoAUD();
@@ -127,8 +147,58 @@ export class Estimateexpense {
       this.calculateGrandTotal();
     });
 
+    const key = this.getStorageKey();
+
+    const localData = localStorage.getItem(key);
+    let parsedLocal = localData ? JSON.parse(localData) : null;
+
+    //  call API
+    const apiData = await this.getSavedEstExpense();
+
+    //  PRIORITY LOGIC
+    let finalData = null;
+
+    if (apiData) {
+      finalData = apiData;
+      localStorage.setItem(key, JSON.stringify(apiData));
+    }
+    else if (parsedLocal) {
+      finalData = parsedLocal;
+    }
+
+    
+ if (finalData) {
+    this.loanformservice.estExpenseInfoData = finalData;
+    this.pendingSavedExpense = finalData;
+    this.tryPatchSavedExpense();
+  } else {
+    this.lastSavedPayload = null;
   }
 
+
+    // if (finalData) {
+    //   if (this.isCoApplicant) {
+    //     this.patchCoApplicantInfo(finalData);
+    //   } else {
+    //     this.patchGeneralInfo(finalData);
+    //   }
+
+
+    //   this.lastSavedPayload = this.isCoApplicant
+    //     ? this.buildCoApplicantPayload(this.coapp_registerForm.value)
+    //     : this.buildMainPayload(this.registerForm.value);
+    // } else {
+    //   this.lastSavedPayload = null;
+    // }
+
+
+  }
+
+  getStorageKey() {
+    return this.isCoApplicant
+      ? `estimateExpenseData_coapp_${this.applicantId}`
+      : `estimateExpenseData_main_${this.applicantId}`;
+  }
   get f() {
     return this.expenseForm.controls;
   }
@@ -171,9 +241,13 @@ export class Estimateexpense {
         code: s.code
       }));
 
-        if (this.loanformservice.estExpenseInfoData) {
-      this.patchExpenseData()
-    }
+      if (this.loanformservice.estExpenseInfoData) {
+        this.patchExpenseData()
+      }
+
+      this.livingLoaded = true;
+      this.tryPatchSavedExpense();
+
     });
   }
 
@@ -189,9 +263,13 @@ export class Estimateexpense {
         label: s.name,
         code: s.code
       }));
-  if (this.loanformservice.estExpenseInfoData) {
-      this.patchExpenseData()
-    }
+      if (this.loanformservice.estExpenseInfoData) {
+        this.patchExpenseData()
+      }
+
+      this.miscLoaded = true;
+      this.tryPatchSavedExpense();
+
     });
   }
 
@@ -248,16 +326,16 @@ export class Estimateexpense {
       // })
     });
     const amountCtrl = group.get('amountINR');
-const frequencyCtrl = group.get('securityfrequency');
+    const frequencyCtrl = group.get('securityfrequency');
 
-amountCtrl?.valueChanges.subscribe(() => {
-  this.validateAmount(group);
-});
+    amountCtrl?.valueChanges.subscribe(() => {
+      this.validateAmount(group);
+    });
 
-frequencyCtrl?.valueChanges.subscribe(() => {
-  this.validateAmount(group);
-});
-``
+    frequencyCtrl?.valueChanges.subscribe(() => {
+      this.validateAmount(group);
+    });
+    ``
 
     return group;
 
@@ -341,7 +419,7 @@ frequencyCtrl?.valueChanges.subscribe(() => {
       });
 
       group.get('securityfrequency')?.valueChanges.subscribe(() => {
-        this.validateAmount(group); 
+        this.validateAmount(group);
       });
 
     });
@@ -539,7 +617,7 @@ frequencyCtrl?.valueChanges.subscribe(() => {
     let num = Number(value);
     const formatted = this.formatIndian(num.toString());
     this.expenseForm.get(controlName)?.setValue(formatted, { emitEvent: false });
-   
+
 
   }
 
@@ -687,7 +765,7 @@ frequencyCtrl?.valueChanges.subscribe(() => {
     });
   }
 
-   patchExpenseData() {
+  patchExpenseData() {
     const data = this.loanformservice.estExpenseInfoData;
 
     if (!data) return;
@@ -701,8 +779,8 @@ frequencyCtrl?.valueChanges.subscribe(() => {
     this.livingexpenses.clear();
     this.miscexpenses.clear();
 
-this.selectedCategories = [];
-  this.selectedmisCategories = [];
+    this.selectedCategories = [];
+    this.selectedmisCategories = [];
 
     data.items.forEach((item: any) => {
 
@@ -745,17 +823,173 @@ this.selectedCategories = [];
 
     });
 
-this.selectedCategories = [...new Set(this.selectedCategories)];
-  this.selectedmisCategories = [...new Set(this.selectedmisCategories)];
+    this.selectedCategories = [...new Set(this.selectedCategories)];
+    this.selectedmisCategories = [...new Set(this.selectedmisCategories)];
 
     this.calculateINRtoAUD();
     this.calculateGrandTotal();
-     this.cd.detectChanges();
+    this.cd.detectChanges();
   }
   capitalize(val: string): string {
     return val.charAt(0).toUpperCase() + val.slice(1).toLowerCase();
   }
 
+  tryPatchSavedExpense() {
+    if (!this.pendingSavedExpense) return;
+    if (!this.livingLoaded || !this.miscLoaded) return;
+
+    this.patchSavedEstExpense(this.pendingSavedExpense);
+
+    // optional snapshot for “changed or not” logic
+    this.lastSavedPayload = this.buildExpensePayload();
+
+    this.pendingSavedExpense = null;
+  }
+
+  patchSavedEstExpense(data: any) {
+  if (!data) return;
+
+  this.expenseForm.patchValue({
+    tutionfees: this.formatIndian(String(data.tuitionFeesInr || 0)),
+    tutionfeesAUD: this.formatAustralian((data.tuitionFeesInr || 0) / 62.5)
+  }, { emitEvent: false });
+
+  this.livingexpenses.clear();
+  this.miscexpenses.clear();
+
+  this.selectedCategories = [];
+  this.selectedmisCategories = [];
+
+  (data.items || []).forEach((item: any) => {
+    // Living Expense
+    if (item.livingExpenseItemMasterId) {
+      const group = this.createExpense(item.livingExpenseItemMasterId);
+
+      group.patchValue({
+        category: item.livingExpenseItemMasterId,
+        categoryLabel: this.getCategoryLabel(item.livingExpenseItemMasterId),
+        securityfrequency: this.capitalize(item.frequency || 'MONTHLY'),
+        amountINR: this.formatIndian(String(item.amountInr || 0)),
+        amountAUD: this.formatAustralian((item.amountInr || 0) / 62.5),
+        description: item.description || ''
+      }, { emitEvent: false });
+
+      this.livingexpenses.push(group);
+
+      if (!this.selectedCategories.includes(item.livingExpenseItemMasterId)) {
+        this.selectedCategories.push(item.livingExpenseItemMasterId);
+      }
+    }
+
+    // Misc Expense
+    if (item.miscellaneousExpenseItemMasterId) {
+      const group = this.createmiscExpense(item.miscellaneousExpenseItemMasterId);
+
+      group.patchValue({
+        category: item.miscellaneousExpenseItemMasterId,
+        categoryLabel: this.getmisCategoryLabel(item.miscellaneousExpenseItemMasterId),
+        securityfrequency: this.capitalize(item.frequency || 'MONTHLY'),
+        amountINR: this.formatIndian(String(item.amountInr || 0)),
+        amountAUD: this.formatAustralian((item.amountInr || 0) / 62.5),
+        descriptionmisc: item.description || ''
+      }, { emitEvent: false });
+
+      this.miscexpenses.push(group);
+
+      if (!this.selectedmisCategories.includes(item.miscellaneousExpenseItemMasterId)) {
+        this.selectedmisCategories.push(item.miscellaneousExpenseItemMasterId);
+      }
+    }
+  });
+
+  this.selectedCategories = [...new Set(this.selectedCategories)];
+  this.selectedmisCategories = [...new Set(this.selectedmisCategories)];
+
+  this.calculateINRtoAUD();
+  this.calculateGrandTotal();
+  this.cd.detectChanges();
+}
+
+buildExpensePayload() {
+  const formdata = this.expenseForm.getRawValue();
+
+  const livingExpenses = formdata.livingexpenses.map((item: any) => ({
+    livingExpenseItemMasterId: item.category,
+    frequency: item.securityfrequency?.toUpperCase(),
+    amountInr: Number(String(item.amountINR || '').replace(/,/g, '')),
+    description: item.description || ''
+  }));
+
+  const miscExpenses = formdata.miscexpenses.map((item: any) => ({
+    miscellaneousExpenseItemMasterId: item.category,
+    frequency: item.securityfrequency?.toUpperCase(),
+    amountInr: Number(String(item.amountINR || '').replace(/,/g, '')),
+    description: item.descriptionmisc || ''
+  }));
+
+  return {
+    applicantId: this.applicantId,
+    tuitionFeesInr: Number(String(formdata.tutionfees || '').replace(/,/g, '')),
+    items: [...livingExpenses, ...miscExpenses]
+  };
+}
+
+  //save and exit 
+  saveExit() {
+    let formdata = this.expenseForm.value
+    console.log("form data Expenses:", formdata);
+
+    const livingExpenses = this.expenseForm.value.livingexpenses.map((item: any) => ({
+      livingExpenseItemMasterId: item.category,
+      frequency: item.securityfrequency?.toUpperCase(),
+      amountInr: Number(item.amountINR.replace(/,/g, '')),
+      description: item.description || ''
+    }));
+
+    const miscExpenses = this.expenseForm.value.miscexpenses.map((item: any) => ({
+      miscellaneousExpenseItemMasterId: item.category,
+      frequency: item.securityfrequency?.toUpperCase(),
+      amountInr: Number(item.amountINR.replace(/,/g, '')),
+      description: item.description || ''
+    }));
+
+
+    let input = {
+      tuitionFeesInr: Number(formdata.tutionfees.replace(/,/g, '')),
+      items: [...livingExpenses, ...miscExpenses]
+    }
+
+    const inputdata = {
+      action: "auto-save",
+      sectionKey: "ESTIMATED_EXPENSE",
+      applicationId: this.applicationId,
+      applicantId: this.applicantId,
+      jsonData: input
+    };
+
+    this.loanformservice.saveandExit(inputdata).subscribe();
+  }
+  //get api for saved data
+  getSavedEstExpense(): Promise<any> {
+    let sectionkey = "ESTIMATED_EXPENSE"
+    return new Promise((resolve) => {
+      this.loanformservice.getSavedData(this.applicationId, this.applicantId, sectionkey).pipe()
+
+        .subscribe({
+          next: (res) => {
+
+            console.log(res)
+            if (res.status === "success") {
+              resolve(res.data.data);
+
+            }
+            else {
+              resolve(null);
+            }
+          }, error: () => resolve(null)
+        });
+    });
+  }
   back() {
     this.stepperService.previous();
   }
@@ -811,6 +1045,7 @@ this.selectedCategories = [...new Set(this.selectedCategories)];
 
 
     let input = {
+      applicantId: this.applicantId,
       tuitionFeesInr: Number(formdata.tutionfees.replace(/,/g, '')),
       items: [...livingExpenses, ...miscExpenses]
     }
@@ -820,10 +1055,10 @@ this.selectedCategories = [...new Set(this.selectedCategories)];
         console.log("resp---", res);
         if (res.status == "success") {
           this.loanformservice.estExpenseInfoData = input;
-           const key = `estimateExpenseData_${this.applicantId}`;
+          const key = `estimateExpenseData_main_${this.applicantId}`;
           localStorage.setItem(key, JSON.stringify(this.loanformservice.estExpenseInfoData));
           this.stepperService.markStepCompleted('expense');
-           this.stepperService.setStepData('expense', formdata);
+          this.stepperService.setStepData('expense', formdata);
           this.stepperService.next();
         }
       }

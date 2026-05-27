@@ -188,9 +188,9 @@
     <hr class="footer-hr-class">
     <div class="loan-footerbtns row w-100  d-flex justify-content-between align-items-center">
 
-        <div class="col-lg-4 ">
+        <div class="col-lg-4 pointer">
             <img src="../assets/images/icons/save.svg">
-            <span class="text-dp-3-regular mx-2 blue-text"> Save and Exit</span>
+            <span class="text-dp-3-regular mx-2 blue-text" (click)="saveExit()"> Save and Exit</span>
         </div>
         <div class="col-lg-4  d-flex justify-content-end">
             <app-buttons type="button" label="Back" class="btn btncustomClass" [outline]="true" (click)="back()">

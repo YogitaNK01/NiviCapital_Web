@@ -292,27 +292,29 @@ export class LosOperation {
     let input = {
       identifier: this.searchText,
       type: "MOBILE",
-      isSearch :true
+      isSearch :true,
+        "applicantType": "PRIMARY", //// PRIMARY / CO_APPLICANT
+      "coApplicantIndex": 0,
 
     }
     this.addcustomerservice.customersearch(input).subscribe({
       next: (res) => {
         console.log(res);
-
+ let respdata= res.data[0];
 
 
         const row: TransformedUserData = {
-          custId: res.data.custId ?? '-',
-          ncId: res.data.ncId ?? '-',
-          firstName: res.data.firstName ?? '-',
-          lastName: res.data.lastName ?? '-',
-          mobile: res.data.mobile ?? '-',
-          email: res.data.email ?? '-',
-          status: res.data.status ?? '-',
-          kycStatus: res.data.kycStatus ?? '-',
+          custId: respdata.custId ?? '-',
+          ncId: respdata.ncId ?? '-',
+          firstName: respdata.firstName ?? '-',
+          lastName: respdata.lastName ?? '-',
+          mobile: respdata.mobile ?? '-',
+          email: respdata.email ?? '-',
+          status: respdata.status ?? '-',
+          kycStatus: respdata.kycStatus ?? '-',
 
-          createdAt: res.data.custId ?? '-',
-          userId: res.data.userInitiateId ?? '-'
+          createdAt: respdata.custId ?? '-',
+          userId: respdata.userInitiateId ?? '-'
 
         };
 

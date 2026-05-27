@@ -74,21 +74,22 @@ export class Additionalinfo implements OnInit {
   submitAttempted = false;
 
   isCoApplicant: boolean = false;
+  lastSavedPayload: any = null;
 
   constructor(private fb: FormBuilder, public main: Main, private route: ActivatedRoute, private router: Router, private stepperService: Loanstepperservice, private formSvc: Loanformservice) { }
-  ngOnInit(): void {
+  async ngOnInit() {
     this.isCoApplicant = this.router.url.includes('co-applicant');
     this.stepperService.rebuildSteps();
-    this.route.queryParams.subscribe(params => {
+    // this.route.queryParams.subscribe(params => {
+    const params = this.route.snapshot.queryParams;
+    const applicantId = params['applicantId'];
+    const applicationId = params['applicationId'];
 
-      const applicantId = params['applicantId'];
-      const applicationId = params['applicationId'];
+    // Store in variables if needed
+    this.applicantId = applicantId;
+    this.applicationId = applicationId;
 
-      // Store in variables if needed
-      this.applicantId = applicantId;
-      this.applicationId = applicationId;
-
-    });
+    // });
 
     this.additionalinfoForm = this.fb.group({
 
@@ -111,19 +112,82 @@ export class Additionalinfo implements OnInit {
 
     });
 
+    this.additionalinfoForm.get('maritalstatus')?.valueChanges.subscribe(value => {
+
+      this.updateSpouseValidators(value);
+      // const sFname = this.additionalinfoForm.get('s_fname');
+      // const sLname = this.additionalinfoForm.get('s_lname');
+
+      // if (value === 'Married') {
+
+      //   sFname?.setValidators([
+      //     Validators.required,
+      //     Validators.pattern('^[A-Za-z ]+$'),
+      //     Validators.minLength(2),
+      //     Validators.maxLength(25)
+      //   ]);
+
+      //   sLname?.setValidators([
+      //     Validators.required,
+      //     Validators.pattern('^[A-Za-z ]+$'),
+      //     Validators.minLength(2),
+      //     Validators.maxLength(25)
+      //   ]);
+
+      // } else {
+
+      //   sFname?.clearValidators();
+      //   sLname?.clearValidators();
+
+      //   sFname?.setValue('');
+      //   sLname?.setValue('');
+      // }
+
+      // sFname?.updateValueAndValidity();
+      // sLname?.updateValueAndValidity();
+
+    });
+
+
+    const key = this.getStorageKey();
+    const localData = localStorage.getItem(key);
+    const parsedLocal = localData ? JSON.parse(localData) : null;
+
+    const apiData = await this.getSavedAdditionalInfo();
+
+    let finalData = null;
+
+    if (apiData) {
+      finalData = apiData;
+      localStorage.setItem(key, JSON.stringify(apiData));
+    } else if (parsedLocal) {
+      finalData = parsedLocal;
+    }
+
+    if (finalData) {
+      if (this.isCoApplicant) {
+        this.formSvc.co_additionalInfoData = finalData;
+      } else {
+        this.formSvc.additionalInfoData = finalData;
+      }
+
+      this.patchAdditionalInfo(finalData);
+      this.updateSpouseValidators(this.additionalinfoForm.get('maritalstatus')?.value);
+
+      this.lastSavedPayload = this.buildAdditionalPayload(this.additionalinfoForm.getRawValue());
+
+      this.stepperService.markStepCompleted('additionalinfo');
+    } else {
+      this.lastSavedPayload = null;
+    }
+
+
     let data = this.formSvc.additionalInfoData;
 
     if (!data) {
-
-
-      const key = this.isCoApplicant
-        ? `additionalinfo_coapp_${this.applicantId}`
-        : `additionalinfo_main_${this.applicantId}`;
+      const key = this.getStorageKey();
 
       const storedData = localStorage.getItem(key);
-
-      // const key = `additionalinfoData_${this.applicantId}`;
-      // const storedData = localStorage.getItem(key);
 
       if (storedData) {
         data = JSON.parse(storedData);
@@ -139,50 +203,52 @@ export class Additionalinfo implements OnInit {
       }
     }
 
-    // if (this.formSvc.additionalInfoData) {
-    //   this.patchAdditionalInfo();
-    // }
+
     if (this.isCoApplicant) {
       this.patchAdditionalInfo(this.formSvc.co_additionalInfoData);
     } else {
       this.patchAdditionalInfo(this.formSvc.additionalInfoData);
     }
 
-    this.additionalinfoForm.get('maritalstatus')?.valueChanges.subscribe(value => {
 
-      const sFname = this.additionalinfoForm.get('s_fname');
-      const sLname = this.additionalinfoForm.get('s_lname');
-
-      if (value === 'Married') {
-
-        sFname?.setValidators([
-          Validators.required,
-          Validators.pattern('^[A-Za-z ]+$'),
-          Validators.minLength(2),
-          Validators.maxLength(25)
-        ]);
-
-        sLname?.setValidators([
-          Validators.required,
-          Validators.pattern('^[A-Za-z ]+$'),
-          Validators.minLength(2),
-          Validators.maxLength(25)
-        ]);
-
-      } else {
-
-        sFname?.clearValidators();
-        sLname?.clearValidators();
-
-        sFname?.setValue('');
-        sLname?.setValue('');
-      }
-
-      sFname?.updateValueAndValidity();
-      sLname?.updateValueAndValidity();
-
-    });
   }
+
+  getStorageKey() {
+    return this.isCoApplicant
+      ? `additionalinfo_coapp_${this.applicantId}`
+      : `additionalinfo_main_${this.applicantId}`;
+  }
+
+  updateSpouseValidators(value: string) {
+    const sFname = this.additionalinfoForm.get('s_fname');
+    const sLname = this.additionalinfoForm.get('s_lname');
+
+    if (value === 'Married') {
+      sFname?.setValidators([
+        Validators.required,
+        Validators.pattern('^[A-Za-z ]+$'),
+        Validators.minLength(2),
+        Validators.maxLength(25)
+      ]);
+
+      sLname?.setValidators([
+        Validators.required,
+        Validators.pattern('^[A-Za-z ]+$'),
+        Validators.minLength(2),
+        Validators.maxLength(25)
+      ]);
+    } else {
+      sFname?.clearValidators();
+      sLname?.clearValidators();
+
+      sFname?.setValue('');
+      sLname?.setValue('');
+    }
+
+    sFname?.updateValueAndValidity();
+    sLname?.updateValueAndValidity();
+  }
+
   get f() {
     return this.additionalinfoForm.controls;
   }
@@ -266,12 +332,12 @@ export class Additionalinfo implements OnInit {
 
     if (!data) return;
 
-const genderValue =
-  data.gender == "M" ? "Male" :
-  data.gender == "F" ? "Female" : "Third Gender";
+    const genderValue =
+      data.gender == "M" ? "Male" :
+        data.gender == "F" ? "Female" : "Third Gender";
 
     this.additionalinfoForm.patchValue({
-      
+
       uploadphoto: data.uploadphoto,
       maritalstatus: data.maritalStatus ? data.maritalStatus.charAt(0) + data.maritalStatus.slice(1).toLowerCase() : '',
       // gender: data.gender == "M" ? "Male" : data.gender == "F" ? "Female" : 'O',
@@ -293,9 +359,9 @@ const genderValue =
 
 
     });
-    
-this.additionalinfoForm.get('gender')?.setValue(genderValue);
-this.gendercheck(genderValue);
+
+    this.additionalinfoForm.get('gender')?.setValue(genderValue, { emitEvent: false });
+    this.gendercheck(genderValue);
 
 
     this.isfathermiddlename = !!data.fatherNoMiddleName;
@@ -360,13 +426,89 @@ this.gendercheck(genderValue);
     );
   }
 
+  saveExit() {
+    let formdata = this.additionalinfoForm.value;
+    const input = this.buildAdditionalPayload(formdata);
+
+    const key = this.getStorageKey();
+    localStorage.setItem(key, JSON.stringify(input));
+
+    const inputdata = {
+      action: "auto-save",
+      sectionKey: "PERSONAL_INFO",
+      applicationId: this.applicationId,
+      applicantId: this.applicantId,
+      jsonData: input
+    };
+
+    this.formSvc.saveandExit(inputdata).subscribe({
+      next: () => {
+        this.lastSavedPayload = { ...input };
+      }
+    });
+  }
+  getSavedAdditionalInfo(): Promise<any> {
+    let sectionkey = "PERSONAL_INFO"
+    return new Promise((resolve) => {
+      this.formSvc.getSavedData(this.applicationId, this.applicantId, sectionkey).pipe()
+
+        .subscribe({
+          next: (res) => {
+
+            console.log(res)
+            if (res.status === "success") {
+              resolve(res.data.data);
+
+            }
+            else {
+              resolve(null);
+            }
+          }, error: () => resolve(null)
+        });
+    });
+  }
+
+  isPayloadChanged(currentPayload: any, savedPayload: any): boolean {
+    return JSON.stringify(currentPayload) !== JSON.stringify(savedPayload);
+  }
+  buildAdditionalPayload(formdata: any) {
+    return {
+      applicantId: this.applicantId,
+      profilePhotoUrl: this.profilePhotoUrl || formdata.uploadphoto || '',
+      fileName: this.fileName || '',
+      objectName: this.objectName || '',
+
+      maritalStatus: formdata.maritalstatus?.toUpperCase() || '',
+      gender:
+        this.gendercheckvalue === "Male"
+          ? "M"
+          : this.gendercheckvalue === "Female"
+            ? "F"
+            : "O",
+
+      numberOfDependents: formdata.dependents || '',
+
+      spouseFirstName: formdata.s_fname || '',
+      spouseMiddleName: formdata.s_mname || '',
+      spouseLastName: formdata.s_lname || '',
+      spouseNoMiddleName: this.isspousemiddlename,
+
+      fatherFirstName: formdata.f_fname || '',
+      fatherMiddleName: formdata.f_mname || '',
+      fatherLastName: formdata.f_lname || '',
+      fatherNoMiddleName: this.isfathermiddlename,
+
+      motherFirstName: formdata.m_fname || '',
+      motherMiddleName: formdata.m_mname || '',
+      motherLastName: formdata.m_lname || '',
+      motherNoMiddleName: this.ismothermiddlename
+    };
+  }
+
   next() {
     console.log("form--", this.additionalinfoForm.value);
     let formdata = this.additionalinfoForm.value;
     this.submitAttempted = true;
-
-
-
     if (!this.canProceed) {
       return;
     }
@@ -376,11 +518,7 @@ this.gendercheck(genderValue);
       return;
     }
 
-
-
-
-
-    let input =
+    let input1 =
 
     {
       "applicantId": this.applicantId,
@@ -408,6 +546,18 @@ this.gendercheck(genderValue);
       "motherLastName": formdata.m_lname,
       "motherNoMiddleName": this.ismothermiddlename
     }
+    const input = this.buildAdditionalPayload(formdata);
+    const hasChanged = this.isPayloadChanged(input, this.lastSavedPayload);
+
+
+    if (!hasChanged) {
+      console.log('No changes detected, skipping API');
+      this.stepperService.markStepCompleted('additionalinfo');
+      this.stepperService.setStepData('additionalinfo', formdata);
+      this.stepperService.next();
+      return;
+    }
+
 
     console.log(input);
     this.formSvc.submitAdditionalInfo(input, this.applicationId).subscribe({
@@ -417,9 +567,7 @@ this.gendercheck(genderValue);
           this.formSvc.additionalInfoData = input;
           // const key = `additionalinfoData_${this.applicantId}`;
 
-          const key = this.isCoApplicant
-            ? `additionalinfo_coapp_${this.applicantId}`
-            : `additionalinfo_main_${this.applicantId}`;
+          const key = this.getStorageKey();
 
           localStorage.setItem(key, JSON.stringify(this.formSvc.additionalInfoData));
 
@@ -429,7 +577,7 @@ this.gendercheck(genderValue);
           } else {
             this.formSvc.additionalInfoData = input;
           }
-
+          this.lastSavedPayload = { ...input };
 
           this.stepperService.markStepCompleted('additionalinfo');
           this.stepperService.setStepData('additionalinfo', formdata);

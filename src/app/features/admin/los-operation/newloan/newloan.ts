@@ -113,11 +113,14 @@ export class Newloan implements OnInit {
   searchMobile(mobile: string) {
     let input = {
       identifier: mobile,
-      type: "MOBILE"
+      type: "MOBILE",
+        "applicantType": "PRIMARY", //// PRIMARY / CO_APPLICANT
+      "coApplicantIndex": 0,
 
     }
 
     this.apiService.customersearch(input).subscribe(res => {
+       let respdata= res.data[0];
       if (res.message.includes('Existing customer found')) {
 
 
@@ -125,14 +128,14 @@ export class Newloan implements OnInit {
         this.cd.detectChanges();
 
         let fullData: TransformedUserData[] = [{
-          custId: res.data.custId ?? "-",
-          firstName: res.data.firstName ?? "-",
-          lastName: res.data.lastName ?? "-",
-          mobile: res.data.mobile ?? "-",
-          email: res.data.email ?? '-',
-          kycStatus: res.data.kycStatus ?? "-",
-          status: res.data.status ?? "-",
-          ncId: res.data.ncId ?? "-",
+          custId: respdata.custId ?? "-",
+          firstName: respdata.firstName ?? "-",
+          lastName: respdata.lastName ?? "-",
+          mobile: respdata.mobile ?? "-",
+          email: respdata.email ?? '-',
+          kycStatus: respdata.kycStatus ?? "-",
+          status: respdata.status ?? "-",
+          ncId: respdata.ncId ?? "-",
         }]
         // this.filteredData = [fullData];
         this.filteredData = [...fullData];

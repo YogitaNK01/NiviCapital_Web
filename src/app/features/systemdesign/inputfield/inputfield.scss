@@ -49,17 +49,23 @@
 }
 
 .input-prefix svg {
-  width: 26px;
-  height: 20px;
+  // width: 26px;
+  // height: 20px;
 }
 .input-field.has-prefix {
-  padding-left: 110px !important;  
+  // padding-left: 110px !important;  
   font-size: $font-size-h2; //22px
   line-height: $spacing_13; //28px
   letter-spacing: 0.22px;
           
 }
+.input-field.has-prefix-flag-only {
+  padding-left: 75px !important;
+}
 
+.input-field.has-prefix-full {
+  padding-left: 115px !important;
+}
 
 .has-prefix{
   padding-left: 70px !important; 

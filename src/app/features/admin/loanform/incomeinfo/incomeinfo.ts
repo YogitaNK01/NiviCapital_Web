@@ -57,7 +57,7 @@ export class Incomeinfo {
   handleresponse: any;
 
   requiredDocs = ['salary1', 'salary2', 'salary3', 'Form16', 'oneyearbankstatement', 'ay1', 'ay2', 'ay3'];   // only required ones
-  requiredBusinessDocs = ['year1','year2','year3','businessITR1', 'businessITR2', 'businessITR3', 'businessGST', 'businessBankstatement'];   // only required ones
+  requiredBusinessDocs = ['year1', 'year2', 'year3', 'businessITR1', 'businessITR2', 'businessITR3', 'businessGST', 'businessBankstatement'];   // only required ones
 
   optionalDocs = ['other'];
   uploadedFiles: Record<string, File | null> = {};
@@ -77,45 +77,56 @@ export class Incomeinfo {
   private slotCounter = 0;
   newOtherBusinessTitle: string = '';
 
-   isCoApplicant: boolean = false;
-
-  constructor(private fb: FormBuilder, private stepperService: Loanstepperservice,private router:Router, private cd: ChangeDetectorRef, private msgBox: Msgboxservice, public loanformservice: Loanformservice, private route: ActivatedRoute, public main: Main) { }
+  isCoApplicant: boolean = false;
+  lastSavedPayload: any = null;
+  constructor(private fb: FormBuilder, private stepperService: Loanstepperservice, private router: Router, private cd: ChangeDetectorRef, private msgBox: Msgboxservice, public loanformservice: Loanformservice, private route: ActivatedRoute, public main: Main) { }
   ngOnInit(): void {
-      this.isCoApplicant = this.router.url.includes('co-applicant');
+    this.isCoApplicant = this.router.url.includes('co-applicant');
     this.stepperService.rebuildSteps();
-    this.route.queryParams.subscribe(params => {
+    // this.route.queryParams.subscribe(params => {
 
-      const applicantId = params['applicantId'];
-      const applicationId = params['applicationId'];
+    const params = this.route.snapshot.queryParams;
+    const applicantId = params['applicantId'];
+    const applicationId = params['applicationId'];
 
-      // Store in variables if needed
-      this.applicantId = applicantId;
-      this.applicationId = applicationId;
+    // Store in variables if needed
+    this.applicantId = applicantId;
+    this.applicationId = applicationId;
 
-
-const stepData = this.stepperService.getStepData('incomeinfo');
+    const key = `IncomeInfoData_main${this.applicantId}`;
+    const stepData = this.stepperService.getStepData('incomeinfo');
 
     if (stepData) {
       this.uploadedrespfiles = stepData.uploadedFiles || [];
       this.otherIncomeSlots = stepData.otherIncomeSlots || [];
       this.otherBusinessSlots = stepData.otherBusinessSlots || [];
 
-      this.getAllDocuments();
-      this.restoreSlotsFromDocuments();
-      return; 
-    }
+      // this.getAllDocuments();
+      // this.restoreSlotsFromDocuments();
+      // return;
+    } else {
 
-      const key = `incomeDocs_${this.applicantId}`;
       const stored = localStorage.getItem(key);
-
       if (stored) {
         this.uploadedrespfiles = JSON.parse(stored);
-         this.stepperService.markStepCompleted('incomeinfo');
-        this.getAllDocuments();
-        this.restoreSlotsFromDocuments();
       }
 
-    });
+    }
+
+    this.getAllDocuments();
+    this.restoreSlotsFromDocuments();
+
+
+    // const stored = localStorage.getItem(key);
+
+    // if (stored) {
+    //   this.uploadedrespfiles = JSON.parse(stored);
+    //    this.stepperService.markStepCompleted('incomeinfo');
+    //   this.getAllDocuments();
+    //   this.restoreSlotsFromDocuments();
+    // }
+
+    // });
 
     this.incomeForm = this.fb.group({
       assettitle: ['', [Validators.minLength(2), Validators.maxLength(25)]]
@@ -131,6 +142,11 @@ const stepData = this.stepperService.getStepData('incomeinfo');
 
   }
 
+   getStorageKey() {
+    return this.isCoApplicant
+      ? `IncomeInfoData_coapp${this.applicantId}`
+      : `IncomeInfoData_main${this.applicantId}`;
+  }
   toggle(i: number) {
     this.openIndex = this.openIndex === i ? null : i;
   }
@@ -187,8 +203,6 @@ const stepData = this.stepperService.getStepData('incomeinfo');
       }
     });
   }
-
-
 
 
   onUploadStarted(
@@ -507,9 +521,30 @@ const stepData = this.stepperService.getStepData('incomeinfo');
   back() {
     this.stepperService.previous();
   }
+
+  saveExit() {
+
+
+    const key = this.getStorageKey();
+
+    let input: any;
+
+    localStorage.setItem(key, JSON.stringify(input));
+
+    const inputdata = {
+      action: "auto-save",
+      sectionKey: "GENERAL_INFO",
+      applicationId: this.applicationId,
+      applicantId: this.applicantId,
+      jsonData: input
+    };
+
+    this.loanformservice.saveandExit(inputdata).subscribe();
+  }
   next() {
 
     console.log('allRequiredFilesUploaded:', this.allRequiredFilesUploaded);
+    if (!this.allRequiredFilesUploaded) return;
     if (this.allRequiredFilesUploaded) {
 
       const stepData = {
@@ -518,10 +553,14 @@ const stepData = this.stepperService.getStepData('incomeinfo');
         otherBusinessSlots: this.otherBusinessSlots
       };
 
+
+
+
+      const key = `IncomeInfoData_main${this.applicantId}`;
+
+      localStorage.setItem(key, JSON.stringify(this.uploadedrespfiles));
+
       this.loanformservice.incomeInfoData = stepData;
-
-
-      const key = `IncomeInfoData_${this.applicantId}`;
 
 
       this.stepperService.setStepData('incomeinfo', this.loanformservice.incomeInfoData);

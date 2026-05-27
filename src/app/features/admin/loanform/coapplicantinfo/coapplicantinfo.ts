@@ -36,6 +36,7 @@ export class Coapplicantinfo implements OnInit {
   prefillPhone: any;
 
   mobileSubmitted: boolean = false;
+  coApplicantIndex: number = 1;
 
   constructor(public service: Main, private router: Router, private addcustomerservice: Addcustomerservice,
     private route: ActivatedRoute, private cd: ChangeDetectorRef, private loanform: Loanformservice, private loanStepper: Loanstepperservice) { }
@@ -53,6 +54,8 @@ export class Coapplicantinfo implements OnInit {
       // Store in variables if needed
       this.applicantId = applicantId;
       this.applicationId = applicationId;
+
+      this.coApplicantIndex = Number(params['coApplicantIndex']) || 1;
 
       this.restoreCoApplicantState();
     });
@@ -76,7 +79,7 @@ export class Coapplicantinfo implements OnInit {
     'co-basicinfo',
     'co-generalinfo',
     'co-additionalinfo',
-     'co-kycinfo',
+    'co-kycinfo',
     'co-incomeinfo',
     'co-assetsinfo',
     'co-liabilitiesinfo',
@@ -96,8 +99,8 @@ export class Coapplicantinfo implements OnInit {
       return;
     }
 
-    const saved = localStorage.getItem(`coapp_mobile_submitted_${this.applicantId}`);
-    this.mobileSubmitted = saved === 'true';
+    const saved = localStorage.getItem(`coapp_mobile_submitted_${this.applicantId}_${this.coApplicantIndex}`);
+    // this.mobileSubmitted = saved === 'true';
   }
   getPhoneFieldState(phone: any): 'default' | 'error' | 'success' {
     if (phone.touched && phone.invalid) {
@@ -110,6 +113,41 @@ export class Coapplicantinfo implements OnInit {
     return 'default';
   }
   back() { }
+
+  saveCoApplicantToList(userid: any) {
+  const key = `coApplicants_${this.applicantId}`;
+
+  const saved = localStorage.getItem(key);
+  let coApplicants = saved ? JSON.parse(saved) : [];
+
+  const existingIndex = coApplicants.findIndex(
+    (x: any) => Number(x.index) === Number(this.coApplicantIndex)
+  );
+
+  const data = {
+    index: this.coApplicantIndex,
+    userInitiateId: userid,
+    phone: this.prefillPhone,
+    name: '',
+    status: 'IN_PROGRESS'
+  };
+
+  if (existingIndex > -1) {
+    coApplicants[existingIndex] = {
+      ...coApplicants[existingIndex],
+      ...data
+    };
+  } else {
+    coApplicants.push(data);
+  }
+
+  coApplicants = coApplicants
+    .sort((a: any, b: any) => Number(a.index) - Number(b.index))
+    .slice(0, 4);
+
+  localStorage.setItem(key, JSON.stringify(coApplicants));
+}
+
   next() {
     if (!this.isPhoneValid() || this.searchLoading) return;
 
@@ -120,19 +158,27 @@ export class Coapplicantinfo implements OnInit {
     this.mobileSubmitted = true;
 
     localStorage.setItem(
-      `coapp_mobile_submitted_${this.applicantId}`,
+
+      `coapp_mobile_submitted_${this.applicantId}_${this.coApplicantIndex}`,
       'true'
+
     );
 
     const input = {
       identifier: this.prefillPhone,
-      type: "MOBILE"
+      type: "MOBILE",
+      isSearch: false,
+      applicantType: "CO_APPLICANT",
+      coApplicantIndex: this.coApplicantIndex,
+      applicationId: this.applicationId
     };
 
     this.addcustomerservice.customersearch(input).subscribe({
+
       next: (res) => {
         console.log(res);
         const userid = res.data.userInitiateId
+        this.saveCoApplicantToList(userid);
         this.loanStepper.setStepperType('CO_APPLICANT');
 
         this.router.navigate(
@@ -145,7 +191,8 @@ export class Coapplicantinfo implements OnInit {
               custName: this.custName,
               custARN: this.custARN,
               id: userid,
-              phone: this.prefillPhone
+              phone: this.prefillPhone,
+              coApplicantIndex: this.coApplicantIndex
             },
             queryParamsHandling: 'merge'
           }

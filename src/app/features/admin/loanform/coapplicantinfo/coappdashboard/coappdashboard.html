@@ -1,6 +1,6 @@
 <div class="vh-container">
 
-    <div class="base-layout base-height"  *ngIf="!isChildActive">
+    <div class="base-layout base-height" *ngIf="!isChildActive">
 
         <div class="header ">
 
@@ -13,11 +13,43 @@
                 </div>
                 <div>
                     <app-buttons type="button" label="Add " class="btn btncustomClass p-0" [outline]="true"
-                        (click)="add()">
+                        (click)="add()" [disabled]="coApplicants.length >= 4">
                         <img src="/assets/images/icons/addred.svg">
                     </app-buttons>
 
                 </div>
+
+                <!-- Co-applicant list -->
+                <div class="row mt-4" *ngIf="coApplicants.length > 0">
+
+                    <div class="col-lg-6 mb-3" *ngFor="let coapp of coApplicants; let i = index">
+                        <div class="coapp-card d-flex justify-content-between align-items-center">
+
+                            <div>
+                                <div class="fw-bold">
+                                    {{ coapp.name || 'Co-Applicant ' + coapp.index }}
+                                </div>
+                                <div class="small">
+                                    Co-Applicant {{ coapp.index }}
+                                </div>
+                            </div>
+
+                            <div class="d-flex gap-2 align-items-center">
+                                <span class="text-success">✔</span>
+
+                                <img src="../assets/images/icons/delete.svg" class="cursor-pointer"
+                                    (click)="deleteCoApplicant(coapp.index)">
+
+                                <span class="cursor-pointer" (click)="openCoApplicant(coapp.index)">
+                                    >
+                                </span>
+                            </div>
+
+                        </div>
+                    </div>
+
+                </div>
+
             </div>
 
         </div>
@@ -26,21 +58,21 @@
 
     </div>
     <router-outlet (activate)="onChildActivate()" (deactivate)="onChildDeactivate()"></router-outlet>
-       <div *ngIf="!isChildActive">
+    <div *ngIf="!isChildActive">
         <hr class="footer-hr-class" *ngIf="!isChildActive">
-    <div class="loan-footerbtns row w-100  d-flex justify-content-between align-items-center">
+        <div class="loan-footerbtns row w-100  d-flex justify-content-between align-items-center">
 
-        <div class="col-lg-4 ">
-            <img src="../assets/images/icons/save.svg">
-            <span class="text-dp-3-regular mx-2 blue-text"> Save and Exit</span>
+            <div class="col-lg-4 ">
+                <img src="../assets/images/icons/save.svg">
+                <span class="text-dp-3-regular mx-2 blue-text"> Save and Exit</span>
+            </div>
+            <div class="col-lg-4  d-flex justify-content-end">
+                <app-buttons type="button" label="Back" class="btn btncustomClass" [outline]="true" (click)="back()">
+                </app-buttons>
+                <app-buttons type="button" label="Next" class="btn btncustomClass" color="primary" (click)=" next()" >
+                </app-buttons>
+<!-- [disabled]="coApplicants.length < 1" -->
+            </div>
         </div>
-        <div class="col-lg-4  d-flex justify-content-end">
-            <app-buttons type="button" label="Back" class="btn btncustomClass" [outline]="true" (click)="back()">
-            </app-buttons>
-            <app-buttons type="button" label="Next" class="btn btncustomClass" color="primary" (click)=" next()">
-            </app-buttons>
-
-        </div>
-    </div>
     </div>
 </div>

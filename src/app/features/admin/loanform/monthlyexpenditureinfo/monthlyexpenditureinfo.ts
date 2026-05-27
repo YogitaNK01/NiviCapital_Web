@@ -96,41 +96,42 @@ export class Monthlyexpenditureinfo {
   totalother = 0;
   totalINRamt: any;
 
-   isCoApplicant: boolean = false;
-  constructor(private fb: FormBuilder, public main: Main, private route: ActivatedRoute, private msgBox: Msgboxservice,private router:Router,
+  isCoApplicant: boolean = false;
+  lastSavedPayload: any = null;
+  constructor(private fb: FormBuilder, public main: Main, private route: ActivatedRoute, private msgBox: Msgboxservice, private router: Router,
     private stepperService: Loanstepperservice, private formSvc: Loanformservice, private cd: ChangeDetectorRef) { }
 
 
-  ngOnInit(): void {
-      this.isCoApplicant = this.router.url.includes('co-applicant');
+  async ngOnInit() {
+    this.isCoApplicant = this.router.url.includes('co-applicant');
     this.stepperService.rebuildSteps();
-    this.route.queryParams.subscribe(params => {
+    // this.route.queryParams.subscribe(params => {
+    const params = this.route.snapshot.queryParams;
+    const applicantId = params['applicantId'];
+    const applicationId = params['applicationId'];
 
-      const applicantId = params['applicantId'];
-      const applicationId = params['applicationId'];
-
-      // Store in variables if needed
-      this.applicantId = applicantId;
-      this.applicationId = applicationId;
-
-
-      const key = `monthlyExpenditureData_${this.applicantId}`;
-      const saved = localStorage.getItem(key);
-
-      if (saved) {
-        this.formSvc.monthlyExpenditureData = JSON.parse(saved);
-        this.stepperService.markStepCompleted('monthlyexpinfo');
-      }
-
-      //   AFTER restore → patch
-      setTimeout(() => {
-        if (this.formSvc.monthlyExpenditureData) {
-          this.patchMonthlyExpenditure();
-        }
-      });
+    // Store in variables if needed
+    this.applicantId = applicantId;
+    this.applicationId = applicationId;
 
 
-    });
+    // const key = `monthlyExpenditureData_main${this.applicantId}`;
+    // const saved = localStorage.getItem(key);
+
+    // if (saved) {
+    //   this.formSvc.monthlyExpenditureData = JSON.parse(saved);
+    //   this.stepperService.markStepCompleted('monthlyexpinfo');
+    // }
+
+    // //   AFTER restore → patch
+    // setTimeout(() => {
+    //   if (this.formSvc.monthlyExpenditureData) {
+    //     this.patchMonthlyExpenditure();
+    //   }
+    // });
+
+
+    // });
 
 
 
@@ -167,8 +168,37 @@ export class Monthlyexpenditureinfo {
         this.calculateGrandTotal();
       });
 
+
+
+    const key = this.getStorageKey();
+    const localData = localStorage.getItem(key);
+    const parsedLocal = localData ? JSON.parse(localData) : null;
+
+    const apiData = await this.getSavedMonthlyExp();
+
+    let finalData = null;
+
+    if (apiData) {
+      finalData = apiData;
+      localStorage.setItem(key, JSON.stringify(apiData));
+    } else if (parsedLocal) {
+      finalData = parsedLocal;
+    }
+
+    if (finalData) {
+      this.formSvc.monthlyExpenditureData = finalData;
+      this.patchMonthlyExpenditure();
+      this.lastSavedPayload = this.buildMonthlyExpPayload();
+      this.stepperService.markStepCompleted('monthlyexpinfo');
+    }
+
   }
 
+  getStorageKey() {
+    return this.isCoApplicant
+      ? `monthlyExpenditureData_coapp${this.applicantId}`
+      : `monthlyExpenditureData_main${this.applicantId}`;
+  }
   get other(): FormArray {
     return this.monthlyExpenditureForm.get('other') as FormArray;
   }
@@ -599,8 +629,9 @@ export class Monthlyexpenditureinfo {
         const group = this.createOther();
 
         group.patchValue({
-          type: this.getOtherType(item.expenseTypeText),
-          customType: item.expenseTypeText,
+          // type: this.getOtherType(item.expenseTypeText),
+          // customType: item.expenseTypeText,
+           type:  item.expenseTypeText,
           amount: this.formatIndian(item.amountInr.toString())
         });
         // this.other.clear()
@@ -678,8 +709,227 @@ export class Monthlyexpenditureinfo {
     this.stepperService.previous();
   }
 
+  //compare function
+  isPayloadChanged(current: any, saved: any) {
+    return JSON.stringify(current) !== JSON.stringify(saved);
+  }
 
+  //common payload
+  buildMonthlyExpPayload() {
+    const form = this.monthlyExpenditureForm.value;
+    const items: any[] = [];
+    let invalid = false;
+
+    const cleanAmount = (val: any) =>
+      val ? Number(val.toString().replace(/,/g, '')) : 0;
+
+    const addItem = (code: string, value: any, extra: any = {}) => {
+      if (!value) return;
+
+      items.push({
+        expenseType: code,
+        amountInr: cleanAmount(value),
+        ...extra
+      });
+    };
+
+    // RENT
+    if (this.selectedexpenditure.includes('RentHomeMaintenance')) {
+      const val = form.rent?.rentvalue;
+      if (!val) {
+        this.monthlyExpenditureForm.get('rent')?.markAllAsTouched();
+        invalid = true;
+      } else {
+        addItem('RENT_HOME_MAINTENANCE', val);
+      }
+    }
+
+    // GROCERY
+    if (this.selectedexpenditure.includes('GroceriesandHousehold')) {
+      const val = form.grocery?.groceryvalue;
+      if (!val) {
+        this.monthlyExpenditureForm.get('grocery')?.markAllAsTouched();
+        invalid = true;
+      } else {
+        addItem('GROCERIES_HOUSEHOLD', val);
+      }
+    }
+
+    // UTILITIES
+    if (this.selectedexpenditure.includes('Utilities')) {
+      const utility1 = form.utilities?.utilityvalue1;
+      const utility2 = form.utilities?.utilityvalue2;
+
+      if (!utility1) {
+        this.monthlyExpenditureForm.get('utilities.utilityvalue1')?.markAsTouched();
+        invalid = true;
+      } else {
+        addItem('TELEPHONE', utility1, {
+          expenseTypeText: 'Telephone and Internet bills'
+        });
+      }
+
+      if (!utility2) {
+        this.monthlyExpenditureForm.get('utilities.utilityvalue2')?.markAsTouched();
+        invalid = true;
+      } else {
+        addItem('UTILITIES', utility2, {
+          expenseTypeText: 'Utilities (Electricity, Water, Gas)'
+        });
+      }
+    }
+
+    // TRANSPORTATION
+    if (this.selectedexpenditure.includes('Transportation')) {
+      const val = form.transportation?.transportationvalue;
+      if (!val) {
+        this.monthlyExpenditureForm.get('transportation')?.markAllAsTouched();
+        invalid = true;
+      } else {
+        addItem('TRANSPORTATION', val);
+      }
+    }
+
+    // SCHOOL
+    if (this.selectedexpenditure.includes('SchoolEducationFees')) {
+      const val = form.SchoolFees?.SchoolFeesvalue;
+      if (!val) {
+        this.monthlyExpenditureForm.get('SchoolFees')?.markAllAsTouched();
+        invalid = true;
+      } else {
+        addItem('SCHOOL_EDUCATION_FEES', val);
+      }
+    }
+
+    // MEDICAL
+    if (this.selectedexpenditure.includes('Medical')) {
+      const val = form.MedicalMedicines?.MedicalMedicinesvalue;
+      if (!val) {
+        this.monthlyExpenditureForm.get('MedicalMedicines')?.markAllAsTouched();
+        invalid = true;
+      } else {
+        addItem('MEDICAL_MEDICINES', val);
+      }
+    }
+
+    // OTHER
+    if (this.selectedexpenditure.includes('Others')) {
+      if (!form.other || form.other.length === 0) {
+        this.other.markAllAsTouched();
+        invalid = true;
+      } else {
+        form.other.forEach((item: any, i: number) => {
+          const type = item.type === 'Other' ? item.customType : item.type;
+
+          if (!type || !item.amount) {
+            this.other.at(i).markAllAsTouched();
+            invalid = true;
+          } else {
+            addItem('OTHER_RECURRING', item.amount, {
+              expenseTypeText: type
+            });
+          }
+        });
+      }
+    }
+
+    if (invalid) {
+      return { invalid: true };
+    }
+
+    return {
+      invalid: false,
+      items
+    };
+  }
+
+  //get saved data from api
+  getSavedMonthlyExp(): Promise<any> {
+    return new Promise((resolve) => {
+      this.formSvc.getSavedData(
+        this.applicationId,
+        this.applicantId,
+        "SAVE_MONTHLY_EXPENSES"
+      ).subscribe({
+        next: (res) => {
+          if (res.status === 'success') {
+            resolve(res.data.data);
+          } else {
+            resolve(null);
+          }
+        },
+        error: () => resolve(null)
+      });
+    });
+  }
+
+  saveExit() {
+    
+const result = this.buildMonthlyExpPayload();
+
+  if (!result || result.invalid) {
+    console.log('Invalid form - not saving');
+    return;
+  }
+
+  const input = { items: result.items };
+
+
+    const key = this.getStorageKey();
+    localStorage.setItem(key, JSON.stringify(input));
+
+    const inputdata = {
+      action: "auto-save",
+      sectionKey: "SAVE_MONTHLY_EXPENSES",
+      applicationId: this.applicationId,
+      applicantId: this.applicantId,
+      jsonData: input
+    };
+
+    this.formSvc.saveandExit(inputdata).subscribe({
+      next: () => {
+        this.lastSavedPayload = { ...input };
+      }
+    });
+  }
   next() {
+  const result = this.buildMonthlyExpPayload();
+
+  if (!result || result.invalid) {
+    console.log('Form invalid - stop navigation');
+    return;
+  }
+
+  const payload = { items: result.items, applicantId: this.applicantId, };
+
+  const hasChanged =
+    !this.lastSavedPayload ||
+    this.isPayloadChanged(payload, this.lastSavedPayload);
+
+  if (!hasChanged) {
+    console.log('No changes, skip API');
+    this.stepperService.markStepCompleted('monthlyexpinfo');
+    this.stepperService.setStepData('monthlyexpinfo', this.monthlyExpenditureForm.getRawValue());
+    this.stepperService.next();
+    return;
+  }
+
+  this.formSvc.MonthlyExpenditure(payload, this.applicationId).subscribe({
+    next: (res) => {
+      if (res.status === 'success') {
+        this.lastSavedPayload = { ...payload };
+        this.formSvc.monthlyExpenditureData = payload;
+
+        localStorage.setItem(this.getStorageKey(), JSON.stringify(payload));
+
+        this.stepperService.markStepCompleted('monthlyexpinfo');
+        this.stepperService.setStepData('monthlyexpinfo', this.monthlyExpenditureForm.getRawValue());
+        this.stepperService.next();
+      }
+    }
+  });
+}
+  next1() {
 
 
     let form = this.monthlyExpenditureForm.value;
@@ -798,7 +1048,7 @@ export class Monthlyexpenditureinfo {
         console.log("resp---", res);
         if (res.status == "success") {
           this.formSvc.monthlyExpenditureData = payload;
-          const key = `monthlyExpenditureData_${this.applicantId}`;
+          const key = `monthlyExpenditureData_main${this.applicantId}`;
           localStorage.setItem(key, JSON.stringify(payload));
 
           this.stepperService.markStepCompleted('monthlyexpinfo');

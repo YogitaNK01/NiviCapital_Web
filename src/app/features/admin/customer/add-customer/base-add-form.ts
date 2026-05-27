@@ -26,7 +26,7 @@ export abstract class BaseAddForm<T extends Record<string, any>> {
   /** child must provide field config */
   protected abstract getFields(): { key: string }[];
 
-  /** 🔥 COMMON FOR ALL COMPONENTS */
+  /**  COMMON FOR ALL COMPONENTS */
   protected buildForm() {
     const group: Record<string, FormControl> = {};
 

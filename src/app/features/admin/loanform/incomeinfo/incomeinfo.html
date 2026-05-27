@@ -1,4 +1,24 @@
 <div class="base-layout" [ngClass]="{'coapplicant-layout': isCoApplicant}">
+      <div class="header ">
+
+            <div class="text-datepicker blue-text d-flex flex-column gap-2 ">Income Details
+                <div class="text-body-1 fw-normal">
+                    <span><svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 22 22"
+                            fill="none">
+                            <path
+                                d="M10.9997 20.1667C16.0413 20.1667 20.1663 16.0417 20.1663 11C20.1663 5.95833 16.0413 1.83333 10.9997 1.83333C5.95801 1.83333 1.83301 5.95833 1.83301 11C1.83301 16.0417 5.95801 20.1667 10.9997 20.1667Z"
+                                stroke="#25262F" stroke-width="1.28125" stroke-linecap="round"
+                                stroke-linejoin="round" />
+                            <path d="M11 7.33333V11.9167" stroke="#25262F" stroke-width="1.28125" stroke-linecap="round"
+                                stroke-linejoin="round" />
+                            <path d="M10.9961 14.6667H11.0043" stroke="#25262F" stroke-width="1.28125"
+                                stroke-linecap="round" stroke-linejoin="round" />
+                        </svg></span>
+                    Click the “Next” button to save your changes
+                </div>
+            </div>
+
+        </div>
     <form [formGroup]="incomeForm" (ngSubmit)="submit()" id="kycForm" class="w-100">
 
         <div class="accordion d-flex flex-column gap-4 mb-4">
@@ -53,7 +73,7 @@
 
 
 
-                            @if(handleresponse && hasDocument('salary1')){
+                            @if( hasDocument('salary1')){
                             <label class="text-label">Salary Slip 1<span class="text-danger">*</span></label>
                             <div class="addcust-img-box mt-2">
                                 <p class="text-label">{{ getDocumentName('salary1') }}</p>
@@ -78,7 +98,7 @@
 
                         </div>
                         <div class="col-lg-4 col-sm-12">
-                            @if(handleresponse && hasDocument('salary2')){
+                            @if( hasDocument('salary2')){
                             <label class="text-label">Salary Slip 2<span class="text-danger">*</span></label>
                             <div class="addcust-img-box mt-2">
                                 <p class="text-label">{{ getDocumentName('salary2') }}</p>
@@ -102,7 +122,7 @@
                             }
                         </div>
                         <div class="col-lg-4 col-sm-12">
-                            @if(handleresponse && hasDocument('salary3')){
+                            @if( hasDocument('salary3')){
                             <label class="text-label">Salary Slip 3<span class="text-danger">*</span></label>
                             <div class="addcust-img-box mt-2">
                                 <p class="text-label">{{ getDocumentName('salary3') }}</p>
@@ -149,7 +169,7 @@
                     </div>
                     <div class="row mt-20">
                         <div class="col-lg-4 col-sm-12">
-                            @if(handleresponse && hasDocument('Form16')){
+                            @if( hasDocument('Form16')){
                             <label class="text-label">Form 16<span class="text-danger">*</span></label>
                             <div class="addcust-img-box mt-2">
                                 <p class="text-label">{{ getDocumentName('Form16') }}</p>
@@ -194,7 +214,7 @@
                     </div>
                     <div class="row mt-20">
                         <div class="col-lg-4 col-sm-12">
-                            @if(handleresponse && hasDocument('oneyearbankstatement')){
+                            @if( hasDocument('oneyearbankstatement')){
                             <label class="text-label">1 Year bank statement<span class="text-danger">*</span></label>
                             <div class="addcust-img-box mt-2">
                                 <p class="text-label">{{ getDocumentName('oneyearbankstatement') }}</p>
@@ -240,7 +260,7 @@
                     </div>
                     <div class="row mt-20">
                         <div class="col-lg-4 col-sm-12">
-                            @if(handleresponse && hasDocument('ay1')){
+                            @if( hasDocument('ay1')){
                             <label class="text-label">Year 1<span class="text-danger">*</span></label>
                             <div class="addcust-img-box mt-2">
                                 <p class="text-label">{{ getDocumentName('ay1') }}</p>
@@ -264,7 +284,7 @@
                             }
                         </div>
                         <div class="col-lg-4 col-sm-12">
-                            @if(handleresponse && hasDocument('ay2')){
+                            @if( hasDocument('ay2')){
                             <label class="text-label">Year 2<span class="text-danger">*</span></label>
                             <div class="addcust-img-box mt-2">
                                 <p class="text-label">{{ getDocumentName('ay2') }}</p>
@@ -288,7 +308,7 @@
                             }
                         </div>
                         <div class="col-lg-4 col-sm-12">
-                            @if(handleresponse && hasDocument('ay3')){
+                            @if( hasDocument('ay3')){
                             <label class="text-label">Year 3<span class="text-danger">*</span></label>
                             <div class="addcust-img-box mt-2">
                                 <p class="text-label">{{ getDocumentName('ay3') }}</p>
@@ -354,7 +374,7 @@
                             </div>
                             <div class="col-lg-4 col-sm-12 ">
 
-                                @if (handleresponse && getDocumentByKey( slot.title)) {
+                                @if ( getDocumentByKey( slot.title)) {
 
                                
 
@@ -454,7 +474,7 @@
                     </div>
                     <div class="row mt-20">
                         <div class="col-lg-4 col-sm-12">
-                            @if(handleresponse && hasDocument('year1')){
+                            @if( hasDocument('year1')){
                             <label class="text-label">Year 1<span class="text-danger">*</span></label>
                             <div class="addcust-img-box mt-2">
                                 <p class="text-label">{{ getDocumentName('year1') }}</p>
@@ -478,7 +498,7 @@
                         </div>
 
                         <div class="col-lg-4 col-sm-12">
-                            @if(handleresponse && hasDocument('year2')){
+                            @if( hasDocument('year2')){
                             <label class="text-label">Year 2<span class="text-danger">*</span></label>
                             <div class="addcust-img-box mt-2">
                                 <p class="text-label">{{ getDocumentName('year2') }}</p>
@@ -501,7 +521,7 @@
                             </app-uploadbtn>}
                         </div>
                         <div class="col-lg-4 col-sm-12">
-                            @if(handleresponse && hasDocument('year3')){
+                            @if( hasDocument('year3')){
                             <label class="text-label">Year 3<span class="text-danger">*</span></label>
                             <div class="addcust-img-box mt-2">
                                 <p class="text-label">{{ getDocumentName('year3') }}</p>
@@ -545,7 +565,7 @@
                     </div>
                     <div class="row mt-20">
                         <div class="col-lg-4 col-sm-12">
-                            @if(handleresponse && hasDocument('businessITR1')){
+                            @if( hasDocument('businessITR1')){
                             <label class="text-label">Year 1<span class="text-danger">*</span></label>
                             <div class="addcust-img-box mt-2">
                                 <p class="text-label">{{ getDocumentName('businessITR1') }}</p>
@@ -568,7 +588,7 @@
                             </app-uploadbtn>}
                         </div>
                         <div class="col-lg-4 col-sm-12">
-                            @if(handleresponse && hasDocument('businessITR2')){
+                            @if( hasDocument('businessITR2')){
                             <label class="text-label">Year 2<span class="text-danger">*</span></label>
                             <div class="addcust-img-box mt-2">
                                 <p class="text-label">{{ getDocumentName('businessITR2') }}</p>
@@ -591,7 +611,7 @@
                             </app-uploadbtn>}
                         </div>
                         <div class="col-lg-4 col-sm-12">
-                            @if(handleresponse && hasDocument('businessITR3')){
+                            @if( hasDocument('businessITR3')){
                             <label class="text-label">Year 3<span class="text-danger">*</span></label>
                             <div class="addcust-img-box mt-2">
                                 <p class="text-label">{{ getDocumentName('businessITR3') }}</p>
@@ -634,7 +654,7 @@
                     </div>
                     <div class="row mt-20">
                         <div class="col-lg-4 col-sm-12">
-                            @if(handleresponse && hasDocument('businessGST')){
+                            @if( hasDocument('businessGST')){
                             <label class="text-label">1 Year GST Return<span class="text-danger">*</span></label>
                             <div class="addcust-img-box mt-2">
                                 <p class="text-label">{{ getDocumentName('businessGST') }}</p>
@@ -678,7 +698,7 @@
                     </div>
                     <div class="row mt-20">
                         <div class="col-lg-4 col-sm-12">
-                            @if(handleresponse && hasDocument('businessBankstatement')){
+                            @if( hasDocument('businessBankstatement')){
                             <label class="text-label">1 Year bank statement<span class="text-danger">*</span></label>
                             <div class="addcust-img-box mt-2">
                                 <p class="text-label">{{ getDocumentName('businessBankstatement') }}</p>
@@ -748,7 +768,7 @@
 
                                 <div class="col-lg-4 col-sm-12 ">
 
-                                    @if (handleresponse && getDocumentByKey(slot.title)) {
+                                    @if ( getDocumentByKey(slot.title)) {
 
                                     <div class="addcust-img-box mt-4">
                                         <p class="text-label">
@@ -833,9 +853,9 @@
 <hr class="footer-hr-class">
 <div class="loan-footerbtns row w-100  d-flex justify-content-between align-items-center">
 
-    <div class="col-lg-4 ">
+    <div class="col-lg-4 pointer">
         <img src="../assets/images/icons/save.svg">
-        <span class="text-dp-3-regular mx-2 blue-text"> Save and Exit</span>
+        <span class="text-dp-3-regular mx-2 blue-text" (click)="saveExit()"> Save and Exit</span>
     </div>
     <div class="col-lg-4  d-flex justify-content-end">
         <app-buttons type="button" label="Back" class="btn btncustomClass" [outline]="true" (click)="back()">

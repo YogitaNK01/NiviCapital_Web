@@ -115,34 +115,28 @@ export class Edudetails {
 
   hasProceededOnce = false;
 
-
   private previousEducationId: string | null = null;
 
-
+  isCoApplicant: boolean = false;
+  lastSavedPayload: any = null;
 
   constructor(private fb: FormBuilder, private stepperService: Loanstepperservice, private cd: ChangeDetectorRef, private formSvc: Loanformservice, private msgbox: Msgboxservice,
     private route: ActivatedRoute, private router: Router) { }
-  ngOnInit(): void {
-    this.route.queryParams.subscribe(params => {
-      if (params['applicantId']) {
-        this.applicantId = params['applicantId'];
-        this.applicationId = params['applicationId'];
-        this.custName = params['custName'];
-        this.custARN = params['custARN'];
+  async ngOnInit() {
+    // this.route.queryParams.subscribe(params => {
+    const params = this.route.snapshot.queryParams;
+    // if (params['applicantId']) {
+    this.applicantId = params['applicantId'];
+    this.applicationId = params['applicationId'];
+    this.custName = params['custName'];
+    this.custARN = params['custARN'];
 
-        this.stepperService.setLoanId(this.applicantId, this.applicationId, this.custName, this.custARN);
-      }
-    });
-
-
-
-    this.getEducationdetails();
+    this.stepperService.setLoanId(this.applicantId, this.applicationId, this.custName, this.custARN);
+    // }
+    // });
     // this.getInstituteName();
 
-    this.formSvc.getInstitutesCached().subscribe(list => {
-      this.seleactInstitute = list;
-      this.filteredInstitutes = [...list];
-    });
+
 
 
     this.selectedcoursetype = localStorage.getItem('coursetypeug') === 'true';
@@ -155,7 +149,25 @@ export class Edudetails {
       institute: ['', Validators.required],
       institutetitle: ['', [Validators.minLength(2), Validators.maxLength(100)]]
     })
-this.restoreEducationBasic();
+
+
+    this.getEducationdetails();
+    this.formSvc.getInstitutesCached().subscribe(list => {
+      this.seleactInstitute = list;
+      this.filteredInstitutes = [...list];
+    });
+
+    this.restoreEducationBasic();
+
+    const savedData = await this.getSavedEducationalDetails();
+    if (savedData) {
+      this.patchSavedEducation(savedData);
+    }
+
+    // fallback to localStorage payload if backend empty
+    else {
+      this.restoreSavedEducationPayload();
+    }
 
 
     this.hasProceededOnce = !!this.previousEducationId;
@@ -172,6 +184,7 @@ this.restoreEducationBasic();
 
 
   }
+
 
   getEducationdetails() {
     this.formSvc.getEducation().subscribe((res: any) => {
@@ -220,7 +233,7 @@ this.restoreEducationBasic();
       this.isOtherEducation = false;
     }
 
-this.saveEducationBasic();
+    this.saveEducationBasic();
   }
 
 
@@ -409,7 +422,7 @@ this.saveEducationBasic();
 
     //   if already available
     this.handleEducationChangeFlow(newId);
-this.saveEducationBasic();
+    this.saveEducationBasic();
 
     // this.showAdditionPopup(newId, newLabel);
 
@@ -589,7 +602,7 @@ this.saveEducationBasic();
 
 
   //second confirmation popup
- 
+
   private openPostUpdateInfoPopup(
     newId: string,
     options: {
@@ -709,12 +722,12 @@ this.saveEducationBasic();
     //others
     if (lower.includes('others') && lower.includes('after 12th')) return 'others12';
     if (lower.includes('others') && lower.includes('diploma')) return 'othersdiploma';
- // PG
+    // PG
     if ((lower.includes('postgraduate')) || (lower.includes('postgraduate') && lower.includes('undergraduate'))) return 'pg';
 
     // UG
     if (lower.includes('undergraduate') || (lower.includes('undergraduate') && lower.includes('after 12th'))) return 'ug';
-   
+
     // IELTS / PTE
     if (lower.includes('ielts') || lower.includes('pte')) return 'ielts';
 
@@ -751,48 +764,175 @@ this.saveEducationBasic();
     this.stepperService.previous();
   }
 
-private getEducationBasicKey(): string {
-  return `educationBasic_${this.applicantId}`;
-}
+  private getEducationBasicKey(): string {
+    return `educationBasic_${this.applicantId}`;
+  }
 
-private saveEducationBasic() {
-  if (!this.applicantId || !this.basicform) return;
+  private saveEducationBasic() {
+    if (!this.applicantId || !this.basicform) return;
 
-  localStorage.setItem(
-    this.getEducationBasicKey(),
-    JSON.stringify({
-      form: this.basicform.getRawValue(),
-      selectedQualificationLabel: this.selectedQualificationLabel,
-      selectedInstituteLabel: this.selectedInstituteLabel,
-      isOtherQualification: this.isOtherQualification,
-      isOtherEducation: this.isOtherEducation,
-      previousEducationId: this.previousEducationId,
-      hasProceededOnce: this.hasProceededOnce
-    })
-  );
-}
+    localStorage.setItem(
+      this.getEducationBasicKey(),
+      JSON.stringify({
+        form: this.basicform.getRawValue(),
+        selectedQualificationLabel: this.selectedQualificationLabel,
+        selectedInstituteLabel: this.selectedInstituteLabel,
+        isOtherQualification: this.isOtherQualification,
+        isOtherEducation: this.isOtherEducation,
+        previousEducationId: this.previousEducationId,
+        hasProceededOnce: this.hasProceededOnce
+      })
+    );
+  }
 
-private restoreEducationBasic() {
-  if (!this.applicantId || !this.basicform) return;
+  private restoreEducationBasic() {
+    if (!this.applicantId || !this.basicform) return;
 
-  const saved = localStorage.getItem(this.getEducationBasicKey());
-  if (!saved) return;
+    const saved = localStorage.getItem(this.getEducationBasicKey());
+    if (!saved) return;
 
-  const parsed = JSON.parse(saved);
+    const parsed = JSON.parse(saved);
 
-  this.basicform.patchValue(parsed.form || {}, {
-    emitEvent: false
-  });
+    this.basicform.patchValue(parsed.form || {}, {
+      emitEvent: false
+    });
 
-  this.selectedQualificationLabel = parsed.selectedQualificationLabel || '';
-  this.selectedInstituteLabel = parsed.selectedInstituteLabel || '';
-  this.isOtherQualification = !!parsed.isOtherQualification;
-  this.isOtherEducation = !!parsed.isOtherEducation;
-  this.previousEducationId = parsed.previousEducationId || null;
-  this.hasProceededOnce = !!parsed.hasProceededOnce;
+    this.selectedQualificationLabel = parsed.selectedQualificationLabel || '';
+    this.selectedInstituteLabel = parsed.selectedInstituteLabel || '';
+    this.isOtherQualification = !!parsed.isOtherQualification;
+    this.isOtherEducation = !!parsed.isOtherEducation;
+    this.previousEducationId = parsed.previousEducationId || null;
+    this.hasProceededOnce = !!parsed.hasProceededOnce;
 
-  this.cd.detectChanges();
-}
+    this.cd.detectChanges();
+  }
+
+  private restoreSavedEducationPayload() {
+    const key = `educationdetailsData_${this.applicantId}`;
+    const saved = localStorage.getItem(key);
+
+    if (!saved) return;
+
+    const data = JSON.parse(saved);
+
+    this.basicform.patchValue({
+      qualification: data.lastQualificationId,
+      qualificationtitle: data.otherQualification || '',
+      institute: data.lastInstitutionId,
+      institutetitle: data.otherInstitutionName || ''
+    }, { emitEvent: false });
+
+    // ✅ restore flags
+    this.isOtherQualification = !!data.otherQualification;
+    this.isOtherEducation = !!data.otherInstitutionName;
+    this.previousEducationId = data.lastQualificationId;
+    this.hasProceededOnce = true;
+
+    // ✅ restore labels
+    const qual = this.seleactqualification.find(q => q.value === data.lastQualificationId);
+    this.selectedQualificationLabel = qual?.label || '';
+
+    const inst = this.seleactInstitute.find(i => i.value === data.lastInstitutionId);
+    this.selectedInstituteLabel = inst?.label || '';
+
+    // ✅ restore education flow
+    if (this.previousEducationId) {
+      this.formSvc.getselectedEducation(this.previousEducationId).subscribe(res => {
+        this.educationdetails = res.data ?? res;
+      });
+    }
+
+    this.cd.detectChanges();
+  }
+
+  patchSavedEducation(data: any) {
+    if (!data) return;
+
+    this.basicform.patchValue({
+      qualification: data.lastQualificationId || '',
+      qualificationtitle: data.otherQualification || '',
+      institute: data.lastInstitutionId || '',
+      institutetitle: data.otherInstitutionName || ''
+    }, { emitEvent: false });
+
+    this.isOtherQualification = !!data.otherQualification;
+    this.isOtherEducation = !!data.otherInstitutionName;
+    this.previousEducationId = data.lastQualificationId || null;
+    this.hasProceededOnce = !!this.previousEducationId;
+
+    const qual = this.seleactqualification.find(q => q.value === data.lastQualificationId);
+    this.selectedQualificationLabel = qual?.label || '';
+
+    const inst = this.seleactInstitute.find(i => i.value === data.lastInstitutionId);
+    this.selectedInstituteLabel = inst?.label || '';
+
+    if (this.previousEducationId) {
+      this.formSvc.getselectedEducation(this.previousEducationId).subscribe(res => {
+        this.educationdetails = res.data ?? res;
+      });
+    }
+
+    this.cd.detectChanges();
+  }
+
+  buildEduDetailsPayload() {
+    this.previousEducationId = this.basicform.value.qualification;
+
+    const qualificationId = this.basicform.value.qualification;
+
+    let input =
+
+    {
+      "applicantId": this.applicantId,
+      "lastQualificationId": this.basicform.value.qualification,
+      'otherQualification': this.isOtherQualification ? this.basicform.value.qualificationtitle : '',
+      "lastInstitutionId": this.basicform.value.institute,
+      "otherInstitutionName": this.isOtherEducation ? this.basicform.value.institutetitle : ''
+    }
+    return input
+  }
+
+  getSavedEducationalDetails(): Promise<any> {
+    let sectionkey = "SAVE_LAST_QUALIFICATION"
+    return new Promise((resolve) => {
+      this.formSvc.getSavedData(this.applicationId, this.applicantId, sectionkey).pipe()
+
+        .subscribe({
+          next: (res) => {
+
+            console.log(res)
+            if (res.status === "success") {
+              resolve(res.data.data);
+
+            }
+            else {
+              resolve(null);
+            }
+          }, error: () => resolve(null)
+        });
+    });
+  }
+  saveExit() {
+
+    if (!this.basicform) return;
+    const key = `educationdetailsData_${this.applicantId}`;
+
+    let input = this.buildEduDetailsPayload();
+
+    localStorage.setItem(key, JSON.stringify(input));
+
+    this.saveEducationBasic();
+    const inputdata = {
+      action: "auto-save",
+      sectionKey: "SAVE_LAST_QUALIFICATION",
+      applicationId: this.applicationId,
+      applicantId: this.applicantId,
+      jsonData: input
+    };
+
+    this.formSvc.saveandExit(inputdata).subscribe();
+
+  }
   next() {
     if (this.basicform.invalid) return;
 
@@ -816,7 +956,10 @@ private restoreEducationBasic() {
         console.log(res);
         if (res.status == "success") {
           const firstStep = '10th';
-
+          this.formSvc.educationdetailsData = input;
+          const key = `educationdetailsData_${this.applicantId}`;
+          localStorage.setItem(key, JSON.stringify(this.formSvc.educationdetailsData));
+          this.saveEducationBasic();
           this.router.navigate(['educationinfo'], {
             relativeTo: this.route,
             queryParams: {
@@ -828,6 +971,7 @@ private restoreEducationBasic() {
               qualificationlabel: firstStep
             }
           });
+
         }
 
       },

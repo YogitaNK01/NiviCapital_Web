@@ -102,42 +102,25 @@ export class Assetsinfo implements OnInit {
   };
 
 
-
-
-  investmentTypeMap = {
-    MutualFunds: 'MUTUAL_FUNDS',
-    Shares: 'EQUITY_SHARES',
-    Bonds: 'BONDS',
-    Others: 'OTHER_INVESTMENTS'
-  };
-
-   isCoApplicant: boolean = false;
+  isCoApplicant: boolean = false;
+  lastSavedPayload: any = null;
   constructor(private fb: FormBuilder, public main: Main, private route: ActivatedRoute, private msgBox: Msgboxservice,
-    private stepperService: Loanstepperservice, private formSvc: Loanformservice, private cd: ChangeDetectorRef,private router:Router ) { }
+    private stepperService: Loanstepperservice, private formSvc: Loanformservice, private cd: ChangeDetectorRef, private router: Router) { }
 
 
-  ngOnInit(): void {
-      this.isCoApplicant = this.router.url.includes('co-applicant');
+  async ngOnInit() {
+    this.isCoApplicant = this.router.url.includes('co-applicant');
     this.stepperService.rebuildSteps();
-    this.route.queryParams.subscribe(params => {
+    // this.route.queryParams.subscribe(params => {
 
-      const applicantId = params['applicantId'];
-      const applicationId = params['applicationId'];
+    const params = this.route.snapshot.queryParams;
+    const applicantId = params['applicantId'];
+    const applicationId = params['applicationId'];
 
-      // Store in variables if needed
-      this.applicantId = applicantId;
-      this.applicationId = applicationId;
+    // Store in variables if needed
+    this.applicantId = applicantId;
+    this.applicationId = applicationId;
 
-
-      const key = `assetsinfoData_${this.applicantId}`;
-      const savedData = localStorage.getItem(key);
-
-      if (savedData) {
-        this.formSvc.aseetsInfoData = JSON.parse(savedData);
-         this.stepperService.markStepCompleted('assetsinfo');
-      }
-
-    });
 
     this.assetsForm = this.fb.group({
       gold: this.fb.group({
@@ -166,8 +149,46 @@ export class Assetsinfo implements OnInit {
 
 
     this.getbanks();
+
+    const key = this.getStorageKey();
+
+    const localData = localStorage.getItem(key);
+    const parsedLocal = localData ? JSON.parse(localData) : null;
+
+    //  call API
+    const apiData = await this.getSavedAssets();
+
+    let finalData = null;
+
+    if (apiData) {
+      finalData = apiData;
+      localStorage.setItem(key, JSON.stringify(apiData));
+    }
+    else if (parsedLocal) {
+      finalData = parsedLocal;
+    }
+
+    if (finalData) {
+      this.formSvc.aseetsInfoData = finalData;
+
+      //  wait until assets loaded
+      setTimeout(() => {
+        this.patchAssetsData();
+
+        //  store snapshot
+        this.lastSavedPayload = this.buildAssetsPayload();
+      });
+
+      this.stepperService.markStepCompleted('assetsinfo');
+    }
+
   }
 
+  getStorageKey() {
+    return this.isCoApplicant
+      ? `assetsinfoData_coapp_${this.applicantId}`
+      : `assetsinfoData_main_${this.applicantId}`;
+  }
   get f() {
     return this.assetsForm.controls;
   }
@@ -599,7 +620,8 @@ export class Assetsinfo implements OnInit {
       case 'PROPERTY': return 'Property/ Land Assets';
       case 'FIXED_DEPOSIT': return 'Fixed Deposit';
       case 'INVESTMENTS': return 'Investments';
-      case 'OTHER': return 'Other Assets';
+      case 'OTHER': return 'Other';
+      // case 'OTHER': return 'Other Assets';
       default: return code;
     }
   }
@@ -641,13 +663,30 @@ export class Assetsinfo implements OnInit {
         return acc;
       }, {});
 
-      if (this.formSvc.aseetsInfoData) {
-        this.patchAssetsData();
-      }
-      this.cd.detectChanges();
-      console.log(this.assetCodeMap);
+      this.formSvc.selectedAssets('INVESTMENTS').subscribe((invRes: any) => {
+        const invList = invRes.data ?? invRes;
+
+        this.selectInvestments = invList.map((s: any) => ({
+          value: s.id,
+          label: s.name,
+          code: s.code
+        }));
+
+        invList.forEach((item: any) => {
+          this.assetCodeMap[item.code] = item.id;
+        });
+
+        console.log('assetCodeMap after investments:', this.assetCodeMap);
 
 
+        if (this.formSvc.aseetsInfoData) {
+          this.patchAssetsData();
+          this.lastSavedPayload = this.buildAssetsPayload();
+        }
+        this.cd.detectChanges();
+        console.log(this.assetCodeMap);
+
+      });
     });
 
   }
@@ -951,8 +990,6 @@ export class Assetsinfo implements OnInit {
     return found?.label === 'Other';
   }
 
-
-
   back() {
     this.stepperService.previous();
   }
@@ -996,6 +1033,9 @@ export class Assetsinfo implements OnInit {
     this.properties.clear();
     this.fixedDeposits.clear();
     this.otherassets.clear();
+    this.investmentsArray.clear();
+    this.selectedInvestmentIds = [];
+    this.selectedPropertyIds = [];
 
     items.forEach((item: any) => {
 
@@ -1049,7 +1089,7 @@ export class Assetsinfo implements OnInit {
         const group = this.createFD();
 
         group.patchValue({
-          bankname: item.bankName,
+          bankname: item.bankId,
           bankamt: item.valueInr,
           maturitydate: item.maturityDate
         });
@@ -1058,28 +1098,87 @@ export class Assetsinfo implements OnInit {
       }
 
       // ---------------- INVESTMENTS ----------------
-      if (code === 'INVESTMENT') {
+      // if (code === 'INVESTMENT') {
+      //   this.selectedAssets.push(this.normalizeToAccordionKey('INVESTMENTS'));
+
+
+      //   this.investmentsArray.push(
+      //     this.createInvestment(item.assetType || 'Shares')
+      //   );
+
+      //   this.investmentsArray.at(this.investmentsArray.length - 1).patchValue({
+      //     value: item.valueInr
+      //   });
+
+
+      //   // if (
+      //   //   code === 'MUTUAL_FUNDS' ||
+      //   //   code === 'EQUITY_SHARES' ||
+      //   //   code === 'BONDS' ||
+      //   //   code === 'OTHER_INVESTMENTS'
+      //   // ) {
+      //   //   this.selectedAssets.push(this.normalizeToAccordionKey('INVESTMENTS'));
+
+      //   //   let formType = '';
+
+      //   //   if (code === 'MUTUAL_FUNDS') formType = 'MutualFunds';
+      //   //   if (code === 'EQUITY_SHARES') formType = 'Shares';
+      //   //   if (code === 'BONDS') formType = 'Bonds';
+      //   //   if (code === 'OTHER_INVESTMENTS') formType = 'Others';
+
+      //   //   const group = this.createInvestment(formType);
+
+      //   //   group.patchValue({
+      //   //     type: formType,
+      //   //     value: item.valueInr,
+      //   //     name: code === 'OTHER_INVESTMENTS' ? item.assetType : ''
+      //   //   });
+
+      //   //   this.investmentsArray.push(group);
+      //   // }
+
+      // }
+
+      // if (code === 'MUTUAL_FUNDS' || code === 'STOCKS' ) {
+      //   // this.selectedAssets.push('INVESTMENTS');
+      //   this.selectedAssets.push(this.normalizeToAccordionKey('INVESTMENTS'));
+
+      //   this.assetsForm.get('investments')?.patchValue({
+      //     mutualfundvalue: item.valueInr
+      //   });
+      // }
+
+
+
+      if (
+        code === 'STOCKS' ||
+        code === 'MUTUAL_FUNDS' ||
+        code === 'BONDS' ||
+        code === 'DEBENTURES' ||
+        code === 'OTHERS'
+      ) {
         this.selectedAssets.push(this.normalizeToAccordionKey('INVESTMENTS'));
 
-        // this.assetsForm.get('investments')?.patchValue({
-        //   stockvalue: item.valueInr
-        // });
-        this.investmentsArray.push(
-          this.createInvestment(item.assetType || 'Shares')
-        );
+        // restore dropdown selection
+        this.selectedInvestmentIds.push(item.assetItemMasterId);
 
-        this.investmentsArray.at(this.investmentsArray.length - 1).patchValue({
-          value: item.valueInr
+        let formType = '';
+
+        if (code === 'STOCKS') formType = 'Stocks';
+        if (code === 'MUTUAL_FUNDS') formType = 'Mutual Funds';
+        if (code === 'BONDS') formType = 'Bonds';
+        if (code === 'DEBENTURES') formType = 'Debentures';
+        if (code === 'OTHERS') formType = 'Others';
+
+        const group = this.createInvestment(formType);
+
+        group.patchValue({
+          type: formType,
+          value: item.valueInr,
+          name: code === 'OTHERS' ? item.assetType : ''
         });
-      }
 
-      if (code === 'MUTUAL_FUNDS') {
-        // this.selectedAssets.push('INVESTMENTS');
-        this.selectedAssets.push(this.normalizeToAccordionKey('INVESTMENTS'));
-
-        this.assetsForm.get('investments')?.patchValue({
-          mutualfundvalue: item.valueInr
-        });
+        this.investmentsArray.push(group);
       }
 
       // ---------------- OTHER ----------------
@@ -1112,8 +1211,236 @@ export class Assetsinfo implements OnInit {
 
     this.cd.detectChanges();
   }
+  //payload that will send in next btn api call
+  buildAssetsPayload() {
+    const form = this.assetsForm.value;
+    const items: any[] = [];
+    let invalid = false;
 
-  next() {
+    const addItem = (code: string, value: any, extra: any = null) => {
+      const assetItemMasterId = this.assetCodeMap[code];
+      if (!value) return;
+
+
+      if (!assetItemMasterId) {
+        console.log('Missing asset code mapping for:', code);
+        invalid = true;
+        return;
+      }
+
+
+      items.push({
+        assetItemMasterId: this.assetCodeMap[code],
+        valueInr: cleanAmount(value),
+        ...extra
+      });
+    };
+    const cleanAmount = (val: any) =>
+      val ? Number(val.toString().replace(/,/g, '')) : 0;
+
+    const markInvalid = (path: string) => {
+      this.assetsForm.get(path)?.markAsTouched();
+      invalid = true;
+    };
+
+    //  GOLD
+    if (this.selectedAssets.includes('Gold')) {
+      const val = form.gold?.goldvalue;
+
+      !val ? markInvalid('gold.goldvalue') : addItem('GOLD', val, {
+        assetType: 'GOLD'
+      });
+    }
+
+    //  LIQUID
+    if (this.selectedAssets.includes('Liquid Assets')) {
+      const cash = form.liquidAssets?.cashinhand;
+      const savings = form.liquidAssets?.savingbalance;
+
+      !cash ? markInvalid('liquidAssets.cashinhand') : addItem('LIQUID_CASH', cash, { assetType: 'Cash In Hand' });
+      !savings ? markInvalid('liquidAssets.savingbalance') : addItem('LIQUID_CASH', savings, { assetType: 'Savings Account Balance (INR)' });
+    }
+
+    //  PROPERTY (FormArray)
+    if (this.selectedAssets.includes('Property/ Land Assets')) {
+      const arr = this.assetsForm.get('properties') as FormArray;
+
+      arr.controls.forEach((ctrl: any, index: number) => {
+        if (ctrl.invalid) {
+          ctrl.markAllAsTouched();
+          invalid = true;
+          console.log('properties true:');
+        } else {
+          addItem('PROPERTY', ctrl.value.marketval, {
+            propertyId: ctrl.value.propertytype,
+            ownershipType: ctrl.value.ownershiptype,
+            location: ctrl.value.location,
+            assetType: `Property ${index + 1}`
+          });
+        }
+      });
+    }
+
+
+
+    //  FIXED DEPOSIT (FormArray)
+    if (this.selectedAssets.includes('Fixed Deposit')) {
+      const arr1 = this.assetsForm.get('fixedDeposits') as FormArray;
+      const arr = this.fixedDeposits;
+      if (!arr || arr.length === 0) {
+
+        invalid = true;
+      }
+      else {
+        arr.controls.forEach((ctrl: any, index: number) => {
+          ctrl.markAllAsTouched();
+          if (ctrl.invalid) {
+
+            invalid = true;
+            console.log('Fixed Deposit true:'); return
+
+          } else {
+
+            addItem('FIXED_DEPOSIT', ctrl.value.bankamt, {
+              bankId: ctrl.value.bankname,
+              // ...(this.isOtherSelected(ctrl) && { description: ctrl.value.description }),
+
+              ...(this.isOtherSelected(ctrl) && ctrl.value.description?.trim()
+                ? { description: ctrl.value.description }
+                : {}),
+
+              maturityDate: (ctrl.value.maturitydate).format('YYYY-MM-DD'),
+              assetType: `Fixed Deposit ${index + 1}`
+            });
+          }
+        });
+      }
+    }
+
+
+
+    //  INVESTMENTS 
+    if (this.selectedAssets.includes('Investments')) {
+
+      const arr = this.investmentsArray;
+
+      if (!arr || arr.length === 0) {
+        invalid = true;
+        // return;
+      } else {
+
+        arr.controls.forEach((ctrl: any) => {
+          ctrl.markAllAsTouched();
+          if (ctrl.invalid) {
+            ctrl.markAllAsTouched();
+            invalid = true;
+            console.log('Investment true:');
+            return;
+          }
+
+          const type = ctrl.value.type == 'Mutual Funds' ? 'MUTUAL_FUNDS' : (ctrl.value.type).toUpperCase();
+          const amount = ctrl.value.value;
+
+          if (type === 'Others') {
+            addItem('Others', amount, {
+              assetType: ctrl.value.name
+            });
+          }
+          else {
+            addItem(type, amount, { assetType: type });
+          }
+        });
+      }
+    }
+
+
+    //  Other Assets
+    if (this.selectedAssets.includes('Other')) {
+      const arr = this.assetsForm.get('otherassets') as FormArray;
+
+      arr.controls.forEach((ctrl: any,) => {
+        if (ctrl.invalid) {
+          ctrl.markAllAsTouched();
+          invalid = true;
+          console.log('Other Assets true:');
+        } else {
+          addItem('OTHER', ctrl.value.assetamt, {
+            assetType: ctrl.value.assettype,
+
+
+          });
+        }
+      });
+    }
+    if (invalid || this.invalidamt === true) { console.log("invalid--"); return { invalid: true }; }
+
+
+
+    const payload = { items   };
+
+    console.log("FINAL PAYLOAD:", payload);
+
+
+    return { items,
+     
+     };
+  }
+  //check already saved or not
+  isPayloadChanged(current: any, saved: any) {
+    return JSON.stringify(current) !== JSON.stringify(saved);
+  }
+  //get saved data from api
+  getSavedAssets(): Promise<any> {
+    return new Promise((resolve) => {
+      this.formSvc.getSavedData(
+        this.applicationId,
+        this.applicantId,
+        "SAVE_ASSETS"
+      ).subscribe({
+        next: (res) => {
+          if (res.status === 'success') {
+            resolve(res.data.data);
+          } else {
+            resolve(null);
+          }
+        },
+        error: () => resolve(null)
+      });
+    });
+  }
+  saveExit() {
+
+    const result = this.buildAssetsPayload();
+
+    if (!result || result.invalid) {
+      console.log("Invalid form - not saving");
+      return;
+    }
+
+    const input = { items: result.items };
+    console.log(input);
+
+
+
+    const key = this.getStorageKey();
+    localStorage.setItem(key, JSON.stringify(input));
+
+    const inputdata = {
+      action: "auto-save",
+      sectionKey: "SAVE_ASSETS",
+      applicationId: this.applicationId,
+      applicantId: this.applicantId,
+      jsonData: input
+    };
+
+    this.formSvc.saveandExit(inputdata).subscribe({
+      next: () => {
+        this.lastSavedPayload = { ...input };
+      }
+    });
+
+  }
+  next1() {
     let form = this.assetsForm.value
     console.log("form data Assets:", form);
     const items: any[] = [];
@@ -1281,8 +1608,49 @@ export class Assetsinfo implements OnInit {
         console.log("resp---", res);
         if (res.status == "success") {
           this.formSvc.aseetsInfoData = payload
-          const key = `assetsinfoData_${this.applicantId}`;
+          const key = `assetsinfoData_main_${this.applicantId}`;
           localStorage.setItem(key, JSON.stringify(payload));
+          this.stepperService.markStepCompleted('assetsinfo');
+          this.stepperService.setStepData('assetsinfo', this.assetsForm.getRawValue());
+
+          this.stepperService.next();
+        }
+      }
+    });
+
+  }
+
+  next() {
+    const result = this.buildAssetsPayload();
+
+    if (!result || result.invalid) {
+      console.log("Form invalid - stop navigation");
+      return;
+    }
+    const payload = { items: result.items, applicantId: this.applicantId, };
+
+    const hasChanged = !this.lastSavedPayload ||
+      this.isPayloadChanged(payload, this.lastSavedPayload);
+
+    if (!hasChanged) {
+      console.log("No changes, skip API");
+
+      this.stepperService.markStepCompleted('assetsinfo');
+      this.stepperService.setStepData('assetsinfo', this.assetsForm.getRawValue());
+      this.stepperService.next();
+      return;
+    }
+
+
+    this.formSvc.getAssets(payload, this.applicationId).pipe().subscribe({
+      next: (res) => {
+        console.log("resp---", res);
+        if (res.status == "success") {
+          this.lastSavedPayload = { ...payload };
+
+          this.formSvc.aseetsInfoData = payload
+          const key = `assetsinfoData_main_${this.applicantId}`;
+          localStorage.setItem(this.getStorageKey(), JSON.stringify(payload));
           this.stepperService.markStepCompleted('assetsinfo');
           this.stepperService.setStepData('assetsinfo', this.assetsForm.getRawValue());
 

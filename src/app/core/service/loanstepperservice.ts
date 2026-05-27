@@ -79,7 +79,8 @@ private stepperType: StepperType = 'MAIN';
 
     const baseSteps: Step[] = [
       { label: 'Loan Info', route: 'loaninfo' },
-      { label: 'General Info', route: 'genralinfo' },
+      { label: 'General Info', route: 'genralinfo' }, 
+      
       //   {
       //   label: 'Education Details',
       //   route: 'educationDetails',
@@ -94,8 +95,6 @@ private stepperType: StepperType = 'MAIN';
         route: 'educationDetails',
         children: this.educationSubSteps
       },
-
-
     ];
     const conditionalSteps: { label: string; route: string }[] = [];
     if (this.formSvc.isincome) {
@@ -110,8 +109,8 @@ private stepperType: StepperType = 'MAIN';
       ...conditionalSteps,
       { label: 'Liabilities', route: 'liabilitiesinfo' },
       { label: 'Monthly Expenditure', route: 'monthlyexpinfo' },
-      { label: 'Reference', route: 'referenceinfo' },
-      // { label: 'Co-Applicant', route: 'Coappdashboard' },
+      // { label: 'Reference', route: 'referenceinfo' },
+      { label: 'Co-Applicant', route: 'co-applicantdetails' },
       { label: 'Summary', route: 'summaryinfo' }
     ];
     

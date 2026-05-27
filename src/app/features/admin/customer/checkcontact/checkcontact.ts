@@ -111,17 +111,20 @@ export class Checkcontact implements OnInit {
     this.mobilenumber = data.value.phone;
     let input = {
       identifier: this.mobilenumber,
-      type: "MOBILE"
+      type: "MOBILE",
+        "applicantType": "PRIMARY", //// PRIMARY / CO_APPLICANT
+      "coApplicantIndex": 0,
 
     }
     this.addcustomerservice.customersearch(input).subscribe({
       next: (res) => {
         console.log(res);
-        this.number_id = res.data.userInitiateId;
+        let respdata= res.data[0];
+        this.number_id = respdata.userInitiateId;
         if (
           (
-            res.data?.status?.includes("NEW_USER") ||
-            res.data?.status?.includes("INITIATED")
+            respdata?.status?.includes("NEW_USER") ||
+            respdata?.status?.includes("INITIATED")
           )
         ) {
           console.log("new user found");
@@ -131,17 +134,17 @@ export class Checkcontact implements OnInit {
           this.isexistinguser = true;
           // this.loadallusers()
           const row: TransformedUserData = {
-            custId: res.data.custId ?? '-',
-            ncId: res.data.ncId ?? '-',
-            firstName: res.data.firstName ?? '-',
-            lastName: res.data.lastName ?? '-',
-            mobile: res.data.mobile ?? '-',
-            email: res.data.email ?? '-',
-            status: res.data.status ?? '-',
-            kycStatus: res.data.kycStatus ?? '-',
+            custId: respdata.custId ?? '-',
+            ncId: respdata.ncId ?? '-',
+            firstName: respdata.firstName ?? '-',
+            lastName: respdata.lastName ?? '-',
+            mobile: respdata.mobile ?? '-',
+            email: respdata.email ?? '-',
+            status: respdata.status ?? '-',
+            kycStatus: respdata.kycStatus ?? '-',
 
-            createdAt: res.data.custId ?? '-',
-            userId: res.data.userInitiateId ?? '-'
+            createdAt: respdata.custId ?? '-',
+            userId: respdata.userInitiateId ?? '-'
 
           };
           this.filteredData = [row];

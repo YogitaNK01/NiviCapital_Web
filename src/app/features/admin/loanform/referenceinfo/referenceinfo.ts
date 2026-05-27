@@ -58,6 +58,9 @@ export class Referenceinfo implements OnInit {
   perselectedCityId!: string;
   perselectedCityLabel!: string;
 
+  perselectedStateLabelArr: string[] = ['', ''];
+  perselectedCityLabelArr: string[] = ['', ''];
+
   // mobileNumber:any;
   popupStep = 1;
   currentRefIndex = 0;
@@ -81,13 +84,14 @@ export class Referenceinfo implements OnInit {
   firstPhoneEnteredRef: 1 | 2 | null = null;
   private successModalInstance: bootstrap.Modal | null = null;
   @ViewChild('phone') phone!: any;
-  
- isCoApplicant: boolean = false;
+
+  isCoApplicant: boolean = false;
+  lastSavedPayload: any = null;
 
   constructor(private fb: FormBuilder, private stepperService: Loanstepperservice, private cd: ChangeDetectorRef, private loanformservice: Loanformservice,
     private router: Router, private route: ActivatedRoute, public main: Main, private apiservice: Addcustomerservice) { }
-  ngOnInit(): void {
-  this.isCoApplicant = this.router.url.includes('co-applicant');
+  async ngOnInit() {
+    this.isCoApplicant = this.router.url.includes('co-applicant');
     this.route.queryParams.subscribe(params => {
 
       const applicantId = params['applicantId'];
@@ -111,25 +115,58 @@ export class Referenceinfo implements OnInit {
     )
 
 
-    const key = `referenceinfoData_${this.applicantId}`;
-const storedData = localStorage.getItem(key);
+    //     const key = `referenceinfoData_main${this.applicantId}`;
+    // const storedData = localStorage.getItem(key);
 
-if (!this.loanformservice.referenceInfoData && storedData) {
-  this.loanformservice.referenceInfoData = JSON.parse(storedData);
-}
+    // if (!this.loanformservice.referenceInfoData && storedData) {
+    //   this.loanformservice.referenceInfoData = JSON.parse(storedData);
+    // }
 
-if (this.loanformservice.referenceInfoData) {
-  this.patchReferenceData();
+    // if (this.loanformservice.referenceInfoData) {
+    //   this.patchReferenceData();
 
-  this.reference1Filled = this.loanformservice.referenceInfoData.reference1Filled || false;
-  this.reference2Filled = this.loanformservice.referenceInfoData.reference2Filled || false;
+    //   this.reference1Filled = this.loanformservice.referenceInfoData.reference1Filled || false;
+    //   this.reference2Filled = this.loanformservice.referenceInfoData.reference2Filled || false;
 
-  this.stepperService.markStepCompleted('referenceinfo');
-}
+    //   this.stepperService.markStepCompleted('referenceinfo');
+    // }
+
+
+    const key = this.getStorageKey();
+    const localData = localStorage.getItem(key);
+    const parsedLocal = localData ? JSON.parse(localData) : null;
+
+    const apiData = await this.getSavedReferenceInfo();
+
+    let finalData = null;
+
+    if (apiData) {
+      finalData = apiData;
+      localStorage.setItem(key, JSON.stringify(apiData));
+    } else if (parsedLocal) {
+      finalData = parsedLocal;
+    }
+
+    if (finalData) {
+      this.loanformservice.referenceInfoData = finalData;
+      this.patchReferenceData();
+
+      this.reference1Filled = finalData.reference1Filled || false;
+      this.reference2Filled = finalData.reference2Filled || false;
+
+      this.lastSavedPayload = this.buildReferencePayload();
+
+      this.stepperService.markStepCompleted('referenceinfo');
+    }
+
 
     this.states()
   }
-
+  getStorageKey() {
+    return this.isCoApplicant
+      ? `referenceinfoData_coapp${this.applicantId}`
+      : `referenceinfoData_main${this.applicantId}`;
+  }
 
   get f() {
     return this.referenceForm.controls;
@@ -195,7 +232,9 @@ if (this.loanformservice.referenceInfoData) {
     this.mobileNumber = mobile;
     let input = {
       identifier: mobile,
-      type: "MOBILE"
+      type: "MOBILE",
+        "applicantType": "PRIMARY", //// PRIMARY / CO_APPLICANT
+      "coApplicantIndex": 0,
 
     }
 
@@ -214,7 +253,7 @@ if (this.loanformservice.referenceInfoData) {
 
       currentArray.at(0).patchValue({
         phone: mobile,
-        ...(isExisting ? res.data : {})
+        ...(isExisting ? res.data[0] : {})
       });
 
       this.isSearchDone = true;
@@ -279,6 +318,12 @@ if (this.loanformservice.referenceInfoData) {
     this.perselectedStateLabel = found?.label ?? '';
 
 
+    this.perselectedStateLabelArr[refIndex] = found?.label ?? '';
+
+    // reset city for this form only
+    this.perselectedCityLabelArr[refIndex] = '';
+
+
     const array =
       this.currentRefIndex === 0
         ? this.reference1Array
@@ -330,6 +375,9 @@ if (this.loanformservice.referenceInfoData) {
 
     this.perselectedCityLabel = found?.label ?? '';
 
+    this.perselectedCityLabelArr[this.currentRefIndex] = found?.label ?? '';
+
+
 
     const array =
       this.currentRefIndex === 0
@@ -363,103 +411,40 @@ if (this.loanformservice.referenceInfoData) {
   submit() {
   }
 
-  patchReferenceData1() {
-    const data = this.loanformservice.referenceInfoData;
 
+
+  patchReferenceData() {
+    const data = this.loanformservice.referenceInfoData;
     if (!data) return;
 
+    // ✅ clear first
+    this.reference1Array.clear();
+    this.reference2Array.clear();
 
     // ---------------- REFERENCE 1 ----------------
-    if (data.reference1 && data.reference1.length) {
+    if (data.reference1?.length) {
       data.reference1.forEach((item: any) => {
-
         const group = this.createReferenceGroup();
-
-        group.patchValue({
-          fname: item.fname,
-          mname: item.mname,
-          lname: item.lname,
-          peraddressline1: item.peraddressline1,
-          peraddressline2: item.peraddressline2,
-          peraddressline3: item.peraddressline3,
-          percountry: item.percountry,
-          perstate: item.perstate,
-          percity: item.percity,
-          perpincode: item.perpincode,
-          phone: item.phone
-        });
-
+        group.patchValue(item);
         this.reference1Array.push(group);
       });
-    }
-
-    // ---------------- REFERENCE 2 ----------------
-    if (data.reference2 && data.reference2.length) {
-      data.reference2.forEach((item: any) => {
-
-        const group = this.createReferenceGroup();
-
-        group.patchValue({
-          fname: item.fname,
-          mname: item.mname,
-          lname: item.lname,
-          peraddressline1: item.peraddressline1,
-          peraddressline2: item.peraddressline2,
-          peraddressline3: item.peraddressline3,
-          percountry: item.percountry,
-          perstate: item.perstate,
-          percity: item.percity,
-          perpincode: item.perpincode,
-          phone: item.phone
-        });
-
-        this.reference2Array.push(group);
-      });
-    }
-
-    if (this.reference1Array.length === 0) {
+    } else {
       this.reference1Array.push(this.createReferenceGroup());
     }
 
-    if (this.reference2Array.length === 0) {
+    // ---------------- REFERENCE 2 ----------------
+    if (data.reference2?.length) {
+      data.reference2.forEach((item: any) => {
+        const group = this.createReferenceGroup();
+        group.patchValue(item);
+        this.reference2Array.push(group);
+      });
+    } else {
       this.reference2Array.push(this.createReferenceGroup());
     }
 
     this.cd.detectChanges();
   }
-
-  patchReferenceData() {
-  const data = this.loanformservice.referenceInfoData;
-  if (!data) return;
-
-  // ✅ clear first
-  this.reference1Array.clear();
-  this.reference2Array.clear();
-
-  // ---------------- REFERENCE 1 ----------------
-  if (data.reference1?.length) {
-    data.reference1.forEach((item: any) => {
-      const group = this.createReferenceGroup();
-      group.patchValue(item);
-      this.reference1Array.push(group);
-    });
-  } else {
-    this.reference1Array.push(this.createReferenceGroup());
-  }
-
-  // ---------------- REFERENCE 2 ----------------
-  if (data.reference2?.length) {
-    data.reference2.forEach((item: any) => {
-      const group = this.createReferenceGroup();
-      group.patchValue(item);
-      this.reference2Array.push(group);
-    });
-  } else {
-    this.reference2Array.push(this.createReferenceGroup());
-  }
-
-  this.cd.detectChanges();
-}
   onEmailChange() {
 
     if (this.currentRefIndex === 1) {
@@ -715,11 +700,14 @@ if (this.loanformservice.referenceInfoData) {
         addressLine2: refForm.peraddressline2,
         addressLine3: refForm.peraddressline3,
         country: 'India',
-        state: this.perselectedStateLabel,
-        city: this.perselectedCityLabel,
+        // state: this.perselectedStateLabel,
+        // city: this.perselectedCityLabel,
+        state: this.perselectedStateLabelArr[this.currentRefIndex],
+        city: this.perselectedCityLabelArr[this.currentRefIndex],
         pincode: refForm.perpincode,
         customerCifId: custID,
-        isNewCustomer: this.isdata ? 1 : 0
+        isNewCustomer: this.isdata ? 1 : 0,
+         applicantId: this.applicantId,
       }
     };
 
@@ -897,7 +885,85 @@ if (this.loanformservice.referenceInfoData) {
     return true;
   }
 
+
+  isPayloadChanged(current: any, saved: any) {
+    return JSON.stringify(current) !== JSON.stringify(saved);
+  }
+
+  buildReferencePayload() {
+    return {
+      reference1: this.reference1Array.getRawValue(),
+      reference2: this.reference2Array.getRawValue(),
+      reference1Filled: this.reference1Filled,
+      reference2Filled: this.reference2Filled,
+      
+    };
+  }
+
+  //get saved data from api
+  getSavedReferenceInfo(): Promise<any> {
+    return new Promise((resolve) => {
+      this.loanformservice.getSavedData(
+        this.applicationId,
+        this.applicantId,
+        "SAVE_REFERENCES"
+      ).subscribe({
+        next: (res) => {
+          if (res.status === 'success') {
+            resolve(res.data.data);
+          } else {
+            resolve(null);
+          }
+        },
+        error: () => resolve(null)
+      });
+    });
+  }
+  saveExit() {
+    const input = this.buildReferencePayload();
+
+    const key = this.getStorageKey();
+    localStorage.setItem(key, JSON.stringify(input));
+
+    const inputdata = {
+      action: "auto-save",
+      sectionKey: "SAVE_REFERENCES",
+      applicationId: this.applicationId,
+      applicantId: this.applicantId,
+      jsonData: input
+    };
+
+    this.loanformservice.saveandExit(inputdata).subscribe({
+
+      next: () => {
+        this.lastSavedPayload = { ...input };
+        console.log('Reference draft saved successfully');
+      },
+      error: (err) => {
+        console.error('Save & Exit failed', err);
+      }
+
+    });
+  }
+
   next() {
+    if (!(this.reference1Filled && this.reference2Filled)) {
+      return;
+    }
+
+    const payload = this.buildReferencePayload();
+
+    const key = this.getStorageKey();
+    localStorage.setItem(key, JSON.stringify(payload));
+
+    this.loanformservice.referenceInfoData = payload;
+    this.lastSavedPayload = { ...payload };
+
+    this.stepperService.markStepCompleted('referenceinfo');
+    this.stepperService.setStepData('referenceinfo', payload);
+    this.stepperService.next();
+  }
+  next1() {
     if (this.reference1Filled && this.reference2Filled) {
 
       const payload = {
@@ -907,9 +973,9 @@ if (this.loanformservice.referenceInfoData) {
         reference2Filled: this.reference2Filled
       };
 
-   
+
       this.loanformservice.referenceInfoData = payload;
-      const key = `referenceinfoData_${this.applicantId}`;
+      const key = `referenceinfoData_main${this.applicantId}`;
       localStorage.setItem(key, JSON.stringify(payload));
       this.stepperService.markStepCompleted('referenceinfo');
       this.stepperService.setStepData('referenceinfo', payload);

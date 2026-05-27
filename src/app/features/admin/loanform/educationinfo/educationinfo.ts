@@ -140,7 +140,7 @@ export class Educationinfo implements OnInit {
 
   private isEducationFlowInitialized = false;
   uploadedFiles: Record<string, File | null> = {}; // central store
-
+  savedFileMeta: Record<string, any> = {};
   private educationFormState: Record<string, any> = {};
 
   uploadeddata: any;
@@ -148,8 +148,24 @@ export class Educationinfo implements OnInit {
   private hasUnsavedChanges = false;
 
   private flowQualificationId: string | null = null;
+  lastSavedPayload: any = null;
+  //save exit 
+  private educationSectionKeyMap: Record<string, string> = {
+    '10th': 'BATCH_UPLOAD_10',
+    '12th': 'BATCH_UPLOAD_12',
 
+    diploma10: 'BATCH_UPLOAD_DIPLOMA',
+    diploma12: 'BATCH_UPLOAD_DIPLOMA',
 
+    ug: 'BATCH_UPLOAD_UNDERGRADUATE',
+    pg: 'BATCH_UPLOAD_POSTGRADUATE',
+
+    ielts: 'BATCH_UPLOAD_IELTS_PTE',
+    offerletter: 'BATCH_UPLOAD_OFFER_LETTER',
+
+    others12: 'BATCH_UPLOAD_12',
+    othersdiploma: 'BATCH_UPLOAD_DIPLOMA'
+  };
   constructor(private fb: FormBuilder, private stepperService: Loanstepperservice, private cd: ChangeDetectorRef, private formSvc: Loanformservice,
     private route: ActivatedRoute, private router: Router, private msgbox: Msgboxservice, public main: Main) { }
   ngOnInit(): void {
@@ -168,33 +184,8 @@ export class Educationinfo implements OnInit {
       others12: this.createForm(),
       othersdiploma: this.createForm()
     }
-    0    // 2.
-    Object.keys(this.educationForms).forEach(step => {
-      const form = this.educationForms[step] as FormGroup;
 
-      form.valueChanges.subscribe(() => {
-        if (this.activeEducation === step) {
-          const raw = form.getRawValue();
-
-          this.educationFormState[step] = {
-            ...raw,
-            institutename: this.normalizeDropdownValue(raw.institutename),
-            location: this.normalizeDropdownValue(raw.location),
-            passingyear: this.normalizeDropdownValue(raw.passingyear),
-          };
-
-          this.stepperService.setEducationStepData(
-            step,
-            this.educationFormState[step]
-          );
-
-          this.saveEducationStateToLocalStorage();
-        }
-      });
-    });
-
-
-    //  3. QUERY PARAMS
+    //  2. QUERY PARAMS
     this.route.queryParams.subscribe(params => {
 
       const applicantId = params['applicantId'];
@@ -205,13 +196,23 @@ export class Educationinfo implements OnInit {
       this.applicationId = applicationId;
 
 
-      // this.restoreEducationStateFromLocalStorage();
+
       if (params['qualificationlabel']) {
 
         const step = params['qualificationlabel'] as StepKey;
+
+        this.restoreEducationStateFromLocalStorage();
+
         if (step) {
           this.activeEducation = step;
-          this.restoreFormState(step);
+
+
+          setTimeout(() => {
+            this.restoreFormState(step);
+            this.loadSavedEducationInfoFromApi(step);
+          }, 200)
+
+
         }
 
         //   build submenu only when flow qualificationId changes
@@ -251,6 +252,34 @@ export class Educationinfo implements OnInit {
       }
 
     });
+
+    // 3.
+    Object.keys(this.educationForms).forEach(step => {
+      const form = this.educationForms[step] as FormGroup;
+
+      form.valueChanges.subscribe(() => {
+        if (this.activeEducation === step) {
+          const raw = form.getRawValue();
+
+          this.educationFormState[step] = {
+            ...raw,
+            institutename: this.normalizeDropdownValue(raw.institutename),
+            location: this.normalizeDropdownValue(raw.location),
+            passingyear: this.normalizeDropdownValue(raw.passingyear),
+          };
+
+          this.stepperService.setEducationStepData(
+            step,
+            this.educationFormState[step]
+          );
+
+          this.saveEducationStateToLocalStorage();
+        }
+      });
+    });
+
+
+
 
     this.getEducationdetails();
 
@@ -585,7 +614,7 @@ export class Educationinfo implements OnInit {
     this.cd.detectChanges();
   }
 
-  getFile(step: StepKey, doc: DocType, index?: number) {
+  getFile1(step: StepKey, doc: DocType, index?: number) {
 
     // return this.uploadedFiles[this.buildKey(step, doc, index)] ?? null;
 
@@ -597,7 +626,12 @@ export class Educationinfo implements OnInit {
 
   }
 
+  getFile(step: StepKey, doc: DocType, index?: number) {
+    const normalizedDoc = this.normalizeDocType(doc);
+    const key = this.buildKey(step, normalizedDoc, index);
 
+    return this.uploadedFiles[key] || this.savedFileMeta[key] || null;
+  }
 
 
   //resotre form data
@@ -619,24 +653,7 @@ export class Educationinfo implements OnInit {
     form.updateValueAndValidity({ emitEvent: false });
 
 
-    // const patchedValue = {
-    //   ...saved,
-    //   institutename: this.normalizeDropdownValue(saved?.institutename),
-    //   location: this.normalizeDropdownValue(saved?.location),
-    //   passingyear: this.normalizeDropdownValue(saved?.passingyear),
-    // };
-
-    // form.patchValue(patchedValue, { emitEvent: false });
-
-    // setTimeout(() => {
-    //   form.get('institutename')?.setValue(patchedValue.institutename, { emitEvent: false });
-    //   form.get('location')?.setValue(patchedValue.location, { emitEvent: false });
-    //   form.get('passingyear')?.setValue(patchedValue.passingyear, { emitEvent: false });
-
-    //   form.markAsPristine();
-    //   form.updateValueAndValidity({ emitEvent: false });
-    //   this.cd.detectChanges();
-    // }, 300);
+    
 
   }
 
@@ -854,15 +871,22 @@ export class Educationinfo implements OnInit {
 
     //  IELTS
     if (step === 'ielts') {
+      // return (
+      //   form.valid &&
+      //   !!this.getFile(step, 'ielts')
+      // );
+
       return (
         form.valid &&
-        !!this.getFile(step, 'ielts')
+        this.hasFileOrSavedMeta(step, 'ielts')
       );
+
     }
 
     //  Offer Letter
     if (step === 'offerletter') {
-      return !!this.getFile(step, 'offerletter');
+      // return !!this.getFile(step, 'offerletter');
+      return this.hasFileOrSavedMeta(step, 'offerletter');
     }
 
     if (form.invalid) return false;
@@ -879,8 +903,11 @@ export class Educationinfo implements OnInit {
     //  Required documents check
     const reqDocs = this.requiredDocs(step);
 
+    // return reqDocs.every(doc =>
+    //   !!this.getFile(step, doc.doc, doc.index)
+    // );
     return reqDocs.every(doc =>
-      !!this.getFile(step, doc.doc, doc.index)
+      this.hasFileOrSavedMeta(step, doc.doc, doc.index)
     );
   }
   showValidationErrors(step: StepKey): void {
@@ -912,7 +939,7 @@ export class Educationinfo implements OnInit {
       .filter(key => key.startsWith(`${step}_other_`))
       .map(key => ({
         title: this.otherDocMap[key]?.title,
-        file: this.uploadedFiles[key]
+        file: this.uploadedFiles[key] || this.savedFileMeta[key]
       }));
   }
   onOtherDocAdded(rowId: number) {
@@ -950,51 +977,27 @@ export class Educationinfo implements OnInit {
 
     Object.keys(this.educationForms).forEach(step => {
 
-      
-       const form = this.educationForms[step];
+
+      const form = this.educationForms[step];
       if (form) {
         forms[step] = form.getRawValue();
       }
-
-      //       const form = this.educationForms[step];
-      //       if (form) {
-
-      //  const raw = form.getRawValue();
-
-      //     forms[step] = {
-      //       ...raw,
-      //       institutename: this.normalizeDropdownValue(raw.institutename),
-      //       location: this.normalizeDropdownValue(raw.location),
-      //       passingyear: this.normalizeDropdownValue(raw.passingyear),
-      //     };
-      // }
-
-      // const currentForm = this.educationForms[step];
-      // const raw = currentForm?.getRawValue();
-      // const savedState = this.educationFormState[step];
-      // const data = savedState || raw;
-
-      // if (!data) return;
-
-      // forms[step] = {
-      //   ...data,
-      //   institutename: this.normalizeDropdownValue(data?.institutename),
-      //   location: this.normalizeDropdownValue(data?.location),
-      //   passingyear: this.normalizeDropdownValue(data?.passingyear),
-      // };
 
 
     });
 
     const uploadedFileMeta: Record<string, any> = {};
 
+
     Object.keys(this.uploadedFiles).forEach(key => {
       const file: any = this.uploadedFiles[key];
 
       if (file) {
         uploadedFileMeta[key] = {
-          name: file.name || file.fileName || '',
-          uploaded: !(file instanceof File)
+          // name: file.name || file.fileName || '',
+          // uploaded: !(file instanceof File)
+          name: file.name,
+          uploaded: true
         };
       }
     });
@@ -1011,7 +1014,7 @@ export class Educationinfo implements OnInit {
   }
   private restoreEducationStateFromLocalStorage() {
     if (!this.applicantId) return;
-
+    const savedFileMeta: Record<string, any> = {};
     const saved = localStorage.getItem(this.getEducationStateKey());
     if (!saved) return;
 
@@ -1019,50 +1022,123 @@ export class Educationinfo implements OnInit {
 
     this.educationFormState = parsed.educationFormState || {};
     this.otherDocMap = parsed.otherDocMap || {};
-
-    if (parsed.educationOrder?.length) {
-      this.educationOrder = parsed.educationOrder;
-    }
-
-    if (parsed.activeEducation) {
-      this.activeEducation = parsed.activeEducation;
-    }
+    this.educationOrder = parsed.educationOrder || this.educationOrder;
+    this.activeEducation = parsed.activeEducation || this.activeEducation;
 
     Object.keys(this.educationFormState).forEach(step => {
       const form = this.educationForms[step];
+      const savedValue = this.educationFormState[step];
 
-      if (form) {
-        const savedValue = this.educationFormState[step];
+      if (!form || !savedValue) return;
 
-        const patchedValue = {
-          ...savedValue,
-          institutename: this.normalizeDropdownValue(savedValue?.institutename),
-          location: this.normalizeDropdownValue(savedValue?.location),
-          passingyear: this.normalizeDropdownValue(savedValue?.passingyear),
-        };
+      form.patchValue({
+        ...savedValue,
+        institutename: this.normalizeDropdownValue(savedValue?.institutename),
+        location: this.normalizeDropdownValue(savedValue?.location),
+        passingyear: this.normalizeDropdownValue(savedValue?.passingyear),
+      }, { emitEvent: false });
 
-        // form.patchValue(patchedValue, {
-        //   emitEvent: false
-        // });
 
-        this.educationFormState = parsed.educationFormState || {};
-        this.otherDocMap = parsed.otherDocMap || {};
-
-        if (parsed.activeEducation) {
-          this.activeEducation = parsed.activeEducation;
-        }
-      }
     });
 
-    if (parsed.uploadedFileMeta) {
-      Object.keys(parsed.uploadedFileMeta).forEach(key => {
-        this.uploadedFiles[key] = parsed.uploadedFileMeta[key] as any;
-      });
 
-      this.uploadedFiles = { ...this.uploadedFiles };
+    if (parsed.uploadedFileMeta) {
+      this.savedFileMeta = parsed.uploadedFileMeta || {};
+      this.savedFileMeta = { ...this.savedFileMeta }
+
+
+      // this.uploadedFiles = { ...this.uploadedFiles };
+    }
+
+    if (this.activeEducation) {
+
+      setTimeout(() => {
+        this.restoreFormState(this.activeEducation);
+        this.cd.detectChanges();
+      }, 200);
+
     }
 
     this.cd.detectChanges();
+  }
+  private async loadSavedEducationInfoFromApi(step: StepKey) {
+    if (!this.applicationId || !this.applicantId || !step) return;
+
+    const savedData = await this.getSavedSectionEducationInfo();
+
+    if (!savedData) return;
+
+    console.log('Saved education data from API:', savedData);
+
+    this.patchSavedEducationData(step, savedData);
+
+    const sectionKey = this.getCurrentEducationSectionKey();
+    const localKey = `educationInfoData_${this.applicantId}_${sectionKey}`;
+    localStorage.setItem(localKey, JSON.stringify(savedData));
+
+    this.cd.detectChanges();
+
+  }
+  private patchSavedEducationData(step: StepKey, savedData: any) {
+    const form = this.educationForms[step] as FormGroup;
+    if (!form) return;
+
+    const data = savedData?.jsonData || savedData;
+
+    if (!data) return;
+
+    if (step === 'ielts') {
+      form.patchValue({
+        score: data.score || ''
+      }, { emitEvent: false });
+    } else if (step === 'offerletter') {
+      // no normal form fields except file display
+    } else {
+      form.patchValue({
+        institutename: this.normalizeDropdownValue(data.institutename || data.instituteId),
+        institutetitle: data.title || data.institutetitle || '',
+        passingyear: this.normalizeDropdownValue(data.passingyear || data.yearOfPassing),
+        per_cgpa: data.percentageCgpa || data.per_cgpa || '',
+        location: this.normalizeDropdownValue(data.location || data.locationId),
+        otherLocation: data.otherLocation || ''
+      }, { emitEvent: false });
+    }
+
+    this.educationFormState[step] = form.getRawValue();
+
+    if (data.otherDocMap) {
+      this.otherDocMap = {
+        ...this.otherDocMap,
+        ...data.otherDocMap
+      };
+    }
+
+    if (Array.isArray(data.files)) {
+      data.files.forEach((fileMeta: any) => {
+        if (!fileMeta?.key) return;
+
+        this.savedFileMeta[fileMeta.key] = {
+          name: fileMeta.fileName || fileMeta.name || '',
+          fileName: fileMeta.fileName || fileMeta.name || '',
+          title: fileMeta.title || '',
+          uploaded: true,
+          fileUrl: fileMeta.fileUrl || fileMeta.url || '',
+          publicUrl: fileMeta.publicUrl || '',
+          objectName: fileMeta.objectName || ''
+
+        };
+      });
+      this.savedFileMeta = { ...this.savedFileMeta };
+    }
+
+    this.stepperService.setEducationStepData(step, form.getRawValue());
+
+    this.cd.detectChanges();
+  }
+  private hasFileOrSavedMeta(step: StepKey, doc: DocType, index?: number): boolean {
+    const key = this.buildKey(step, this.normalizeDocType(doc), index);
+
+    return this.uploadedFiles[key] instanceof File || !!this.savedFileMeta[key];
   }
   private normalizeDropdownValue(value: any): any {
     if (Array.isArray(value)) {
@@ -1070,6 +1146,190 @@ export class Educationinfo implements OnInit {
     }
 
     return value ?? '';
+  }
+
+  private getCurrentEducationSectionKey(): string {
+    const step = this.activeEducation as StepKey;
+    return this.educationSectionKeyMap[step] || 'BATCH_UPLOAD_10';
+  }
+  buildEducationInfoPayload() {
+
+    const step = this.activeEducation as StepKey;
+    const form = this.educationForms[step] as FormGroup;
+
+    if (!form) return {};
+
+    const raw = form.getRawValue();
+
+    const filesMeta: any[] = [];
+
+    Object.keys(this.uploadedFiles)
+      .filter(key => key.startsWith(`${step}_`))
+      .forEach(key => {
+        const file: any = this.uploadedFiles[key];
+
+        if (!file) return;
+
+        filesMeta.push({
+          key,
+          fileName: file.name || file.fileName || '',
+          title: this.otherDocMap[key]?.title || '',
+          isUploadedFile: !(file instanceof File)
+        });
+      });
+
+    return {
+      step,
+      category: 'EDUCATION',
+      subcategory: this.stepToSubcategory[step],
+      institutename: this.normalizeDropdownValue(raw.institutename),
+      location: this.normalizeDropdownValue(raw.location),
+      passingyear: this.normalizeDropdownValue(raw.passingyear),
+      files: filesMeta,
+      otherDocMap: this.otherDocMap
+    };
+  }
+
+  getSavedSectionEducationInfo(): Promise<any> {
+    const sectionkey = this.getCurrentEducationSectionKey();
+
+    return new Promise((resolve) => {
+      this.formSvc.getSavedData(this.applicationId, this.applicantId, sectionkey).pipe()
+
+        .subscribe({
+          next: (res) => {
+
+            console.log(res)
+            if (res.status === "success") {
+              resolve(res.data.data);
+
+            }
+            else {
+              resolve(null);
+            }
+          }, error: () => resolve(null)
+        });
+    });
+  }
+  saveExit() {
+
+
+    const step = this.activeEducation as StepKey;
+    const form = this.educationForms[step] as FormGroup;
+
+    if (!form) return;
+
+    this.saveCurrentFormState();
+    this.saveEducationStateToLocalStorage();
+
+    const sectionKey = this.getCurrentEducationSectionKey()
+
+
+    let input = this.buildEducationInfoPayload();
+    const fd = this.buildEducationSaveExitFormData();
+
+    const localKey = `educationInfoData_${this.applicantId}_${sectionKey}`;
+    localStorage.setItem(localKey, JSON.stringify(input));
+
+    const inputdata = {
+      action: "auto-save",
+      sectionKey: sectionKey,
+      applicationId: this.applicationId,
+      applicantId: this.applicantId,
+      jsonData: fd
+    };
+
+
+    this.formSvc.saveandExit(fd).subscribe({
+      next: (res: any) => {
+        console.log('Education save and exit success:', res);
+
+
+
+
+      },
+      error: (err: any) => {
+        console.error('Education save and exit failed:', err);
+        alert('Failed to save education details.');
+      }
+    });
+
+
+  }
+
+  private buildEducationSaveExitFormData(): FormData {
+    const step = this.activeEducation as StepKey;
+    const form = this.educationForms[step] as FormGroup;
+    const fd = new FormData();
+
+    const sectionKey = this.getCurrentEducationSectionKey();
+    const subcategory = this.stepToSubcategory[step];
+
+    // fd.append('action', 'auto-save');
+    // fd.append('sectionKey', sectionKey);
+    // fd.append('applicationId', this.applicationId);
+    // fd.append('applicantId', this.applicantId);
+    fd.append('category', 'EDUCATION');
+    fd.append('subcategory', subcategory);
+
+    if (step === 'ielts') {
+      fd.append('score', form.get('score')?.value || '');
+
+      const file = this.getFile(step, 'ielts');
+      if (file instanceof File) {
+        fd.append('files[0].type', 'UPLOAD_CERTIFICATE');
+        fd.append('files[0].file', file);
+      }
+
+      return fd;
+    }
+
+    if (step === 'offerletter') {
+      const file = this.getFile(step, 'offerletter');
+
+      if (file instanceof File) {
+        fd.append('files[0].type', 'UPLOAD_CERTIFICATE');
+        fd.append('files[0].file', file);
+      }
+
+      return fd;
+    }
+
+    fd.append('instituteId', form.get('institutename')?.value || '');
+    fd.append('title', form.get('institutetitle')?.value || '');
+    fd.append('yearOfPassing', form.get('passingyear')?.value || '');
+    fd.append('percentageCgpa', form.get('per_cgpa')?.value || '');
+    fd.append('locationId', form.get('location')?.value || '');
+    fd.append('otherLocation', form.get('otherLocation')?.value || '');
+
+    let fileIndex = 0;
+
+    const reqDocs = this.requiredDocs(step);
+
+    reqDocs.forEach(r => {
+      const file = this.getFile(step, r.doc, r.index);
+
+      if (file instanceof File) {
+        fd.append(`files[${fileIndex}].type`, r.apiType);
+        fd.append(`files[${fileIndex}].file`, file);
+        fileIndex++;
+      }
+    });
+
+    Object.keys(this.uploadedFiles)
+      .filter(key => key.startsWith(`${step}_other_`))
+      .forEach(key => {
+        const file = this.uploadedFiles[key];
+
+        if (file instanceof File) {
+          fd.append(`files[${fileIndex}].type`, 'OTHER');
+          fd.append(`files[${fileIndex}].title`, this.otherDocMap[key]?.title || 'Other Document');
+          fd.append(`files[${fileIndex}].file`, file);
+          fileIndex++;
+        }
+      });
+
+    return fd;
   }
   next() {
     console.log("next---");
@@ -1136,32 +1396,64 @@ export class Educationinfo implements OnInit {
     if (step === 'ielts') {
 
       const score = form.get('score')?.value;
-      const file = this.getFile(step, 'ielts');
 
-      if (!score || !file) {
+      const key = this.buildKey(step, 'ielts');
+      const file = this.uploadedFiles[key];
+
+      // const file = this.getFile(step, 'ielts');
+
+      // if (!score || !file) {
+      //   alert('Please enter score and upload IELTS certificate.');
+      //   return;
+      // }
+
+      if (!score || !this.hasFileOrSavedMeta(step, 'ielts')) {
         alert('Please enter score and upload IELTS certificate.');
         return;
       }
 
 
       fd.append('score', score);
-      fd.append('files[0].type', 'UPLOAD_CERTIFICATE');
-      fd.append('files[0].file', file);
+      if (file instanceof File) {
+        fd.append('files[0].type', 'UPLOAD_CERTIFICATE');
+        fd.append('files[0].file', file);
+
+      } else {
+        console.log('IELTS file already saved, skipping upload');
+      }
+
 
     }
-    else if (step === 'offerletter') {
-      const file = this.getFile(step, 'offerletter');
+    // else if (step === 'offerletter') {
+    //   const file = this.getFile(step, 'offerletter');
 
-      if (!file) {
+    //   if (!file) {
+    //     alert('Please upload offer letter.');
+    //     return;
+    //   }
+
+
+    //   fd.append('files[0].type', 'UPLOAD_CERTIFICATE');
+    //   fd.append('files[0].file', file);
+
+    // } 
+    else if (step === 'offerletter') {
+      const key = this.buildKey(step, 'offerletter');
+      const file = this.uploadedFiles[key];
+
+      if (!this.hasFileOrSavedMeta(step, 'offerletter')) {
         alert('Please upload offer letter.');
         return;
       }
 
-      // if (file) {
-      fd.append('files[0].type', 'UPLOAD_CERTIFICATE');
-      fd.append('files[0].file', file);
-      // }
-    } else {
+      if (file instanceof File) {
+        fd.append('files[0].type', 'UPLOAD_CERTIFICATE');
+        fd.append('files[0].file', file);
+      } else {
+        console.log('Offer letter already saved, skipping upload');
+      }
+    }
+    else {
       const reqDocs = this.requiredDocs(step);
       console.log('reqdoc-', reqDocs);
 
@@ -1178,6 +1470,7 @@ export class Educationinfo implements OnInit {
       reqDocs.forEach((r, index) => {
         const file = this.getFile(step, r.doc as DocType, r.index);
         if (!file) return;
+
 
         fd.append(`files[${index}].type`, r.apiType);
         fd.append(`files[${index}].file`, file);
@@ -1199,10 +1492,19 @@ export class Educationinfo implements OnInit {
           const isRequired = key.includes('marksheet1') || key.includes('marksheet_0');
           if (isRequired) return;
 
-          fd.append(`files[${fileIndex}].type`, 'MARKSHEET');
-          fd.append(`files[${fileIndex}].file`, file);
 
-          fileIndex++;
+          if (file instanceof File) {
+            fd.append(`files[${fileIndex}].type`, 'MARKSHEET');
+            fd.append(`files[${fileIndex}].file`, file);
+
+            fileIndex++;
+          }
+          else if (this.savedFileMeta[key]) {
+            console.log('Already saved file, skipping upload:', key);
+          } else {
+            console.warn('Missing required file:', key);
+          }
+
         });
 
 
@@ -1214,6 +1516,8 @@ export class Educationinfo implements OnInit {
 
           const meta = this.otherDocMap[key];
 
+
+
           fd.append(`files[${fileIndex}].type`, 'OTHER');
           fd.append(
             `files[${fileIndex}].title`,
@@ -1223,6 +1527,9 @@ export class Educationinfo implements OnInit {
 
           fileIndex++;
         });
+
+
+
 
       fd.append('instituteId', form.get('institutename')?.value);
       fd.append('title', form.get('institutetitle')?.value);
