@@ -21,6 +21,7 @@ import { Coappdashboard } from './coapplicantinfo/coappdashboard/coappdashboard'
 import { Coappstepper } from './coapplicantinfo/coappstepper/coappstepper';
 import { Basicinfo } from './basicinfo/basicinfo';
 import { Uploadkyc } from '../customer/uploadkyc/uploadkyc';
+import { Coappsummary } from './coapplicantinfo/coappsummary/coappsummary';
 
 const routes: Routes = [
   // {
@@ -74,7 +75,7 @@ const routes: Routes = [
               { path: 'co-assetsinfo', component: Assetsinfo },
               { path: 'co-liabilitiesinfo', component: Liabilitiesinfo },
               { path: 'co-monthlyexpinfo', component: Monthlyexpenditureinfo },
-              { path: 'co-summaryinfo', component: Summaryinfo }
+              { path: 'co-summaryinfo', component: Coappsummary }
             ]
 
           },

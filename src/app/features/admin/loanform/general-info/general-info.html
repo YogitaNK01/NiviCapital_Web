@@ -1,6 +1,6 @@
 <div class="base-layout" [ngClass]="{'coapplicant-layout': isCoApplicant}">
 
-    <div class="header ">
+    <div class="header "  *ngIf="!isCoApplicant">
 
             <div class="text-datepicker blue-text d-flex flex-column gap-2 ">General Information
                 <div class="text-body-1 fw-normal">
@@ -62,7 +62,7 @@
                     <!-- <div class="text-label fw-bold ">Last Qualification Details</div> -->
                     <div class="col-lg-12 col-sm-12 mt-20">
                         <app-dropdown [options]="selectoccupation" [placeholder]="'Select Current Occupation'"
-                            [required]="true" (selectedValueChange)="registerForm.get('occupation')?.setValue($event)"
+                            [required]="true" (selectedValueChange)="registerForm.get('occupation')?.setValue($event);handleOccupationChange($event)"
                             [avatarUrl]="avatarUrl" formControlName="occupation" [hasAvatar]="hasAvatar"
                             [label]="occupationlabel">
                         </app-dropdown>
@@ -290,11 +290,10 @@
             <div class="container-fluid">
                 <div class="row">
 
-                    <!-- <div class="text-label fw-bold ">Last Qualification Details</div> -->
                     <div class="col-lg-4 col-sm-12 mt-20">
                         <app-dropdown [options]="selectoccupation" [placeholder]="'Select Current Occupation'"
                             [required]="true"
-                            (selectedValueChange)="coapp_registerForm.get('occupation')?.setValue($event)"
+                            (selectedValueChange)="coapp_registerForm.get('occupation')?.setValue($event);handleCoApplicantOccupationChange($event)"
                             [avatarUrl]="avatarUrl" formControlName="occupation" [hasAvatar]="hasAvatar"
                             [label]="occupationlabel">
                         </app-dropdown>
@@ -325,12 +324,12 @@
                             </div>
                             <div class="d-flex flex-row">
                                 <app-radiobuttons name="optionsGroup1" label="Yes" value="Yes"
-                                    formControlName="checkedasset" (checkedChange)="checkassetOnChange('Yes')">
+                                    formControlName="co_checkedasset" (checkedChange)="co_checkassetOnChange('Yes')">
                                 </app-radiobuttons>
 
 
-                                <app-radiobuttons name="optionsGroup1" (checkedChange)="checkassetOnChange('No')"
-                                    label="No" value="No" formControlName="checkedasset">
+                                <app-radiobuttons name="optionsGroup1" (checkedChange)="co_checkassetOnChange('No')"
+                                    label="No" value="No" formControlName="co_checkedasset">
                                 </app-radiobuttons>
                             </div>
                         </div>

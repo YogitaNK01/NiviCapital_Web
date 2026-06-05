@@ -44,16 +44,17 @@ export class Coapplicantinfo implements OnInit {
 
 
   ngOnInit() {
+     let Allids = this.loanStepper.getLoanId();
+
+    this.applicantId = Allids[0];
+    this.applicationId = Allids[1];
+    this.custName = Allids[2];
+    this.custARN = Allids[3];
+
+    
     this.route.queryParams.subscribe(params => {
 
-      const applicantId = params['applicantId'];
-      const applicationId = params['applicationId'];
-      this.custName = params['custName'];
-      this.custARN = params['custARN'];
-
-      // Store in variables if needed
-      this.applicantId = applicantId;
-      this.applicationId = applicationId;
+     
 
       this.coApplicantIndex = Number(params['coApplicantIndex']) || 1;
 
@@ -177,7 +178,7 @@ export class Coapplicantinfo implements OnInit {
 
       next: (res) => {
         console.log(res);
-        const userid = res.data.userInitiateId
+        const userid = res.data[0].userInitiateId
         this.saveCoApplicantToList(userid);
         this.loanStepper.setStepperType('CO_APPLICANT');
 
@@ -186,10 +187,7 @@ export class Coapplicantinfo implements OnInit {
           {
             relativeTo: this.route,
             queryParams: {
-              applicantId: this.applicantId,
-              applicationId: this.applicationId,
-              custName: this.custName,
-              custARN: this.custARN,
+              
               id: userid,
               phone: this.prefillPhone,
               coApplicantIndex: this.coApplicantIndex

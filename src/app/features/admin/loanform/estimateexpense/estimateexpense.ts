@@ -83,25 +83,53 @@ export class Estimateexpense {
 
   async ngOnInit() {
     this.isCoApplicant = this.router.url.includes('co-applicant');
+    this.stepperService.setStepperType(
+      this.isCoApplicant ? 'CO_APPLICANT' : 'MAIN'
+    );
+
+    let Allids = this.stepperService.getLoanId();
+    this.applicantId = Allids[0];
+    this.applicationId = Allids[1];
+
+
+    let AllCoapp_ids = this.stepperService.getCo_appId();
+
+    if (
+      this.isCoApplicant &&
+      (!AllCoapp_ids || !AllCoapp_ids[0] || !AllCoapp_ids[1])
+    ) {
+
+      const storedCoApp = sessionStorage.getItem('coAppIds');
+      if (storedCoApp) {
+        const parsed = JSON.parse(storedCoApp);
+
+        AllCoapp_ids = [
+          parsed.applicantId,
+          parsed.applicationId,
+          parsed.fullName
+        ];
+
+        // restore back into service
+        this.stepperService.setCo_appId(
+          parsed.applicantId,
+          parsed.applicationId,
+          parsed.fullName
+        );
+      }
+    }
+
+
+    // this.applicantId = this.isCoApplicant ? AllCoapp_ids[0] : Allids[0];
+    if (this.isCoApplicant) {
+      this.applicantId = AllCoapp_ids?.[0];
+      this.applicationId = AllCoapp_ids?.[1];
+    } else {
+      this.applicantId = Allids?.[0];
+      this.applicationId = Allids?.[1];
+    }
     this.stepperService.rebuildSteps();
-    // this.route.queryParams.subscribe(params => {
-      const params = this.route.snapshot.queryParams;
-      const applicantId = params['applicantId'];
-      const applicationId = params['applicationId'];
 
-      // Store in variables if needed
-      this.applicantId = applicantId;
-      this.applicationId = applicationId;
 
-      // const key = `estimateExpenseData_${this.applicantId}`;
-      // const savedData = localStorage.getItem(key);
-
-      // if (savedData) {
-      //   this.loanformservice.estExpenseInfoData = JSON.parse(savedData);
-      //   this.stepperService.markStepCompleted('expense');
-      // }
-    // });
-    // Reset localStorage if applicant changed
     const currentUserKey = 'currentApplicantId';
     const previousId = localStorage.getItem(currentUserKey);
 
@@ -147,6 +175,11 @@ export class Estimateexpense {
       this.calculateGrandTotal();
     });
 
+if (this.loanformservice.isEditFlow()) {
+      setTimeout(() => {
+        this.patchFromSummary();
+      }, 300);
+    } else {
     const key = this.getStorageKey();
 
     const localData = localStorage.getItem(key);
@@ -166,30 +199,17 @@ export class Estimateexpense {
       finalData = parsedLocal;
     }
 
-    
- if (finalData) {
-    this.loanformservice.estExpenseInfoData = finalData;
-    this.pendingSavedExpense = finalData;
-    this.tryPatchSavedExpense();
-  } else {
-    this.lastSavedPayload = null;
+
+    if (finalData) {
+      this.loanformservice.estExpenseInfoData = finalData;
+      this.pendingSavedExpense = finalData;
+      this.tryPatchSavedExpense();
+    } else {
+      this.lastSavedPayload = null;
+    }
+
+
   }
-
-
-    // if (finalData) {
-    //   if (this.isCoApplicant) {
-    //     this.patchCoApplicantInfo(finalData);
-    //   } else {
-    //     this.patchGeneralInfo(finalData);
-    //   }
-
-
-    //   this.lastSavedPayload = this.isCoApplicant
-    //     ? this.buildCoApplicantPayload(this.coapp_registerForm.value)
-    //     : this.buildMainPayload(this.registerForm.value);
-    // } else {
-    //   this.lastSavedPayload = null;
-    // }
 
 
   }
@@ -833,7 +853,78 @@ export class Estimateexpense {
   capitalize(val: string): string {
     return val.charAt(0).toUpperCase() + val.slice(1).toLowerCase();
   }
+//edit floe patch from summary
+patchFromSummary() {
+  if (!this.loanformservice.isEditFlow()) return;
 
+  const data = this.loanformservice.getSummarySection('estimatedExpense');
+  console.log('patch estimated expense', data);
+
+  if (!data) return;
+
+  const items: any[] = [];
+
+  // Living Expenses
+  (data.livingExpenses || []).forEach((item: any) => {
+    const categoryId =
+      item.livingExpenseItemMasterId ||
+      item.categoryId ||
+      item.id ||
+      this.livCatagories.find(c =>
+        c.label?.toLowerCase() ===
+        (item.name || item.category || item.expenseName || '').toLowerCase()
+      )?.value;
+
+    if (categoryId) {
+      items.push({
+        livingExpenseItemMasterId: categoryId,
+        frequency: item.frequency || 'MONTHLY',
+        amountInr: Number(item.amountInr || item.amount || 0),
+        description: item.description || ''
+      });
+    }
+  });
+
+  // Miscellaneous Expenses
+  (data.miscellaneousExpenses || []).forEach((item: any) => {
+    const categoryId =
+      item.miscellaneousExpenseItemMasterId ||
+      item.categoryId ||
+      item.id ||
+      this.misCatagories.find(c =>
+        c.label?.toLowerCase() ===
+        (item.name || item.category || item.expenseName || '').toLowerCase()
+      )?.value;
+
+    if (categoryId) {
+      items.push({
+        miscellaneousExpenseItemMasterId: categoryId,
+        frequency: item.frequency || 'MONTHLY',
+        amountInr: Number(item.amountInr || item.amount || 0),
+        description: item.description || ''
+      });
+    }
+  });
+
+  const tuitionFeesInr =
+    typeof data.educationFees === 'number'
+      ? data.educationFees
+      : data.educationFees?.amountInr ||
+        data.educationFees?.tuitionFeesInr ||
+        data.tuitionFeesInr ||
+        0;
+
+  const mappedData = {
+    tuitionFeesInr: Number(tuitionFeesInr || 0),
+    items: items
+  };
+
+  this.loanformservice.estExpenseInfoData = mappedData;
+
+  this.patchSavedEstExpense(mappedData);
+
+  this.lastSavedPayload = this.buildExpensePayload();
+}
   tryPatchSavedExpense() {
     if (!this.pendingSavedExpense) return;
     if (!this.livingLoaded || !this.miscLoaded) return;
@@ -847,92 +938,92 @@ export class Estimateexpense {
   }
 
   patchSavedEstExpense(data: any) {
-  if (!data) return;
+    if (!data) return;
 
-  this.expenseForm.patchValue({
-    tutionfees: this.formatIndian(String(data.tuitionFeesInr || 0)),
-    tutionfeesAUD: this.formatAustralian((data.tuitionFeesInr || 0) / 62.5)
-  }, { emitEvent: false });
+    this.expenseForm.patchValue({
+      tutionfees: this.formatIndian(String(data.tuitionFeesInr || 0)),
+      tutionfeesAUD: this.formatAustralian((data.tuitionFeesInr || 0) / 62.5)
+    }, { emitEvent: false });
 
-  this.livingexpenses.clear();
-  this.miscexpenses.clear();
+    this.livingexpenses.clear();
+    this.miscexpenses.clear();
 
-  this.selectedCategories = [];
-  this.selectedmisCategories = [];
+    this.selectedCategories = [];
+    this.selectedmisCategories = [];
 
-  (data.items || []).forEach((item: any) => {
-    // Living Expense
-    if (item.livingExpenseItemMasterId) {
-      const group = this.createExpense(item.livingExpenseItemMasterId);
+    (data.items || []).forEach((item: any) => {
+      // Living Expense
+      if (item.livingExpenseItemMasterId) {
+        const group = this.createExpense(item.livingExpenseItemMasterId);
 
-      group.patchValue({
-        category: item.livingExpenseItemMasterId,
-        categoryLabel: this.getCategoryLabel(item.livingExpenseItemMasterId),
-        securityfrequency: this.capitalize(item.frequency || 'MONTHLY'),
-        amountINR: this.formatIndian(String(item.amountInr || 0)),
-        amountAUD: this.formatAustralian((item.amountInr || 0) / 62.5),
-        description: item.description || ''
-      }, { emitEvent: false });
+        group.patchValue({
+          category: item.livingExpenseItemMasterId,
+          categoryLabel: this.getCategoryLabel(item.livingExpenseItemMasterId),
+          securityfrequency: this.capitalize(item.frequency || 'MONTHLY'),
+          amountINR: this.formatIndian(String(item.amountInr || 0)),
+          amountAUD: this.formatAustralian((item.amountInr || 0) / 62.5),
+          description: item.description || ''
+        }, { emitEvent: false });
 
-      this.livingexpenses.push(group);
+        this.livingexpenses.push(group);
 
-      if (!this.selectedCategories.includes(item.livingExpenseItemMasterId)) {
-        this.selectedCategories.push(item.livingExpenseItemMasterId);
+        if (!this.selectedCategories.includes(item.livingExpenseItemMasterId)) {
+          this.selectedCategories.push(item.livingExpenseItemMasterId);
+        }
       }
-    }
 
-    // Misc Expense
-    if (item.miscellaneousExpenseItemMasterId) {
-      const group = this.createmiscExpense(item.miscellaneousExpenseItemMasterId);
+      // Misc Expense
+      if (item.miscellaneousExpenseItemMasterId) {
+        const group = this.createmiscExpense(item.miscellaneousExpenseItemMasterId);
 
-      group.patchValue({
-        category: item.miscellaneousExpenseItemMasterId,
-        categoryLabel: this.getmisCategoryLabel(item.miscellaneousExpenseItemMasterId),
-        securityfrequency: this.capitalize(item.frequency || 'MONTHLY'),
-        amountINR: this.formatIndian(String(item.amountInr || 0)),
-        amountAUD: this.formatAustralian((item.amountInr || 0) / 62.5),
-        descriptionmisc: item.description || ''
-      }, { emitEvent: false });
+        group.patchValue({
+          category: item.miscellaneousExpenseItemMasterId,
+          categoryLabel: this.getmisCategoryLabel(item.miscellaneousExpenseItemMasterId),
+          securityfrequency: this.capitalize(item.frequency || 'MONTHLY'),
+          amountINR: this.formatIndian(String(item.amountInr || 0)),
+          amountAUD: this.formatAustralian((item.amountInr || 0) / 62.5),
+          descriptionmisc: item.description || ''
+        }, { emitEvent: false });
 
-      this.miscexpenses.push(group);
+        this.miscexpenses.push(group);
 
-      if (!this.selectedmisCategories.includes(item.miscellaneousExpenseItemMasterId)) {
-        this.selectedmisCategories.push(item.miscellaneousExpenseItemMasterId);
+        if (!this.selectedmisCategories.includes(item.miscellaneousExpenseItemMasterId)) {
+          this.selectedmisCategories.push(item.miscellaneousExpenseItemMasterId);
+        }
       }
-    }
-  });
+    });
 
-  this.selectedCategories = [...new Set(this.selectedCategories)];
-  this.selectedmisCategories = [...new Set(this.selectedmisCategories)];
+    this.selectedCategories = [...new Set(this.selectedCategories)];
+    this.selectedmisCategories = [...new Set(this.selectedmisCategories)];
 
-  this.calculateINRtoAUD();
-  this.calculateGrandTotal();
-  this.cd.detectChanges();
-}
+    this.calculateINRtoAUD();
+    this.calculateGrandTotal();
+    this.cd.detectChanges();
+  }
 
-buildExpensePayload() {
-  const formdata = this.expenseForm.getRawValue();
+  buildExpensePayload() {
+    const formdata = this.expenseForm.getRawValue();
 
-  const livingExpenses = formdata.livingexpenses.map((item: any) => ({
-    livingExpenseItemMasterId: item.category,
-    frequency: item.securityfrequency?.toUpperCase(),
-    amountInr: Number(String(item.amountINR || '').replace(/,/g, '')),
-    description: item.description || ''
-  }));
+    const livingExpenses = formdata.livingexpenses.map((item: any) => ({
+      livingExpenseItemMasterId: item.category,
+      frequency: item.securityfrequency?.toUpperCase(),
+      amountInr: Number(String(item.amountINR || '').replace(/,/g, '')),
+      description: item.description || ''
+    }));
 
-  const miscExpenses = formdata.miscexpenses.map((item: any) => ({
-    miscellaneousExpenseItemMasterId: item.category,
-    frequency: item.securityfrequency?.toUpperCase(),
-    amountInr: Number(String(item.amountINR || '').replace(/,/g, '')),
-    description: item.descriptionmisc || ''
-  }));
+    const miscExpenses = formdata.miscexpenses.map((item: any) => ({
+      miscellaneousExpenseItemMasterId: item.category,
+      frequency: item.securityfrequency?.toUpperCase(),
+      amountInr: Number(String(item.amountINR || '').replace(/,/g, '')),
+      description: item.descriptionmisc || ''
+    }));
 
-  return {
-    applicantId: this.applicantId,
-    tuitionFeesInr: Number(String(formdata.tutionfees || '').replace(/,/g, '')),
-    items: [...livingExpenses, ...miscExpenses]
-  };
-}
+    return {
+      applicantId: this.applicantId,
+      tuitionFeesInr: Number(String(formdata.tutionfees || '').replace(/,/g, '')),
+      items: [...livingExpenses, ...miscExpenses]
+    };
+  }
 
   //save and exit 
   saveExit() {
@@ -995,6 +1086,7 @@ buildExpensePayload() {
   }
 
 
+
   next() {
 
     // alert(this.expenseForm.get('tutionfees')?.value)
@@ -1002,7 +1094,7 @@ buildExpensePayload() {
     const miscArray = this.expenseForm.get('miscexpenses') as FormArray;
     const tutionfee = this.expenseForm.get('tutionfees')
     let invalid = false;
-
+   
 
 
     livingArray.controls.forEach(control => {

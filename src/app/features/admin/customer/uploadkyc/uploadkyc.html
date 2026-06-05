@@ -52,14 +52,16 @@
         <div class="col-lg-6 col-sm-12">
 
           <app-inputfield type="text" name="aadharnum" ngModel [required]="true" #aadharnum="ngModel"
-            label="Aadhaar Number" placeholder="Enter your 12 digit Aadhar number" helpText="Help text" (ngModelChange)="checkSequential($event, aadharnum)"
-            pattern="^(?!([0-9])\1{11}$)[0-9]{12}$" [minlength]="12" [maxlength]="12" (input)="main.restrictInput($event, 'number')">
+            label="Aadhaar Number" placeholder="Enter your 12 digit Aadhar number" helpText="Help text"
+            (ngModelChange)="checkSequential($event, aadharnum)" pattern="^(?!([0-9])\1{11}$)[0-9]{12}$"
+            [minlength]="12" [maxlength]="12" (input)="main.restrictInput($event, 'number')">
           </app-inputfield>
 
 
           <div class="text-danger mt-1" *ngIf="aadharnum.invalid && aadharnum.touched">
             <small *ngIf="aadharnum.errors?.['required']">Aadhaar number is required</small>
-             <small *ngIf="aadharnum.errors?.['pattern']   ||aadharnum.errors?.['minlength'] || aadharnum.errors?.['maxlength'] || aadharnum.errors?.['sequential']">
+            <small
+              *ngIf="aadharnum.errors?.['pattern']   ||aadharnum.errors?.['minlength'] || aadharnum.errors?.['maxlength'] || aadharnum.errors?.['sequential']">
               Please enter a valid Aadhaar number
             </small>
 
@@ -70,16 +72,69 @@
 
         <div class="col-lg-6 col-sm-12 loan-mt-4">
 
+          @if (hasLocalFile('aadharfront')) {
+          <label class="text-label">
+            Aadhaar Card Front<span class="text-danger">*</span>
+          </label>
+
+          <div class="addcust-img-box mt-2">
+            <p class="text-label">{{ getLocalFileName('aadharfront') }}</p>
+
+            <div class="icons">
+              <span class="view" (click)="viewLocalFile('aadharfront')">
+                <img src="/assets/images/icons/eyered.svg" alt="view">
+              </span>
+
+              <span class="download" (click)="downloadLocalFile('aadharfront')">
+                <img src="/assets/images/icons/import-red.svg" alt="Download">
+              </span>
+
+              <span class="delete" (click)="deleteLocalFile('aadharfront')">
+                <img src="/assets/images/icons/close.svg" alt="Delete">
+              </span>
+            </div>
+          </div>
+          } @else {
           <app-uploadbtn [config]="basicConfig" [required]="true" (fileChange)="onFileChange($event, 'aadharfront')"
             label="Aadhaar Card Front">
           </app-uploadbtn>
+          }
+
+          <!-- <app-uploadbtn [config]="basicConfig" [required]="true" (fileChange)="onFileChange($event, 'aadharfront')"
+            label="Aadhaar Card Front">
+          </app-uploadbtn> -->
         </div>
 
         <div class="col-lg-6 col-sm-12 loan-mt-4">
+          @if (hasLocalFile('aadharback')) {
+          <label class="text-label">
+            Aadhaar Card Back<span class="text-danger">*</span>
+          </label>
 
+          <div class="addcust-img-box mt-2">
+            <p class="text-label">{{ getLocalFileName('aadharback') }}</p>
+
+            <div class="icons">
+              <span class="view" (click)="viewLocalFile('aadharback')">
+                <img src="/assets/images/icons/eyered.svg" alt="view">
+              </span>
+
+              <span class="download" (click)="downloadLocalFile('aadharback')">
+                <img src="/assets/images/icons/import-red.svg" alt="Download">
+              </span>
+
+              <span class="delete" (click)="deleteLocalFile('aadharback')">
+                <img src="/assets/images/icons/close.svg" alt="Delete">
+              </span>
+            </div>
+          </div>
+          } @else {
           <app-uploadbtn [config]="basicConfig" [required]="true" (fileChange)="onFileChange($event, 'aadharback')"
             label="Aadhaar Card Back">
           </app-uploadbtn>
+          }
+
+
         </div>
 
         <!-- pan number -->
@@ -104,10 +159,36 @@
 
         <div class="col-lg-6 loan-mt-4 col-sm-12">
 
+ @if (hasLocalFile('pan')) {
+          <label class="text-label">
+            PAN Card<span class="text-danger">*</span>
+          </label>
 
+          <div class="addcust-img-box mt-2">
+            <p class="text-label">{{ getLocalFileName('pan') }}</p>
+
+            <div class="icons">
+              <span class="view" (click)="viewLocalFile('pan')">
+                <img src="/assets/images/icons/eyered.svg" alt="view">
+              </span>
+
+              <span class="download" (click)="downloadLocalFile('pan')">
+                <img src="/assets/images/icons/import-red.svg" alt="Download">
+              </span>
+
+              <span class="delete" (click)="deleteLocalFile('pan')">
+                <img src="/assets/images/icons/close.svg" alt="Delete">
+              </span>
+            </div>
+          </div>
+          } @else {
           <app-uploadbtn [config]="basicConfig" [required]="true" (fileChange)="onFileChange($event, 'pan')"
             label="PAN Card">
           </app-uploadbtn>
+          }
+          <!-- <app-uploadbtn [config]="basicConfig" [required]="true" (fileChange)="onFileChange($event, 'pan')"
+            label="PAN Card">
+          </app-uploadbtn> -->
 
         </div>
 
@@ -134,30 +215,57 @@
 
         <div class="col-lg-6 loan-mt-4 col-sm-12">
 
+ @if (hasLocalFile('passport')) {
+          <label class="text-label">
+            Passport<span class="text-danger">*</span>
+          </label>
 
-          <app-uploadbtn [config]="basicConfig" (fileChange)="onFileChange($event, 'passport')" label="Passport">
+          <div class="addcust-img-box mt-2">
+            <p class="text-label">{{ getLocalFileName('passport') }}</p>
+
+            <div class="icons">
+              <span class="view" (click)="viewLocalFile('passport')">
+                <img src="/assets/images/icons/eyered.svg" alt="view">
+              </span>
+
+              <span class="download" (click)="downloadLocalFile('passport')">
+                <img src="/assets/images/icons/import-red.svg" alt="Download">
+              </span>
+
+              <span class="delete" (click)="deleteLocalFile('passport')">
+                <img src="/assets/images/icons/close.svg" alt="Delete">
+              </span>
+            </div>
+          </div>
+          } @else {
+          <app-uploadbtn [config]="basicConfig" [required]="true" (fileChange)="onFileChange($event, 'passport')"
+            label="Passport">
           </app-uploadbtn>
+          }
+          <!-- <app-uploadbtn [config]="basicConfig" (fileChange)="onFileChange($event, 'passport')" label="Passport">
+          </app-uploadbtn> -->
 
         </div>
 
-          <!-- DOB -->
+        <!-- DOB -->
 
-      <div class="col-lg-6 loan-mt-4 col-sm-12">
-        <app-datepickernew name="dob" label="Date of Birth" ngModel [required]="true" #dob="ngModel" [disablefutureDates]="true"
-          (ngModelChange)="checkDob($event)" (click)="dobTouched = true"></app-datepickernew>
+        <div class="col-lg-6 loan-mt-4 col-sm-12">
+          <app-datepickernew name="dob" label="Date of Birth" ngModel [required]="true" #dob="ngModel"
+            [disablefutureDates]="true" (ngModelChange)="checkDob($event)"
+            (click)="dobTouched = true"></app-datepickernew>
+        </div>
+
+
+        <div class="text-danger error" *ngIf="(dob.invalid && dob.touched) || (!dobValid && dob.value)">
+          <small *ngIf="dob.errors?.['required']">DOB is required</small>
+          <small *ngIf=" !dobValid && dob.value">
+            Age must be 18 years or above
+          </small>
+        </div>
+
       </div>
 
 
-      <div class="text-danger error" *ngIf="(dob.invalid && dob.touched) || (!dobValid && dob.value)">
-        <small *ngIf="dob.errors?.['required']">DOB is required</small>
-        <small *ngIf=" !dobValid && dob.value">
-          Age must be 18 years or above
-        </small>
-      </div>
-
-      </div>
-
-    
     </ng-template>
 
     <ng-template #permanentaddressTemplate let-i="index">
@@ -197,7 +305,7 @@
       <div class="row d-flex justify-content-center align-items-end ">
 
         <app-inputfield type="text" name="addressline3" ngModel #addressline3="ngModel" label="Address Line 3"
-          placeholder="Address Line 3" helpText="Help text" [minlength]="2" [maxlength]="255" >
+          placeholder="Address Line 3" helpText="Help text" [minlength]="2" [maxlength]="255">
         </app-inputfield>
 
 
@@ -263,140 +371,184 @@
       <!-- <div class="loan-heading text-label">Current Address</div> -->
 
       <div class="addresscheck d-flex justify-content-start align-items-center gap-4">
-        <app-checkbox label="Same as Permanent Address" [checked]="addressType === 'same'" [disabled]="addressType === 'same'"
-          (checkedChange)="selectSameAddress($event)"></app-checkbox>
+        <app-checkbox label="Same as Permanent Address" [checked]="addressType === 'same'"
+          [disabled]="addressType === 'same'" (checkedChange)="selectSameAddress($event)"></app-checkbox>
         <label for="sameAddress"></label>
 
-        <app-checkbox label="Different Address" [checked]="addressType === 'different'" [disabled]="addressType === 'different'"
-          (checkedChange)="selectDifferentAddress($event)"></app-checkbox>
+        <app-checkbox label="Different Address" [checked]="addressType === 'different'"
+          [disabled]="addressType === 'different'" (checkedChange)="selectDifferentAddress($event)"></app-checkbox>
         <label for="differentAddress"></label>
       </div>
-    
-    <!-- address proofs -->
-    <div class="row d-flex " *ngIf="isDifferentAddress ">
 
-      <div class="col-lg-6  col-sm-12 ">
-        <app-dropdown [options]="secondaryaddproof" [required]="true" [(selectedValue)]="selectedOption" placeholder="Select Secondary Address Proof"
-          name="secondary_address_prrof" [searchable]="true" (selectedValueChange)="onSelectionChange($event)"
-          [(ngModel)]="selectedSecondaryProof" label="Secondary Address Proof"></app-dropdown>
-      </div>
-      <div class="col-lg-6  col-sm-12 ">
-        <app-uploadbtn [config]="basicConfig" [required]="true" (fileChange)="onFileChange($event, 'secaddress')"
-          label="Secondary Address Proof Name">
-        </app-uploadbtn>
-      </div>
-    </div>
+      <!-- address proofs -->
+      <div class="row d-flex " *ngIf="isDifferentAddress ">
 
-    <!-- current address -->
-    <div class="row d-flex justify-content-center align-items-end " *ngIf="isDifferentAddress">
+        <div class="col-lg-6  col-sm-12 ">
+          <app-dropdown [options]="secondaryaddproof" [required]="true" [(selectedValue)]="selectedOption"
+            placeholder="Select Secondary Address Proof" name="secondary_address_prrof" [searchable]="true"
+            (selectedValueChange)="onSelectionChange($event)" [(ngModel)]="selectedSecondaryProof"
+            label="Secondary Address Proof"></app-dropdown>
+        </div>
+        <div class="col-lg-6  col-sm-12 ">
+           @if (hasLocalFile('secaddress')) {
+          <label class="text-label">
+            Secondary Address Proof Name<span class="text-danger">*</span>
+          </label>
 
-      <div class="col-lg-12  col-sm-12 ">
-        <app-inputfield type="text" name="currentaddressline1" ngModel [required]="true" #currentaddressline1="ngModel"
-          label="Address Line 1" placeholder="Address Line 1" helpText="Help text" [minlength]="2" [maxlength]="255">
-        </app-inputfield>
+          <div class="addcust-img-box mt-2">
+            <p class="text-label">{{ getLocalFileName('secaddress') }}</p>
 
+            <div class="icons">
+              <span class="view" (click)="viewLocalFile('secaddress')">
+                <img src="/assets/images/icons/eyered.svg" alt="view">
+              </span>
 
-        <div class="text-danger mt-1" *ngIf="currentaddressline1.invalid && currentaddressline1.touched">
-          <small *ngIf="currentaddressline1.errors?.['required']">Address Line 1 is required</small>
-          <small *ngIf="currentaddressline1.errors?.['minlength'] || currentaddressline1.errors?.['maxlength']">
-            Address must be between 2 to 255 characters
-          </small>
+              <span class="download" (click)="downloadLocalFile('secaddress')">
+                <img src="/assets/images/icons/import-red.svg" alt="Download">
+              </span>
+
+              <span class="delete" (click)="deleteLocalFile('secaddress')">
+                <img src="/assets/images/icons/close.svg" alt="Delete">
+              </span>
+            </div>
+          </div>
+          } @else {
+          <app-uploadbtn [config]="basicConfig" [required]="true" (fileChange)="onFileChange($event, 'secaddress')"
+            label="Secondary Address Proof Name">
+          </app-uploadbtn>
+          }
+          <!-- <app-uploadbtn [config]="basicConfig" [required]="true" (fileChange)="onFileChange($event, 'secaddress')"
+            label="Secondary Address Proof Name">
+          </app-uploadbtn> -->
         </div>
       </div>
-      <div class="col-lg-12  col-sm-12 loan-mt-4">
-        <app-inputfield type="text" name="currentaddressline2" ngModel [required]="true" #currentaddressline2="ngModel"
-          label="Address Line 2" placeholder="Address Line 2" helpText="Help text" [minlength]="2" [maxlength]="255">
-        </app-inputfield>
+
+      <!-- current address -->
+      <div class="row d-flex justify-content-center align-items-end " *ngIf="isDifferentAddress">
+
+        <div class="col-lg-12  col-sm-12 ">
+          <app-inputfield type="text" name="currentaddressline1" ngModel [required]="true"
+            #currentaddressline1="ngModel" label="Address Line 1" placeholder="Address Line 1" helpText="Help text"
+            [minlength]="2" [maxlength]="255">
+          </app-inputfield>
 
 
-        <div class="text-danger mt-1" *ngIf="currentaddressline2.invalid && currentaddressline2.touched">
-          <small *ngIf="currentaddressline2.errors?.['required']">Address Line 2 is required</small>
-          <small *ngIf="currentaddressline2.errors?.['minlength'] || currentaddressline2.errors?.['maxlength']">
-            Address must be between 2 to 255 characters
-          </small>
+          <div class="text-danger mt-1" *ngIf="currentaddressline1.invalid && currentaddressline1.touched">
+            <small *ngIf="currentaddressline1.errors?.['required']">Address Line 1 is required</small>
+            <small *ngIf="currentaddressline1.errors?.['minlength'] || currentaddressline1.errors?.['maxlength']">
+              Address must be between 2 to 255 characters
+            </small>
+          </div>
+        </div>
+        <div class="col-lg-12  col-sm-12 loan-mt-4">
+          <app-inputfield type="text" name="currentaddressline2" ngModel [required]="true"
+            #currentaddressline2="ngModel" label="Address Line 2" placeholder="Address Line 2" helpText="Help text"
+            [minlength]="2" [maxlength]="255">
+          </app-inputfield>
+
+
+          <div class="text-danger mt-1" *ngIf="currentaddressline2.invalid && currentaddressline2.touched">
+            <small *ngIf="currentaddressline2.errors?.['required']">Address Line 2 is required</small>
+            <small *ngIf="currentaddressline2.errors?.['minlength'] || currentaddressline2.errors?.['maxlength']">
+              Address must be between 2 to 255 characters
+            </small>
+          </div>
+        </div>
+        <div class="col-lg-12  col-sm-12 loan-mt-4">
+          <app-inputfield type="text" name="currentaddressline3" ngModel #currentaddressline3="ngModel"
+            label="Address Line 3" placeholder="Address Line 3" helpText="Help text" [minlength]="2" [maxlength]="255">
+          </app-inputfield>
+
+
+          <div class="text-danger mt-1" *ngIf="currentaddressline3.invalid && currentaddressline3.touched">
+            <small *ngIf="currentaddressline3.errors?.['required']">Address Line 3 is required</small>
+            <small *ngIf="currentaddressline3.errors?.['minlength'] || currentaddressline3.errors?.['maxlength']">
+              Address must be between 2 to 255 characters
+            </small>
+          </div>
         </div>
       </div>
-      <div class="col-lg-12  col-sm-12 loan-mt-4">
-        <app-inputfield type="text" name="currentaddressline3" ngModel #currentaddressline3="ngModel"
-          label="Address Line 3" placeholder="Address Line 3" helpText="Help text" [minlength]="2" [maxlength]="255">
-        </app-inputfield>
+      <!-- curr stAte city -->
+      <div class="row d-flex justify-content-center align-items-end" *ngIf="isDifferentAddress">
+        <div class="col-lg-6  col-sm-12 ">
+          <app-inputfield type="text" ngModel [required]="true" label="Country" [required]="true" placeholder="India"
+            helpText="Help text" [disabled]="true" name="country">
+          </app-inputfield>
+        </div>
+        <div class="col-lg-6  col-sm-12 ">
+          <app-dropdown [options]="currstateOptions" [required]="true" [(selectedValue)]="currStateSelectedOption"
+            [placeholder]="placeholderstate" [searchable]="true" (selectedValueChange)="selectCurrState($event)"
+            label="State" name="curstate" [(ngModel)]="currselectedStateId">
+          </app-dropdown>
+        </div>
+        <div class="col-lg-6 loan-mt-4 col-sm-12 ">
+          <app-dropdown [options]="currcityOptions" [required]="true" [(selectedValue)]="currCitySelectedOption"
+            [placeholder]="placeholdercity" [searchable]="true" (selectedValueChange)="selectCurrCity($event)"
+            label="City" name="curcity" [(ngModel)]="currselectedCityId">
+          </app-dropdown>
+        </div>
+        <div class="col-lg-6 loan-mt-4 col-sm-12 ">
 
 
-        <div class="text-danger mt-1" *ngIf="currentaddressline3.invalid && currentaddressline3.touched">
-          <small *ngIf="currentaddressline3.errors?.['required']">Address Line 3 is required</small>
-          <small *ngIf="currentaddressline3.errors?.['minlength'] || currentaddressline3.errors?.['maxlength']">
-            Address must be between 2 to 255 characters
-          </small>
+          <app-inputfield type="text" name="currpincode" ngModel [required]="true" #currpincode="ngModel"
+            label="Pin Code" placeholder="Enter Pin Code" helpText="Help text" pattern="^[1-9][0-9]{5}$" [maxlength]="6"
+            [minlength]="6" (input)="main.restrictInput($event, 'number')">
+          </app-inputfield>
+
+
+          <div class="text-danger mt-1" *ngIf="currpincode.invalid && currpincode.touched">
+            <small *ngIf="currpincode.errors?.['required']">Pin Code is required</small>
+            <small *ngIf="currpincode.errors?.['pattern'] && !currpincode.errors?.['minlength']">Only numbers
+              allowed</small>
+            <small *ngIf="currpincode.errors?.['minlength']">
+              Please enter a valid Pin Code
+            </small>
+
+            <small *ngIf="currpincode.errors?.['maxlength']">
+              Please enter a valid Pin Code
+            </small>
+
+          </div>
         </div>
       </div>
-    </div>
-    <!-- curr stAte city -->
-    <div class="row d-flex justify-content-center align-items-end" *ngIf="isDifferentAddress">
-      <div class="col-lg-6  col-sm-12 ">
-        <app-inputfield type="text" ngModel [required]="true" label="Country" [required]="true" placeholder="India"
-          helpText="Help text" [disabled]="true" name="country">
-        </app-inputfield>
+
+      <div class="mailcheck d-flex justify-content-start align-items-center gap-4  mb-2" *ngIf="isDifferentAddress">
+        <app-checkbox label="Is this the mailing address ?" [checked]="isCurrentMailingChecked"
+          (checkedChange)="currentmailcheck($event)" [disabled]="isPermanentMailingChecked"></app-checkbox>
       </div>
-      <div class="col-lg-6  col-sm-12 ">
-        <app-dropdown [options]="currstateOptions" [required]="true" [(selectedValue)]="currStateSelectedOption"
-          [placeholder]="placeholderstate" [searchable]="true" (selectedValueChange)="selectCurrState($event)"
-          label="State" name="curstate" [(ngModel)]="currselectedStateId">
-        </app-dropdown>
-      </div>
-      <div class="col-lg-6 loan-mt-4 col-sm-12 ">
-        <app-dropdown [options]="currcityOptions" [required]="true" [(selectedValue)]="currCitySelectedOption"
-          [placeholder]="placeholdercity" [searchable]="true" (selectedValueChange)="selectCurrCity($event)"
-          label="City" name="curcity" [(ngModel)]="currselectedCityId">
-        </app-dropdown>
-      </div>
-      <div class="col-lg-6 loan-mt-4 col-sm-12 ">
 
-
-        <app-inputfield type="text" name="currpincode" ngModel [required]="true" #currpincode="ngModel" label="Pin Code"
-          placeholder="Enter Pin Code" helpText="Help text" pattern="^[1-9][0-9]{5}$" [maxlength]="6" [minlength]="6"
-          (input)="main.restrictInput($event, 'number')">
-        </app-inputfield>
-
-
-        <div class="text-danger mt-1" *ngIf="currpincode.invalid && currpincode.touched">
-          <small *ngIf="currpincode.errors?.['required']">Pin Code is required</small>
-          <small *ngIf="currpincode.errors?.['pattern'] && !currpincode.errors?.['minlength']">Only numbers
-            allowed</small>
-          <small *ngIf="currpincode.errors?.['minlength']">
-            Please enter a valid Pin Code
-          </small>
-
-          <small *ngIf="currpincode.errors?.['maxlength']">
-            Please enter a valid Pin Code
-          </small>
+      <!-- footer btns -->
+      <div class="row  d-flex justify-content-center space-evenly align-items-center " *ngIf="!isCoApplicant">
+        <div class="col-lg-6  col-sm-12">
+          <app-buttons label="Back to dashboard" [outline]="true" class="btncustomClass primary "
+            (click)="goToDashboard()"></app-buttons>
 
         </div>
-      </div>
-    </div>
+        <div class="col-lg-6  col-sm-12">
+          <app-buttons label="Submit" type="submit" color="primary" class="btncustomClass btn"
+            [disabled]="!kycForm.valid || !allRequiredFilesUploaded  || !(isPermanentMailingChecked || isCurrentMailingChecked )"></app-buttons>
 
-    <div class="mailcheck d-flex justify-content-start align-items-center gap-4  mb-2"
-      *ngIf="isDifferentAddress">
-      <app-checkbox label="Is this the mailing address ?" [checked]="isCurrentMailingChecked"
-        (checkedChange)="currentmailcheck($event)" [disabled]="isPermanentMailingChecked"></app-checkbox>
-    </div>
+        </div>
 
-    <!-- footer btns -->
-    <div class="row  d-flex justify-content-center space-evenly align-items-center ">
-      <div class="col-lg-6  col-sm-12">
-        <app-buttons label="Back to dashboard" [outline]="true" class="btncustomClass primary "
-          (click)="goToDashboard()"></app-buttons>
 
       </div>
-      <div class="col-lg-6  col-sm-12">
-        <app-buttons label="Submit" type="submit" color="primary" class="btncustomClass btn"
+    </ng-template>
+
+    <hr class="footer-hr-class" *ngIf="isCoApplicant">
+    <div class="loan-footerbtns row w-100  d-flex justify-content-between align-items-center" *ngIf="isCoApplicant">
+
+      <div class="col-lg-4 pointer">
+        <img src="../assets/images/icons/save.svg">
+        <span class="text-dp-3-regular mx-2 blue-text" (click)="saveExit()"> Save and Exit</span>
+      </div>
+      <div class="col-lg-4  d-flex justify-content-end">
+        <app-buttons type="button" label="Back" class="btn btncustomClass" [outline]="true" (click)="back()">
+        </app-buttons>
+        <app-buttons type="button" label="Next" class="btn btncustomClass" color="primary" (click)="next()"
           [disabled]="!kycForm.valid || !allRequiredFilesUploaded  || !(isPermanentMailingChecked || isCurrentMailingChecked )"></app-buttons>
 
       </div>
-
-
     </div>
-</ng-template>
-
   </form>
 
 </div>

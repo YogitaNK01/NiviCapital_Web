@@ -6,6 +6,7 @@ import { Router, ActivatedRoute, RouterOutlet } from '@angular/router';
 import { Addcustomerservice } from '../../../../../core/service/addcustomerservice';
 import { Main } from '../../../../../core/service/main';
 import { TableData } from '../../../../../core/service/table-data';
+import { Loanstepperservice } from '../../../../../core/service/loanstepperservice';
 
 @Component({
   selector: 'app-coappdashboard',
@@ -26,19 +27,44 @@ export class Coappdashboard implements OnInit {
   coApplicantIndex: number = 1;
 
   constructor(public service: Main, private router: Router, private addcustomerservice: Addcustomerservice,
-    private route: ActivatedRoute, private cd: ChangeDetectorRef) { }
+    private route: ActivatedRoute, private cd: ChangeDetectorRef, private stepperService: Loanstepperservice) { }
 
   ngOnInit() {
-    this.route.queryParams.subscribe(params => {
+    let Allids = this.stepperService.getLoanId();
 
-      // Store in variables if needed
-      this.applicantId = params['applicantId'];;
-      this.applicationId = params['applicationId'];
-      this.custName = params['custName'];
-      this.arnid = params['custARN'];
+    this.applicantId = Allids[0];
+    this.applicationId = Allids[1];
+    this.custName = Allids[2];
+    this.arnid = Allids[3];
 
-      
-    });
+    let AllCoapp_ids = this.stepperService.getCo_appId();
+
+
+
+    if (
+
+      (!AllCoapp_ids || !AllCoapp_ids[0] || !AllCoapp_ids[1])
+    ) {
+
+      const storedCoApp = sessionStorage.getItem('coAppIds');
+      if (storedCoApp) {
+        const parsed = JSON.parse(storedCoApp);
+
+        AllCoapp_ids = [
+          parsed.applicantId,
+          parsed.applicationId,
+          parsed.fullName
+        ];
+
+        // restore back into service
+        this.stepperService.setCo_appId(
+          parsed.applicantId,
+          parsed.applicationId,
+          parsed.fullName
+        );
+      }
+    }
+
     this.loadCoApplicants();
   }
   add() {
@@ -53,15 +79,17 @@ export class Coappdashboard implements OnInit {
 
     const nextIndex = this.getNextAvailableCoApplicantIndex();
 
+    this.stepperService.setCurrentCoApplicantIndex(nextIndex);
+
+    localStorage.removeItem(`coapp_completedSteps_${this.applicantId}_${nextIndex}`);
+
+
     this.router.navigate(
       ['coapplicantinfo'],
       {
         relativeTo: this.route,
         queryParams: {
-          applicantId: this.applicantId,
-          applicationId: this.applicationId,
-          custName: this.custName,
-          custARN: this.arnid,
+
           coApplicantIndex: nextIndex
         },
         // queryParamsHandling: 'merge' 
@@ -89,14 +117,11 @@ export class Coappdashboard implements OnInit {
   //open 
   openCoApplicant(index: number) {
     this.router.navigate(
-      ['coapplicantinfo'],
+      ['coapplicantinfo', 'co-basicinfo'],
       {
         relativeTo: this.route,
         queryParams: {
-          applicantId: this.applicantId,
-          applicationId: this.applicationId,
-          custName: this.custName,
-          custARN: this.arnid,
+
           coApplicantIndex: index
         }
       }
@@ -128,6 +153,14 @@ export class Coappdashboard implements OnInit {
 
   back() { }
 
-  next() { }
+  getStepRoute() {
+    return  'co-applicantdetails';
+  }
+  next() { 
+    this.stepperService.next();
+    const stepRoute = this.getStepRoute();
+     this.stepperService.markStepCompleted(stepRoute);
+          // this.stepperService.setStepData(stepRoute, formdata);
+  }
 
 }

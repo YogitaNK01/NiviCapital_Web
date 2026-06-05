@@ -22,7 +22,7 @@ interface OptionItem {
   providedIn: 'root'
 })
 export class Loanformservice {
- 
+
   form!: FormGroup;
   // private baseUrl = environment.apiBaseUrl;
   private baseUrl = "/nivicapsit/api";
@@ -34,6 +34,25 @@ export class Loanformservice {
   issalaried: boolean = false;
   coursetypeug: boolean = false;
 
+  co_isasset: boolean = false;
+  co_isincome: boolean = false;
+  co_issalaried: boolean = false;
+  co_coursetypeug: boolean = false;
+
+  applicantState = {
+    isasset: false,
+    isincome: false,
+    issalaried: false,
+    coursetypeug: false
+  };
+
+  coApplicantState = {
+    isasset: false,
+    isincome: false,
+    issalaried: false
+  };
+
+
   loanInfoData: any;
   generalInfoData: any;
   estExpenseInfoData: any;
@@ -44,7 +63,7 @@ export class Loanformservice {
   liabilitiesInfoData: any;
   monthlyExpenditureData: any;
   referenceInfoData: any;
-   educationdetailsData: any;
+  educationdetailsData: any;
   educationInfoData: any;
 
 
@@ -60,12 +79,15 @@ export class Loanformservice {
   co_referenceInfoData: any;
   co_educationInfoData: any;
 
-  coapppmobile :any;
+  coapppmobile: any;
   coappStep: number = 1
-  
+
   private instituteCache: OptionItem[] | null = null;
   private instituteRequest$!: Observable<OptionItem[]>;
 
+
+  summaryData: any = null;summaryLoaded = false;
+  private summaryRequest$?: Observable<ApiResponse<any>>;
 
   constructor(private http: HttpClient,) { this.restoreFromStorage(); }
 
@@ -97,6 +119,39 @@ export class Loanformservice {
       localStorage.setItem('coursetypeug', JSON.stringify(coursetypeug));
     }
   }
+
+  // *************************Edit flow*********************************
+
+ 
+isEditFlow(): boolean {
+  const ctx = sessionStorage.getItem('loanContextData');
+  if (!ctx) return false;
+
+  try {
+    return JSON.parse(ctx)?.edit === true;
+  } catch {
+    return false;
+  }
+}
+
+loadSummaryIfEdit(applicationId: string,applicantId:string) {
+  if (!this.isEditFlow()) return null;
+
+  if (this.summaryLoaded && this.summaryData) {
+    return null;
+  }
+
+  return this.getCoappSummary(applicationId,applicantId);
+}
+
+setSummary(data: any) {
+  this.summaryData = data;
+  this.summaryLoaded = true;
+}
+
+getSummarySection(section: string) {
+  return this.summaryData?.[section] || null;
+}
 
 
 
@@ -162,6 +217,14 @@ export class Loanformservice {
   submitGenralInfo(payload: any, id: string): Observable<ApiResponse<any>> {
     return this.http.post<ApiResponse<any>>(
       `${this.baseUrl}/v1/los/applications/${id}/general-info`,
+      payload
+    );
+  }
+
+  //coapplicant genrela info 
+  submit_Coapp_GenralInfo(payload: any, id: string): Observable<ApiResponse<any>> {
+    return this.http.post<ApiResponse<any>>(
+      `${this.baseUrl}/v1/los/applications/coApp-general-info`,
       payload
     );
   }
@@ -271,7 +334,8 @@ export class Loanformservice {
   getallBanks(): Observable<ApiResponse<any>> {
     return this.http.get<ApiResponse<any>>(
       `${this.baseUrl}/v1/los/applications/bank-list`,
-    )};
+    )
+  };
 
 
 
@@ -292,7 +356,8 @@ export class Loanformservice {
   getalllenders(): Observable<ApiResponse<any>> {
     return this.http.get<ApiResponse<any>>(
       `${this.baseUrl}/v1/los/applications/lender-names`,
-    )};
+    )
+  };
 
   submitliability(data: any, id: string): Observable<ApiResponse<any>> {
 
@@ -313,8 +378,8 @@ export class Loanformservice {
 
   // *************************Education *************************
 
-  
-getInstitutesCached(): Observable<OptionItem[]> {
+
+  getInstitutesCached(): Observable<OptionItem[]> {
 
     //  1. Return cached data if already loaded
     if (this.instituteCache) {
@@ -331,15 +396,15 @@ getInstitutesCached(): Observable<OptionItem[]> {
       .pipe(
         map(res =>
           (res.data ?? res).map((s: any) => ({
-            value: s.id ,
+            value: s.id,
             //  value: s.instituteName,
             label: s.instituteName
           }))
         ),
         tap(data => {
-          this.instituteCache = data;     
+          this.instituteCache = data;
         }),
-        shareReplay(1)                     
+        shareReplay(1)
       );
 
     return this.instituteRequest$;
@@ -391,15 +456,33 @@ getInstitutesCached(): Observable<OptionItem[]> {
       data
     );
   }
-    // *************************Summary *************************
- 
-    getSummary(id:string): Observable<ApiResponse<any>> {
+  // *************************Summary *************************
+
+  getSummary(id: string): Observable<ApiResponse<any>> {
     return this.http.get<ApiResponse<any>>(
       `${this.baseUrl}/v1/los/applications/${id}/summary`,
- 
+
     );
   }
- // ************************* Save and Exit data *************************
+
+  //coapplicant summary - single summary coapplicant
+  getCoappSummary(id1: string, id2: string): Observable<ApiResponse<any>> {
+    return this.http.get<ApiResponse<any>>(
+      `${this.baseUrl}/v1/los/applications/${id1}/summary/${id2}`,
+
+    );
+  }
+  // *************************submit Summary *************************
+
+  //coapplicant summary
+  submitCoappSummary(data:any): Observable<ApiResponse<any>> {
+    return this.http.post<ApiResponse<any>>(
+      `${this.baseUrl}/v1/los/applications/applicant/submit`,
+data
+    );
+  }
+
+  // ************************* Save and Exit data *************************
 
   saveandExit(data: any): Observable<ApiResponse<any>> {
 
@@ -409,16 +492,22 @@ getInstitutesCached(): Observable<OptionItem[]> {
     );
   }
 
-  // *************************Summary *************************
+  // *************************get saved data *************************
 
-  
-    getSavedData(id1:string,id2:string,sectionkey:string): Observable<ApiResponse<any>> {
+
+  getSavedData(id1: string, id2: string, sectionkey: string): Observable<ApiResponse<any>> {
     return this.http.get<ApiResponse<any>>(
       `${this.baseUrl}/v1/los/draft/get?applicationId=${id1}&applicantId=${id2}&sectionKey=${sectionkey}`,
- 
+
     );
   }
 
-}
+  // *************************get saved data for income and education*************************
+  getUploadedData(id1: string, id2: string, sectionkey: string, category: string, subcategory: string, documentType: string): Observable<ApiResponse<any>> {
+    console.log(id1, id2, sectionkey, category, subcategory, documentType)
+    return this.http.get<ApiResponse<any>>(
+      `${this.baseUrl}/v1/los/draft/get?applicationId=${id1}&applicantId=${id2}&sectionKey=${sectionkey}&category=${category}&subcategory=${subcategory}&documentType=${documentType}`,
 
-// http://192.168.5.42:8080/nivicapsit/api/v1/los/draft/get?applicationId=d9a99523-5eda-4d07-a654-fd92fa6c9d37&applicantId=48958838-2fb7-46ca-b299-852ef8e46e8d&sectionKey=BATCH_UPLOAD
+    );
+  }
+}

@@ -13,10 +13,10 @@ import { Loanformservice } from '../../../../core/service/loanformservice';
 })
 export class Loanstepper implements OnInit {
   steps: any;
-  applicantId: string = '';
-  applicationId: string = '';
-  custName: string = '';
-  custARN: string = '';
+  applicantId:any;
+  applicationId:any;
+  custName:any;
+  custARN:any;
   // completedEducationSections: Set<string> = new Set();
   completedSteps: Set<number> = new Set();
 
@@ -41,25 +41,16 @@ export class Loanstepper implements OnInit {
 
   ngOnInit() {
     this.steps = this.stepservice.steps;
+
+     let Allids = this.stepperService.getLoanId();
+
+    this.applicantId = Allids[0];
+    this.applicationId = Allids[1];
+    this.custName = Allids[2];
+    this.custARN = Allids[3];
+
     this.route.queryParams.subscribe(params => {
-      if (params['applicantId']) {
-        this.applicantId = params['applicantId'];
-        this.applicationId = params['applicationId'];
-        this.custName = params['custName'];
-        this.custARN = params['custARN'];
-
-        this.stepperService.setLoanId(this.applicantId, this.applicationId, this.custName, this.custARN);
-
-
-
-        // this.activeQualificationId = this.normalizeQualification(
-        //   params['qualificationlabel'] || ''
-        // );
-      }
-      // if (params['qualificationlabel']) {
-      //   this.activeQualificationId = params['qualificationlabel'];
-      //   this.cdr.detectChanges();
-      // }
+      
 
       const label = params['qualificationlabel'];
       if (label) {
@@ -80,10 +71,6 @@ export class Loanstepper implements OnInit {
         });
       }
 
-
-
-
-
     });
     this.router.events.subscribe(() => {
       // this.cdr.detectChanges(); 
@@ -95,7 +82,7 @@ export class Loanstepper implements OnInit {
 
     });
     
-this.stepperService.restoreCompletedSteps(); 
+// this.stepperService.restoreCompletedSteps(); 
   this.stepperService.rebuildSteps();
 
   }
@@ -127,6 +114,11 @@ this.stepperService.restoreCompletedSteps();
 
     let logicalRoute = lastSegment;
 
+    
+if (cleanUrl.includes('co-applicantdetails')) {
+    logicalRoute = 'co-applicantdetails';
+  }
+
     // Treat education sub-pages as Education Details
     if (lastSegment === 'educationinfo') {
       logicalRoute = 'educationDetails';
@@ -153,9 +145,6 @@ this.stepperService.restoreCompletedSteps();
       return true;
     }
 
-    //  if (this.stepservice.isStepCompleted(step.route)) {
-    //     return true;
-    //   }
 
 
     if (index === currentIdx) {
@@ -166,31 +155,41 @@ this.stepperService.restoreCompletedSteps();
   }
   canNavigateTo(index: number): boolean {
     const step = this.steps[index];
-
+  if (!step) return false;
     //  allow if completed
-    if (this.stepservice.isStepCompleted(step.route)) {
-      return true;
-    }
+    // if (this.stepservice.isStepCompleted(step.route)) {
+    //   return true;
+    // }
+    
+ if (this.stepservice.isMainStepCompleted(step.route)) {
+    return true;
+  }
+
 
     //  allow current step
-    if (index === this.currentIndex) {
+   if (index === this.currentIndex ) {
       return true;
     }
 
     //  allow next step ONLY if previous is completed
     const prevStep = this.steps[index - 1];
-    if (prevStep && this.stepservice.isStepCompleted(prevStep.route)) {
-      return true;
-    }
+    // if (prevStep && this.stepservice.isStepCompleted(prevStep.route)) {
+    //   return true;
+    // }
+    
+ if (prevStep && this.stepservice.isMainStepCompleted(prevStep.route)) {
+    return true;
+  }
+
 
     return false;
   }
 
 
-  goToStep(route: string, index: number) {
+  goToStep1(route: string, index: number) {
 
     const step = this.steps[index];
-
+this.stepperService.switchToMainApplicantFlow();
     //  If education step → go to active child
     if (route === 'educationDetails') {
 
@@ -219,30 +218,47 @@ this.stepperService.restoreCompletedSteps();
       console.log(` Navigating to ${route} (index ${index})`);
       this.router.navigate(['/loanform', route], {
         queryParams: {
-          applicantId: this.applicantId,
-          applicationId: this.applicationId,
-          custName: this.custName,
-          custARN: this.custARN
+         
         }
       });
     } else {
       console.log(`Blocked navigation to index ${index}`);
     }
   }
+goToStep(route: string, index: number) {
+  if (!this.canNavigateTo(index)) {
+    console.log(`Blocked navigation to index ${index}`);
+    return;
+  }
 
+  // Important: if user clicks vertical stepper while inside co-applicant,
+  // switch context back to MAIN applicant
+  this.stepperService.switchToMainApplicantFlow();
+
+  if (route === 'educationDetails') {
+    this.router.navigate(['/loanform', 'educationDetails'], {
+      queryParamsHandling: 'merge'
+    });
+    return;
+  }
+
+  this.router.navigate(['/loanform', route], {
+    queryParamsHandling: 'merge'
+  });
+}
   isNextStep(index: number): boolean {
     return index === this.currentIndex + 1;
   }
 
   isCompleted(index: number): boolean {
     const step = this.steps[index];
-    return this.stepservice.isStepCompleted(step.route);
+    return this.stepservice.isMainStepCompleted(step.route);
   }
 
   // In component.ts, temporarily add:
-  isCompleted1(index: number): boolean {
-    const result = index < this.currentIndex;
-    return result;
+ isCompleted1(index: number): boolean {
+    const step = this.steps[index];
+    return this.stepservice.isStepCompleted(step.route);
   }
 
   isUpcoming(index: number): boolean {

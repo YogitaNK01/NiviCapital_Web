@@ -33,6 +33,17 @@ interface TransformedUserData {
   kycStatus: string;
   createdAt: number[];
   userId: string;
+
+  loanType?: string,
+  disbursedAmount?: string,
+  outstandingBalance?: string,
+  loanStatus?: string,
+  applicationId?: string,
+  arn?: string,
+  applicationStatus?: string,
+  currentApplicationStatus?: string,
+  nextStage?: string,
+  applicantId?:string 
 }
 @Component({
   selector: 'app-los-operation',
@@ -412,8 +423,8 @@ export class LosOperation {
 
   //disable edit btn from row
   disableEditCondition = (row: any) => {
-
-    return true;
+ console.log("edit-----",row)
+    return false;
 
 
   };

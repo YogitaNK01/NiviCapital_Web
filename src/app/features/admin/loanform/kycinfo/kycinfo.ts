@@ -69,16 +69,22 @@ selectedPassportFile: File | null = null;
 
   ngOnInit(): void {
 this.stepperService.rebuildSteps();
-    this.route.queryParams.subscribe(params => {
+    // this.route.queryParams.subscribe(params => {
 
-      const applicantId = params['applicantId'];
-      const applicationId = params['applicationId'];
+    //   const applicantId = params['applicantId'];
+    //   const applicationId = params['applicationId'];
 
-      // Store in variables if needed
-      this.applicantId = applicantId;
-      this.applicationId = applicationId;
+    //   // Store in variables if needed
+    //   this.applicantId = applicantId;
+    //   this.applicationId = applicationId;
 
-    });
+    // });
+     let Allids = this.stepperService.getLoanId();
+
+    this.applicantId = Allids[0];
+    this.applicationId = Allids[1];
+    // this.custName = Allids[2];
+    // this.custARN = Allids[3];
 
     let ids = this.stepperService.getLoanId();
     this.kycdetailsID = ids[1] ?? this.applicationId;

@@ -20,10 +20,10 @@ import { loanErrors } from './loanerror';
 export class LoanInfo implements OnInit {
 
 
-  applicantId: string = '';
-  applicationId: string = '';
-  custName: string = '';
-  custARN: string = '';
+  applicantId: any;
+  applicationId: any;
+  custName: any;
+  custARN: any;
 
   @Input() avatarUrl = '';
   @Input() hasAvatar = false;
@@ -93,16 +93,21 @@ export class LoanInfo implements OnInit {
 
   ngOnInit(): void {
     this.stepperService.rebuildSteps();
-    this.route.queryParams.subscribe(params => {
-      if (params['applicantId']) {
-        this.applicantId = params['applicantId'];
-        this.applicationId = params['applicationId'];
-        this.custName = params['custName'];
-        this.custARN = params['custARN'];
-        this.stepperService.setLoanId(this.applicantId, this.applicationId, this.custName, this.custARN);
-      }
-    });
- const currentUserKey = 'currentApplicantId';
+
+    const loandata = sessionStorage.getItem('loanContextData');
+
+    if (loandata) {
+      const parsed = JSON.parse(loandata);
+
+      this.applicantId = parsed.applicantId;
+      this.applicationId = parsed.applicationId;
+      this.custName = parsed.custName;
+      this.custARN = parsed.custARN;
+      this.stepperService.setLoanId(this.applicantId, this.applicationId, this.custName, this.custARN);
+
+    }
+
+    const currentUserKey = 'currentApplicantId';
     const previousId = localStorage.getItem(currentUserKey);
 
     if (previousId && previousId !== this.applicantId) {
@@ -114,30 +119,30 @@ export class LoanInfo implements OnInit {
     }
 
     localStorage.setItem(currentUserKey, this.applicantId);
-    
 
-  let data = this.loanformservice.loanInfoData;
 
-  if (!data) {
-    // const storedData = localStorage.getItem('loanInfoData');
-     const key = `loanInfoData_${this.applicantId}`;
+    let data = this.loanformservice.loanInfoData;
+
+    if (!data) {
+      // const storedData = localStorage.getItem('loanInfoData');
+      const key = `loanInfoData_${this.applicantId}`;
       const storedData = localStorage.getItem(key);
-      
-    if (storedData) {
-      data = JSON.parse(storedData);
-      this.loanformservice.loanInfoData = data;
-       this.stepperService.markStepCompleted('loaninfo');
-    }
-  }
 
-  if (!data) return;
-      this.annual_Income = data.annualIncome;
-      this.rateOfInterest = data.interestRate;
-      this.loanAmount = data.requestedAmount;
-      this.tenure = data.requestedTenureMonths / 12;
-      this.paymentmode = data.modeOfPayment;
-      //  setTimeout(() => this.updateSliderBackground(), 0);
-    
+      if (storedData) {
+        data = JSON.parse(storedData);
+        this.loanformservice.loanInfoData = data;
+        this.stepperService.markStepCompleted('loaninfo');
+      }
+    }
+
+    if (!data) return;
+    this.annual_Income = data.annualIncome;
+    this.rateOfInterest = data.interestRate;
+    this.loanAmount = data.requestedAmount;
+    this.tenure = data.requestedTenureMonths / 12;
+    this.paymentmode = data.modeOfPayment;
+    //  setTimeout(() => this.updateSliderBackground(), 0);
+
   }
 
   limitLoanAmount(event: any, slider: any) {
@@ -227,8 +232,8 @@ export class LoanInfo implements OnInit {
         console.log(data);
         if (data.status == "success") {
           this.loanformservice.loanInfoData = input;
-const key = `loanInfoData${this.applicantId}`;
-          localStorage.setItem( key,JSON.stringify(input)  );
+          const key = `loanInfoData${this.applicantId}`;
+          localStorage.setItem(key, JSON.stringify(input));
 
           this.stepperService.markStepCompleted('loaninfo');
           this.stepperService.next();

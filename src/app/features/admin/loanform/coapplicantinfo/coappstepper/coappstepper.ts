@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute, NavigationEnd, Router, RouterOutlet } from '@angular/router';
 import { filter } from 'rxjs/operators';
 import { Loanstepperservice } from '../../../../../core/service/loanstepperservice';
@@ -13,8 +13,8 @@ import { Loanstepperservice } from '../../../../../core/service/loanstepperservi
 })
 export class Coappstepper implements OnInit, OnDestroy {
 
-
-  steps = [
+  steps: any;
+  steps1 = [
     { label: 'Basic Info', route: 'co-basicinfo' },
     { label: 'General Info', route: 'co-generalinfo' },
     { label: 'Additional Info', route: 'co-additionalinfo' },
@@ -26,47 +26,50 @@ export class Coappstepper implements OnInit, OnDestroy {
     { label: 'Summary', route: 'co-summaryinfo' }
   ];
   currentIndex = 0;
-  constructor(private router: Router, private route: ActivatedRoute, private stepperService: Loanstepperservice) {
+  coApplicantIndex: any;
+  constructor(private router: Router, private route: ActivatedRoute, private stepperService: Loanstepperservice, private cdr: ChangeDetectorRef) {
 
-
-    // this.router.events.pipe(filter(e => e instanceof NavigationEnd)).subscribe(() => {
-    //       const childPath = this.route.firstChild?.snapshot.url?.[0]?.path;
-    //       const idx = this.steps.findIndex(s => s.route === childPath);
-    //       this.currentIndex = idx >= 0 ? idx : 0;
-    //     });
+    this.stepperService.coSteps$.subscribe(steps => {
+      this.steps = steps;
+      this.cdr.detectChanges(); // Force change detection
+    });
 
   }
 
-  // get currentIndex(): number {
-  //   const route = this.router.url.split('/').pop();
-  //   return this.steps.findIndex(s => s.route === route);
-  // }
 
 
   ngOnInit() {
     this.stepperService.setStepperType('CO_APPLICANT');
-    this.steps = this.stepperService.steps;
+    const params = this.route.snapshot.queryParams;
+    this.coApplicantIndex = params['coApplicantIndex'] || 1;
+    
+    this.stepperService.setCurrentCoApplicantIndex(this.coApplicantIndex);
+this.stepperService.setStepperType('CO_APPLICANT');
+    this.steps = this.stepperService.coSteps; // get co-applicant steps from service
+
+
+    this.stepperService.restoreCompletedSteps();
+    this.stepperService.rebuildSteps();
 
     this.updateCurrentIndex();
-
+this.cdr.detectChanges();
     this.router.events
       .pipe(filter(e => e instanceof NavigationEnd))
       .subscribe(() => {
         this.updateCurrentIndex();
+        this.cdr.detectChanges();
       });
   }
 
 
-  // goToStep(step: any, index: number) {
-  //   this.router.navigate([ step.route],{ relativeTo: this.route });
-  // }
+
 
 
   updateCurrentIndex() {
     const cleanUrl = this.router.url.split('?')[0];
     const lastSegment = cleanUrl.split('/').filter(Boolean).at(-1) || '';
 
-    const idx = this.steps.findIndex(s => s.route === lastSegment);
+    const idx = this.steps.findIndex((s: any) => s.route === lastSegment);
     this.currentIndex = idx >= 0 ? idx : 0;
   }
 
@@ -84,12 +87,69 @@ export class Coappstepper implements OnInit, OnDestroy {
     return index === this.currentIndex;
   }
 
-  isCompleted(index: number) {
+  isCompleted1(index: number) {
     return index < this.currentIndex;
   }
-  canNavigate(i: number) {
+
+  isCompleted(index: number): boolean {
+    const step = this.steps[index];
+    
+ if (!step) {
+    return false;
+  }
+
+    return this.stepperService.isCoApplicantStepCompleted(step.route);
+  }
+
+isUpcoming(index: number): boolean {
+  const step = this.steps[index];
+
+  if (!step) {
+    return false;
+  }
+
+  if (this.isCompleted(index)) {
+    return false;
+  }
+
+  if (this.isActive(index)) {
+    return false;
+  }
+
+  return !this.canNavigate(index);
+}
+
+  canNavigate1(i: number) {
     return i <= this.currentIndex;
   }
+  
+canNavigate(index: number): boolean {
+    const step = this.steps[index];
+
+    if (!step) {
+      return false;
+    }
+    if (index === 0) {
+      return true;
+    }
+
+    if (this.stepperService.isCoApplicantStepCompleted(step.route)) {
+      return true;
+    }
+
+    if (index === this.currentIndex) {
+      return true;
+    }
+
+    const prevStep = this.steps[index - 1];
+
+    if (prevStep && this.stepperService.isCoApplicantStepCompleted(prevStep.route)) {
+      return true;
+    }
+
+    return false;
+  }
+
 
 
   ngOnDestroy() {

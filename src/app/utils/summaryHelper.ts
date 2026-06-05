@@ -9,6 +9,21 @@ type Field = {
 
 export class SummaryHelper {
 
+  static extractcoappBasicInfo(data: any) {
+    if (!data) return { };
+    const course = data;
+    const basicDetailsFields = [
+      { label: 'First Name', value: course.firstName },
+      { label: 'Middle Name', value: course.middleName },
+      { label: 'Last Name', value: course.lastName },
+      { label: 'Email ID', value: course.emailId },
+      { label: 'Mobile Number', value: course.mobileNumber },
+
+    
+    ].filter(field => field.value !== null && field.value !== '');
+
+    return { basicDetailsFields };
+  }
 
 
   static extractGeneralInfo(generalInfo: any) {
@@ -39,55 +54,23 @@ export class SummaryHelper {
     return { currentOccupation, courseDetailsFields };
   }
 
+  static extractcoappGeneralInfo(generalInfo: any) {
+    if (!generalInfo) return { currentOccupation: '', courseDetailsFields: [] };
 
+    const currentOccupation = generalInfo.occupationInfo?.occupation || '';
 
-  static extractEstimatedExpense1(estimatedExpense: any) {
-    if (!estimatedExpense) {
-      return {
-        educationFees: null,
-        livingExpenses: [],
-        miscellaneousExpenses: []
-      };
-    }
+    const courseDetailsFields = [
+      { label: 'Current Occupation', value: currentOccupation },
+      { label: 'Annual Income', value: generalInfo.annualIncome },
+      { label: 'Relation with Applicant', value: generalInfo.relationWithApplicant },
+      { label: 'Do you have Assets?', value: (generalInfo.hasAssets ? 'Yes' : 'No') },
+      
+    ].filter(field => field.value !== null && field.value !== '');
 
-    const livingRaw = Array.isArray(estimatedExpense.livingExpenses)
-      ? estimatedExpense.livingExpenses
-      : [];
-
-    const miscRaw = Array.isArray(estimatedExpense.miscellaneousExpenses)
-      ? estimatedExpense.miscellaneousExpenses
-      : [];
-
-    //  Living
-    const otherLiving = livingRaw.filter((e: any) => e.name === 'Other Expense');
-    const livingWithoutOther = livingRaw.filter((e: any) => e.name !== 'Other Expense');
-
-    if (otherLiving.length) {
-      livingWithoutOther.push({
-        name: 'Other Expense',
-        isGroup: true,
-        children: otherLiving
-      });
-    }
-
-    //  Misc
-    const otherMisc = miscRaw.filter((e: any) => e.name === 'Other Expenses');
-    const miscWithoutOther = miscRaw.filter((e: any) => e.name !== 'Other Expenses');
-
-    if (otherMisc.length) {
-      miscWithoutOther.push({
-        name: 'Other Expenses',
-        isGroup: true,
-        children: otherMisc
-      });
-    }
-
-    return {
-      educationFees: estimatedExpense.educationFees || null,
-      livingExpenses: livingWithoutOther,
-      miscellaneousExpenses: miscWithoutOther
-    };
+    return { currentOccupation, courseDetailsFields };
   }
+
+
 
   static extractEstimatedExpense(estimatedExpense: any) {
     if (!estimatedExpense) {
@@ -141,10 +124,11 @@ export class SummaryHelper {
   }
 
 
-  static extractAdditionalInfo(additionalInfo: any) {
-    // Define labels for each section
+  static extractAdditionalInfo(additionalInfo: any,applicantType: 'MAIN' | 'CO_APPLICANT' = 'CO_APPLICANT') {
+    const isMainApplicant = applicantType === 'MAIN';
+
     const labels = {
-      mainApplicant: [
+      applicantDetails: [
         { label: 'Gender', key: 'gender' },
         { label: 'Marital Status', key: 'maritalStatus' },
         { label: 'Upload Applicant Photo', key: 'fileName' },
@@ -176,13 +160,26 @@ export class SummaryHelper {
       return obj[key] || '';
     };
 
+    
+  const applicantSource = isMainApplicant
+    ? additionalInfo?.mainApplicant
+    : additionalInfo?.applicantDetails;
+
     // Extract values for each section based on labels
     const values = {
-      mainApplicant: labels.mainApplicant.map(field => ({
-        label: field.label,
-        value: getValue(additionalInfo?.mainApplicant, field.key)
-      })).filter(field => field.value && field.value !== ''),
+      // mainApplicant: labels.mainApplicant.map(field => ({
+      //   label: field.label,
+      //   value: getValue(additionalInfo?.mainApplicant, field.key)
+      // })).filter(field => field.value && field.value !== ''),
 
+    applicantDetails: labels.applicantDetails
+      .map(field => ({
+        label: field.label,
+        value: getValue(applicantSource, field.key)
+      }))
+      .filter(field => field.value !== null && field.value !== undefined && field.value !== ''),
+
+      
       spouse: labels.spouse.map(field => ({
         label: field.label,
         value: getValue(additionalInfo?.spouse, field.key)

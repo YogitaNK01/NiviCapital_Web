@@ -9,6 +9,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { Successbox } from '../../customer/successbox/successbox';
 import { Addcustomerservice } from '../../../../core/service/addcustomerservice';
 import { LocationStrategy } from '@angular/common';
+import { Loanstepperservice } from '../../../../core/service/loanstepperservice';
 
 @Component({
   selector: 'app-selectproduct',
@@ -72,7 +73,7 @@ export class Selectproduct implements OnInit {
   issuccess: boolean = false;
 
 
-  constructor(private router: Router, private apiService: Addcustomerservice, private route: ActivatedRoute, private cd: ChangeDetectorRef, private locationStrategy: LocationStrategy) { }
+  constructor(private router: Router, private apiService: Addcustomerservice, private route: ActivatedRoute,private stepperService: Loanstepperservice, private cd: ChangeDetectorRef, private locationStrategy: LocationStrategy) { }
   ngOnInit(): void {
     this.route.queryParams.subscribe(params => {
       if (params['custId']) {
@@ -137,20 +138,23 @@ export class Selectproduct implements OnInit {
   handleSuccessAction(action: string) {
     if (action === 'letsstart') {
 
+      
+ const payload = {
+      applicantId: this.applicantId,
+      applicationId: this.applicationId,
+      custName: this.custName,
+      custARN: this.arnid
+    };
+
+    sessionStorage.setItem('loanContextData', JSON.stringify(payload));
+
+
       const url = this.router.serializeUrl(
         this.router.createUrlTree(['/loanform/loaninfo'],
-          {
-            queryParams: {
-              applicationId: this.applicationId,
-              applicantId: this.applicantId,
-              custName: this.custName,
-              custARN: this.arnid
-
-            }
-          }
+         
         )
       );
-      // console.log("url---", url);
+       
 
 
       const finalUrl = this.locationStrategy.prepareExternalUrl(url);

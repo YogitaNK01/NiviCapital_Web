@@ -56,10 +56,10 @@ export class Edudetails {
   educationdetails: any;
   qualificationId!: string;
 
-  applicantId: string = '';
-  applicationId: string = '';
-  custName: string = '';
-  custARN: string = '';
+  applicantId:any;
+  applicationId:any;
+  custName:any;
+  custARN:any;
 
   activeEducation!: '10th' | '12th' | 'diploma10' | 'diploma12' | 'ug' | 'pg';
 
@@ -123,19 +123,14 @@ export class Edudetails {
   constructor(private fb: FormBuilder, private stepperService: Loanstepperservice, private cd: ChangeDetectorRef, private formSvc: Loanformservice, private msgbox: Msgboxservice,
     private route: ActivatedRoute, private router: Router) { }
   async ngOnInit() {
-    // this.route.queryParams.subscribe(params => {
-    const params = this.route.snapshot.queryParams;
-    // if (params['applicantId']) {
-    this.applicantId = params['applicantId'];
-    this.applicationId = params['applicationId'];
-    this.custName = params['custName'];
-    this.custARN = params['custARN'];
+  
+    
+ let Allids = this.stepperService.getLoanId();
 
-    this.stepperService.setLoanId(this.applicantId, this.applicationId, this.custName, this.custARN);
-    // }
-    // });
-    // this.getInstituteName();
-
+    this.applicantId = Allids[0];
+    this.applicationId = Allids[1];
+    this.custName = Allids[2];
+    this.custARN = Allids[3];
 
 
 
@@ -845,6 +840,15 @@ export class Edudetails {
     this.cd.detectChanges();
   }
 
+  //edit flow =patch from summary
+  patchFromSummary() {
+    if (!this.formSvc.isEditFlow()) return;
+
+    const data = this.formSvc.getSummarySection('additionalInfo');
+    console.log("patch",data)
+    if (!data) return;
+  }
+  
   patchSavedEducation(data: any) {
     if (!data) return;
 
@@ -964,10 +968,10 @@ export class Edudetails {
             relativeTo: this.route,
             queryParams: {
               qualificationId: qualificationId,
-              applicantId: this.applicantId,
-              applicationId: this.applicationId,
-              custName: this.custName,
-              custARN: this.custARN,
+              // applicantId: this.applicantId,
+              // applicationId: this.applicationId,
+              // custName: this.custName,
+              // custARN: this.custARN,
               qualificationlabel: firstStep
             }
           });

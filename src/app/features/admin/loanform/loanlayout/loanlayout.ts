@@ -3,43 +3,67 @@ import { Loanstepper } from "../loanstepper/loanstepper";
 import { ActivatedRoute, RouterOutlet } from "@angular/router";
 import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { Loanformservice } from '../../../../core/service/loanformservice';
+import { Loanstepperservice } from '../../../../core/service/loanstepperservice';
 
 
 @Component({
   selector: 'app-loanlayout',
-  standalone:true,
-  imports: [Loanstepper, RouterOutlet,ReactiveFormsModule],
+  standalone: true,
+  imports: [Loanstepper, RouterOutlet, ReactiveFormsModule],
   templateUrl: './loanlayout.html',
   styleUrl: './loanlayout.scss'
 })
 export class Loanlayout implements OnInit {
 
-   masterForm!: FormGroup;
- 
+  masterForm!: FormGroup;
+
   applicantId: any;
   applicationId: any;
- 
+
   applicantName: any;
   applicationARN: any;
-   
-  constructor(private fb: FormBuilder, private formSvc: Loanformservice,private route: ActivatedRoute) {}
+
+  constructor(private fb: FormBuilder, private formSvc: Loanformservice, private route: ActivatedRoute, private stepperService: Loanstepperservice,) { }
 
   ngOnInit() {
 
-     this.route.queryParams.subscribe(params => {
+    const loandata = sessionStorage.getItem('loanContextData');
 
-      const applicantId = params['applicantId'];
-      const applicationId = params['applicationId'];
-      const applicantName = params['custName'];
-      const applicationARN = params['custARN'];
+    if (loandata) {
+      const parsed = JSON.parse(loandata);
+
+      this.applicantId = parsed.applicantId;
+      this.applicationId = parsed.applicationId;
+      this.applicantName = parsed.custName;
+      this.applicationARN = parsed.custARN;
+      this.stepperService.setLoanId(this.applicantId, this.applicationId, this.applicantName, this.applicationARN);
 
 
-      this.applicantId = applicantId;
-      this.applicationId = applicationId;
-       this.applicantName = applicantName.split('%20')[0];
-      this.applicationARN = applicationARN;
 
-    });
+      const completedRoute = this.stepperService.getRouteFromStage(
+        parsed.currentApplicationStatus
+      );
+
+      this.stepperService.markCompletedStepsTillRoute(completedRoute);
+
+      // Load summary only for edit flow
+    
+ const summaryCall = this.formSvc.loadSummaryIfEdit(this.applicationId,this.applicantId);
+
+    if (summaryCall) {
+      summaryCall.subscribe({
+        next: (res: any) => {
+          this.formSvc.setSummary(res.data);
+          console.log('summary cached', res.data);
+        },
+        error: err => console.error(err)
+      });
+    }
+
+
+
+    }
+
 
 
     this.masterForm = this.fb.group({
@@ -80,17 +104,17 @@ export class Loanlayout implements OnInit {
       })
 
     });
-    
- this.formSvc.form = this.masterForm;
-   
+
+    this.formSvc.form = this.masterForm;
+
   }
-  
+
   submit() {
-  if (this.masterForm.invalid) return;
+    if (this.masterForm.invalid) return;
 
-  const payload = this.masterForm.value;
-  // this.api.submit(payload).subscribe();
-}
+    const payload = this.masterForm.value;
+    // this.api.submit(payload).subscribe();
+  }
 
- 
+
 }

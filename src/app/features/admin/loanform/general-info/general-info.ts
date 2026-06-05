@@ -86,10 +86,10 @@ export class GeneralInfo implements OnInit {
   selectedcourseNameLabel: string = '';
 
 
-  applicantId: string = '';
-  applicationId: string = '';
-  custName: string = '';
-  custARN: string = '';
+  applicantId: any;
+  applicationId: any;
+  custName: any;
+  custARN: any;
 
   calculatedEndDate!: Date;
 
@@ -129,25 +129,78 @@ export class GeneralInfo implements OnInit {
     { label: 'Son', value: 'Son', icon: '' },
     { label: 'Daughter', value: 'Daughter', icon: '' },
     { label: 'Legal Guardian', value: 'Legal Guardian', icon: '' },
-    
+
 
   ]
- 
+
   lastSavedPayload: any = null;
 
   constructor(private fb: FormBuilder, private formSvc: Loanformservice, private router: Router, private stepperService: Loanstepperservice, private route: ActivatedRoute, public mainservice: Main) { }
   async ngOnInit() {
-    // this.route.queryParams.subscribe(params => {
-    // if (params['applicantId']) {
-    const params = this.route.snapshot.queryParams;
-    this.applicantId = params['applicantId'];
-    this.applicationId = params['applicationId'];
-    this.custName = params['custName'];
-    this.custARN = params['custARN'];
 
-    this.stepperService.setLoanId(this.applicantId, this.applicationId, this.custName, this.custARN);
-    // }
-    // });
+    this.isCoApplicant = this.router.url.includes('co-applicant');
+
+    this.stepperService.setStepperType(
+      this.isCoApplicant ? 'CO_APPLICANT' : 'MAIN'
+    );
+
+    if (this.isCoApplicant) {
+      this.stepperService.restoreCoAppIdFromSession();
+    }
+    let Allids = this.stepperService.getLoanId();
+
+    this.applicantId = Allids[0];
+    this.applicationId = Allids[1];
+    this.custName = Allids[2];
+    this.custARN = Allids[3];
+
+    let AllCoapp_ids = this.stepperService.getCo_appId();
+
+
+    if (
+      this.isCoApplicant &&
+      (!AllCoapp_ids || !AllCoapp_ids[0] || !AllCoapp_ids[1])
+    ) {
+
+      const storedCoApp = sessionStorage.getItem('coAppIds');
+      if (storedCoApp) {
+        const parsed = JSON.parse(storedCoApp);
+        if (parsed?.applicantId && parsed?.applicationId) {
+          AllCoapp_ids = [
+            parsed.applicantId,
+            parsed.applicationId,
+            parsed.fullName, parsed.custARN
+          ];
+
+          // restore back into service
+          this.stepperService.setCo_appId(
+            parsed.applicantId,
+            parsed.applicationId,
+            parsed.fullName, parsed.custARN
+          );
+
+        } else {
+          console.error('Invalid coAppIds in sessionStorage:', parsed);
+        }
+
+      }
+    }
+
+
+    // this.applicantId = this.isCoApplicant ? AllCoapp_ids[0] : Allids[0];
+
+    if (this.isCoApplicant) {
+      this.applicantId = AllCoapp_ids?.[0];
+      this.applicationId = AllCoapp_ids?.[1];
+      this.custName = AllCoapp_ids?.[2];
+      this.custARN = AllCoapp_ids?.[3] || this.custARN;
+    } else {
+      this.applicantId = Allids?.[0];
+      this.applicationId = Allids?.[1];
+      this.custName = Allids?.[2];
+      this.custARN = Allids?.[3];
+    }
+
     this.registerForm = this.fb.group({
 
       occupation: ['', Validators.required],
@@ -176,22 +229,26 @@ export class GeneralInfo implements OnInit {
       occupation: ['', Validators.required],
       annualincome: ['', Validators.required],
       relationship: ['', Validators.required],
-      checkedasset: [false, Validators.required],
+      co_checkedasset: [false, Validators.required],
     });
 
 
-    this.isCoApplicant = this.router.url.includes('co-applicant');
-
     // Reset localStorage if applicant changed
-    const currentUserKey = 'currentApplicantId';
+
+    const currentUserKey = this.isCoApplicant
+      ? 'currentCoApplicantId'
+      : 'currentApplicantId';
+
     const previousId = localStorage.getItem(currentUserKey);
 
     if (previousId && previousId !== this.applicantId) {
-      Object.keys(localStorage).forEach(key => {
-        if (key.includes('_')) {
-          localStorage.removeItem(key);
-        }
-      });
+
+      if (this.isCoApplicant) {
+        localStorage.removeItem(`generalInfo_coapp_${previousId}`);
+      } else {
+        localStorage.removeItem(`generalInfo_main_${previousId}`);
+      }
+
     }
 
     localStorage.setItem(currentUserKey, this.applicantId);
@@ -206,155 +263,58 @@ export class GeneralInfo implements OnInit {
     this.listenToChanges();
 
 
-
-    const key = this.getStorageKey();
-
-    const localData = localStorage.getItem(key);
-    let parsedLocal = localData ? JSON.parse(localData) : null;
-
-    //  call API
-    const apiData = await this.getSavedGeneralInfo();
-
-    //  PRIORITY LOGIC
-    let finalData = null;
-
-    if (apiData) {
-      finalData = apiData;
-      localStorage.setItem(key, JSON.stringify(apiData));
-    }
-    else if (parsedLocal) {
-      finalData = this.mapLocalToApiFormat(parsedLocal);
-    }
+    if (this.formSvc.isEditFlow()) {
+        this.patchFromSummary();
+    } else {
 
 
-    if (finalData) {
-      if (this.isCoApplicant) {
-        this.patchCoApplicantInfo(finalData);
-      } else {
-        this.patchGeneralInfo(finalData);
+
+      const key = this.getStorageKey();
+
+      const localData = localStorage.getItem(key);
+      let parsedLocal = localData ? JSON.parse(localData) : null;
+
+      //  call API
+      const apiData = await this.getSavedGeneralInfo();
+
+      //  PRIORITY LOGIC
+      let finalData = null;
+
+      if (apiData) {
+        finalData = apiData;
+        localStorage.setItem(key, JSON.stringify(apiData));
+      }
+      else if (parsedLocal) {
+        finalData = this.mapLocalToApiFormat(parsedLocal);
       }
 
-      this.checkassetOnChange(finalData.hasAssets ? 'Yes' : 'No');
-      this.handleOccupationChange(finalData.currentOccupationId || finalData.occupation);
 
-      //  store last saved snapshot in comparable format
-      this.lastSavedPayload = this.isCoApplicant
-        ? this.buildCoApplicantPayload(this.coapp_registerForm.value)
-        : this.buildMainPayload(this.registerForm.value);
-    } else {
-      this.lastSavedPayload = null;
+      if (finalData) {
+        if (this.isCoApplicant) {
+          this.patchCoApplicantInfo(finalData);
+
+          this.co_checkassetOnChange(finalData.hasAssets ? 'Yes' : 'No');
+          this.handleCoApplicantOccupationChange(
+            finalData.currentOccupationId ||
+            finalData.occupation ||
+            finalData.occupationId
+          );
+
+        } else {
+          this.patchGeneralInfo(finalData);
+
+
+          this.checkassetOnChange(finalData.hasAssets ? 'Yes' : 'No');
+          this.handleOccupationChange(finalData.currentOccupationId || finalData.occupation);
+        }
+        //  store last saved snapshot in comparable format
+        this.lastSavedPayload = this.isCoApplicant
+          ? this.buildCoApplicantPayload(this.coapp_registerForm.value)
+          : this.buildMainPayload(this.registerForm.value);
+      } else {
+        this.lastSavedPayload = null;
+      }
     }
-
-
-    //  rest init
-    // this.listenToChanges();
-
-    // this.registerForm.get('coursestartdate')?.valueChanges.subscribe((startDate) => {
-
-    //   if (!startDate) return;
-
-    //   const start = new Date(startDate);
-    //   start.setHours(0, 0, 0, 0);
-    //   this.calculatedEndDate = start;
-    //   const endCtrl = this.registerForm.get('courseenddate');
-    //   endCtrl?.reset();
-    //   endCtrl?.updateValueAndValidity();
-
-    // });
-
-    // const storedData = localStorage.getItem(key);
-    // let parsed: any = null;
-    // if (storedData) {
-    //   parsed = JSON.parse(storedData);
-
-
-    //   if (!parsed.currentOccupationId) {
-    //     parsed = {
-    //       ...parsed,
-    //       currentOccupationId: parsed.occupation,
-    //       stateId: parsed.state,
-    //       universityId: parsed.university,
-    //       courseId: parsed.coursename,
-    //       hasAssets: parsed.checkedasset === 'Yes',
-
-    //     };
-    //   }
-
-
-    //   if (this.isCoApplicant) {
-    //     // this.coapp_registerForm.patchValue(parsed);
-    //     this.coapp_registerForm.patchValue({
-
-    //       occupation: parsed.currentOccupationId,
-    //       checkedasset: parsed.hasAssets ? 'Yes' : 'No',
-    //     });
-    //   } else {
-    //     // this.registerForm.patchValue(parsed);
-
-    //     this.registerForm.patchValue({
-
-    //       occupation: parsed.currentOccupationId,
-    //       checkedasset: parsed.hasAssets ? 'Yes' : 'No',
-    //       coursestartdate: this.parseDate(parsed.courseStartDate),
-    //       courseenddate: this.parseDate(parsed.courseEndDate),
-    //       lendingpartner: parsed.lendingPartnerId
-
-    //     });
-
-    //     this.registerForm.get('checkedasset')?.setValue(parsed.hasAssets ? 'Yes' : 'No');
-
-    //     this.restoreDependentDropdowns(parsed); //  this handles university/courses
-    //   }
-
-    //   this.checkboxasset = parsed.hasAssets ? "Yes" : "No";
-
-    // }
-
-
-
-
-
-    // this.registerForm.get('checkedasset')?.valueChanges.subscribe(value => {
-    //   console.log('Selected:', value);
-    //   this.checkassetOnChange(value);
-    // });
-    // this.activeForm.get('checkedasset')?.valueChanges.subscribe(value => {
-    //   this.checkassetOnChange(value);
-    // });
-
-
-
-    // let data = this.formSvc.generalInfoData || parsed;
-
-    // if (this.formSvc.generalInfoData && !this.isCoApplicant) {
-
-    //   this.registerForm.patchValue({
-    //     checkedasset: this.formSvc.generalInfoData.hasAssets ? 'Yes' : 'No'
-    //   });
-
-
-    //   this.registerForm.patchValue({
-    //     occupation: this.formSvc.generalInfoData.currentOccupationId,
-    //     state: this.formSvc.generalInfoData.stateId,
-    //     otherstatetitle: this.formSvc.generalInfoData.otherStateName,
-    //     university: this.formSvc.generalInfoData.universityId,
-    //     otherunititle: this.formSvc.generalInfoData.otherUniversityName,
-    //     coursename: this.formSvc.generalInfoData.courseId,
-    //     othercoursenametitle: this.formSvc.generalInfoData.otherCourseName,
-    //     coursetype: this.formSvc.generalInfoData.coursetype,
-    //     othercoursetypetitle: this.formSvc.generalInfoData.othercoursetypetitle ? this.formSvc.generalInfoData.othercoursetypetitle : '',
-
-    //     coursestartdate: this.parseDate(data.courseStartDate),
-    //     courseenddate: this.parseDate(data.courseEndDate),
-    //     lendingpartner: this.formSvc.generalInfoData.lendingPartnerId
-    //   });
-
-    //   this.checkboxasset = this.formSvc.generalInfoData.hasAssets ? "Yes" : "No";
-
-    //   this.restoreDependentDropdowns(this.formSvc.generalInfoData);
-    // }
-
-
 
   }
   getStorageKey() {
@@ -364,9 +324,43 @@ export class GeneralInfo implements OnInit {
   }
 
   listenToChanges() {
+    if (this.isCoApplicant) {
+      this.coapp_registerForm.get('co_checkedasset')?.valueChanges.subscribe(value => {
+        this.co_checkassetOnChange(value);
+      });
+
+      this.coapp_registerForm.get('occupation')?.valueChanges.subscribe(value => {
+        this.handleCoApplicantOccupationChange(value);
+      });
+    } else {
+      this.registerForm.get('checkedasset')?.valueChanges.subscribe(value => {
+        this.checkassetOnChange(value);
+      });
+
+      this.registerForm.get('occupation')?.valueChanges.subscribe(value => {
+        this.handleOccupationChange(value);
+      });
+
+      this.registerForm.get('coursestartdate')?.valueChanges.subscribe((startDate) => {
+        if (!startDate) return;
+
+        const start = new Date(startDate);
+        start.setHours(0, 0, 0, 0);
+        this.calculatedEndDate = start;
+
+        const endCtrl = this.registerForm.get('courseenddate');
+        endCtrl?.reset();
+        endCtrl?.updateValueAndValidity();
+      });
+    }
+  }
+  listenToChanges1() {
     // checkedasset change
     this.activeForm.get('checkedasset')?.valueChanges.subscribe(value => {
       this.checkassetOnChange(value);
+    });
+    this.activeForm.get('co_checkedasset')?.valueChanges.subscribe(value => {
+      this.co_checkassetOnChange(value);
     });
 
     // course start date change
@@ -386,20 +380,13 @@ export class GeneralInfo implements OnInit {
 
     // occupation change
     this.activeForm.get('occupation')?.valueChanges.subscribe(value => {
-      const selected = this.selectoccupation.find(o => o.value === value);
 
-      this.formSvc.isincome =
-        selected?.label === 'Employed' || selected?.label === 'Self-employed';
+      if (this.isCoApplicant) {
+        this.handleCoApplicantOccupationChange(value);
+      } else {
+        this.handleOccupationChange(value);
+      }
 
-      this.formSvc.issalaried = selected?.label === 'Employed';
-
-      this.stepperService.rebuildSteps();
-      this.stepperService.setvalues(
-        this.formSvc.isasset,
-        this.formSvc.isincome,
-        this.formSvc.issalaried,
-        this.formSvc.coursetypeug
-      );
     });
   }
   buildCoApplicantPayload(formdata: any) {
@@ -408,6 +395,7 @@ export class GeneralInfo implements OnInit {
       applicantId: this.applicantId,
       occupation: formdata.occupation,
       annualIncome: formdata.annualincome,
+      relationWithApplicant: formdata.relationship,
       relationship: formdata.relationship,
       hasAssets: this.checkboxasset === 'Yes'
     };
@@ -490,8 +478,8 @@ export class GeneralInfo implements OnInit {
 
     console.log(this.registerForm.value);
   }
-
-  checkassetOnChange(event: any) {
+  //main applicant radiobutton for assets
+  checkassetOnChange1(event: any) {
     this.checkboxasset = event;
     if (this.checkboxasset === 'Yes') {
       this.formSvc.isasset = true;
@@ -512,21 +500,95 @@ export class GeneralInfo implements OnInit {
 
     console.log(event);
   }
+  checkassetOnChange(value: any) {
+    const isAsset = value === 'Yes';
+
+    this.checkboxasset = value;
+
+    this.stepperService.setApplicantValues('main', {
+      isasset: isAsset,
+      isincome: this.formSvc.applicantState.isincome,
+      issalaried: this.formSvc.applicantState.issalaried,
+      coursetypeug: this.formSvc.applicantState.coursetypeug
+    });
+
+    localStorage.setItem('main_isasset', JSON.stringify(isAsset));
+  }
+
+
+  //co-applicant radiobutton for assets
+  co_checkassetOnChange(value: any) {
+    const isAsset = value === 'Yes';
+
+    this.checkboxasset = value;
+
+    this.stepperService.setApplicantValues('coapp', {
+      isasset: isAsset,
+      isincome: this.formSvc.coApplicantState.isincome,
+      issalaried: this.formSvc.coApplicantState.issalaried
+    });
+
+    localStorage.setItem('co_isasset', JSON.stringify(isAsset));
+  }
+
+
   handleOccupationChange(value: any) {
     const selected = this.selectoccupation.find(o => o.value === value);
 
-    this.formSvc.isincome =
-      selected?.label === 'Employed' || selected?.label === 'Self-employed';
 
-    this.formSvc.issalaried = selected?.label === 'Employed';
+    const isIncome =
+      selected?.label === 'Employed' || selected?.label === 'Self-employed';
+    const isSalaried = selected?.label === 'Employed';
 
     this.stepperService.rebuildSteps();
-    this.stepperService.setvalues(
-      this.formSvc.isasset,
-      this.formSvc.isincome,
-      this.formSvc.issalaried,
-      this.formSvc.coursetypeug
+
+    if (this.isCoApplicant) {
+      this.formSvc.coApplicantState.isincome = isIncome;
+      this.formSvc.coApplicantState.issalaried = isSalaried;
+
+      localStorage.setItem(
+        'coApplicantState',
+        JSON.stringify(this.formSvc.coApplicantState)
+      );
+
+      this.stepperService.setApplicantValues('coapp', this.formSvc.coApplicantState);
+    } else {
+      this.formSvc.applicantState.isincome = isIncome;
+      this.formSvc.applicantState.issalaried = isSalaried;
+
+
+      localStorage.setItem(
+        'applicantState',
+        JSON.stringify(this.formSvc.applicantState)
+      );
+
+
+      this.stepperService.setApplicantValues('main', this.formSvc.applicantState);
+    }
+
+  }
+
+  handleCoApplicantOccupationChange(value: any) {
+    const selected = this.selectoccupation.find(o => o.value === value);
+
+    const isIncome =
+      selected?.label === 'Employed' || selected?.label === 'Self-employed';
+
+    const isSalaried = selected?.label === 'Employed';
+
+    this.formSvc.coApplicantState.isincome = isIncome;
+    this.formSvc.coApplicantState.issalaried = isSalaried;
+    localStorage.setItem(
+      'coApplicantState',
+      JSON.stringify(this.formSvc.coApplicantState)
     );
+
+    this.stepperService.setApplicantValues('coapp', {
+      isincome: isIncome,
+      issalaried: isSalaried,
+      isasset: this.formSvc.coApplicantState.isasset
+    });
+
   }
   get f() {
     return this.registerForm.controls;
@@ -541,25 +603,14 @@ export class GeneralInfo implements OnInit {
         label: s.occupationName,
 
       }));
+
+      
+ if (this.formSvc.isEditFlow()) {
+      this.patchFromSummary();
+    }
+
     });
-    // setTimeout(() => {
-    //   let data = this.registerForm.get('occupation')?.valueChanges.subscribe(value => {
-    //     const selected = this.selectoccupation.find(o => o.value === value);
-    //     // this.occupationlabel = selected ? selected.label : 'Current Occupation';
-    //     this.formSvc.isincome = selected?.label === 'Employed' ? true : selected?.label === 'Self-employed' ? true : false;
-    //     console.log('Selected Occupation:', this.formSvc.isincome);
-    //     this.formSvc.issalaried = selected?.label === 'Employed' ? true : false;
-    //     this.stepperService.rebuildSteps();
 
-    //     this.stepperService.setvalues(
-    //       this.formSvc.isasset, this.formSvc.isincome, this.formSvc.issalaried
-    //     );
-
-    //   });
-    // }, 1000);
-
-
-    // console.log(data);
 
   }
 
@@ -895,6 +946,12 @@ export class GeneralInfo implements OnInit {
   mapLocalToApiFormat(local: any) {
     return {
       currentOccupationId: local.currentOccupationId || local.occupation,
+
+      occupationId:
+        local.occupationId ||
+        local.currentOccupationId ||
+        local.occupation,
+
       stateId: local.stateId || local.state,
       otherStateName: local.otherStateName || local.otherstatetitle,
       universityId: local.universityId || local.university,
@@ -902,16 +959,110 @@ export class GeneralInfo implements OnInit {
       courseId: local.courseId || local.coursename,
       otherCourseName: local.otherCourseName || local.othercoursenametitle,
       coursetype: local.coursetype,
-      hasAssets: local.hasAssets ?? (local.checkedasset === 'Yes'),
+      // hasAssets: local.hasAssets ?? (local.checkedasset === 'Yes'),
       courseStartDate: local.courseStartDate,
       courseEndDate: local.courseEndDate,
       lendingPartnerId: local.lendingPartnerId || local.lendingpartner,
       annualIncome: local.annualIncome || local.annualincome,
-      relationship: local.relationship
+      relationship: local.relationship || this.formatRelation(local.relationWithApplicant),
+      hasAssets:
+        local.hasAssets === true ||
+        local.hasAssets === 'true' ||
+        local.checkedasset === 'Yes' ||
+        local.co_checkedasset === 'Yes',
+
     };
   }
 
-  //patch form data
+  //edit flow - get data from summary
+  patchFromSummary() {
+    if (!this.formSvc.isEditFlow()) return;
+
+    const data = this.formSvc.getSummarySection('generalInfo');
+    if (!data) return;
+
+    const course = data.courseDetails || {};
+    const occupation = data.occupationInfo || {};
+
+    this.checkboxasset = data.hasAssets ? 'Yes' : 'No';
+
+    
+ 
+  // ---------------- CO-APPLICANT ----------------
+  if (this.isCoApplicant) {
+    const occupationId = this.getValueByLabel(
+      this.selectoccupation,
+      occupation.occupation
+    );
+
+    const relationship = this.formatRelation(data.relationWithApplicant);
+
+    this.coapp_registerForm.patchValue({
+      occupation: occupationId,
+      annualincome: data.annualIncome || '',
+      relationship: relationship,
+      co_checkedasset: data.hasAssets ? 'Yes' : 'No'
+    }, { emitEvent: false });
+
+    this.co_checkassetOnChange(data.hasAssets ? 'Yes' : 'No');
+    this.handleCoApplicantOccupationChange(occupationId);
+
+    this.lastSavedPayload = this.buildCoApplicantPayload(
+      this.coapp_registerForm.value
+    );
+
+    this.formSvc.co_generalInfoData = {
+      applicationId: this.applicationId,
+      applicantId: this.applicantId,
+      occupationId: occupationId,
+      occupation: occupationId,
+      annualIncome: data.annualIncome || '',
+      relationship: relationship,
+      relationWithApplicant: relationship,
+      hasAssets: data.hasAssets
+    };
+
+    localStorage.setItem(
+      `generalInfo_coapp_${this.applicantId}`,
+      JSON.stringify(this.formSvc.co_generalInfoData)
+    );
+
+    return;
+  }
+
+  // ---------------- MAIN APPLICANT ----------------
+  this.registerForm.patchValue({
+    checkedasset: data.hasAssets ? 'Yes' : 'No',
+    coursestartdate: this.parseDate(course.startDate),
+    courseenddate: this.parseDate(course.endDate),
+
+    otherstatetitle: course.otherStateName || '',
+    otherunititle: course.otherUniversityName || '',
+    othercoursenametitle: course.otherCourseName || '',
+
+    occupation: occupation.occupation,
+    state: course.state,
+    university: course.universityName,
+    coursetype: course.courseType,
+    coursename: course.courseName,
+    lendingpartner: course.lendingPartner
+  }, { emitEvent: false });
+
+  this.checkassetOnChange(data.hasAssets ? 'Yes' : 'No');
+
+  this.lastSavedPayload = this.buildMainPayload(this.registerForm.value);
+
+  }
+
+getValueByLabel(list: any[], label: string) {
+  if (!label || !list?.length) return '';
+
+  return list.find((x: any) =>
+    x.label?.toString().trim().toLowerCase() ===
+    label.toString().trim().toLowerCase()
+  )?.value || '';
+}
+  //patch main form data
   patchGeneralInfo(data: any) {
     if (!data) return;
 
@@ -931,20 +1082,50 @@ export class GeneralInfo implements OnInit {
 
     this.restoreDependentDropdowns(data);
   }
-
+  
+  //patch co-applicant form
   patchCoApplicantInfo(data: any) {
     if (!data) return;
 
+    const occupation =
+      data.currentOccupationId ||
+      data.occupationId ||
+      data.occupation ||
+      '';
+
+    const annualIncome =
+      data.annualIncome ||
+      data.annualincome ||
+      '';
+
+    const relationship =
+      data.relationship ||
+      this.formatRelation(data.relationWithApplicant) ||
+      '';
+
+    const hasAssets =
+      data.hasAssets === true ||
+      data.hasAssets === 'true';
+
+
     this.coapp_registerForm.patchValue({
-      occupation: data.currentOccupationId || data.occupation,
-      annualincome: data.annualIncome || data.annualincome || '',
-      relationship: data.relationship || '',
-      checkedasset: data.hasAssets ? 'Yes' : 'No'
+      occupation: occupation,
+      annualincome: annualIncome,
+      relationship: relationship,
+
+      co_checkedasset: data.hasAssets ? 'Yes' : 'No'
     }, { emitEvent: false });
 
     this.checkboxasset = data.hasAssets ? 'Yes' : 'No';
   }
 
+  formatRelation(value: any): string {
+    if (!value) return '';
+
+    const text = value.toString().toLowerCase();
+
+    return text.charAt(0).toUpperCase() + text.slice(1);
+  }
   //save and exit 
 
   saveExit() {
@@ -956,10 +1137,16 @@ export class GeneralInfo implements OnInit {
 
     if (this.isCoApplicant) {
       input = {
+
+        applicationId: this.applicationId,
+        applicantId: this.applicantId,
+        occupationId: formdata.occupation,
         occupation: formdata.occupation,
         annualIncome: formdata.annualincome,
         relationship: formdata.relationship,
+        relationWithApplicant: formdata.relationship,
         hasAssets: this.checkboxasset === 'Yes'
+
       };
     } else {
 
@@ -990,10 +1177,21 @@ export class GeneralInfo implements OnInit {
           next: (res) => {
 
             console.log(res)
-            if (res.status === "success") {
-              resolve(res.data.data);
 
+            if (res.status === "success" && res.data?.data) {
+              let data = res.data.data;
+
+              if (typeof data === 'string') {
+                try {
+                  data = JSON.parse(data);
+                } catch {
+                  data = null;
+                }
+              }
+
+              resolve(data);
             }
+
             else {
               resolve(null);
             }
@@ -1032,31 +1230,43 @@ export class GeneralInfo implements OnInit {
 
   //coapplicant data
   saveCoApplicant(formdata: any) {
+    const payload = this.buildCoApplicantPayload(formdata);
+
     const input = {
       applicationId: this.applicationId,
       applicantId: this.applicantId,
-      occupation: formdata.occupation,
-      annualIncome: formdata.annualincome,
-      relationship: formdata.relationship,
-      hasAssets: this.checkboxasset === "Yes",
+      occupationId: payload.occupation,
+      annualIncome: payload.annualIncome,
+      relationWithApplicant: payload.relationWithApplicant?.toUpperCase(),
+      hasAssets: payload.hasAssets// this.checkboxasset === "Yes",
     };
 
-    // Call separate API if required
-    console.log("Co-Applicant Data:", input);
+    this.formSvc.submit_Coapp_GenralInfo(input, this.applicationId).subscribe(res => {
+      if (res.status === "success") {
+
+        const localPayload = {
+          ...input,
+          relationship: payload.relationship
+        };
+
+        this.lastSavedPayload = { ...payload };
+
+        this.formSvc.co_generalInfoData = { ...localPayload };
+        localStorage.setItem(
+          `generalInfo_coapp_${this.applicantId}`,
+          JSON.stringify(this.formSvc.co_generalInfoData)
+        );
+
+        this.stepperService.markStepCompleted('co-generalinfo');
+        this.stepperService.setStepData('co-generalinfo', formdata);
+        this.stepperService.next();
 
 
-    this.lastSavedPayload = { ...input };
-    this.stepperService.next();
-    this.formSvc.co_generalInfoData = { ...input, coursetype: formdata.coursetype };
-    const key = `generalInfoData_${this.applicantId}`;
-    localStorage.setItem(
-      `generalInfo_coapp_${this.applicantId}`,
-      JSON.stringify(this.formSvc.co_generalInfoData)
-    );
 
-    // this.stepperService.markStepCompleted('genralinfo');
-    // this.stepperService.setStepData('genralinfo', formdata);
 
+
+      }
+    });
 
 
   }

@@ -31,6 +31,13 @@ export class TableData {
       outstandingBalance: item.outstandingBalance ?? "-",
       loanStatus: item.loanStatus ?? "-",
       // Id: item.id ?? "-"
+
+      applicationId: item.applicationId ?? "-",
+      arn: item.arn ?? "-",
+      applicationStatus: item.applicationStatus ?? "-",
+      currentApplicationStatus: item.currentApplicationStatus ?? "-",
+      nextStage: item.nextStage ?? "-",
+      applicantId: item.applicantId ?? "-",
     }));
   }
 

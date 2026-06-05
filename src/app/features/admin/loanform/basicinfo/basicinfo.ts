@@ -30,6 +30,11 @@ export class Basicinfo {
 
   applicationId: any;
   applicantId: any;
+
+  co_applicationId: any;
+  co_applicantId: any;
+  co_applicantName: any;
+
   otpsent = false;
   otpVerifiedOk = false;
   sendotpId: any
@@ -60,18 +65,23 @@ export class Basicinfo {
     private router: Router, private loanform: Loanformservice, private stepperService: Loanstepperservice, private route: ActivatedRoute) { }
 
 
-  ngOnInit(): void {
+  async ngOnInit() {
     this.isCoApplicant = this.router.url.includes('co-applicant');
 
-    const params = this.route.snapshot.queryParams;
-    
+    this.stepperService.setStepperType(
+      this.isCoApplicant ? 'CO_APPLICANT' : 'MAIN'
+    );
+    let Allids = this.stepperService.getLoanId();
 
-    // Store in variables if needed
-    this.applicantId = params['applicantId'];
-    this.applicationId = params['applicationId'];
+    this.applicantId = Allids[0];
+    this.applicationId = Allids[1];
+    // this.custName = Allids[2];
+    // this.custARN = Allids[3];
+
+    const params = this.route.snapshot.queryParams;
     this.sendotpId = params['id'];
 
-    
+
     this.registerForm = this.fb.group({
       fname: ['', [
         Validators.required,
@@ -113,6 +123,39 @@ export class Basicinfo {
       this.prefillPhone = this.loanform.coapppmobile;
     }
 
+    
+if (this.loanform.isEditFlow()) {
+  this.patchFromSummary();
+  return;
+}
+
+
+    const key = this.getStorageKey();
+    const localData = localStorage.getItem(key);
+    const parsedLocal = localData ? JSON.parse(localData) : null;
+
+    const apiData = await this.getSavedbasicInfo();
+
+    let finalData = null;
+
+    if (apiData) {
+      finalData = apiData;
+      localStorage.setItem(key, JSON.stringify(apiData));
+    } else if (parsedLocal) {
+      finalData = parsedLocal;
+    }
+
+    if (finalData) {
+     
+         this.loanform.co_basicInfoData = finalData;
+      // this.patchAdditionalInfo(finalData);
+
+      this.lastSavedPayload = this.buildBasicPayload(this.registerForm.getRawValue());
+
+      this.stepperService.markStepCompleted('co-basicinfo');
+    } else {
+      this.lastSavedPayload = null;
+    }
   }
   get f() {
     return this.registerForm.controls;
@@ -257,7 +300,10 @@ export class Basicinfo {
     }, 1000);
   }
 
-
+  
+  getStorageKey() {
+    return `basicinfo_coapp_${this.applicantId}`;
+  }
   toggle(i: number) {
     this.openIndex = this.openIndex === i ? null : i;
   }
@@ -266,20 +312,71 @@ export class Basicinfo {
   isPayloadChanged(currentPayload: any, savedPayload: any): boolean {
     return JSON.stringify(currentPayload) !== JSON.stringify(savedPayload);
   }
+  //edit flow patch from summary
+  patchFromSummary() {
+  if (!this.loanform.isEditFlow()) return;
 
-  buildBasicPayload(formdata: any) {
+  const data = this.loanform.summaryData;
 
-    let input =
-    {
-      "firstName": formdata.fname,
-      "middleName": formdata.mname,
-      "lastName": formdata.lname,
-      "emailId": formdata.email,
-      "phoneNumber": this.prefillPhone,
-      "source": "WEB",
-    }
-    return input;
+  if (!data) return;
+
+  const mappedData = {
+    firstName: data.firstName || '',
+    middleName: data.middleName || '',
+    lastName: data.lastName || '',
+    emailId: data.emailId || '',
+    phoneNumber: data.mobileNumber || ''
+  };
+
+  this.patchBasicInfo(mappedData);
+
+  localStorage.setItem(
+    this.getStorageKey(),
+    JSON.stringify(this.lastSavedPayload)
+  );
+}
+
+patchBasicInfo(data: any) {
+  if (!data || !this.registerForm) return;
+
+  this.prefillPhone =
+    data.phoneNumber ||
+    data.mobileNumber ||
+    data.phone ||
+    '';
+
+  this.registerForm.patchValue({
+    fname: data.firstName || data.fname || '',
+    mname: data.middleName || data.mname || '',
+    lname: data.lastName || data.lname || '',
+    email: data.emailId || data.email || '',
+    phone: this.prefillPhone
+  }, { emitEvent: false });
+
+  if (!data.middleName && !data.mname) {
+    this.ismiddlename = true;
+    this.registerForm.get('mname')?.disable({ emitEvent: false });
   }
+
+  this.lastSavedPayload = this.buildBasicPayload(
+    this.registerForm.getRawValue()
+  );
+
+  this.loanform.co_basicInfoData = this.lastSavedPayload;
+
+  this.stepperService.markStepCompleted('co-basicinfo');
+}
+  buildBasicPayload(formdata: any) {
+  return {
+    firstName: formdata.fname || '',
+    middleName: formdata.mname || '',
+    lastName: formdata.lname || '',
+    emailId: formdata.email || '',
+    phoneNumber: formdata.phone || this.prefillPhone || '',
+    source: 'WEB',
+    applicationId: this.applicationId,
+  };
+}
   saveExit() {
     let formdata = this.registerForm.value;
     const input = this.buildBasicPayload(formdata);
@@ -289,7 +386,7 @@ export class Basicinfo {
 
     const inputdata = {
       action: "auto-save",
-      sectionKey: "PERSONAL_INFO",
+      sectionKey: "PERSONAL_INFO1",
       applicationId: this.applicationId,
       applicantId: this.applicantId,
       jsonData: input
@@ -301,8 +398,8 @@ export class Basicinfo {
       }
     });
   }
-  getSavedAdditionalInfo(): Promise<any> {
-    let sectionkey = "PERSONAL_INFO"
+  getSavedbasicInfo(): Promise<any> {
+    let sectionkey = "PERSONAL_INFO1"
     return new Promise((resolve) => {
       this.loanform.getSavedData(this.applicationId, this.applicantId, sectionkey).pipe()
 
@@ -335,8 +432,8 @@ export class Basicinfo {
 
     if (!hasChanged) {
       console.log('No changes detected, skipping API');
-      this.stepperService.markStepCompleted('basicInfo');
-      this.stepperService.setStepData('basicInfo', formdata);
+      this.stepperService.markStepCompleted('co-basicinfo');
+      this.stepperService.setStepData('co-basicinfo', formdata);
       this.stepperService.next();
       return;
     }
@@ -347,21 +444,35 @@ export class Basicinfo {
         this.loanform.co_basicInfoData = input
 
 
-        sessionStorage.setItem('cifdetails', JSON.stringify(res.data));
+        sessionStorage.setItem('coapp_cifdetails', JSON.stringify(res.data));
         const key = `basicinfo_coapp_${this.applicantId}`
 
         localStorage.setItem(key, JSON.stringify(this.loanform.co_basicInfoData));
+
+        this.co_applicantId = res.data.applicantId
+        this.co_applicationId = res.data.applicationId
+        this.co_applicantName = res.data.fullName
+
+        this.stepperService.setCo_appId(this.co_applicantId, this.co_applicationId, this.co_applicantName);
+
+
+        const coAppData = {
+          applicantId: this.co_applicantId,
+          applicationId: this.co_applicationId,
+          fullName: this.co_applicantName
+        };
+        sessionStorage.setItem('coAppIds', JSON.stringify(coAppData));
 
 
         if (this.isCoApplicant) {
           this.loanform.co_basicInfoData = input;
         } else {
-          
+
         }
         this.lastSavedPayload = { ...input };
 
-        this.stepperService.markStepCompleted('Basicinfo');
-        this.stepperService.setStepData('Basicinfo', formdata);
+        this.stepperService.markStepCompleted('co-basicinfo');
+        this.stepperService.setStepData('co-basicinfo', formdata);
         this.stepperService.next();
       },
       error: (err) => {

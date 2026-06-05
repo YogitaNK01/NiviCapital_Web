@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, EventEmitter, OnDestroy, Output } from '@angular/core';
+import { AfterViewInit, Component, EventEmitter, OnDestroy, Output, ViewChild } from '@angular/core';
 import { ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { Main } from '../../../../core/service/main';
 import { Inputfield } from '../../../systemdesign/inputfield/inputfield';
@@ -13,7 +13,8 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { Loanformservice } from '../../../../core/service/loanformservice';
 import moment from 'moment';
 import { Msgboxservice } from '../../../../core/service/msgboxservice';
-
+import { Loanstepperservice } from '../../../../core/service/loanstepperservice';
+import { NgForm } from '@angular/forms';
 
 interface OptionItem {
   label: string;
@@ -26,7 +27,7 @@ interface OptionItem {
   templateUrl: './uploadkyc.html',
   styleUrl: './uploadkyc.scss'
 })
-export class Uploadkyc implements OnDestroy {
+export class Uploadkyc implements OnDestroy, AfterViewInit {
   basicConfig: UploadConfig = {
     accept: '.svg, .png, .jpg, .jpeg, .pdf, .tiff, .heic',
     maxSize: 10,
@@ -85,33 +86,86 @@ export class Uploadkyc implements OnDestroy {
 
 
   requiredDocs = ['aadharfront', 'aadharback', 'pan'];   // only required ones
-  optionalDocs = ['passport', 'bill',];
+  optionalDocs = ['passport', 'bill', 'secaddress'];
 
   uploadedFiles: Record<string, File | null> = {};
-
+  uploadedPreviewUrls: Record<string, string> = {};
 
   // dob: any;
   selectstate_: any;
   selectcity_: any;
   userdata: any;
   userid: any;
+  co_userid: any;
 
   editMode = false;
   editUserData: any = {};
   dobValid = false;
   dobTouched = false;
+  @ViewChild('kycForm') kycForm!: NgForm;
 
-  isCoApplicant:boolean = false;
-  constructor(public main: Main, private addcustomerservice: Addcustomerservice, private route: ActivatedRoute, private loanservice: Loanformservice, private msgBox: Msgboxservice,private router:Router) { }
+  applicationId: any;
+  applicantId: any;
+  lastSavedPayload: any = null;
+  isCoApplicant: boolean = false;
+  uploadedFileMeta: Record<string, any> = {};
+
+  constructor(public main: Main, private addcustomerservice: Addcustomerservice, private route: ActivatedRoute, private stepperService: Loanstepperservice, private loanservice: Loanformservice, private msgBox: Msgboxservice, private router: Router) { }
 
   ngOnInit(): void {
-     this.isCoApplicant = this.router.url.includes('co-applicant');
+    this.isCoApplicant = this.router.url.includes('co-applicant');
+    this.stepperService.setStepperType(
+      this.isCoApplicant ? 'CO_APPLICANT' : 'MAIN'
+    );
+
+    let Allids = this.stepperService.getLoanId();
+
+    this.applicantId = Allids?.[0];
+    this.applicationId = Allids?.[1];
+
+    let AllCoapp_ids = this.stepperService.getCo_appId();
+
+    if (
+      this.isCoApplicant &&
+      (!AllCoapp_ids || !AllCoapp_ids[0] || !AllCoapp_ids[1])
+    ) {
+      const storedCoApp = sessionStorage.getItem('coAppIds');
+
+      if (storedCoApp) {
+        const parsed = JSON.parse(storedCoApp);
+
+        AllCoapp_ids = [
+          parsed.applicantId,
+          parsed.applicationId,
+          parsed.fullName
+        ];
+
+        this.stepperService.setCo_appId(
+          parsed.applicantId,
+          parsed.applicationId,
+          parsed.fullName
+        );
+      }
+    }
+
+    if (this.isCoApplicant) {
+      this.applicantId = AllCoapp_ids?.[0];
+      this.applicationId = AllCoapp_ids?.[1];
+    } else {
+      this.applicantId = Allids?.[0];
+      this.applicationId = Allids?.[1];
+    }
+
+
     this.states();
     const cifDetails = sessionStorage.getItem('cifdetails');
     this.userid = this.safeParse(cifDetails);
 
     const userDetails = sessionStorage.getItem('userdetails');
     this.userdata = this.safeParse(userDetails);
+
+    const coapp_cifDetails = sessionStorage.getItem('coapp_cifdetails');
+    this.co_userid = this.safeParse(coapp_cifDetails);
 
     const editUser = sessionStorage.getItem('editUser');
 
@@ -127,6 +181,21 @@ export class Uploadkyc implements OnDestroy {
   }
 
 
+ngAfterViewInit(): void {
+  setTimeout(() => {
+    if (this.loanservice.isEditFlow()) {
+      this.patchFromSummary();
+    } else {
+      this.restoreKycData();
+    }
+  }, 500);
+}
+
+
+
+  getStorageKey() {
+    return `kycinfo_coapp_${this.applicantId}`;
+  }
 
   goToDashboard() {
 
@@ -232,7 +301,7 @@ export class Uploadkyc implements OnDestroy {
 
 
   }
-  kycupload(form: any) {
+  kycupload1(form: any) {
     console.log(form.value);
 
 
@@ -240,11 +309,11 @@ export class Uploadkyc implements OnDestroy {
       console.log("form invalid");
       return;
     }
-    const firstName = this.editMode ? this.editUserData.fname : this.userdata.fname;
+    const firstName = this.editMode ? this.editUserData.fname : this.isCoApplicant ? this.co_userid.fullName : this.userdata.fname;
 
-    const lastName = this.editMode ? this.editUserData.lname : this.userdata.lname;
+    const lastName = this.editMode ? this.editUserData.lname : this.isCoApplicant ? this.co_userid.fullName : this.userdata.lname;
 
-    const custid = this.editMode ? this.editUserData.custId : this.userid.cifId;
+    const custid = this.editMode ? this.editUserData.custId : this.isCoApplicant ? this.co_userid.cifId : this.userid.cifId;
 
     const permanentAddress = {
       addressType: 'PERMANENT',
@@ -330,7 +399,94 @@ export class Uploadkyc implements OnDestroy {
         this.ncid.emit(res.ncId);
         this.kycid.emit(res.kycId);
         this.loanservice.setKycId(res.kycId);
-        this.nextStep.emit();
+        // this.nextStep.emit();
+        if (this.isCoApplicant) {
+          this.stepperService.markStepCompleted('co-kyc');
+          this.stepperService.setStepData('co-kyc', fd);
+          this.stepperService.next();
+        } else {
+          this.nextStep.emit();
+        }
+      },
+      error: err => {
+        console.error(err);
+      }
+    });
+
+    this.editMode = false;
+  }
+  kycupload(form: any) {
+    console.log(form.value);
+
+    if (!form.valid) {
+      console.log("form invalid");
+      return;
+    }
+
+
+    const kycPayload = this.buildKycPayload(form.value);
+    let key = this.getStorageKey();
+    localStorage.setItem(key, JSON.stringify(kycPayload));
+    this.lastSavedPayload = { ...kycPayload };
+
+
+    sessionStorage.setItem(
+      'userdetails',
+      JSON.stringify({
+        ...kycPayload,
+        dob: kycPayload.dob
+      })
+    );
+
+    console.log("this.files----", this.files);
+
+    const fd = new FormData();
+
+
+    // text fields
+    fd.append('kycData', JSON.stringify({
+
+
+      firstName: kycPayload.firstName,
+      lastName: kycPayload.lastName,
+      dob: kycPayload.dob,
+      aadhaarNumber: kycPayload.aadhaarNumber,
+      panNumber: kycPayload.panNumber,
+      passportNo: kycPayload.passportNo,
+      addresses: kycPayload.addresses
+
+      // addresses: this.isDifferentAddress
+      //   ? [permanentAddress, currentAddress, otherAddress]
+      //   : [permanentAddress, currentAddress]
+
+
+
+    }));
+    if (this.files.pan) fd.append('panFile', this.files.pan);
+    if (this.files.aadharfront) fd.append('aadharFrontFile', this.files.aadharfront);
+    if (this.files.aadharback) fd.append('aadharBackFile', this.files.aadharback);
+    if (this.files.passport) fd.append('passportFile', this.files.passport);
+    fd.append('custId', kycPayload.custId);
+    if (this.files.secaddress) {
+      fd.append('utilityBillFile', this.files.secaddress);
+    }
+
+
+
+    this.addcustomerservice.uploadkycdocuments(fd).subscribe({
+      next: res => {
+        console.log("KYC uploaded", res);
+        this.ncid.emit(res.ncId);
+        this.kycid.emit(res.kycId);
+        this.loanservice.setKycId(res.kycId);
+        // this.nextStep.emit();
+        if (this.isCoApplicant) {
+          this.stepperService.markStepCompleted('co-kyc');
+          this.stepperService.setStepData('co-kyc', kycPayload);
+          this.stepperService.next();
+        } else {
+          this.nextStep.emit();
+        }
       },
       error: err => {
         console.error(err);
@@ -340,7 +496,7 @@ export class Uploadkyc implements OnDestroy {
     this.editMode = false;
   }
 
-  onFileChange(result: UploadResult, key: string) {
+  onFileChange1(result: UploadResult, key: string) {
 
     if (!result.file) {
       this.uploadedFiles[key] = null;
@@ -352,6 +508,46 @@ export class Uploadkyc implements OnDestroy {
 
   }
 
+  onFileChange(result: UploadResult, key: string) {
+    if (!result.file) {
+      this.uploadedFiles[key] = null;
+
+      if (this.uploadedPreviewUrls[key]) {
+        URL.revokeObjectURL(this.uploadedPreviewUrls[key]);
+        delete this.uploadedPreviewUrls[key];
+      }
+
+      delete this.files[key];
+      delete this.uploadedFileMeta[key];
+      return;
+    }
+
+    this.files[key] = result.file;
+    this.uploadedFiles[key] = result.file;
+
+    // Clear old preview URL if same key uploaded again
+    if (this.uploadedPreviewUrls[key]) {
+      URL.revokeObjectURL(this.uploadedPreviewUrls[key]);
+    }
+
+
+    const previewUrl = URL.createObjectURL(result.file);
+    this.uploadedPreviewUrls[key] = previewUrl;
+
+    this.uploadedFileMeta[key] = {
+      fileName: result.file.name,
+      fileUrl: previewUrl,
+      uploaded: true,
+      localOnly: true
+    };
+
+    if (this.kycForm) {
+      const input = this.buildKycPayload(this.kycForm.value);
+      localStorage.setItem(this.getStorageKey(), JSON.stringify(input));
+    }
+
+  }
+
   get allRequiredFilesUploaded(): boolean {
 
     let docsToCheck = [...this.requiredDocs];
@@ -360,7 +556,7 @@ export class Uploadkyc implements OnDestroy {
       docsToCheck.push('secaddress');
     }
 
-    return docsToCheck.every(k => !!this.uploadedFiles[k]);
+    return docsToCheck.every(k => !!this.uploadedFiles[k] || !!this.uploadedFileMeta[k]?.fileName);
   }
 
   permailcheck(event: any) {
@@ -475,8 +671,596 @@ export class Uploadkyc implements OnDestroy {
     this.currselectedCityLabel = found?.label ?? '';
   }
 
+  //file upload img to show preview
+  hasLocalFile(key: string): boolean {
+    return !!this.uploadedFiles[key] || !!this.uploadedFileMeta[key]?.fileName;;
+  }
+
+  getLocalFileName(key: string): string {
+    return this.uploadedFiles[key]?.name || this.uploadedFileMeta[key]?.fileName || 'No file uploaded';
+  }
+
+  getLocalFileUrl(key: string): string {
+    return this.uploadedPreviewUrls[key] || this.uploadedFileMeta[key]?.fileName || '';
+  }
+
+  viewLocalFile(key: string): void {
+    const url = this.getLocalFileUrl(key);
+
+    if (!url) return;
+
+    window.open(url, '_blank');
+  }
+
+  downloadLocalFile(key: string): void {
+    const file = this.uploadedFiles[key];
+
+    if (!file) return;
+
+    const url = this.getLocalFileUrl(key);
+
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = file.name;
+    link.click();
+  }
+
+  deleteLocalFile(key: string): void {
+    this.msgBox.open({
+      title: 'Are you sure want to Remove',
+      message: ``,
+      showCancel: true,
+      onOk: () => {
+        this.uploadedFiles[key] = null;
+        delete this.files[key];
+
+        if (this.uploadedPreviewUrls[key]) {
+          URL.revokeObjectURL(this.uploadedPreviewUrls[key]);
+          delete this.uploadedPreviewUrls[key];
+        }
+
+        if (this.kycForm) {
+          const input = this.buildKycPayload(this.kycForm.value);
+          localStorage.setItem(this.getStorageKey(), JSON.stringify(input));
+        }
+
+      }
+    });
+  }
+
+
+  back() {
+    this.stepperService.previous();
+  }
+  next() {
+
+    if (!this.kycForm) {
+      console.error('KYC form not found');
+      return;
+    }
+
+    if (
+      !this.kycForm.valid ||
+      !this.allRequiredFilesUploaded ||
+      !(this.isPermanentMailingChecked || this.isCurrentMailingChecked)
+    ) {
+      console.log('KYC form invalid');
+      return;
+    }
+
+    this.kycupload(this.kycForm);
+
+  }
+  buildKycPayload(formValue: any) {
+    const firstName = this.editMode
+      ? this.editUserData.fname
+      : this.isCoApplicant
+        ? this.co_userid?.fullName
+        : this.userdata?.fname;
+
+    const lastName = this.editMode
+      ? this.editUserData.lname
+      : this.isCoApplicant
+        ? this.co_userid?.fullName
+        : this.userdata?.lname;
+
+    const custId = this.editMode
+      ? this.editUserData.custId
+      : this.isCoApplicant
+        ? this.co_userid?.cifId
+        : this.userid?.cifId;
+
+    const permanentAddress = {
+      addressType: 'PERMANENT',
+      addressLine: formValue.addressline1 || '',
+      addressLine1: formValue.addressline2 || '',
+      addressLine2: formValue.addressline3 || '',
+      city: this.perselectedCityLabel || '',
+      cityId: this.perselectedCityId || this.perCitySelectedOption || '',
+      state: this.perselectedStateLabel || '',
+      stateId: this.perselectedStateId || this.perStateSelectedOption || '',
+      isPreferredAddress: this.isDifferentAddress === false ? 1 : 0,
+      isMailingAddress: this.isPermanentMailingChecked ? 1 : 0,
+      zipCode: formValue.perpincode || '',
+      country: 'India'
+    };
+
+    const currentAddress = {
+      addressType: 'CURRENT',
+      addressLine: formValue.addressline1 || '',
+      addressLine1: formValue.addressline2 || '',
+      addressLine2: formValue.addressline3 || '',
+      city: this.perselectedCityLabel || '',
+      cityId: this.perselectedCityId || this.perCitySelectedOption || '',
+      state: this.perselectedStateLabel || '',
+      stateId: this.perselectedStateId || this.perStateSelectedOption || '',
+      isPreferredAddress: this.isDifferentAddress === false ? 1 : 0,
+      isMailingAddress: this.isCurrentMailingChecked ? 1 : 0,
+      zipCode: formValue.perpincode || '',
+      country: 'India'
+    };
+
+    const otherAddress = {
+      addressType: 'OTHER',
+      addressLine: formValue.currentaddressline1 || '',
+      addressLine1: formValue.currentaddressline2 || '',
+      addressLine2: formValue.currentaddressline3 || '',
+      city: this.currselectedCityLabel || '',
+      cityId: this.currselectedCityId || this.currCitySelectedOption || '',
+      state: this.currselectedStateLabel || '',
+      stateId: this.currselectedStateId || this.currStateSelectedOption || '',
+      isPreferredAddress: this.isDifferentAddress === true ? 1 : 0,
+      isMailingAddress: this.isDifferentAddress === true ? 1 : 0,
+      zipCode: formValue.currpincode || '',
+      country: 'India'
+    };
+
+    return {
+      applicationId: this.applicationId,
+      applicantId: this.applicantId,
+      custId: custId,
+
+      firstName: firstName || '',
+      lastName: lastName || '',
+
+      dob: formValue.dob
+        ? moment.isMoment(formValue.dob)
+          ? formValue.dob.format('YYYY-MM-DD')
+          : moment(formValue.dob).format('YYYY-MM-DD')
+        : null,
+
+      aadhaarNumber: formValue.aadharnum || '',
+      panNumber: formValue.pan ? formValue.pan.toUpperCase() : '',
+      passportNo: formValue.Passport || '',
+
+      addressType: this.addressType,
+      isDifferentAddress: this.isDifferentAddress,
+      isPermanentMailingChecked: this.isPermanentMailingChecked,
+      isCurrentMailingChecked: this.isCurrentMailingChecked,
+
+      selectedSecondaryProof: this.selectedSecondaryProof,
+
+      addresses: this.isDifferentAddress
+        ? [permanentAddress, currentAddress, otherAddress]
+        : [permanentAddress, currentAddress],
+
+      // fileMeta: {
+      //   pan: this.uploadedFiles['pan']?.name || '',
+      //   aadharfront: this.uploadedFiles['aadharfront']?.name || '',
+      //   aadharback: this.uploadedFiles['aadharback']?.name || '',
+      //   passport: this.uploadedFiles['passport']?.name || '',
+      //   secaddress: this.uploadedFiles['secaddress']?.name || ''
+      // }
+
+      fileMeta: {
+        pan: this.uploadedFileMeta['pan'] || {
+          fileName: this.uploadedFiles['pan']?.name || '',
+          fileUrl: this.uploadedPreviewUrls['pan'] || '',
+          uploaded: !!this.uploadedFiles['pan']
+        },
+
+        aadharfront: this.uploadedFileMeta['aadharfront'] || {
+          fileName: this.uploadedFiles['aadharfront']?.name || '',
+          fileUrl: this.uploadedPreviewUrls['aadharfront'] || '',
+          uploaded: !!this.uploadedFiles['aadharfront']
+        },
+
+        aadharback: this.uploadedFileMeta['aadharback'] || {
+          fileName: this.uploadedFiles['aadharback']?.name || '',
+          fileUrl: this.uploadedPreviewUrls['aadharback'] || '',
+          uploaded: !!this.uploadedFiles['aadharback']
+        },
+
+        passport: this.uploadedFileMeta['passport'] || {
+          fileName: this.uploadedFiles['passport']?.name || '',
+          fileUrl: this.uploadedPreviewUrls['passport'] || '',
+          uploaded: !!this.uploadedFiles['passport']
+        },
+
+        secaddress: this.uploadedFileMeta['secaddress'] || {
+          fileName: this.uploadedFiles['secaddress']?.name || '',
+          fileUrl: this.uploadedPreviewUrls['secaddress'] || '',
+          uploaded: !!this.uploadedFiles['secaddress']
+        }
+      }
+
+    };
+  }
+
+
+  saveExit() {
+
+    if (!this.kycForm) {
+      console.error('KYC form not found');
+      return;
+    }
+
+    const formValue = this.kycForm.value;
+
+    const input = this.buildKycPayload(formValue);
+
+    const key = this.getStorageKey();
+    localStorage.setItem(key, JSON.stringify(input));
+
+    const inputdata = {
+      action: "auto-save",
+      sectionKey: "KYC",
+      applicationId: this.applicationId,
+      applicantId: this.applicantId,
+      jsonData: input
+    };
+
+    this.loanservice.saveandExit(inputdata).subscribe({
+      next: () => {
+        this.lastSavedPayload = { ...input };
+      },
+      error: (err) => {
+        console.error('KYC save and exit failed', err);
+      }
+
+    });
+  }
+  getSavedKycInfo(): Promise<any> {
+    let sectionkey = "KYC"
+    return new Promise((resolve) => {
+      this.loanservice.getSavedData(this.applicationId, this.applicantId, sectionkey).pipe()
+
+        .subscribe({
+          next: (res) => {
+
+            console.log(res)
+            if (res.status === "success" && res.data?.data) {
+              let data = res.data.data;
+
+              if (typeof data === 'string') {
+                try {
+                  data = JSON.parse(data);
+                } catch {
+                  data = null;
+                }
+              }
+
+              resolve(data);
+            }
+            else {
+              resolve(null);
+            }
+          }, error: () => resolve(null)
+        });
+    });
+  }
+  async restoreKycData() {
+    const key = this.getStorageKey();
+
+    const localData = localStorage.getItem(key);
+    const parsedLocal = localData ? JSON.parse(localData) : null;
+
+    const apiData = await this.getSavedKycInfo();
+
+    let finalData = null;
+
+    if (apiData) {
+      finalData = apiData;
+      localStorage.setItem(key, JSON.stringify(apiData));
+    } else if (parsedLocal) {
+      finalData = parsedLocal;
+    }
+
+    if (!finalData) {
+      this.lastSavedPayload = null;
+      return;
+    }
+
+    setTimeout(() => {
+      this.patchKycInfo(finalData);
+      this.lastSavedPayload = finalData;
+
+      const stepRoute = 'co-kyc';
+      this.stepperService.markStepCompleted('co-kyc');
+    }, 0);
+  }
+
+  // edit flow = patch from summary
+patchFromSummary() {
+  if (!this.loanservice.isEditFlow()) return;
+
+  const data = this.loanservice.getSummarySection('kyc');
+  console.log('patch kyc', data);
+
+  if (!data || !this.kycForm) return;
+
+  const identity = data.identityAndResidency || {};
+  const permanent = data.permanentAddress || {};
+  const current = data.currentAddress || {};
+  const other = data.otherAddress || null;
+
+  const findStateId = (stateName: string) =>
+    this.stateOptions.find(s =>
+      s.label?.toLowerCase() === stateName?.toLowerCase()
+    )?.value || '';
+
+  const permanentStateId = findStateId(permanent.state);
+  const currentStateId = findStateId(other?.state || current.state);
+
+  const isDifferent = !!other;
+
+  const mappedData = {
+    applicationId: this.applicationId,
+    applicantId: this.applicantId,
+    custId: this.isCoApplicant
+      ? this.co_userid?.cifId
+      : this.userid?.cifId,
+
+    firstName: this.isCoApplicant
+      ? this.co_userid?.fullName
+      : this.userdata?.fname,
+
+    lastName: this.isCoApplicant
+      ? this.co_userid?.fullName
+      : this.userdata?.lname,
+
+    dob: identity.dob
+      ? moment(identity.dob, 'DD/MM/YYYY').format('YYYY-MM-DD')
+      : null,
+
+    aadhaarNumber: identity.aadhaarNumber || '',
+    panNumber: identity.panNumber || '',
+    passportNo: identity.passportNumber || '',
+
+    addressType: isDifferent ? 'different' : 'same',
+    isDifferentAddress: isDifferent,
+
+    isPermanentMailingChecked:
+      permanent.isMailingAddress === 1 || !isDifferent,
+
+    isCurrentMailingChecked:
+      isDifferent
+        ? other?.isMailingAddress === 1
+        : current.isMailingAddress === 1,
+
+    selectedSecondaryProof: null,
+
+    addresses: [
+      {
+        addressType: 'PERMANENT',
+        addressLine: permanent.addressLine || '',
+        addressLine1: permanent.addressLine1 || '',
+        addressLine2: permanent.addressLine2 || '',
+        city: permanent.city || '',
+        cityId: '',
+        state: permanent.state || '',
+        stateId: permanentStateId,
+        isPreferredAddress: permanent.isPreferredAddress ?? 1,
+        isMailingAddress: permanent.isMailingAddress ?? 1,
+        zipCode: permanent.pincode || '',
+        country: permanent.country || 'India'
+      },
+      {
+        addressType: 'CURRENT',
+        addressLine: current.addressLine || '',
+        addressLine1: current.addressLine1 || '',
+        addressLine2: current.addressLine2 || '',
+        city: current.city || '',
+        cityId: '',
+        state: current.state || '',
+        stateId: findStateId(current.state),
+        isPreferredAddress: current.isPreferredAddress ?? 0,
+        isMailingAddress: current.isMailingAddress ?? 0,
+        zipCode: current.pincode || '',
+        country: current.country || 'India'
+      },
+
+      ...(isDifferent ? [{
+        addressType: 'OTHER',
+        addressLine: other.addressLine || '',
+        addressLine1: other.addressLine1 || '',
+        addressLine2: other.addressLine2 || '',
+        city: other.city || '',
+        cityId: '',
+        state: other.state || '',
+        stateId: currentStateId,
+        isPreferredAddress: other.isPreferredAddress ?? 1,
+        isMailingAddress: other.isMailingAddress ?? 1,
+        zipCode: other.pincode || '',
+        country: other.country || 'India'
+      }] : [])
+    ],
+
+    fileMeta: {
+      aadharfront: {
+        fileName: identity.aadhaarFrontUrl || '',
+        fileUrl: identity.aadhaarFrontUrl || '',
+        uploaded: !!identity.aadhaarFrontUrl
+      },
+      aadharback: {
+        fileName: identity.aadhaarBackUrl || '',
+        fileUrl: identity.aadhaarBackUrl || '',
+        uploaded: !!identity.aadhaarBackUrl
+      },
+      pan: {
+        fileName: identity.panCardUrl || '',
+        fileUrl: identity.panCardUrl || '',
+        uploaded: !!identity.panCardUrl
+      },
+      passport: {
+        fileName: identity.passportUrl || '',
+        fileUrl: identity.passportUrl || '',
+        uploaded: !!identity.passportUrl
+      },
+      secaddress: {
+        fileName:
+          other?.supportingDocumentUrl ||
+          current?.supportingDocumentUrl ||
+          permanent?.supportingDocumentUrl ||
+          '',
+        fileUrl:
+          other?.supportingDocumentUrl ||
+          current?.supportingDocumentUrl ||
+          permanent?.supportingDocumentUrl ||
+          '',
+        uploaded: !!(
+          other?.supportingDocumentUrl ||
+          current?.supportingDocumentUrl ||
+          permanent?.supportingDocumentUrl
+        )
+      }
+    }
+  };
+
+  this.patchKycInfo(mappedData);
+
+  // set city id after state-wise city API loads
+  if (permanentStateId && permanent.city) {
+    this.main.getIndianstatescities(permanentStateId).subscribe((res: any) => {
+      const list = res.data ?? res;
+
+      this.cityOptions = list.map((c: any) => ({
+        value: c.id,
+        label: c.name
+      }));
+
+      const cityId =
+        this.cityOptions.find(c =>
+          c.label?.toLowerCase() === permanent.city?.toLowerCase()
+        )?.value || '';
+
+      this.perCitySelectedOption = cityId;
+      this.perselectedCityId = cityId;
+      this.perselectedCityLabel = permanent.city;
+    });
+  }
+
+  if (isDifferent && currentStateId && other?.city) {
+    this.main.getIndianstatescities(currentStateId).subscribe((res: any) => {
+      const list = res.data ?? res;
+
+      this.currcityOptions = list.map((c: any) => ({
+        value: c.id,
+        label: c.name
+      }));
+
+      const cityId =
+        this.currcityOptions.find(c =>
+          c.label?.toLowerCase() === other.city?.toLowerCase()
+        )?.value || '';
+
+      this.currCitySelectedOption = cityId;
+      this.currselectedCityId = cityId;
+      this.currselectedCityLabel = other.city;
+    });
+  }
+
+  this.lastSavedPayload = mappedData;
+
+  const stepRoute = this.isCoApplicant ? 'co-kyc' : 'kycinfo';
+  this.stepperService.markStepCompleted(stepRoute);
+}
+
+  patchKycInfo(data: any) {
+    if (!data || !this.kycForm) return;
+
+    const permanentAddress = data.addresses?.find(
+      (a: any) => a.addressType === 'PERMANENT'
+    );
+
+    const otherAddress = data.addresses?.find(
+      (a: any) => a.addressType === 'OTHER'
+    );
+
+    this.addressType = data.addressType || 'same';
+    this.isDifferentAddress = !!data.isDifferentAddress;
+
+    this.isPermanentMailingChecked =
+      data.isPermanentMailingChecked ?? !this.isDifferentAddress;
+
+    this.isCurrentMailingChecked =
+      data.isCurrentMailingChecked ?? this.isDifferentAddress;
+
+    this.selectedSecondaryProof = data.selectedSecondaryProof || null;
+
+    this.perStateSelectedOption = permanentAddress?.stateId || '';
+    this.perCitySelectedOption = permanentAddress?.cityId || '';
+
+    this.perselectedStateId = permanentAddress?.stateId || '';
+    this.perselectedCityId = permanentAddress?.cityId || '';
+    this.perselectedStateLabel = permanentAddress?.state || '';
+    this.perselectedCityLabel = permanentAddress?.city || '';
+
+    this.currStateSelectedOption = otherAddress?.stateId || '';
+    this.currCitySelectedOption = otherAddress?.cityId || '';
+
+    this.currselectedStateId = otherAddress?.stateId || '';
+    this.currselectedCityId = otherAddress?.cityId || '';
+    this.currselectedStateLabel = otherAddress?.state || '';
+    this.currselectedCityLabel = otherAddress?.city || '';
+
+    this.kycForm.form.patchValue({
+      dob: data.dob ? moment(data.dob, 'YYYY-MM-DD') : null,
+      aadharnum: data.aadhaarNumber || '',
+      pan: data.panNumber || '',
+      Passport: data.passportNo || '',
+
+      addressline1: permanentAddress?.addressLine || '',
+      addressline2: permanentAddress?.addressLine1 || '',
+      addressline3: permanentAddress?.addressLine2 || '',
+      perpincode: permanentAddress?.zipCode || '',
+
+      currentaddressline1: otherAddress?.addressLine || '',
+      currentaddressline2: otherAddress?.addressLine1 || '',
+      currentaddressline3: otherAddress?.addressLine2 || '',
+      currpincode: otherAddress?.zipCode || ''
+    });
+
+    if (this.perselectedStateId) {
+      this.loadPerCities(this.perselectedStateId);
+    }
+
+    if (this.currselectedStateId) {
+      this.loadCurrCities(this.currselectedStateId);
+    }
+    if (data.fileMeta) {
+      this.uploadedFileMeta = data.fileMeta;
+
+      Object.keys(data.fileMeta).forEach(key => {
+        const file = data.fileMeta[key];
+
+        if (file?.fileName) {
+          this.uploadedFiles[key] = null;
+          this.uploadedPreviewUrls[key] = file.fileUrl || '';
+        }
+      });
+    }
+  }
+
   ngOnDestroy(): void {
     sessionStorage.removeItem('kycs');
+
+    Object.values(this.uploadedPreviewUrls).forEach(url => {
+      if (url) {
+        URL.revokeObjectURL(url);
+      }
+    });
+
   }
 
 }

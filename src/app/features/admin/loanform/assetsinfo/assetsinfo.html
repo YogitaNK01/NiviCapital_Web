@@ -1,7 +1,7 @@
 <div class="vh-container" >
     <div class="base-layout base-height" [ngClass]="{'coapplicant-layout': isCoApplicant}">
 
-          <div class="header ">
+          <div class="header " *ngIf="!isCoApplicant">
 
             <div class="text-datepicker blue-text d-flex flex-column gap-2 ">Assets
                 <div class="text-body-1 fw-normal">

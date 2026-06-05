@@ -4,7 +4,7 @@
     <p class="text-body-1">Share your basic details, upload required documents, and verify your information.</p>
   </div>
   <div class="stepcls">
-    <div *ngFor="let s of steps ; let i = index;" class="step" [ngClass]="{
+    <div *ngFor="let s of steps  ; let i = index;" class="step" [ngClass]="{
       active: isActive(s.route),
       completed: isCompleted(i),
       upcoming: isUpcoming(i)
@@ -26,20 +26,7 @@
         <div class="title text-body-1">{{ s.label }}</div>
 
 
-<!-- <div *ngIf="s.children?.length" class="sub-stepper">
-  <div
-    *ngFor="let sub of s.children; let subIndex = index"
-    class="sub-step title text-body-1"
-    [ngClass]="{
-      active: activeQualificationId === normalizeQualification(sub.label) ,
-      disabled: isSubStepperDisabled(i, subIndex) &&  normalizeQualification(sub.label) !== activeQualificationId
 
-    }"
-    (click)="!isSubStepperDisabled(i, subIndex) && openEducationSubStep(sub, $event)"
-  >
-    {{ sub.label }}
-  </div>
-</div> -->
 
 
 <div *ngIf="s.children?.length" class="sub-stepper">

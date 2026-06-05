@@ -7,6 +7,7 @@ import { Checkbox } from '../checkbox/checkbox';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatButtonModule } from '@angular/material/button';
 import { Router } from '@angular/router';
+import { Loanstepperservice } from '../../../core/service/loanstepperservice';
 
 
 export interface TableColumn {
@@ -14,8 +15,8 @@ export interface TableColumn {
   label: string;
   class?: string;
   clickable?: boolean;
-  transform?: (row: any) => string ;
-  classFn?: (row: any) => string ;
+  transform?: (row: any) => string;
+  classFn?: (row: any) => string;
   onClick?: (row: any) => void;
 }
 
@@ -23,7 +24,7 @@ export interface TableColumn {
 
 @Component({
   selector: 'app-tables',
-  imports: [CommonModule, MatMenuModule,MatButtonModule, MatTableModule, MatPaginatorModule, Checkbox],
+  imports: [CommonModule, MatMenuModule, MatButtonModule, MatTableModule, MatPaginatorModule, Checkbox],
   standalone: true,
   templateUrl: './tables.html',
   styleUrl: './tables.scss'
@@ -36,7 +37,7 @@ export class Tables implements OnChanges {
   @Input() pageSize: number = 6;
 
   @Input() isLoading = false;
-   @Input() hidepagination = false;
+  @Input() hidepagination = false;
 
   @Output() rowClick = new EventEmitter<any>();
 
@@ -50,15 +51,45 @@ export class Tables implements OnChanges {
 
   selection: any[] = [];
 
-@Output() selectionChange = new EventEmitter<any[]>();
-@Input() totalPages: number = 1;
-@Output() pageChange = new EventEmitter<number>();
-@Input() disableEditFn?: (row: any) => boolean;
+  @Output() selectionChange = new EventEmitter<any[]>();
+  @Input() totalPages: number = 1;
+  @Output() pageChange = new EventEmitter<number>();
+  @Input() disableEditFn?: (row: any) => boolean;
 
-  constructor(private http: HttpClient,private router: Router) { }
+  STAGE_ROUTE_MAP: Record<string, string> = {
+    LOAN_INFO: 'loaninfo',
+
+    PERSONAL_INFO: 'genralinfo',
+    SAVE_GENERAL_INFO: 'genralinfo',
+
+    SAVE_ESTIMATED_EXPENSES: 'expense',
+    SAVE_EXPENSE: 'expense',
+
+    SAVE_ADDITIONAL_INFO: 'additionalinfo',
+
+    FETCH_KYC: 'kycinfo',
+    SAVE_KYC: 'kycinfo',
+
+    SAVE_EDUCATION_DETAILS: 'educationDetails',
+
+    SAVE_INCOME_DETAILS: 'incomeinfo',
+
+    SAVE_ASSETS: 'assetsinfo',
+
+    SAVE_LIABILITIES: 'liabilitiesinfo',
+
+    SAVE_MONTHLY_EXPENSES: 'monthlyexpinfo',
+
+    SAVE_REFERENCES: 'referenceinfo',
+
+    SAVE_CO_APPLICANT: 'co-applicantdetails',
+
+    SUMMARY: 'summaryinfo'
+  };
+  constructor(private http: HttpClient, private router: Router, private stepperservice: Loanstepperservice) { }
 
   ngOnInit() {
-    this.displayedColumnKeys = ['select', ...this.columns.map(c => c.key) , 'actions'];
+    this.displayedColumnKeys = ['select', ...this.columns.map(c => c.key), 'actions'];
     if (this.data && this.data.length > 0) {
       this.updatePagedData();
     }
@@ -78,13 +109,13 @@ export class Tables implements OnChanges {
     }
   }
 
- 
+
   get totalPagesCount() {
-  return this.totalPages;
-}
+    return this.totalPages;
+  }
 
   updatePagination() {
-   const totalPages = this.totalPages;
+    const totalPages = this.totalPages;
 
     const total = totalPages;
     const current = this.currentPage;
@@ -123,12 +154,12 @@ export class Tables implements OnChanges {
 
   onPageChange(page: any) {
 
-    if (page === '...') return; 
+    if (page === '...') return;
     if (page < 1 || page > this.totalPages) return;
 
     this.currentPage = page as number;
     this.pageChange.emit(this.currentPage);
-  
+
   }
 
   onCellClick(col: TableColumn, row: any) {
@@ -153,7 +184,7 @@ export class Tables implements OnChanges {
     } else {
       this.selection = [];
     }
-     this.selectionChange.emit(this.selection);
+    this.selectionChange.emit(this.selection);
   }
 
   isAllSelected(): boolean {
@@ -173,9 +204,9 @@ export class Tables implements OnChanges {
         return { text: 'Completed', class: 'status-completed' };
       case 'pending':
         return { text: 'Pending', class: 'Pending' };
-         case 'active':
+      case 'active':
         return { text: 'Active', class: 'activebtn' };
-        
+
       case 'document issue':
         return { text: 'Document Issue', class: 'Document-Issue' };
       default:
@@ -183,52 +214,83 @@ export class Tables implements OnChanges {
     }
   }
 
-isEditDisabled(row: any): boolean {
-  return this.disableEditFn ? this.disableEditFn(row) : false;
-}
+  isEditDisabled(row: any): boolean {
+    return this.disableEditFn ? this.disableEditFn(row) : false;
+  }
 
+  getRouteFromStage(stage: string | null | undefined): string {
+    if (!stage) {
+      return 'loaninfo';
+    }
+
+    return this.STAGE_ROUTE_MAP[stage] || 'loaninfo';
+  }
   onEdit(row: any) {
-  console.log("Edit", row);
-    if(row.custId == "-" || row.custId == null ){
-     this.router.navigate(
-      ['/admin/customer/addcustomer'],
-      {
-        queryParams: {
-          step: 0,
-          edit:true,
-          phone: row.mobile,
-          id: row.userId
- 
-          
+    console.log("Edit", row);
+    if (row.custId == "-" || row.custId == null) {
+      this.router.navigate(
+        ['/admin/customer/addcustomer'],
+        {
+          queryParams: {
+            step: 0,
+            edit: true,
+            phone: row.mobile,
+            id: row.userId
+
+
+          }
         }
-      }
-    );
-  }
-  else if(row.kycStatus == "PENDING"){
-     this.router.navigate(
-      ['/admin/customer/addcustomer'],
-      {
-        queryParams: {
-          step: 2,
-          edit:true,
-          custId: row.custId,
-          fname: row.firstName,
-        lname: row.lastName
+      );
+    }
+    else if (row.kycStatus == "PENDING") {
+      this.router.navigate(
+        ['/admin/customer/addcustomer'],
+        {
+          queryParams: {
+            step: 2,
+            edit: true,
+            custId: row.custId,
+            fname: row.firstName,
+            lname: row.lastName
+          }
         }
-      }
-    );
-  }
-  else {
+      );
+    }
+
+    if (row.applicationStatus === 'DRAFT' || row.loanStatus === 'In Progress') {
+      const targetRoute = this.stepperservice.getRouteFromStage(row.nextStage || row.currentApplicationStatus);
+
+
+      const editContext = {
+        edit: true,
+        applicantId: row.applicantId,
+        applicationId: row.applicationId,
+        custId: row.custId,
+        custName: `${row.firstName || ''} ${row.lastName || ''}`.trim(),
+        custARN: row.arn,
+        currentApplicationStatus: row.currentApplicationStatus,
+        nextStage: row.nextStage
+      };
+
+      sessionStorage.setItem('loanContextData', JSON.stringify(editContext));
+
+      this.router.navigate(['/loanform', targetRoute]);
+
+      return;
+
+
+    }
+    else {
+
+    }
 
   }
-  
-}
 
-onDelete(row: any) {
-  console.log("Delete", row);
-  
-}
+  onDelete(row: any) {
+    console.log("Delete", row);
 
-  
-  
+  }
+
+
+
 }

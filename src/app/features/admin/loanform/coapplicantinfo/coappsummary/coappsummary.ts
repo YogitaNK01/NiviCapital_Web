@@ -1,83 +1,46 @@
-import { CommonModule } from '@angular/common';
 import { ChangeDetectorRef, Component } from '@angular/core';
+import { SummaryHelper } from '../../../../../utils/summaryHelper';
+import { CommonModule } from '@angular/common';
 import { FormBuilder, FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
+import { Buttons } from '../../../../systemdesign/buttons/buttons';
+import { Inputfield } from '../../../../systemdesign/inputfield/inputfield';
+import { otherFields } from '../../../../../shared/config/custdetails.config';
 import { Router, ActivatedRoute } from '@angular/router';
-import { Addcustomerservice } from '../../../../core/service/addcustomerservice';
-import { Loanformservice } from '../../../../core/service/loanformservice';
-import { Loanstepperservice } from '../../../../core/service/loanstepperservice';
-import { Main } from '../../../../core/service/main';
-import { otherFields } from '../../../../shared/config/custdetails.config';
-import { Button } from 'bootstrap';
-import { Inputfield } from '../../../systemdesign/inputfield/inputfield';
-import { Buttons } from '../../../systemdesign/buttons/buttons';
-import { SummaryHelper } from '../../../../utils/summaryHelper';
-
-
-
+import { Addcustomerservice } from '../../../../../core/service/addcustomerservice';
+import { Loanformservice } from '../../../../../core/service/loanformservice';
+import { Loanstepperservice } from '../../../../../core/service/loanstepperservice';
+import { Main } from '../../../../../core/service/main';
 @Component({
-  selector: 'app-summaryinfo',
+  selector: 'app-coappsummary',
   imports: [CommonModule, ReactiveFormsModule, Inputfield, Buttons],
   standalone: true,
-  templateUrl: './summaryinfo.html',
-  styleUrl: './summaryinfo.scss'
+  templateUrl: './coappsummary.html',
+  styleUrl: './coappsummary.scss'
 })
-export class Summaryinfo {
+export class Coappsummary {
 
   openIndex: number[] = [0];
-  openKeys: string[] = ['general'];
+  openKeys: string[] = ['basic'];
   accordions = [
+    { key: 'basic', title: 'Basic Info', alwaysOpen: true },
     { key: 'general', title: 'General Info', alwaysOpen: true },
-    { key: 'expense', title: 'Estimated Expense', alwaysOpen: false, amount: 0 },
     { key: 'additional', title: 'Additional Info', alwaysOpen: false },
     { key: 'kyc', title: 'KYC', alwaysOpen: true },
-    { key: 'education', title: 'Education Details', alwaysOpen: false },
     { key: 'income', title: 'Income Details', alwaysOpen: true },
     { key: 'assets', title: 'Assets', alwaysOpen: false, amount: 0 },
     { key: 'liabilities', title: 'Liabilities', alwaysOpen: true, amount: 0 },
     { key: 'monthly', title: 'Monthly Expenditure', alwaysOpen: false, amount: 0 },
-    { key: 'reference', title: 'Reference', alwaysOpen: true },
+
   ];
   summaryForm!: FormGroup;
 
-
+  basicFields:any[] = [];
 
   currentOccupation = '';
   courseDetailsFields: { label: string; value: any }[] = [];
 
-  // estimatedExpense 
-
-  educationFees: { tuitionInr: any; tuitionAud: number } | null = null;
-  livingExpenses: Array<{
-    isGroup?: any;
-    children?: any;
-    name: string;
-    frequency: string;
-    amountInr: number;
-    amountAud: number;
-    description?: string;
-
-  }> = [];
-
-  miscellaneousExpenses: Array<{
-    name: string;
-    frequency: string;
-    amountInr: number;
-    amountAud: number;
-    description?: string;
-    isGroup?: any;
-    children?: any;
-  }> = [];
-  totalEstimatedExpenseInr: any;
-  totalEstimatedExpenseAud: any;
-  totalassetsval: any;
-  totalliabilities: any;
-  totalMonthlyExpenditure: any;
-  totalMiscellaneousExpense: any;
-  totalLivingExpense: any;
-
-
   additionalInfoFields: any = {
-    mainApplicant: [],
+    applicantDetails: [],
     spouse: [],
     father: [],
     mother: []
@@ -164,38 +127,15 @@ export class Summaryinfo {
   isasset: boolean = false;
   liabilitiesSections: any[] = [];
 
-  qualificationDetail: any = {
-    QualificationDetails: [],
-  };
-
-  EducationInfoFields: any = {
-    tenth: [],
-    twelfth: [],
-    diploma: [],
-    bachelors: [],
-    postgraduate: [],
-    ieltsPte: [],
-    offerLetter: []
-
-  };
-  educationSections = [
-    { title: '10th', key: 'tenth' },
-    { title: '12th', key: 'twelfth' },
-    { title: 'Diploma', key: 'diploma' },
-    { title: 'Undergraduate', key: 'bachelors' },
-    { title: 'Postgraduate', key: 'postgraduate' },
-  ];
-
-
-  ReferenceInfoFields: any = {
-
-
-  };
 
   filteredAccordions: any[] = [];
   showIncome = false;
   showAssets = false;
   showMonthly = false;
+  totalassetsval: any;
+  totalliabilities: any;
+  totalMonthlyExpenditure: any;
+
   constructor(private fb: FormBuilder, private formSvc: Loanformservice, private stepperService: Loanstepperservice, private cd: ChangeDetectorRef, private loanformservice: Loanformservice,
     private router: Router, private route: ActivatedRoute, public main: Main, private apiservice: Addcustomerservice) { }
 
@@ -211,7 +151,7 @@ export class Summaryinfo {
 
 
     if (
-      
+
       (!AllCoapp_ids || !AllCoapp_ids[0] || !AllCoapp_ids[1])
     ) {
 
@@ -235,9 +175,11 @@ export class Summaryinfo {
     }
 
 
- 
+    this.applicantId = AllCoapp_ids[0];
 
-    this.getSummarydetails()
+
+
+    this.getcoappSummarydetails()
     this.buildForm();
   }
 
@@ -255,14 +197,7 @@ export class Summaryinfo {
     const group: { [key: string]: FormControl } = {};
     this.summaryForm = new FormGroup(group);
   }
-  toggle1(index: number) {
-    if (this.openIndex.includes(index)) {
-      this.openIndex = this.openIndex.filter(i => i !== index);
-    } else {
-      this.openIndex.push(index);
-    }
-    this.cd.detectChanges();
-  }
+
 
   toggle(key: string) {
     if (this.openKeys.includes(key)) {
@@ -272,19 +207,16 @@ export class Summaryinfo {
     }
   }
 
-
-  getSummarydetails() {
-    this.formSvc.getSummary(this.applicationId).subscribe(
+  getcoappSummarydetails() {
+    this.formSvc.getCoappSummary(this.applicationId, this.applicantId).subscribe(
       (res: any) => {
         if (res && res.status === 'success' && res.data) {
           const data = res.data;
-          this.totalEstimatedExpenseAud = data.totalEstimatedExpenseAud;
-          this.totalEstimatedExpenseInr = data.totalEstimatedExpenseInr;
-          this.accordions[1].amount = this.totalEstimatedExpenseInr;
 
-
+          const basicInfoData = SummaryHelper.extractcoappBasicInfo(data);
+           this.basicFields = basicInfoData.basicDetailsFields || [];
           // Use helper methods to extract data
-          const generalInfoData = SummaryHelper.extractGeneralInfo(data.generalInfo);
+          const generalInfoData = SummaryHelper.extractcoappGeneralInfo(data.generalInfo);
           this.currentOccupation = generalInfoData.currentOccupation;
           this.courseDetailsFields = generalInfoData.courseDetailsFields;
           this.isasset = this.courseDetailsFields.some((field: any) => field.label === 'Do you have Assets?' && field.value === 'Yes');
@@ -315,17 +247,8 @@ export class Summaryinfo {
 
 
 
-          // Extract Estimated Expense
-          const estimatedExpenseData = SummaryHelper.extractEstimatedExpense(data.estimatedExpense);
-          this.educationFees = estimatedExpenseData.educationFees;
-          this.livingExpenses = estimatedExpenseData.livingExpenses;
-          this.miscellaneousExpenses = estimatedExpenseData.miscellaneousExpenses;
-          this.totalLivingExpense = data.estimatedExpense.totalLivingExpense;
-          this.totalMiscellaneousExpense = data.estimatedExpense.totalMiscExpense;
 
-
-
-          const additionalInfoData = SummaryHelper.extractAdditionalInfo(data.additionalInfo,'MAIN');
+          const additionalInfoData = SummaryHelper.extractAdditionalInfo(data.additionalInfo, 'CO_APPLICANT');
           this.additionalInfoFields = additionalInfoData;
 
           const KYCInfoData = SummaryHelper.extractKYCInfo(data.kyc);
@@ -369,41 +292,21 @@ export class Summaryinfo {
             this.hasMonthlyValue(this.monthlyExpenditure[field.key])
           );
           this.totalMonthlyExpenditure = res.data.monthlyExpenditure.totalMonthlyInr;
-          this.accordions[8].amount = this.totalMonthlyExpenditure;
+          this.accordions[7].amount = this.totalMonthlyExpenditure;
 
 
           this.assetsSections = SummaryHelper.extractAssetsInfo(res.data.assets);
           console.log("assetsSections", this.assetsSections);
 
           this.totalassetsval = res.data.assets.totalAssets;
-          this.accordions[6].amount = this.totalassetsval;
+          // this.accordions[6].amount = this.totalassetsval;
 
 
           this.liabilitiesSections = SummaryHelper.extractLiabilitiesInfo(res.data.liabilities);
           this.totalliabilities = res.data.liabilities.totalLiabilities;
-          this.accordions[7].amount = this.totalliabilities;
-
-          const qualificationInfoData = SummaryHelper.extractQualificationInfo(data.qualificationDetail);
-          this.qualificationDetail = qualificationInfoData;
-
-          const educationInfoData = SummaryHelper.extractEducationInfo(data.educationDetails);
-          this.EducationInfoFields = educationInfoData;
-          this.educationSections = this.educationSections.filter(section => {
-            const fields = this.EducationInfoFields[section.key];
-
-            // return fields?.some((field: any) => field.value && field.value !== '-');
-            return fields?.some((field: any) => {
-              if (field.key === 'marksheetUrl') {
-                return Array.isArray(field.value) && field.value.length > 0;
-              }
-              return field.value && field.value !== '-';
-            });
-          });
+          // this.accordions[7].amount = this.totalliabilities;
 
 
-
-          const ReferenceInfoData = SummaryHelper.extractReferenceInfo(data.references);
-          this.ReferenceInfoFields = ReferenceInfoData;
 
           this.cd.detectChanges();
         }
@@ -414,7 +317,74 @@ export class Summaryinfo {
     );
   }
 
+  submitsummary() {
+    let input = {
+      "applicationId": this.applicationId,
+      "applicantId": this.applicantId
+    }
+    this.formSvc.submitCoappSummary(input).subscribe(
+      (res: any) => {
+        console.log(res)
+        if (res.status === "success") {
+this.saveCoApplicantOnDashboard();
+          this.router.navigate(['/loanform/co-applicantdetails']);
+        }
+      },
 
+      (error) => {
+        console.error('Submit summary failed', error);
+      }
+
+    )
+  }
+  saveCoApplicantOnDashboard() {
+  const loanIds = this.stepperService.getLoanId();
+  const mainApplicantId = loanIds?.[0];
+
+  const coApplicantIndex = Number(this.route.snapshot.queryParamMap.get('coApplicantIndex') || 1);
+
+  const key = `coApplicants_${mainApplicantId}`;
+  const saved = localStorage.getItem(key);
+  let coApplicants = saved ? JSON.parse(saved) : [];
+
+  const fullName = this.getCoApplicantFullName();
+
+  const existingIndex = coApplicants.findIndex(
+    (x: any) => Number(x.index) === coApplicantIndex
+  );
+
+  const coappObj = {
+    index: coApplicantIndex,
+    name: fullName || `Co-Applicant ${coApplicantIndex}`,
+    completed: true
+  };
+
+  if (existingIndex >= 0) {
+    coApplicants[existingIndex] = coappObj;
+  } else {
+    coApplicants.push(coappObj);
+  }
+
+  coApplicants = coApplicants.sort((a: any, b: any) => Number(a.index) - Number(b.index));
+
+  localStorage.setItem(key, JSON.stringify(coApplicants));
+}
+getCoApplicantFullName(): string {
+  const firstName =
+    this.basicFields?.find((f: any) => f.label === 'First Name')?.value || '';
+
+  const middleName =
+    this.basicFields?.find((f: any) => f.label === 'Middle Name')?.value || '';
+
+  const lastName =
+    this.basicFields?.find((f: any) => f.label === 'Last Name')?.value || '';
+
+  return `${firstName} ${middleName} ${lastName}`
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+  submit() { }
 
   labelDisplayMap: { [key: string]: string } = {
     'GROCERIES HOUSEHOLD': 'Groceries and Household',
@@ -484,14 +454,5 @@ export class Summaryinfo {
     }
 
     return val !== '';
-  }
-
-  submit() {
-  }
-  back() {
-
-  }
-  next() {
-
   }
 }

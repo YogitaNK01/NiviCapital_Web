@@ -1,12 +1,15 @@
 <div class="d-flex flex-column container-fluid">
 <div class="horizontal-stepper w-100">
   <div class="step"
-       *ngFor="let step of steps; let i = index"
+       *ngFor="let step of steps ; let i = index"
        [ngClass]="{
          active: isActive(i),
-         completed: isCompleted(i)
+         completed: isCompleted(i),
+         upcoming: isUpcoming(i),
+        disabled: !canNavigate(i)
+
        }"
-       (click)="goToStep(step, i)">
+       (click)="canNavigate(i) && goToStep(step, i)">
 
 <!-- (click)="canNavigate(i) && goToStep(step, i)" -->
 

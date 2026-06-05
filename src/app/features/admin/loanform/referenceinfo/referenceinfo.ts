@@ -92,16 +92,49 @@ export class Referenceinfo implements OnInit {
     private router: Router, private route: ActivatedRoute, public main: Main, private apiservice: Addcustomerservice) { }
   async ngOnInit() {
     this.isCoApplicant = this.router.url.includes('co-applicant');
-    this.route.queryParams.subscribe(params => {
+    this.stepperService.setStepperType(
+      this.isCoApplicant ? 'CO_APPLICANT' : 'MAIN'
+    );
+    let Allids = this.stepperService.getLoanId();
 
-      const applicantId = params['applicantId'];
-      const applicationId = params['applicationId'];
+    this.applicantId = Allids[0];
+    this.applicationId = Allids[1];
+    // this.custName = Allids[2];
+    // this.custARN = Allids[3];
 
-      // Store in variables if needed
-      this.applicantId = applicantId;
-      this.applicationId = applicationId;
+    let AllCoapp_ids = this.stepperService.getCo_appId();
 
-    });
+
+    if (
+      this.isCoApplicant &&
+      (!AllCoapp_ids || !AllCoapp_ids[0] || !AllCoapp_ids[1])
+    ) {
+
+      const storedCoApp = sessionStorage.getItem('coAppIds');
+      if (storedCoApp) {
+        const parsed = JSON.parse(storedCoApp);
+
+        AllCoapp_ids = [
+          parsed.applicantId,
+          parsed.applicationId,
+          parsed.fullName
+        ];
+
+        // restore back into service
+        this.stepperService.setCo_appId(
+          parsed.applicantId,
+          parsed.applicationId,
+          parsed.fullName
+        );
+      }
+    }
+    if (this.isCoApplicant) {
+      this.applicantId = AllCoapp_ids?.[0];
+      this.applicationId = AllCoapp_ids?.[1];
+    } else {
+      this.applicantId = Allids?.[0];
+      this.applicationId = Allids?.[1];
+    }
 
 
     this.referenceForm = this.fb.group({
@@ -114,53 +147,43 @@ export class Referenceinfo implements OnInit {
       }
     )
 
-
-    //     const key = `referenceinfoData_main${this.applicantId}`;
-    // const storedData = localStorage.getItem(key);
-
-    // if (!this.loanformservice.referenceInfoData && storedData) {
-    //   this.loanformservice.referenceInfoData = JSON.parse(storedData);
-    // }
-
-    // if (this.loanformservice.referenceInfoData) {
-    //   this.patchReferenceData();
-
-    //   this.reference1Filled = this.loanformservice.referenceInfoData.reference1Filled || false;
-    //   this.reference2Filled = this.loanformservice.referenceInfoData.reference2Filled || false;
-
-    //   this.stepperService.markStepCompleted('referenceinfo');
-    // }
-
-
-    const key = this.getStorageKey();
-    const localData = localStorage.getItem(key);
-    const parsedLocal = localData ? JSON.parse(localData) : null;
-
-    const apiData = await this.getSavedReferenceInfo();
-
-    let finalData = null;
-
-    if (apiData) {
-      finalData = apiData;
-      localStorage.setItem(key, JSON.stringify(apiData));
-    } else if (parsedLocal) {
-      finalData = parsedLocal;
-    }
-
-    if (finalData) {
-      this.loanformservice.referenceInfoData = finalData;
-      this.patchReferenceData();
-
-      this.reference1Filled = finalData.reference1Filled || false;
-      this.reference2Filled = finalData.reference2Filled || false;
-
-      this.lastSavedPayload = this.buildReferencePayload();
-
-      this.stepperService.markStepCompleted('referenceinfo');
-    }
-
-
     this.states()
+
+    if (this.loanformservice.isEditFlow()) {
+      setTimeout(() => {
+        this.patchFromSummary();
+      }, 300);
+    } else {
+
+      const key = this.getStorageKey();
+      const localData = localStorage.getItem(key);
+      const parsedLocal = localData ? JSON.parse(localData) : null;
+
+      const apiData = await this.getSavedReferenceInfo();
+
+      let finalData = null;
+
+      if (apiData) {
+        finalData = apiData;
+        localStorage.setItem(key, JSON.stringify(apiData));
+      } else if (parsedLocal) {
+        finalData = parsedLocal;
+      }
+
+      if (finalData) {
+        this.loanformservice.referenceInfoData = finalData;
+        this.patchReferenceData();
+
+        this.reference1Filled = finalData.reference1Filled || false;
+        this.reference2Filled = finalData.reference2Filled || false;
+
+        this.lastSavedPayload = this.buildReferencePayload();
+
+        this.stepperService.markStepCompleted('referenceinfo');
+      }
+
+    }
+
   }
   getStorageKey() {
     return this.isCoApplicant
@@ -233,7 +256,7 @@ export class Referenceinfo implements OnInit {
     let input = {
       identifier: mobile,
       type: "MOBILE",
-        "applicantType": "PRIMARY", //// PRIMARY / CO_APPLICANT
+      "applicantType": "PRIMARY", //// PRIMARY / CO_APPLICANT
       "coApplicantIndex": 0,
 
     }
@@ -411,6 +434,82 @@ export class Referenceinfo implements OnInit {
   submit() {
   }
 
+  // edit flow = patch from summary
+  patchFromSummary() {
+    if (!this.loanformservice.isEditFlow()) return;
+
+    const data = this.loanformservice.getSummarySection('references');
+    console.log('patch references', data);
+
+    if (!data) return;
+
+    const references = Array.isArray(data) ? data : [];
+
+    const mappedData = {
+      reference1: references
+        .filter((r: any, index: number) =>
+          r.referenceType === 'reference1' ||
+          r.referenceType === 'REFERENCE_1' ||
+          index === 0
+        )
+        .slice(0, 1)
+        .map((r: any) => ({
+          fname: r.firstName || r.fname || '',
+          mname: r.middleName || r.mname || '',
+          lname: r.lastName || r.lname || '',
+          email: r.emailId || r.email || '',
+          peraddressline1: r.addressLine1 || r.peraddressline1 || '',
+          peraddressline2: r.addressLine2 || r.peraddressline2 || '',
+          peraddressline3: r.addressLine3 || r.peraddressline3 || '',
+          percountry: r.country || 'India',
+          perstate: r.state || r.perstate || '',
+          percity: r.city || r.percity || '',
+          perpincode: r.pincode || r.perpincode || '',
+          phone: r.mobileNumber || r.phone || ''
+        })),
+
+      reference2: references
+        .filter((r: any, index: number) =>
+          r.referenceType === 'reference2' ||
+          r.referenceType === 'REFERENCE_2' ||
+          index === 1
+        )
+        .slice(0, 1)
+        .map((r: any) => ({
+          fname: r.firstName || r.fname || '',
+          mname: r.middleName || r.mname || '',
+          lname: r.lastName || r.lname || '',
+          email: r.emailId || r.email || '',
+          peraddressline1: r.addressLine1 || r.peraddressline1 || '',
+          peraddressline2: r.addressLine2 || r.peraddressline2 || '',
+          peraddressline3: r.addressLine3 || r.peraddressline3 || '',
+          percountry: r.country || 'India',
+          perstate: r.state || r.perstate || '',
+          percity: r.city || r.percity || '',
+          perpincode: r.pincode || r.perpincode || '',
+          phone: r.mobileNumber || r.phone || ''
+        })),
+
+      reference1Filled: references.length >= 1,
+      reference2Filled: references.length >= 2
+    };
+
+    this.loanformservice.referenceInfoData = mappedData;
+
+    this.patchReferenceData();
+
+    this.reference1Filled = mappedData.reference1Filled;
+    this.reference2Filled = mappedData.reference2Filled;
+
+    this.savedReferenceData[0] = mappedData.reference1?.[0] || {};
+    this.savedReferenceData[1] = mappedData.reference2?.[0] || {};
+
+    this.lastSavedPayload = this.buildReferencePayload();
+
+    this.stepperService.markStepCompleted('referenceinfo');
+
+    this.cd.detectChanges();
+  }
 
 
   patchReferenceData() {
@@ -707,7 +806,7 @@ export class Referenceinfo implements OnInit {
         pincode: refForm.perpincode,
         customerCifId: custID,
         isNewCustomer: this.isdata ? 1 : 0,
-         applicantId: this.applicantId,
+        applicantId: this.applicantId,
       }
     };
 
@@ -896,7 +995,7 @@ export class Referenceinfo implements OnInit {
       reference2: this.reference2Array.getRawValue(),
       reference1Filled: this.reference1Filled,
       reference2Filled: this.reference2Filled,
-      
+
     };
   }
 

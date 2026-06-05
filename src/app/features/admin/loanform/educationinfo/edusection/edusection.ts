@@ -63,8 +63,8 @@ export type SectionFileEvent = {
   styleUrl: './edusection.scss'
 })
 export class Edusection {
-  applicantId: string = '';
-  applicationId: string = '';
+  applicantId:any;
+  applicationId:any;
 
 
   files: any = {};
@@ -112,7 +112,7 @@ export class Edusection {
   @Output() fileSelected = new EventEmitter<SectionFileEvent>();
 
   @Input() uploadedFiles: Record<string, File | null> = {};
-
+ @Input() savedFileMeta: Record<string, File | null> = {};
   @Input() stepKey!: '10th' | '12th' | 'diploma10' | 'diploma12' | 'ug' | 'pg' | 'others' | 'others12' | 'othersdiploma';
 
 
@@ -155,30 +155,14 @@ export class Edusection {
 
   ngOnInit(): void {
 
-    this.route.queryParams.subscribe(params => {
-
-      const applicantId = params['applicantId'];
-      const applicationId = params['applicationId'];
-
-      // Store in variables if needed
-      this.applicantId = applicantId;
-      this.applicationId = applicationId;
 
 
-      if (params['qualificationId']) {
-        // this.activeQualificationId = params['qualificationId'];
-      }
+     let Allids = this.stepperService.getLoanId();
 
-
-    });
-    // this.getInstituteName();
-
-    // this.loanformservice.getInstitutesCached().subscribe(list => {
-    //   this.seleactInstitute = list;
-    //   this.filteredInstitutes = [...list];
-    //    this.restoreDropdownValues();
-    // });
-
+    this.applicantId = Allids[0];
+    this.applicationId = Allids[1];
+    // this.custName = Allids[2];
+    // this.custARN = Allids[3];
     
 combineLatest([
     this.loanformservice.getInstitutesCached(),
@@ -576,25 +560,79 @@ return index !== undefined
 
   viewLocalFile(doc: DocType, index?: number): void {
     const key = this.buildKey(doc, index);
-    const file = this.uploadedFiles[key];
+    const file = this.uploadedFiles[key] as
+      | File
+      | { viewUrl?: string; fileUrl?: string; publicUrl?: string }
+      | null;
+
     if (!file) return;
 
-    const url = URL.createObjectURL(file);
-    window.open(url, '_blank');
+    // Case 1: New selected file from browser
+    if (file instanceof File) {
+      const url = URL.createObjectURL(file);
+      window.open(url, '_blank');
+
+      // optional cleanup
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+
+      return;
+    }
+
+    // Case 2: Restored file metadata from API/localStorage
+    const savedUrl =
+      file.viewUrl ||
+      file.fileUrl ||
+      file.publicUrl ||
+      '';
+
+    if (savedUrl) {
+      window.open(savedUrl, '_blank');
+      return;
+    }
+
+    console.warn('No view URL found for file:', file);
+
   }
   downloadLocalFile(doc: DocType, index?: number): void {
-    const key = this.buildKey(doc, index);
-    const file = this.uploadedFiles[key];
-    if (!file) return;
+  const key = this.buildKey(doc, index);
 
+  const file: any =
+    this.uploadedFiles[key] ||
+    this.savedFileMeta?.[key];
+
+  if (!file) return;
+
+  // Case 1: newly selected browser file
+  if (file instanceof File) {
     const url = URL.createObjectURL(file);
+
     const a = document.createElement('a');
     a.href = url;
-    a.download = file.name;
+    a.download = file.name || 'document';
     a.click();
 
     URL.revokeObjectURL(url);
+    return;
   }
+
+  // Case 2: restored file metadata from API/localStorage
+  const savedUrl =
+    file.viewUrl ||
+    file.fileUrl ||
+    file.publicUrl ||
+    '';
+
+  if (!savedUrl) {
+    console.warn('No downloadable URL found for file:', file);
+    return;
+  }
+
+  const a = document.createElement('a');
+  a.href = savedUrl;
+  a.target = '_blank';
+  a.download = file.fileName || file.name || 'document';
+  a.click();
+}
 
   removeLocalFile(doc: DocType, index?: number): void {
     this.msgBox.open({
