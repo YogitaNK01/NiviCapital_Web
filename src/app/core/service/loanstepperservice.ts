@@ -70,15 +70,15 @@ export class Loanstepperservice {
 
     // const saved1 = localStorage.getItem(this.completedStepsKey);
 
-    const saved1 = localStorage.getItem('main_completedSteps');
+//     const saved1 = localStorage.getItem('main_completedSteps');
 
-if (saved1) {
-  const parsed = JSON.parse(saved1);
+// if (saved1) {
+//   const parsed = JSON.parse(saved1);
 
-  this.completedSteps = Array.isArray(parsed)
-    ? new Set<string>(parsed)
-    : new Set<string>();
-}
+//   this.completedSteps = Array.isArray(parsed)
+//     ? new Set<string>(parsed)
+//     : new Set<string>();
+// }
 
 
   }
@@ -253,11 +253,16 @@ getRouteFromStage(stage: string | null | undefined): string {
   this.currentCoApplicantIndex = index || 1;
   this.restoreCompletedSteps()
 }
+getCurrentCoApplicantIndex(): number {
+  return Number(this.currentCoApplicantIndex) || 1;
+}
 getCoApplicantCompletedKey(): string {
   const loanIds = this.getLoanId();
-  const applicantId = loanIds?.[0] || 'defaultApplicant';
 
-  return `coapp_completedSteps_${applicantId}_${this.currentCoApplicantIndex}`;
+  const applicantId = loanIds?.[0] || 'defaultApplicant';
+  const applicationId = loanIds?.[1] || 'defaultApplication';
+
+  return `coapp_completedSteps_${applicantId}_${applicationId}_${this.currentCoApplicantIndex}`;
 }
 // ========================================================
   get steps(): Step[] {
@@ -392,11 +397,21 @@ getCoApplicantCompletedKey(): string {
 
   //---------------all other steps --------------
 
-  private getCompletedStepsKey(): string {
+  private getCompletedStepsKey1(): string {
     // return `completedSteps_${this.applicantId}`;
     return `${this.stepperType}_completedSteps_${this.applicantId}`;
   }
+getCompletedStepsKey(): string {
+  const loanIds = this.getLoanId();
+  const mainApplicantId = loanIds?.[0];
 
+  if (this.stepperType === 'CO_APPLICANT') {
+    const index = this.getCurrentCoApplicantIndex();
+    return `coapp_completedSteps_${mainApplicantId}_${index}`;
+  }
+
+  return `main_completedSteps_${mainApplicantId}`;
+}
   markStepCompleted1(route: string) {
     this.completedSteps.add(route);
     const key = `completedSteps_${this.applicantId}`;
@@ -420,7 +435,7 @@ getCoApplicantCompletedKey(): string {
   const key =
     this.stepperType === 'CO_APPLICANT'
       ? this.getCoApplicantCompletedKey()
-      : 'main_completedSteps';
+      : this.getMainCompletedKey();
 
   localStorage.setItem(
     key,
@@ -446,7 +461,7 @@ restoreCompletedSteps() {
   const key =
     this.stepperType === 'CO_APPLICANT'
       ? this.getCoApplicantCompletedKey()
-      : 'main_completedSteps';
+      : this.getMainCompletedKey();
 
   const saved = localStorage.getItem(key);
 
@@ -478,7 +493,7 @@ restoreCompletedSteps() {
 const key =
   this.stepperType === 'CO_APPLICANT'
     ? this.getCoApplicantCompletedKey()
-    : 'main_completedSteps';
+    : this.getMainCompletedKey();
 
   if (this.applicantId) {
     localStorage.setItem(
@@ -523,7 +538,7 @@ restoreLoanEditContext() {
   }
 
   //coapplicant data store
-  setCo_appId(id1: string, id2: string, name: string, arn?: string) {
+  setCo_appId(id1: string, id2: string, name: string, arn?: string,index?: number) {
     this.co_applicantId = id1;
     this.co_applicationId = id2;
     this.co_custName = name;
@@ -535,7 +550,8 @@ restoreLoanEditContext() {
         applicantId: id1,
         applicationId: id2,
         fullName: name,
-        custARN: arn
+        custARN: arn,
+        coApplicantIndex: index || this.getCurrentCoApplicantIndex()
       })
     );
 
@@ -558,6 +574,11 @@ restoreLoanEditContext() {
     this.co_applicationId = parsed.applicationId;
     this.co_custName = parsed.fullName;
     this.co_custARN = parsed.custARN || null;
+    
+if (parsed.coApplicantIndex) {
+    this.currentCoApplicantIndex = Number(parsed.coApplicantIndex);
+  }
+
   }
 
 restoreLoanIdFromSession() {
@@ -810,11 +831,20 @@ localStorage.setItem(
     this.formData = {};
   }
   
+removeStepCompleted(route: string) {
+  this.completedSteps.delete(route);
 
+  localStorage.setItem(
+    this.getCompletedStepsKey(),
+    JSON.stringify([...this.completedSteps])
+  );
+}
 //switching main and coapplicant
 private getMainCompletedKey(): string {
-  return 'main_completedSteps';
+  return `main_completedSteps_${this.applicantId || 'defaultApplicant'}_${this.applicationId || 'defaultApplication'}`;
 }
+
+
 
 private getCompletedSetFromKey(key: string): Set<string> {
   const saved = localStorage.getItem(key);
@@ -870,4 +900,3 @@ restoreApplicantStatesFromStorage() {
 
 
 }
-

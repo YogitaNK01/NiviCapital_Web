@@ -37,7 +37,7 @@ export class Coapplicantinfo implements OnInit {
 
   mobileSubmitted: boolean = false;
   coApplicantIndex: number = 1;
-
+showmsg: boolean = false;
   constructor(public service: Main, private router: Router, private addcustomerservice: Addcustomerservice,
     private route: ActivatedRoute, private cd: ChangeDetectorRef, private loanform: Loanformservice, private loanStepper: Loanstepperservice) { }
 
@@ -58,14 +58,23 @@ export class Coapplicantinfo implements OnInit {
 
       this.coApplicantIndex = Number(params['coApplicantIndex']) || 1;
 
+      
+ this.loanStepper.setCurrentCoApplicantIndex(this.coApplicantIndex);
+
+    // reset first, then restore per index
+    this.mobileSubmitted = false;
+    this.prefillPhone = '';
+
+
       this.restoreCoApplicantState();
+       this.cd.detectChanges();
     });
 
-    if (this.loanform.coappStep === 2) {
-      // this.mobileSubmitted = true;
-      this.mobileSubmitted = this.loanform.coappStep === 2;
+    // if (this.loanform.coappStep === 2) {
+    //   // this.mobileSubmitted = true;
+    //   this.mobileSubmitted = this.loanform.coappStep === 2;
 
-    }
+    // }
 
   }
 
@@ -88,7 +97,7 @@ export class Coapplicantinfo implements OnInit {
     'co-summaryinfo'
   ];
   //on refresh page redirecting to number page so storing here 
-  restoreCoApplicantState() {
+  restoreCoApplicantState1() {
     const cleanUrl = this.router.url.split('?')[0];
 
     const isStepperRoute = this.coApplicantChildRoutes.some(route =>
@@ -103,6 +112,58 @@ export class Coapplicantinfo implements OnInit {
     const saved = localStorage.getItem(`coapp_mobile_submitted_${this.applicantId}_${this.coApplicantIndex}`);
     // this.mobileSubmitted = saved === 'true';
   }
+  restoreCoApplicantState() {
+  const cleanUrl = this.router.url.split('?')[0];
+
+  const isStepperRoute = this.coApplicantChildRoutes.some(route =>
+    cleanUrl.includes(route)
+  );
+
+  
+const listKey = `coApplicants_${this.applicantId}`;
+  const savedList = localStorage.getItem(listKey);
+  const coApplicants = savedList ? JSON.parse(savedList) : [];
+
+  const current = coApplicants.find(
+    (x: any) => Number(x.index) === Number(this.coApplicantIndex)
+  );
+
+  if (current?.phone) {
+    this.prefillPhone = current.phone;
+    this.loanform.coapppmobile = current.phone;
+  }
+
+  if (isStepperRoute) {
+    this.mobileSubmitted = true;
+    return;
+  }
+
+  const saved = localStorage.getItem(
+    `coapp_mobile_submitted_${this.applicantId}_${this.coApplicantIndex}`
+  );
+
+  this.mobileSubmitted = saved === 'true';
+
+  // reset phone for new coapp
+  if (!this.mobileSubmitted) {
+    this.prefillPhone = '';
+    this.loanform.coapppmobile = '';
+    this.loanform.coappStep = 1;
+  }
+
+  // if already saved, prefill phone from list
+  // const listKey = `coApplicants_${this.applicantId}`;
+  // const savedList = localStorage.getItem(listKey);
+  // const coApplicants = savedList ? JSON.parse(savedList) : [];
+
+  // const current = coApplicants.find(
+  //   (x: any) => Number(x.index) === Number(this.coApplicantIndex)
+  // );
+
+  if (current?.phone) {
+    this.prefillPhone = current.phone;
+  }
+}
   getPhoneFieldState(phone: any): 'default' | 'error' | 'success' {
     if (phone.touched && phone.invalid) {
       return 'error';
@@ -147,6 +208,12 @@ export class Coapplicantinfo implements OnInit {
     .slice(0, 4);
 
   localStorage.setItem(key, JSON.stringify(coApplicants));
+  sessionStorage.setItem('coAppIds', JSON.stringify({
+  applicantId: userid,
+  applicationId: this.applicationId,
+  fullName: '',
+  coApplicantIndex: this.coApplicantIndex
+}));
 }
 
   next() {
@@ -178,7 +245,8 @@ export class Coapplicantinfo implements OnInit {
 
       next: (res) => {
         console.log(res);
-        const userid = res.data[0].userInitiateId
+        if(res.status === 'success'){
+           const userid = res.data[0].userInitiateId
         this.saveCoApplicantToList(userid);
         this.loanStepper.setStepperType('CO_APPLICANT');
 
@@ -197,6 +265,11 @@ export class Coapplicantinfo implements OnInit {
         );
 
         this.searchLoading = false;
+        }
+        else {
+this.showmsg = true
+        }
+       
       },
       error: (err) => {
         console.error("error msg", err);

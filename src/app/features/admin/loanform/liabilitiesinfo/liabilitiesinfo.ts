@@ -139,7 +139,8 @@ export class Liabilitiesinfo {
         this.stepperService.setCo_appId(
           parsed.applicantId,
           parsed.applicationId,
-          parsed.fullName
+          parsed.fullName,
+          undefined,this.stepperService.getCurrentCoApplicantIndex()
         );
       }
     }
@@ -244,8 +245,10 @@ this.normalizeLiabilityPayload({
   }
 
   getStorageKey() {
+     const index = this.stepperService.getCurrentCoApplicantIndex();
+    // return `kycinfo_coapp_${this.applicantId}_${index}`;
     return this.isCoApplicant
-      ? `liabilitiesinfoData_coapp_${this.applicantId}`
+      ? `liabilitiesinfoData_coapp_${this.applicantId}_${index}`
       : `liabilitiesinfoData_main_${this.applicantId}`;
   }
   get loans(): FormArray {
@@ -1159,6 +1162,12 @@ normalizeLiabilityPayload(payload: any) {
     this.creditcard.clear();
     this.bnpl.clear();
     this.other.clear();
+    
+const loansArray = this.fb.array([]);
+  const creditcardArray = this.fb.array([]);
+  const bnplArray = this.fb.array([]);
+  const otherArray = this.fb.array([]);
+
 
     items.forEach((item: any) => {
 
@@ -1198,6 +1207,7 @@ normalizeLiabilityPayload(payload: any) {
 
         this.loans.push(group);
       }
+      // ---------------- CREDIT_CARD_OUTSTANDING ----------------
 
       if (item.liabilityType === 'CREDIT_CARD_OUTSTANDING' || item.liabilityType === 'creditcard') {
 
@@ -1214,6 +1224,7 @@ normalizeLiabilityPayload(payload: any) {
         });
 
         this.creditcard.push(group);
+        // creditcardArray.push(group)
       }
 
       // ---------------- BNPL ----------------
@@ -1264,7 +1275,7 @@ normalizeLiabilityPayload(payload: any) {
     if (this.creditcard.length === 0) this.creditcard.push(this.createCreditcard());
     if (this.bnpl.length === 0) this.bnpl.push(this.createBNPL());
     if (this.other.length === 0) this.other.push(this.createOther());
-
+this.liabilityForm.updateValueAndValidity();
     this.cd.detectChanges();
   }
   back() {

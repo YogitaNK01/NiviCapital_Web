@@ -265,55 +265,15 @@ goToStep(route: string, index: number) {
 
 
     const step = this.steps[index];
-
-    if (this.stepservice.isStepCompleted(step.route)) {
+  if (!step) return false;
+    if (this.stepservice.isMainStepCompleted(step.route)) {
       return false;
     }
 
     return index > this.currentIndex;
   }
 
-  isSubStepperDisabled1(parentIndex: number, subIndex: number): boolean {
 
-
-    const parentStep = this.steps[parentIndex];
-    if (!parentStep?.children) return false;
-
-
-    const children = parentStep.children;
-    const stepKey = children[subIndex].key;
-
-    // const stepKey = this.normalizeQualification(
-    //   parentStep.children[subIndex].label
-    // );
-
-
-    if (this.stepperService.isEducationStepCompleted(stepKey)) {
-      return false;
-    }
-    // if (this.activeQualificationId === stepKey) {
-    //   return false;
-    // }
-
-    const activeIndex = children.findIndex(
-      (c: any) => c.key === this.activeQualificationId
-    );
-
-    //  current → allowed
-    if (subIndex === activeIndex) return false;
-
-    //  previous → allowed
-    if (subIndex < activeIndex) return false;
-
-    return true;
-
-
-    // const activeIndex = parentStep.children.findIndex(
-    //   (c: any) => this.normalizeQualification(c.label) === this.activeQualificationId
-    // );
-
-    // return subIndex > activeIndex;
-  }
 
   isSubStepperDisabled(parentIndex: number, subIndex: number): boolean {
 
@@ -324,7 +284,6 @@ goToStep(route: string, index: number) {
 
     // find active index
     const activeIndex = children.findIndex(
-      // (c: any) => this.normalizeQualification(c.label) === this.activeQualificationId
       (c: any) => c.key === this.activeQualificationId
     );
 
@@ -375,10 +334,7 @@ goToStep(route: string, index: number) {
         // relativeTo: this.route,
         queryParams: {
 
-          applicantId: this.applicantId,
-          applicationId: this.applicationId,
-          custName: this.custName,
-          custARN: this.custARN,
+          
           qualificationlabel: stepKey,
           qualificationId: flowQualificationId
           // qualificationId: sub.id

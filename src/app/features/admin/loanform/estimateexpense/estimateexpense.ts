@@ -113,8 +113,8 @@ export class Estimateexpense {
         this.stepperService.setCo_appId(
           parsed.applicantId,
           parsed.applicationId,
-          parsed.fullName
-        );
+          parsed.fullName,
+       undefined,this.stepperService.getCurrentCoApplicantIndex());
       }
     }
 

@@ -136,8 +136,8 @@ export class Monthlyexpenditureinfo {
         this.stepperService.setCo_appId(
           parsed.applicantId,
           parsed.applicationId,
-          parsed.fullName
-        );
+          parsed.fullName,
+        undefined,this.stepperService.getCurrentCoApplicantIndex());
       }
     }
     if (this.isCoApplicant) {
@@ -229,8 +229,10 @@ export class Monthlyexpenditureinfo {
   }
 
   getStorageKey() {
+     const index = this.stepperService.getCurrentCoApplicantIndex();
+    // return `kycinfo_coapp_${this.applicantId}_${index}`;
     return this.isCoApplicant
-      ? `monthlyExpenditureData_coapp_${this.applicantId}`
+      ? `monthlyExpenditureData_coapp_${this.applicantId}_${index}`
       : `monthlyExpenditureData_main_${this.applicantId}`;
   }
   get other(): FormArray {

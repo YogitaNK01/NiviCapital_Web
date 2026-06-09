@@ -82,6 +82,12 @@ export class Additionalinfo implements OnInit {
 uploadedFileName: string | null = null;
 localFiles: any = {};
 
+//edit from summary
+isFromSummary = false;
+isViewMode = false;
+isEditMode = false;
+originalFormValue: any = null;
+
   constructor(private fb: FormBuilder, public main: Main, private route: ActivatedRoute, private router: Router, private stepperService: Loanstepperservice,
     private formSvc: Loanformservice, private msgBox: Msgboxservice,) { }
   async ngOnInit() {
@@ -90,6 +96,10 @@ localFiles: any = {};
     this.stepperService.setStepperType(
       this.isCoApplicant ? 'CO_APPLICANT' : 'MAIN'
     );
+
+    this.stepperService.restoreLoanEditContext();
+this.stepperService.restoreLoanIdFromSession();
+
     //application and applicant id of main-applicant 
     let Allids = this.stepperService.getLoanId();
 
@@ -118,13 +128,12 @@ localFiles: any = {};
         this.stepperService.setCo_appId(
           parsed.applicantId,
           parsed.applicationId,
-          parsed.fullName
-        );
+          parsed.fullName,
+        undefined,this.stepperService.getCurrentCoApplicantIndex());
       }
     }
 
 
-    // this.applicantId = this.isCoApplicant ? AllCoapp_ids[0] : Allids[0];
     if (this.isCoApplicant) {
       this.applicantId = AllCoapp_ids?.[0];
       this.applicationId = AllCoapp_ids?.[1];
@@ -262,8 +271,11 @@ localFiles: any = {};
   }
 
   getStorageKey() {
+     const index = this.stepperService.getCurrentCoApplicantIndex();
+    // return `kycinfo_coapp_${this.applicantId}_${index}`;
+
     return this.isCoApplicant
-      ? `additionalinfo_coapp_${this.applicantId}`
+      ? `additionalinfo_coapp_${this.applicantId}_${index}`
       : `additionalinfo_main_${this.applicantId}`;
   }
 
@@ -788,4 +800,73 @@ setExistingFile(type: string, fileName: string, fileUrl: string) {
     // this.stepperService.next();
 
   }
+
+  //edit from summary
+
+  disableAdditionalInfoForm() {
+  this.additionalinfoForm.disable({ emitEvent: false });
+}
+
+enableAdditionalInfoForm() {
+  this.additionalinfoForm.enable({ emitEvent: false });
+
+  this.restoreMiddleNameState();
+  this.updateSpouseValidators(this.additionalinfoForm.get('maritalstatus')?.value);
+}
+
+onEditClick() {
+  this.isViewMode = false;
+  this.isEditMode = true;
+
+  this.enableAdditionalInfoForm();
+
+  this.router.navigate([], {
+    relativeTo: this.route,
+    queryParams: {
+      fromSummary: true,
+      mode: 'edit'
+    },
+    queryParamsHandling: 'merge'
+  });
+}
+cancelSummaryEdit() {
+  if (this.isEditMode && this.originalFormValue) {
+    this.additionalinfoForm.patchValue(this.originalFormValue);
+  }
+
+  this.router.navigate(['/applications', this.applicationId, 'summary']);
+}
+saveSummaryEdit() {
+  this.submitAttempted = true;
+
+  if (!this.canProceed) {
+    this.additionalinfoForm.markAllAsTouched();
+    return;
+  }
+
+  const formdata = this.additionalinfoForm.getRawValue();
+  const input = this.buildAdditionalPayload(formdata);
+
+  this.formSvc.submitAdditionalInfo(input, this.applicationId).subscribe({
+    next: (res: any) => {
+      if (res.status === 'success') {
+        const key = this.getStorageKey();
+        localStorage.setItem(key, JSON.stringify(input));
+
+        if (this.isCoApplicant) {
+          this.formSvc.co_additionalInfoData = input;
+        } else {
+          this.formSvc.additionalInfoData = input;
+        }
+
+        this.lastSavedPayload = { ...input };
+
+        this.router.navigate(['/applications', this.applicationId, 'summary']);
+      }
+    },
+    error: (err) => {
+      console.error('Additional info update failed', err);
+    }
+  });
+}
 }

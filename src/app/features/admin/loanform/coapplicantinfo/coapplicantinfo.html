@@ -23,8 +23,14 @@
                 [(ngModel)]="prefillPhone" [showPhonePrefix]="true" [showPhonePrefixnumber]="true"
                 [state]="getPhoneFieldState(phone)"></app-inputfield>
 
+ <div class="text-danger" *ngIf="showmsg">
 
+                        <div >
+                            This Customer is already added as coapplicant
+                        </div>
+                        </div>
             </div>
+            
 
           </div>
 

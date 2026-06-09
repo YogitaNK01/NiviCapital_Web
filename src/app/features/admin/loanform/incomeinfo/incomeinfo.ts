@@ -300,8 +300,8 @@ export class Incomeinfo {
         this.stepperService.setCo_appId(
           parsed.applicantId,
           parsed.applicationId,
-          parsed.fullName
-        );
+          parsed.fullName,
+        undefined,this.stepperService.getCurrentCoApplicantIndex());
       }
     }
     // this.applicantId = this.isCoApplicant ? AllCoapp_ids[0] : Allids[0];
@@ -341,7 +341,7 @@ export class Incomeinfo {
     }
      if (this.loanformservice.isEditFlow()) {
       setTimeout(() => {
-        // this.patchFromSummary();
+        this.patchFromSummary();
       }, 300);
     } else {
 
@@ -371,8 +371,10 @@ export class Incomeinfo {
   }
 
   getStorageKey() {
+     const index = this.stepperService.getCurrentCoApplicantIndex();
+    // return `kycinfo_coapp_${this.applicantId}_${index}`;
     return this.isCoApplicant
-      ? `IncomeInfoData_coapp_${this.applicantId}`
+      ? `IncomeInfoData_coapp_${this.applicantId}_${index}`
       : `IncomeInfoData_main_${this.applicantId}`;
   }
   get currentApplicantState() {
@@ -831,14 +833,141 @@ export class Incomeinfo {
     this.slotCounter = incomeCounter + businessCounter;
   }
 
-  //edit flow =patch from summary
-  // patchFromSummary() {
-  //   if (!this.formSvc.isEditFlow()) return;
+  // edit flow =patch from summary
 
-  //   const data = this.formSvc.getSummarySection('additionalInfo');
-  //   console.log("patch",data)
-  //   if (!data) return;
-  // }
+patchFromSummary() {
+  if (!this.loanformservice.isEditFlow()) return;
+
+  const income = this.loanformservice.getSummarySection('incomeDetails');
+  const business = this.loanformservice.getSummarySection('incomeBusinessDetails');
+
+  console.log("PATCH SUMMARY:", income, business);
+
+  if (!income && !business) return;
+
+  this.allDocuments = [];
+  this.otherIncomeSlots = [];
+  this.otherBusinessSlots = [];
+
+  const buildDoc = (item: any) => {
+    const key = item.name;
+
+    return {
+      documentId: key,
+      title: key,
+      slotKey: key,
+      fileName: item.url,
+      type: key,
+      viewUrl: this.buildViewUrl(item.url)
+    };
+  };
+
+  // SALARIED FLOW
+  if (this.isSalariedUser() && income) {
+
+    income.salarySlips?.forEach((item: any) =>
+      this.allDocuments.push(buildDoc(item))
+    );
+
+    income.bankStatements?.forEach((item: any) =>
+      this.allDocuments.push(buildDoc(item))
+    );
+
+    income.form16?.forEach((item: any) =>
+      this.allDocuments.push(buildDoc(item))
+    );
+
+    income.itrs?.forEach((item: any) =>
+      this.allDocuments.push(buildDoc(item))
+    );
+
+    // OTHER INCOME
+    income.otherIncome?.forEach((item: any, i: number) => {
+      const key = item.name || `other_income_${i + 1}`;
+
+      this.otherIncomeSlots.push({
+        id: i + 1,
+        key,
+        title: key
+      });
+
+      this.allDocuments.push(buildDoc({ name: key, url: item.url }));
+    });
+  }
+
+  // BUSINESS FLOW
+  if (!this.isSalariedUser() && business) {
+
+    business.business_finance_3_years?.forEach((item: any) =>
+      this.allDocuments.push(buildDoc(item))
+    );
+
+    business.business_itr_3_years?.forEach((item: any) =>
+      this.allDocuments.push(buildDoc(item))
+    );
+
+    business.business_gst_1_year?.forEach((item: any) =>
+      this.allDocuments.push(buildDoc(item))
+    );
+
+    business.business_bank_statement_1_year?.forEach((item: any) =>
+      this.allDocuments.push(buildDoc(item))
+    );
+
+    // OTHER BUSINESS
+    business.otherBussinessincome?.forEach((item: any, i: number) => {
+      const key = item.name || `other_business_${i + 1}`;
+
+      this.otherBusinessSlots.push({
+        id: i + 1,
+        key,
+        title: key
+      });
+
+      this.allDocuments.push(buildDoc({ name: key, url: item.url }));
+    });
+  }
+
+ // FINAL STEP (VERY IMPORTANT)
+  this.rebuildDocumentMap();
+
+  const stepData = {
+    uploadedFiles: [],
+    otherIncomeSlots: this.otherIncomeSlots,
+    otherBusinessSlots: this.otherBusinessSlots
+  };
+
+  const key = this.getStorageKey();
+
+  localStorage.setItem(key, JSON.stringify(stepData));
+
+  this.stepperService.setStepData(this.getStepRoute(), stepData);
+
+  if (this.isCoApplicant) {
+    this.loanformservice.co_incomeInfoData = stepData;
+  } else {
+    this.loanformservice.incomeInfoData = stepData;
+  }
+
+  console.log("FINAL DOC MAP:", this.documentMap);
+
+  this.cd.detectChanges();
+}
+buildViewUrl(fileName: string): string {
+  if (!fileName) return '';
+
+  if (fileName.startsWith('http')) {
+    return fileName;
+  }
+
+  return `${window.location.origin}/files/${fileName}`;
+}
+
+
+isSalariedUser(): boolean {
+  return this.currentApplicantState?.issalaried;
+}
+
 
   restoreIncomeDraftData(savedResponses: any[]): void {
     if (!savedResponses?.length) return;

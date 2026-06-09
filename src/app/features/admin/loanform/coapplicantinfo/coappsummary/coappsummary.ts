@@ -33,8 +33,9 @@ export class Coappsummary {
 
   ];
   summaryForm!: FormGroup;
-
-  basicFields:any[] = [];
+  summaryData: any = null;
+  summaryLoaded = false;
+  basicFields: any[] = [];
 
   currentOccupation = '';
   courseDetailsFields: { label: string; value: any }[] = [];
@@ -169,8 +170,8 @@ export class Coappsummary {
         this.stepperService.setCo_appId(
           parsed.applicantId,
           parsed.applicationId,
-          parsed.fullName
-        );
+          parsed.fullName,
+        undefined,this.stepperService.getCurrentCoApplicantIndex());
       }
     }
 
@@ -212,9 +213,11 @@ export class Coappsummary {
       (res: any) => {
         if (res && res.status === 'success' && res.data) {
           const data = res.data;
+          this.summaryData = data;
+          this.formSvc.setSummary(data);
 
           const basicInfoData = SummaryHelper.extractcoappBasicInfo(data);
-           this.basicFields = basicInfoData.basicDetailsFields || [];
+          this.basicFields = basicInfoData.basicDetailsFields || [];
           // Use helper methods to extract data
           const generalInfoData = SummaryHelper.extractcoappGeneralInfo(data.generalInfo);
           this.currentOccupation = generalInfoData.currentOccupation;
@@ -326,7 +329,7 @@ export class Coappsummary {
       (res: any) => {
         console.log(res)
         if (res.status === "success") {
-this.saveCoApplicantOnDashboard();
+          this.saveCoApplicantOnDashboard();
           this.router.navigate(['/loanform/co-applicantdetails']);
         }
       },
@@ -338,51 +341,51 @@ this.saveCoApplicantOnDashboard();
     )
   }
   saveCoApplicantOnDashboard() {
-  const loanIds = this.stepperService.getLoanId();
-  const mainApplicantId = loanIds?.[0];
+    const loanIds = this.stepperService.getLoanId();
+    const mainApplicantId = loanIds?.[0];
 
-  const coApplicantIndex = Number(this.route.snapshot.queryParamMap.get('coApplicantIndex') || 1);
+    const coApplicantIndex = Number(this.route.snapshot.queryParamMap.get('coApplicantIndex') || 1);
 
-  const key = `coApplicants_${mainApplicantId}`;
-  const saved = localStorage.getItem(key);
-  let coApplicants = saved ? JSON.parse(saved) : [];
+    const key = `coApplicants_${mainApplicantId}`;
+    const saved = localStorage.getItem(key);
+    let coApplicants = saved ? JSON.parse(saved) : [];
 
-  const fullName = this.getCoApplicantFullName();
+    const fullName = this.getCoApplicantFullName();
 
-  const existingIndex = coApplicants.findIndex(
-    (x: any) => Number(x.index) === coApplicantIndex
-  );
+    const existingIndex = coApplicants.findIndex(
+      (x: any) => Number(x.index) === coApplicantIndex
+    );
 
-  const coappObj = {
-    index: coApplicantIndex,
-    name: fullName || `Co-Applicant ${coApplicantIndex}`,
-    completed: true
-  };
+    const coappObj = {
+      index: coApplicantIndex,
+      name: fullName || `Co-Applicant ${coApplicantIndex}`,
+      completed: true
+    };
 
-  if (existingIndex >= 0) {
-    coApplicants[existingIndex] = coappObj;
-  } else {
-    coApplicants.push(coappObj);
+    if (existingIndex >= 0) {
+      coApplicants[existingIndex] = coappObj;
+    } else {
+      coApplicants.push(coappObj);
+    }
+
+    coApplicants = coApplicants.sort((a: any, b: any) => Number(a.index) - Number(b.index));
+
+    localStorage.setItem(key, JSON.stringify(coApplicants));
   }
+  getCoApplicantFullName(): string {
+    const firstName =
+      this.basicFields?.find((f: any) => f.label === 'First Name')?.value || '';
 
-  coApplicants = coApplicants.sort((a: any, b: any) => Number(a.index) - Number(b.index));
+    const middleName =
+      this.basicFields?.find((f: any) => f.label === 'Middle Name')?.value || '';
 
-  localStorage.setItem(key, JSON.stringify(coApplicants));
-}
-getCoApplicantFullName(): string {
-  const firstName =
-    this.basicFields?.find((f: any) => f.label === 'First Name')?.value || '';
+    const lastName =
+      this.basicFields?.find((f: any) => f.label === 'Last Name')?.value || '';
 
-  const middleName =
-    this.basicFields?.find((f: any) => f.label === 'Middle Name')?.value || '';
-
-  const lastName =
-    this.basicFields?.find((f: any) => f.label === 'Last Name')?.value || '';
-
-  return `${firstName} ${middleName} ${lastName}`
-    .replace(/\s+/g, ' ')
-    .trim();
-}
+    return `${firstName} ${middleName} ${lastName}`
+      .replace(/\s+/g, ' ')
+      .trim();
+  }
 
   submit() { }
 
@@ -454,5 +457,29 @@ getCoApplicantFullName(): string {
     }
 
     return val !== '';
+  }
+
+  //
+
+  goToEdit(sectionKey: string, event: Event) {
+    event.stopPropagation();
+
+    const editUrlMap: any = {
+      general: this.summaryData?.generalInfo?.editUrl,
+      additional: this.summaryData?.additionalInfo?.editUrl,
+      kyc: this.summaryData?.kyc?.editUrl,
+      education: this.summaryData?.educationDetails?.editUrl,
+      income: this.summaryData?.incomeDetails?.editUrl,
+      assets: this.summaryData?.assets?.editUrl,
+      liabilities: this.summaryData?.liabilities?.editUrl,
+      monthly: this.summaryData?.monthlyExpenditure?.editUrl,
+    };
+
+    const editUrl = editUrlMap[sectionKey];
+
+    if (!editUrl) return;
+
+   this.formSvc.startSummaryEditFlow(this.summaryData, 'CO_APPLICANT');
+this.router.navigateByUrl(`${editUrl}?fromSummary=true&mode=view`);
   }
 }

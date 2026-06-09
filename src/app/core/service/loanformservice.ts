@@ -86,9 +86,16 @@ export class Loanformservice {
   private instituteRequest$!: Observable<OptionItem[]>;
 
 
-  summaryData: any = null;summaryLoaded = false;
-  private summaryRequest$?: Observable<ApiResponse<any>>;
+  summaryData: any = null;
+summaryLoaded = false;
 
+//edit from summary
+private readonly SUMMARY_EDIT_CONTEXT_KEY = 'summaryEditContextData';
+private readonly SUMMARY_STORAGE_KEY = 'summaryData';
+
+private summaryRequest$?: Observable<ApiResponse<any>>;
+
+  
   constructor(private http: HttpClient,) { this.restoreFromStorage(); }
 
 
@@ -120,7 +127,7 @@ export class Loanformservice {
     }
   }
 
-  // *************************Edit flow*********************************
+  // *************************Edit flow from table*********************************
 
  
 isEditFlow(): boolean {
@@ -144,14 +151,14 @@ loadSummaryIfEdit(applicationId: string,applicantId:string) {
   return this.getCoappSummary(applicationId,applicantId);
 }
 
-setSummary(data: any) {
-  this.summaryData = data;
-  this.summaryLoaded = true;
-}
+// setSummary(data: any) {
+//   this.summaryData = data;
+//   this.summaryLoaded = true;
+// }
 
-getSummarySection(section: string) {
-  return this.summaryData?.[section] || null;
-}
+// getSummarySection(section: string) {
+//   return this.summaryData?.[section] || null;
+// }
 
 
 
@@ -510,4 +517,98 @@ data
 
     );
   }
+
+   // *************************edit flow from summary*************************
+
+startSummaryEditFlow(
+  data: any,
+  applicantType: 'MAIN' | 'CO_APPLICANT' = 'MAIN'
+) {
+  const context = {
+    edit: true,
+    fromSummary: true,
+    applicantType
+  };
+
+  sessionStorage.setItem(this.SUMMARY_EDIT_CONTEXT_KEY, JSON.stringify(context));
+  this.setSummary(data);
+}
+
+isSummaryEditFlow(): boolean {
+  const ctx = sessionStorage.getItem(this.SUMMARY_EDIT_CONTEXT_KEY);
+
+  if (!ctx) return false;
+
+  try {
+    return JSON.parse(ctx)?.edit === true;
+  } catch {
+    return false;
+  }
+}
+
+isFromSummaryFlow(): boolean {
+  const ctx = sessionStorage.getItem(this.SUMMARY_EDIT_CONTEXT_KEY);
+
+  if (!ctx) return false;
+
+  try {
+    return JSON.parse(ctx)?.fromSummary === true;
+  } catch {
+    return false;
+  }
+}
+
+getSummaryEditApplicantType(): 'MAIN' | 'CO_APPLICANT' {
+  const ctx = sessionStorage.getItem(this.SUMMARY_EDIT_CONTEXT_KEY);
+
+  if (!ctx) return 'MAIN';
+
+  try {
+    return JSON.parse(ctx)?.applicantType || 'MAIN';
+  } catch {
+    return 'MAIN';
+  }
+}
+
+setSummary(data: any) {
+  this.summaryData = data;
+  this.summaryLoaded = true;
+
+  sessionStorage.setItem(this.SUMMARY_STORAGE_KEY, JSON.stringify(data));
+}
+
+getSummaryData() {
+  if (this.summaryData) {
+    return this.summaryData;
+  }
+
+  const stored = sessionStorage.getItem(this.SUMMARY_STORAGE_KEY);
+
+  if (!stored) return null;
+
+  try {
+    this.summaryData = JSON.parse(stored);
+    this.summaryLoaded = true;
+    return this.summaryData;
+  } catch {
+    return null;
+  }
+}
+
+getSummarySection(section: string) {
+  const data = this.getSummaryData();
+  return data?.[section] || null;
+}
+
+clearSummaryEditFlow() {
+  sessionStorage.removeItem(this.SUMMARY_EDIT_CONTEXT_KEY);
+}
+
+clearSummary() {
+  this.summaryData = null;
+  this.summaryLoaded = false;
+  sessionStorage.removeItem(this.SUMMARY_STORAGE_KEY);
+}
+
+
 }

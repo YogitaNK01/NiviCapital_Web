@@ -147,6 +147,9 @@ export class GeneralInfo implements OnInit {
     if (this.isCoApplicant) {
       this.stepperService.restoreCoAppIdFromSession();
     }
+    this.stepperService.restoreLoanEditContext();
+this.stepperService.restoreLoanIdFromSession();
+
     let Allids = this.stepperService.getLoanId();
 
     this.applicantId = Allids[0];
@@ -176,8 +179,8 @@ export class GeneralInfo implements OnInit {
           this.stepperService.setCo_appId(
             parsed.applicantId,
             parsed.applicationId,
-            parsed.fullName, parsed.custARN
-          );
+            parsed.fullName, parsed.custARN,
+          this.stepperService.getCurrentCoApplicantIndex());
 
         } else {
           console.error('Invalid coAppIds in sessionStorage:', parsed);
@@ -318,8 +321,10 @@ export class GeneralInfo implements OnInit {
 
   }
   getStorageKey() {
+     const index = this.stepperService.getCurrentCoApplicantIndex();
+    // return `kycinfo_coapp_${this.applicantId}_${index}`;
     return this.isCoApplicant
-      ? `generalInfo_coapp_${this.applicantId}`
+      ? `generalInfo_coapp_${this.applicantId}_${index}`
       : `generalInfo_main_${this.applicantId}`;
   }
 
@@ -1023,7 +1028,7 @@ export class GeneralInfo implements OnInit {
     };
 
     localStorage.setItem(
-      `generalInfo_coapp_${this.applicantId}`,
+      this.getStorageKey(),
       JSON.stringify(this.formSvc.co_generalInfoData)
     );
 
@@ -1253,7 +1258,7 @@ getValueByLabel(list: any[], label: string) {
 
         this.formSvc.co_generalInfoData = { ...localPayload };
         localStorage.setItem(
-          `generalInfo_coapp_${this.applicantId}`,
+          this.getStorageKey(),
           JSON.stringify(this.formSvc.co_generalInfoData)
         );
 

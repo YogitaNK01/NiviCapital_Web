@@ -60,8 +60,8 @@ export class Coappdashboard implements OnInit {
         this.stepperService.setCo_appId(
           parsed.applicantId,
           parsed.applicationId,
-          parsed.fullName
-        );
+          parsed.fullName,
+        undefined,this.stepperService.getCurrentCoApplicantIndex());
       }
     }
 
@@ -78,10 +78,14 @@ export class Coappdashboard implements OnInit {
     }
 
     const nextIndex = this.getNextAvailableCoApplicantIndex();
+    this.clearCoApplicantLocalData(nextIndex);
 
+    sessionStorage.removeItem('coAppIds');
+    sessionStorage.removeItem('coapp_cifdetails');
+    this.stepperService.setStepperType('CO_APPLICANT');
     this.stepperService.setCurrentCoApplicantIndex(nextIndex);
 
-    localStorage.removeItem(`coapp_completedSteps_${this.applicantId}_${nextIndex}`);
+    // localStorage.removeItem(`coapp_completedSteps_${this.applicantId}_${nextIndex}`);
 
 
     this.router.navigate(
@@ -90,7 +94,7 @@ export class Coappdashboard implements OnInit {
         relativeTo: this.route,
         queryParams: {
 
-          coApplicantIndex: nextIndex
+          coApplicantIndex: nextIndex,mode: 'new'
         },
         // queryParamsHandling: 'merge' 
       }
@@ -109,27 +113,83 @@ export class Coappdashboard implements OnInit {
     return this.maxCoApplicants;
   }
 
-  loadCoApplicants() {
+  loadCoApplicants1() {
     const saved = localStorage.getItem(`coApplicants_${this.applicantId}`);
     this.coApplicants = saved ? JSON.parse(saved) : [];
   }
 
+loadCoApplicants() {
+  const saved = localStorage.getItem(this.getCoappListKey());
+  this.coApplicants = saved ? JSON.parse(saved) : [];
+
+  this.coApplicants = this.coApplicants.sort(
+    (a: any, b: any) => Number(a.index) - Number(b.index)
+  );
+
+  this.updateCoApplicantStepStatus();
+}
+updateCoApplicantStepStatus() {
+  const stepRoute = this.getStepRoute();
+
+  if (this.coApplicants.length > 0) {
+    this.stepperService.markStepCompleted(stepRoute);
+  } else {
+    // optional if your service has remove method
+    this.stepperService.removeStepCompleted?.(stepRoute);
+  }
+}
+
+private getCoappListKey(): string {
+  return `coApplicants_${this.applicantId}`;
+}
+
   //open 
   openCoApplicant(index: number) {
+    const current = this.coApplicants.find(
+      x => Number(x.index) === Number(index)
+    );
+    
+ if (!current) return;
+
+  this.stepperService.setStepperType('CO_APPLICANT');
+
+    this.stepperService.setCurrentCoApplicantIndex(index);
+
+    
+ sessionStorage.setItem('coAppIds', JSON.stringify({
+    applicantId: current.applicantId,
+    applicationId: current.applicationId || this.applicationId,
+    fullName: current.name || '',
+    coApplicantIndex: index
+  }));
+
+  this.stepperService.setCo_appId(
+    current.applicantId,
+    current.applicationId || this.applicationId,
+    current.name || '',
+    undefined,this.stepperService.getCurrentCoApplicantIndex()
+  );
+
+
     this.router.navigate(
       ['coapplicantinfo', 'co-basicinfo'],
       {
         relativeTo: this.route,
         queryParams: {
 
-          coApplicantIndex: index
+          coApplicantIndex: index,
+
+          id: current?.userInitiateId || '',
+          phone: current?.phone || '',
+           mode: 'existing'
+
         }
       }
     );
   }
 
   //delete 
-  deleteCoApplicant(index: number) {
+  deleteCoApplicant1(index: number) {
     this.coApplicants = this.coApplicants.filter(x => Number(x.index) !== Number(index));
 
     localStorage.setItem(
@@ -139,7 +199,88 @@ export class Coappdashboard implements OnInit {
 
     localStorage.removeItem(`coapp_mobile_submitted_${this.applicantId}_${index}`);
   }
+  deleteCoApplicant(index: number, event?: Event) {
+    event?.stopPropagation();
+    event?.preventDefault();
 
+    // remove card from dashboard list
+    this.coApplicants = this.coApplicants.filter(
+      x => Number(x.index) !== Number(index)
+    );
+
+    localStorage.setItem(
+      `coApplicants_${this.applicantId}`,
+      JSON.stringify(this.coApplicants)
+    );
+
+    // clear all old form data for this coapp index
+    this.clearCoApplicantLocalData(index);
+
+    // if currently inside deleted coapp route, come back to dashboard
+    // const currentIndex = Number(this.route.snapshot.queryParams['coApplicantIndex']);
+
+    // if (currentIndex === Number(index)) {
+    //   this.router.navigate(['./'], { relativeTo: this.route });
+    // }
+
+    this.loadCoApplicants(); this.updateCoApplicantStepStatus();
+    this.cd.detectChanges();
+  }
+
+  private clearCoApplicantLocalData(index: number): void {
+    const mainApplicantId = this.applicantId;
+
+    // exact keys
+    const exactKeys = [
+      `coapp_mobile_submitted_${mainApplicantId}_${index}`,
+      `coapp_completedSteps_${mainApplicantId}_${index}`,
+      `coapp_stepData_${mainApplicantId}_${index}`,
+      `coapp_currentStep_${mainApplicantId}_${index}`,
+
+      // if you used these patterns anywhere
+      `basicInfoData_coapp_${mainApplicantId}_${index}`,
+      `generalInfoData_coapp_${mainApplicantId}_${index}`,
+      `additionalinfo_coapp_${mainApplicantId}_${index}`,
+      `kycInfoData_coapp_${mainApplicantId}_${index}`,
+      `IncomeInfoData_coapp_${mainApplicantId}_${index}`,
+      `assetsinfoData_coapp_${mainApplicantId}_${index}`,
+      `liabilitiesinfoData_coapp_${mainApplicantId}_${index}`,
+      `monthlyexpinfoData_coapp_${mainApplicantId}_${index}`,
+      `summaryinfoData_coapp_${mainApplicantId}_${index}`,
+    ];
+
+    exactKeys.forEach(key => localStorage.removeItem(key));
+
+    // remove any dynamic keys related to this coapp index
+    const patterns = [
+      `_coapp_${mainApplicantId}_${index}`,
+      `_coapp_${index}`,
+      `${mainApplicantId}_${index}`,
+      `coapp_${mainApplicantId}_${index}`,
+    ];
+
+    Object.keys(localStorage).forEach(key => {
+      if (patterns.some(pattern => key.includes(pattern))) {
+        localStorage.removeItem(key);
+      }
+    });
+
+    // clear session if current coapp deleted
+    const storedCoApp = sessionStorage.getItem('coAppIds');
+    if (storedCoApp) {
+      try {
+        const parsed = JSON.parse(storedCoApp);
+        if (Number(parsed.coApplicantIndex) === Number(index)) {
+          sessionStorage.removeItem('coAppIds');
+        }
+      } catch {
+        sessionStorage.removeItem('coAppIds');
+      }
+    }
+
+    // reset service state also
+    this.stepperService.setCurrentCoApplicantIndex(index);
+  }
   onChildActivate() {
     this.isChildRouteActive = true;
   }
@@ -149,18 +290,30 @@ export class Coappdashboard implements OnInit {
 
   onChildDeactivate() {
     this.isChildRouteActive = false;
+    this.loadCoApplicants();
   }
+get hasAtLeastOneCoApplicant(): boolean {
+  return this.coApplicants.length > 0;
+}
+
 
   back() { }
 
   getStepRoute() {
-    return  'co-applicantdetails';
+    return 'co-applicantdetails';
   }
-  next() { 
-    this.stepperService.next();
-    const stepRoute = this.getStepRoute();
-     this.stepperService.markStepCompleted(stepRoute);
-          // this.stepperService.setStepData(stepRoute, formdata);
+  next() {
+   
+
+  if (!this.hasAtLeastOneCoApplicant) {
+    return;
+  }
+
+  const stepRoute = this.getStepRoute();
+
+  this.stepperService.markStepCompleted(stepRoute);
+  this.stepperService.next();
+
   }
 
 }

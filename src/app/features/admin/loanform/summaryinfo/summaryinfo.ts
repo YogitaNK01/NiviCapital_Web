@@ -38,8 +38,8 @@ export class Summaryinfo {
     { key: 'reference', title: 'Reference', alwaysOpen: true },
   ];
   summaryForm!: FormGroup;
-
-
+  summaryData: any = null;
+  summaryLoaded = false;
 
   currentOccupation = '';
   courseDetailsFields: { label: string; value: any }[] = [];
@@ -211,7 +211,7 @@ export class Summaryinfo {
 
 
     if (
-      
+
       (!AllCoapp_ids || !AllCoapp_ids[0] || !AllCoapp_ids[1])
     ) {
 
@@ -229,13 +229,14 @@ export class Summaryinfo {
         this.stepperService.setCo_appId(
           parsed.applicantId,
           parsed.applicationId,
-          parsed.fullName
-        );
+          parsed.fullName,
+          undefined,this.stepperService.getCurrentCoApplicantIndex());
+        
       }
     }
 
 
- 
+
 
     this.getSummarydetails()
     this.buildForm();
@@ -277,7 +278,11 @@ export class Summaryinfo {
     this.formSvc.getSummary(this.applicationId).subscribe(
       (res: any) => {
         if (res && res.status === 'success' && res.data) {
-          const data = res.data;
+          const data = res.data.applicants[0];
+
+          this.summaryData = data;
+          this.formSvc.setSummary(data);
+
           this.totalEstimatedExpenseAud = data.totalEstimatedExpenseAud;
           this.totalEstimatedExpenseInr = data.totalEstimatedExpenseInr;
           this.accordions[1].amount = this.totalEstimatedExpenseInr;
@@ -325,7 +330,7 @@ export class Summaryinfo {
 
 
 
-          const additionalInfoData = SummaryHelper.extractAdditionalInfo(data.additionalInfo,'MAIN');
+          const additionalInfoData = SummaryHelper.extractAdditionalInfo(data.additionalInfo, 'MAIN');
           this.additionalInfoFields = additionalInfoData;
 
           const KYCInfoData = SummaryHelper.extractKYCInfo(data.kyc);
@@ -352,7 +357,7 @@ export class Summaryinfo {
 
 
           // this.monthlyExpenditure = res.data.monthlyExpenditure || this.monthlyExpenditure;
-          this.monthlyExpenditure = { ...this.monthlyExpenditure, ...(res.data.monthlyExpenditure || {}) };
+          this.monthlyExpenditure = { ...this.monthlyExpenditure, ...(data.monthlyExpenditure || {}) };
 
           const allFields = [
             { key: 'rentHomeMaintenance', label: 'Rent / Home Maintenance' },
@@ -368,19 +373,19 @@ export class Summaryinfo {
           this.monthlyExpenditureFields = allFields.filter(field =>
             this.hasMonthlyValue(this.monthlyExpenditure[field.key])
           );
-          this.totalMonthlyExpenditure = res.data.monthlyExpenditure.totalMonthlyInr;
+          this.totalMonthlyExpenditure = data.monthlyExpenditure.totalMonthlyInr;
           this.accordions[8].amount = this.totalMonthlyExpenditure;
 
 
-          this.assetsSections = SummaryHelper.extractAssetsInfo(res.data.assets);
+          this.assetsSections = SummaryHelper.extractAssetsInfo(data.assets);
           console.log("assetsSections", this.assetsSections);
 
-          this.totalassetsval = res.data.assets.totalAssets;
+          this.totalassetsval = data.assets.totalAssets;
           this.accordions[6].amount = this.totalassetsval;
 
 
-          this.liabilitiesSections = SummaryHelper.extractLiabilitiesInfo(res.data.liabilities);
-          this.totalliabilities = res.data.liabilities.totalLiabilities;
+          this.liabilitiesSections = SummaryHelper.extractLiabilitiesInfo(data.liabilities);
+          this.totalliabilities = data.liabilities.totalLiabilities;
           this.accordions[7].amount = this.totalliabilities;
 
           const qualificationInfoData = SummaryHelper.extractQualificationInfo(data.qualificationDetail);
@@ -414,7 +419,26 @@ export class Summaryinfo {
     );
   }
 
+ submitsummary() {
+    let input = {
+      "applicationId": this.applicationId,
+      "applicantId": this.applicantId
+    }
+    this.formSvc.submitCoappSummary(input).subscribe(
+      (res: any) => {
+        console.log(res)
+        if (res.status === "success") {
+          // this.saveCoApplicantOnDashboard();
+          // this.router.navigate(['/loanform/co-applicantdetails']);
+        }
+      },
 
+      (error) => {
+        console.error('Submit summary failed', error);
+      }
+
+    )
+  }
 
   labelDisplayMap: { [key: string]: string } = {
     'GROCERIES HOUSEHOLD': 'Groceries and Household',
@@ -485,6 +509,64 @@ export class Summaryinfo {
 
     return val !== '';
   }
+
+  goToEdit1(sectionKey: string, event: Event) {
+    event.stopPropagation();
+     event.preventDefault();
+
+    const editUrlMap: any = {
+      general: this.summaryData?.generalInfo?.editUrl,
+      expense: this.summaryData?.estimatedExpense?.editUrl,
+      additional: this.summaryData?.additionalInfo?.editUrl,
+      kyc: this.summaryData?.kyc?.editUrl,
+      education: this.summaryData?.educationDetails?.editUrl,
+      income: this.summaryData?.incomeDetails?.editUrl,
+      assets: this.summaryData?.assets?.editUrl,
+      liabilities: this.summaryData?.liabilities?.editUrl,
+      monthly: this.summaryData?.monthlyExpenditure?.editUrl,
+    };
+
+    const editUrl = editUrlMap[sectionKey];
+
+    if (!editUrl) return;
+
+    this.formSvc.startSummaryEditFlow(this.summaryData, 'MAIN');
+    this.router.navigateByUrl(`${editUrl}?fromSummary=true&mode=view`);
+  }
+goToEdit(sectionKey: string, event: Event) {
+  event.stopPropagation();
+  event.preventDefault();
+
+  const frontendRouteMap: any = {
+    general: '/loanform/genralinfo',
+    expense: '/loanform/estimatedexpense',
+    additional: '/loanform/additionalinfo',
+    kyc: '/loanform/kyc',
+    education: '/loanform/educationdetails',
+    income: '/loanform/incomedetails',
+    assets: '/loanform/assets',
+    liabilities: '/loanform/liabilities',
+    monthly: '/loanform/monthlyexpenditure',
+    reference: '/loanform/reference'
+  };
+
+  const route = frontendRouteMap[sectionKey];
+
+  if (!route) {
+    console.warn('No frontend route found for section:', sectionKey);
+    return;
+  }
+
+  this.formSvc.startSummaryEditFlow(this.summaryData, 'MAIN');
+
+  this.router.navigate([route], {
+    queryParams: {
+      fromSummary: true,
+      mode: 'view',
+      section: sectionKey
+    }
+  });
+}
 
   submit() {
   }

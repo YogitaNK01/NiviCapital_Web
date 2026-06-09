@@ -124,8 +124,8 @@ export class Referenceinfo implements OnInit {
         this.stepperService.setCo_appId(
           parsed.applicantId,
           parsed.applicationId,
-          parsed.fullName
-        );
+          parsed.fullName,
+       undefined,this.stepperService.getCurrentCoApplicantIndex());
       }
     }
     if (this.isCoApplicant) {
@@ -186,8 +186,10 @@ export class Referenceinfo implements OnInit {
 
   }
   getStorageKey() {
+     const index = this.stepperService.getCurrentCoApplicantIndex();
+    // return `kycinfo_coapp_${this.applicantId}_${index}`;
     return this.isCoApplicant
-      ? `referenceinfoData_coapp${this.applicantId}`
+      ? `referenceinfoData_coapp${this.applicantId}_${index}`
       : `referenceinfoData_main${this.applicantId}`;
   }
 

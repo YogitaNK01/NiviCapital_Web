@@ -223,7 +223,7 @@
             </app-buttons>
             <!-- <app-buttons type="button" label="Next" class="btn btncustomClass" color="primary" (click)="next1()" ></app-buttons> -->
             <app-buttons type="button" label="Next" class="btn btncustomClass" color="primary" (click)="next()" 
-                [disabled]="registerForm.invalid "> </app-buttons>
+                [disabled]="registerForm.invalid || !otpVerifiedOk"> </app-buttons>
 
         </div>
     </div>

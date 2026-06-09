@@ -551,4 +551,30 @@
     </div>
   </form>
 
+
+<div class="success-modal" *ngIf="isCoApplicant && issuccess">
+  <div class="modal-overlay"></div>
+
+  <div class="modal-container">
+   <button class="close-btn" (click)="onCancel()" >
+      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
+        <path d="M3 3L15 15L3 3Z" fill="#F4F6FF" />
+        <path d="M3 3L15 15" stroke="#F4F6FF" stroke-width="1.125" stroke-linecap="round" stroke-linejoin="round" />
+        <path d="M3 15L15 3" stroke="#F4F6FF" stroke-width="1.125" stroke-linecap="round" stroke-linejoin="round" />
+      </svg></button>
+
+        <app-successbox title="Customer Created Successfully!" [description]="`The customer's KYC details have been submitted and 
+the profile is now active.`" [boxText]="'custname'"
+          [id]="'custid'" [buttons]="[
+    { label: '', action: '', outline: true, color: '',class: 'd-none'  },
+    { label: 'Ok', action: '', outline: false, color: 'primary',class: 'btncustomClass'  }
+  ]" (actionClick)="handleSuccessAction()">
+        </app-successbox>
+
+      </div>
+      </div>
+      
+
+      
+
 </div>

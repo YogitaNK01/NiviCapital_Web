@@ -142,7 +142,8 @@ export class Assetsinfo implements OnInit {
         this.stepperService.setCo_appId(
           parsed.applicantId,
           parsed.applicationId,
-          parsed.fullName
+          parsed.fullName,
+          undefined,this.stepperService.getCurrentCoApplicantIndex()
         );
       }
     }
@@ -234,8 +235,10 @@ export class Assetsinfo implements OnInit {
   }
 
   getStorageKey() {
+     const index = this.stepperService.getCurrentCoApplicantIndex();
+    // return `kycinfo_coapp_${this.applicantId}_${index}`;
     return this.isCoApplicant
-      ? `assetsinfoData_coapp_${this.applicantId}`
+      ? `assetsinfoData_coapp_${this.applicantId}_${index}`
       : `assetsinfoData_main_${this.applicantId}`;
   }
   get f() {
@@ -1163,7 +1166,44 @@ patchFromSummary() {
     items.forEach((item: any) => {
 
       const code = Object.keys(this.assetCodeMap)
-        .find(key => this.assetCodeMap[key] === item.assetItemMasterId);
+        .find(key => (this.assetCodeMap[key] === item.assetItemMasterId));
+
+//       const code = Object.keys(this.assetCodeMap).find(key => {
+
+//   //  1. Match using masterId (normal flow)
+//   if (item.assetItemMasterId && this.assetCodeMap[key] === item.assetItemMasterId) {
+//     return true;
+//   }
+
+//   //  2. Match using assetCategory (SUMMARY fallback)
+//   if (item.assetCategory) {
+//     const categoryMap: any = {
+//       LIQUID_ASSET: ['SAVINGS_ACCOUNT', 'CASH IN HAND'],
+//       PROPERTY: ['PROPERTY'],
+//       GOLD: ['GOLD'],
+//       INVESTMENT: ['INVESTMENT'],
+//       FIXED_DEPOSIT: ['FIXED_DEPOSIT']
+//     };
+
+//     if (categoryMap[item.assetCategory]?.includes(key)) {
+//       return true;
+//     }
+//   }
+
+//   //  3. Match using assetType (more precise fallback)
+//   if (item.assetType) {
+//     const type = item.assetType.toLowerCase();
+
+//     if (type.includes('saving') || type.includes('cash')) return key === 'LIQUID_CASH';
+//     if (type.includes('fd') || type.includes('deposit')) return key === 'FIXED_DEPOSIT';
+//     if (type.includes('investment')) return key === 'INVESTMENT';
+//     if (type.includes('property')) return key === 'PROPERTY';
+//     if (type.includes('gold')) return key === 'GOLD';
+//   }
+
+//   return false;
+// });
+
 
       if (!code) return;
 

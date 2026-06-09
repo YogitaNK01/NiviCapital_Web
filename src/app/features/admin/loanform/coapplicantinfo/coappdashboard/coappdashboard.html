@@ -13,10 +13,10 @@
                 </div>
                 <!-- Co-applicant list -->
                 <div class="container-fluid">
-                    <div class="row " *ngIf="coApplicants.length > 0">
+                    <div class="row coapplicant-grid" *ngIf="coApplicants.length > 0">
 
                         <div class="coapp mb-3" *ngFor="let coapp of coApplicants; let i = index"
-                            [ngClass]="coApplicants.length === 1 ? 'col-12' : 'col-lg-6 col-md-6 col-sm-12'">
+                            [ngClass]="coApplicants.length === 1 ? 'col-12' : 'col-lg-12 col-md-12 col-sm-12'">
                             <div class="coapp-card d-flex align-items-center w-100">
 
                                 <div class="coapp-name d-flex flex-column gap-2">
@@ -39,7 +39,7 @@
                                             </svg>
                                         </span>
 
-                                        <span class="delete-icon" (click)="deleteCoApplicant(coapp.index)">
+                                        <span class="delete-icon" (click)="deleteCoApplicant(coapp.index,$event)">
                                             <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32"
                                                 viewBox="0 0 32 32" fill="none">
                                                 <path
@@ -108,7 +108,7 @@
                 <app-buttons type="button" label="Back" class="btn btncustomClass" [outline]="true" (click)="back()">
                 </app-buttons>
                 <app-buttons type="button" label="Next" class="btn btncustomClass" color="primary" (click)=" next()"
-                    [disabled]="coApplicants.length < 1">
+                    [disabled]="!hasAtLeastOneCoApplicant">
                 </app-buttons>
                 <!-- [disabled]="coApplicants.length < 1" -->
             </div>
