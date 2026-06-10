@@ -38,6 +38,18 @@ export class Summaryinfo {
     { key: 'reference', title: 'Reference', alwaysOpen: true },
     { key: 'coapplicants', title: 'Co-Applicant', alwaysOpen: true },
   ];
+
+  coapp_accordions = [
+    { key: 'co-basic', title: 'Basic Info', alwaysOpen: true },
+    { key: 'co-general', title: 'General Info', alwaysOpen: true },
+    { key: 'co-additional', title: 'Additional Info', alwaysOpen: false },
+    { key: 'co-kyc', title: 'KYC', alwaysOpen: true },
+    { key: 'co-income', title: 'Income Details', alwaysOpen: true },
+    { key: 'co-assets', title: 'Assets', alwaysOpen: false, amount: 0 },
+    { key: 'co-liabilities', title: 'Liabilities', alwaysOpen: true, amount: 0 },
+    { key: 'co-monthly', title: 'Monthly Expenditure', alwaysOpen: false, amount: 0 },
+
+  ];
   summaryForm!: FormGroup;
   summaryData: any = null;
   summaryLoaded = false;
@@ -360,9 +372,9 @@ export class Summaryinfo {
     if (!data) return null;
 
     const generalInfoData =
-  applicantType === 'CO_APPLICANT'
-    ? SummaryHelper.extractcoappGeneralInfo(data?.generalInfo || {})
-    : SummaryHelper.extractGeneralInfo(data?.generalInfo || {});
+      applicantType === 'CO_APPLICANT'
+        ? SummaryHelper.extractcoappGeneralInfo(data?.generalInfo || {})
+        : SummaryHelper.extractGeneralInfo(data?.generalInfo || {});
 
     const estimatedExpenseData = SummaryHelper.extractEstimatedExpense(
       data?.estimatedExpense || {}
@@ -417,7 +429,7 @@ export class Summaryinfo {
       customerId: data?.customerId,
       status: data?.status,
       applicantTypeRaw: this.getApplicantType(data),
-      index: index ,
+      index: index,
 
       applicantName:
         data?.applicantName ||
@@ -445,20 +457,20 @@ export class Summaryinfo {
       totalLivingExpense: data?.estimatedExpense?.totalLivingExpense || 0,
       totalMiscellaneousExpense: data?.estimatedExpense?.totalMiscExpense || 0,
 
-      
-  additionalInfoFields: additionalInfoData || {
-    applicantDetails: [],
-    spouse: [],
-    father: [],
-    mother: []
-  },
 
-      
- kycInfoFields: kycInfoData || {
-    identityAndResidency: [],
-    permanentAddress: [],
-    secondAddress: []
-  },
+      additionalInfoFields: additionalInfoData || {
+        applicantDetails: [],
+        spouse: [],
+        father: [],
+        mother: []
+      },
+
+
+      kycInfoFields: kycInfoData || {
+        identityAndResidency: [],
+        permanentAddress: [],
+        secondAddress: []
+      },
 
 
       incomeDetails: data?.incomeDetails || {
@@ -480,7 +492,7 @@ export class Summaryinfo {
         otherBussinessincome: []
       },
 
-       assetsSections: assetsSections || [],
+      assetsSections: assetsSections || [],
       totalAssets: data?.assets?.totalAssets || 0,
 
       lliabilitiesSections: liabilitiesSections || [],
