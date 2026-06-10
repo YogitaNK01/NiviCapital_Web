@@ -24,7 +24,7 @@ interface OptionItem {
 @Component({
   selector: 'app-uploadkyc',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, FormsModule, Inputfield, Uploadbtn, Datepickernew, Dropdown, Checkbox, Buttons,Successbox],
+  imports: [CommonModule, ReactiveFormsModule, FormsModule, Inputfield, Uploadbtn, Datepickernew, Dropdown, Checkbox, Buttons, Successbox],
   templateUrl: './uploadkyc.html',
   styleUrl: './uploadkyc.scss'
 })
@@ -98,6 +98,8 @@ export class Uploadkyc implements OnDestroy, AfterViewInit {
   userdata: any;
   userid: any;
   co_userid: any;
+  NCId: any;
+  custName: any;
 
   editMode = false;
   editUserData: any = {};
@@ -110,7 +112,7 @@ export class Uploadkyc implements OnDestroy, AfterViewInit {
   lastSavedPayload: any = null;
   isCoApplicant: boolean = false;
   uploadedFileMeta: Record<string, any> = {};
-issuccess:boolean= false;
+  issuccess: boolean = false;
   constructor(public main: Main, private addcustomerservice: Addcustomerservice, private route: ActivatedRoute, private stepperService: Loanstepperservice, private loanservice: Loanformservice, private msgBox: Msgboxservice, private router: Router) { }
 
   ngOnInit(): void {
@@ -145,7 +147,7 @@ issuccess:boolean= false;
           parsed.applicantId,
           parsed.applicationId,
           parsed.fullName,
-          undefined,this.stepperService.getCurrentCoApplicantIndex()
+          undefined, this.stepperService.getCurrentCoApplicantIndex()
         );
       }
     }
@@ -199,11 +201,29 @@ issuccess:boolean= false;
   }
 
 
-
   getStorageKey() {
-    // return `kycinfo_coapp_${this.applicantId}`;
-     const index = this.stepperService.getCurrentCoApplicantIndex();
-    return `kycinfo_coapp_${this.applicantId}_${index}`;
+     const coApplicantId = this.stepperService.getCo_appId()?.[0];
+    const index = this.stepperService.getCurrentCoApplicantIndex();
+    // return `kycinfo_coapp_${this.applicantId}_${index}`;
+     return `kycinfo_coapp_${coApplicantId || 'temp_' + index}` 
+  }
+
+   getCurrentCoApplicantFromList() {
+    const mainApplicantId = this.stepperService.getLoanId()?.[0];
+    const index = this.stepperService.getCurrentCoApplicantIndex();
+
+    const saved = localStorage.getItem(`coApplicants_${mainApplicantId}`);
+    const list = saved ? JSON.parse(saved) : [];
+
+    return list.find((x: any) => Number(x.index) === Number(index));
+  }
+
+  getApiApplicantId() {
+    if (!this.isCoApplicant) {
+      return this.stepperService.getLoanId()?.[0];
+    }
+
+    return this.stepperService.getCo_appId()?.[0] || null;
   }
 
   goToDashboard() {
@@ -408,7 +428,7 @@ issuccess:boolean= false;
         this.ncid.emit(res.ncId);
         this.kycid.emit(res.kycId);
         this.loanservice.setKycId(res.kycId);
-          this.lastSavedPayload = this.normalizeKycPayload(kycPayload);
+        this.lastSavedPayload = this.normalizeKycPayload(kycPayload);
         // this.nextStep.emit();
         if (this.isCoApplicant) {
           this.stepperService.markStepCompleted('co-kyc');
@@ -489,13 +509,15 @@ issuccess:boolean= false;
         this.ncid.emit(res.ncId);
         this.kycid.emit(res.kycId);
         this.loanservice.setKycId(res.kycId);
-          this.lastSavedPayload = this.normalizeKycPayload(kycPayload);
+        this.lastSavedPayload = this.normalizeKycPayload(kycPayload);
         // this.nextStep.emit();
         if (this.isCoApplicant) {
+          this.custName = res.ncId
+          this.NCId = res.ncId
           this.issuccess = true;
           this.stepperService.markStepCompleted('co-kyc');
           this.stepperService.setStepData('co-kyc', kycPayload);
-         
+
         } else {
           this.nextStep.emit();
         }
@@ -760,38 +782,38 @@ issuccess:boolean= false;
       return;
     }
 
- const currentPayload = this.buildKycPayload(this.kycForm.value);
+    const currentPayload = this.buildKycPayload(this.kycForm.value);
 
-  const hasChanged = this.isKycPayloadChanged(
-    currentPayload,
-    this.lastSavedPayload
-  );
+    const hasChanged = this.isKycPayloadChanged(
+      currentPayload,
+      this.lastSavedPayload
+    );
 
-    
-const hasNewFiles = this.hasNewKycFiles();
 
-  const stepRoute = this.isCoApplicant ? 'co-kyc' : 'kycinfo';
+    const hasNewFiles = this.hasNewKycFiles();
 
-  //  No changes + no new files = skip API
-  if (!hasChanged && !hasNewFiles) {
-    console.log('No KYC changes detected, skipping API');
+    const stepRoute = this.isCoApplicant ? 'co-kyc' : 'kycinfo';
 
-    this.stepperService.markStepCompleted(stepRoute);
-    this.stepperService.setStepData(stepRoute, currentPayload);
-    this.stepperService.next();
+    //  No changes + no new files = skip API
+    if (!hasChanged && !hasNewFiles) {
+      console.log('No KYC changes detected, skipping API');
 
-    return;
-  }
+      this.stepperService.markStepCompleted(stepRoute);
+      this.stepperService.setStepData(stepRoute, currentPayload);
+      this.stepperService.next();
+
+      return;
+    }
 
 
     this.kycupload(this.kycForm);
 
   }
-   handleSuccessAction() {
-   this.stepperService.next();
+  handleSuccessAction() {
+    this.stepperService.next();
   }
-    onCancel() {
-   this.issuccess = false;
+  onCancel() {
+    this.issuccess = false;
   }
   buildKycPayload(formValue: any) {
     const firstName = this.editMode
@@ -947,21 +969,26 @@ const hasNewFiles = this.hasNewKycFiles();
     const key = this.getStorageKey();
     localStorage.setItem(key, JSON.stringify(input));
 
-    
-const hasChanged = this.isKycPayloadChanged(input, this.lastSavedPayload);
-  const hasNewFiles = this.hasNewKycFiles();
 
-  // ✅ If no changes, don't call save API
-  if (!hasChanged && !hasNewFiles) {
-    console.log('No KYC changes detected, skipping save-exit API');
+    const hasChanged = this.isKycPayloadChanged(input, this.lastSavedPayload);
+    const hasNewFiles = this.hasNewKycFiles();
+    const apiApplicantId = this.getApiApplicantId();
+
+ if (!apiApplicantId) {
+    this.lastSavedPayload = { ...input };
     return;
   }
+    // ✅ If no changes, don't call save API
+    if (!hasChanged && !hasNewFiles) {
+      console.log('No KYC changes detected, skipping save-exit API');
+      return;
+    }
 
     const inputdata = {
       action: "auto-save",
       sectionKey: "KYC",
       applicationId: this.applicationId,
-      applicantId: this.applicantId,
+      applicantId: apiApplicantId,
       jsonData: input
     };
 
@@ -975,10 +1002,10 @@ const hasChanged = this.isKycPayloadChanged(input, this.lastSavedPayload);
 
     });
   }
-  getSavedKycInfo(): Promise<any> {
+  getSavedKycInfo(applicantId: any): Promise<any> {
     let sectionkey = "KYC"
     return new Promise((resolve) => {
-      this.loanservice.getSavedData(this.applicationId, this.applicantId, sectionkey).pipe()
+      this.loanservice.getSavedData(this.applicationId, applicantId, sectionkey).pipe()
 
         .subscribe({
           next: (res) => {
@@ -1009,8 +1036,13 @@ const hasChanged = this.isKycPayloadChanged(input, this.lastSavedPayload);
 
     const localData = localStorage.getItem(key);
     const parsedLocal = localData ? JSON.parse(localData) : null;
+    const apiApplicantId = this.getApiApplicantId();
+    const apiData = await this.getSavedKycInfo(apiApplicantId);
 
-    const apiData = await this.getSavedKycInfo();
+     if (!apiApplicantId) {
+   
+    return;
+  }
 
     let finalData = null;
 
@@ -1312,58 +1344,58 @@ const hasChanged = this.isKycPayloadChanged(input, this.lastSavedPayload);
   }
 
   private normalizeKycPayload(payload: any) {
-  if (!payload) return null;
+    if (!payload) return null;
 
-  return {
-    applicationId: payload.applicationId || '',
-    applicantId: payload.applicantId || '',
-    custId: payload.custId || '',
+    return {
+      applicationId: payload.applicationId || '',
+      applicantId: payload.applicantId || '',
+      custId: payload.custId || '',
 
-    firstName: payload.firstName || '',
-    lastName: payload.lastName || '',
-    dob: payload.dob || '',
-    aadhaarNumber: payload.aadhaarNumber || '',
-    panNumber: payload.panNumber || '',
-    passportNo: payload.passportNo || '',
+      firstName: payload.firstName || '',
+      lastName: payload.lastName || '',
+      dob: payload.dob || '',
+      aadhaarNumber: payload.aadhaarNumber || '',
+      panNumber: payload.panNumber || '',
+      passportNo: payload.passportNo || '',
 
-    addressType: payload.addressType || '',
-    isDifferentAddress: !!payload.isDifferentAddress,
-    isPermanentMailingChecked: !!payload.isPermanentMailingChecked,
-    isCurrentMailingChecked: !!payload.isCurrentMailingChecked,
-    selectedSecondaryProof: payload.selectedSecondaryProof || null,
+      addressType: payload.addressType || '',
+      isDifferentAddress: !!payload.isDifferentAddress,
+      isPermanentMailingChecked: !!payload.isPermanentMailingChecked,
+      isCurrentMailingChecked: !!payload.isCurrentMailingChecked,
+      selectedSecondaryProof: payload.selectedSecondaryProof || null,
 
-    addresses: (payload.addresses || []).map((a: any) => ({
-      addressType: a.addressType || '',
-      addressLine: a.addressLine || '',
-      addressLine1: a.addressLine1 || '',
-      addressLine2: a.addressLine2 || '',
-      city: a.city || '',
-      state: a.state || '',
-      zipCode: a.zipCode || '',
-      country: a.country || 'India',
-      isPreferredAddress: Number(a.isPreferredAddress || 0),
-      isMailingAddress: Number(a.isMailingAddress || 0)
-    })),
+      addresses: (payload.addresses || []).map((a: any) => ({
+        addressType: a.addressType || '',
+        addressLine: a.addressLine || '',
+        addressLine1: a.addressLine1 || '',
+        addressLine2: a.addressLine2 || '',
+        city: a.city || '',
+        state: a.state || '',
+        zipCode: a.zipCode || '',
+        country: a.country || 'India',
+        isPreferredAddress: Number(a.isPreferredAddress || 0),
+        isMailingAddress: Number(a.isMailingAddress || 0)
+      })),
 
-    // compare only filename, not blob URL
-    fileMeta: {
-      pan: payload.fileMeta?.pan?.fileName || '',
-      aadharfront: payload.fileMeta?.aadharfront?.fileName || '',
-      aadharback: payload.fileMeta?.aadharback?.fileName || '',
-      passport: payload.fileMeta?.passport?.fileName || '',
-      secaddress: payload.fileMeta?.secaddress?.fileName || ''
-    }
-  };
-}
+      // compare only filename, not blob URL
+      fileMeta: {
+        pan: payload.fileMeta?.pan?.fileName || '',
+        aadharfront: payload.fileMeta?.aadharfront?.fileName || '',
+        aadharback: payload.fileMeta?.aadharback?.fileName || '',
+        passport: payload.fileMeta?.passport?.fileName || '',
+        secaddress: payload.fileMeta?.secaddress?.fileName || ''
+      }
+    };
+  }
 
-private isKycPayloadChanged(current: any, saved: any): boolean {
-  return JSON.stringify(this.normalizeKycPayload(current)) !==
-         JSON.stringify(this.normalizeKycPayload(saved));
-}
+  private isKycPayloadChanged(current: any, saved: any): boolean {
+    return JSON.stringify(this.normalizeKycPayload(current)) !==
+      JSON.stringify(this.normalizeKycPayload(saved));
+  }
 
-private hasNewKycFiles(): boolean {
-  return Object.values(this.files || {}).some(file => !!file);
-}
+  private hasNewKycFiles(): boolean {
+    return Object.values(this.files || {}).some(file => !!file);
+  }
 
   ngOnDestroy(): void {
     sessionStorage.removeItem('kycs');

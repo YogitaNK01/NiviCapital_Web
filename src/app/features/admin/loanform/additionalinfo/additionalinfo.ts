@@ -79,14 +79,14 @@ export class Additionalinfo implements OnInit {
   lastSavedPayload: any = null;
 
   photoPreviewUrl: string | null = null;
-uploadedFileName: string | null = null;
-localFiles: any = {};
+  uploadedFileName: string | null = null;
+  localFiles: any = {};
 
-//edit from summary
-isFromSummary = false;
-isViewMode = false;
-isEditMode = false;
-originalFormValue: any = null;
+  //edit from summary
+  isFromSummary = false;
+  isViewMode = false;
+  isEditMode = false;
+  originalFormValue: any = null;
 
   constructor(private fb: FormBuilder, public main: Main, private route: ActivatedRoute, private router: Router, private stepperService: Loanstepperservice,
     private formSvc: Loanformservice, private msgBox: Msgboxservice,) { }
@@ -98,7 +98,7 @@ originalFormValue: any = null;
     );
 
     this.stepperService.restoreLoanEditContext();
-this.stepperService.restoreLoanIdFromSession();
+    this.stepperService.restoreLoanIdFromSession();
 
     //application and applicant id of main-applicant 
     let Allids = this.stepperService.getLoanId();
@@ -129,7 +129,7 @@ this.stepperService.restoreLoanIdFromSession();
           parsed.applicantId,
           parsed.applicationId,
           parsed.fullName,
-        undefined,this.stepperService.getCurrentCoApplicantIndex());
+          undefined, this.stepperService.getCurrentCoApplicantIndex());
       }
     }
 
@@ -210,17 +210,28 @@ this.stepperService.restoreLoanIdFromSession();
       const localData = localStorage.getItem(key);
       const parsedLocal = localData ? JSON.parse(localData) : null;
 
-      const apiData = await this.getSavedAdditionalInfo();
-
       let finalData = null;
 
-      if (apiData) {
-        finalData = apiData;
-        localStorage.setItem(key, JSON.stringify(apiData));
-      } else if (parsedLocal) {
+      // 1. First local data
+      if (parsedLocal) {
         finalData = parsedLocal;
       }
 
+
+      // 2. API only if applicant id exists
+      const apiApplicantId = this.getApiApplicantId();
+
+      if (!finalData && apiApplicantId) {
+        const apiData = await this.getSavedAdditionalInfo(apiApplicantId);
+
+        if (apiData) {
+          finalData = apiData;
+          localStorage.setItem(key, JSON.stringify(apiData));
+        }
+      }
+
+
+// 3. Patch only finalDat
       if (finalData) {
         if (this.isCoApplicant) {
           this.formSvc.co_additionalInfoData = finalData;
@@ -233,45 +244,46 @@ this.stepperService.restoreLoanIdFromSession();
 
         this.lastSavedPayload = this.buildAdditionalPayload(this.additionalinfoForm.getRawValue());
 
-        this.stepperService.markStepCompleted('additionalinfo');
+        this.stepperService.markStepCompleted(this.getStepRoute());
       } else {
         this.lastSavedPayload = null;
       }
 
 
-      let data = this.formSvc.additionalInfoData;
-
-      if (!data) {
-        const key = this.getStorageKey();
-
-        const storedData = localStorage.getItem(key);
-
-        if (storedData) {
-          data = JSON.parse(storedData);
-          // this.formSvc.additionalInfoData = data;
-
-          if (this.isCoApplicant) {
-            this.formSvc.co_additionalInfoData = data;
-          } else {
-            this.formSvc.additionalInfoData = data;
-          }
-
-          this.stepperService.markStepCompleted('additionalinfo');
-        }
-      }
-
-
-      if (this.isCoApplicant) {
-        this.patchAdditionalInfo(this.formSvc.co_additionalInfoData);
-      } else {
-        this.patchAdditionalInfo(this.formSvc.additionalInfoData);
-      }
+      // let data = this.formSvc.additionalInfoData;
+      // if (!data) {
+      //   const key = this.getStorageKey();
+      //   const storedData = localStorage.getItem(key);
+      //   if (storedData) {
+      //     data = JSON.parse(storedData);
+      //     // this.formSvc.additionalInfoData = data;
+      //     if (this.isCoApplicant) {
+      //       this.formSvc.co_additionalInfoData = data;
+      //     } else {
+      //       this.formSvc.additionalInfoData = data;
+      //     }
+      //     this.stepperService.markStepCompleted('additionalinfo');
+      //   }
+      // }
+      // if (this.isCoApplicant) {
+      //   this.patchAdditionalInfo(this.formSvc.co_additionalInfoData);
+      // } else {
+      //   this.patchAdditionalInfo(this.formSvc.additionalInfoData);
+      // }
 
     }
   }
 
   getStorageKey() {
-     const index = this.stepperService.getCurrentCoApplicantIndex();
+    const coApplicantId = this.stepperService.getCo_appId()?.[0];
+    const index = this.stepperService.getCurrentCoApplicantIndex();
+
+    return this.isCoApplicant
+      ? `additionalinfo_coapp_${coApplicantId || 'temp_' + index}`
+      : `additionalinfo_main_${this.stepperService.getLoanId()?.[0]}`;
+  }
+  getStorageKey1() {
+    const index = this.stepperService.getCurrentCoApplicantIndex();
     // return `kycinfo_coapp_${this.applicantId}_${index}`;
 
     return this.isCoApplicant
@@ -343,8 +355,17 @@ this.stepperService.restoreLoanIdFromSession();
       this.additionalinfoForm.get('uploadphoto')?.markAsTouched();
       return;
     }
+
+    const applicantId = this.getApiApplicantId();
+
+    if (!applicantId) {
+      console.error('ApplicantId not found for photo upload');
+      return;
+    }
+
+
     const fd = new FormData();
-    fd.append('applicantId', this.applicantId);
+    fd.append('applicantId', applicantId);
     fd.append('file', result.file);
 
     this.formSvc.uploadPhoto(fd).subscribe({
@@ -388,13 +409,13 @@ this.stepperService.restoreLoanIdFromSession();
     return !!this.uploadedFiles[key];
   }
 
-setExistingFile(type: string, fileName: string, fileUrl: string) {
-  this.localFiles[type] = {
-    name: fileName,
-    url: fileUrl,
-    isExisting: true
-  };
-}
+  setExistingFile(type: string, fileName: string, fileUrl: string) {
+    this.localFiles[type] = {
+      name: fileName,
+      url: fileUrl,
+      isExisting: true
+    };
+  }
 
   getLocalFileName(key: string): string {
     return this.uploadedFiles[key]?.name || 'No file uploaded';
@@ -457,27 +478,27 @@ setExistingFile(type: string, fileName: string, fileUrl: string) {
     const father = data.father || {};
     const mother = data.mother || {};
 
-    
- if (applicantDetails.photoUrl && applicantDetails.fileName) {
-    this.setExistingFile(
-      'applicantphoto',
-      applicantDetails.fileName,
-      applicantDetails.photoUrl
-    );
-  }
+
+    if (applicantDetails.photoUrl && applicantDetails.fileName) {
+      this.setExistingFile(
+        'applicantphoto',
+        applicantDetails.fileName,
+        applicantDetails.photoUrl
+      );
+    }
 
     const genderValue =
       applicantDetails.gender == "M" ? "Male" :
         applicantDetails.gender == "F" ? "Female" : "Third Gender";
 
-        
-  this.photoPreviewUrl = applicantDetails.photoUrl || null;
-  this.uploadedFileName = applicantDetails.fileName || null;
+
+    this.photoPreviewUrl = applicantDetails.photoUrl || null;
+    this.uploadedFileName = applicantDetails.fileName || null;
 
 
     this.additionalinfoForm.patchValue({
 
-      uploadphoto:applicantDetails.fileName || '',
+      uploadphoto: applicantDetails.fileName || '',
       maritalstatus: applicantDetails.maritalStatus ? applicantDetails.maritalStatus.charAt(0) + applicantDetails.maritalStatus.slice(1).toLowerCase() : '',
       // gender: data.gender == "M" ? "Male" : data.gender == "F" ? "Female" : 'O',
       dependents: applicantDetails.numberofDependents,
@@ -619,11 +640,19 @@ setExistingFile(type: string, fileName: string, fileUrl: string) {
     const key = this.getStorageKey();
     localStorage.setItem(key, JSON.stringify(input));
 
+    const apiApplicantId = this.getApiApplicantId();
+
+    
+ if (!apiApplicantId) {
+    this.lastSavedPayload = { ...input };
+    return;
+  }
+
     const inputdata = {
       action: "auto-save",
       sectionKey: "PERSONAL_INFO",
       applicationId: this.applicationId,
-      applicantId: this.applicantId,
+      applicantId: apiApplicantId,
       jsonData: input
     };
 
@@ -633,10 +662,10 @@ setExistingFile(type: string, fileName: string, fileUrl: string) {
       }
     });
   }
-  getSavedAdditionalInfo(): Promise<any> {
+  getSavedAdditionalInfo(applicantId: any): Promise<any> {
     let sectionkey = "PERSONAL_INFO"
     return new Promise((resolve) => {
-      this.formSvc.getSavedData(this.applicationId, this.applicantId, sectionkey).pipe()
+      this.formSvc.getSavedData(this.applicationId, applicantId, sectionkey).pipe()
 
         .subscribe({
           next: (res) => {
@@ -668,7 +697,7 @@ setExistingFile(type: string, fileName: string, fileUrl: string) {
   }
   buildAdditionalPayload(formdata: any) {
     return {
-      applicantId: this.applicantId,
+      applicantId: this.getApiApplicantId(),
       profilePhotoUrl: this.profilePhotoUrl || formdata.uploadphoto || '',
       fileName: this.fileName || this.formSvc.additionalInfoData?.fileName || this.formSvc.co_additionalInfoData?.fileName || '',
       objectName: this.objectName || this.formSvc.additionalInfoData?.objectName || this.formSvc.co_additionalInfoData?.objectName || '',
@@ -714,37 +743,20 @@ setExistingFile(type: string, fileName: string, fileUrl: string) {
       this.additionalinfoForm.markAllAsTouched();
       return;
     }
-    //old input
-    let input1 =
+    const apiApplicantId = this.getApiApplicantId();
 
-    {
-      "applicantId": this.applicantId,
-      "profilePhotoUrl": this.profilePhotoUrl,
-      "fileName": this.fileName,
-      "objectName": this.objectName,
-
-      "maritalStatus": formdata.maritalstatus.toUpperCase(),
-      "gender": this.gendercheckvalue == "Male" ? "M" : this.gendercheckvalue == "Female" ? "F" : 'O',
-
-      "numberOfDependents": formdata.dependents,
-
-      "spouseFirstName": formdata.s_fname,
-      "spouseMiddleName": formdata.s_mname,
-      "spouseLastName": formdata.s_lname,
-      "spouseNoMiddleName": this.isspousemiddlename,
-
-      "fatherFirstName": formdata.f_fname,
-      "fatherMiddleName": formdata.f_mname,
-      "fatherLastName": formdata.f_lname,
-      "fatherNoMiddleName": this.isfathermiddlename,
-
-      "motherFirstName": formdata.m_fname,
-      "motherMiddleName": formdata.m_mname,
-      "motherLastName": formdata.m_lname,
-      "motherNoMiddleName": this.ismothermiddlename
+    if (!apiApplicantId) {
+      console.error('Co-applicant applicantId not found. CIF not generated.');
+      return;
     }
+
+    
     //new input 
-    const input = this.buildAdditionalPayload(formdata);
+    // const input = this.buildAdditionalPayload(formdata);
+    const input = {
+      ...this.buildAdditionalPayload(formdata),
+      applicantId: apiApplicantId
+    };
     const hasChanged = this.isPayloadChanged(input, this.lastSavedPayload);
 
     const stepRoute = this.getStepRoute();
@@ -754,8 +766,6 @@ setExistingFile(type: string, fileName: string, fileUrl: string) {
       this.stepperService.markStepCompleted(stepRoute);
       this.stepperService.setStepData(stepRoute, formdata);
 
-      // this.stepperService.markStepCompleted('additionalinfo');
-      // this.stepperService.setStepData('additionalinfo', formdata);
       this.stepperService.next();
       return;
     }
@@ -801,72 +811,90 @@ setExistingFile(type: string, fileName: string, fileUrl: string) {
 
   }
 
+  getCurrentCoApplicantFromList() {
+    const mainApplicantId = this.stepperService.getLoanId()?.[0];
+    const index = this.stepperService.getCurrentCoApplicantIndex();
+
+    const saved = localStorage.getItem(`coApplicants_${mainApplicantId}`);
+    const list = saved ? JSON.parse(saved) : [];
+
+    return list.find((x: any) => Number(x.index) === Number(index));
+  }
+
+  getApiApplicantId() {
+    if (!this.isCoApplicant) {
+      return this.stepperService.getLoanId()?.[0];
+    }
+
+    return this.stepperService.getCo_appId()?.[0] || null;
+  }
+
   //edit from summary
 
   disableAdditionalInfoForm() {
-  this.additionalinfoForm.disable({ emitEvent: false });
-}
-
-enableAdditionalInfoForm() {
-  this.additionalinfoForm.enable({ emitEvent: false });
-
-  this.restoreMiddleNameState();
-  this.updateSpouseValidators(this.additionalinfoForm.get('maritalstatus')?.value);
-}
-
-onEditClick() {
-  this.isViewMode = false;
-  this.isEditMode = true;
-
-  this.enableAdditionalInfoForm();
-
-  this.router.navigate([], {
-    relativeTo: this.route,
-    queryParams: {
-      fromSummary: true,
-      mode: 'edit'
-    },
-    queryParamsHandling: 'merge'
-  });
-}
-cancelSummaryEdit() {
-  if (this.isEditMode && this.originalFormValue) {
-    this.additionalinfoForm.patchValue(this.originalFormValue);
+    this.additionalinfoForm.disable({ emitEvent: false });
   }
 
-  this.router.navigate(['/applications', this.applicationId, 'summary']);
-}
-saveSummaryEdit() {
-  this.submitAttempted = true;
+  enableAdditionalInfoForm() {
+    this.additionalinfoForm.enable({ emitEvent: false });
 
-  if (!this.canProceed) {
-    this.additionalinfoForm.markAllAsTouched();
-    return;
+    this.restoreMiddleNameState();
+    this.updateSpouseValidators(this.additionalinfoForm.get('maritalstatus')?.value);
   }
 
-  const formdata = this.additionalinfoForm.getRawValue();
-  const input = this.buildAdditionalPayload(formdata);
+  onEditClick() {
+    this.isViewMode = false;
+    this.isEditMode = true;
 
-  this.formSvc.submitAdditionalInfo(input, this.applicationId).subscribe({
-    next: (res: any) => {
-      if (res.status === 'success') {
-        const key = this.getStorageKey();
-        localStorage.setItem(key, JSON.stringify(input));
+    this.enableAdditionalInfoForm();
 
-        if (this.isCoApplicant) {
-          this.formSvc.co_additionalInfoData = input;
-        } else {
-          this.formSvc.additionalInfoData = input;
-        }
-
-        this.lastSavedPayload = { ...input };
-
-        this.router.navigate(['/applications', this.applicationId, 'summary']);
-      }
-    },
-    error: (err) => {
-      console.error('Additional info update failed', err);
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: {
+        fromSummary: true,
+        mode: 'edit'
+      },
+      queryParamsHandling: 'merge'
+    });
+  }
+  cancelSummaryEdit() {
+    if (this.isEditMode && this.originalFormValue) {
+      this.additionalinfoForm.patchValue(this.originalFormValue);
     }
-  });
-}
+
+    this.router.navigate(['/applications', this.applicationId, 'summary']);
+  }
+  saveSummaryEdit() {
+    this.submitAttempted = true;
+
+    if (!this.canProceed) {
+      this.additionalinfoForm.markAllAsTouched();
+      return;
+    }
+
+    const formdata = this.additionalinfoForm.getRawValue();
+    const input = this.buildAdditionalPayload(formdata);
+
+    this.formSvc.submitAdditionalInfo(input, this.applicationId).subscribe({
+      next: (res: any) => {
+        if (res.status === 'success') {
+          const key = this.getStorageKey();
+          localStorage.setItem(key, JSON.stringify(input));
+
+          if (this.isCoApplicant) {
+            this.formSvc.co_additionalInfoData = input;
+          } else {
+            this.formSvc.additionalInfoData = input;
+          }
+
+          this.lastSavedPayload = { ...input };
+
+          this.router.navigate(['/applications', this.applicationId, 'summary']);
+        }
+      },
+      error: (err) => {
+        console.error('Additional info update failed', err);
+      }
+    });
+  }
 }

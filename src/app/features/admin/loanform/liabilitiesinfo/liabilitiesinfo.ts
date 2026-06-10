@@ -140,7 +140,7 @@ export class Liabilitiesinfo {
           parsed.applicantId,
           parsed.applicationId,
           parsed.fullName,
-          undefined,this.stepperService.getCurrentCoApplicantIndex()
+          undefined, this.stepperService.getCurrentCoApplicantIndex()
         );
       }
     }
@@ -197,28 +197,46 @@ export class Liabilitiesinfo {
     //   }
     // }, 500);
 
-await this.loadMasters();
+    await this.loadMasters();
     if (this.formSvc.isEditFlow()) {
-     
-        this.patchFromSummary();
-     return
-    } 
+
+      this.patchFromSummary();
+      return
+    }
 
 
     const key = this.getStorageKey();
     const localData = localStorage.getItem(key);
     const parsedLocal = localData ? JSON.parse(localData) : null;
 
-    const apiData = await this.getSavedLiability();
+     const applicantId = this.getApiApplicantId();
 
-    let finalData = null;
-
-    if (apiData) {
-      finalData = apiData;
-      localStorage.setItem(key, JSON.stringify(apiData));
-    } else if (parsedLocal) {
-      finalData = parsedLocal;
+    if (!applicantId) {
+      console.error('ApplicantId not found for photo upload');
+      return;
     }
+
+  let finalData = null;
+
+if (parsedLocal) {
+  finalData = parsedLocal;
+}
+
+if (!finalData) {
+  const applicantId = this.getApiApplicantId();
+
+  if (!applicantId) {
+    console.error('ApplicantId not found for liabilities');
+    return;
+  }
+
+  const apiData = await this.getSavedLiability(applicantId);
+
+  if (apiData) {
+    finalData = apiData;
+    localStorage.setItem(key, JSON.stringify(apiData));
+  }
+}
 
     if (finalData) {
 
@@ -232,25 +250,49 @@ await this.loadMasters();
 
       const snapshot = this.buildLiabilityPayloadWithApplicantId();
       this.lastSavedPayload = snapshot.invalid ? null :
-this.normalizeLiabilityPayload({
-      applicantId: snapshot.applicantId,
-      items: snapshot.items
-    });
+        this.normalizeLiabilityPayload({
+          applicantId: snapshot.applicantId,
+          items: snapshot.items
+        });
 
- this.liabilityForm.markAsPristine();
+      this.liabilityForm.markAsPristine();
       this.stepperService.markStepCompleted(this.getStepRoute());
     }
-    
+
 
   }
 
   getStorageKey() {
-     const index = this.stepperService.getCurrentCoApplicantIndex();
-    // return `kycinfo_coapp_${this.applicantId}_${index}`;
+    const index = this.stepperService.getCurrentCoApplicantIndex();
+    const coApplicantId = this.stepperService.getCo_appId()?.[0];
+
     return this.isCoApplicant
-      ? `liabilitiesinfoData_coapp_${this.applicantId}_${index}`
-      : `liabilitiesinfoData_main_${this.applicantId}`;
+      ? `liabilitiesinfoData_coapp_${coApplicantId || 'temp_' + index}`
+      : `liabilitiesinfoData_main_${this.stepperService.getLoanId()?.[0]}`;
+
+    // return `kycinfo_coapp_${this.applicantId}_${index}`;
+    // return this.isCoApplicant
+    //   ? `liabilitiesinfoData_coapp_${this.applicantId}_${index}`
+    //   : `liabilitiesinfoData_main_${this.applicantId}`;
   }
+  getCurrentCoApplicantFromList() {
+    const mainApplicantId = this.stepperService.getLoanId()?.[0];
+    const index = this.stepperService.getCurrentCoApplicantIndex();
+
+    const saved = localStorage.getItem(`coApplicants_${mainApplicantId}`);
+    const list = saved ? JSON.parse(saved) : [];
+
+    return list.find((x: any) => Number(x.index) === Number(index));
+  }
+
+  getApiApplicantId() {
+    if (!this.isCoApplicant) {
+      return this.stepperService.getLoanId()?.[0];
+    }
+
+    return this.stepperService.getCo_appId()?.[0] || null;
+  }
+
   get loans(): FormArray {
     return this.liabilityForm.get('loans') as FormArray;
   }
@@ -302,64 +344,64 @@ this.normalizeLiabilityPayload({
 
   }
 
-async loadMasters() {
-  const res: any = await firstValueFrom(
-    forkJoin({
-      liabilities: this.formSvc.getAllLiabilities(),
-      loanTypes: this.formSvc.getloan_type(),
-      banks: this.formSvc.getallBanks(),
-      lenders: this.formSvc.getalllenders()
-    })
-  );
+  async loadMasters() {
+    const res: any = await firstValueFrom(
+      forkJoin({
+        liabilities: this.formSvc.getAllLiabilities(),
+        loanTypes: this.formSvc.getloan_type(),
+        banks: this.formSvc.getallBanks(),
+        lenders: this.formSvc.getalllenders()
+      })
+    );
 
-  const liabilitiesList = res.liabilities.data ?? res.liabilities;
-  const loanTypeList = res.loanTypes.data ?? res.loanTypes;
-  const bankList = res.banks.data ?? res.banks;
-  const lenderList = res.lenders.data ?? res.lenders;
+    const liabilitiesList = res.liabilities.data ?? res.liabilities;
+    const loanTypeList = res.loanTypes.data ?? res.loanTypes;
+    const bankList = res.banks.data ?? res.banks;
+    const lenderList = res.lenders.data ?? res.lenders;
 
-  this.groupIdMap = liabilitiesList.reduce((acc: any, item: any) => {
-    if (!acc[item.code]) acc[item.code] = [];
-    acc[item.code].push(item.id);
-    return acc;
-  }, {});
+    this.groupIdMap = liabilitiesList.reduce((acc: any, item: any) => {
+      if (!acc[item.code]) acc[item.code] = [];
+      acc[item.code].push(item.id);
+      return acc;
+    }, {});
 
-  this.liabilitiesCatagories = liabilitiesList.map((a: any) => ({
-    value: a.code,
-    label: this.accordianTitle(a.code),
-    code: a.code
-  }));
+    this.liabilitiesCatagories = liabilitiesList.map((a: any) => ({
+      value: a.code,
+      label: this.accordianTitle(a.code),
+      code: a.code
+    }));
 
-  this.accordions = liabilitiesList.map((group: any) => ({
-    title: this.accordianTitle(group.code),
-    alwaysOpen: true,
-    key: group.code
-  }));
+    this.accordions = liabilitiesList.map((group: any) => ({
+      title: this.accordianTitle(group.code),
+      alwaysOpen: true,
+      key: group.code
+    }));
 
-  this.liabilityCodeMap = liabilitiesList.reduce((acc: any, item: any) => {
-    acc[item.code] = item.code;
-    return acc;
-  }, {});
+    this.liabilityCodeMap = liabilitiesList.reduce((acc: any, item: any) => {
+      acc[item.code] = item.code;
+      return acc;
+    }, {});
 
-  this.loanoptions = loanTypeList.map((a: any) => ({
-    value: a.id,
-    label: a.name,
-    code: a.code
-  }));
+    this.loanoptions = loanTypeList.map((a: any) => ({
+      value: a.id,
+      label: a.name,
+      code: a.code
+    }));
 
-  this.selectBanks = bankList.map((s: any) => ({
-    value: s.id,
-    label: s.name,
-    code: s.code
-  }));
+    this.selectBanks = bankList.map((s: any) => ({
+      value: s.id,
+      label: s.name,
+      code: s.code
+    }));
 
-  this.selectLenders = lenderList.map((s: any) => ({
-    value: s.id,
-    label: s.lenderName,
-    code: s.lenderName
-  }));
+    this.selectLenders = lenderList.map((s: any) => ({
+      value: s.id,
+      label: s.lenderName,
+      code: s.lenderName
+    }));
 
-  this.cd.detectChanges();
-}
+    this.cd.detectChanges();
+  }
 
   //existing loans
   createLoan(type: string): FormGroup {
@@ -567,8 +609,8 @@ async loadMasters() {
       case 'other':
         array = this.other;
         // accKey = 'Other Liabilities';
-        
-      accKey = 'OTHER_LIABILITY';
+
+        accKey = 'OTHER_LIABILITY';
 
         break;
     }
@@ -614,14 +656,14 @@ async loadMasters() {
         acc[item.code] = item.code;
         return acc;
       }, {});
-     
-      const savedData = this.isCoApplicant
-  ? this.formSvc.co_liabilitiesInfoData
-  : this.formSvc.liabilitiesInfoData;
 
-if (savedData) {
-  this.patchLiabilitiesData();
-}
+      const savedData = this.isCoApplicant
+        ? this.formSvc.co_liabilitiesInfoData
+        : this.formSvc.liabilitiesInfoData;
+
+      if (savedData) {
+        this.patchLiabilitiesData();
+      }
 
       this.cd.detectChanges();
 
@@ -970,182 +1012,190 @@ if (savedData) {
 
     return result;
   }
-  
- // edit flow = patch from summary
-patchFromSummary() {
-  if (!this.formSvc.isEditFlow()) return;
 
-  const data = this.formSvc.getSummarySection('liabilities');
-  console.log('patch liabilities', data);
+  // edit flow = patch from summary
+  patchFromSummary() {
+    if (!this.formSvc.isEditFlow()) return;
 
-  if (!data) return;
+    const data = this.formSvc.getSummarySection('liabilities');
+    console.log('patch liabilities', data);
 
-  const clean = (v: any) => Number(v || 0);
+    if (!data) return;
 
-  const mappedData = {
-    applicantId: this.applicantId,
-    items: [
-      ...(data.existingLoans || []).map((item: any) => ({
-        liabilityType: 'EXISTING_LOAN',
-        // bankId:
-        //   item.bankLender ||
-        //   this.selectBanks.find(b =>
-        //     b.label?.toLowerCase() ===
-        //     (item.bankName || item.lenderName || '').toLowerCase()
-        //   )?.value ||
-        //   '',
-        
-bankId: this.findId(
-          this.selectBanks,
-          item.bankId || item.bankLender || item.bankName || item.lenderName
-        ),
+    const clean = (v: any) => Number(v || 0);
 
-        outstandingBalanceInr: clean(item.outstandingBalanceInr || item.outstandingBalance),
-        emiAmountInr: clean(item.emiAmountInr || item.emiAmount),
-        remainingTenureMonths: item.remainingTenureMonths || item.remainingTenure || '',
-        liabilityTypeText:
-          item.liabilityTypeText ||
-          item.loanType ||
-          item.type ||
-          '',
-        title: item.title || ''
-      })),
+    const applicantId = this.getApiApplicantId();
 
-      ...(data.creditCardOutstanding || []).map((item: any, index: number) => ({
-        liabilityType: 'CREDIT_CARD_OUTSTANDING',
-        // bankId:
-        //   item.bankName ||
-        //   this.selectBanks.find(b =>
-        //     b.label?.toLowerCase() ===
-        //     (item.bankName || '').toLowerCase()
-        //   )?.value ||
-        //   '',
-        
- bankId: this.findId(
-          this.selectBanks,
+    if (!applicantId) {
+      console.error('ApplicantId not found for photo upload');
+      return;
+    }
+
+
+    const mappedData = {
+      applicantId: applicantId,
+      items: [
+        ...(data.existingLoans || []).map((item: any) => ({
+          liabilityType: 'EXISTING_LOAN',
+          // bankId:
+          //   item.bankLender ||
+          //   this.selectBanks.find(b =>
+          //     b.label?.toLowerCase() ===
+          //     (item.bankName || item.lenderName || '').toLowerCase()
+          //   )?.value ||
+          //   '',
+
+          bankId: this.findId(
+            this.selectBanks,
+            item.bankId || item.bankLender || item.bankName || item.lenderName
+          ),
+
+          outstandingBalanceInr: clean(item.outstandingBalanceInr || item.outstandingBalance),
+          emiAmountInr: clean(item.emiAmountInr || item.emiAmount),
+          remainingTenureMonths: item.remainingTenureMonths || item.remainingTenure || '',
+          liabilityTypeText:
+            item.liabilityTypeText ||
+            item.loanType ||
+            item.type ||
+            '',
+          title: item.title || ''
+        })),
+
+        ...(data.creditCardOutstanding || []).map((item: any, index: number) => ({
+          liabilityType: 'CREDIT_CARD_OUTSTANDING',
+          // bankId:
+          //   item.bankName ||
+          //   this.selectBanks.find(b =>
+          //     b.label?.toLowerCase() ===
+          //     (item.bankName || '').toLowerCase()
+          //   )?.value ||
+          //   '',
+
+          bankId: this.findId(
+            this.selectBanks,
             item.bankName || item.bankId
-        ),
+          ),
 
-        outstandingBalanceInr: clean(item.outstandingBalanceInr || item.outstandingBalance),
-        creditLimitInr: clean(item.creditLimitInr || item.creditLimit),
-        liabilityTypeText: item.liabilityTypeText || `CREDIT_CARD_OUTSTANDING ${index + 1}`,
-        title: item.title || ''
-      })),
+          outstandingBalanceInr: clean(item.outstandingBalanceInr || item.outstandingBalance),
+          creditLimitInr: clean(item.creditLimitInr || item.creditLimit),
+          liabilityTypeText: item.liabilityTypeText || `CREDIT_CARD_OUTSTANDING ${index + 1}`,
+          title: item.title || ''
+        })),
 
-      ...(data.bnpl || []).map((item: any, index: number) => ({
-        liabilityType: 'BNPL',
-        // bankId: item.lenderName||
-        //   item.bankId ||
-        //   this.selectLenders.find(l =>
-        //     l.label?.toLowerCase() ===
-        //     (item.lenderName || item.bankName || '').toLowerCase()
-        //   )?.value ||
-        //   '',
-        
-  bankId: this.findId(
-          this.selectLenders,
-          item.lenderName|| item.bankId || item.lenderId  || item.bankName
-        ),
+        ...(data.bnpl || []).map((item: any, index: number) => ({
+          liabilityType: 'BNPL',
+          // bankId: item.lenderName||
+          //   item.bankId ||
+          //   this.selectLenders.find(l =>
+          //     l.label?.toLowerCase() ===
+          //     (item.lenderName || item.bankName || '').toLowerCase()
+          //   )?.value ||
+          //   '',
 
-        outstandingBalanceInr: clean(item.outstandingBalanceInr || item.outstandingBalance),
-        creditLimitInr: clean(item.creditLimitInr || item.creditLimit),
-        monthlyEmiInr: clean(item.monthlyEmiInr || item.monthlyEMI || item.monthlyEmi),
-        liabilityTypeText: item.liabilityTypeText || `BNPL ${index + 1}`,
-        title: item.title || ''
-      })),
+          bankId: this.findId(
+            this.selectLenders,
+            item.lenderName || item.bankId || item.lenderId || item.bankName
+          ),
 
-      ...(data.otherLiabilities || []).map((item: any) => ({
-        liabilityType: 'OTHER_LIABILITY',
-        liabilityTypeText: item.liabilityType ||
-          item.liabilityTypeText ||
-          item.name ||
-          item.liabilityName ||
-          item.type ||
-          '',
-        amountInr: clean(item.amountInr || item.amount),
-        monthlyRepaymentInr: clean(item.monthlyRepaymentInr || item.monthlyRepayment)
-      }))
-    ]
-  };
+          outstandingBalanceInr: clean(item.outstandingBalanceInr || item.outstandingBalance),
+          creditLimitInr: clean(item.creditLimitInr || item.creditLimit),
+          monthlyEmiInr: clean(item.monthlyEmiInr || item.monthlyEMI || item.monthlyEmi),
+          liabilityTypeText: item.liabilityTypeText || `BNPL ${index + 1}`,
+          title: item.title || ''
+        })),
 
-  if (this.isCoApplicant) {
-    this.formSvc.co_liabilitiesInfoData = mappedData;
-  } else {
-    this.formSvc.liabilitiesInfoData = mappedData;
+        ...(data.otherLiabilities || []).map((item: any) => ({
+          liabilityType: 'OTHER_LIABILITY',
+          liabilityTypeText: item.liabilityType ||
+            item.liabilityTypeText ||
+            item.name ||
+            item.liabilityName ||
+            item.type ||
+            '',
+          amountInr: clean(item.amountInr || item.amount),
+          monthlyRepaymentInr: clean(item.monthlyRepaymentInr || item.monthlyRepayment)
+        }))
+      ]
+    };
+
+    if (this.isCoApplicant) {
+      this.formSvc.co_liabilitiesInfoData = mappedData;
+    } else {
+      this.formSvc.liabilitiesInfoData = mappedData;
+    }
+
+    this.patchLiabilitiesData();
+
+    const snapshot = this.buildLiabilityPayloadWithApplicantId();
+
+    this.lastSavedPayload = snapshot.invalid
+      ? null
+      :
+      this.normalizeLiabilityPayload({
+        applicantId: snapshot.applicantId,
+        items: snapshot.items
+      });
+
+
+    this.liabilityForm.markAsPristine();
+
+    this.calculateGrandTotal();
+    this.cd.detectChanges();
   }
+  findId(list: any[], value: any) {
+    if (!value || !list?.length) return '';
 
-  this.patchLiabilitiesData();
+    const normalize = (v: any) =>
+      v?.toString()
+        .trim()
+        .toLowerCase()
+        .replace(/\./g, '')
+        .replace(/\s+/g, ' ')
+        .replace(/limited/g, 'ltd');
 
-  const snapshot = this.buildLiabilityPayloadWithApplicantId();
+    const input = normalize(value);
 
-  this.lastSavedPayload = snapshot.invalid
-    ? null
-    : 
-this.normalizeLiabilityPayload({
-      applicantId: snapshot.applicantId,
-      items: snapshot.items
-    });
+    const byId = list.find(x => x.value === value);
+    if (byId) return byId.value;
 
+    const exact = list.find(x => normalize(x.label) === input);
+    if (exact) return exact.value;
 
-  this.liabilityForm.markAsPristine();
+    const partial = list.find(x =>
+      normalize(x.label).includes(input) ||
+      input.includes(normalize(x.label))
+    );
 
-  this.calculateGrandTotal();
-  this.cd.detectChanges();
-}
-findId(list: any[], value: any) {
-  if (!value || !list?.length) return '';
-
-  const normalize = (v: any) =>
-    v?.toString()
-      .trim()
-      .toLowerCase()
-      .replace(/\./g, '')
-      .replace(/\s+/g, ' ')
-      .replace(/limited/g, 'ltd');
-
-  const input = normalize(value);
-
-  const byId = list.find(x => x.value === value);
-  if (byId) return byId.value;
-
-  const exact = list.find(x => normalize(x.label) === input);
-  if (exact) return exact.value;
-
-  const partial = list.find(x =>
-    normalize(x.label).includes(input) ||
-    input.includes(normalize(x.label))
-  );
-
-  return partial?.value || '';
-}
-normalizeLiabilityPayload(payload: any) {
-  return {
-    applicantId: payload?.applicantId || this.applicantId,
-    items: (payload?.items || [])
-      .map((item: any) => ({
-        liabilityType: item.liabilityType || '',
-        bankId: item.bankId || '',
-        outstandingBalanceInr: Number(item.outstandingBalanceInr || 0),
-        emiAmountInr: Number(item.emiAmountInr || 0),
-        remainingTenureMonths: item.remainingTenureMonths || '',
-        creditLimitInr: Number(item.creditLimitInr || 0),
-        monthlyEmiInr: Number(item.monthlyEmiInr || 0),
-        liabilityTypeText: item.liabilityTypeText || '',
-        amountInr: Number(item.amountInr || 0),
-        monthlyRepaymentInr: Number(item.monthlyRepaymentInr || 0),
-        title: item.title || ''
-      }))
-      .sort((a: any, b: any) =>
-        `${a.liabilityType}-${a.liabilityTypeText}-${a.bankId}`
-          .localeCompare(`${b.liabilityType}-${b.liabilityTypeText}-${b.bankId}`)
-      )
-  };
-}
+    return partial?.value || '';
+  }
+  normalizeLiabilityPayload(payload: any) {
+    return {
+      applicantId: payload?.applicantId || this.getApiApplicantId(),
+      items: (payload?.items || [])
+        .map((item: any) => ({
+          liabilityType: item.liabilityType || '',
+          bankId: item.bankId || '',
+          outstandingBalanceInr: Number(item.outstandingBalanceInr || 0),
+          emiAmountInr: Number(item.emiAmountInr || 0),
+          remainingTenureMonths: item.remainingTenureMonths || '',
+          creditLimitInr: Number(item.creditLimitInr || 0),
+          monthlyEmiInr: Number(item.monthlyEmiInr || 0),
+          liabilityTypeText: item.liabilityTypeText || '',
+          amountInr: Number(item.amountInr || 0),
+          monthlyRepaymentInr: Number(item.monthlyRepaymentInr || 0),
+          title: item.title || ''
+        }))
+        .sort((a: any, b: any) =>
+          `${a.liabilityType}-${a.liabilityTypeText}-${a.bankId}`
+            .localeCompare(`${b.liabilityType}-${b.liabilityTypeText}-${b.bankId}`)
+        )
+    };
+  }
 
   patchLiabilitiesData() {
     let data = this.isCoApplicant
-  ? this.formSvc.co_liabilitiesInfoData
-  : this.formSvc.liabilitiesInfoData;
+      ? this.formSvc.co_liabilitiesInfoData
+      : this.formSvc.liabilitiesInfoData;
 
 
     if (data && !data.items) {
@@ -1162,11 +1212,11 @@ normalizeLiabilityPayload(payload: any) {
     this.creditcard.clear();
     this.bnpl.clear();
     this.other.clear();
-    
-const loansArray = this.fb.array([]);
-  const creditcardArray = this.fb.array([]);
-  const bnplArray = this.fb.array([]);
-  const otherArray = this.fb.array([]);
+
+    const loansArray = this.fb.array([]);
+    const creditcardArray = this.fb.array([]);
+    const bnplArray = this.fb.array([]);
+    const otherArray = this.fb.array([]);
 
 
     items.forEach((item: any) => {
@@ -1275,7 +1325,7 @@ const loansArray = this.fb.array([]);
     if (this.creditcard.length === 0) this.creditcard.push(this.createCreditcard());
     if (this.bnpl.length === 0) this.bnpl.push(this.createBNPL());
     if (this.other.length === 0) this.other.push(this.createOther());
-this.liabilityForm.updateValueAndValidity();
+    this.liabilityForm.updateValueAndValidity();
     this.cd.detectChanges();
   }
   back() {
@@ -1534,8 +1584,8 @@ this.liabilityForm.updateValueAndValidity();
       case 'other':
         isEmpty = this.other.length === 0;
         // accKey = 'OtherLiabilities';
-        
-      accKey = 'OTHER_LIABILITY';
+
+        accKey = 'OTHER_LIABILITY';
 
         break;
     }
@@ -1553,11 +1603,11 @@ this.liabilityForm.updateValueAndValidity();
   }
 
   //get saved data from api
-  getSavedLiability(): Promise<any> {
+  getSavedLiability(applicantId: any): Promise<any> {
     return new Promise((resolve) => {
       this.formSvc.getSavedData(
         this.applicationId,
-        this.applicantId,
+        applicantId,
         "SAVE_LIABILITIES"
       ).subscribe({
         next: (res) => {
@@ -1576,27 +1626,33 @@ this.liabilityForm.updateValueAndValidity();
 
     const result = this.buildLiabilityPayloadWithApplicantId();
 
-    if ( result.invalid) return;
+    if (result.invalid) return;
 
-    const input = { items: result.items,applicantId: result.applicantId, };
+    const input = { items: result.items, applicantId: result.applicantId, };
 
 
     const key = this.getStorageKey();
     localStorage.setItem(key, JSON.stringify(input));
 
-    
- if (this.isCoApplicant) {
-    this.formSvc.co_liabilitiesInfoData = input;
-  } else {
-    this.formSvc.liabilitiesInfoData = input;
-  }
 
+    if (this.isCoApplicant) {
+      this.formSvc.co_liabilitiesInfoData = input;
+    } else {
+      this.formSvc.liabilitiesInfoData = input;
+    }
+
+ const applicantId = this.getApiApplicantId();
+
+    if (!applicantId) {
+      console.error('ApplicantId not found for photo upload');
+      return;
+    }
 
     const inputdata = {
       action: "auto-save",
       sectionKey: "SAVE_LIABILITIES",
       applicationId: this.applicationId,
-      applicantId: this.applicantId,
+      applicantId: applicantId,
       jsonData: input
     };
 
@@ -1604,18 +1660,18 @@ this.liabilityForm.updateValueAndValidity();
       next: () => {
         this.lastSavedPayload = { ...input };
       },
-      
- error: (err) => {
-      console.error('Liabilities saveExit error:', err);
-    }
+
+      error: (err) => {
+        console.error('Liabilities saveExit error:', err);
+      }
 
     });
   }
   buildLiabilityPayload(): {
-  invalid: boolean;
-  items: any[];
-  applicantId?: any;
-} {
+    invalid: boolean;
+    items: any[];
+    applicantId?: any;
+  } {
     let form = this.liabilityForm.getRawValue();
     const items: any[] = [];
     this.loanerror = false;
@@ -1738,37 +1794,48 @@ this.liabilityForm.updateValueAndValidity();
 
 
     if (invalid) {
-      return { invalid: true,items: [] };
+      return { invalid: true, items: [] };
     }
+
+     const applicantId = this.getApiApplicantId();
+
+   
 
     return {
       invalid: false,
       items,
-      applicantId: this.applicantId,
+      applicantId: applicantId,
     };
 
   }
 
   buildLiabilityPayloadWithApplicantId(): {
-  invalid: boolean;
-  applicantId?: any;
-  items: any[];
-} {
-  const result = this.buildLiabilityPayload();
+    invalid: boolean;
+    applicantId?: any;
+    items: any[];
+  } {
+    const result = this.buildLiabilityPayload();
 
-  if (!result || result.invalid) {
+    if (!result || result.invalid) {
+      return {
+        invalid: true,
+        items: []
+      };
+    }
+
+     const applicantId = this.getApiApplicantId();
+
+    // if (!applicantId) {
+    //   console.error('ApplicantId not found for photo upload');
+    //   return;
+    // }
+
     return {
-      invalid: true,
-      items: []
+      invalid: false,
+      applicantId: applicantId,
+      items: result.items
     };
   }
-
-  return {
-    invalid: false,
-    applicantId: this.applicantId,
-    items: result.items
-  };
-}
 
   //compare function
   isPayloadChanged(current: any, saved: any) {
@@ -1778,23 +1845,23 @@ this.liabilityForm.updateValueAndValidity();
     return this.isCoApplicant ? 'co-liabilitiesinfo' : 'liabilitiesinfo';
   }
   next() {
-   
-    
-  const result = this.buildLiabilityPayloadWithApplicantId();
 
-  if (result.invalid) {
-    console.log('Form invalid - stop navigation');
-    return;
-  }
+
+    const result = this.buildLiabilityPayloadWithApplicantId();
+
+    if (result.invalid) {
+      console.log('Form invalid - stop navigation');
+      return;
+    }
 
 
     const payload = { items: result.items, applicantId: result.applicantId, };
 
-const currentPayload = this.normalizeLiabilityPayload(payload);
+    const currentPayload = this.normalizeLiabilityPayload(payload);
 
-const hasChanged =
-  !this.lastSavedPayload ||
-  JSON.stringify(currentPayload) !== JSON.stringify(this.lastSavedPayload);
+    const hasChanged =
+      !this.lastSavedPayload ||
+      JSON.stringify(currentPayload) !== JSON.stringify(this.lastSavedPayload);
 
     const stepRoute = this.getStepRoute();
 
@@ -1802,7 +1869,7 @@ const hasChanged =
       console.log('No changes, skip API');
       this.stepperService.markStepCompleted(stepRoute);
       this.stepperService.setStepData(stepRoute, this.liabilityForm.getRawValue());
-       this.stepperService.next();
+      this.stepperService.next();
       return;
     }
 
@@ -1810,10 +1877,10 @@ const hasChanged =
       next: (res) => {
         console.log("resp---", res);
         if (res.status == "success") {
-            // this.lastSavedPayload = { ...payload };
-            this.lastSavedPayload = currentPayload;
-this.liabilityForm.markAsPristine();
-            
+          // this.lastSavedPayload = { ...payload };
+          this.lastSavedPayload = currentPayload;
+          this.liabilityForm.markAsPristine();
+
           if (this.isCoApplicant) {
             this.formSvc.co_liabilitiesInfoData = payload;
           } else {

@@ -177,13 +177,30 @@ const listKey = `coApplicants_${this.applicantId}`;
   back() { }
 
   saveCoApplicantToList(userid: any) {
+    
+  const mainApplicantId = this.loanStepper.getLoanId()[0];
+
   const key = `coApplicants_${this.applicantId}`;
 
   const saved = localStorage.getItem(key);
-  let coApplicants = saved ? JSON.parse(saved) : [];
+  let list = saved ? JSON.parse(saved) : [];
 
-  const existingIndex = coApplicants.findIndex(
-    (x: any) => Number(x.index) === Number(this.coApplicantIndex)
+
+  
+const index = Number(this.loanStepper.getCurrentCoApplicantIndex());
+
+  // const item = {
+  //   index,
+  //   applicantId: coApplicant.applicantId,
+  //   applicationId: coApplicant.applicationId,
+  //   name: coApplicant.fullName || coApplicant.name || '',
+  //   phone: coApplicant.phone || '',
+  //   userInitiateId: coApplicant.userInitiateId || ''
+  // };
+
+  
+  const existingIndex = list.findIndex(
+    (x: any) => Number(x.index) === index
   );
 
   const data = {
@@ -195,25 +212,20 @@ const listKey = `coApplicants_${this.applicantId}`;
   };
 
   if (existingIndex > -1) {
-    coApplicants[existingIndex] = {
-      ...coApplicants[existingIndex],
+    list[existingIndex] = {
+      ...list[existingIndex],
       ...data
     };
   } else {
-    coApplicants.push(data);
+    list.push(data);
   }
 
-  coApplicants = coApplicants
+  list = list
     .sort((a: any, b: any) => Number(a.index) - Number(b.index))
-    .slice(0, 4);
+    // .slice(0, 4);
 
-  localStorage.setItem(key, JSON.stringify(coApplicants));
-  sessionStorage.setItem('coAppIds', JSON.stringify({
-  applicantId: userid,
-  applicationId: this.applicationId,
-  fullName: '',
-  coApplicantIndex: this.coApplicantIndex
-}));
+  localStorage.setItem(key, JSON.stringify(list));
+
 }
 
   next() {

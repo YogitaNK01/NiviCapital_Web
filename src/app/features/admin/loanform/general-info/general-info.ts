@@ -321,6 +321,14 @@ this.stepperService.restoreLoanIdFromSession();
 
   }
   getStorageKey() {
+  const coApplicantId = this.stepperService.getCo_appId()?.[0];
+  const index = this.stepperService.getCurrentCoApplicantIndex();
+
+  return this.isCoApplicant
+    ? `generalInfo_coapp_${coApplicantId || 'temp_' + index}`
+    : `generalInfo_main_${this.stepperService.getLoanId()?.[0]}`;
+}
+  getStorageKey1() {
      const index = this.stepperService.getCurrentCoApplicantIndex();
     // return `kycinfo_coapp_${this.applicantId}_${index}`;
     return this.isCoApplicant
@@ -1239,7 +1247,7 @@ getValueByLabel(list: any[], label: string) {
 
     const input = {
       applicationId: this.applicationId,
-      applicantId: this.applicantId,
+      applicantId: this.stepperService.getCo_appId()?.[0],
       occupationId: payload.occupation,
       annualIncome: payload.annualIncome,
       relationWithApplicant: payload.relationWithApplicant?.toUpperCase(),

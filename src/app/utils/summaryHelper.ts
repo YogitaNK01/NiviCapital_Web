@@ -767,7 +767,7 @@ export class SummaryHelper {
   }
 
   static extractReferenceInfo(references: any[]) {
-
+if (!Array.isArray(references)) return [];
     const labels = [
       { label: 'First Name', key: 'firstName' },
       { label: 'Middle Name', key: 'middleName' },

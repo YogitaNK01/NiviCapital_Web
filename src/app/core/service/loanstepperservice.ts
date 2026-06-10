@@ -256,8 +256,13 @@ getRouteFromStage(stage: string | null | undefined): string {
 getCurrentCoApplicantIndex(): number {
   return Number(this.currentCoApplicantIndex) || 1;
 }
+//switching main and coapplicant
+private getMainCompletedKey(): string {
+  return `main_completedSteps_${this.applicantId || 'defaultApplicant'}_${this.applicationId || 'defaultApplication'}`;
+}
+
 getCoApplicantCompletedKey(): string {
-  const loanIds = this.getLoanId();
+  const loanIds = this.getCo_appId();
 
   const applicantId = loanIds?.[0] || 'defaultApplicant';
   const applicationId = loanIds?.[1] || 'defaultApplication';
@@ -397,11 +402,8 @@ getCoApplicantCompletedKey(): string {
 
   //---------------all other steps --------------
 
-  private getCompletedStepsKey1(): string {
-    // return `completedSteps_${this.applicantId}`;
-    return `${this.stepperType}_completedSteps_${this.applicantId}`;
-  }
-getCompletedStepsKey(): string {
+
+getCompletedStepsKey1(): string {
   const loanIds = this.getLoanId();
   const mainApplicantId = loanIds?.[0];
 
@@ -412,21 +414,24 @@ getCompletedStepsKey(): string {
 
   return `main_completedSteps_${mainApplicantId}`;
 }
-  markStepCompleted1(route: string) {
-    this.completedSteps.add(route);
-    const key = `completedSteps_${this.applicantId}`;
+getCompletedStepsKey(): string {
+  return this.stepperType === 'CO_APPLICANT'
+    ? this.getCoApplicantCompletedKey()
+    : this.getMainCompletedKey();
+}
 
-
-    if (this.applicantId) {
-      localStorage.setItem(
-        this.getCompletedStepsKey(),
-        JSON.stringify([...this.completedSteps])
-      );
-    }
-
-    this.buildSteps();
-  }
   markStepCompleted(route: string) {
+  this.completedSteps.add(route);
+
+  localStorage.setItem(
+    this.getCompletedStepsKey(),
+    JSON.stringify([...this.completedSteps])
+  );
+
+  this.rebuildSteps();
+}
+
+  markStepCompleted1(route: string) {
   if (!this.completedSteps.has(route)) {
     this.completedSteps.add(route);
   }
@@ -445,17 +450,8 @@ getCompletedStepsKey(): string {
 
   this.rebuildSteps();
 }
-  restoreCompletedSteps1() {
-    if (!this.applicantId) return;
-    
-    const saved = localStorage.getItem(this.getCompletedStepsKey());
-    if (saved) {
-      this.completedSteps = new Set(JSON.parse(saved));
-    } else {
-      //this
-    }
-  }
-restoreCompletedSteps() {
+
+restoreCompletedSteps1() {
   if (!this.applicantId) return;
 
   const key =
@@ -475,6 +471,22 @@ restoreCompletedSteps() {
     this.completedSteps = new Set<string>();
   }
 
+}
+restoreCompletedSteps() {
+  const saved = localStorage.getItem(this.getCompletedStepsKey());
+
+  if (saved) {
+    try {
+      const parsed = JSON.parse(saved);
+      this.completedSteps = Array.isArray(parsed)
+        ? new Set<string>(parsed)
+        : new Set<string>();
+    } catch {
+      this.completedSteps = new Set<string>();
+    }
+  } else {
+    this.completedSteps = new Set<string>();
+  }
 }
   isStepCompleted(route: string): boolean {
     return this.completedSteps.has(route);
@@ -504,7 +516,7 @@ const key =
 
   this.buildSteps();
 }
-restoreLoanEditContext() {
+restoreLoanEditContext1() {
   const stored = sessionStorage.getItem('loanContextData');
 
   if (!stored) return null;
@@ -520,19 +532,48 @@ restoreLoanEditContext() {
 
   return parsed;
 }
+restoreLoanEditContext() {
+  const stored =
+    sessionStorage.getItem('loanContextData') ||
+    sessionStorage.getItem('loanEditData');
 
+  if (!stored) return null;
 
+  const parsed = JSON.parse(stored);
+
+  this.applicantId = parsed.applicantId;
+  this.applicationId = parsed.applicationId;
+  this.custName = parsed.custName;
+  this.custARN = parsed.custARN;
+
+  this.restoreEducationProgress();
+  this.restoreCompletedSteps();
+  this.buildSteps();
+
+  return parsed;
+}
+
+//for main applicant
   setLoanId(id1: string, id2: string, name: string, arn: string) {
     this.applicantId = id1;
     this.applicationId = id2;
     this.custName = name;
     this.custARN = arn;
+    
+sessionStorage.setItem(
+    'loanContextData',
+    JSON.stringify({
+      applicantId: id1,
+      applicationId: id2,
+      custName: name,
+      custARN: arn
+    })
+  );
+
     this.restoreEducationProgress();
     this.restoreCompletedSteps();
     this.buildSteps();
   }
-
-
   getLoanId() {
     return [this.applicantId, this.applicationId, this.custName, this.custARN];
   }
@@ -558,11 +599,17 @@ restoreLoanEditContext() {
     this.buildSteps();
   }
 
-
   getCo_appId() {
     return [this.co_applicantId, this.co_applicationId, this.co_custName, this.co_custARN];
   }
+clearCoAppId() {
+  this.co_applicantId = null;
+  this.co_applicationId = null;
+  this.co_custName = null;
+  this.co_custARN = null;
 
+  sessionStorage.removeItem('coAppIds');
+}
   restoreCoAppIdFromSession() {
     const storedCoApp = sessionStorage.getItem('coAppIds');
 
@@ -838,10 +885,7 @@ removeStepCompleted(route: string) {
     this.getCompletedStepsKey(),
     JSON.stringify([...this.completedSteps])
   );
-}
-//switching main and coapplicant
-private getMainCompletedKey(): string {
-  return `main_completedSteps_${this.applicantId || 'defaultApplicant'}_${this.applicationId || 'defaultApplication'}`;
+  this.rebuildSteps();
 }
 
 

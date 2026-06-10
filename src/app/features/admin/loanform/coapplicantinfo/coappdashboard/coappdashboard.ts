@@ -7,6 +7,8 @@ import { Addcustomerservice } from '../../../../../core/service/addcustomerservi
 import { Main } from '../../../../../core/service/main';
 import { TableData } from '../../../../../core/service/table-data';
 import { Loanstepperservice } from '../../../../../core/service/loanstepperservice';
+import { Loanformservice } from '../../../../../core/service/loanformservice';
+import { Msgboxservice } from '../../../../../core/service/msgboxservice';
 
 @Component({
   selector: 'app-coappdashboard',
@@ -26,16 +28,23 @@ export class Coappdashboard implements OnInit {
   maxCoApplicants = 4;
   coApplicantIndex: number = 1;
 
-  constructor(public service: Main, private router: Router, private addcustomerservice: Addcustomerservice,
-    private route: ActivatedRoute, private cd: ChangeDetectorRef, private stepperService: Loanstepperservice) { }
+  constructor(public service: Main, private router: Router, private addcustomerservice: Addcustomerservice, private msgBox: Msgboxservice,
+    private route: ActivatedRoute, private cd: ChangeDetectorRef, private stepperService: Loanstepperservice, private loanfornservice: Loanformservice) { }
 
   ngOnInit() {
+    this.stepperService.restoreLoanEditContext();
     let Allids = this.stepperService.getLoanId();
 
     this.applicantId = Allids[0];
     this.applicationId = Allids[1];
     this.custName = Allids[2];
     this.arnid = Allids[3];
+
+
+    if (!this.applicantId || !this.applicationId) {
+      console.error('Loan context missing after refresh');
+      return;
+    }
 
     let AllCoapp_ids = this.stepperService.getCo_appId();
 
@@ -61,14 +70,18 @@ export class Coappdashboard implements OnInit {
           parsed.applicantId,
           parsed.applicationId,
           parsed.fullName,
-        undefined,this.stepperService.getCurrentCoApplicantIndex());
+          undefined, this.stepperService.getCurrentCoApplicantIndex());
       }
     }
-
+    this.getAllcoapplicants();
     this.loadCoApplicants();
   }
   add() {
 
+    sessionStorage.removeItem('coAppIds');
+    sessionStorage.removeItem('coapp_cifdetails');
+
+    this.stepperService.clearCoAppId?.();
 
     this.loadCoApplicants();
 
@@ -94,7 +107,7 @@ export class Coappdashboard implements OnInit {
         relativeTo: this.route,
         queryParams: {
 
-          coApplicantIndex: nextIndex,mode: 'new'
+          coApplicantIndex: nextIndex, mode: 'new'
         },
         // queryParamsHandling: 'merge' 
       }
@@ -117,58 +130,119 @@ export class Coappdashboard implements OnInit {
     const saved = localStorage.getItem(`coApplicants_${this.applicantId}`);
     this.coApplicants = saved ? JSON.parse(saved) : [];
   }
+  //get all applicants
+  getAllcoapplicants() {
+    this.loanfornservice.getAllCoapp(this.applicationId).subscribe({
+      next: (res: any) => {
+        console.log('Co-applicants API response:', res);
 
-loadCoApplicants() {
-  const saved = localStorage.getItem(this.getCoappListKey());
-  this.coApplicants = saved ? JSON.parse(saved) : [];
+        const data = Array.isArray(res?.data) ? res.data : [];
 
-  this.coApplicants = this.coApplicants.sort(
-    (a: any, b: any) => Number(a.index) - Number(b.index)
-  );
+        this.coApplicants = data.map((item: any, i: number) => ({
+          index: Number(item.index || i + 1),
+          applicantId: item.applicantId,
+          applicationId: this.applicationId,
+          name: item.name || '',
+          status: item.status || '',
+        }));
 
-  this.updateCoApplicantStepStatus();
-}
-updateCoApplicantStepStatus() {
-  const stepRoute = this.getStepRoute();
+        this.coApplicants = this.coApplicants.sort(
+          (a: any, b: any) => Number(a.index) - Number(b.index)
+        );
 
-  if (this.coApplicants.length > 0) {
-    this.stepperService.markStepCompleted(stepRoute);
-  } else {
-    // optional if your service has remove method
-    this.stepperService.removeStepCompleted?.(stepRoute);
+        localStorage.setItem(
+          this.getCoappListKey(),
+          JSON.stringify(this.coApplicants)
+        );
+
+        this.updateCoApplicantStepStatus();
+        this.cd.detectChanges();
+      },
+
+      error: (err) => {
+        console.error('Failed to load co-applicants:', err);
+
+        // fallback local data
+        this.loadCoApplicants();
+      }
+    });
   }
-}
 
-private getCoappListKey(): string {
-  return `coApplicants_${this.applicantId}`;
-}
+  loadCoApplicants() {
+    const saved = localStorage.getItem(this.getCoappListKey());
+    this.coApplicants = saved ? JSON.parse(saved) : [];
+
+    this.coApplicants = this.coApplicants.sort(
+      (a: any, b: any) => Number(a.index) - Number(b.index)
+    );
+
+    this.updateCoApplicantStepStatus();
+  }
+  updateCoApplicantStepStatus() {
+    const stepRoute = this.getStepRoute();
+
+    if (this.coApplicants.length > 0) {
+      this.stepperService.markStepCompleted(stepRoute);
+    } else {
+      // optional if your service has remove method
+      this.stepperService.removeStepCompleted?.(stepRoute);
+    }
+  }
+  //restore
+  private restoreCoApplicantContext(): void {
+    const storedCoApp = sessionStorage.getItem('coAppIds');
+
+    if (!storedCoApp) return;
+
+    try {
+      const parsed = JSON.parse(storedCoApp);
+
+      this.stepperService.setCurrentCoApplicantIndex(
+        parsed.coApplicantIndex || 1
+      );
+
+      this.stepperService.setCo_appId(
+        parsed.applicantId,
+        parsed.applicationId,
+        parsed.fullName,
+        parsed.custARN,
+        parsed.coApplicantIndex
+      );
+    } catch {
+      sessionStorage.removeItem('coAppIds');
+    }
+  }
+  private getCoappListKey(): string {
+    return `coApplicants_${this.applicantId}`;
+  }
 
   //open 
   openCoApplicant(index: number) {
     const current = this.coApplicants.find(
       x => Number(x.index) === Number(index)
     );
-    
- if (!current) return;
 
-  this.stepperService.setStepperType('CO_APPLICANT');
+    if (!current) return;
 
-    this.stepperService.setCurrentCoApplicantIndex(index);
+    this.stepperService.setStepperType('CO_APPLICANT');
 
-    
- sessionStorage.setItem('coAppIds', JSON.stringify({
-    applicantId: current.applicantId,
-    applicationId: current.applicationId || this.applicationId,
-    fullName: current.name || '',
-    coApplicantIndex: index
-  }));
+    this.stepperService.setCurrentCoApplicantIndex(current.index);
 
-  this.stepperService.setCo_appId(
-    current.applicantId,
-    current.applicationId || this.applicationId,
-    current.name || '',
-    undefined,this.stepperService.getCurrentCoApplicantIndex()
-  );
+
+    sessionStorage.setItem('coAppIds', JSON.stringify({
+      applicantId: current.applicantId,
+      applicationId: current.applicationId || this.applicationId,
+      fullName: current.name || '',
+      coApplicantIndex: index,
+      status: current.status || ''
+    }));
+
+    this.stepperService.setCo_appId(
+      current.applicantId,
+      current.applicationId || this.applicationId,
+      current.name || '',
+      undefined, current.index
+    );
 
 
     this.router.navigate(
@@ -177,11 +251,11 @@ private getCoappListKey(): string {
         relativeTo: this.route,
         queryParams: {
 
-          coApplicantIndex: index,
+          coApplicantIndex: current.index,
 
           id: current?.userInitiateId || '',
           phone: current?.phone || '',
-           mode: 'existing'
+          mode: 'existing'
 
         }
       }
@@ -189,17 +263,8 @@ private getCoappListKey(): string {
   }
 
   //delete 
-  deleteCoApplicant1(index: number) {
-    this.coApplicants = this.coApplicants.filter(x => Number(x.index) !== Number(index));
 
-    localStorage.setItem(
-      `coApplicants_${this.applicantId}`,
-      JSON.stringify(this.coApplicants)
-    );
-
-    localStorage.removeItem(`coapp_mobile_submitted_${this.applicantId}_${index}`);
-  }
-  deleteCoApplicant(index: number, event?: Event) {
+  deleteCoApplicant1(index: number, event?: Event) {
     event?.stopPropagation();
     event?.preventDefault();
 
@@ -216,16 +281,56 @@ private getCoappListKey(): string {
     // clear all old form data for this coapp index
     this.clearCoApplicantLocalData(index);
 
-    // if currently inside deleted coapp route, come back to dashboard
-    // const currentIndex = Number(this.route.snapshot.queryParams['coApplicantIndex']);
+    this.loanfornservice.deleteCoapp(this.applicantId, this.applicantId).subscribe({
 
-    // if (currentIndex === Number(index)) {
-    //   this.router.navigate(['./'], { relativeTo: this.route });
-    // }
 
-    this.loadCoApplicants(); this.updateCoApplicantStepStatus();
+      next: (res) => {
+        console.log(res);
+      }
+    });
+    this.loadCoApplicants();
+    this.updateCoApplicantStepStatus();
+    this.cd.detectChanges();
+
+  }
+ deleteCoApplicant(index: number, event?: Event) {
+    event?.stopPropagation();
+    event?.preventDefault();
+ 
+    this.msgBox.open({
+      title: 'Are you sure want to Delete',
+      message: `${this.coApplicants[index - 1].name} (Co-Applicant ${index})`,
+      showCancel: true,
+      onOk: () => {
+        this.loanfornservice.deleteCoapp(this.applicationId, this.coApplicants[index - 1].applicantId).subscribe({
+          next: (res) => {
+            // remove card from dashboard list
+            this.coApplicants = this.coApplicants.filter(
+              x => Number(x.index) !== Number(index)
+            );
+ 
+            console.log(this.coApplicants);
+ 
+            localStorage.setItem(
+              `coApplicants_${this.applicantId}`,
+              JSON.stringify(this.coApplicants)
+            );
+ 
+            // clear all old form data for this coapp index
+            this.clearCoApplicantLocalData(index);
+ 
+            this.loadCoApplicants(); this.updateCoApplicantStepStatus();
+          },
+          error: (err) => {
+            console.log(err);
+          }
+        });
+      }
+    });
+ 
     this.cd.detectChanges();
   }
+
 
   private clearCoApplicantLocalData(index: number): void {
     const mainApplicantId = this.applicantId;
@@ -292,9 +397,9 @@ private getCoappListKey(): string {
     this.isChildRouteActive = false;
     this.loadCoApplicants();
   }
-get hasAtLeastOneCoApplicant(): boolean {
-  return this.coApplicants.length > 0;
-}
+  get hasAtLeastOneCoApplicant(): boolean {
+    return this.coApplicants.length > 0;
+  }
 
 
   back() { }
@@ -303,16 +408,16 @@ get hasAtLeastOneCoApplicant(): boolean {
     return 'co-applicantdetails';
   }
   next() {
-   
 
-  if (!this.hasAtLeastOneCoApplicant) {
-    return;
-  }
 
-  const stepRoute = this.getStepRoute();
+    if (!this.hasAtLeastOneCoApplicant) {
+      return;
+    }
 
-  this.stepperService.markStepCompleted(stepRoute);
-  this.stepperService.next();
+    const stepRoute = this.getStepRoute();
+
+    this.stepperService.markStepCompleted(stepRoute);
+    this.stepperService.next();
 
   }
 

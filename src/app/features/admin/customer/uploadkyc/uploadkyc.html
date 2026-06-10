@@ -563,9 +563,9 @@
         <path d="M3 15L15 3" stroke="#F4F6FF" stroke-width="1.125" stroke-linecap="round" stroke-linejoin="round" />
       </svg></button>
 
-        <app-successbox title="Customer Created Successfully!" [description]="`The customer's KYC details have been submitted and 
-the profile is now active.`" [boxText]="'custname'"
-          [id]="'custid'" [buttons]="[
+        <app-successbox title="Your NCID has been created!" [description]="`The customer's KYC details have been submitted and 
+the profile is now active.`" [boxText]="custName"
+          [id]="NCId" [buttons]="[
     { label: '', action: '', outline: true, color: '',class: 'd-none'  },
     { label: 'Ok', action: '', outline: false, color: 'primary',class: 'btncustomClass'  }
   ]" (actionClick)="handleSuccessAction()">

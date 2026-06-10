@@ -197,18 +197,39 @@ export class Assetsinfo implements OnInit {
     const localData = localStorage.getItem(key);
     const parsedLocal = localData ? JSON.parse(localData) : null;
 
+     const applicantId = this.getApiApplicantId();
+
+    if (!applicantId) {
+      console.error('ApplicantId not found for photo upload');
+      return;
+    }
+
     //  call API
-    const apiData = await this.getSavedAssets();
+    const apiData = await this.getSavedAssets(applicantId);
 
     let finalData = null;
 
-    if (apiData) {
-      finalData = apiData;
-      localStorage.setItem(key, JSON.stringify(apiData));
-    }
-    else if (parsedLocal) {
-      finalData = parsedLocal;
-    }
+   
+if (parsedLocal) {
+  finalData = parsedLocal;
+}
+
+if (!finalData) {
+  const applicantId = this.getApiApplicantId();
+
+  if (!applicantId) {
+    console.error('ApplicantId not found for assets');
+    return;
+  }
+
+  const apiData = await this.getSavedAssets(applicantId);
+
+  if (apiData) {
+    finalData = apiData;
+    localStorage.setItem(key, JSON.stringify(apiData));
+  }
+}
+
 
     if (finalData) {
 
@@ -235,12 +256,37 @@ export class Assetsinfo implements OnInit {
   }
 
   getStorageKey() {
+        const coApplicantId = this.stepperService.getCo_appId()?.[0];
      const index = this.stepperService.getCurrentCoApplicantIndex();
-    // return `kycinfo_coapp_${this.applicantId}_${index}`;
-    return this.isCoApplicant
-      ? `assetsinfoData_coapp_${this.applicantId}_${index}`
-      : `assetsinfoData_main_${this.applicantId}`;
+
+return this.isCoApplicant
+      ? `assetsinfoData_coapp_${coApplicantId || 'temp_' + index}`
+      : `assetsinfoData_main_${this.stepperService.getLoanId()?.[0]}`;
+      
+      //      return this.isCoApplicant
+      // ? `assetsinfoData_coapp_${this.applicantId}_${index}`
+      // : `assetsinfoData_main_${this.applicantId}`;
   }
+
+    getCurrentCoApplicantFromList() {
+    const mainApplicantId = this.stepperService.getLoanId()?.[0];
+    const index = this.stepperService.getCurrentCoApplicantIndex();
+
+    const saved = localStorage.getItem(`coApplicants_${mainApplicantId}`);
+    const list = saved ? JSON.parse(saved) : [];
+
+    return list.find((x: any) => Number(x.index) === Number(index));
+  }
+
+  getApiApplicantId() {
+    if (!this.isCoApplicant) {
+      return this.stepperService.getLoanId()?.[0];
+    }
+
+    return this.stepperService.getCo_appId()?.[0] || null;
+  }
+
+
   get f() {
     return this.assetsForm.controls;
   }
@@ -1082,7 +1128,7 @@ export class Assetsinfo implements OnInit {
     return numeric === 0 ? { zeroNotAllowed: true } : null;
   }
    //edit flow =patch from summary
-  // edit flow = patch from summary
+
 patchFromSummary() {
   if (!this.formSvc.isEditFlow()) return;
 
@@ -1106,7 +1152,7 @@ patchFromSummary() {
     ...(data.properties || []).map((x: any) => ({
       assetCategory: 'PROPERTY',
       assetType: x.assetType || '',
-      propertyType: x.propertyType || '',
+      propertyId: x.propertyId || '',
       ownershipType: x.ownershipType || '',
       marketValueInr: x.marketValueInr || 0,
       location: x.location || ''
@@ -1534,23 +1580,27 @@ patchFromSummary() {
         items: []
       };
     }
+ const applicantId = this.getApiApplicantId();
+
+   
 
     return {
       invalid: false,
-      applicantId: this.applicantId,
+      applicantId: applicantId,
       items: result.items
     };
   }
+
   //check already saved or not
   isPayloadChanged(current: any, saved: any) {
     return JSON.stringify(current) !== JSON.stringify(saved);
   }
   //get saved data from api
-  getSavedAssets(): Promise<any> {
+  getSavedAssets(applicantId: any): Promise<any> {
     return new Promise((resolve) => {
       this.formSvc.getSavedData(
         this.applicationId,
-        this.applicantId,
+        applicantId,
         "SAVE_ASSETS"
       ).subscribe({
         next: (res) => {
@@ -1594,12 +1644,19 @@ patchFromSummary() {
       this.formSvc.aseetsInfoData = input;
     }
 
+     const applicantId = this.getApiApplicantId();
+
+    if (!applicantId) {
+      console.error('ApplicantId not found for photo upload');
+      return;
+    }
+
 
     const inputdata = {
       action: "auto-save",
       sectionKey: "SAVE_ASSETS",
       applicationId: this.applicationId,
-      applicantId: this.applicantId,
+      applicantId: applicantId,
       jsonData: input
     };
 

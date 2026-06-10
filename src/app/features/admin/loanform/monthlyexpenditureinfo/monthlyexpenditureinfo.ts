@@ -193,16 +193,36 @@ export class Monthlyexpenditureinfo {
     const localData = localStorage.getItem(key);
     const parsedLocal = localData ? JSON.parse(localData) : null;
 
-    const apiData = await this.getSavedMonthlyExp();
+     const applicantId = this.getApiApplicantId();
+
+    if (!applicantId) {
+      console.error('ApplicantId not found for photo upload');
+      return;
+    }
+
+  
 
     let finalData = null;
 
-    if (apiData) {
-      finalData = apiData;
-      localStorage.setItem(key, JSON.stringify(apiData));
-    } else if (parsedLocal) {
-      finalData = parsedLocal;
-    }
+if (parsedLocal) {
+  finalData = parsedLocal;
+}
+
+if (!finalData) {
+  const applicantId = this.getApiApplicantId();
+
+  if (!applicantId) {
+    console.error('ApplicantId not found for liabilities');
+    return;
+  }
+
+    const apiData = await this.getSavedMonthlyExp(applicantId);
+
+  if (apiData) {
+    finalData = apiData;
+    localStorage.setItem(key, JSON.stringify(apiData));
+  }
+}
 
     if (finalData) {
 
@@ -230,11 +250,34 @@ export class Monthlyexpenditureinfo {
 
   getStorageKey() {
      const index = this.stepperService.getCurrentCoApplicantIndex();
-    // return `kycinfo_coapp_${this.applicantId}_${index}`;
+         const coApplicantId = this.stepperService.getCo_appId()?.[0];
     return this.isCoApplicant
-      ? `monthlyExpenditureData_coapp_${this.applicantId}_${index}`
-      : `monthlyExpenditureData_main_${this.applicantId}`;
+      ? `monthlyExpenditureData_coapp_${coApplicantId || 'temp_' + index}`
+      : `monthlyExpenditureData_main_${this.stepperService.getLoanId()?.[0]}`;
+
+    // return `kycinfo_coapp_${this.applicantId}_${index}`;
+    // return this.isCoApplicant
+    //   ? `monthlyExpenditureData_coapp_${this.applicantId}_${index}`
+    //   : `monthlyExpenditureData_main_${this.applicantId}`;
   }
+    getCurrentCoApplicantFromList() {
+    const mainApplicantId = this.stepperService.getLoanId()?.[0];
+    const index = this.stepperService.getCurrentCoApplicantIndex();
+
+    const saved = localStorage.getItem(`coApplicants_${mainApplicantId}`);
+    const list = saved ? JSON.parse(saved) : [];
+
+    return list.find((x: any) => Number(x.index) === Number(index));
+  }
+
+  getApiApplicantId() {
+    if (!this.isCoApplicant) {
+      return this.stepperService.getLoanId()?.[0];
+    }
+
+    return this.stepperService.getCo_appId()?.[0] || null;
+  }
+
   get other(): FormArray {
     return this.monthlyExpenditureForm.get('other') as FormArray;
   }
@@ -648,8 +691,15 @@ patchFromSummary() {
     });
   });
 
+   const applicantId = this.getApiApplicantId();
+
+    if (!applicantId) {
+      console.error('ApplicantId not found for photo upload');
+      return;
+    }
+
   const mappedData = {
-    applicantId: this.applicantId,
+    applicantId: applicantId,
     items
   };
 
@@ -982,7 +1032,9 @@ patchFromSummary() {
     items: any[];
   } {
     const result = this.buildMonthlyExpPayload();
+ const applicantId = this.getApiApplicantId();
 
+    
     if (result.invalid) {
       return {
         invalid: true,
@@ -992,16 +1044,16 @@ patchFromSummary() {
 
     return {
       invalid: false,
-      applicantId: this.applicantId,
+      applicantId: applicantId,
       items: result.items
     };
   }
   //get saved data from api
-  getSavedMonthlyExp(): Promise<any> {
+  getSavedMonthlyExp(applicantId: any): Promise<any> {
     return new Promise((resolve) => {
       this.formSvc.getSavedData(
         this.applicationId,
-        this.applicantId,
+        applicantId,
         "SAVE_MONTHLY_EXPENSES"
       ).subscribe({
         next: (res) => {
@@ -1026,7 +1078,12 @@ patchFromSummary() {
     }
 
     const input = { items: result.items, applicantId: result.applicantId };
+ const applicantId = this.getApiApplicantId();
 
+    if (!applicantId) {
+      console.error('ApplicantId not found for photo upload');
+      return;
+    }
 
     const key = this.getStorageKey();
     localStorage.setItem(key, JSON.stringify(input));
@@ -1042,7 +1099,7 @@ patchFromSummary() {
       action: "auto-save",
       sectionKey: "SAVE_MONTHLY_EXPENSES",
       applicationId: this.applicationId,
-      applicantId: this.applicantId,
+      applicantId: applicantId,
       jsonData: input
     };
 

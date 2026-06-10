@@ -127,39 +127,6 @@ private summaryRequest$?: Observable<ApiResponse<any>>;
     }
   }
 
-  // *************************Edit flow from table*********************************
-
- 
-isEditFlow(): boolean {
-  const ctx = sessionStorage.getItem('loanContextData');
-  if (!ctx) return false;
-
-  try {
-    return JSON.parse(ctx)?.edit === true;
-  } catch {
-    return false;
-  }
-}
-
-loadSummaryIfEdit(applicationId: string,applicantId:string) {
-  if (!this.isEditFlow()) return null;
-
-  if (this.summaryLoaded && this.summaryData) {
-    return null;
-  }
-
-  return this.getCoappSummary(applicationId,applicantId);
-}
-
-// setSummary(data: any) {
-//   this.summaryData = data;
-//   this.summaryLoaded = true;
-// }
-
-// getSummarySection(section: string) {
-//   return this.summaryData?.[section] || null;
-// }
-
 
 
   // *************************loan info api*********************************
@@ -479,6 +446,14 @@ loadSummaryIfEdit(applicationId: string,applicantId:string) {
 
     );
   }
+
+  //delete single coapplicant 
+  deleteCoapp(id1: string, id2: string): Observable<ApiResponse<any>> {
+    return this.http.get<ApiResponse<any>>(
+      `${this.baseUrl}/v1/los/applications/${id1}/co-applicants/${id2}`,
+
+    );
+  }
   // *************************submit Summary *************************
 
   //coapplicant summary
@@ -486,6 +461,14 @@ loadSummaryIfEdit(applicationId: string,applicantId:string) {
     return this.http.post<ApiResponse<any>>(
       `${this.baseUrl}/v1/los/applications/applicant/submit`,
 data
+    );
+  }
+
+  //get coapplicant against main applicant
+    getAllCoapp(id1: string): Observable<ApiResponse<any>> {
+    return this.http.get<ApiResponse<any>>(
+      `${this.baseUrl}/v1/los/applications/${id1}/co-applicants`,
+
     );
   }
 
@@ -610,5 +593,27 @@ clearSummary() {
   sessionStorage.removeItem(this.SUMMARY_STORAGE_KEY);
 }
 
+  // *************************Edit flow from table*********************************
 
+ 
+isEditFlow(): boolean {
+  const ctx = sessionStorage.getItem('loanContextData');
+  if (!ctx) return false;
+
+  try {
+    return JSON.parse(ctx)?.edit === true;
+  } catch {
+    return false;
+  }
+}
+
+loadSummaryIfEdit(applicationId: string,applicantId:string) {
+  if (!this.isEditFlow()) return null;
+
+  if (this.summaryLoaded && this.summaryData) {
+    return null;
+  }
+
+  return this.getCoappSummary(applicationId,applicantId);
+}
 }

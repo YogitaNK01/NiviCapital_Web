@@ -306,11 +306,19 @@ export class Incomeinfo {
     }
     // this.applicantId = this.isCoApplicant ? AllCoapp_ids[0] : Allids[0];
     if (this.isCoApplicant) {
-      this.applicantId = AllCoapp_ids?.[0];
-      this.applicationId = AllCoapp_ids?.[1];
+      this.applicantId = this.stepperService.getCo_appId()?.[0];
+      this.applicationId = this.stepperService.getCo_appId()?.[1];
+      
+if (!this.applicantId) {
+    console.error('Co-applicant applicantId not found. BasicInfo CIF not generated.');
+    return;
+  }
+
     } else {
-      this.applicantId = Allids?.[0];
-      this.applicationId = Allids?.[1];
+      
+ this.applicantId = this.stepperService.getLoanId()?.[0];
+  this.applicationId = this.stepperService.getLoanId()?.[1];
+
     }
     this.stepperService.rebuildSteps();
     this.incomeForm = this.fb.group({
@@ -356,13 +364,24 @@ export class Incomeinfo {
 
       this.getAllDocuments();
       this.restoreSlotsFromDocuments();
+      
+ if (this.allDocuments.length > 0) {
+    return; // ✅ already restored, no API needed
+  }
+
     }
 
 
 
     // 3. Then call API.
+ const applicantId = this.getApiApplicantId();
 
-    const savedDraftData = await this.getSavedIncomeData();
+    if (!applicantId) {
+      console.error('ApplicantId not found for photo upload');
+      return;
+    }
+
+    const savedDraftData = await this.getSavedIncomeData(applicantId);
 
     if (savedDraftData?.length) {
       this.restoreIncomeDraftData(savedDraftData);
@@ -372,11 +391,34 @@ export class Incomeinfo {
 
   getStorageKey() {
      const index = this.stepperService.getCurrentCoApplicantIndex();
-    // return `kycinfo_coapp_${this.applicantId}_${index}`;
+         const coApplicantId = this.stepperService.getCo_appId()?.[0];
     return this.isCoApplicant
-      ? `IncomeInfoData_coapp_${this.applicantId}_${index}`
-      : `IncomeInfoData_main_${this.applicantId}`;
+      ? `IncomeInfoData_coapp_${coApplicantId || 'temp_' + index}`
+      : `IncomeInfoData_main_${this.stepperService.getLoanId()?.[0]}`;
+
+    // return `kycinfo_coapp_${this.applicantId}_${index}`;
+    // return this.isCoApplicant
+    //   ? `IncomeInfoData_coapp_${this.applicantId}_${index}`
+    //   : `IncomeInfoData_main_${this.applicantId}`;
   }
+    getCurrentCoApplicantFromList() {
+    const mainApplicantId = this.stepperService.getLoanId()?.[0];
+    const index = this.stepperService.getCurrentCoApplicantIndex();
+
+    const saved = localStorage.getItem(`coApplicants_${mainApplicantId}`);
+    const list = saved ? JSON.parse(saved) : [];
+
+    return list.find((x: any) => Number(x.index) === Number(index));
+  }
+
+  getApiApplicantId() {
+    if (!this.isCoApplicant) {
+      return this.stepperService.getLoanId()?.[0];
+    }
+
+    return this.stepperService.getCo_appId()?.[0] || null;
+  }
+
   get currentApplicantState() {
     return this.isCoApplicant
       ? this.loanformservice.coApplicantState
@@ -417,11 +459,18 @@ export class Incomeinfo {
     if (!result.file) return;
 
 
+const apiApplicantId = this.getApiApplicantId();
+
+if (!apiApplicantId) {
+  console.error('ApplicantId not found for income upload');
+  return;
+}
+
     const fd = new FormData();
     fd.append('category', 'INCOME');
     fd.append('subcategory', subcategory);
     fd.append('title', subcategory);
-    fd.append('applicantId', this.applicantId);
+    fd.append('applicantId',apiApplicantId);
     fd.append('files[0].type', type);
     fd.append('files[0].file', result.file);
 
@@ -448,13 +497,18 @@ export class Incomeinfo {
 
     if (!result.file) return;
 
+const apiApplicantId = this.getApiApplicantId();
 
+if (!apiApplicantId) {
+  console.error('ApplicantId not found for income upload');
+  return;
+}
     this.uploadedFiles[key] = result.file;
 
     const fd = new FormData();
     fd.append('category', category);
     fd.append('subcategory', subcategory);
-    fd.append('applicantId', this.applicantId);
+    fd.append('applicantId', apiApplicantId);
     fd.append('files[0].title', othertitle || key);
     fd.append('files[0].type', type);
     fd.append('files[0].file', result.file);
@@ -476,7 +530,15 @@ export class Incomeinfo {
 
 
         const key1 = this.getStorageKey()
-        localStorage.setItem(key1, JSON.stringify(this.uploadedrespfiles));
+        // localStorage.setItem(key1, JSON.stringify(this.uploadedrespfiles));
+        const stepData = {
+  uploadedFiles: this.uploadedrespfiles,
+  otherIncomeSlots: this.otherIncomeSlots,
+  otherBusinessSlots: this.otherBusinessSlots
+};
+
+localStorage.setItem(this.getStorageKey(), JSON.stringify(stepData));
+this.stepperService.setStepData(this.getStepRoute(), stepData);
 
         this.getAllDocuments();
         // this.cd.detectChanges();
@@ -764,7 +826,16 @@ export class Incomeinfo {
           return true;
         });
         const keyLocal = this.getStorageKey();
-        localStorage.setItem(keyLocal, JSON.stringify(this.uploadedrespfiles));
+        const stepData = {
+  uploadedFiles: this.uploadedrespfiles,
+  otherIncomeSlots: this.otherIncomeSlots,
+  otherBusinessSlots: this.otherBusinessSlots
+};
+
+localStorage.setItem(this.getStorageKey(), JSON.stringify(stepData));
+this.stepperService.setStepData(this.getStepRoute(), stepData);
+
+        // localStorage.setItem(keyLocal, JSON.stringify(this.uploadedrespfiles));
 
         this.cd.detectChanges();
 
@@ -1179,11 +1250,11 @@ isSalariedUser(): boolean {
   }
 
   //get api for saved data
-  getSavedIncomeData(): Promise<any[]> {
+  getSavedIncomeData(applicantId: any): Promise<any[]> {
     const requests = this.incomeDraftSections.map(section => {
       return this.loanformservice.getUploadedData(
         this.applicationId,
-        this.applicantId,
+        applicantId,
         section.sectionKey,
         section.category,
         section.subcategory,
@@ -1343,7 +1414,12 @@ isSalariedUser(): boolean {
 
   private buildDraftUploadRequests() {
     const grouped: Record<string, any> = {};
+   const apiApplicantId = this.getApiApplicantId();
 
+if (!apiApplicantId) {
+  console.error('ApplicantId missing for income draft');
+  return [];
+}
     Object.keys(this.uploadedFiles).forEach(fileKey => {
       const file = this.uploadedFiles[fileKey];
 
@@ -1374,11 +1450,12 @@ isSalariedUser(): boolean {
       });
     });
 
+ 
     return Object.values(grouped).map((group: any) => {
       const fd = new FormData();
 
       fd.append('applicationId', this.applicationId);
-      fd.append('applicantId', this.applicantId);
+      fd.append('applicantId', apiApplicantId);
       fd.append('sectionKey', group.sectionKey);
       fd.append('category', group.category);
       fd.append('subcategory', group.subcategory);
@@ -1393,9 +1470,19 @@ isSalariedUser(): boolean {
     });
   }
 
-  getStepRoute() {
+  getStepRoute1() {
     return this.isCoApplicant ? 'co-incomeinfo' : 'incomeinfo';
   }
+  
+getStepRoute() {
+  const coApplicantId = this.stepperService.getCo_appId()?.[0];
+  const index = this.stepperService.getCurrentCoApplicantIndex();
+
+  return this.isCoApplicant
+    ? `co-incomeinfo_${coApplicantId || 'temp_' + index}`
+    : 'incomeinfo';
+}
+
   next() {
 
     console.log('allRequiredFilesUploaded:', this.allRequiredFilesUploaded);
@@ -1411,6 +1498,7 @@ isSalariedUser(): boolean {
 
       const key = this.getStorageKey();
       const stepRoute = this.getStepRoute();
+      const completedRoute = this.isCoApplicant ? 'co-incomeinfo' : 'incomeinfo';
 
       localStorage.setItem(key, JSON.stringify(stepData));
 
@@ -1423,7 +1511,7 @@ isSalariedUser(): boolean {
       }
 
       this.stepperService.setStepData(stepRoute, stepData);
-      this.stepperService.markStepCompleted(stepRoute);
+      this.stepperService.markStepCompleted(completedRoute);
 
 
 

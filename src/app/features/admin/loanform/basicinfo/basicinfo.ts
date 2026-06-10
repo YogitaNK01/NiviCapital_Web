@@ -73,7 +73,7 @@ export class Basicinfo {
       this.isCoApplicant ? 'CO_APPLICANT' : 'MAIN'
     );
     this.stepperService.restoreLoanEditContext();
-this.stepperService.restoreLoanIdFromSession();
+    this.stepperService.restoreLoanIdFromSession();
 
     let Allids = this.stepperService.getLoanId();
 
@@ -126,6 +126,17 @@ this.stepperService.restoreLoanIdFromSession();
 
     const currentCoapp = this.getCurrentCoApplicantFromList();
 
+
+    if (currentCoapp?.applicantId) {
+      this.stepperService.setCo_appId(
+        currentCoapp.applicantId,
+        currentCoapp.applicationId || this.applicationId,
+        currentCoapp.name || '',
+        undefined,
+        this.stepperService.getCurrentCoApplicantIndex()
+      );
+    }
+
     const finalPhone =
       queryPhone ||
       currentCoapp?.phone ||
@@ -139,7 +150,7 @@ this.stepperService.restoreLoanIdFromSession();
 
 
 
-    if (mode === 'new' || !currentCoapp?.applicantId) {
+    if (!currentCoapp?.applicantId) {
       this.resetBasicFormForNewCoapp(finalPhone);
       return;
     }
@@ -154,59 +165,59 @@ this.stepperService.restoreLoanIdFromSession();
     }
 
 
-    const key = this.getStorageKey();
-    const localData = localStorage.getItem(key);
-    const parsedLocal = localData ? JSON.parse(localData) : null;
+    // const key = this.getStorageKey();
+    // const localData = localStorage.getItem(key);
+    // const parsedLocal = localData ? JSON.parse(localData) : null;
 
-    // const apiData = await this.getSavedbasicInfo();
+    // // const apiData = await this.getSavedbasicInfo();
 
-    let finalData = null;
+    // let finalData = null;
 
 
-    //  1. First priority: indexed local data
-    if (parsedLocal && this.isBasicInfoComplete(parsedLocal)) {
-      finalData = parsedLocal;
-    }
+    // //  1. First priority: indexed local data
+    // if (parsedLocal && this.isBasicInfoComplete(parsedLocal)) {
+    //   finalData = parsedLocal;
+    // }
 
-    //  2. API only if CIF already generated for this coapp
-    const coApplicantApplicantId = this.getCoApplicantApplicantId();
+    // //  2. API only if CIF already generated for this coapp
+    // const coApplicantApplicantId = this.getCoApplicantApplicantId();
 
-    if (!finalData && coApplicantApplicantId) {
-      const apiData = await this.getSavedbasicInfo(coApplicantApplicantId);
+    // if (!finalData && coApplicantApplicantId) {
+    //   const apiData = await this.getSavedbasicInfo(coApplicantApplicantId);
 
-      if (apiData && this.isBasicInfoComplete(apiData)) {
-        finalData = apiData;
-        localStorage.setItem(key, JSON.stringify(apiData));
-      }
-    }
+    //   if (apiData && this.isBasicInfoComplete(apiData)) {
+    //     finalData = apiData;
+    //     localStorage.setItem(key, JSON.stringify(apiData));
+    //   }
+    // }
 
-    //  3. Patch only if actual coapp data found
-    if (finalData) {
-      this.loanform.co_basicInfoData = finalData;
+    // //  3. Patch only if actual coapp data found
+    // if (finalData) {
+    //   this.loanform.co_basicInfoData = finalData;
 
-      this.patchBasicInfo(finalData);
+    //   this.patchBasicInfo(finalData);
 
-      this.lastSavedPayload = this.buildBasicPayload(
-        this.registerForm.getRawValue()
-      );
+    //   this.lastSavedPayload = this.buildBasicPayload(
+    //     this.registerForm.getRawValue()
+    //   );
 
-      this.stepperService.markStepCompleted('co-basicinfo');
+    //   this.stepperService.markStepCompleted('co-basicinfo');
 
-    } else {
-      //  new coapp: keep only phone prefilled
-      this.registerForm.patchValue({
-        fname: '',
-        mname: '',
-        lname: '',
-        email: '',
-        phone: finalPhone
-      }, { emitEvent: false });
+    // } else {
+    //   //  new coapp: keep only phone prefilled
+    //   this.registerForm.patchValue({
+    //     fname: '',
+    //     mname: '',
+    //     lname: '',
+    //     email: '',
+    //     phone: finalPhone
+    //   }, { emitEvent: false });
 
-      this.ismiddlename = false;
-      this.registerForm.get('mname')?.enable({ emitEvent: false });
+    //   this.ismiddlename = false;
+    //   this.registerForm.get('mname')?.enable({ emitEvent: false });
 
-      this.lastSavedPayload = null;
-    }
+    //   this.lastSavedPayload = null;
+    // }
 
   }
   get f() {
@@ -408,10 +419,30 @@ this.stepperService.restoreLoanIdFromSession();
   }
 
 
-  getStorageKey() {
+  getTempStorageKey() {
     const index = this.stepperService.getCurrentCoApplicantIndex();
-    return `basicInfoData_coapp_${this.applicantId}_${index}`;
+    return `basicInfoData_coapp_temp_${index}`;
   }
+
+  getStorageKey() {
+    const coApplicantId = this.stepperService.getCo_appId()?.[0];
+
+    if (coApplicantId) {
+      return `basicInfoData_coapp_${coApplicantId}`;
+    }
+
+    return this.getTempStorageKey();
+  }
+
+  getMainApplicantId() {
+    return this.stepperService.getLoanId()?.[0];
+  }
+
+  getCoApplicantApplicantId() {
+    return this.stepperService.getCo_appId()?.[0] || this.getCurrentCoApplicantFromList()?.applicantId || null;
+  }
+
+
   toggle(i: number) {
     this.openIndex = this.openIndex === i ? null : i;
   }
@@ -488,27 +519,39 @@ this.stepperService.restoreLoanIdFromSession();
   }
   updateCoApplicantListAfterCif() {
     const index = this.stepperService.getCurrentCoApplicantIndex();
-    const mainApplicantId = this.applicantId;
 
-    const key = `coApplicants_${mainApplicantId}`;
-    const saved = localStorage.getItem(key);
-    let list = saved ? JSON.parse(saved) : [];
+    // always use MAIN applicant id for dashboard list
+    const mainApplicantId = this.stepperService.getLoanId()?.[0];
+
+    const listKey = `coApplicants_${this.applicationId}`;
+
+    const saved = localStorage.getItem(listKey);
+
+    let list: any[] = [];
+
+    try {
+      const parsed = saved ? JSON.parse(saved) : [];
+      list = Array.isArray(parsed) ? parsed : [];
+    } catch {
+      list = [];
+    }
 
     const existingIndex = list.findIndex(
       (x: any) => Number(x.index) === Number(index)
     );
+
+    const formValue = this.registerForm.getRawValue();
 
     const item = {
       index,
       userInitiateId: this.sendotpId,
       applicantId: this.co_applicantId,
       applicationId: this.co_applicationId,
-      phone: this.registerForm.get('phone')?.value || this.prefillPhone,
+      phone: formValue.phone || this.prefillPhone,
       name:
         this.co_applicantName ||
-        `${this.registerForm.get('fname')?.value || ''} ${this.registerForm.get('lname')?.value || ''}`.trim(),
+        `${formValue.fname || ''} ${formValue.lname || ''}`.trim(),
       status: 'IN_PROGRESS'
-
     };
 
     if (existingIndex > -1) {
@@ -520,24 +563,28 @@ this.stepperService.restoreLoanIdFromSession();
       list.push(item);
     }
 
-    localStorage.setItem(key, JSON.stringify(list));
+    list = list.sort((a: any, b: any) => Number(a.index) - Number(b.index));
+
+    localStorage.setItem(listKey, JSON.stringify(list));
   }
   getCurrentCoApplicantFromList() {
     const index = this.stepperService.getCurrentCoApplicantIndex();
-    const key = `coApplicants_${this.applicantId}`;
 
+    const key = `coApplicants_${this.applicationId}`;
     const saved = localStorage.getItem(key);
-    const list = saved ? JSON.parse(saved) : [];
+
+    let list: any[] = [];
+
+    try {
+      const parsed = saved ? JSON.parse(saved) : [];
+      list = Array.isArray(parsed) ? parsed : [];
+    } catch {
+      list = [];
+    }
 
     return list.find((x: any) => Number(x.index) === Number(index));
   }
 
-  getCoApplicantApplicantId(): any {
-    const current = this.getCurrentCoApplicantFromList();
-
-    // after CIF generation this should exist
-    return current?.applicantId || null;
-  }
 
   saveExit() {
     let formdata = this.registerForm.getRawValue();
@@ -547,11 +594,21 @@ this.stepperService.restoreLoanIdFromSession();
     localStorage.setItem(key, JSON.stringify(input));
     this.loanform.co_basicInfoData = input;
 
+
+    const coApplicantApplicantId = this.stepperService.getCo_appId()?.[0];
+
+    // Before CIF, save only local
+    if (!coApplicantApplicantId) {
+      this.lastSavedPayload = { ...input };
+      return;
+    }
+
+
     const inputdata = {
       action: "auto-save",
       sectionKey: "PERSONAL_INFO1",
       applicationId: this.applicationId,
-      applicantId: this.applicantId,
+      applicantId: coApplicantApplicantId,
       jsonData: input
     };
 
@@ -608,9 +665,9 @@ this.stepperService.restoreLoanIdFromSession();
 
         const index = this.stepperService.getCurrentCoApplicantIndex();
         sessionStorage.setItem('coapp_cifdetails', JSON.stringify(res.data));
-        const key = this.getStorageKey();
+        // const key = this.getStorageKey();
 
-        localStorage.setItem(key, JSON.stringify(this.loanform.co_basicInfoData));
+        // localStorage.setItem(key, JSON.stringify(this.loanform.co_basicInfoData));
 
         this.co_applicantId = res.data.applicantId
         this.co_applicationId = res.data.applicationId
@@ -627,20 +684,47 @@ this.stepperService.restoreLoanIdFromSession();
         };
         sessionStorage.setItem('coAppIds', JSON.stringify(coAppData));
 
+
+        const payload = {
+          applicantId: this.co_applicantId,
+          applicationId: this.co_applicationId,
+          fullName: this.co_applicantName,
+          // custARN: this.arnid
+        };
+
+        sessionStorage.setItem('loanContextData', JSON.stringify(payload));
+
+        const finalKey = `basicInfoData_coapp_${this.co_applicantId}`;
+        const tempKey = this.getTempStorageKey();
+
+        localStorage.setItem(finalKey, JSON.stringify(input));
+        localStorage.removeItem(tempKey);
+
+
         this.updateCoApplicantListAfterCif();
-        if (this.isCoApplicant) {
-          this.loanform.co_basicInfoData = input;
-        } else {
-
-        }
 
 
-        localStorage.setItem(key, JSON.stringify(input));
+
+        // localStorage.setItem(key, JSON.stringify(input));
 
         this.lastSavedPayload = { ...input };
 
         this.stepperService.markStepCompleted('co-basicinfo');
         this.stepperService.setStepData('co-basicinfo', formdata);
+
+
+        this.router.navigate([], {
+          relativeTo: this.route,
+          queryParams: {
+            mode: 'existing',
+            coApplicantIndex: this.stepperService.getCurrentCoApplicantIndex(),
+            phone: formdata.phone,
+            id: this.sendotpId
+          },
+          queryParamsHandling: 'merge',
+          replaceUrl: true
+        });
+
         this.stepperService.next();
       },
       error: (err) => {
