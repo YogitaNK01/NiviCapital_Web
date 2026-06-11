@@ -100,6 +100,9 @@ export class Liabilitiesinfo {
   loanerror: boolean = false;
   isCoApplicant: boolean = false;
   lastSavedPayload: any = null;
+  isSummaryEditMode = false;
+  viewOnly = false;
+
   constructor(private fb: FormBuilder, public main: Main, private route: ActivatedRoute, private msgBox: Msgboxservice, private router: Router,
     private stepperService: Loanstepperservice, private formSvc: Loanformservice, private cd: ChangeDetectorRef) { }
 
@@ -111,6 +114,13 @@ export class Liabilitiesinfo {
     this.stepperService.setStepperType(
       this.isCoApplicant ? 'CO_APPLICANT' : 'MAIN'
     );
+    if (this.isCoApplicant) {
+      this.stepperService.restoreCoAppIdFromSession();
+    }
+
+    this.stepperService.restoreLoanEditContext();
+    this.stepperService.restoreLoanIdFromSession();
+
     let Allids = this.stepperService.getLoanId();
 
     this.applicantId = Allids[0];
@@ -119,6 +129,14 @@ export class Liabilitiesinfo {
 
     let AllCoapp_ids = this.stepperService.getCo_appId();
 
+    const queryParams = this.route.snapshot.queryParams;
+
+    this.isSummaryEditMode =
+      queryParams['fromSummary'] === true ||
+      queryParams['fromSummary'] === 'true' ||
+      this.formSvc.isSummaryEditFlow();
+
+    this.viewOnly = this.isSummaryEditMode && (queryParams['mode'] === 'view' || queryParams['mode'] === undefined);
 
     if (
       this.isCoApplicant &&
@@ -182,82 +200,15 @@ export class Liabilitiesinfo {
     });
 
 
-    // this.alllibilitiy_type();
-    // this.getloantype();
-    // this.getbanks();
-    // this.getlender();
 
-    // setTimeout(() => {
-    //   const savedData = this.isCoApplicant
-    //     ? this.formSvc.co_liabilitiesInfoData
-    //     : this.formSvc.liabilitiesInfoData;
-
-    //   if (savedData) {
-    //     this.patchLiabilitiesData();
-    //   }
-    // }, 500);
 
     await this.loadMasters();
-    if (this.formSvc.isEditFlow()) {
-
-      this.patchFromSummary();
-      return
+    if (this.viewOnly) {
+      this.liabilityForm.disable({ emitEvent: false });
     }
+    await this.loadliabilityForBothFlows()
 
 
-    const key = this.getStorageKey();
-    const localData = localStorage.getItem(key);
-    const parsedLocal = localData ? JSON.parse(localData) : null;
-
-     const applicantId = this.getApiApplicantId();
-
-    if (!applicantId) {
-      console.error('ApplicantId not found for photo upload');
-      return;
-    }
-
-  let finalData = null;
-
-if (parsedLocal) {
-  finalData = parsedLocal;
-}
-
-if (!finalData) {
-  const applicantId = this.getApiApplicantId();
-
-  if (!applicantId) {
-    console.error('ApplicantId not found for liabilities');
-    return;
-  }
-
-  const apiData = await this.getSavedLiability(applicantId);
-
-  if (apiData) {
-    finalData = apiData;
-    localStorage.setItem(key, JSON.stringify(apiData));
-  }
-}
-
-    if (finalData) {
-
-      if (this.isCoApplicant) {
-        this.formSvc.co_liabilitiesInfoData = finalData;
-      } else {
-        this.formSvc.liabilitiesInfoData = finalData;
-      }
-
-      this.patchLiabilitiesData();
-
-      const snapshot = this.buildLiabilityPayloadWithApplicantId();
-      this.lastSavedPayload = snapshot.invalid ? null :
-        this.normalizeLiabilityPayload({
-          applicantId: snapshot.applicantId,
-          items: snapshot.items
-        });
-
-      this.liabilityForm.markAsPristine();
-      this.stepperService.markStepCompleted(this.getStepRoute());
-    }
 
 
   }
@@ -270,10 +221,7 @@ if (!finalData) {
       ? `liabilitiesinfoData_coapp_${coApplicantId || 'temp_' + index}`
       : `liabilitiesinfoData_main_${this.stepperService.getLoanId()?.[0]}`;
 
-    // return `kycinfo_coapp_${this.applicantId}_${index}`;
-    // return this.isCoApplicant
-    //   ? `liabilitiesinfoData_coapp_${this.applicantId}_${index}`
-    //   : `liabilitiesinfoData_main_${this.applicantId}`;
+
   }
   getCurrentCoApplicantFromList() {
     const mainApplicantId = this.stepperService.getLoanId()?.[0];
@@ -403,6 +351,272 @@ if (!finalData) {
     this.cd.detectChanges();
   }
 
+  private async loadliabilityForBothFlows() {
+    const key = this.getStorageKey();
+
+    const localData = localStorage.getItem(key);
+    const parsedLocal = localData ? JSON.parse(localData) : null;
+
+    const apiApplicantId = this.getApiApplicantId();
+
+    const draftData = apiApplicantId
+      ? await this.getSavedLiability(apiApplicantId)
+      : null;
+
+    const summarySection = await this.getSummarySection('liabilities');
+
+
+    const normalizedSummary = this.normalizeLiabilities(summarySection);
+    const normalizedDraft = this.normalizeLiabilities(draftData);
+    const normalizedLocal = this.normalizeLiabilities(parsedLocal);
+
+    // ✅ after FINAL submit, summary must win
+    const finalData =
+      normalizedSummary ||
+      normalizedDraft ||
+      normalizedLocal;
+
+    if (!finalData) {
+      this.lastSavedPayload = null;
+
+      this.selectedliabilities = [];
+      this.selectedloantype = [];
+      this.openIndex = [];
+
+      this.loans.clear();
+      this.creditcard.clear();
+      this.bnpl.clear();
+      this.other.clear();
+
+      // keep default empty rows only for arrays you want visible by default
+      this.creditcard.push(this.createCreditcard());
+      this.bnpl.push(this.createBNPL());
+      this.other.push(this.createOther());
+
+      this.calculateGrandTotal();
+      this.cd.detectChanges();
+      return;
+    }
+
+
+    if (this.isCoApplicant) {
+      this.formSvc.co_liabilitiesInfoData = finalData;
+    } else {
+      this.formSvc.liabilitiesInfoData = finalData;
+    }
+
+
+
+    this.patchLiabilitiesData();
+
+    const snapshot = this.buildLiabilityPayloadWithApplicantId();
+
+    this.lastSavedPayload = snapshot.invalid
+      ? null
+      : this.normalizeLiabilityPayload({
+        applicantId: snapshot.applicantId,
+        items: snapshot.items
+      });
+
+    localStorage.setItem(key, JSON.stringify(finalData));
+
+    this.liabilityForm.markAsPristine();
+    this.calculateGrandTotal();
+
+ // ✅ mark complete only if strict valid payload can be built
+  if (!snapshot.invalid && snapshot.items.length > 0) {
+    this.stepperService.markStepCompleted(this.getStepRoute());
+  }
+    this.cd.detectChanges();
+
+  }
+  private async getSummarySection(sectionKey: string): Promise<any> {
+    if (!this.applicationId) return null;
+
+    try {
+      const res: any = await firstValueFrom(
+        this.formSvc.getSummary(this.applicationId)
+      );
+
+      if (!res || res.status !== 'success') return null;
+
+      return this.formSvc.getApplicantSectionFromSummary(
+        res,
+        sectionKey,
+        {
+          isCoApplicant: this.isCoApplicant,
+          coApplicantId: this.stepperService.getCo_appId()?.[0],
+          coApplicantIndex: this.stepperService.getCurrentCoApplicantIndex()
+        }
+      );
+    } catch (error) {
+      console.error(`Failed to get summary section: ${sectionKey}`, error);
+      return null;
+    }
+  }
+
+  private normalizeLiabilities(data: any): any {
+    if (!data) return null;
+
+    // Already in saved/draft/local payload format
+    // Example: { applicantId: '...', items: [...] }
+    if (Array.isArray(data.items)) {
+      if (data.items.length === 0) return null;
+      return {
+        applicantId: data.applicantId || this.getApiApplicantId(),
+        items: data.items
+      };
+    }
+
+    const cleanAmount = (value: any): number => {
+      if (value === null || value === undefined || value === '') return 0;
+
+      return Number(
+        value
+          .toString()
+          .replace(/,/g, '')
+      ) || 0;
+    };
+
+    const items: any[] = [];
+
+    // Existing Loans
+    (data.existingLoans || []).forEach((item: any) => {
+      items.push({
+        liabilityType: 'EXISTING_LOAN',
+
+        bankId: this.findId(
+          this.selectBanks,
+          item.bankId ||
+          item.bankLender ||
+          item.bankName ||
+          item.lenderName
+        ),
+
+        outstandingBalanceInr: cleanAmount(
+          item.outstandingBalanceInr ||
+          item.outstandingBalance
+        ),
+
+        emiAmountInr: cleanAmount(
+          item.emiAmountInr ||
+          item.emiAmount
+        ),
+
+        remainingTenureMonths:
+          item.remainingTenureMonths ||
+          item.remainingTenure ||
+          '',
+
+        liabilityTypeText:
+          item.liabilityTypeText ||
+          item.loanType ||
+          item.type ||
+          '',
+
+        title: item.title || ''
+      });
+    });
+
+    // Credit Card Outstanding
+    (data.creditCardOutstanding || []).forEach((item: any, index: number) => {
+      items.push({
+        liabilityType: 'CREDIT_CARD_OUTSTANDING',
+
+        bankId: this.findId(
+          this.selectBanks,
+          item.bankId ||
+          item.bankName
+        ),
+
+        outstandingBalanceInr: cleanAmount(
+          item.outstandingBalanceInr ||
+          item.outstandingBalance
+        ),
+
+        creditLimitInr: cleanAmount(
+          item.creditLimitInr ||
+          item.creditLimit
+        ),
+
+        liabilityTypeText:
+          item.liabilityTypeText ||
+          `CREDIT_CARD_OUTSTANDING ${index + 1}`,
+
+        title: item.title || ''
+      });
+    });
+
+    // BNPL
+    (data.bnpl || []).forEach((item: any, index: number) => {
+      items.push({
+        liabilityType: 'BNPL',
+
+        bankId: this.findId(
+          this.selectLenders,
+          item.bankId ||
+          item.lenderId ||
+          item.lenderName ||
+          item.bankName
+        ),
+
+        outstandingBalanceInr: cleanAmount(
+          item.outstandingBalanceInr ||
+          item.outstandingBalance
+        ),
+
+        creditLimitInr: cleanAmount(
+          item.creditLimitInr ||
+          item.creditLimit
+        ),
+
+        monthlyEmiInr: cleanAmount(
+          item.monthlyEmiInr ||
+          item.monthlyEMI ||
+          item.monthlyEmi
+        ),
+
+        liabilityTypeText:
+          item.liabilityTypeText ||
+          `BNPL ${index + 1}`,
+
+        title: item.title || ''
+      });
+    });
+
+    // Other Liabilities
+    (data.otherLiabilities || []).forEach((item: any) => {
+      items.push({
+        liabilityType: 'OTHER_LIABILITY',
+
+        liabilityTypeText:
+          item.liabilityType ||
+          item.liabilityTypeText ||
+          item.name ||
+          item.liabilityName ||
+          item.type ||
+          '',
+
+        amountInr: cleanAmount(
+          item.amountInr ||
+          item.amount
+        ),
+
+        monthlyRepaymentInr: cleanAmount(
+          item.monthlyRepaymentInr ||
+          item.monthlyRepayment
+        )
+      });
+    });
+
+    if (!items.length) return null;
+
+    return {
+      applicantId: this.getApiApplicantId(),
+      totalLiabilities: data.totalLiabilities || 0,
+      items
+    };
+  }
   //existing loans
   createLoan(type: string): FormGroup {
     const selected1 = this.loanoptions.find(l => l.value === type);
@@ -1014,114 +1228,16 @@ if (!finalData) {
   }
 
   // edit flow = patch from summary
-  patchFromSummary() {
-    if (!this.formSvc.isEditFlow()) return;
-
-    const data = this.formSvc.getSummarySection('liabilities');
-    console.log('patch liabilities', data);
+  async patchFromSummary() {
+    const section = await this.getSummarySection('liabilities');
+    const data = this.normalizeLiabilities(section);
 
     if (!data) return;
 
-    const clean = (v: any) => Number(v || 0);
-
-    const applicantId = this.getApiApplicantId();
-
-    if (!applicantId) {
-      console.error('ApplicantId not found for photo upload');
-      return;
-    }
-
-
-    const mappedData = {
-      applicantId: applicantId,
-      items: [
-        ...(data.existingLoans || []).map((item: any) => ({
-          liabilityType: 'EXISTING_LOAN',
-          // bankId:
-          //   item.bankLender ||
-          //   this.selectBanks.find(b =>
-          //     b.label?.toLowerCase() ===
-          //     (item.bankName || item.lenderName || '').toLowerCase()
-          //   )?.value ||
-          //   '',
-
-          bankId: this.findId(
-            this.selectBanks,
-            item.bankId || item.bankLender || item.bankName || item.lenderName
-          ),
-
-          outstandingBalanceInr: clean(item.outstandingBalanceInr || item.outstandingBalance),
-          emiAmountInr: clean(item.emiAmountInr || item.emiAmount),
-          remainingTenureMonths: item.remainingTenureMonths || item.remainingTenure || '',
-          liabilityTypeText:
-            item.liabilityTypeText ||
-            item.loanType ||
-            item.type ||
-            '',
-          title: item.title || ''
-        })),
-
-        ...(data.creditCardOutstanding || []).map((item: any, index: number) => ({
-          liabilityType: 'CREDIT_CARD_OUTSTANDING',
-          // bankId:
-          //   item.bankName ||
-          //   this.selectBanks.find(b =>
-          //     b.label?.toLowerCase() ===
-          //     (item.bankName || '').toLowerCase()
-          //   )?.value ||
-          //   '',
-
-          bankId: this.findId(
-            this.selectBanks,
-            item.bankName || item.bankId
-          ),
-
-          outstandingBalanceInr: clean(item.outstandingBalanceInr || item.outstandingBalance),
-          creditLimitInr: clean(item.creditLimitInr || item.creditLimit),
-          liabilityTypeText: item.liabilityTypeText || `CREDIT_CARD_OUTSTANDING ${index + 1}`,
-          title: item.title || ''
-        })),
-
-        ...(data.bnpl || []).map((item: any, index: number) => ({
-          liabilityType: 'BNPL',
-          // bankId: item.lenderName||
-          //   item.bankId ||
-          //   this.selectLenders.find(l =>
-          //     l.label?.toLowerCase() ===
-          //     (item.lenderName || item.bankName || '').toLowerCase()
-          //   )?.value ||
-          //   '',
-
-          bankId: this.findId(
-            this.selectLenders,
-            item.lenderName || item.bankId || item.lenderId || item.bankName
-          ),
-
-          outstandingBalanceInr: clean(item.outstandingBalanceInr || item.outstandingBalance),
-          creditLimitInr: clean(item.creditLimitInr || item.creditLimit),
-          monthlyEmiInr: clean(item.monthlyEmiInr || item.monthlyEMI || item.monthlyEmi),
-          liabilityTypeText: item.liabilityTypeText || `BNPL ${index + 1}`,
-          title: item.title || ''
-        })),
-
-        ...(data.otherLiabilities || []).map((item: any) => ({
-          liabilityType: 'OTHER_LIABILITY',
-          liabilityTypeText: item.liabilityType ||
-            item.liabilityTypeText ||
-            item.name ||
-            item.liabilityName ||
-            item.type ||
-            '',
-          amountInr: clean(item.amountInr || item.amount),
-          monthlyRepaymentInr: clean(item.monthlyRepaymentInr || item.monthlyRepayment)
-        }))
-      ]
-    };
-
     if (this.isCoApplicant) {
-      this.formSvc.co_liabilitiesInfoData = mappedData;
+      this.formSvc.co_liabilitiesInfoData = data;
     } else {
-      this.formSvc.liabilitiesInfoData = mappedData;
+      this.formSvc.liabilitiesInfoData = data;
     }
 
     this.patchLiabilitiesData();
@@ -1130,14 +1246,10 @@ if (!finalData) {
 
     this.lastSavedPayload = snapshot.invalid
       ? null
-      :
-      this.normalizeLiabilityPayload({
+      : this.normalizeLiabilityPayload({
         applicantId: snapshot.applicantId,
         items: snapshot.items
       });
-
-
-    this.liabilityForm.markAsPristine();
 
     this.calculateGrandTotal();
     this.cd.detectChanges();
@@ -1612,7 +1724,20 @@ if (!finalData) {
       ).subscribe({
         next: (res) => {
           if (res.status === 'success') {
-            resolve(res.data.data);
+            // resolve(res.data.data);
+
+            let data = res.data.data;
+
+            if (typeof data === 'string') {
+              try {
+                data = JSON.parse(data);
+              } catch {
+                data = null;
+              }
+            }
+
+            resolve(data);
+
           } else {
             resolve(null);
           }
@@ -1624,8 +1749,8 @@ if (!finalData) {
 
   saveExit() {
 
-    const result = this.buildLiabilityPayloadWithApplicantId();
-
+    // const result = this.buildLiabilityPayloadWithApplicantId();
+    const result = this.buildDraftLiabilityPayloadWithApplicantId();
     if (result.invalid) return;
 
     const input = { items: result.items, applicantId: result.applicantId, };
@@ -1641,7 +1766,7 @@ if (!finalData) {
       this.formSvc.liabilitiesInfoData = input;
     }
 
- const applicantId = this.getApiApplicantId();
+    const applicantId = this.getApiApplicantId();
 
     if (!applicantId) {
       console.error('ApplicantId not found for photo upload');
@@ -1797,9 +1922,9 @@ if (!finalData) {
       return { invalid: true, items: [] };
     }
 
-     const applicantId = this.getApiApplicantId();
+    const applicantId = this.getApiApplicantId();
 
-   
+
 
     return {
       invalid: false,
@@ -1808,7 +1933,102 @@ if (!finalData) {
     };
 
   }
+  //draft payload for saveexit
+  buildDraftLiabilityPayloadWithApplicantId(): {
+    invalid: boolean;
+    applicantId?: any;
+    items: any[];
+  } {
+    const items: any[] = [];
 
+    const cleanAmount = (val: any) =>
+      val ? Number(val.toString().replace(/,/g, '')) : 0;
+
+    // EXISTING LOANS
+    if (this.selectedliabilities.includes('EXISTING_LOAN')) {
+      this.loans.controls.forEach((loan: any) => {
+        const row = loan.getRawValue();
+
+        if (this.hasAnyValue(row, ['type', 'bankname', 'title', 'outstanding', 'emiamount', 'remtenure'])) {
+          items.push({
+            liabilityType: 'EXISTING_LOAN',
+            bankId: row.bankname || '',
+            ...(row.title ? { title: row.title } : {}),
+            outstandingBalanceInr: cleanAmount(row.outstanding),
+            emiAmountInr: cleanAmount(row.emiamount),
+            remainingTenureMonths: row.remtenure || '',
+            liabilityTypeText: row.type || ''
+          });
+        }
+      });
+    }
+
+    // CREDIT CARD
+    if (this.selectedliabilities.includes('CREDIT_CARD_OUTSTANDING')) {
+      this.creditcard.controls.forEach((card: any, index: number) => {
+        const row = card.getRawValue();
+
+        if (this.hasAnyValue(row, ['creditcardbankName', 'title', 'ccoutstandingBalance', 'cccreditLimit'])) {
+          items.push({
+            liabilityType: 'CREDIT_CARD_OUTSTANDING',
+            bankId: row.creditcardbankName || '',
+            ...(row.title ? { title: row.title } : {}),
+            outstandingBalanceInr: cleanAmount(row.ccoutstandingBalance),
+            creditLimitInr: cleanAmount(row.cccreditLimit),
+            liabilityTypeText: `CREDIT_CARD_OUTSTANDING ${index + 1}`
+          });
+        }
+      });
+    }
+
+    // BNPL
+    if (this.selectedliabilities.includes('BNPL')) {
+      this.bnpl.controls.forEach((bnpl: any, index: number) => {
+        const row = bnpl.getRawValue();
+
+        if (this.hasAnyValue(row, ['bnplbankName', 'title', 'outstandingBalance', 'creditLimit', 'monthlyEMI'])) {
+          items.push({
+            liabilityType: 'BNPL',
+            bankId: row.bnplbankName || '',
+            ...(row.title ? { title: row.title } : {}),
+            outstandingBalanceInr: cleanAmount(row.outstandingBalance),
+            creditLimitInr: cleanAmount(row.creditLimit),
+            monthlyEmiInr: cleanAmount(row.monthlyEMI),
+            liabilityTypeText: `BNPL ${index + 1}`
+          });
+        }
+      });
+    }
+
+    // OTHER LIABILITY
+    if (this.selectedliabilities.includes('OTHER_LIABILITY')) {
+      this.other.controls.forEach((other: any) => {
+        const row = other.getRawValue();
+
+        if (this.hasAnyValue(row, ['LiabilityType', 'libamount', 'MonthlyRepaymentLimit'])) {
+          items.push({
+            liabilityType: 'OTHER_LIABILITY',
+            liabilityTypeText: row.LiabilityType || '',
+            amountInr: cleanAmount(row.libamount),
+            monthlyRepaymentInr: cleanAmount(row.MonthlyRepaymentLimit)
+          });
+        }
+      });
+    }
+
+    return {
+      invalid: false,
+      applicantId: this.getApiApplicantId(),
+      items
+    };
+  }
+
+  private hasAnyValue(row: any, keys: string[]): boolean {
+    return keys.some(key => {
+      const val = row?.[key];
+      return val !== null && val !== undefined && val !== '';
+    });
+  }
   buildLiabilityPayloadWithApplicantId(): {
     invalid: boolean;
     applicantId?: any;
@@ -1823,7 +2043,7 @@ if (!finalData) {
       };
     }
 
-     const applicantId = this.getApiApplicantId();
+    const applicantId = this.getApiApplicantId();
 
     // if (!applicantId) {
     //   console.error('ApplicantId not found for photo upload');

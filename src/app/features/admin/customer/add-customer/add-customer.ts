@@ -15,6 +15,7 @@ import { interval, Subscription } from 'rxjs';
 import { Messagebox } from '../../../systemdesign/messagebox/messagebox';
 import { Msgboxservice } from '../../../../core/service/msgboxservice';
 import { DecimalPipe } from '@angular/common';
+import { Loanformservice } from '../../../../core/service/loanformservice';
 
 
 @Component({
@@ -84,7 +85,7 @@ showMiddleNameError = false;
 
   resetCounter = 0;
   
-  constructor(private fb: FormBuilder, public main: Main, private route: ActivatedRoute, private addcustomerservice: Addcustomerservice, 
+  constructor(private fb: FormBuilder, public main: Main, private route: ActivatedRoute, private addcustomerservice: Addcustomerservice, private loanform:Loanformservice,
     private cd: ChangeDetectorRef, private router: Router,private msgBox:Msgboxservice) { }
 
   ngOnInit() {
@@ -208,6 +209,7 @@ const isMiddleNameEmpty = !data.value.mname;
 
   sendOtp() {
     console.log("send otp");
+    this.loanform.setMobileNumber(this.prefillPhone);
     this.otpsent = true;
     const input = {
 

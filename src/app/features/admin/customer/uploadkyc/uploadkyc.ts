@@ -16,6 +16,7 @@ import { Msgboxservice } from '../../../../core/service/msgboxservice';
 import { Loanstepperservice } from '../../../../core/service/loanstepperservice';
 import { NgForm } from '@angular/forms';
 import { Successbox } from '../successbox/successbox';
+import { firstValueFrom } from 'rxjs';
 
 interface OptionItem {
   label: string;
@@ -186,20 +187,67 @@ export class Uploadkyc implements OnDestroy, AfterViewInit {
 
 
   ngAfterViewInit(): void {
-    setTimeout(() => {
+  setTimeout(() => {
+    this.loadKycForBothFlows();
+  }, 300);
+}
 
-      if (!this.isCoApplicant) {
-        return;
-      }
+private async loadKycForBothFlows() {
+  const key = this.isCoApplicant
+    ? this.getStorageKey()
+    : `kycinfo_main_${this.stepperService.getLoanId()?.[0]}`;
 
-      if (this.loanservice.isEditFlow()) {
-        this.patchFromSummary();
-      } else {
-        this.restoreKycData();
-      }
-    }, 500);
+  const localData = localStorage.getItem(key);
+  const parsedLocal = localData ? JSON.parse(localData) : null;
+
+  const apiApplicantId = this.getApiApplicantId();
+
+  if (!apiApplicantId) {
+    return;
   }
 
+  const [draftData, summarySection] = await Promise.all([
+    this.getSavedKycInfo(apiApplicantId),
+    this.getSummarySection('kyc')
+  ]);
+
+  const normalizedSummary = this.normalizeSummaryKyc(summarySection);
+
+  let finalData: any = null;
+
+  // 1) Full submitted summary should always win
+  if (this.isKycComplete(normalizedSummary)) {
+    finalData = normalizedSummary;
+  }
+  // 2) Else draft data (partial save-exit)
+  else if (this.hasAnyKycData(draftData)) {
+    finalData = draftData;
+  }
+  // 3) Else local fallback
+  else if (this.hasAnyKycData(parsedLocal)) {
+    finalData = parsedLocal;
+  }
+  // 4) Else partial summary fallback
+  else if (this.hasAnyKycData(normalizedSummary)) {
+    finalData = normalizedSummary;
+  }
+
+  if (!finalData) {
+    this.lastSavedPayload = null;
+    return; // fresh form remains empty
+  }
+
+  this.patchKycInfo(finalData);
+  this.lastSavedPayload = this.normalizeKycPayload(finalData);
+
+  localStorage.setItem(key, JSON.stringify(finalData));
+
+  const stepRoute = this.isCoApplicant ? 'co-kyc' : 'kycinfo';
+
+  if (this.isKycComplete(finalData)) {
+    this.stepperService.markStepCompleted(stepRoute);
+  }
+}
 
   getStorageKey() {
      const coApplicantId = this.stepperService.getCo_appId()?.[0];
@@ -208,6 +256,10 @@ export class Uploadkyc implements OnDestroy, AfterViewInit {
      return `kycinfo_coapp_${coApplicantId || 'temp_' + index}` 
   }
 
+  isPassportRequired(): boolean {
+  // Main applicant + fresh flow only
+  return !this.isCoApplicant && !this.editMode;
+}
    getCurrentCoApplicantFromList() {
     const mainApplicantId = this.stepperService.getLoanId()?.[0];
     const index = this.stepperService.getCurrentCoApplicantIndex();
@@ -448,6 +500,10 @@ export class Uploadkyc implements OnDestroy, AfterViewInit {
   kycupload(form: any) {
     console.log(form.value);
 
+    if (this.isPassportRequired() && !form.value.Passport) {
+  console.log('Passport number is mandatory for fresh main applicant');
+  return;
+}
     if (!form.valid) {
       console.log("form invalid");
       return;
@@ -772,6 +828,14 @@ export class Uploadkyc implements OnDestroy, AfterViewInit {
       console.error('KYC form not found');
       return;
     }
+    
+  const formValue = this.kycForm.value;
+
+  if (this.isPassportRequired() && !formValue.Passport) {
+    console.log('Passport number is mandatory for fresh main applicant');
+    return;
+  }
+
 
     if (
       !this.kycForm.valid ||
@@ -1397,6 +1461,223 @@ export class Uploadkyc implements OnDestroy, AfterViewInit {
     return Object.values(this.files || {}).some(file => !!file);
   }
 
+  private async getSummarySection(sectionKey: string): Promise<any> {
+  if (!this.applicationId) return null;
+
+  try {
+    const res: any = await firstValueFrom(
+      this.loanservice.getSummary(this.applicationId)
+    );
+
+    if (!res || res.status !== 'success') return null;
+
+    return this.loanservice.getApplicantSectionFromSummary(
+      res,
+      sectionKey,
+      {
+        isCoApplicant: this.isCoApplicant,
+        coApplicantId: this.stepperService.getCo_appId()?.[0],
+        coApplicantIndex: this.stepperService.getCurrentCoApplicantIndex()
+      }
+    );
+  } catch (error) {
+    console.error(`Failed to get summary section: ${sectionKey}`, error);
+    return null;
+  }
+}
+private normalizeSummaryKyc(data: any): any {
+  if (!data) return null;
+
+  const identity = data.identityAndResidency || {};
+  const permanent = data.permanentAddress || {};
+  const current = data.currentAddress || {};
+  const other = data.otherAddress || null;
+
+  const isDifferent = !!other;
+
+  const findStateId = (stateName: string) =>
+    this.stateOptions.find(s =>
+      s.label?.toLowerCase() === stateName?.toLowerCase()
+    )?.value || '';
+
+  const permanentStateId = findStateId(permanent.state);
+  const otherStateId = findStateId(other?.state || current.state);
+
+  return {
+    applicationId: this.applicationId,
+    applicantId: this.applicantId,
+    custId: this.isCoApplicant
+      ? this.co_userid?.cifId
+      : this.userid?.cifId,
+
+    firstName: this.isCoApplicant
+      ? this.co_userid?.fullName
+      : this.userdata?.fname,
+
+    lastName: this.isCoApplicant
+      ? this.co_userid?.fullName
+      : this.userdata?.lname,
+
+    dob: identity.dob
+      ? moment(identity.dob, 'DD/MM/YYYY').format('YYYY-MM-DD')
+      : null,
+
+    aadhaarNumber: identity.aadhaarNumber || '',
+    panNumber: identity.panNumber || '',
+    passportNo: identity.passportNumber || '',
+
+    addressType: isDifferent ? 'different' : 'same',
+    isDifferentAddress: isDifferent,
+
+    isPermanentMailingChecked:
+      permanent.isMailingAddress === 1 || !isDifferent,
+
+    isCurrentMailingChecked:
+      isDifferent
+        ? other?.isMailingAddress === 1
+        : current.isMailingAddress === 1,
+
+    selectedSecondaryProof: null,
+
+    addresses: [
+      {
+        addressType: 'PERMANENT',
+        addressLine: permanent.addressLine || '',
+        addressLine1: permanent.addressLine1 || '',
+        addressLine2: permanent.addressLine2 || '',
+        city: permanent.city || '',
+        cityId: '',
+        state: permanent.state || '',
+        stateId: permanentStateId,
+        isPreferredAddress: permanent.isPreferredAddress ?? 1,
+        isMailingAddress: permanent.isMailingAddress ?? 1,
+        zipCode: permanent.pincode || '',
+        country: permanent.country || 'India'
+      },
+      {
+        addressType: 'CURRENT',
+        addressLine: current.addressLine || '',
+        addressLine1: current.addressLine1 || '',
+        addressLine2: current.addressLine2 || '',
+        city: current.city || '',
+        cityId: '',
+        state: current.state || '',
+        stateId: findStateId(current.state),
+        isPreferredAddress: current.isPreferredAddress ?? 0,
+        isMailingAddress: current.isMailingAddress ?? 0,
+        zipCode: current.pincode || '',
+        country: current.country || 'India'
+      },
+      ...(isDifferent
+        ? [{
+            addressType: 'OTHER',
+            addressLine: other.addressLine || '',
+            addressLine1: other.addressLine1 || '',
+            addressLine2: other.addressLine2 || '',
+            city: other.city || '',
+            cityId: '',
+            state: other.state || '',
+            stateId: otherStateId,
+            isPreferredAddress: other.isPreferredAddress ?? 1,
+            isMailingAddress: other.isMailingAddress ?? 1,
+            zipCode: other.pincode || '',
+            country: other.country || 'India'
+          }]
+        : [])
+    ],
+
+    fileMeta: {
+      aadharfront: {
+        fileName: identity.aadhaarFrontUrl || '',
+        fileUrl: identity.aadhaarFrontUrl || '',
+        uploaded: !!identity.aadhaarFrontUrl
+      },
+      aadharback: {
+        fileName: identity.aadhaarBackUrl || '',
+        fileUrl: identity.aadhaarBackUrl || '',
+        uploaded: !!identity.aadhaarBackUrl
+      },
+      pan: {
+        fileName: identity.panCardUrl || '',
+        fileUrl: identity.panCardUrl || '',
+        uploaded: !!identity.panCardUrl
+      },
+      passport: {
+        fileName: identity.passportUrl || '',
+        fileUrl: identity.passportUrl || '',
+        uploaded: !!identity.passportUrl
+      },
+      secaddress: {
+        fileName:
+          other?.supportingDocumentUrl ||
+          current?.supportingDocumentUrl ||
+          permanent?.supportingDocumentUrl ||
+          '',
+        fileUrl:
+          other?.supportingDocumentUrl ||
+          current?.supportingDocumentUrl ||
+          permanent?.supportingDocumentUrl ||
+          '',
+        uploaded: !!(
+          other?.supportingDocumentUrl ||
+          current?.supportingDocumentUrl ||
+          permanent?.supportingDocumentUrl
+        )
+      }
+    }
+  };
+}
+private hasAnyKycData(data: any): boolean {
+  if (!data) return false;
+
+  return !!(
+    data.dob ||
+    data.aadhaarNumber ||
+    data.panNumber ||
+    data.passportNo ||
+    data.addresses?.length ||
+    data.fileMeta?.aadharfront?.fileName ||
+    data.fileMeta?.aadharback?.fileName ||
+    data.fileMeta?.pan?.fileName ||
+    data.fileMeta?.passport?.fileName ||
+    data.fileMeta?.secaddress?.fileName
+  );
+}
+
+private isKycComplete(data: any): boolean {
+  if (!data) return false;
+
+  const hasBase =
+    !!data.dob &&
+    !!data.aadhaarNumber &&
+    !!data.panNumber &&
+    !!data.fileMeta?.aadharfront?.fileName &&
+    !!data.fileMeta?.aadharback?.fileName &&
+    !!data.fileMeta?.pan?.fileName;
+
+  const passportOk = this.isPassportRequired()
+    ? !!data.passportNo
+    : true;
+
+  const permanent = data.addresses?.find((a: any) => a.addressType === 'PERMANENT');
+  const other = data.addresses?.find((a: any) => a.addressType === 'OTHER');
+
+  const permanentOk =
+    !!permanent?.addressLine &&
+    !!permanent?.state &&
+    !!permanent?.city &&
+    !!permanent?.zipCode;
+
+  const otherOk = !data.isDifferentAddress
+    ? true
+    : !!other?.addressLine &&
+      !!other?.state &&
+      !!other?.city &&
+      !!other?.zipCode &&
+      !!data.fileMeta?.secaddress?.fileName;
+
+  return hasBase && passportOk && permanentOk && otherOk;
+}
   ngOnDestroy(): void {
     sessionStorage.removeItem('kycs');
 

@@ -1,7 +1,7 @@
-import { Injectable } from '@angular/core';
+import { Injectable, signal } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 
-import { BehaviorSubject, map, Observable, of, shareReplay, tap } from 'rxjs';
+import { BehaviorSubject, firstValueFrom, map, Observable, of, shareReplay, tap } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { HttpClient } from '@angular/common/http';
 
@@ -85,6 +85,7 @@ export class Loanformservice {
   private instituteCache: OptionItem[] | null = null;
   private instituteRequest$!: Observable<OptionItem[]>;
 
+   mobileNumber = signal<string | null>(null);
 
   summaryData: any = null;
 summaryLoaded = false;
@@ -127,6 +128,16 @@ private summaryRequest$?: Observable<ApiResponse<any>>;
     }
   }
 
+
+
+
+  setMobileNumber(number: string) {
+    this.mobileNumber.set(number);
+  }
+
+  clearmobile() {
+    this.mobileNumber.set(null);
+  }
 
 
   // *************************loan info api*********************************
@@ -449,7 +460,7 @@ private summaryRequest$?: Observable<ApiResponse<any>>;
 
   //delete single coapplicant 
   deleteCoapp(id1: string, id2: string): Observable<ApiResponse<any>> {
-    return this.http.get<ApiResponse<any>>(
+    return this.http.delete<ApiResponse<any>>(
       `${this.baseUrl}/v1/los/applications/${id1}/co-applicants/${id2}`,
 
     );
@@ -488,6 +499,26 @@ data
   getSavedData(id1: string, id2: string, sectionkey: string): Observable<ApiResponse<any>> {
     return this.http.get<ApiResponse<any>>(
       `${this.baseUrl}/v1/los/draft/get?applicationId=${id1}&applicantId=${id2}&sectionKey=${sectionkey}`,
+
+    );
+  }
+
+  // ************************* Save and Exit basic info from coapplicant data *************************
+
+  saveandExitBasicinfo(data: any): Observable<ApiResponse<any>> {
+
+    return this.http.post<ApiResponse<any>>(
+      `${this.baseUrl}/v1/los/draft/cif-generation`,
+      data
+    );
+  }
+
+  // *************************get saved basic info from coapplicant data *************************
+
+
+  getSavedBasicInfo(id1: string, id2: string, sectionkey: string): Observable<ApiResponse<any>> {
+    return this.http.get<ApiResponse<any>>(
+      `${this.baseUrl}/v1/los/draft/basic-info-draft?applicationId=${id1}&applicantId=${id2}&sectionKey=${sectionkey}`,
 
     );
   }
@@ -616,4 +647,121 @@ loadSummaryIfEdit(applicationId: string,applicantId:string) {
 
   return this.getCoappSummary(applicationId,applicantId);
 }
+///--------------------------------------
+getApplicantType(applicant: any): string {
+  return String(
+    applicant?.applicantType ||
+    applicant?.applicantype ||
+    applicant?.applicant_type ||
+    ''
+  )
+    .toUpperCase()
+    .trim();
+}
+
+getCoApplicantIndexFromType(applicant: any): number {
+  const type = this.getApplicantType(applicant);
+  const match = type.match(/^CO_APPLICANT(\d+)$/);
+
+  return match ? Number(match[1]) + 1 : 1;
+}
+
+getApplicantFromSummary(
+  applicants: any[],
+  options: {
+    isCoApplicant: boolean;
+    coApplicantId?: string | null;
+    coApplicantIndex?: number | string | null;
+  }
+): any {
+  if (!Array.isArray(applicants)) return null;
+
+  if (!options.isCoApplicant) {
+    return applicants.find((x: any) =>
+      this.getApplicantType(x) === 'PRIMARY'
+    ) || null;
+  }
+
+  const currentCoIndex = Number(options.coApplicantIndex || 1);
+
+  return (
+    applicants.find((x: any) =>
+      x?.applicantId &&
+      options.coApplicantId &&
+      x.applicantId === options.coApplicantId
+    ) ||
+    applicants.find((x: any) =>
+      this.getApplicantType(x).startsWith('CO_APPLICANT') &&
+      this.getCoApplicantIndexFromType(x) === currentCoIndex
+    ) ||
+    null
+  );
+}
+
+getApplicantSectionFromSummary(
+  summaryResponse: any,
+  sectionKey: string,
+  options: {
+    isCoApplicant: boolean;
+    coApplicantId?: string | null;
+    coApplicantIndex?: number | string | null;
+  }
+): any {
+  const applicants = Array.isArray(summaryResponse?.data?.applicants)
+    ? summaryResponse.data.applicants
+    : [];
+
+  const applicant = this.getApplicantFromSummary(applicants, options);
+
+  return applicant?.[sectionKey] || null;
+}
+getApplicantFromSummaryResponse(
+  summaryResponse: any,
+  options: {
+    isCoApplicant: boolean;
+    coApplicantId?: string | null;
+    coApplicantIndex?: number | string | null;
+  }
+): any {
+  const applicants = Array.isArray(summaryResponse?.data?.applicants)
+    ? summaryResponse.data.applicants
+    : [];
+
+  return this.getApplicantFromSummary(applicants, options);
+}
+
+
+async getSummarySectionForApplicant(
+  applicationId: string,
+  sectionKey: string,
+  options: {
+    isCoApplicant?: boolean;
+    coApplicantId?: string | null;
+    coApplicantIndex?: number | null;
+  } = {}
+): Promise<any> {
+  if (!applicationId) return null;
+
+  try {
+    const res: any = await firstValueFrom(this.getSummary(applicationId));
+
+    if (!res || res.status !== 'success') {
+      return null;
+    }
+
+    return this.getApplicantSectionFromSummary(
+      res,
+      sectionKey,
+      {
+        isCoApplicant: !!options.isCoApplicant,
+        coApplicantId: options.coApplicantId || null,
+        coApplicantIndex: options.coApplicantIndex ?? null
+      }
+    );
+  } catch (error) {
+    console.error(`Failed to get summary section: ${sectionKey}`, error);
+    return null;
+  }
+}
+
 }

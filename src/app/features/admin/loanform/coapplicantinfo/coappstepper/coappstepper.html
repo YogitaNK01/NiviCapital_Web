@@ -4,9 +4,9 @@
        *ngFor="let step of steps ; let i = index"
        [ngClass]="{
          active: isActive(i),
-         completed: isCompleted(i),
+         completed: isCompleted(i)&& !isActive(i),
          upcoming: isUpcoming(i),
-        disabled: !canNavigate(i)
+        disabled: !canNavigate(i) && !isCompleted(i) && !canNavigate(i)
 
        }"
        (click)="canNavigate(i) && goToStep(step, i)">

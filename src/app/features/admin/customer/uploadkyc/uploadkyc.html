@@ -141,7 +141,7 @@
         <div class="col-lg-6 loan-mt-4 col-sm-12">
 
 
-          <app-inputfield type="text" name="pan" ngModel [required]="true" #pan="ngModel" label="PAN Number"
+          <app-inputfield type="text" name="pan" ngModel [required]="isPassportRequired()" #pan="ngModel" label="PAN Number"
             placeholder="Enter your 10 digit Pan number" helpText="Help text" pattern="^[A-Za-z]{5}[0-9]{4}[A-Za-z]{1}$"
             [maxlength]="10" [uppercase]="true">
           </app-inputfield>

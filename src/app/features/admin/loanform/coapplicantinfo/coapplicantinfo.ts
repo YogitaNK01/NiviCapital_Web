@@ -37,37 +37,61 @@ export class Coapplicantinfo implements OnInit {
 
   mobileSubmitted: boolean = false;
   coApplicantIndex: number = 1;
-showmsg: boolean = false;
+  showmsg: boolean = false;
   constructor(public service: Main, private router: Router, private addcustomerservice: Addcustomerservice,
     private route: ActivatedRoute, private cd: ChangeDetectorRef, private loanform: Loanformservice, private loanStepper: Loanstepperservice) { }
 
 
 
   ngOnInit() {
-     let Allids = this.loanStepper.getLoanId();
+    let Allids = this.loanStepper.getLoanId();
 
     this.applicantId = Allids[0];
     this.applicationId = Allids[1];
     this.custName = Allids[2];
     this.custARN = Allids[3];
 
-    
+
     this.route.queryParams.subscribe(params => {
 
-     
+
 
       this.coApplicantIndex = Number(params['coApplicantIndex']) || 1;
 
-      
- this.loanStepper.setCurrentCoApplicantIndex(this.coApplicantIndex);
 
-    // reset first, then restore per index
-    this.mobileSubmitted = false;
-    this.prefillPhone = '';
+      this.loanStepper.setCurrentCoApplicantIndex(this.coApplicantIndex);
+
+
+      const mode = params['mode'] || '';
+      
+ const cleanUrl = this.router.url.split('?')[0];
+
+  const isChildStepperRoute = this.coApplicantChildRoutes.some(route =>
+    cleanUrl.includes(route)
+  );
+
+
+      if (mode === 'new' && !isChildStepperRoute) {
+        this.loanStepper.clearCoAppId?.();
+        sessionStorage.removeItem('coAppIds');
+        sessionStorage.removeItem('coapp_cifdetails');
+
+        this.mobileSubmitted = false;
+        this.prefillPhone = '';
+        this.loanform.coapppmobile = '';
+        this.loanform.coappStep = 1;
+
+        this.cd.detectChanges();
+        return;
+      }
+
+      // reset first, then restore per index
+      this.mobileSubmitted = false;
+      this.prefillPhone = '';
 
 
       this.restoreCoApplicantState();
-       this.cd.detectChanges();
+      this.cd.detectChanges();
     });
 
     // if (this.loanform.coappStep === 2) {
@@ -77,7 +101,9 @@ showmsg: boolean = false;
     // }
 
   }
-
+private getCoApplicantListKey(): string {
+  return `coApplicants_${this.applicationId}`;
+}
   isPhoneValid(): boolean {
     return this.prefillPhone && this.prefillPhone.toString().length === 10;
   }
@@ -112,15 +138,14 @@ showmsg: boolean = false;
     const saved = localStorage.getItem(`coapp_mobile_submitted_${this.applicantId}_${this.coApplicantIndex}`);
     // this.mobileSubmitted = saved === 'true';
   }
-  restoreCoApplicantState() {
+ restoreCoApplicantState() {
   const cleanUrl = this.router.url.split('?')[0];
 
   const isStepperRoute = this.coApplicantChildRoutes.some(route =>
     cleanUrl.includes(route)
   );
 
-  
-const listKey = `coApplicants_${this.applicantId}`;
+  const listKey =this.getCoApplicantListKey();
   const savedList = localStorage.getItem(listKey);
   const coApplicants = savedList ? JSON.parse(savedList) : [];
 
@@ -128,7 +153,17 @@ const listKey = `coApplicants_${this.applicantId}`;
     (x: any) => Number(x.index) === Number(this.coApplicantIndex)
   );
 
-  if (current?.phone) {
+  const pendingContextRaw = sessionStorage.getItem('pendingCoAppContext');
+  const pendingContext = pendingContextRaw ? JSON.parse(pendingContextRaw) : null;
+
+  // ✅ prefer pending context for freshly added coapplicant
+  if (
+    pendingContext &&
+    Number(pendingContext.coApplicantIndex) === Number(this.coApplicantIndex)
+  ) {
+    this.prefillPhone = pendingContext.phone || '';
+    this.loanform.coapppmobile = pendingContext.phone || '';
+  } else if (current?.phone) {
     this.prefillPhone = current.phone;
     this.loanform.coapppmobile = current.phone;
   }
@@ -144,23 +179,13 @@ const listKey = `coApplicants_${this.applicantId}`;
 
   this.mobileSubmitted = saved === 'true';
 
-  // reset phone for new coapp
   if (!this.mobileSubmitted) {
     this.prefillPhone = '';
     this.loanform.coapppmobile = '';
     this.loanform.coappStep = 1;
   }
 
-  // if already saved, prefill phone from list
-  // const listKey = `coApplicants_${this.applicantId}`;
-  // const savedList = localStorage.getItem(listKey);
-  // const coApplicants = savedList ? JSON.parse(savedList) : [];
-
-  // const current = coApplicants.find(
-  //   (x: any) => Number(x.index) === Number(this.coApplicantIndex)
-  // );
-
-  if (current?.phone) {
+  if (current?.phone && !this.prefillPhone) {
     this.prefillPhone = current.phone;
   }
 }
@@ -176,29 +201,14 @@ const listKey = `coApplicants_${this.applicantId}`;
   }
   back() { }
 
-  saveCoApplicantToList(userid: any) {
-    
-  const mainApplicantId = this.loanStepper.getLoanId()[0];
-
-  const key = `coApplicants_${this.applicantId}`;
+ saveCoApplicantToList(userid: any) {
+  const key = this.getCoApplicantListKey();
 
   const saved = localStorage.getItem(key);
   let list = saved ? JSON.parse(saved) : [];
 
+  const index = Number(this.loanStepper.getCurrentCoApplicantIndex());
 
-  
-const index = Number(this.loanStepper.getCurrentCoApplicantIndex());
-
-  // const item = {
-  //   index,
-  //   applicantId: coApplicant.applicantId,
-  //   applicationId: coApplicant.applicationId,
-  //   name: coApplicant.fullName || coApplicant.name || '',
-  //   phone: coApplicant.phone || '',
-  //   userInitiateId: coApplicant.userInitiateId || ''
-  // };
-
-  
   const existingIndex = list.findIndex(
     (x: any) => Number(x.index) === index
   );
@@ -220,12 +230,9 @@ const index = Number(this.loanStepper.getCurrentCoApplicantIndex());
     list.push(data);
   }
 
-  list = list
-    .sort((a: any, b: any) => Number(a.index) - Number(b.index))
-    // .slice(0, 4);
+  list = list.sort((a: any, b: any) => Number(a.index) - Number(b.index));
 
   localStorage.setItem(key, JSON.stringify(list));
-
 }
 
   next() {
@@ -233,17 +240,8 @@ const index = Number(this.loanStepper.getCurrentCoApplicantIndex());
 
     this.searchLoading = true;
     this.norecordfound = false;
-    this.loanform.coapppmobile = this.prefillPhone;
-    this.loanform.coappStep = 2;
-    this.mobileSubmitted = true;
-
-    localStorage.setItem(
-
-      `coapp_mobile_submitted_${this.applicantId}_${this.coApplicantIndex}`,
-      'true'
-
-    );
-
+    this.showmsg = false;
+   
     const input = {
       identifier: this.prefillPhone,
       type: "MOBILE",
@@ -257,31 +255,57 @@ const index = Number(this.loanStepper.getCurrentCoApplicantIndex());
 
       next: (res) => {
         console.log(res);
-        if(res.status === 'success'){
-           const userid = res.data[0].userInitiateId
-        this.saveCoApplicantToList(userid);
-        this.loanStepper.setStepperType('CO_APPLICANT');
+        if (res.status === 'success') {
+          const userid = res.data[0].userInitiateId || ''
 
-        this.router.navigate(
-          ['co-basicinfo'],
-          {
-            relativeTo: this.route,
-            queryParams: {
-              
-              id: userid,
+          this.loanform.coapppmobile = this.prefillPhone;
+          this.loanform.coappStep = 2;
+          this.mobileSubmitted = true;
+
+          localStorage.setItem(
+
+            `coapp_mobile_submitted_${this.applicantId}_${this.coApplicantIndex}`,
+            'true'
+
+          );
+
+          sessionStorage.setItem(
+            'pendingCoAppContext',
+            JSON.stringify({
+              userInitiateId: userid,
               phone: this.prefillPhone,
-              coApplicantIndex: this.coApplicantIndex
-            },
-            queryParamsHandling: 'merge'
-          }
-        );
+              coApplicantIndex: this.coApplicantIndex,
+              
+            })
+          );
 
-        this.searchLoading = false;
+this.loanStepper.clearCoAppId?.();
+        this.loanStepper.setStepperType('CO_APPLICANT');
+        this.loanStepper.setCurrentCoApplicantIndex(this.coApplicantIndex);
+
+          this.saveCoApplicantToList(userid);
+
+          this.router.navigate(
+            ['co-basicinfo'],
+            {
+              relativeTo: this.route,
+              queryParams: {
+
+            
+                mode:'new',
+                coApplicantIndex: this.coApplicantIndex
+              }, replaceUrl: true
+              // queryParamsHandling: 'merge'
+            }
+          );
+
+          this.searchLoading = false;
         }
         else {
-this.showmsg = true
+          this.showmsg = true;
+          this.searchLoading = false;
         }
-       
+
       },
       error: (err) => {
         console.error("error msg", err);

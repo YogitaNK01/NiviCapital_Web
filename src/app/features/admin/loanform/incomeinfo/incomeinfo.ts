@@ -14,7 +14,7 @@ import { Main } from '../../../../core/service/main';
 import { Msgboxservice } from '../../../../core/service/msgboxservice';
 import { forkJoin, of } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
-
+import { firstValueFrom } from 'rxjs';
 interface Document {
   title: string;
   name?: string;
@@ -264,6 +264,10 @@ export class Incomeinfo {
       documentType: 'OTHER'
     }
   ];
+
+  isSummaryEditMode = false;
+  viewOnly = false;
+
   constructor(private fb: FormBuilder, private stepperService: Loanstepperservice, private router: Router, private cd: ChangeDetectorRef, private msgBox: Msgboxservice, public loanformservice: Loanformservice, private route: ActivatedRoute, public main: Main) { }
   async ngOnInit(): Promise<void> {
     this.isCoApplicant = this.router.url.includes('co-applicant');
@@ -280,6 +284,15 @@ export class Incomeinfo {
 
 
     let AllCoapp_ids = this.stepperService.getCo_appId();
+
+    const queryParams = this.route.snapshot.queryParams;
+
+    this.isSummaryEditMode =
+      queryParams['fromSummary'] === true ||
+      queryParams['fromSummary'] === 'true' ||
+      this.loanformservice.isSummaryEditFlow();
+
+    this.viewOnly = this.isSummaryEditMode && (queryParams['mode'] === 'view' || queryParams['mode'] === undefined);
 
     if (
       this.isCoApplicant &&
@@ -301,23 +314,23 @@ export class Incomeinfo {
           parsed.applicantId,
           parsed.applicationId,
           parsed.fullName,
-        undefined,this.stepperService.getCurrentCoApplicantIndex());
+          undefined, this.stepperService.getCurrentCoApplicantIndex());
       }
     }
     // this.applicantId = this.isCoApplicant ? AllCoapp_ids[0] : Allids[0];
     if (this.isCoApplicant) {
       this.applicantId = this.stepperService.getCo_appId()?.[0];
       this.applicationId = this.stepperService.getCo_appId()?.[1];
-      
-if (!this.applicantId) {
-    console.error('Co-applicant applicantId not found. BasicInfo CIF not generated.');
-    return;
-  }
+
+      if (!this.applicantId) {
+        console.error('Co-applicant applicantId not found. BasicInfo CIF not generated.');
+        return;
+      }
 
     } else {
-      
- this.applicantId = this.stepperService.getLoanId()?.[0];
-  this.applicationId = this.stepperService.getLoanId()?.[1];
+
+      this.applicantId = this.stepperService.getLoanId()?.[0];
+      this.applicationId = this.stepperService.getLoanId()?.[1];
 
     }
     this.stepperService.rebuildSteps();
@@ -330,78 +343,246 @@ if (!this.applicantId) {
     this.optionalDocs.forEach(k => this.uploadedFiles[k] = null);
     this.requiredBusinessDocs.forEach(k => this.uploadedFiles[k] = null);
 
+    if (this.viewOnly) {
+      this.incomeForm.disable({ emitEvent: false });
+    }
+
+    await this.loadIncomeForBothFlows();
 
     const key = this.getStorageKey();
     // 1 try stepper cache
-    const stepData = this.stepperService.getStepData(this.getStepRoute());
+    // const stepData = this.stepperService.getStepData(this.getStepRoute());
 
-    if (stepData) {
-      this.uploadedrespfiles = stepData.uploadedFiles || [];
-      this.otherIncomeSlots = stepData.otherIncomeSlots || [];
-      this.otherBusinessSlots = stepData.otherBusinessSlots || [];
-
-
-      this.getAllDocuments();
-      this.restoreSlotsFromDocuments();
-      return;
+    // if (stepData) {
+    //   this.uploadedrespfiles = stepData.uploadedFiles || [];
+    //   this.otherIncomeSlots = stepData.otherIncomeSlots || [];
+    //   this.otherBusinessSlots = stepData.otherBusinessSlots || [];
 
 
-    }
-     if (this.loanformservice.isEditFlow()) {
-      setTimeout(() => {
-        this.patchFromSummary();
-      }, 300);
-    } else {
-
-    //2. Then try localStorage
-
-    const stored = localStorage.getItem(this.getStorageKey());
-    if (stored) {
-      const parsed = JSON.parse(stored);
-      this.uploadedrespfiles = parsed.uploadedFiles || parsed || [];
-      this.otherIncomeSlots = parsed.otherIncomeSlots || [];
-      this.otherBusinessSlots = parsed.otherBusinessSlots || [];
-
-      this.getAllDocuments();
-      this.restoreSlotsFromDocuments();
-      
- if (this.allDocuments.length > 0) {
-    return; // ✅ already restored, no API needed
-  }
-
-    }
+    //   this.getAllDocuments();
+    //   this.restoreSlotsFromDocuments();
+    //   return;
 
 
+    // }
+    // if (this.loanformservice.isEditFlow()) {
+    //   setTimeout(() => {
+    //     this.patchFromSummary();
+    //   }, 300);
+    // } else {
 
-    // 3. Then call API.
- const applicantId = this.getApiApplicantId();
+    //   //2. Then try localStorage
 
-    if (!applicantId) {
-      console.error('ApplicantId not found for photo upload');
-      return;
-    }
+    //   const stored = localStorage.getItem(this.getStorageKey());
+    //   if (stored) {
+    //     const parsed = JSON.parse(stored);
+    //     this.uploadedrespfiles = parsed.uploadedFiles || parsed || [];
+    //     this.otherIncomeSlots = parsed.otherIncomeSlots || [];
+    //     this.otherBusinessSlots = parsed.otherBusinessSlots || [];
 
-    const savedDraftData = await this.getSavedIncomeData(applicantId);
+    //     this.getAllDocuments();
+    //     this.restoreSlotsFromDocuments();
 
-    if (savedDraftData?.length) {
-      this.restoreIncomeDraftData(savedDraftData);
-    }
-  }
+    //     if (this.allDocuments.length > 0) {
+    //       return; // ✅ already restored, no API needed
+    //     }
+
+    //   }
+
+
+
+    //   // 3. Then call API.
+    //   const applicantId = this.getApiApplicantId();
+
+    //   if (!applicantId) {
+    //     console.error('ApplicantId not found for photo upload');
+    //     return;
+    //   }
+
+    //   const savedDraftData = await this.getSavedIncomeData(applicantId);
+
+    //   if (savedDraftData?.length) {
+    //     this.restoreIncomeDraftData(savedDraftData);
+    //   }
+    // }
   }
 
   getStorageKey() {
-     const index = this.stepperService.getCurrentCoApplicantIndex();
-         const coApplicantId = this.stepperService.getCo_appId()?.[0];
+    const index = this.stepperService.getCurrentCoApplicantIndex();
+    const coApplicantId = this.stepperService.getCo_appId()?.[0];
     return this.isCoApplicant
       ? `IncomeInfoData_coapp_${coApplicantId || 'temp_' + index}`
       : `IncomeInfoData_main_${this.stepperService.getLoanId()?.[0]}`;
 
-    // return `kycinfo_coapp_${this.applicantId}_${index}`;
-    // return this.isCoApplicant
-    //   ? `IncomeInfoData_coapp_${this.applicantId}_${index}`
-    //   : `IncomeInfoData_main_${this.applicantId}`;
+
   }
-    getCurrentCoApplicantFromList() {
+  private async loadIncomeForBothFlows() {
+    const key = this.getStorageKey();
+
+    // 1. Restore stepper cache/local first only for quick UI
+    const stepData = this.stepperService.getStepData(this.getStepRoute());
+    const localData = localStorage.getItem(key);
+    const parsedLocal = localData ? JSON.parse(localData) : null;
+
+    if (stepData) {
+      this.restoreIncomeStepData(stepData);
+    } else if (parsedLocal) {
+      this.restoreIncomeStepData(parsedLocal);
+    }
+
+    const applicantId = this.getApiApplicantId();
+
+    if (!applicantId) {
+      console.error('ApplicantId not found for income restore');
+      return;
+    }
+
+
+    const [savedDraftData, summaryIncome, summaryBusiness] = await Promise.all([
+      this.getSavedIncomeData(applicantId),
+      this.getSummarySection('incomeDetails'),
+      this.getSummarySection('incomeBusinessDetails')
+    ]);
+
+    const hasCompleteSummary = this.hasCompleteSummaryIncome(summaryIncome, summaryBusiness);
+    const hasDraftData = this.hasIncomeDraftData(savedDraftData);
+
+    // 1) Final submitted docs should always win
+    if (hasCompleteSummary) {
+      this.patchFromSummaryData(summaryIncome, summaryBusiness);
+      return;
+    }
+
+    // 2) Otherwise use saved draft
+    if (hasDraftData) {
+      this.restoreIncomeDraftData(savedDraftData);
+      return;
+    }
+
+    // 3) If draft not available, but summary has partial docs, still patch them
+    if (this.hasAnySummaryIncome(summaryIncome, summaryBusiness)) {
+      this.patchFromSummaryData(summaryIncome, summaryBusiness);
+      return;
+    }
+
+
+    // // const savedDraftData = await this.getSavedIncomeData(applicantId);
+
+    // const hasApiData = this.hasIncomeDraftData(savedDraftData);
+
+    // if (hasApiData) {
+    //   this.restoreIncomeDraftData(savedDraftData);
+    //   return;
+    // }
+
+    // // 3. Fallback to summary only if draft API has no documents
+    // if (this.isSummaryEditMode) {
+    //   await this.patchFromSummary();
+    // }
+  }
+  private async getSummarySection(sectionKey: string): Promise<any> {
+    if (!this.applicationId) return null;
+
+    try {
+      const res: any = await firstValueFrom(
+        this.loanformservice.getSummary(this.applicationId)
+      );
+
+      if (!res || res.status !== 'success') return null;
+
+      return this.loanformservice.getApplicantSectionFromSummary(
+        res,
+        sectionKey,
+        {
+          isCoApplicant: this.isCoApplicant,
+          coApplicantId: this.stepperService.getCo_appId()?.[0],
+          coApplicantIndex: this.stepperService.getCurrentCoApplicantIndex()
+        }
+      );
+    } catch (error) {
+      console.error(`Failed to get summary section: ${sectionKey}`, error);
+      return null;
+    }
+  }
+  private hasAnySummaryIncome(income: any, business: any): boolean {
+    return !!(
+      income?.salarySlips?.length ||
+      income?.bankStatements?.length ||
+      income?.form16?.length ||
+      income?.itrs?.length ||
+      income?.otherIncome?.length ||
+      business?.business_finance_3_years?.length ||
+      business?.business_itr_3_years?.length ||
+      business?.business_gst_1_year?.length ||
+      business?.business_bank_statement_1_year?.length ||
+      business?.otherBussinessincome?.length
+    );
+  }
+
+  private hasCompleteSummaryIncome(income: any, business: any): boolean {
+    if (this.currentApplicantState?.issalaried) {
+      return !!(
+        income?.salarySlips?.length >= 3 &&
+        income?.bankStatements?.length >= 1 &&
+        income?.form16?.length >= 1 &&
+        income?.itrs?.length >= 3
+      );
+    }
+
+    return !!(
+      business?.business_finance_3_years?.length >= 3 &&
+      business?.business_itr_3_years?.length >= 3 &&
+      business?.business_gst_1_year?.length >= 1 &&
+      business?.business_bank_statement_1_year?.length >= 1
+    );
+  }
+
+  private restoreIncomeStepData(data: any) {
+    if (!data) return;
+
+    this.uploadedrespfiles = data.uploadedFiles || data || [];
+    this.otherIncomeSlots = data.otherIncomeSlots || [];
+    this.otherBusinessSlots = data.otherBusinessSlots || [];
+
+    this.getAllDocuments();
+    this.restoreSlotsFromDocuments();
+
+    this.cd.detectChanges();
+  }
+  private hasIncomeDraftData(savedResponses: any[]): boolean {
+    if (!Array.isArray(savedResponses)) return false;
+
+    return savedResponses.some(item => {
+      const draft = item?.data;
+      if (!draft) return false;
+
+      let draftData = draft?.jsonData || draft?.data || draft;
+
+      if (typeof draftData === 'string') {
+        try {
+          draftData = JSON.parse(draftData);
+        } catch {
+          draftData = null;
+        }
+      }
+
+      const uploadedFiles =
+        draftData?.uploadedFiles ||
+        draftData?.files ||
+        draft?.uploadedFiles ||
+        [];
+
+      const uploadedDocuments =
+        draftData?.uploadedDocuments ||
+        draft?.uploadedDocuments ||
+        [];
+
+      return uploadedFiles.length > 0 || uploadedDocuments.length > 0;
+    });
+  }
+
+
+  getCurrentCoApplicantFromList() {
     const mainApplicantId = this.stepperService.getLoanId()?.[0];
     const index = this.stepperService.getCurrentCoApplicantIndex();
 
@@ -459,18 +640,18 @@ if (!this.applicantId) {
     if (!result.file) return;
 
 
-const apiApplicantId = this.getApiApplicantId();
+    const apiApplicantId = this.getApiApplicantId();
 
-if (!apiApplicantId) {
-  console.error('ApplicantId not found for income upload');
-  return;
-}
+    if (!apiApplicantId) {
+      console.error('ApplicantId not found for income upload');
+      return;
+    }
 
     const fd = new FormData();
     fd.append('category', 'INCOME');
     fd.append('subcategory', subcategory);
     fd.append('title', subcategory);
-    fd.append('applicantId',apiApplicantId);
+    fd.append('applicantId', apiApplicantId);
     fd.append('files[0].type', type);
     fd.append('files[0].file', result.file);
 
@@ -497,12 +678,12 @@ if (!apiApplicantId) {
 
     if (!result.file) return;
 
-const apiApplicantId = this.getApiApplicantId();
+    const apiApplicantId = this.getApiApplicantId();
 
-if (!apiApplicantId) {
-  console.error('ApplicantId not found for income upload');
-  return;
-}
+    if (!apiApplicantId) {
+      console.error('ApplicantId not found for income upload');
+      return;
+    }
     this.uploadedFiles[key] = result.file;
 
     const fd = new FormData();
@@ -532,13 +713,13 @@ if (!apiApplicantId) {
         const key1 = this.getStorageKey()
         // localStorage.setItem(key1, JSON.stringify(this.uploadedrespfiles));
         const stepData = {
-  uploadedFiles: this.uploadedrespfiles,
-  otherIncomeSlots: this.otherIncomeSlots,
-  otherBusinessSlots: this.otherBusinessSlots
-};
+          uploadedFiles: this.uploadedrespfiles,
+          otherIncomeSlots: this.otherIncomeSlots,
+          otherBusinessSlots: this.otherBusinessSlots
+        };
 
-localStorage.setItem(this.getStorageKey(), JSON.stringify(stepData));
-this.stepperService.setStepData(this.getStepRoute(), stepData);
+        localStorage.setItem(this.getStorageKey(), JSON.stringify(stepData));
+        this.stepperService.setStepData(this.getStepRoute(), stepData);
 
         this.getAllDocuments();
         // this.cd.detectChanges();
@@ -827,13 +1008,13 @@ this.stepperService.setStepData(this.getStepRoute(), stepData);
         });
         const keyLocal = this.getStorageKey();
         const stepData = {
-  uploadedFiles: this.uploadedrespfiles,
-  otherIncomeSlots: this.otherIncomeSlots,
-  otherBusinessSlots: this.otherBusinessSlots
-};
+          uploadedFiles: this.uploadedrespfiles,
+          otherIncomeSlots: this.otherIncomeSlots,
+          otherBusinessSlots: this.otherBusinessSlots
+        };
 
-localStorage.setItem(this.getStorageKey(), JSON.stringify(stepData));
-this.stepperService.setStepData(this.getStepRoute(), stepData);
+        localStorage.setItem(this.getStorageKey(), JSON.stringify(stepData));
+        this.stepperService.setStepData(this.getStepRoute(), stepData);
 
         // localStorage.setItem(keyLocal, JSON.stringify(this.uploadedrespfiles));
 
@@ -906,141 +1087,239 @@ this.stepperService.setStepData(this.getStepRoute(), stepData);
 
   // edit flow =patch from summary
 
-patchFromSummary() {
-  if (!this.loanformservice.isEditFlow()) return;
+  async patchFromSummary() {
+    const income = await this.getSummarySection('incomeDetails');
+    const business = await this.getSummarySection('incomeBusinessDetails');
 
-  const income = this.loanformservice.getSummarySection('incomeDetails');
-  const business = this.loanformservice.getSummarySection('incomeBusinessDetails');
+    if (!income && !business) return;
 
-  console.log("PATCH SUMMARY:", income, business);
+    this.patchFromSummaryData(income, business);
+  }
+  private patchFromSummaryData(income: any, business: any) {
+    this.allDocuments = [];
+    this.otherIncomeSlots = [];
+    this.otherBusinessSlots = [];
+    this.uploadedrespfiles = [];
 
-  if (!income && !business) return;
+    if (this.isSalariedUser() && income) {
+      // salary slips -> salary1, salary2, salary3
+      (income.salarySlips || []).forEach((item: any, i: number) => {
+        this.allDocuments.push(
+          this.buildSummaryDoc(
+            item,
+            `salary${i + 1}`,
+            'SALARY_SLIP',
+            'INCOME',
+            'LAST_3_MONTHS',
+            `salary${i + 1}`
+          )
+        );
+      });
 
-  this.allDocuments = [];
-  this.otherIncomeSlots = [];
-  this.otherBusinessSlots = [];
+      // form16
+      (income.form16 || []).forEach((item: any) => {
+        this.allDocuments.push(
+          this.buildSummaryDoc(
+            item,
+            'Form16',
+            'FORM_16',
+            'INCOME',
+            'FORM_16',
+            'Form16'
+          )
+        );
+      });
 
-  const buildDoc = (item: any) => {
-    const key = item.name;
+      // bank statement
+      (income.bankStatements || []).forEach((item: any) => {
+        this.allDocuments.push(
+          this.buildSummaryDoc(
+            item,
+            'oneyearbankstatement',
+            'BANK_STATEMENT',
+            'INCOME',
+            'BANK_STATEMENT_1_YEAR',
+            'oneyearbankstatement'
+          )
+        );
+      });
 
-    return {
-      documentId: key,
-      title: key,
-      slotKey: key,
-      fileName: item.url,
-      type: key,
-      viewUrl: this.buildViewUrl(item.url)
+      // ITR -> ay1 ay2 ay3
+      (income.itrs || []).forEach((item: any, i: number) => {
+        this.allDocuments.push(
+          this.buildSummaryDoc(
+            item,
+            `ay${i + 1}`,
+            'ITR',
+            'INCOME',
+            'ITR_LAST_3_YEARS',
+            `ay${i + 1}`
+          )
+        );
+      });
+
+      // Other income
+      (income.otherIncome || []).forEach((item: any, i: number) => {
+        const title = item.name || `Other Income ${i + 1}`;
+
+        this.otherIncomeSlots.push({
+          id: i + 1,
+          key: `other_income_${i + 1}`,
+          title
+        });
+
+        this.allDocuments.push(
+          this.buildSummaryDoc(
+            item,
+            title,
+            'OTHER',
+            'OTHER',
+            'OTHER_INCOME',
+            title
+          )
+        );
+      });
+    }
+
+    if (!this.isSalariedUser() && business) {
+      // Business finance -> year1 year2 year3
+      (business.business_finance_3_years || []).forEach((item: any, i: number) => {
+        this.allDocuments.push(
+          this.buildSummaryDoc(
+            item,
+            `year${i + 1}`,
+            'BUSINESS_FINANCE',
+            'BUSINESS',
+            'BUSINESS_FINANCE_3_YEARS',
+            `year${i + 1}`
+          )
+        );
+      });
+
+      // Business ITR -> businessITR1 businessITR2 businessITR3
+      (business.business_itr_3_years || []).forEach((item: any, i: number) => {
+        this.allDocuments.push(
+          this.buildSummaryDoc(
+            item,
+            `businessITR${i + 1}`,
+            'BUSINESS_ITR',
+            'BUSINESS',
+            'BUSINESS_ITR_3_YEARS',
+            `businessITR${i + 1}`
+          )
+        );
+      });
+
+      // GST
+      (business.business_gst_1_year || []).forEach((item: any) => {
+        this.allDocuments.push(
+          this.buildSummaryDoc(
+            item,
+            'businessGST',
+            'BUSINESS_GST',
+            'BUSINESS',
+            'BUSINESS_GST_1_YEAR',
+            'businessGST'
+          )
+        );
+      });
+
+      // bank statement
+      (business.business_bank_statement_1_year || []).forEach((item: any) => {
+        this.allDocuments.push(
+          this.buildSummaryDoc(
+            item,
+            'businessBankstatement',
+            'BUSINESS_BANK_STATEMENT',
+            'BUSINESS',
+            'BUSINESS_BANK_STATEMENT_1_YEAR',
+            'businessBankstatement'
+          )
+        );
+      });
+
+      // other business income
+      (business.otherBussinessincome || []).forEach((item: any, i: number) => {
+        const title = item.name || `Other Business ${i + 1}`;
+
+        this.otherBusinessSlots.push({
+          id: i + 1,
+          key: `other_business_${i + 1}`,
+          title
+        });
+
+        this.allDocuments.push(
+          this.buildSummaryDoc(
+            item,
+            title,
+            'OTHER',
+            'OTHER',
+            'OTHER_BUSSINESS_INCOME',
+            title
+          )
+        );
+      });
+    }
+
+    this.rebuildDocumentMap();
+
+    const stepData = {
+      uploadedFiles: [], // summary docs are already in allDocuments
+      otherIncomeSlots: this.otherIncomeSlots,
+      otherBusinessSlots: this.otherBusinessSlots
     };
-  };
 
-  // SALARIED FLOW
-  if (this.isSalariedUser() && income) {
+    localStorage.setItem(this.getStorageKey(), JSON.stringify(stepData));
+    this.stepperService.setStepData(this.getStepRoute(), stepData);
 
-    income.salarySlips?.forEach((item: any) =>
-      this.allDocuments.push(buildDoc(item))
-    );
+    if (this.isCoApplicant) {
+      this.loanformservice.co_incomeInfoData = stepData;
+    } else {
+      this.loanformservice.incomeInfoData = stepData;
+    }
 
-    income.bankStatements?.forEach((item: any) =>
-      this.allDocuments.push(buildDoc(item))
-    );
-
-    income.form16?.forEach((item: any) =>
-      this.allDocuments.push(buildDoc(item))
-    );
-
-    income.itrs?.forEach((item: any) =>
-      this.allDocuments.push(buildDoc(item))
-    );
-
-    // OTHER INCOME
-    income.otherIncome?.forEach((item: any, i: number) => {
-      const key = item.name || `other_income_${i + 1}`;
-
-      this.otherIncomeSlots.push({
-        id: i + 1,
-        key,
-        title: key
-      });
-
-      this.allDocuments.push(buildDoc({ name: key, url: item.url }));
-    });
+    this.cd.detectChanges();
+  }
+  private buildSummaryDoc(
+    item: any,
+    slotKey: string,
+    type: string,
+    category: string,
+    subcategory: string,
+    title?: string
+  ): Document {
+    return {
+      documentId: item.documentId || slotKey,
+      title: title || item.name || slotKey,
+      slotKey,
+      fileName: item.url || item.fileName || item.name || '',
+      type,
+      objectKey: item.objectKey || '',
+      viewUrl: item.viewUrl || '',
+      category,
+      subcategory,
+      url: item.url || '',
+      fileUrl: item.viewUrl || '',
+    };
   }
 
-  // BUSINESS FLOW
-  if (!this.isSalariedUser() && business) {
+  buildViewUrl(fileName: string): string {
+    if (!fileName) return '';
 
-    business.business_finance_3_years?.forEach((item: any) =>
-      this.allDocuments.push(buildDoc(item))
-    );
+    if (fileName.startsWith('http')) {
+      return fileName;
+    }
 
-    business.business_itr_3_years?.forEach((item: any) =>
-      this.allDocuments.push(buildDoc(item))
-    );
-
-    business.business_gst_1_year?.forEach((item: any) =>
-      this.allDocuments.push(buildDoc(item))
-    );
-
-    business.business_bank_statement_1_year?.forEach((item: any) =>
-      this.allDocuments.push(buildDoc(item))
-    );
-
-    // OTHER BUSINESS
-    business.otherBussinessincome?.forEach((item: any, i: number) => {
-      const key = item.name || `other_business_${i + 1}`;
-
-      this.otherBusinessSlots.push({
-        id: i + 1,
-        key,
-        title: key
-      });
-
-      this.allDocuments.push(buildDoc({ name: key, url: item.url }));
-    });
+    return `${window.location.origin}/files/${fileName}`;
   }
 
- // FINAL STEP (VERY IMPORTANT)
-  this.rebuildDocumentMap();
 
-  const stepData = {
-    uploadedFiles: [],
-    otherIncomeSlots: this.otherIncomeSlots,
-    otherBusinessSlots: this.otherBusinessSlots
-  };
-
-  const key = this.getStorageKey();
-
-  localStorage.setItem(key, JSON.stringify(stepData));
-
-  this.stepperService.setStepData(this.getStepRoute(), stepData);
-
-  if (this.isCoApplicant) {
-    this.loanformservice.co_incomeInfoData = stepData;
-  } else {
-    this.loanformservice.incomeInfoData = stepData;
+  isSalariedUser(): boolean {
+    return this.currentApplicantState?.issalaried;
   }
 
-  console.log("FINAL DOC MAP:", this.documentMap);
 
-  this.cd.detectChanges();
-}
-buildViewUrl(fileName: string): string {
-  if (!fileName) return '';
-
-  if (fileName.startsWith('http')) {
-    return fileName;
-  }
-
-  return `${window.location.origin}/files/${fileName}`;
-}
-
-
-isSalariedUser(): boolean {
-  return this.currentApplicantState?.issalaried;
-}
-
-
-  restoreIncomeDraftData(savedResponses: any[]): void {
+  restoreIncomeDraftData1(savedResponses: any[]): void {
     if (!savedResponses?.length) return;
 
     const restoredUploadedRespFiles: any[] = [];
@@ -1062,7 +1341,8 @@ isSalariedUser(): boolean {
 
       if (!draft) return;
 
-      const draftData = draft?.data || draft;
+      const draftData = draft?.jsonData || draft?.data || draft;
+
 
       const uploadedFiles = draftData?.uploadedFiles || [];
       const uploadedDocuments = draftData?.uploadedDocuments || [];
@@ -1191,16 +1471,283 @@ isSalariedUser(): boolean {
 
     this.cd.detectChanges();
   }
-  private rebuildDocumentMap(): void {
-    const docs = this.allDocuments || [];
-    this.documentMap = docs.reduce((map, doc) => {
-      const key = doc.type || doc.fileName?.trim() || doc.fileName?.toString().trim() || doc.documentId! || doc.slotKey || doc.title;
-      if (key) {
-        map[key] = doc;
+  restoreIncomeDraftData(savedResponses: any[]): void {
+    if (!savedResponses?.length) return;
+
+    const restoredUploadedRespFiles: any[] = [];
+    const restoredDocuments: Document[] = [];
+
+    this.otherIncomeSlots = [];
+    this.otherBusinessSlots = [];
+
+    let salaryCounter = 0;
+    let itrCounter = 0;
+    let businessFinanceCounter = 0;
+    let businessItrCounter = 0;
+    let incomeOtherCounter = 0;
+    let businessOtherCounter = 0;
+
+    savedResponses.forEach(item => {
+      const section = item?.section;
+      const draft = item?.data;
+
+      if (!section || !draft) return;
+
+      let draftData =
+        draft?.jsonData ||
+        draft?.data ||
+        draft;
+
+      if (typeof draftData === 'string') {
+        try {
+          draftData = JSON.parse(draftData);
+        } catch {
+          draftData = null;
+        }
       }
-      return map;
-    }, {} as { [key: string]: Document });
+
+      if (!draftData) return;
+
+      const uploadedFiles =
+        draftData.uploadedFiles ||
+        draftData.files ||
+        draft.uploadedFiles ||
+        [];
+
+      const uploadedDocuments =
+        draftData.uploadedDocuments ||
+        draft.uploadedDocuments ||
+        [];
+
+      const documentsToRestore =
+        Array.isArray(uploadedDocuments) && uploadedDocuments.length
+          ? uploadedDocuments
+          : uploadedFiles;
+
+      if (!documentsToRestore.length) return;
+
+      const normalizedDocs: Document[] = [];
+
+      documentsToRestore.forEach((doc: any, index: number) => {
+        const fallbackFile = uploadedFiles[index] || {};
+
+        const documentType =
+          doc.type ||
+          doc.documentType ||
+          fallbackFile.type ||
+          section.documentType;
+
+        let slotKey = '';
+
+        switch (documentType) {
+          case 'SALARY_SLIP':
+            salaryCounter++;
+            slotKey = `salary${salaryCounter}`;
+            break;
+
+          case 'FORM_16':
+            slotKey = 'Form16';
+            break;
+
+          case 'BANK_STATEMENT':
+            slotKey = 'oneyearbankstatement';
+            break;
+
+          case 'ITR':
+            itrCounter++;
+            slotKey = `ay${itrCounter}`;
+            break;
+
+          case 'BUSINESS_FINANCE':
+            businessFinanceCounter++;
+            slotKey = `year${businessFinanceCounter}`;
+            break;
+
+          case 'BUSINESS_ITR':
+            businessItrCounter++;
+            slotKey = `businessITR${businessItrCounter}`;
+            break;
+
+          case 'BUSINESS_GST':
+            slotKey = 'businessGST';
+            break;
+
+          case 'BUSINESS_BANK_STATEMENT':
+            slotKey = 'businessBankstatement';
+            break;
+
+          case 'OTHER':
+            if (
+              section.sectionKey === 'BATCH_UPLOAD_OTHER_BUSSINESS_INCOME' ||
+              section.subcategory === 'OTHER_BUSSINESS_INCOME' ||
+              section.subcategory === 'OTHER_BUSINESS_INCOME'
+            ) {
+              businessOtherCounter++;
+
+              const title =
+                doc.title ||
+                fallbackFile.title ||
+                doc.fileName ||
+                fallbackFile.fileName ||
+                `Other Business ${businessOtherCounter}`;
+
+              slotKey = title;
+
+              this.otherBusinessSlots.push({
+                id: businessOtherCounter,
+                key: `other_business_${businessOtherCounter}`,
+                title
+              });
+            } else {
+              incomeOtherCounter++;
+
+              const title =
+                doc.title ||
+                fallbackFile.title ||
+                doc.fileName ||
+                fallbackFile.fileName ||
+                `Other Income ${incomeOtherCounter}`;
+
+              slotKey = title;
+
+              this.otherIncomeSlots.push({
+                id: incomeOtherCounter,
+                key: `other_income_${incomeOtherCounter}`,
+                title
+              });
+            }
+            break;
+
+          default:
+            slotKey =
+              doc.slotKey ||
+              doc.title ||
+              doc.fileName ||
+              fallbackFile.fileName ||
+              section.documentType;
+        }
+
+        const normalizedDoc: Document = {
+          documentId:
+            doc.documentId ||
+            fallbackFile.documentId ||
+            slotKey,
+
+          title:
+            doc.title ||
+            fallbackFile.title ||
+            slotKey,
+
+          slotKey,
+
+          fileName:
+            doc.fileName ||
+            fallbackFile.fileName ||
+            doc.name ||
+            fallbackFile.name ||
+            '',
+
+          type: documentType,
+
+          objectKey:
+            doc.objectKey ||
+            fallbackFile.objectKey ||
+            '',
+
+          viewUrl:
+            doc.viewUrl ||
+            fallbackFile.viewUrl ||
+            doc.fileUrl ||
+            fallbackFile.fileUrl ||
+            doc.publicUrl ||
+            fallbackFile.publicUrl ||
+            '',
+
+          fileUrl:
+            doc.fileUrl ||
+            fallbackFile.fileUrl ||
+            '',
+
+          url:
+            doc.url ||
+            fallbackFile.url ||
+            '',
+
+          category:
+            draftData.category ||
+            section.category,
+
+          subcategory:
+            draftData.subcategory ||
+            section.subcategory,
+
+          slotIndex: index
+        };
+
+        normalizedDocs.push(normalizedDoc);
+      });
+
+      if (normalizedDocs.length) {
+        restoredDocuments.push(...normalizedDocs);
+
+        restoredUploadedRespFiles.push({
+          ...draftData,
+          category: draftData.category || section.category,
+          subcategory: draftData.subcategory || section.subcategory,
+          uploadedDocuments: normalizedDocs
+        });
+      }
+    });
+
+    this.uploadedrespfiles = restoredUploadedRespFiles;
+    this.allDocuments = restoredDocuments;
+
+    this.slotCounter = incomeOtherCounter + businessOtherCounter;
+
+    this.rebuildDocumentMap();
+
+    const stepData = {
+      uploadedFiles: this.uploadedrespfiles,
+      otherIncomeSlots: this.otherIncomeSlots,
+      otherBusinessSlots: this.otherBusinessSlots
+    };
+
+    if (this.isCoApplicant) {
+      this.loanformservice.co_incomeInfoData = stepData;
+    } else {
+      this.loanformservice.incomeInfoData = stepData;
+    }
+
+    this.stepperService.setStepData(this.getStepRoute(), stepData);
+    localStorage.setItem(this.getStorageKey(), JSON.stringify(stepData));
+
+    this.cd.detectChanges();
+
+    console.log('Income draft restored:', {
+      documents: this.allDocuments,
+      documentMap: this.documentMap,
+      otherIncomeSlots: this.otherIncomeSlots,
+      otherBusinessSlots: this.otherBusinessSlots
+    });
   }
+  private rebuildDocumentMap(): void {
+    this.documentMap = {};
+
+    for (const doc of this.allDocuments || []) {
+      const keys = [
+        doc.slotKey,
+        doc.title,
+        doc.fileName,
+        doc.documentId,
+        doc.type
+      ].filter(Boolean);
+
+      keys.forEach((k: any) => {
+        this.documentMap[String(k)] = doc;
+      });
+    }
+  }
+
 
   submit() { }
 
@@ -1250,7 +1797,7 @@ isSalariedUser(): boolean {
   }
 
   //get api for saved data
-  getSavedIncomeData(applicantId: any): Promise<any[]> {
+  getSavedIncomeData1(applicantId: any): Promise<any[]> {
     const requests = this.incomeDraftSections.map(section => {
       return this.loanformservice.getUploadedData(
         this.applicationId,
@@ -1293,6 +1840,60 @@ isSalariedUser(): boolean {
       });
     });
   }
+  getSavedIncomeData(applicantId: any): Promise<any[]> {
+    const requests = this.incomeDraftSections.map(section => {
+      return this.loanformservice.getUploadedData(
+        this.applicationId,
+        applicantId,
+        section.sectionKey,
+        section.category,
+        section.subcategory,
+        section.documentType
+      ).pipe(
+        map((res: any) => {
+          let data =
+            res?.status === 'success'
+              ? (res.data?.data || res.data || null)
+              : null;
+
+          if (typeof data === 'string') {
+            try {
+              data = JSON.parse(data);
+            } catch {
+              data = null;
+            }
+          }
+
+          return {
+            section,
+            data
+          };
+        }),
+        catchError(err => {
+          console.error(
+            'Draft get failed for section:',
+            section.sectionKey,
+            section.subcategory,
+            section.documentType,
+            err
+          );
+
+          return of({
+            section,
+            data: null
+          });
+        })
+      );
+    });
+
+    return new Promise(resolve => {
+      forkJoin(requests).subscribe({
+        next: (responses: any[]) => resolve(responses),
+        error: () => resolve([])
+      });
+    });
+  }
+
   private getIncomeMetaByFileKey(fileKey: string): any {
     // 1. Fixed document mapping
     if (this.incomeSectionMap[fileKey]) {
@@ -1414,12 +2015,12 @@ isSalariedUser(): boolean {
 
   private buildDraftUploadRequests() {
     const grouped: Record<string, any> = {};
-   const apiApplicantId = this.getApiApplicantId();
+    const apiApplicantId = this.getApiApplicantId();
 
-if (!apiApplicantId) {
-  console.error('ApplicantId missing for income draft');
-  return [];
-}
+    if (!apiApplicantId) {
+      console.error('ApplicantId missing for income draft');
+      return [];
+    }
     Object.keys(this.uploadedFiles).forEach(fileKey => {
       const file = this.uploadedFiles[fileKey];
 
@@ -1450,7 +2051,7 @@ if (!apiApplicantId) {
       });
     });
 
- 
+
     return Object.values(grouped).map((group: any) => {
       const fd = new FormData();
 
@@ -1470,18 +2071,11 @@ if (!apiApplicantId) {
     });
   }
 
-  getStepRoute1() {
+
+
+  getStepRoute() {
     return this.isCoApplicant ? 'co-incomeinfo' : 'incomeinfo';
   }
-  
-getStepRoute() {
-  const coApplicantId = this.stepperService.getCo_appId()?.[0];
-  const index = this.stepperService.getCurrentCoApplicantIndex();
-
-  return this.isCoApplicant
-    ? `co-incomeinfo_${coApplicantId || 'temp_' + index}`
-    : 'incomeinfo';
-}
 
   next() {
 

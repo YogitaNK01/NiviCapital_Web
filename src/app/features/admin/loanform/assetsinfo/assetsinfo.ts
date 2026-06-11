@@ -10,7 +10,7 @@ import { Dropdown, DropdownOption } from '../../../systemdesign/dropdown/dropdow
 import { Inputfield } from "../../../systemdesign/inputfield/inputfield";
 import { Datepickernew } from '../../../systemdesign/datepickernew/datepickernew';
 import { Msgboxservice } from '../../../../core/service/msgboxservice';
-
+import { firstValueFrom } from 'rxjs';
 
 interface BankOption {
   value: string;
@@ -104,6 +104,9 @@ export class Assetsinfo implements OnInit {
 
   isCoApplicant: boolean = false;
   lastSavedPayload: any = null;
+  isSummaryEditMode = false;
+  viewOnly = false;
+
   constructor(private fb: FormBuilder, public main: Main, private route: ActivatedRoute, private msgBox: Msgboxservice,
     private stepperService: Loanstepperservice, private formSvc: Loanformservice, private cd: ChangeDetectorRef, private router: Router) { }
 
@@ -115,6 +118,13 @@ export class Assetsinfo implements OnInit {
       this.isCoApplicant ? 'CO_APPLICANT' : 'MAIN'
     );
 
+    if (this.isCoApplicant) {
+      this.stepperService.restoreCoAppIdFromSession();
+    }
+
+    this.stepperService.restoreLoanEditContext();
+    this.stepperService.restoreLoanIdFromSession();
+
     let Allids = this.stepperService.getLoanId();
 
     this.applicantId = Allids[0];
@@ -122,6 +132,14 @@ export class Assetsinfo implements OnInit {
 
     let AllCoapp_ids = this.stepperService.getCo_appId();
 
+    const queryParams = this.route.snapshot.queryParams;
+
+    this.isSummaryEditMode =
+      queryParams['fromSummary'] === true ||
+      queryParams['fromSummary'] === 'true' ||
+      this.formSvc.isSummaryEditFlow();
+
+    this.viewOnly = this.isSummaryEditMode && (queryParams['mode'] === 'view' || queryParams['mode'] === undefined);
 
     if (
       this.isCoApplicant &&
@@ -143,7 +161,7 @@ export class Assetsinfo implements OnInit {
           parsed.applicantId,
           parsed.applicationId,
           parsed.fullName,
-          undefined,this.stepperService.getCurrentCoApplicantIndex()
+          undefined, this.stepperService.getCurrentCoApplicantIndex()
         );
       }
     }
@@ -177,98 +195,107 @@ export class Assetsinfo implements OnInit {
 
       otherassets: this.fb.array([]),
     });
-    this.allAssetCatagory();
-
+    // this.allAssetCatagory();
+    if (this.viewOnly) {
+      this.assetsForm.disable({ emitEvent: false });
+    }
 
     this.assetsForm.valueChanges.subscribe(() => {
       this.calculateGrandTotal();
     });
 
 
-    this.getbanks();
+    // this.getbanks();
 
-     if (this.formSvc.isEditFlow()) {
-      setTimeout(() => {
-        this.patchFromSummary();
-      }, 300);
-    } else {
-    const key = this.getStorageKey();
+    //      if (this.formSvc.isEditFlow()) {
+    //       setTimeout(() => {
+    //         this.patchFromSummary();
+    //       }, 300);
+    //     } else {
+    //     const key = this.getStorageKey();
 
-    const localData = localStorage.getItem(key);
-    const parsedLocal = localData ? JSON.parse(localData) : null;
+    //     const localData = localStorage.getItem(key);
+    //     const parsedLocal = localData ? JSON.parse(localData) : null;
 
-     const applicantId = this.getApiApplicantId();
+    //      const applicantId = this.getApiApplicantId();
 
-    if (!applicantId) {
-      console.error('ApplicantId not found for photo upload');
-      return;
-    }
+    //     if (!applicantId) {
+    //       console.error('ApplicantId not found for photo upload');
+    //       return;
+    //     }
 
-    //  call API
-    const apiData = await this.getSavedAssets(applicantId);
+    //     //  call API
+    //     const apiData = await this.getSavedAssets(applicantId);
 
-    let finalData = null;
-
-   
-if (parsedLocal) {
-  finalData = parsedLocal;
-}
-
-if (!finalData) {
-  const applicantId = this.getApiApplicantId();
-
-  if (!applicantId) {
-    console.error('ApplicantId not found for assets');
-    return;
-  }
-
-  const apiData = await this.getSavedAssets(applicantId);
-
-  if (apiData) {
-    finalData = apiData;
-    localStorage.setItem(key, JSON.stringify(apiData));
-  }
-}
+    //     let finalData = null;
 
 
-    if (finalData) {
+    // if (parsedLocal) {
+    //   finalData = parsedLocal;
+    // }
 
-      if (this.isCoApplicant) {
-        this.formSvc.co_aseetsInfoData = finalData;
-      } else {
-        this.formSvc.aseetsInfoData = finalData;
-      }
+    // if (!finalData) {
+    //   const applicantId = this.getApiApplicantId();
+
+    //   if (!applicantId) {
+    //     console.error('ApplicantId not found for assets');
+    //     return;
+    //   }
+
+    //   const apiData = await this.getSavedAssets(applicantId);
+
+    //   if (apiData) {
+    //     finalData = apiData;
+    //     localStorage.setItem(key, JSON.stringify(apiData));
+    //   }
+    // }
 
 
-      //  wait until assets loaded
-      setTimeout(() => {
-        this.patchAssetsData();
-        // this.lastSavedPayload = this.buildAssetsPayload();
+    //     if (finalData) {
 
-        this.lastSavedPayload = this.buildAssetsPayloadWithApplicantId();
+    //       if (this.isCoApplicant) {
+    //         this.formSvc.co_aseetsInfoData = finalData;
+    //       } else {
+    //         this.formSvc.aseetsInfoData = finalData;
+    //       }
 
-      });
 
-      this.stepperService.markStepCompleted(this.getStepRoute());
-    }
-  }
+    //       //  wait until assets loaded
+    //       setTimeout(() => {
+    //         this.patchAssetsData();
+    //         // this.lastSavedPayload = this.buildAssetsPayload();
+
+    //         this.lastSavedPayload = this.buildAssetsPayloadWithApplicantId();
+
+    //       });
+
+    //       this.stepperService.markStepCompleted(this.getStepRoute());
+    //     }
+    //   }
+
+    await Promise.all([
+      this.allAssetCatagory(),
+      this.getbanks()
+    ]);
+
+    await this.loadAssetsForBothFlows()
 
   }
 
   getStorageKey() {
-        const coApplicantId = this.stepperService.getCo_appId()?.[0];
-     const index = this.stepperService.getCurrentCoApplicantIndex();
+    const coApplicantId = this.stepperService.getCo_appId()?.[0];
+    const index = this.stepperService.getCurrentCoApplicantIndex();
 
-return this.isCoApplicant
+    return this.isCoApplicant
       ? `assetsinfoData_coapp_${coApplicantId || 'temp_' + index}`
       : `assetsinfoData_main_${this.stepperService.getLoanId()?.[0]}`;
-      
-      //      return this.isCoApplicant
-      // ? `assetsinfoData_coapp_${this.applicantId}_${index}`
-      // : `assetsinfoData_main_${this.applicantId}`;
+
+    //      return this.isCoApplicant
+    // ? `assetsinfoData_coapp_${this.applicantId}_${index}`
+    // : `assetsinfoData_main_${this.applicantId}`;
   }
 
-    getCurrentCoApplicantFromList() {
+  getCurrentCoApplicantFromList() {
     const mainApplicantId = this.stepperService.getLoanId()?.[0];
     const index = this.stepperService.getCurrentCoApplicantIndex();
 
@@ -286,7 +313,192 @@ return this.isCoApplicant
     return this.stepperService.getCo_appId()?.[0] || null;
   }
 
+  private async loadAssetsForBothFlows() {
+    const key = this.getStorageKey();
 
+    const localData = localStorage.getItem(key);
+    const parsedLocal = localData ? JSON.parse(localData) : null;
+
+    const apiApplicantId = this.getApiApplicantId();
+
+    const draftData = apiApplicantId
+      ? await this.getSavedAssets(apiApplicantId)
+      : null;
+
+    const summarySection = await this.getSummarySection('assets');
+
+    
+  const normalizedSummary = this.normalizeAssets(summarySection);
+  const normalizedDraft = this.normalizeAssets(draftData);
+  const normalizedLocal = this.normalizeAssets(parsedLocal);
+
+
+    // let finalData = null;
+
+
+ const finalData =
+    normalizedSummary ||
+    normalizedDraft ||
+    normalizedLocal;
+
+
+
+    if (!finalData) {
+      this.lastSavedPayload = null;
+      return;
+    }
+
+    if (this.isCoApplicant) {
+      this.formSvc.co_aseetsInfoData = finalData;
+    } else {
+      this.formSvc.aseetsInfoData = finalData;
+    }
+
+    this.patchAssetsData();
+
+    this.calculateGrandTotal();
+
+    this.lastSavedPayload = this.buildAssetsPayloadWithApplicantId();
+
+    localStorage.setItem(key, JSON.stringify(finalData));
+
+    this.stepperService.markStepCompleted(this.getStepRoute());
+  }
+  private async getSummarySection(sectionKey: string): Promise<any> {
+    if (!this.applicationId) return null;
+
+    try {
+      const res: any = await firstValueFrom(
+        this.formSvc.getSummary(this.applicationId)
+      );
+
+      if (!res || res.status !== 'success') return null;
+
+      return this.formSvc.getApplicantSectionFromSummary(
+        res,
+        sectionKey,
+        {
+          isCoApplicant: this.isCoApplicant,
+          coApplicantId: this.stepperService.getCo_appId()?.[0],
+          coApplicantIndex: this.stepperService.getCurrentCoApplicantIndex()
+        }
+      );
+    } catch (error) {
+      console.error(`Failed to get summary section: ${sectionKey}`, error);
+      return null;
+    }
+  }
+
+  private normalizeAssets(data: any): any {
+  if (!data) return null;
+
+  // Already draft/local payload format
+  if (Array.isArray(data.items)) {
+    return data;
+  }
+
+  const items: any[] = [];
+
+  const addItem = (code: string, value: any, extra: any = {}) => {
+    const assetItemMasterId = this.assetCodeMap[code];
+
+    if (!assetItemMasterId && code !== 'LIQUID_CASH') {
+      console.warn('Missing asset master code:', code);
+    }
+
+    items.push({
+      assetItemMasterId,
+      assetCode: code,
+      valueInr: this.cleanAmount(value),
+      ...extra
+    });
+  };
+
+  // GOLD
+  (data.gold || []).forEach((x: any) => {
+    addItem('GOLD', x.valueInr, {
+      assetType: x.assetType || 'GOLD'
+    });
+  });
+
+  // LIQUID ASSETS
+  (data.liquidAssets || []).forEach((x: any) => {
+    addItem('LIQUID_CASH', x.amountInr || x.valueInr, {
+      assetType: x.assetType || x.type || x.name || 'Liquid Asset'
+    });
+  });
+
+  // PROPERTY
+  (data.properties || []).forEach((x: any, index: number) => {
+    addItem('PROPERTY', x.marketValueInr || x.valueInr, {
+      assetType: x.assetType || `Property ${index + 1}`,
+      propertyId: x.propertyId || x.propertyType || '',
+      propertyType: x.propertyType || '',
+      ownershipType: x.ownershipType || '',
+      location: x.location || ''
+    });
+  });
+
+  // FIXED DEPOSIT
+  (data.fixedDeposits || []).forEach((x: any, index: number) => {
+    addItem('FIXED_DEPOSIT', x.amountInr || x.valueInr, {
+      assetType: x.assetType || `Fixed Deposit ${index + 1}`,
+      bankId: x.bankId || this.getBankIdByName(x.bankName),
+      bankName: x.bankName || '',
+      description: x.description || x.title || '',
+      maturityDate: x.maturityDate || ''
+    });
+  });
+
+  // INVESTMENTS
+  (data.investments || []).forEach((x: any) => {
+    const investmentCode = this.getInvestmentCode(x.type || x.assetType);
+
+    addItem(investmentCode, x.valueInr, {
+      assetType: x.assetType || x.type || investmentCode,
+      type: x.type || x.assetType || ''
+    });
+  });
+
+  // OTHER ASSETS
+  (data.otherAssets || []).forEach((x: any) => {
+    addItem('OTHER', x.valueInr || x.amountInr, {
+      assetType: x.assetType || x.type || ''
+    });
+  });
+
+  if (!items.length) return null;
+
+  return {
+    applicantId: this.getApiApplicantId(),
+    totalAssets: data.totalAssets || 0,
+    items
+  };
+}
+private cleanAmount(value: any): number {
+  if (value == null || value === '') return 0;
+  return Number(value.toString().replace(/,/g, '')) || 0;
+}
+
+private getBankIdByName(bankName: string): string {
+  if (!bankName) return '';
+
+  return this.selectBanks.find(
+    b => b.label?.toLowerCase().trim() === bankName.toLowerCase().trim()
+  )?.value || '';
+}
+
+private getInvestmentCode(value: string): string {
+  const text = (value || '').toLowerCase();
+
+  if (text.includes('stock')) return 'STOCKS';
+  if (text.includes('mutual')) return 'MUTUAL_FUNDS';
+  if (text.includes('bond')) return 'BONDS';
+  if (text.includes('debenture')) return 'DEBENTURES';
+  if (text.includes('other')) return 'OTHERS';
+
+  return value?.toUpperCase?.() || 'OTHERS';
+}
   get f() {
     return this.assetsForm.controls;
   }
@@ -725,7 +937,63 @@ return this.isCoApplicant
   }
 
 
-  allAssetCatagory() {
+  allAssetCatagory(): Promise<void> {
+    return new Promise((resolve) => {
+      this.formSvc.getAllAssets().subscribe((res: any) => {
+        const list = res.data ?? res;
+
+        this.groupIdMap = list.reduce((acc: any, item: any) => {
+          if (!acc[item.name]) {
+            acc[item.name] = [];
+          }
+          acc[item.name].push(item.id);
+          return acc;
+        }, {});
+
+        const uniqueGroups = [...new Set(list.map((s: any) => s.name))];
+
+        const sortedGroups = uniqueGroups.sort(
+          (a: any, b: any) =>
+            this.assetOrder.indexOf(a) - this.assetOrder.indexOf(b)
+        );
+
+        this.assetsCatagories = sortedGroups.map((group: any) => ({
+          value: group,
+          label: this.formatTitle(group),
+          code: group
+        }));
+
+        this.accordions = sortedGroups.map((group: any) => ({
+          title: this.accordianTitle(group),
+          alwaysOpen: true,
+          key: this.accordianTitle(group)
+        }));
+
+        this.assetCodeMap = list.reduce((acc: any, item: any) => {
+          acc[item.code] = item.id;
+          return acc;
+        }, {});
+
+        this.formSvc.selectedAssets('INVESTMENTS').subscribe((invRes: any) => {
+          const invList = invRes.data ?? invRes;
+
+          this.selectInvestments = invList.map((s: any) => ({
+            value: s.id,
+            label: s.name,
+            code: s.code
+          }));
+
+          invList.forEach((item: any) => {
+            this.assetCodeMap[item.code] = item.id;
+          });
+
+          this.cd.detectChanges();
+          resolve();
+        });
+      });
+    });
+  }
+  allAssetCatagory1() {
     this.formSvc.getAllAssets().subscribe((res: any) => {
       const list = res.data ?? res;
       console.log("list:", list);
@@ -1054,7 +1322,7 @@ return this.isCoApplicant
   }
 
 
-  getbanks() {
+  getbanks1() {
     this.formSvc.getallBanks().subscribe((res: any) => {
       const list = res.data ?? res;
 
@@ -1066,6 +1334,20 @@ return this.isCoApplicant
 
       }));
 
+    });
+  }
+  getbanks(): Promise<void> {
+    return new Promise((resolve) => {
+      this.formSvc.getallBanks().subscribe((res: any) => {
+        const list = res.data ?? res;
+
+        this.selectBanks = list.map((s: any) => ({
+          value: s.id,
+          label: s.name
+        }));
+
+        resolve();
+      });
     });
   }
   onBankSelected(selectedId: any, fd: AbstractControl) {
@@ -1127,70 +1409,70 @@ return this.isCoApplicant
 
     return numeric === 0 ? { zeroNotAllowed: true } : null;
   }
-   //edit flow =patch from summary
+  //edit flow =patch from summary
 
-patchFromSummary() {
-  if (!this.formSvc.isEditFlow()) return;
+  patchFromSummary() {
+    if (!this.formSvc.isEditFlow()) return;
 
-  const data = this.formSvc.getSummarySection('assets');
-  if (!data) return;
+    const data = this.formSvc.getSummarySection('assets');
+    if (!data) return;
 
-  const items = [
-    ...(data.gold || []).map((x: any) => ({
-      assetCategory: 'GOLD',
-      assetType: x.assetType || 'GOLD',
-      valueInr: x.valueInr || 0
-    })),
+    const items = [
+      ...(data.gold || []).map((x: any) => ({
+        assetCategory: 'GOLD',
+        assetType: x.assetType || 'GOLD',
+        valueInr: x.valueInr || 0
+      })),
 
-    ...(data.liquidAssets || []).map((x: any) => ({
-      assetCategory: 'LIQUID_ASSET',
-      assetType: x.assetType || '',
-      amountInr: x.amountInr || 0,
-      type: x.type || ''
-    })),
+      ...(data.liquidAssets || []).map((x: any) => ({
+        assetCategory: 'LIQUID_ASSET',
+        assetType: x.assetType || '',
+        amountInr: x.amountInr || 0,
+        type: x.type || ''
+      })),
 
-    ...(data.properties || []).map((x: any) => ({
-      assetCategory: 'PROPERTY',
-      assetType: x.assetType || '',
-      propertyId: x.propertyId || '',
-      ownershipType: x.ownershipType || '',
-      marketValueInr: x.marketValueInr || 0,
-      location: x.location || ''
-    })),
+      ...(data.properties || []).map((x: any) => ({
+        assetCategory: 'PROPERTY',
+        assetType: x.assetType || '',
+        propertyId: x.propertyId || '',
+        ownershipType: x.ownershipType || '',
+        marketValueInr: x.marketValueInr || 0,
+        location: x.location || ''
+      })),
 
-    ...(data.fixedDeposits || []).map((x: any) => ({
-      assetCategory: 'FIXED_DEPOSIT',
-      assetType: x.assetType || '',
-      bankName: x.bankName || '',
-      amountInr: x.amountInr || 0,
-      maturityDate: x.maturityDate || '',
-      description: x.description || ''
-    })),
+      ...(data.fixedDeposits || []).map((x: any) => ({
+        assetCategory: 'FIXED_DEPOSIT',
+        assetType: x.assetType || '',
+        bankName: x.bankName || '',
+        amountInr: x.amountInr || 0,
+        maturityDate: x.maturityDate || '',
+        description: x.description || ''
+      })),
 
-    ...(data.investments || []).map((x: any) => ({
-      assetCategory: 'INVESTMENT',
-      assetType: x.assetType || '',
-      type: x.type || '',
-      valueInr: x.valueInr || 0
-    })),
+      ...(data.investments || []).map((x: any) => ({
+        assetCategory: 'INVESTMENT',
+        assetType: x.assetType || '',
+        type: x.type || '',
+        valueInr: x.valueInr || 0
+      })),
 
-    ...(data.otherAssets || []).map((x: any) => ({
-      assetCategory: 'OTHER_ASSET',
-      assetType: x.assetType || '',
-      type: x.type || 'Other',
-      valueInr: x.valueInr || 0
-    }))
-  ];
+      ...(data.otherAssets || []).map((x: any) => ({
+        assetCategory: 'OTHER_ASSET',
+        assetType: x.assetType || '',
+        type: x.type || 'Other',
+        valueInr: x.valueInr || 0
+      }))
+    ];
 
-  const mappedData = {
-    totalAssets: data.totalAssets || 0,
-    items
-  };
+    const mappedData = {
+      totalAssets: data.totalAssets || 0,
+      items
+    };
 
-  this.formSvc.aseetsInfoData = mappedData;
-  this.patchAssetsData();
-  this.lastSavedPayload = this.buildAssetsPayload();
-}
+    this.formSvc.aseetsInfoData = mappedData;
+    this.patchAssetsData();
+    this.lastSavedPayload = this.buildAssetsPayload();
+  }
   patchAssetsData() {
     const data = this.isCoApplicant
       ? this.formSvc.co_aseetsInfoData
@@ -1211,44 +1493,16 @@ patchFromSummary() {
 
     items.forEach((item: any) => {
 
-      const code = Object.keys(this.assetCodeMap)
+      const code1 = Object.keys(this.assetCodeMap)
         .find(key => (this.assetCodeMap[key] === item.assetItemMasterId));
 
-//       const code = Object.keys(this.assetCodeMap).find(key => {
+     
+const code =
+  item.assetCode ||
+  Object.keys(this.assetCodeMap).find(
+    key => this.assetCodeMap[key] === item.assetItemMasterId
+  );
 
-//   //  1. Match using masterId (normal flow)
-//   if (item.assetItemMasterId && this.assetCodeMap[key] === item.assetItemMasterId) {
-//     return true;
-//   }
-
-//   //  2. Match using assetCategory (SUMMARY fallback)
-//   if (item.assetCategory) {
-//     const categoryMap: any = {
-//       LIQUID_ASSET: ['SAVINGS_ACCOUNT', 'CASH IN HAND'],
-//       PROPERTY: ['PROPERTY'],
-//       GOLD: ['GOLD'],
-//       INVESTMENT: ['INVESTMENT'],
-//       FIXED_DEPOSIT: ['FIXED_DEPOSIT']
-//     };
-
-//     if (categoryMap[item.assetCategory]?.includes(key)) {
-//       return true;
-//     }
-//   }
-
-//   //  3. Match using assetType (more precise fallback)
-//   if (item.assetType) {
-//     const type = item.assetType.toLowerCase();
-
-//     if (type.includes('saving') || type.includes('cash')) return key === 'LIQUID_CASH';
-//     if (type.includes('fd') || type.includes('deposit')) return key === 'FIXED_DEPOSIT';
-//     if (type.includes('investment')) return key === 'INVESTMENT';
-//     if (type.includes('property')) return key === 'PROPERTY';
-//     if (type.includes('gold')) return key === 'GOLD';
-//   }
-
-//   return false;
-// });
 
 
       if (!code) return;
@@ -1282,7 +1536,7 @@ patchFromSummary() {
         const group = this.createProperty();
 
         group.patchValue({
-          propertytype: item.propertyId,
+          propertytype: item.propertyId || item.propertyType || '',
           ownershiptype: item.ownershipType,
           marketval: item.valueInr,
           location: item.location
@@ -1298,7 +1552,8 @@ patchFromSummary() {
         const group = this.createFD();
 
         group.patchValue({
-          bankname: item.bankId,
+          bankname: item.bankId || this.getBankIdByName(item.bankName),
+           description: item.description || '',
           bankamt: item.valueInr,
           maturitydate: item.maturityDate
         });
@@ -1451,6 +1706,7 @@ patchFromSummary() {
         } else {
           addItem('PROPERTY', ctrl.value.marketval, {
             propertyId: ctrl.value.propertyId,
+            // propertyType: ctrl.value.propertytype,
             ownershipType: ctrl.value.ownershiptype,
             location: ctrl.value.location,
             assetType: `Property ${index + 1}`
@@ -1566,6 +1822,140 @@ patchFromSummary() {
 
     };
   }
+//draft payload 
+buildDraftAssetsPayloadWithApplicantId(): {
+  invalid: boolean;
+  applicantId?: any;
+  items: any[];
+} {
+  const form = this.assetsForm.getRawValue();
+  const items: any[] = [];
+
+  const addItem = (code: string, value: any, extra: any = {}) => {
+    const assetItemMasterId = this.assetCodeMap[code];
+
+    // For draft save, skip only if absolutely nothing exists
+    if (!assetItemMasterId && code !== 'LIQUID_CASH') {
+      console.warn('Missing asset code mapping for:', code);
+      return;
+    }
+
+    items.push({
+      assetItemMasterId,
+      assetCode: code,
+      valueInr: this.cleanAmount(value),
+      ...extra
+    });
+  };
+
+  // GOLD
+  if (this.selectedAssets.includes('Gold') && this.hasValue(form.gold?.goldvalue)) {
+    addItem('GOLD', form.gold.goldvalue, {
+      assetType: 'GOLD'
+    });
+  }
+
+  // LIQUID
+  if (this.selectedAssets.includes('Liquid Assets')) {
+    if (this.hasValue(form.liquidAssets?.cashinhand)) {
+      addItem('LIQUID_CASH', form.liquidAssets.cashinhand, {
+        assetType: 'Cash In Hand'
+      });
+    }
+
+    if (this.hasValue(form.liquidAssets?.savingbalance)) {
+      addItem('LIQUID_CASH', form.liquidAssets.savingbalance, {
+        assetType: 'Savings Account Balance (INR)'
+      });
+    }
+  }
+
+  // PROPERTY
+  if (this.selectedAssets.includes('Property/ Land Assets')) {
+    this.properties.controls.forEach((ctrl: any, index: number) => {
+      const row = ctrl.value;
+
+      if (this.hasAnyValue(row, ['propertytype', 'ownershiptype', 'marketval', 'location'])) {
+        addItem('PROPERTY', row.marketval || 0, {
+          propertyId: row.propertyId || '',
+          // propertyType: row.propertytype || '',
+          ownershipType: row.ownershiptype || '',
+          location: row.location || '',
+          assetType: `Property ${index + 1}`
+        });
+      }
+    });
+  }
+
+  // FIXED DEPOSIT
+  if (this.selectedAssets.includes('Fixed Deposit')) {
+    this.fixedDeposits.controls.forEach((ctrl: any, index: number) => {
+      const row = ctrl.value;
+
+      if (this.hasAnyValue(row, ['bankname', 'description', 'bankamt', 'maturitydate'])) {
+        addItem('FIXED_DEPOSIT', row.bankamt || 0, {
+          bankId: row.bankname || '',
+          description: row.description || '',
+          maturityDate: this.formatDateForPayload(row.maturitydate),
+          assetType: `Fixed Deposit ${index + 1}`
+        });
+      }
+    });
+  }
+
+  // INVESTMENTS
+  if (this.selectedAssets.includes('Investments')) {
+    this.investmentsArray.controls.forEach((ctrl: any) => {
+      const row = ctrl.value;
+
+      if (this.hasAnyValue(row, ['type', 'value', 'name'])) {
+        let typeCode = '';
+        switch ((row.type || '').toLowerCase()) {
+          case 'stocks':
+            typeCode = 'STOCKS';
+            break;
+          case 'mutual funds':
+            typeCode = 'MUTUAL_FUNDS';
+            break;
+          case 'bonds':
+            typeCode = 'BONDS';
+            break;
+          case 'debentures':
+            typeCode = 'DEBENTURES';
+            break;
+          case 'others':
+            typeCode = 'OTHERS';
+            break;
+        }
+
+        if (typeCode) {
+          addItem(typeCode, row.value || 0, {
+            assetType: row.type === 'Others' ? (row.name || 'Others') : row.type
+          });
+        }
+      }
+    });
+  }
+
+  // OTHER ASSETS
+  if (this.selectedAssets.includes('Other')) {
+    this.otherassets.controls.forEach((ctrl: any) => {
+      const row = ctrl.value;
+
+      if (this.hasAnyValue(row, ['assettype', 'assetamt'])) {
+        addItem('OTHER', row.assetamt || 0, {
+          assetType: row.assettype || ''
+        });
+      }
+    });
+  }
+
+  return {
+    invalid: false,
+    applicantId: this.getApiApplicantId(),
+    items
+  };
+}
 
   buildAssetsPayloadWithApplicantId(): {
     invalid: boolean;
@@ -1580,9 +1970,9 @@ patchFromSummary() {
         items: []
       };
     }
- const applicantId = this.getApiApplicantId();
+    const applicantId = this.getApiApplicantId();
 
-   
+
 
     return {
       invalid: false,
@@ -1605,7 +1995,18 @@ patchFromSummary() {
       ).subscribe({
         next: (res) => {
           if (res.status === 'success') {
-            resolve(res.data.data);
+            // resolve(res.data.data);
+            let data = res.data.data;
+            if (typeof data === 'string') {
+              try {
+                data = JSON.parse(data);
+              } catch {
+                data = null;
+              }
+            }
+
+            resolve(data);
+
           } else {
             resolve(null);
           }
@@ -1618,7 +2019,7 @@ patchFromSummary() {
 
     // const result1 = this.buildAssetsPayload();
 
-    const result = this.buildAssetsPayloadWithApplicantId();
+    const result = this.buildDraftAssetsPayloadWithApplicantId(); //this.buildAssetsPayloadWithApplicantId();
 
     if (!result) {
       console.log("Invalid form - not saving");
@@ -1644,7 +2045,7 @@ patchFromSummary() {
       this.formSvc.aseetsInfoData = input;
     }
 
-     const applicantId = this.getApiApplicantId();
+    const applicantId = this.getApiApplicantId();
 
     if (!applicantId) {
       console.error('ApplicantId not found for photo upload');
@@ -1673,6 +2074,13 @@ patchFromSummary() {
   getStepRoute() {
     return this.isCoApplicant ? 'co-assetsinfo' : 'assetsinfo';
   }
+  private hasValue(val: any): boolean {
+  return val !== null && val !== undefined && val !== '';
+}
+
+private hasAnyValue(obj: any, keys: string[]): boolean {
+  return keys.some(key => this.hasValue(obj?.[key]));
+}
   next1() {
     let form = this.assetsForm.value
     console.log("form data Assets:", form);
@@ -1727,6 +2135,7 @@ patchFromSummary() {
         } else {
           addItem('PROPERTY', ctrl.value.marketval, {
             propertyId: ctrl.value.propertyId,
+            // propertyType: ctrl.value.propertytype,
             ownershipType: ctrl.value.ownershiptype,
             location: ctrl.value.location,
             assetType: `Property ${index + 1}`
@@ -1854,14 +2263,14 @@ patchFromSummary() {
   }
 
   next() {
-  
+
     const payload = this.buildAssetsPayloadWithApplicantId();//{ items: result.items, applicantId: this.applicantId, };
 
     if (payload.invalid) {
-     
- console.log("Form invalid - stop navigation");
-    this.assetsForm.markAllAsTouched();
-    return;
+
+      console.log("Form invalid - stop navigation");
+      this.assetsForm.markAllAsTouched();
+      return;
 
     }
 

@@ -126,9 +126,7 @@
                                     <ng-container *ngTemplateOutlet="referenceTemplate"></ng-container>
                                 </ng-container>
 
-                                <ng-container *ngSwitchCase="'coapplicants'">
-                                    <ng-container *ngTemplateOutlet="coappTemplate"></ng-container>
-                                </ng-container>
+                            
 
                             </ng-container>
 
@@ -140,6 +138,48 @@
             </div>
 
 
+            <!-- multiple-coapplicant -->
+              <div *ngIf="coApplicantSummaries.length > 0">
+                        <!-- <div class="text-body-1 fw-bold blue-text mb-3">
+                            Co-Applicant
+                        </div> -->
+ 
+                        <div class=" accordion d-flex flex-column gap-4 mb-4">
+ 
+                            <div class="accordion-item b-0"
+                                *ngFor="let coapp of coApplicantSummaries; let coIndex = index; trackBy: trackByAccordion">
+ 
+                                <h2 class="accordion-header">
+                                    <button class="accordion-button table-head d-flex  align-items-center"
+                                        [class.collapsed]="!coapp.showAccordion" type="button"
+                                        (click)="toggleCoAppAccordion(coapp)">
+                                        <div class="d-flex align-items-center gap-1">
+                                            <span>Co-Applicant {{coIndex+1}} </span>
+                                        </div>
+                                        <div class="flex-grow-1"></div>
+                                       
+                                    </button>
+                                </h2>
+ 
+ 
+                                <!-- <div class="accordion-collapse collapse" [class.show]="openIndex.includes(i)"> -->
+                                <div class="accordion-collapse collapse" [class.show]="coapp.showAccordion">
+ 
+                                    <div class="accordion-body p-0 ">
+ 
+                                        <ng-container>
+                                            <ng-container
+                                                *ngTemplateOutlet="coappChildTemplate; context: {coapp: coapp}"></ng-container>
+                                        </ng-container>
+ 
+                                    </div>
+ 
+ 
+                                </div>
+ 
+                            </div>
+                        </div>
+                    </div>
 
 
             <ng-template #generalTemplate let-i="index">
@@ -1051,191 +1091,121 @@
 
             </ng-template>
 
-            <ng-template #coappTemplate let-i="index">
-                 <div class=" accordion d-flex flex-column gap-4 mb-4">
-
-                <div class="accordion-item b-0"
-                    *ngFor="let acc of coapp_accordions ; let i = index; trackBy: trackByAccordion">
-
-
-
-                    <h2 class="accordion-header">
-                        <button class="accordion-button table-head d-flex  align-items-center"
-                            [class.collapsed]="!openKeys.includes(acc.key)" type="button" (click)="toggle(acc.key)">
-                            <div class="d-flex align-items-center gap-1">
-                                <span>{{ acc.title }} </span>
-                                <span *ngIf="acc.amount">- ₹{{ formatInr(acc.amount) }}
-
-                                </span>
-                            </div>
-                            <div class="flex-grow-1"></div>
-                            <div class="ms-auto d-flex align-items-center p-0">
-                                <app-buttons type="button" label="Edit" class="btn editbtn p-0"
-                                    (click)="goToEdit(acc.key, $event)" [outline]="true"></app-buttons>
-
-                                <!-- <span class="delete-icon px-2" (click)="removeAccordion(acc.key, i, $event)" (click)="removeAccordion(acc, i, $event)"> -->
-                                <span class="delete-icon px-2"></span>
-                            </div>
-                        </button>
-                    </h2>
-
-
-                    <!-- <div class="accordion-collapse collapse" [class.show]="openIndex.includes(i)"> -->
-                    <div class="accordion-collapse collapse" [class.show]="openKeys.includes(acc.key)">
-
-                        <div class="accordion-body p-0 ">
-
-                           
-
-                            <ng-container [ngSwitch]="acc.key">
-
-                                <ng-container *ngSwitchCase="'co-basic'">
-                                    <ng-container *ngTemplateOutlet="generalTemplate"></ng-container>
-                                </ng-container>
-                                <ng-container *ngSwitchCase="'co-general'">
-                                    <ng-container *ngTemplateOutlet="cogeneralTemplate"></ng-container>
-                                </ng-container>
-
-                        
-
-                                <ng-container *ngSwitchCase="'co-additional'">
-                                    <ng-container *ngTemplateOutlet="additonalTemplate"></ng-container>
-                                </ng-container>
-
-                                <ng-container *ngSwitchCase="'co-kyc'">
-                                    <ng-container *ngTemplateOutlet="kycTemplate"></ng-container>
-                                </ng-container>
-
-                              
-
-                                <ng-container *ngSwitchCase="'co-income'">
-                                    <ng-container *ngTemplateOutlet="incomeTemplate"></ng-container>
-                                </ng-container>
-
-                                <ng-container *ngSwitchCase="'co-assets'">
-                                    <ng-container *ngTemplateOutlet="assetsTemplate"></ng-container>
-                                </ng-container>
-
-                                <ng-container *ngSwitchCase="'co-liabilities'">
-                                    <ng-container *ngTemplateOutlet="liabilitiesTemplate"></ng-container>
-                                </ng-container>
-
-                                <ng-container *ngSwitchCase="'co-monthly'">
-                                    <ng-container *ngTemplateOutlet="monthlyexpTemplate"></ng-container>
-                                </ng-container>
-
-                               
-
-                            </ng-container>
-
-                        </div>
-                    </div>
-
-                </div>
-
-            </div>
-
-             <ng-template #cogeneralTemplate let-i="index">
-                <div class="row common-details-box d-flex flex-row">
-                    <div *ngFor="let coapp of coApplicantSummaries; let coIndex = index">
-
-
-                        <!-- Current Occupation Section -->
-
-                        <div class="d-flex flex-column">
-                            <div class="info-item d-flex flex-column">
-                                <label class="text-label">Current Occupation</label>
-
-                                <div class="text-label-data fw-bold">{{ coapp.currentOccupation }}</div>
-                            </div>
-
-
-                            <!-- Course Details Section -->
-
-                            <label class="text-body-1 fw-bold mt-20">Course Details</label>
-                            <hr class="hrclass" />
-                            <div class="info-grid-img">
-                                <div class="info-item d-flex flex-column" *ngFor="let field of coapp.courseDetailsFields">
-                                    <label class="text-label">{{ field.label }}</label>
-                                    <div class="text-label-data fw-bold">{{ field.value }}</div>
+      
+<ng-template #coappChildTemplate let-coapp="coapp">
+                <ng-container>
+                    <div class="row common-details-box d-flex flex-row">
+                        <div>
+                            <!-- Basic Info -->
+                            <div class="common-details-box1">
+                                <div class="d-flex justify-content-between flex-row align-self-stretch">
+                                    <label class="text-body-1 fw-bold blue-text">Basic Info</label>
+                                    <button class="btn btn-sm btn-outline-danger px-4"
+                                        (click)="editCoApplicant(coapp)">
+                                        Edit
+                                    </button>
                                 </div>
-
-                            </div>
-                        </div>
-
-                        <!-- </form> -->
-                    </div>
-                </div>
-            </ng-template>
-
-                <div class="row common-details-box d-flex flex-row">
-                    <div>
-
-
-                        <div class="mt-20" *ngIf="coApplicantSummaries.length > 0">
-                            <div class="text-body-1 fw-bold blue-text mb-3">
-                                Co-Applicant
-                            </div>
-
-                            <div *ngFor="let coapp of coApplicantSummaries; let coIndex = index">
-
-                                <!-- Basic Info -->
-                                <div class="common-details-box mb-3">
-                                    <div class="d-flex justify-content-between align-items-center">
-                                        <label class="text-body-1 fw-bold">Basic Info</label>
-                                        <button class="btn btn-sm btn-outline-danger" (click)="editCoApplicant(coapp)">
-                                            Edit
-                                        </button>
-                                    </div>
-
-                                    <hr class="hrclass" />
-
-                                    <div class="info-grid-img">
-                                        <div class="info-item d-flex flex-column">
-                                            <label class="text-label">First Name</label>
-                                            <div class="text-label-data fw-bold">{{ coapp.firstName || '-' }}</div>
-                                        </div>
-
-                                        <div class="info-item d-flex flex-column">
-                                            <label class="text-label">Middle Name</label>
-                                            <div class="text-label-data fw-bold">{{ coapp.middleName || '-' }}</div>
-                                        </div>
-
-                                        <div class="info-item d-flex flex-column">
-                                            <label class="text-label">Last Name</label>
-                                            <div class="text-label-data fw-bold">{{ coapp.lastName || '-' }}</div>
-                                        </div>
-
-                                        <div class="info-item d-flex flex-column">
-                                            <label class="text-label">Mobile Number</label>
-                                            <div class="text-label-data fw-bold">{{ coapp.mobileNumber || '-' }}</div>
-                                        </div>
-
-                                        <div class="info-item d-flex flex-column">
-                                            <label class="text-label">Email ID</label>
-                                            <div class="text-label-data fw-bold">{{ coapp.emailId || '-' }}</div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <!-- General Info -->
-                                <div class="common-details-box mb-3">
-                                    <label class="text-body-1 fw-bold">General Info</label>
-                                    <hr class="hrclass" />
-
+ 
+                                <hr class="hrclass" />
+ 
+                                <div class="info-grid-img">
                                     <div class="info-item d-flex flex-column">
-                                        <label class="text-label">Current Occupation</label>
+                                        <label class="text-label">First Name</label>
+                                        <div class="text-label-data fw-bold">{{ coapp.firstName || '-'
+                                            }}</div>
+                                    </div>
+ 
+                                    <div class="info-item d-flex flex-column">
+                                        <label class="text-label">Middle Name</label>
+                                        <div class="text-label-data fw-bold">{{ coapp.middleName || '-'
+                                            }}</div>
+                                    </div>
+ 
+                                    <div class="info-item d-flex flex-column">
+                                        <label class="text-label">Last Name</label>
+                                        <div class="text-label-data fw-bold">{{ coapp.lastName || '-' }}
+                                        </div>
+                                    </div>
+ 
+                                    <div class="info-item d-flex flex-column">
+                                        <label class="text-label">Mobile Number</label>
+                                        <div class="text-label-data fw-bold">{{ coapp.mobileNumber ||
+                                            '-' }}</div>
+                                    </div>
+ 
+                                    <div class="info-item d-flex flex-column">
+                                        <label class="text-label">Email ID</label>
+                                        <div class="text-label-data fw-bold">{{ coapp.emailId || '-' }}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+ 
+                            <!-- General Info -->
+                            <div class="common-details-box1 mt-20">
+                                <!-- <label class="text-body-1 fw-bold">General Info</label> -->
+ 
+                                <div class="d-flex justify-content-between flex-row align-self-stretch">
+                                    <label class="text-body-1 fw-bold blue-text">General Info</label>
+                                    <button class="btn btn-sm btn-outline-danger px-4"
+                                        (click)="editCoApplicant(coapp)">
+                                        Edit
+                                    </button>
+                                </div>
+ 
+                                <hr class="hrclass" />
+ 
+                                <!-- <div class="info-item d-flex flex-column">
+                            <label class="text-label">Current Occupation</label>
+                            <div class="text-label-data fw-bold">
+                                {{ coapp.currentOccupation || '-' }}
+                            </div>
+                        </div> -->
+ 
+                                <!-- <label class="text-body-1 fw-bold mt-20">Course Details</label>
+                        <hr class="hrclass" /> -->
+ 
+                                <div class="info-grid-img">
+                                    <div class="info-item d-flex flex-column"
+                                        *ngFor="let field of coapp.courseDetailsFields">
+                                        <label class="text-label">{{ field.label }}</label>
                                         <div class="text-label-data fw-bold">
-                                            {{ coapp.currentOccupation || '-' }}
+                                            {{ field.value || '-' }}
                                         </div>
                                     </div>
-
-                                    <label class="text-body-1 fw-bold mt-20">Course Details</label>
+                                </div>
+                            </div>
+ 
+                            <!-- Additional Info -->
+                            <div class="common-details-box1 mt-20">
+                                <!-- <label class="text-body-1 fw-bold">Additional Info</label> -->
+ 
+                                <div class="d-flex justify-content-between flex-row align-self-stretch">
+                                    <label class="text-body-1 fw-bold blue-text">Additional Info</label>
+                                    <button class="btn btn-sm btn-outline-danger px-4"
+                                        (click)="editCoApplicant(coapp)">
+                                        Edit
+                                    </button>
+                                </div>
+                                <hr class="hrclass" />
+ 
+                                <div class="info-grid-img">
+                                    <div class="info-item d-flex flex-column"
+                                        *ngFor="let field of coapp.additionalInfoFields.applicantDetails">
+                                        <label class="text-label">{{ field.label }}</label>
+                                        <div class="text-label-data fw-bold">
+                                            {{ field.value || '-' }}
+                                        </div>
+                                    </div>
+                                </div>
+ 
+                                <div class="mt-20" *ngIf="coapp.additionalInfoFields.father?.length">
+                                    <label class="text-dp-2-bold fw-bold">Father's Details</label>
                                     <hr class="hrclass" />
-
+ 
                                     <div class="info-grid-img">
                                         <div class="info-item d-flex flex-column"
-                                            *ngFor="let field of coapp.courseDetailsFields">
+                                            *ngFor="let field of coapp.additionalInfoFields.father">
                                             <label class="text-label">{{ field.label }}</label>
                                             <div class="text-label-data fw-bold">
                                                 {{ field.value || '-' }}
@@ -1243,150 +1213,412 @@
                                         </div>
                                     </div>
                                 </div>
-
-                                <!-- Additional Info -->
-                                <div class="common-details-box mb-3">
-                                    <label class="text-body-1 fw-bold">Additional Info</label>
+ 
+                                <div class="mt-20" *ngIf="coapp.additionalInfoFields.mother?.length">
+                                    <label class="text-dp-2-bold fw-bold">Mother's Details</label>
                                     <hr class="hrclass" />
-
+ 
                                     <div class="info-grid-img">
                                         <div class="info-item d-flex flex-column"
-                                            *ngFor="let field of coapp.additionalInfoFields.applicantDetails">
+                                            *ngFor="let field of coapp.additionalInfoFields.mother">
                                             <label class="text-label">{{ field.label }}</label>
                                             <div class="text-label-data fw-bold">
                                                 {{ field.value || '-' }}
                                             </div>
                                         </div>
                                     </div>
-
-                                    <div class="mt-20" *ngIf="coapp.additionalInfoFields.father?.length">
-                                        <label class="text-dp-2-bold fw-bold">Father's Details</label>
-                                        <hr class="hrclass" />
-
-                                        <div class="info-grid-img">
-                                            <div class="info-item d-flex flex-column"
-                                                *ngFor="let field of coapp.additionalInfoFields.father">
-                                                <label class="text-label">{{ field.label }}</label>
-                                                <div class="text-label-data fw-bold">
-                                                    {{ field.value || '-' }}
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div class="mt-20" *ngIf="coapp.additionalInfoFields.mother?.length">
-                                        <label class="text-dp-2-bold fw-bold">Mother's Details</label>
-                                        <hr class="hrclass" />
-
-                                        <div class="info-grid-img">
-                                            <div class="info-item d-flex flex-column"
-                                                *ngFor="let field of coapp.additionalInfoFields.mother">
-                                                <label class="text-label">{{ field.label }}</label>
-                                                <div class="text-label-data fw-bold">
-                                                    {{ field.value || '-' }}
-                                                </div>
-                                            </div>
+                                </div>
+                            </div>
+ 
+                            <!-- Kyc Info -->
+                            <div class="common-details-box1 mt-20">
+                                <div class="d-flex justify-content-between flex-row align-self-stretch">
+                                    <label class="text-body-1 fw-bold blue-text">KYC</label>
+                                    <button class="btn btn-sm btn-outline-danger px-4"
+                                        (click)="editCoApplicant(coapp)">
+                                        Edit
+                                    </button>
+                                </div>
+                                <hr class="hrclass" />
+ 
+                                <div class="mt-20" *ngIf="coapp.kycInfoFields.identityAndResidency?.length">
+                                    <label class="text-dp-2-bold fw-bold">Identity & Residency</label>
+                                    <hr class="hrclass" />
+ 
+                                    <div class="info-grid-img">
+                                        <div *ngFor="let field of coapp.kycInfoFields.identityAndResidency"
+                                            class="info-item d-flex flex-column">
+                                            <label class="text-label">{{ field.label }}</label>
+ 
+                                            <div class="text-label-data fw-bold">{{field.value}}</div>
                                         </div>
                                     </div>
                                 </div>
-
-                                <!-- Assets -->
-                                <div class="common-details-box mb-3" *ngIf="coapp.assetsSections?.length">
-                                    <label class="text-body-1 fw-bold">
-                                        Assets - ₹ {{ formatInr(coapp.totalAssets) }}
-                                    </label>
+ 
+                                <div class="mt-20" *ngIf="coapp.kycInfoFields.permanentAddress?.length">
+                                    <label class="text-dp-2-bold fw-bold">Permanent Address</label>
                                     <hr class="hrclass" />
-
-                                    <ng-container *ngFor="let section of coapp.assetsSections">
-                                        <label class="text-dp-2-bold fw-bold">
-                                            {{ section.sectionLabel }}
-                                        </label>
-                                        <hr class="hrclass" />
-
-                                        <ng-container *ngFor="let card of section.cards">
-                                            <div class="mt-20" *ngIf="card.title">
-                                                <span>
-                                                    <svg width="8" height="8">
-                                                        <circle cx="4" cy="4" r="4" fill="#2570A3" />
-                                                    </svg>
-                                                    <label class="text-dp-2-bold blue-text fw-bold px-3">
-                                                        {{ card.title }}
-                                                    </label>
-                                                </span>
-                                            </div>
-
-                                            <div class="info-grid-img p-0">
-                                                <div class="info-item d-flex flex-column"
-                                                    *ngFor="let field of card.fields">
-                                                    <label class="text-label">{{ field.label }}</label>
-
-                                                    <div class="text-label-data fw-bold">
-                                                        <ng-container *ngIf="field.isCurrency; else normalCoappAsset">
-                                                            ₹{{ formatInr(field.value) }}
-                                                        </ng-container>
-
-                                                        <ng-template #normalCoappAsset>
-                                                            {{ field.value || '-' }}
-                                                        </ng-template>
+ 
+                                    <div class="info-grid-img">
+                                        <div *ngFor="let field of coapp.kycInfoFields.permanentAddress"
+                                            class="info-item d-flex flex-column">
+                                            <label class="text-label">{{ field.label }}</label>
+ 
+                                            <div class="text-label-data fw-bold">{{field.value}}</div>
+                                        </div>
+                                    </div>
+                                </div>
+ 
+                                <div class="mt-20" *ngIf="coapp.kycInfoFields.secondAddress?.length">
+                                    <label class="text-dp-2-bold fw-bold">Current Address</label>
+                                    <hr class="hrclass" />
+ 
+                                    <div class="info-grid-img">
+                                        <div *ngFor="let field of coapp.kycInfoFields.secondAddress"
+                                            class="info-item d-flex flex-column">
+                                            <label class="text-label">{{ field.label }}</label>
+ 
+                                            <div class="text-label-data fw-bold">{{field.value}}</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+ 
+                            <!-- Income Info -->
+                            <div class="common-details-box1 mt-20"
+                                *ngIf="coapp.currentOccupation === 'Employed' || coapp.currentOccupation === 'Self-employed'">
+                                <div class="d-flex justify-content-between flex-row align-self-stretch">
+                                    <label class="text-body-1 fw-bold blue-text">Income Details</label>
+                                    <button class="btn btn-sm btn-outline-danger px-4"
+                                        (click)="editCoApplicant(coapp)">
+                                        Edit
+                                    </button>
+                                </div>
+                                <hr class="hrclass" />
+ 
+                                <div class="info-grid-img">
+ 
+                                <!-- EMPLOYED -->
+                                <ng-container *ngIf="coapp.currentOccupation === 'Employed'">
+                                    <ng-container *ngFor="let docType of documentTypes">
+                                        <ng-container *ngIf="coapp.incomeDetails[docType.key]?.length">
+                                            <ng-container
+                                                *ngFor="let doc of coapp.incomeDetails[docType.key]; let i = index">
+ 
+                                                <ng-container
+                                                    *ngIf="docType.key === 'otherIncome'; else normalIncomeDoc">
+                                                    <div class="info-item d-flex flex-column">
+                                                        <label class="text-label">Other Document
+                                                            Name</label>
+                                                        <div class="text-label-data fw-bold">{{ doc.name
+                                                            || '-'
+                                                            }}</div>
                                                     </div>
-                                                </div>
-                                            </div>
+                                                    <div class="info-item d-flex flex-column">
+                                                        <label class="text-label">Other Document</label>
+                                                        <div class="text-label-data fw-bold">{{ doc.url
+                                                            || '-'
+                                                            }}</div>
+                                                    </div>
+                                                </ng-container>
+ 
+                                                <ng-template #normalIncomeDoc>
+                                                    <div class="info-item d-flex flex-column">
+                                                        <label class="text-label">
+                                                            {{ docType.label }}
+                                                            {{ docType.key === 'salarySlips' ||
+                                                            docType.key ===
+                                                            'itrs' ?
+                                                            (i + 1) : '' }}
+                                                        </label>
+                                                        <div class="text-label-data fw-bold">{{ doc.url
+                                                            || '-'
+                                                            }}</div>
+                                                    </div>
+                                                </ng-template>
+ 
+                                            </ng-container>
                                         </ng-container>
                                     </ng-container>
-                                </div>
-
-                                <!-- Liabilities -->
-                                <div class="common-details-box mb-3" *ngIf="coapp.liabilitiesSections?.length">
-                                    <label class="text-body-1 fw-bold">
-                                        Liabilities - ₹ {{ formatInr(coapp.totalLiabilities) }}
-                                    </label>
-                                    <hr class="hrclass" />
-
-                                    <ng-container *ngFor="let section of coapp.liabilitiesSections">
-                                        <label class="text-dp-2-bold fw-bold">
-                                            {{ section.sectionLabel }}
-                                        </label>
-                                        <hr class="hrclass" />
-
-                                        <ng-container *ngFor="let card of section.cards">
-                                            <div class="mt-20" *ngIf="card.title">
-                                                <span>
-                                                    <svg width="8" height="8">
-                                                        <circle cx="4" cy="4" r="4" fill="#2570A3" />
-                                                    </svg>
-                                                    <label class="text-dp-2-bold blue-text fw-bold px-3">
-                                                        {{ card.title }}
-                                                    </label>
-                                                </span>
-                                            </div>
-
-                                            <div class="info-grid-img p-0">
-                                                <div class="info-item d-flex flex-column"
-                                                    *ngFor="let field of card.fields">
-                                                    <label class="text-label">{{ field.label }}</label>
-
-                                                    <div class="text-label-data fw-bold">
-                                                        <ng-container
-                                                            *ngIf="field.isCurrency; else normalCoappLiability">
-                                                            ₹{{ formatInr(field.value) }}
-                                                        </ng-container>
-
-                                                        <ng-template #normalCoappLiability>
-                                                            {{ field.value || '-' }}
-                                                        </ng-template>
+                                </ng-container>
+ 
+                                <!-- SELF EMPLOYED -->
+                                <ng-container *ngIf="coapp.currentOccupation === 'Self-employed'">
+                                    <ng-container *ngFor="let docType of businessdocumentTypes">
+                                        <ng-container *ngIf="coapp.incomeBusinessDetails[docType.key]?.length">
+                                            <ng-container
+                                                *ngFor="let doc of coapp.incomeBusinessDetails[docType.key]; let i = index">
+ 
+                                                <ng-container
+                                                    *ngIf="docType.key === 'otherBussinessincome'; else normalBusinessDoc">
+                                                    <div class="info-item d-flex flex-column">
+                                                        <label class="text-label">Other Document
+                                                            Name</label>
+                                                        <div class="text-label-data fw-bold">{{ doc.name
+                                                            || '-'
+                                                            }}</div>
                                                     </div>
-                                                </div>
-                                            </div>
+                                                    <div class="info-item d-flex flex-column">
+                                                        <label class="text-label">Other Document</label>
+                                                        <div class="text-label-data fw-bold">{{ doc.url
+                                                            || '-'
+                                                            }}</div>
+                                                    </div>
+                                                </ng-container>
+ 
+                                                <ng-template #normalBusinessDoc>
+                                                    <div class="info-item d-flex flex-column">
+                                                        <label class="text-label">
+                                                            {{ docType.label }}
+                                                            {{ docType.key === 'business_itr_3_years' ||
+                                                            docType.key ===
+                                                            'business_finance_3_years' ? (i + 1) : '' }}
+                                                        </label>
+                                                        <div class="text-label-data fw-bold">{{ doc.url
+                                                            || '-'
+                                                            }}</div>
+                                                    </div>
+                                                </ng-template>
+ 
+                                            </ng-container>
                                         </ng-container>
                                     </ng-container>
+                                </ng-container>
+ 
                                 </div>
-
+ 
+                            </div>
+ 
+                            <!-- Assets -->
+                            <div class="common-details-box1 mt-20" *ngIf="coapp.assetsSections?.length">
+                                <!-- <label class="text-body-1 fw-bold">
+                                    Assets - ₹ {{ formatInr(coapp.totalAssets) }}
+                                </label> -->
+ 
+                                <div class="d-flex justify-content-between flex-row align-self-stretch">
+                                    <label class="text-body-1 fw-bold blue-text">Assets - ₹ {{
+                                        formatInr(coapp.totalAssets) }}</label>
+                                    <button class="btn btn-sm btn-outline-danger px-4"
+                                        (click)="editCoApplicant(coapp)">
+                                        Edit
+                                    </button>
+                                </div>
+ 
+                                <hr class="hrclass" />
+ 
+                                <ng-container *ngFor="let section of coapp.assetsSections">
+                                    <label class="text-dp-2-bold fw-bold">
+                                        {{ section.sectionLabel }}
+                                    </label>
+                                    <hr class="hrclass" />
+ 
+                                    <ng-container *ngFor="let card of section.cards">
+                                        <div class="mt-20" *ngIf="card.title">
+                                            <span>
+                                                <svg width="8" height="8">
+                                                    <circle cx="4" cy="4" r="4" fill="#2570A3" />
+                                                </svg>
+                                                <label class="text-dp-2-bold blue-text fw-bold px-3">
+                                                    {{ card.title }}
+                                                </label>
+                                            </span>
+                                        </div>
+ 
+                                        <div class="info-grid-img p-0">
+                                            <div class="info-item d-flex flex-column"
+                                                *ngFor="let field of card.fields">
+                                                <label class="text-label">{{ field.label }}</label>
+ 
+                                                <div class="text-label-data fw-bold">
+                                                    <ng-container
+                                                        *ngIf="field.isCurrency; else normalCoappAsset">
+                                                        ₹{{ formatInr(field.value) }}
+                                                    </ng-container>
+ 
+                                                    <ng-template #normalCoappAsset>
+                                                        {{ field.value || '-' }}
+                                                    </ng-template>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </ng-container>
+                                </ng-container>
+                            </div>
+ 
+                            <!-- Liabilities -->
+                            <div class="common-details-box1 mt-20" *ngIf="coapp.liabilitiesSections?.length">
+                                <!-- <label class="text-body-1 fw-bold">
+                                    Liabilities - ₹ {{ formatInr(coapp.totalLiabilities) }}
+                                </label> -->
+ 
+                                <div class="d-flex justify-content-between flex-row align-self-stretch">
+                                    <label class="text-body-1 fw-bold blue-text">Liabilities - ₹ {{
+                                        formatInr(coapp.totalLiabilities) }}</label>
+                                    <button class="btn btn-sm btn-outline-danger px-4"
+                                        (click)="editCoApplicant(coapp)">
+                                        Edit
+                                    </button>
+                                </div>
+ 
+                                <hr class="hrclass" />
+ 
+                                <ng-container *ngFor="let section of coapp.liabilitiesSections">
+                                    <label class="text-dp-2-bold fw-bold">
+                                        {{ section.sectionLabel }}
+                                    </label>
+                                    <hr class="hrclass" />
+ 
+                                    <ng-container *ngFor="let card of section.cards">
+                                        <div class="mt-20" *ngIf="card.title">
+                                            <span>
+                                                <svg width="8" height="8">
+                                                    <circle cx="4" cy="4" r="4" fill="#2570A3" />
+                                                </svg>
+                                                <label class="text-dp-2-bold blue-text fw-bold px-3">
+                                                    {{ card.title }}
+                                                </label>
+                                            </span>
+                                        </div>
+ 
+                                        <div class="info-grid-img p-0">
+                                            <div class="info-item d-flex flex-column"
+                                                *ngFor="let field of card.fields">
+                                                <label class="text-label">{{ field.label }}</label>
+ 
+                                                <div class="text-label-data fw-bold">
+                                                    <ng-container
+                                                        *ngIf="field.isCurrency; else normalCoappLiability">
+                                                        ₹{{ formatInr(field.value) }}
+                                                    </ng-container>
+ 
+                                                    <ng-template #normalCoappLiability>
+                                                        {{ field.value || '-' }}
+                                                    </ng-template>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </ng-container>
+                                </ng-container>
+                            </div>
+ 
+                            <!-- Monthly Exp -->
+                            <div class="common-details-box1 mt-20"
+                                *ngIf="coapp.monthlyExpenditureFields?.length">
+                                <div class="d-flex justify-content-between flex-row align-self-stretch">
+                                    <label class="text-body-1 fw-bold blue-text">Monthly Expense</label>
+                                    <button class="btn btn-sm btn-outline-danger px-4"
+                                        (click)="editCoApplicant(coapp)">
+                                        Edit
+                                    </button>
+                                </div>
+                                <hr class="hrclass" />
+ 
+                                <!--  If it is multiple (ARRAY like utilities) -->
+                                <ng-container
+                                    *ngFor="let field of coapp.monthlyExpenditureFields; let i = index">
+ 
+                                    <div [ngClass]="{ 'mt-0': i === 0, 'mt-20': i !== 0 }">
+ 
+                                        <!--   Section Title -->
+                                        <label class="text-dp-2-bold fw-bold">{{ field.label }}</label>
+                                        <hr class="hrclass" />
+ 
+                                        <!--   ARRAY CASE (like utilities) -->
+                                        <ng-container
+                                            *ngIf="isArray(coapp.monthlyExpenditure[field.key]); else singleItem">
+ 
+                                            <div class="info-grid-img mt-10">
+ 
+                                                <div *ngFor="let item of coapp.monthlyExpenditure[field.key]"
+                                                    class="info-item d-flex flex-column">
+ 
+                                                    <label class="text-label">
+                                                        {{ getDisplayLabel(item.name) }}
+                                                    </label>
+ 
+                                                    <div class="text-label-data fw-bold">
+                                                        {{ (item.amountInr != null
+                                                        ? '₹'+ formatInr(item.amountInr )
+                                                        : '-' )}}
+                                                    </div>
+ 
+                                                </div>
+ 
+                                            </div>
+ 
+                                        </ng-container>
+ 
+                                        <!--   SINGLE OBJECT CASE -->
+                                        <ng-template #singleItem>
+                                            <div class="info-item d-flex flex-column">
+                                                <label class="text-label">
+                                                    {{
+                                                    getDisplayLabel(coapp.monthlyExpenditure[field.key]?.name)
+                                                    }}
+                                                </label>
+ 
+                                                <div class="text-label-data fw-bold">
+                                                    {{ coapp.monthlyExpenditure[field.key]?.amountInr !=
+                                                    null ?
+                                                    '₹' +
+                                                    formatInr(coapp.monthlyExpenditure[field.key].amountInr)
+                                                    :
+                                                    '-' }}
+                                                </div>
+ 
+                                            </div>
+                                        </ng-template>
+ 
+                                    </div>
+ 
+                                </ng-container>
+ 
+ 
+ 
+                                <!-- Other Recurring Expenses -->
+                                <div
+                                    *ngIf="coapp.monthlyExpenditure.otherRecurringExpenses?.length > 0; else noOtherExpenses">
+                                    <label class="text-dp-2-bold fw-bold">Other Recurring
+                                        Expenses</label>
+                                    <hr class="hrclass" />
+ 
+                                    <div class=""
+                                        *ngFor="let expense of coapp.monthlyExpenditure.otherRecurringExpenses">
+                                        <!-- <div class="mt-20"> -->
+ 
+ 
+                                        <div class="info-grid-img  mt-20">
+                                            <div class="info-item d-flex flex-column">
+                                                <label class="text-label">Expense Name</label>
+                                                <label class="text-label-data fw-bold">{{ expense.name
+                                                    }}</label>
+                                            </div>
+ 
+                                            <div class="info-item d-flex flex-column">
+ 
+                                                <label class="text-label"> Amount (INR)</label>
+                                                <label class="text-label-data fw-bold"> {{
+                                                    expense.amountInr!= null
+                                                    ?
+                                                    '₹' + formatInr(expense.amountInr) : '-'
+                                                    }}</label>
+ 
+ 
+                                            </div>
+                                        </div>
+                                        <!-- </div> -->
+ 
+                                    </div>
+                                </div>
+ 
+                                <ng-template #noOtherExpenses>
+                                    <!-- Optionally show nothing or a message if no other expenses -->
+                                </ng-template>
                             </div>
                         </div>
                     </div>
-                </div>
+                </ng-container>
             </ng-template>
-
 
         </form>
     </div>

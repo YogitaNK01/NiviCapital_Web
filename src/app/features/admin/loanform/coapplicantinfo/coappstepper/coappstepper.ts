@@ -39,26 +39,40 @@ export class Coappstepper implements OnInit, OnDestroy {
 
 
   ngOnInit() {
-    this.stepperService.setStepperType('CO_APPLICANT');
     const params = this.route.snapshot.queryParams;
     this.coApplicantIndex = params['coApplicantIndex'] || 1;
-    
+
     this.stepperService.setCurrentCoApplicantIndex(this.coApplicantIndex);
-this.stepperService.setStepperType('CO_APPLICANT');
-    this.steps = this.stepperService.coSteps; // get co-applicant steps from service
+    this.stepperService.setStepperType('CO_APPLICANT');
+
 
 
     this.stepperService.restoreCompletedSteps();
     this.stepperService.rebuildSteps();
+    this.steps = this.stepperService.coSteps; // get co-applicant steps from service
 
     this.updateCurrentIndex();
-this.cdr.detectChanges();
+    this.cdr.detectChanges();
+
+
     this.router.events
       .pipe(filter(e => e instanceof NavigationEnd))
       .subscribe(() => {
+        const qp = this.route.snapshot.queryParams;
+        const newIndex = qp['coApplicantIndex'] || 1;
+
+        if (Number(newIndex) !== Number(this.coApplicantIndex)) {
+          this.coApplicantIndex = newIndex;
+          this.stepperService.setCurrentCoApplicantIndex(this.coApplicantIndex);
+          this.stepperService.restoreCompletedSteps();
+          this.stepperService.rebuildSteps();
+          this.steps = this.stepperService.coSteps;
+        }
+
         this.updateCurrentIndex();
         this.cdr.detectChanges();
       });
+
   }
 
 
@@ -93,37 +107,34 @@ this.cdr.detectChanges();
 
   isCompleted(index: number): boolean {
     const step = this.steps[index];
-    
- if (!step) {
-    return false;
-  }
+
+    if (!step) {
+      return false;
+    }
 
     return this.stepperService.isCoApplicantStepCompleted(step.route);
   }
 
-isUpcoming(index: number): boolean {
-  const step = this.steps[index];
+  isUpcoming(index: number): boolean {
+    const step = this.steps[index];
 
-  if (!step) {
-    return false;
+    if (!step) {
+      return false;
+    }
+
+    if (this.isCompleted(index)) {
+      return false;
+    }
+
+    if (this.isActive(index)) {
+      return false;
+    }
+
+    return !this.canNavigate(index);
   }
 
-  if (this.isCompleted(index)) {
-    return false;
-  }
 
-  if (this.isActive(index)) {
-    return false;
-  }
-
-  return !this.canNavigate(index);
-}
-
-  canNavigate1(i: number) {
-    return i <= this.currentIndex;
-  }
-  
-canNavigate(index: number): boolean {
+  canNavigate1(index: number): boolean {
     const step = this.steps[index];
 
     if (!step) {
@@ -149,7 +160,27 @@ canNavigate(index: number): boolean {
 
     return false;
   }
+  canNavigate(index: number): boolean {
+    const step = this.steps[index];
+    if (!step) return false;
 
+    // first step always allowed
+    if (index === 0) return true;
+
+    // current step always allowed
+    if (index === this.currentIndex) return true;
+
+    // completed step always allowed
+    if (this.isCompleted(index)) return true;
+
+    // previous step completed => allow next step
+    const prevStep = this.steps[index - 1];
+    if (prevStep && this.isCompleted(index - 1)) {
+      return true;
+    }
+
+    return false;
+  }
 
 
   ngOnDestroy() {

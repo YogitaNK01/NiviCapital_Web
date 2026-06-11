@@ -36,20 +36,10 @@ export class Summaryinfo {
     { key: 'liabilities', title: 'Liabilities', alwaysOpen: true, amount: 0 },
     { key: 'monthly', title: 'Monthly Expenditure', alwaysOpen: false, amount: 0 },
     { key: 'reference', title: 'Reference', alwaysOpen: true },
-    { key: 'coapplicants', title: 'Co-Applicant', alwaysOpen: true },
+    // { key: 'coapplicants', title: 'Co-Applicant', alwaysOpen: true },
   ];
 
-  coapp_accordions = [
-    { key: 'co-basic', title: 'Basic Info', alwaysOpen: true },
-    { key: 'co-general', title: 'General Info', alwaysOpen: true },
-    { key: 'co-additional', title: 'Additional Info', alwaysOpen: false },
-    { key: 'co-kyc', title: 'KYC', alwaysOpen: true },
-    { key: 'co-income', title: 'Income Details', alwaysOpen: true },
-    { key: 'co-assets', title: 'Assets', alwaysOpen: false, amount: 0 },
-    { key: 'co-liabilities', title: 'Liabilities', alwaysOpen: true, amount: 0 },
-    { key: 'co-monthly', title: 'Monthly Expenditure', alwaysOpen: false, amount: 0 },
-
-  ];
+  
   summaryForm!: FormGroup;
   summaryData: any = null;
   summaryLoaded = false;
@@ -288,6 +278,9 @@ export class Summaryinfo {
       this.openKeys.push(key);
     }
   }
+  toggleCoAppAccordion(item: any) {
+    item.showAccordion = !item.showAccordion;
+  }
   private getApplicantType(applicant: any): string {
     return String(
       applicant?.applicantType ||
@@ -334,6 +327,7 @@ export class Summaryinfo {
           this.coApplicantSummaries = coApplicants
             .map((coapp: any, index: number) => {
               try {
+                 coapp.showAccordion = false;
                 return this.buildApplicantSummary(
                   coapp,
                   'CO_APPLICANT',
@@ -371,6 +365,7 @@ export class Summaryinfo {
   private buildApplicantSummary(data: any, applicantType: 'MAIN' | 'CO_APPLICANT', index: number): any {
     if (!data) return null;
 
+        const basicInfoData = SummaryHelper.extractcoappBasicInfo(data);
     const generalInfoData =
       applicantType === 'CO_APPLICANT'
         ? SummaryHelper.extractcoappGeneralInfo(data?.generalInfo || {})
@@ -448,6 +443,7 @@ export class Summaryinfo {
       conversionRate: data?.conversionRate || 0,
       netWorthInr: data?.netWorthInr || 0,
 
+      basicDetailsFields: basicInfoData?.basicDetailsFields || '',
       currentOccupation: generalInfoData?.currentOccupation || '-',
       courseDetailsFields: generalInfoData?.courseDetailsFields || [],
 

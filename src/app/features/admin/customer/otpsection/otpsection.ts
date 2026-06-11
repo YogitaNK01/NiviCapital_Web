@@ -6,6 +6,7 @@ import { ActivatedRoute } from '@angular/router';
 import { FormsModule, NgForm, ReactiveFormsModule } from '@angular/forms';
 import { interval, Subscription } from 'rxjs';
 import { take } from 'rxjs/operators';
+import { Loanformservice } from '../../../../core/service/loanformservice';
 
 
 @Component({
@@ -38,14 +39,16 @@ export class Otpsection implements OnInit {
   isCounting = false;
   timerId: any;
 
-  constructor(public mainservice: Main, public addcustomerservice: Addcustomerservice, private route: ActivatedRoute, private cdr: ChangeDetectorRef) { }
+  constructor(public mainservice: Main, public addcustomerservice: Addcustomerservice, private route: ActivatedRoute, private cdr: ChangeDetectorRef,private loanform:Loanformservice) { }
   ngOnInit(): void {
     this.otp = Array(this.length).fill('');
     this.route.queryParams.subscribe(params => {
 
-      this.phonenumber = params['phone'];
-      this.sendotpId = params['id'];
+      // this.phonenumber = params['phone'];
+      // this.sendotpId = params['id'];
     });
+
+    this.phonenumber = this.loanform.mobileNumber();
   }
 
 
@@ -130,7 +133,7 @@ export class Otpsection implements OnInit {
         }
 
         this.otpVerifiedSuccess.emit(res);
-
+        this.loanform.clearmobile()
 
       },
       error: (err) => {

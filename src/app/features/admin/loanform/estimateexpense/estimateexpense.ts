@@ -10,7 +10,7 @@ import { Dropdown, DropdownOption } from '../../../systemdesign/dropdown/dropdow
 import { Main } from '../../../../core/service/main';
 import { Msgboxservice } from '../../../../core/service/msgboxservice';
 import { groupBy } from 'rxjs';
-
+import { firstValueFrom } from 'rxjs';
 interface OptionItem {
   label: string;
   value: string;
@@ -78,6 +78,8 @@ export class Estimateexpense {
   pendingSavedExpense: any = null;
   lastSavedPayload: any = null;
 
+  isSummaryEditMode = false;
+  viewOnly = false;
   constructor(private fb: FormBuilder, private stepperService: Loanstepperservice, private cd: ChangeDetectorRef, private loanformservice: Loanformservice,
     private router: Router, private route: ActivatedRoute, public main: Main, private msgBox: Msgboxservice) { }
 
@@ -87,12 +89,28 @@ export class Estimateexpense {
       this.isCoApplicant ? 'CO_APPLICANT' : 'MAIN'
     );
 
+    if (this.isCoApplicant) {
+      this.stepperService.restoreCoAppIdFromSession();
+    }
+
+    this.stepperService.restoreLoanEditContext();
+    this.stepperService.restoreLoanIdFromSession();
+
     let Allids = this.stepperService.getLoanId();
     this.applicantId = Allids[0];
     this.applicationId = Allids[1];
 
 
     let AllCoapp_ids = this.stepperService.getCo_appId();
+
+    const queryParams = this.route.snapshot.queryParams;
+
+    this.isSummaryEditMode =
+      queryParams['fromSummary'] === true ||
+      queryParams['fromSummary'] === 'true' ||
+      this.loanformservice.isSummaryEditFlow();
+
+    this.viewOnly = this.isSummaryEditMode && (queryParams['mode'] === 'view' || queryParams['mode'] === undefined);
 
     if (
       this.isCoApplicant &&
@@ -114,7 +132,7 @@ export class Estimateexpense {
           parsed.applicantId,
           parsed.applicationId,
           parsed.fullName,
-       undefined,this.stepperService.getCurrentCoApplicantIndex());
+          undefined, this.stepperService.getCurrentCoApplicantIndex());
       }
     }
 
@@ -152,9 +170,9 @@ export class Estimateexpense {
       miscexpenses: this.fb.array([])
     })
 
-    this.livingexp();
-    this.miscgexp();
-
+    // this.livingexp();
+    // this.miscgexp();
+   
 
 
     this.expenseForm.get('tutionfees')?.valueChanges.subscribe(() => {
@@ -175,49 +193,281 @@ export class Estimateexpense {
       this.calculateGrandTotal();
     });
 
-if (this.loanformservice.isEditFlow()) {
-      setTimeout(() => {
-        this.patchFromSummary();
-      }, 300);
-    } else {
-    const key = this.getStorageKey();
+    // if (this.loanformservice.isEditFlow()) {
+    //   setTimeout(() => {
+    //     this.patchFromSummary();
+    //   }, 300);
+    // } else {
+    //   const key = this.getStorageKey();
 
-    const localData = localStorage.getItem(key);
-    let parsedLocal = localData ? JSON.parse(localData) : null;
+    //   const localData = localStorage.getItem(key);
+    //   let parsedLocal = localData ? JSON.parse(localData) : null;
 
-    //  call API
-    const apiData = await this.getSavedEstExpense();
+    //   //  call API
+    //   const apiData = await this.getSavedEstExpense();
 
-    //  PRIORITY LOGIC
-    let finalData = null;
+    //   //  PRIORITY LOGIC
+    //   let finalData = null;
 
-    if (apiData) {
-      finalData = apiData;
-      localStorage.setItem(key, JSON.stringify(apiData));
+    //   if (apiData) {
+    //     finalData = apiData;
+    //     localStorage.setItem(key, JSON.stringify(apiData));
+    //   }
+    //   else if (parsedLocal) {
+    //     finalData = parsedLocal;
+    //   }
+
+
+    //   if (finalData) {
+    //     this.loanformservice.estExpenseInfoData = finalData;
+    //     this.pendingSavedExpense = finalData;
+    //     this.tryPatchSavedExpense();
+    //   } else {
+    //     this.lastSavedPayload = null;
+    //   }
+
+
+    // }
+
+
+    await Promise.all([
+      this.livingexpAsync(),
+      this.miscgexpAsync()
+    ]);
+
+    if (this.viewOnly) {
+      this.expenseForm.disable({ emitEvent: false });
     }
-    else if (parsedLocal) {
-      finalData = parsedLocal;
-    }
 
-
-    if (finalData) {
-      this.loanformservice.estExpenseInfoData = finalData;
-      this.pendingSavedExpense = finalData;
-      this.tryPatchSavedExpense();
-    } else {
-      this.lastSavedPayload = null;
-    }
-
-
-  }
-
+    await this.loadEstimatedExpenseForBothFlows();
 
   }
 
   getStorageKey() {
-    return this.isCoApplicant
-      ? `estimateExpenseData_coapp_${this.applicantId}`
-      : `estimateExpenseData_main_${this.applicantId}`;
+    return `estimateExpenseData_main_${this.stepperService.getLoanId()?.[0]}`;
+    // return this.isCoApplicant
+    //   ? `estimateExpenseData_coapp_${this.applicantId}`
+    //   : `estimateExpenseData_main_${this.applicantId}`;
+  }
+  getStepRoute() {
+    return this.isCoApplicant ? 'co-expense' : 'expense';
+  }
+  getApiApplicantId() {
+    if (!this.isCoApplicant) {
+      return this.stepperService.getLoanId()?.[0];
+    }
+
+    return this.stepperService.getCo_appId()?.[0] || null;
+  }
+  private async getSummarySection(sectionKey: string): Promise<any> {
+    if (!this.applicationId) return null;
+
+    try {
+      const res: any = await firstValueFrom(
+        this.loanformservice.getSummary(this.applicationId)
+      );
+
+      if (!res || res.status !== 'success') return null;
+
+      return this.loanformservice.getApplicantSectionFromSummary(
+        res,
+        sectionKey,
+        {
+          isCoApplicant: this.isCoApplicant,
+          coApplicantId: this.stepperService.getCo_appId()?.[0],
+          coApplicantIndex: this.stepperService.getCurrentCoApplicantIndex()
+        }
+      );
+    } catch (error) {
+      console.error(`Failed to get summary section: ${sectionKey}`, error);
+      return null;
+    }
+  }
+
+private normalizeEstimatedExpense(data: any): any {
+  if (!data) return null;
+
+  const cleanAmount = (value: any): number => {
+    if (value === null || value === undefined || value === '') return 0;
+
+    return Number(
+      value.toString().replace(/,/g, '')
+    ) || 0;
+  };
+
+  // Already saved/draft/local format
+  if (Array.isArray(data.items)) {
+    const tuitionFeesInr = cleanAmount(data.tuitionFeesInr);
+
+    // Empty draft/local should not block summary fallback
+    if (!tuitionFeesInr && data.items.length === 0) {
+      return null;
+    }
+
+    return {
+      applicantId: data.applicantId || this.getApiApplicantId(),
+      tuitionFeesInr,
+      items: data.items || []
+    };
+  }
+
+  const items: any[] = [];
+
+  const findLivingId = (item: any) => {
+    const name = (
+      item.name ||
+      item.category ||
+      item.expenseName ||
+      item.livingExpenseName ||
+      item.title ||
+      ''
+    )
+      .toString()
+      .trim()
+      .toLowerCase();
+
+    return (
+      item.livingExpenseItemMasterId ||
+      item.categoryId ||
+      item.id ||
+      this.livCatagories.find(c =>
+        c.label?.toLowerCase().trim() === name ||
+        c.code?.toLowerCase().trim() === name
+      )?.value ||
+      ''
+    );
+  };
+
+  const findMiscId = (item: any) => {
+    const name = (
+      item.name ||
+      item.category ||
+      item.expenseName ||
+      item.miscellaneousExpenseName ||
+      item.title ||
+      ''
+    )
+      .toString()
+      .trim()
+      .toLowerCase();
+
+    return (
+      item.miscellaneousExpenseItemMasterId ||
+      item.categoryId ||
+      item.id ||
+      this.misCatagories.find(c =>
+        c.label?.toLowerCase().trim() === name ||
+        c.code?.toLowerCase().trim() === name
+      )?.value ||
+      ''
+    );
+  };
+
+  const livingList =
+    data.livingExpenses ||
+    data.livingExpense ||
+    data.living ||
+    [];
+
+  const miscList =
+    data.miscellaneousExpenses ||
+    data.miscExpenses ||
+    data.miscellaneous ||
+    data.misc ||
+    [];
+
+  livingList.forEach((item: any) => {
+    const categoryId = findLivingId(item);
+
+    if (!categoryId) return;
+
+    items.push({
+      livingExpenseItemMasterId: categoryId,
+      frequency: item.frequency || 'MONTHLY',
+      amountInr: cleanAmount(item.amountInr || item.amount),
+      description: item.description || ''
+    });
+  });
+
+  miscList.forEach((item: any) => {
+    const categoryId = findMiscId(item);
+
+    if (!categoryId) return;
+
+    items.push({
+      miscellaneousExpenseItemMasterId: categoryId,
+      frequency: item.frequency || 'MONTHLY',
+      amountInr: cleanAmount(item.amountInr || item.amount),
+      description: item.description || ''
+    });
+  });
+
+  const educationFees = data.educationFees || data.educationFee || {};
+
+  const tuitionFeesInr =
+    cleanAmount(data.tuitionFeesInr) ||
+    cleanAmount(data.tuitionFeeInr) ||
+    cleanAmount(data.educationFeesInr) ||
+
+    // ✅ Your current summary response key
+    cleanAmount(educationFees.tuitionInr) ||
+
+    // other possible keys
+    cleanAmount(educationFees.amountInr) ||
+    cleanAmount(educationFees.tuitionFeesInr) ||
+    cleanAmount(educationFees.feesInr) ||
+    cleanAmount(data.educationFees) ||
+    cleanAmount(data.tuitionFees?.amountInr) ||
+    0;
+
+  if (!tuitionFeesInr && !items.length) return null;
+
+  return {
+    applicantId: this.getApiApplicantId(),
+    tuitionFeesInr,
+    items
+  };
+}
+  
+  private async loadEstimatedExpenseForBothFlows() {
+    const key = this.getStorageKey();
+
+    const localData = localStorage.getItem(key);
+    const parsedLocal = localData ? JSON.parse(localData) : null;
+
+    const draftData = await this.getSavedEstExpense();
+
+    const summarySection = await this.getSummarySection('estimatedExpense');
+
+    let finalData = null;
+
+    if (this.isSummaryEditMode) {
+      finalData =
+        this.normalizeEstimatedExpense(summarySection) ||
+        this.normalizeEstimatedExpense(draftData) ||
+        this.normalizeEstimatedExpense(parsedLocal);
+    } else {
+      finalData =
+        this.normalizeEstimatedExpense(draftData) ||
+        this.normalizeEstimatedExpense(summarySection) ||
+        this.normalizeEstimatedExpense(parsedLocal);
+    }
+
+    if (!finalData) {
+      this.lastSavedPayload = null;
+      return;
+    }
+
+    this.loanformservice.estExpenseInfoData = finalData;
+
+    this.patchSavedEstExpense(finalData);
+
+    this.lastSavedPayload = this.buildExpensePayload();
+
+    localStorage.setItem(key, JSON.stringify(finalData));
+
+    this.stepperService.markStepCompleted(this.getStepRoute());
+    this.cd.detectChanges();
   }
   get f() {
     return this.expenseForm.controls;
@@ -272,7 +522,22 @@ if (this.loanformservice.isEditFlow()) {
   }
 
 
+  livingexpAsync(): Promise<void> {
+    return new Promise((resolve) => {
+      this.loanformservice.getlivingexp().subscribe((res: any) => {
+        const list = res.data ?? res;
 
+        this.livCatagories = list.map((s: any) => ({
+          value: s.id,
+          label: s.name,
+          code: s.code
+        }));
+
+        this.livingLoaded = true;
+        resolve();
+      });
+    });
+  }
 
   miscgexp() {
     this.loanformservice.getmiscellaneousexp().subscribe((res: any) => {
@@ -293,7 +558,22 @@ if (this.loanformservice.isEditFlow()) {
     });
   }
 
+  miscgexpAsync(): Promise<void> {
+    return new Promise((resolve) => {
+      this.loanformservice.getmiscellaneousexp().subscribe((res: any) => {
+        const list = res.data ?? res;
 
+        this.misCatagories = list.map((s: any) => ({
+          value: s.id,
+          label: s.name,
+          code: s.code
+        }));
+
+        this.miscLoaded = true;
+        resolve();
+      });
+    });
+  }
   isExpenseValid(): boolean {
 
     const tuitionINR = this.expenseForm.get('tutionfees')?.value;
@@ -853,78 +1133,23 @@ if (this.loanformservice.isEditFlow()) {
   capitalize(val: string): string {
     return val.charAt(0).toUpperCase() + val.slice(1).toLowerCase();
   }
-//edit floe patch from summary
-patchFromSummary() {
-  if (!this.loanformservice.isEditFlow()) return;
+  //edit floe patch from summary
+  async patchFromSummary() {
+    const section = await this.getSummarySection('estimatedExpense');
+    const data = this.normalizeEstimatedExpense(section);
 
-  const data = this.loanformservice.getSummarySection('estimatedExpense');
-  console.log('patch estimated expense', data);
+    if (!data) return;
 
-  if (!data) return;
+    this.loanformservice.estExpenseInfoData = data;
 
-  const items: any[] = [];
+    this.patchSavedEstExpense(data);
 
-  // Living Expenses
-  (data.livingExpenses || []).forEach((item: any) => {
-    const categoryId =
-      item.livingExpenseItemMasterId ||
-      item.categoryId ||
-      item.id ||
-      this.livCatagories.find(c =>
-        c.label?.toLowerCase() ===
-        (item.name || item.category || item.expenseName || '').toLowerCase()
-      )?.value;
+    this.lastSavedPayload = this.buildExpensePayload();
 
-    if (categoryId) {
-      items.push({
-        livingExpenseItemMasterId: categoryId,
-        frequency: item.frequency || 'MONTHLY',
-        amountInr: Number(item.amountInr || item.amount || 0),
-        description: item.description || ''
-      });
-    }
-  });
+    this.stepperService.markStepCompleted(this.getStepRoute());
 
-  // Miscellaneous Expenses
-  (data.miscellaneousExpenses || []).forEach((item: any) => {
-    const categoryId =
-      item.miscellaneousExpenseItemMasterId ||
-      item.categoryId ||
-      item.id ||
-      this.misCatagories.find(c =>
-        c.label?.toLowerCase() ===
-        (item.name || item.category || item.expenseName || '').toLowerCase()
-      )?.value;
-
-    if (categoryId) {
-      items.push({
-        miscellaneousExpenseItemMasterId: categoryId,
-        frequency: item.frequency || 'MONTHLY',
-        amountInr: Number(item.amountInr || item.amount || 0),
-        description: item.description || ''
-      });
-    }
-  });
-
-  const tuitionFeesInr =
-    typeof data.educationFees === 'number'
-      ? data.educationFees
-      : data.educationFees?.amountInr ||
-        data.educationFees?.tuitionFeesInr ||
-        data.tuitionFeesInr ||
-        0;
-
-  const mappedData = {
-    tuitionFeesInr: Number(tuitionFeesInr || 0),
-    items: items
-  };
-
-  this.loanformservice.estExpenseInfoData = mappedData;
-
-  this.patchSavedEstExpense(mappedData);
-
-  this.lastSavedPayload = this.buildExpensePayload();
-}
+    this.cd.detectChanges();
+  }
   tryPatchSavedExpense() {
     if (!this.pendingSavedExpense) return;
     if (!this.livingLoaded || !this.miscLoaded) return;
@@ -1071,7 +1296,19 @@ patchFromSummary() {
 
             console.log(res)
             if (res.status === "success") {
-              resolve(res.data.data);
+              // resolve(res.data.data);
+
+              let data = res.data.data;
+
+              if (typeof data === 'string') {
+                try {
+                  data = JSON.parse(data);
+                } catch {
+                  data = null;
+                }
+              }
+
+              resolve(data);
 
             }
             else {
@@ -1086,7 +1323,19 @@ patchFromSummary() {
   }
 
 
+private finishAfterSaveOrNoChange() {
+  if (this.isSummaryEditMode) {
+    this.loanformservice.clearSummaryEditFlow();
 
+    this.router.navigate(['/loanform', 'summaryinfo'], {
+      queryParamsHandling: 'merge'
+    });
+
+    return;
+  }
+
+  this.stepperService.next();
+}
   next() {
 
     // alert(this.expenseForm.get('tutionfees')?.value)
@@ -1094,7 +1343,7 @@ patchFromSummary() {
     const miscArray = this.expenseForm.get('miscexpenses') as FormArray;
     const tutionfee = this.expenseForm.get('tutionfees')
     let invalid = false;
-   
+
 
 
     livingArray.controls.forEach(control => {
@@ -1151,7 +1400,8 @@ patchFromSummary() {
           localStorage.setItem(key, JSON.stringify(this.loanformservice.estExpenseInfoData));
           this.stepperService.markStepCompleted('expense');
           this.stepperService.setStepData('expense', formdata);
-          this.stepperService.next();
+          // this.stepperService.next();
+          this.finishAfterSaveOrNoChange()
         }
       }
     });

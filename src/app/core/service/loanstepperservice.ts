@@ -256,18 +256,117 @@ getRouteFromStage(stage: string | null | undefined): string {
 getCurrentCoApplicantIndex(): number {
   return Number(this.currentCoApplicantIndex) || 1;
 }
+
+
+
+isStepCompleted(route: string): boolean {
+    return this.completedSteps.has(route);
+  }
+  
+
+  isMainStepCompleted(route: string): boolean {
+  const set = this.getCompletedSetFromKey(this.getMainCompletedKey());
+  return set.has(route);
+}
+
+isCoApplicantStepCompleted(route: string): boolean {
+  const set = this.getCompletedSetFromKey(this.getCoApplicantCompletedKey());
+  return set.has(route);
+}
+
+switchToMainApplicantFlow() {
+  this.stepperType = 'MAIN';
+  this.completedSteps = this.getCompletedSetFromKey(this.getMainCompletedKey());
+  this.buildSteps();
+}
+
+
+private getCompletedStepsKey(): string {
+  return this.stepperType === 'CO_APPLICANT'
+    ? this.getCoApplicantCompletedKey()
+    : this.getMainCompletedKey();
+}
+
 //switching main and coapplicant
 private getMainCompletedKey(): string {
   return `main_completedSteps_${this.applicantId || 'defaultApplicant'}_${this.applicationId || 'defaultApplication'}`;
 }
 
 getCoApplicantCompletedKey(): string {
-  const loanIds = this.getCo_appId();
+  const coloanIds = this.getCo_appId();
 
-  const applicantId = loanIds?.[0] || 'defaultApplicant';
-  const applicationId = loanIds?.[1] || 'defaultApplication';
+  const applicantId = coloanIds?.[0] || 'defaultApplicant';
+  const applicationId = coloanIds?.[1] || 'defaultApplication';
 
   return `coapp_completedSteps_${applicantId}_${applicationId}_${this.currentCoApplicantIndex}`;
+}
+  markStepCompleted(route: string) {
+  this.completedSteps.add(route);
+
+  localStorage.setItem(
+    this.getCompletedStepsKey(),
+    JSON.stringify([...this.completedSteps])
+  );
+
+  this.rebuildSteps();
+}
+
+  markStepCompleted1(route: string) {
+  if (!this.completedSteps.has(route)) {
+    this.completedSteps.add(route);
+  }
+
+ 
+  const key =
+    this.stepperType === 'CO_APPLICANT'
+      ? this.getCoApplicantCompletedKey()
+      : this.getMainCompletedKey();
+
+  localStorage.setItem(
+    key,
+    JSON.stringify([...this.completedSteps])
+  );
+
+
+  this.rebuildSteps();
+}
+
+restoreCompletedSteps1() {
+  if (!this.applicantId) return;
+
+  const key =
+    this.stepperType === 'CO_APPLICANT'
+      ? this.getCoApplicantCompletedKey()
+      : this.getMainCompletedKey();
+
+  const saved = localStorage.getItem(key);
+
+ if (saved) {
+    const parsed = JSON.parse(saved);
+
+    this.completedSteps = Array.isArray(parsed)
+      ? new Set<string>(parsed)
+      : new Set<string>();
+  } else {
+    this.completedSteps = new Set<string>();
+  }
+
+}
+restoreCompletedSteps() {
+  const saved = localStorage.getItem(this.getCompletedStepsKey());
+
+  if (saved) {
+    try {
+      const parsed = JSON.parse(saved);
+      this.completedSteps = Array.isArray(parsed)
+        ? new Set<string>(parsed)
+        : new Set<string>();
+    } catch {
+      this.completedSteps = new Set<string>();
+    }
+  } else {
+    this.completedSteps = new Set<string>();
+  }
 }
 // ========================================================
   get steps(): Step[] {
@@ -403,94 +502,8 @@ getCoApplicantCompletedKey(): string {
   //---------------all other steps --------------
 
 
-getCompletedStepsKey1(): string {
-  const loanIds = this.getLoanId();
-  const mainApplicantId = loanIds?.[0];
 
-  if (this.stepperType === 'CO_APPLICANT') {
-    const index = this.getCurrentCoApplicantIndex();
-    return `coapp_completedSteps_${mainApplicantId}_${index}`;
-  }
-
-  return `main_completedSteps_${mainApplicantId}`;
-}
-getCompletedStepsKey(): string {
-  return this.stepperType === 'CO_APPLICANT'
-    ? this.getCoApplicantCompletedKey()
-    : this.getMainCompletedKey();
-}
-
-  markStepCompleted(route: string) {
-  this.completedSteps.add(route);
-
-  localStorage.setItem(
-    this.getCompletedStepsKey(),
-    JSON.stringify([...this.completedSteps])
-  );
-
-  this.rebuildSteps();
-}
-
-  markStepCompleted1(route: string) {
-  if (!this.completedSteps.has(route)) {
-    this.completedSteps.add(route);
-  }
-
- 
-  const key =
-    this.stepperType === 'CO_APPLICANT'
-      ? this.getCoApplicantCompletedKey()
-      : this.getMainCompletedKey();
-
-  localStorage.setItem(
-    key,
-    JSON.stringify([...this.completedSteps])
-  );
-
-
-  this.rebuildSteps();
-}
-
-restoreCompletedSteps1() {
-  if (!this.applicantId) return;
-
-  const key =
-    this.stepperType === 'CO_APPLICANT'
-      ? this.getCoApplicantCompletedKey()
-      : this.getMainCompletedKey();
-
-  const saved = localStorage.getItem(key);
-
- if (saved) {
-    const parsed = JSON.parse(saved);
-
-    this.completedSteps = Array.isArray(parsed)
-      ? new Set<string>(parsed)
-      : new Set<string>();
-  } else {
-    this.completedSteps = new Set<string>();
-  }
-
-}
-restoreCompletedSteps() {
-  const saved = localStorage.getItem(this.getCompletedStepsKey());
-
-  if (saved) {
-    try {
-      const parsed = JSON.parse(saved);
-      this.completedSteps = Array.isArray(parsed)
-        ? new Set<string>(parsed)
-        : new Set<string>();
-    } catch {
-      this.completedSteps = new Set<string>();
-    }
-  } else {
-    this.completedSteps = new Set<string>();
-  }
-}
-  isStepCompleted(route: string): boolean {
-    return this.completedSteps.has(route);
-  }
+  
   markCompletedStepsTillRoute(route: string) {
   const steps = this.stepsSubject.getValue();
 
@@ -905,21 +918,7 @@ private getCompletedSetFromKey(key: string): Set<string> {
   }
 }
 
-isMainStepCompleted(route: string): boolean {
-  const set = this.getCompletedSetFromKey(this.getMainCompletedKey());
-  return set.has(route);
-}
 
-isCoApplicantStepCompleted(route: string): boolean {
-  const set = this.getCompletedSetFromKey(this.getCoApplicantCompletedKey());
-  return set.has(route);
-}
-
-switchToMainApplicantFlow() {
-  this.stepperType = 'MAIN';
-  this.completedSteps = this.getCompletedSetFromKey(this.getMainCompletedKey());
-  this.buildSteps();
-}
 
 
 //coapplicant asset hides 

@@ -137,6 +137,9 @@ export class Coappsummary {
   totalliabilities: any;
   totalMonthlyExpenditure: any;
 
+  isSubmittingSummary = false;
+isSummarySubmitted = false;
+
   constructor(private fb: FormBuilder, private formSvc: Loanformservice, private stepperService: Loanstepperservice, private cd: ChangeDetectorRef, private loanformservice: Loanformservice,
     private router: Router, private route: ActivatedRoute, public main: Main, private apiservice: Addcustomerservice) { }
 
@@ -177,14 +180,53 @@ export class Coappsummary {
 
 
     this.applicantId = AllCoapp_ids[0];
+  this.applicationId = AllCoapp_ids?.[1];
+
+this.syncSubmitButtonState();
+
+this.stepperService.rebuildSteps();
+this.getcoappSummarydetails();
+this.buildForm();
 
 
-
-    this.getcoappSummarydetails()
-    this.buildForm();
   }
 
 
+private getCurrentCoApplicantIndex(): number {
+  return Number(
+    this.route.snapshot.queryParamMap.get('coApplicantIndex') ||
+    this.stepperService.getCurrentCoApplicantIndex() ||
+    1
+  );
+}
+
+private syncSubmitButtonState(): void {
+  const loanIds = this.stepperService.getLoanId();
+  const mainApplicantId = loanIds?.[0];
+
+  if (!mainApplicantId) {
+    this.isSummarySubmitted = false;
+    return;
+  }
+
+  const key = `coApplicants_${mainApplicantId}`;
+  const saved = localStorage.getItem(key);
+  const coApplicants = saved ? JSON.parse(saved) : [];
+
+  const currentIndex = this.getCurrentCoApplicantIndex();
+
+  const currentCoapp = coApplicants.find(
+    (x: any) =>
+      Number(x.index) === Number(currentIndex) ||
+      (this.applicantId && String(x.applicantId) === String(this.applicantId))
+  );
+
+  this.isSummarySubmitted = !!currentCoapp?.completed;
+}
+
+get isSubmitDisabled(): boolean {
+  return this.isSubmittingSummary || this.isSummarySubmitted;
+}
 
   trackByKey(index: number, field: any) {
     return field.key;
@@ -321,6 +363,13 @@ export class Coappsummary {
   }
 
   submitsummary() {
+    
+ if (this.isSubmitDisabled) {
+    return;
+  }
+
+  this.isSubmittingSummary = true;
+
     let input = {
       "applicationId": this.applicationId,
       "applicantId": this.applicantId
@@ -330,6 +379,10 @@ export class Coappsummary {
         console.log(res)
         if (res.status === "success") {
           this.saveCoApplicantOnDashboard();
+          
+this.isSummarySubmitted = true;
+        this.isSubmittingSummary = false;
+
           this.router.navigate(['/loanform/co-applicantdetails']);
         }
       },
@@ -344,7 +397,7 @@ export class Coappsummary {
     const loanIds = this.stepperService.getLoanId();
     const mainApplicantId = loanIds?.[0];
 
-    const coApplicantIndex = Number(this.route.snapshot.queryParamMap.get('coApplicantIndex') || 1);
+    const coApplicantIndex = this.getCurrentCoApplicantIndex();
 
     const key = `coApplicants_${mainApplicantId}`;
     const saved = localStorage.getItem(key);
@@ -357,7 +410,7 @@ export class Coappsummary {
     );
 
     const coappObj = {
-      index: coApplicantIndex,
+      index: coApplicantIndex, applicantId: this.applicantId,
       name: fullName || `Co-Applicant ${coApplicantIndex}`,
       completed: true
     };
