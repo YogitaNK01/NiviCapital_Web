@@ -175,7 +175,7 @@ export class SummaryHelper {
     applicantDetails: labels.applicantDetails
       .map(field => ({
         label: field.label,
-        value: getValue(applicantSource, field.key)
+        value: getValue(additionalInfo?.applicantDetails, field.key)
       }))
       .filter(field => field.value !== null && field.value !== undefined && field.value !== ''),
 
