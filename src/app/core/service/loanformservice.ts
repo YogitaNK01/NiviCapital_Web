@@ -467,6 +467,22 @@ private summaryRequest$?: Observable<ApiResponse<any>>;
   }
   // *************************submit Summary *************************
 
+  // submit summary form
+  submitMainApplicationSummary(applicantId: string, data: any): Observable<ApiResponse<any>> {
+    return this.http.post<ApiResponse<any>>(
+      `${this.baseUrl}/v1/los/applications/${applicantId}/submit`, data
+    )
+  }
+
+  // open summary pdf file
+  openPdfFileApplicationSummary(applicationId: string): Observable<Blob> {
+    return this.http.get(
+      `${this.baseUrl}/v1/los/applications/${applicationId}/summary/pdf`, {
+        responseType: 'blob'
+      }
+    )
+  }
+
   //coapplicant summary
   submitCoappSummary(data:any): Observable<ApiResponse<any>> {
     return this.http.post<ApiResponse<any>>(

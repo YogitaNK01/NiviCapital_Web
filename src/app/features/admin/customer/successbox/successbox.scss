@@ -121,3 +121,15 @@ img, svg {
     border-radius: 4px;
     white-space: nowrap;
 }
+
+// for submit success message box
+.submit-title-text{
+    font-family: var(--typography-typeface-display, "DM Sans");
+    font-size: var(--typography-size-dp_2, 48px);
+    font-style: normal;
+    font-weight: 500;
+    line-height: 52px;
+    letter-spacing: 0.48px;
+    width: 70%;
+    margin: auto;
+}

@@ -11,12 +11,13 @@ import { Button } from 'bootstrap';
 import { Inputfield } from '../../../systemdesign/inputfield/inputfield';
 import { Buttons } from '../../../systemdesign/buttons/buttons';
 import { SummaryHelper } from '../../../../utils/summaryHelper';
-
+import { Successbox } from '../../customer/successbox/successbox';
+import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 
 
 @Component({
   selector: 'app-summaryinfo',
-  imports: [CommonModule, ReactiveFormsModule, Inputfield, Buttons],
+  imports: [CommonModule, ReactiveFormsModule, Inputfield, Buttons, Successbox],
   standalone: true,
   templateUrl: './summaryinfo.html',
   styleUrl: './summaryinfo.scss'
@@ -39,7 +40,7 @@ export class Summaryinfo {
     // { key: 'coapplicants', title: 'Co-Applicant', alwaysOpen: true },
   ];
 
-  
+
   summaryForm!: FormGroup;
   summaryData: any = null;
   summaryLoaded = false;
@@ -203,9 +204,10 @@ export class Summaryinfo {
   mainApplicantSummary: any = null;
   coApplicantSummaries: any[] = [];
   summaryApplicants: any[] = [];
+  submitDescription: any = "";
 
   constructor(private fb: FormBuilder, private formSvc: Loanformservice, private stepperService: Loanstepperservice, private cd: ChangeDetectorRef, private loanformservice: Loanformservice,
-    private router: Router, private route: ActivatedRoute, public main: Main, private apiservice: Addcustomerservice) { }
+    private router: Router, private route: ActivatedRoute, public main: Main, private apiservice: Addcustomerservice, private sanitizer: DomSanitizer) { }
 
   ngOnInit(): void {
     let Allids = this.stepperService.getLoanId();
@@ -327,7 +329,7 @@ export class Summaryinfo {
           this.coApplicantSummaries = coApplicants
             .map((coapp: any, index: number) => {
               try {
-                 coapp.showAccordion = false;
+                coapp.showAccordion = false;
                 return this.buildApplicantSummary(
                   coapp,
                   'CO_APPLICANT',
@@ -365,7 +367,7 @@ export class Summaryinfo {
   private buildApplicantSummary(data: any, applicantType: 'MAIN' | 'CO_APPLICANT', index: number): any {
     if (!data) return null;
 
-        const basicInfoData = SummaryHelper.extractcoappBasicInfo(data);
+    const basicInfoData = SummaryHelper.extractcoappBasicInfo(data);
     const generalInfoData =
       applicantType === 'CO_APPLICANT'
         ? SummaryHelper.extractcoappGeneralInfo(data?.generalInfo || {})
@@ -763,6 +765,19 @@ export class Summaryinfo {
       "applicationId": this.applicationId,
       "applicantId": this.applicantId
     }
+    this.formSvc.submitMainApplicationSummary(this.applicationId, {}).subscribe((res: any) => {
+      console.log(res);
+      if (res.status === "success") {
+        this.submitDescription = `Application Reference Number : ${res.application.referenceNumber}`;
+        return;
+      }
+    },
+
+      (error) => {
+        console.log('Submit summary failed', error);
+      }
+    );
+
     this.formSvc.submitCoappSummary(input).subscribe(
       (res: any) => {
         console.log(res)
@@ -777,6 +792,30 @@ export class Summaryinfo {
       }
 
     )
+  }
+
+  openPdf() {
+    this.formSvc.openPdfFileApplicationSummary(this.applicationId).subscribe((res: any) => {
+      const fileUrl = URL.createObjectURL(res);
+      const safeUrl: SafeResourceUrl = this.sanitizer.bypassSecurityTrustResourceUrl(fileUrl);
+      window.open(fileUrl, '_blank');
+      setTimeout(() => URL.revokeObjectURL(fileUrl), 10000);
+    },
+      (error) => {
+        console.log(error);
+      }
+    );
+  }
+
+  handleSuccessAction(action: string) {
+    if (action === 'openPdf') {
+      this.openPdf();
+    }
+
+    else if (action === 'ToDashboard') {
+      this.submitDescription = "";
+      this.router.navigate(['/admin/dashboard']);
+    }
   }
 
   labelDisplayMap: { [key: string]: string } = {

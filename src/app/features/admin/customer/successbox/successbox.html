@@ -7,12 +7,12 @@
 
       <div class="msg_data d-flex flex-column">
         <div class="product-info d-flex flex-column gap-3">
-          <div class="text-dp-3-bold successmsg text-center">{{title}}</div>
-          <p class="text-label-data-head desc" [innerHTML]="description">
-          </p>
+            <div [ngClass]="!id ? 'submit-title-text successmsg text-center' : 'text-dp-3-bold successmsg text-center'">{{title}}</div>
+            <p class="text-label-data-head desc" [innerHTML]="description">
+            </p>
         </div>
 
-        <div class="NC-id-box d-flex align-items-center justify-content-center m-auto ">
+        <div class="NC-id-box d-flex align-items-center justify-content-center m-auto " *ngIf="id">
           <!-- <div class="text-dp-3-bold nc-id-label">{{boxText}} - {{id}}</div> -->
           <div class="text-dp-3-bold nc-id-label">
             {{ boxText ? (boxText + ' - ') : '' }}{{ id }}
