@@ -493,7 +493,7 @@ export class Summaryinfo {
       assetsSections: assetsSections || [],
       totalAssets: data?.assets?.totalAssets || 0,
 
-      lliabilitiesSections: liabilitiesSections || [],
+      liabilitiesSections: liabilitiesSections || [],
       totalLiabilities: data?.liabilities?.totalLiabilities || 0,
 
       monthlyExpenditure,
