@@ -288,6 +288,11 @@ export class Liabilitiesinfo {
 
     this.selectedliabilityLabel = selected.map(s => s.label).join(', ');
 
+    // I_DONT_HAVE_LIABILITIES code
+    if (ids.includes('I_DONT_HAVE_LIABILITIES')) {
+      this.selectedliabilities = ['I_DONT_HAVE_LIABILITIES'];
+    }
+
     console.log("selectedliabilityLabel:", this.selectedliabilityLabel);
 
   }
@@ -734,7 +739,7 @@ export class Liabilitiesinfo {
   isOtherSelectedcc(fd: AbstractControl): boolean {
     const selectedId = fd.get('creditcardbankName')?.value;
     const found = this.selectBanks.find(b => b.value === selectedId);
-    return found?.label === 'Other';
+    return found?.label?.toLowerCase() === 'other';
   }
 
   //bnpl
@@ -1857,6 +1862,7 @@ export class Liabilitiesinfo {
       if (this.creditcard.length === 0) invalid = true;
 
       this.creditcard.controls.forEach((card: any, index: number) => {
+        console.log(card.invalid);
         if (card.invalid) {
           card.markAllAsTouched();
           invalid = true;
@@ -1916,6 +1922,7 @@ export class Liabilitiesinfo {
       });
     }
 
+    console.log(items);
 
 
     if (invalid) {
@@ -2064,10 +2071,14 @@ export class Liabilitiesinfo {
   getStepRoute() {
     return this.isCoApplicant ? 'co-liabilitiesinfo' : 'liabilitiesinfo';
   }
+  get hasNoLiabilitiesSelected(): boolean {
+    return this.selectedliabilities?.includes('I_DONT_HAVE_LIABILITIES');
+  }
   next() {
 
 
     const result = this.buildLiabilityPayloadWithApplicantId();
+    console.log(result);
 
     if (result.invalid) {
       console.log('Form invalid - stop navigation');

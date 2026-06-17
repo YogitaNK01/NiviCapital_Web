@@ -1141,7 +1141,7 @@ private getInvestmentCode(value: string): string {
 
   }
 
-  onchange(values: string | string[], type: 'property' | 'investment' | 'propertyOwnertype' | 'bank'): void {
+  onchange(values: string | string[], type: 'property' | 'investment' | 'propertyOwnertype' | 'bank') {
 
     const ids = Array.isArray(values) ? values : [values];
     if (type === 'property') {
@@ -1699,13 +1699,14 @@ const code =
       const arr = this.assetsForm.get('properties') as FormArray;
 
       arr.controls.forEach((ctrl: any, index: number) => {
+        console.log(ctrl.value);
         if (ctrl.invalid) {
           ctrl.markAllAsTouched();
           invalid = true;
           console.log('properties true:');
         } else {
           addItem('PROPERTY', ctrl.value.marketval, {
-            propertyId: ctrl.value.propertyId,
+            propertyId: ctrl.value.propertytype,
             // propertyType: ctrl.value.propertytype,
             ownershipType: ctrl.value.ownershiptype,
             location: ctrl.value.location,

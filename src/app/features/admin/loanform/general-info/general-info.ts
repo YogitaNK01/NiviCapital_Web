@@ -12,6 +12,7 @@ import { Loanstepperservice } from '../../../../core/service/loanstepperservice'
 import { Main } from '../../../../core/service/main';
 import { generalerrors } from './generalerror';
 import { firstValueFrom } from 'rxjs';
+import { Msgboxservice } from '../../../../core/service/msgboxservice';
 interface OptionItem {
   label: string;
   value: string;
@@ -138,7 +139,7 @@ export class GeneralInfo implements OnInit {
   isSummaryEditMode = false;
   viewOnly = false;
 
-  constructor(private fb: FormBuilder, private formSvc: Loanformservice, private router: Router, private stepperService: Loanstepperservice, private route: ActivatedRoute, public mainservice: Main) { }
+  constructor(private fb: FormBuilder, private formSvc: Loanformservice, private router: Router, private stepperService: Loanstepperservice, private route: ActivatedRoute, public mainservice: Main, private msgBox: Msgboxservice) { }
   async ngOnInit() {
 
     this.isCoApplicant = this.router.url.includes('co-applicant');
@@ -1419,6 +1420,24 @@ export class GeneralInfo implements OnInit {
 
     if (!form.valid) {
       console.log("form invalid");
+      return;
+    }
+
+    if(form.value.occupation && this.isCoApplicant){
+      const occupationType: any = this.selectoccupation.filter((item: any) => item.value === form.value.occupation);
+      console.log(occupationType, this.checkboxasset);
+      if((occupationType?.[0]?.label === "Housewife / Homemaker" || occupationType?.[0]?.label === "Unemployed") && this.checkboxasset === "No"){
+        this.msgBox.open({
+          title: 'You are not eligible as a co-applicant. Please ask the main applicant to add another co-applicant.',
+          message: ``,
+          showCancel: false,
+          okText: '+ Add Co-applicant',
+          // onOk: () => {
+          //   this.router.navigate(['/loanform/co-applicantdetails/coapplicantinfo/co-generalinfo']);
+          // }
+        });
+      }
+
       return;
     }
 

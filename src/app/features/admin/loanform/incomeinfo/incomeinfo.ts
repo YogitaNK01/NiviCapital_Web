@@ -674,7 +674,7 @@ export class Incomeinfo {
     result: UploadResult, key: string, category: 'INCOME' | 'BUSINESS' | 'OTHER',
     subcategory: 'LAST_3_MONTHS' | 'FORM_16' | 'BANK_STATEMENT_1_YEAR' | 'ITR_LAST_3_YEARS' | 'OTHER_INCOME' | 'BUSINESS_BANK_STATEMENT_1_YEAR' | 'BUSINESS_ITR_3_YEARS' | 'BUSINESS_GST_1_YEAR' | 'BUSINESS_FINANCE_3_YEARS' | 'OTHER_BUSSINESS_INCOME',
     type: 'SALARY_SLIP' | 'FORM_16' | 'BANK_STATEMENT' | 'ITR' | 'OTHER' | 'BUSINESS_BANK_STATEMENT' | 'BUSINESS_ITR' | 'BUSINESS_GST' | 'BUSINESS_FINANCE',
-    othertitle?: any) {
+    othertitle?: any, index: number = 0) {
 
     if (!result.file) return;
 
@@ -690,9 +690,9 @@ export class Incomeinfo {
     fd.append('category', category);
     fd.append('subcategory', subcategory);
     fd.append('applicantId', apiApplicantId);
-    fd.append('files[0].title', othertitle || key);
-    fd.append('files[0].type', type);
-    fd.append('files[0].file', result.file);
+    fd.append(`files[${index}].title`, othertitle || key);
+    fd.append(`files[${index}].type`, type);
+    fd.append(`files[${index}].file`, result.file);
 
     this.loanformservice.uploadIncome(fd, this.applicationId).subscribe({
       next: (res) => {

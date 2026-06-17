@@ -181,6 +181,12 @@ private summaryRequest$?: Observable<ApiResponse<any>>;
     );
   }
 
+  getRelationList(id: string): Observable<ApiResponse<any>> {
+    return this.http.get<ApiResponse<any>>(
+      `${this.baseUrl}/v1/applications/relations`,
+    );
+  }
+
   // ************************* Australian states and cities api *************************
 
   getAustralianstates(): Observable<ApiResponse<any>> {
@@ -468,9 +474,9 @@ private summaryRequest$?: Observable<ApiResponse<any>>;
   // *************************submit Summary *************************
 
   // submit summary form
-  submitMainApplicationSummary(applicantId: string, data: any): Observable<ApiResponse<any>> {
+  submitMainApplicationSummary(applicationId: string, data: any): Observable<ApiResponse<any>> {
     return this.http.post<ApiResponse<any>>(
-      `${this.baseUrl}/v1/los/applications/${applicantId}/submit`, data
+      `${this.baseUrl}/v1/los/applications/${applicationId}/submit`, data
     )
   }
 

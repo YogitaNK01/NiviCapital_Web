@@ -568,7 +568,7 @@ private async loadKycForBothFlows() {
         this.lastSavedPayload = this.normalizeKycPayload(kycPayload);
         // this.nextStep.emit();
         if (this.isCoApplicant) {
-          this.custName = res.ncId
+          this.custName = res.name
           this.NCId = res.ncId
           this.issuccess = true;
           this.stepperService.markStepCompleted('co-kyc');

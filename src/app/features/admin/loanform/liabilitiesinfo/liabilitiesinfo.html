@@ -44,7 +44,7 @@
 
         <form [formGroup]="liabilityForm" (ngSubmit)="submit()" id="expenseForm" class="w-100 ">
 
-            <div class=" accordion d-flex flex-column gap-4 mb-4">
+            <div class=" accordion d-flex flex-column gap-4 mb-4" *ngIf="!selectedliabilities?.includes('I_DONT_HAVE_LIABILITIES')">
                 <ng-container *ngFor="let acc of accordions; let i = index">
                     <div class="accordion-item b-0" [hidden]="!selectedliabilities.includes(acc.key)">
 
@@ -752,7 +752,7 @@
             <app-buttons type="button" label="Back" class="btn btncustomClass" [outline]="true" (click)="back()">
             </app-buttons>
             <app-buttons type="button" label="Next" class="btn btncustomClass" color="primary" (click)="next()"
-                [disabled]="isNextDisabled">
+                [disabled]="isNextDisabled && !hasNoLiabilitiesSelected">
             </app-buttons>
 
         </div>
