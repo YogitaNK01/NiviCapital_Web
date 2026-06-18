@@ -89,7 +89,7 @@ export class Referenceinfo implements OnInit {
   lastSavedPayload: any = null;
   isSummaryEditMode = false;
   viewOnly = false;
-  constructor(private fb: FormBuilder, private stepperService: Loanstepperservice, private cd: ChangeDetectorRef, private loanformservice: Loanformservice,
+  constructor(private fb: FormBuilder, private stepperService: Loanstepperservice, private cd: ChangeDetectorRef, private loanformservice: Loanformservice,private msgBox:Msgboxservice,
     private router: Router, private route: ActivatedRoute, public main: Main, private apiservice: Addcustomerservice) { }
   async ngOnInit() {
     this.isCoApplicant = this.router.url.includes('co-applicant');
@@ -1168,37 +1168,45 @@ export class Referenceinfo implements OnInit {
     });
   }
   saveExit() {
-    const input = this.buildReferencePayload();
+    this.msgBox.open({
+      title: 'Are you sure you want to exit?',
+      message: ``,
+      showCancel: true,
+      onOk: () => {
+        const input = this.buildReferencePayload();
 
-    const key = this.getStorageKey();
-    localStorage.setItem(key, JSON.stringify(input));
+        const key = this.getStorageKey();
+        localStorage.setItem(key, JSON.stringify(input));
 
 
-    const applicantId = this.getApiApplicantId();
+        const applicantId = this.getApiApplicantId();
 
-    if (!applicantId) {
-      this.lastSavedPayload = { ...input };
-      return;
-    }
+        if (!applicantId) {
+          this.lastSavedPayload = { ...input };
+          return;
+        }
 
-    const inputdata = {
-      action: "auto-save",
-      sectionKey: "SAVE_REFERENCES",
-      applicationId: this.applicationId,
-      applicantId: applicantId,
-      jsonData: input
-    };
+        const inputdata = {
+          action: "auto-save",
+          sectionKey: "SAVE_REFERENCES",
+          applicationId: this.applicationId,
+          applicantId: applicantId,
+          jsonData: input
+        };
 
-    this.loanformservice.saveandExit(inputdata).subscribe({
+        this.loanformservice.saveandExit(inputdata).subscribe({
 
-      next: () => {
-        this.lastSavedPayload = { ...input };
-        console.log('Reference draft saved successfully');
-      },
-      error: (err) => {
-        console.error('Save & Exit failed', err);
+          next: () => {
+            this.lastSavedPayload = { ...input };
+            console.log('Reference draft saved successfully');
+          },
+          error: (err) => {
+            console.error('Save & Exit failed', err);
+          }
+
+        });
+        this.router.navigate(['/admin/losoperation']);
       }
-
     });
   }
 

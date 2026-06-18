@@ -44,7 +44,7 @@
 
         <form [formGroup]="liabilityForm" (ngSubmit)="submit()" id="expenseForm" class="w-100 ">
 
-            <div class=" accordion d-flex flex-column gap-4 mb-4">
+            <div class=" accordion d-flex flex-column gap-4 mb-4" *ngIf="!hasNoLiabilitiesSelected">
                 <ng-container *ngFor="let acc of accordions; let i = index">
                     <div class="accordion-item b-0" [hidden]="!selectedliabilities.includes(acc.key)">
 
@@ -540,67 +540,6 @@
 
 
 
-                                <!-- <div class="col-lg-6 ">
-                                    <div class="form-group mb-3">
-
-
-                                        <app-dropdown [options]="selectLenders" formControlName="bnplbankName"
-                                            [placeholder]="'Select Lender Name'" [required]="true" [searchable]="true"
-                                            (selectedValueChange)="onlenderSelected($event,item)"
-                                            [avatarUrl]="avatarUrl" [hasAvatar]="hasAvatar" [label]="'Lender Name'">
-                                        </app-dropdown>
-
-                                    </div>
-                                </div>
-                                <div class="col-lg-6 ">
-                                    <div class="form-group mb-3">
-                                        <app-inputfield type="text" [required]="true" label="Outstanding Balance (INR)"
-                                            (input)="handleAmountInput($event,'outstandingBalance',item)"
-                                            [required]="true" formControlName="outstandingBalance"
-                                            placeholder="Enter Value" helpText="Help text" name="outstandingBalance">
-                                        </app-inputfield>
-                                        <div class="text-danger"
-                                            *ngIf="item.get('outstandingBalance')?.touched && item.get('outstandingBalance')?.invalid">
-                                            <div *ngIf="item.get('outstandingBalance')?.errors?.['required']">
-                                                Outstanding Balance is required
-                                            </div>
-                                        </div>
-
-                                    </div>
-                                </div>
-                                <div class="col-lg-6 mt-20">
-                                    <div class="form-group mb-3">
-                                        <app-inputfield type="text" [required]="true" label="Credit Limit (INR)"
-                                            (input)="main.restrictInput($event, 'number');formatAmountfromarray($event,'creditLimit',item)" [required]="true"
-                                            formControlName="creditLimit" placeholder="Enter Value" helpText="Help text"
-                                            name="creditLimit">
-                                        </app-inputfield>
-                                        <div class="text-danger"
-                                            *ngIf="item.get('creditLimit')?.touched && item.get('creditLimit')?.invalid">
-                                            <div *ngIf="item.get('creditLimit')?.errors?.['required']">
-                                                Credit Limit is required
-                                            </div>
-                                        </div>
-
-                                    </div>
-                                </div>
-                                <div class="col-lg-6 mt-20">
-                                    <div class="form-group mb-3">
-                                        <app-inputfield type="text" [required]="true" label="Monthly EMI (INR)"
-                                            (input)="handleAmountInput($event,'monthlyEMI',item)" [required]="true"
-                                            formControlName="monthlyEMI" placeholder="Enter Value" helpText="Help text"
-                                            name="monthlyEMI">
-                                        </app-inputfield>
-                                        <div class="text-danger"
-                                            *ngIf="item.get('monthlyEMI')?.touched && item.get('monthlyEMI')?.invalid">
-                                            <div *ngIf="item.get('monthlyEMI')?.errors?.['required']">
-                                                Monthly EMI is required
-                                            </div>
-                                        </div>
-
-                                    </div>
-                                </div> -->
-
                             </div>
                             @if(i === getFormArray('bnpl').length - 1 ) {
                             <div class="row common-details-box pt-0 pb-0 ">
@@ -620,6 +559,7 @@
                     </div>
                 </div>
             </ng-template>
+
             <ng-template #otherTemplate let-i="index">
                 <div class="mobiledetails d-flex w-100 flex-column ">
                     <div class="w-100 gap-3">
@@ -752,7 +692,7 @@
             <app-buttons type="button" label="Back" class="btn btncustomClass" [outline]="true" (click)="back()">
             </app-buttons>
             <app-buttons type="button" label="Next" class="btn btncustomClass" color="primary" (click)="next()"
-                [disabled]="isNextDisabled">
+                [disabled]="isNextDisabled && !hasNoLiabilitiesSelected">
             </app-buttons>
 
         </div>

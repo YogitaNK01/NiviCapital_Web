@@ -205,78 +205,11 @@ export class Assetsinfo implements OnInit {
     });
 
 
-    // this.getbanks();
-
-    //      if (this.formSvc.isEditFlow()) {
-    //       setTimeout(() => {
-    //         this.patchFromSummary();
-    //       }, 300);
-    //     } else {
-    //     const key = this.getStorageKey();
-
-    //     const localData = localStorage.getItem(key);
-    //     const parsedLocal = localData ? JSON.parse(localData) : null;
-
-    //      const applicantId = this.getApiApplicantId();
-
-    //     if (!applicantId) {
-    //       console.error('ApplicantId not found for photo upload');
-    //       return;
-    //     }
-
-    //     //  call API
-    //     const apiData = await this.getSavedAssets(applicantId);
-
-    //     let finalData = null;
-
-
-    // if (parsedLocal) {
-    //   finalData = parsedLocal;
-    // }
-
-    // if (!finalData) {
-    //   const applicantId = this.getApiApplicantId();
-
-    //   if (!applicantId) {
-    //     console.error('ApplicantId not found for assets');
-    //     return;
-    //   }
-
-    //   const apiData = await this.getSavedAssets(applicantId);
-
-    //   if (apiData) {
-    //     finalData = apiData;
-    //     localStorage.setItem(key, JSON.stringify(apiData));
-    //   }
-    // }
-
-
-    //     if (finalData) {
-
-    //       if (this.isCoApplicant) {
-    //         this.formSvc.co_aseetsInfoData = finalData;
-    //       } else {
-    //         this.formSvc.aseetsInfoData = finalData;
-    //       }
-
-
-    //       //  wait until assets loaded
-    //       setTimeout(() => {
-    //         this.patchAssetsData();
-    //         // this.lastSavedPayload = this.buildAssetsPayload();
-
-    //         this.lastSavedPayload = this.buildAssetsPayloadWithApplicantId();
-
-    //       });
-
-    //       this.stepperService.markStepCompleted(this.getStepRoute());
-    //     }
-    //   }
-
     await Promise.all([
       this.allAssetCatagory(),
       this.getbanks()
     ]);
+    await this.loadPropertyMaster();
 
     await this.loadAssetsForBothFlows()
 
@@ -290,9 +223,6 @@ export class Assetsinfo implements OnInit {
       ? `assetsinfoData_coapp_${coApplicantId || 'temp_' + index}`
       : `assetsinfoData_main_${this.stepperService.getLoanId()?.[0]}`;
 
-    //      return this.isCoApplicant
-    // ? `assetsinfoData_coapp_${this.applicantId}_${index}`
-    // : `assetsinfoData_main_${this.applicantId}`;
   }
 
   getCurrentCoApplicantFromList() {
@@ -321,32 +251,46 @@ export class Assetsinfo implements OnInit {
 
     const apiApplicantId = this.getApiApplicantId();
 
-    const draftData = apiApplicantId
-      ? await this.getSavedAssets(apiApplicantId)
-      : null;
 
-    const summarySection = await this.getSummarySection('assets');
-
-    
-  const normalizedSummary = this.normalizeAssets(summarySection);
-  const normalizedDraft = this.normalizeAssets(draftData);
-  const normalizedLocal = this.normalizeAssets(parsedLocal);
+    const [draftData, summarySection] = await Promise.all([
+      apiApplicantId ? this.getSavedAssets(apiApplicantId) : Promise.resolve(null),
+      this.getSummarySection('assets')
+    ]);
 
 
-    // let finalData = null;
+    // const draftData = apiApplicantId
+    //   ? await this.getSavedAssets(apiApplicantId)
+    //   : null;
+
+    // const summarySection = await this.getSummarySection('assets');
 
 
- const finalData =
-    normalizedSummary ||
-    normalizedDraft ||
-    normalizedLocal;
+    const normalizedSummary = this.normalizeAssets(summarySection);
+    const normalizedDraft = this.normalizeAssets(draftData);
+    const normalizedLocal = this.normalizeAssets(parsedLocal);
 
 
 
-    if (!finalData) {
+    const finalData = this.mergeAssetsData(
+      normalizedSummary,
+      normalizedDraft,
+      normalizedLocal
+    );
+
+
+
+    // const finalData =
+    //   normalizedSummary ||
+    //   normalizedDraft ||
+    //   normalizedLocal;
+
+    console.log('finalAssetsData', finalData);
+
+    if (!finalData || !finalData.items?.length) {
       this.lastSavedPayload = null;
       return;
     }
+
 
     if (this.isCoApplicant) {
       this.formSvc.co_aseetsInfoData = finalData;
@@ -354,7 +298,7 @@ export class Assetsinfo implements OnInit {
       this.formSvc.aseetsInfoData = finalData;
     }
 
-    this.patchAssetsData();
+    this.patchAssetsData(finalData);
 
     this.calculateGrandTotal();
 
@@ -364,6 +308,58 @@ export class Assetsinfo implements OnInit {
 
     this.stepperService.markStepCompleted(this.getStepRoute());
   }
+
+
+  private mergeAssetsData(...sources: any[]): any {
+    const validSources = sources.filter(Boolean);
+    if (!validSources.length) return null;
+
+    const mergedItems: any[] = [];
+
+    validSources.forEach(source => {
+      const items = Array.isArray(source?.items) ? source.items : [];
+      mergedItems.push(...items);
+    });
+
+    const dedupedItems = this.dedupeAssetItems(mergedItems);
+
+    return {
+      applicantId:
+        validSources.find(x => x?.applicantId)?.applicantId || this.getApiApplicantId(),
+      totalAssets: dedupedItems.reduce(
+        (sum, item) => sum + Number(item.valueInr || 0),
+        0
+      ),
+      items: dedupedItems
+    };
+  }
+
+ 
+  //avoid duplicate
+  private dedupeAssetItems(items: any[]): any[] {
+    const map = new Map<string, any>();
+
+    items.forEach(item => {
+      const key = [
+        item.assetItemMasterId || '',
+        item.assetCode || '',
+        item.assetType || '',
+        item.bankId || '',
+        item.propertyId || '',
+        item.location || '',
+        item.maturityDate || '',
+        item.valueInr || 0
+      ].join('|');
+
+      if (!map.has(key)) {
+        map.set(key, item);
+      }
+    });
+
+    return Array.from(map.values());
+  }
+
+
   private async getSummarySection(sectionKey: string): Promise<any> {
     if (!this.applicationId) return null;
 
@@ -390,115 +386,122 @@ export class Assetsinfo implements OnInit {
   }
 
   private normalizeAssets(data: any): any {
-  if (!data) return null;
+    if (!data) return null;
 
-  // Already draft/local payload format
-  if (Array.isArray(data.items)) {
-    return data;
-  }
+    // Already draft/local payload format
+    if (Array.isArray(data.items)) {
+      // return data;
 
-  const items: any[] = [];
+      return {
+        applicantId: data.applicantId || this.getApiApplicantId(),
+        totalAssets: Number(data.totalAssets || 0),
+        items: data.items || []
+      };
 
-  const addItem = (code: string, value: any, extra: any = {}) => {
-    const assetItemMasterId = this.assetCodeMap[code];
-
-    if (!assetItemMasterId && code !== 'LIQUID_CASH') {
-      console.warn('Missing asset master code:', code);
     }
 
-    items.push({
-      assetItemMasterId,
-      assetCode: code,
-      valueInr: this.cleanAmount(value),
-      ...extra
+    const items: any[] = [];
+
+    const addItem = (code: string, value: any, extra: any = {}) => {
+      const assetItemMasterId = this.assetCodeMap[code];
+
+      if (!assetItemMasterId && code !== 'LIQUID_CASH') {
+        console.warn('Missing asset master code:', code);
+      }
+
+      items.push({
+        assetItemMasterId,
+        assetCode: code,
+        valueInr: this.cleanAmount(value),
+        ...extra
+      });
+    };
+
+    // GOLD
+    (data.gold || []).forEach((x: any) => {
+      addItem('GOLD', x.valueInr, {
+        assetType: x.assetType || 'GOLD'
+      });
     });
-  };
 
-  // GOLD
-  (data.gold || []).forEach((x: any) => {
-    addItem('GOLD', x.valueInr, {
-      assetType: x.assetType || 'GOLD'
+    // LIQUID ASSETS
+    (data.liquidAssets || []).forEach((x: any) => {
+      addItem('LIQUID_CASH', x.amountInr || x.valueInr, {
+        assetType: x.assetType || x.type || x.name || 'Liquid Asset'
+      });
     });
-  });
 
-  // LIQUID ASSETS
-  (data.liquidAssets || []).forEach((x: any) => {
-    addItem('LIQUID_CASH', x.amountInr || x.valueInr, {
-      assetType: x.assetType || x.type || x.name || 'Liquid Asset'
+    // PROPERTY
+    (data.properties || []).forEach((x: any, index: number) => {
+      addItem('PROPERTY', x.marketValueInr || x.valueInr, {
+        assetType: x.assetType || `Property ${index + 1}`,
+        propertyId: x.propertyId || x.propertyType || '',
+        propertyType: x.propertyType || '',
+        ownershipType: x.ownershipType || '',
+        location: x.location || ''
+      });
     });
-  });
 
-  // PROPERTY
-  (data.properties || []).forEach((x: any, index: number) => {
-    addItem('PROPERTY', x.marketValueInr || x.valueInr, {
-      assetType: x.assetType || `Property ${index + 1}`,
-      propertyId: x.propertyId || x.propertyType || '',
-      propertyType: x.propertyType || '',
-      ownershipType: x.ownershipType || '',
-      location: x.location || ''
+    // FIXED DEPOSIT
+    (data.fixedDeposits || []).forEach((x: any, index: number) => {
+      addItem('FIXED_DEPOSIT', x.amountInr || x.valueInr, {
+        assetType: x.assetType || `Fixed Deposit ${index + 1}`,
+        bankId: x.bankId || this.getBankIdByName(x.bankName),
+        bankName: x.bankName || '',
+        description: x.description || x.title || '',
+        maturityDate: x.maturityDate || ''
+      });
     });
-  });
 
-  // FIXED DEPOSIT
-  (data.fixedDeposits || []).forEach((x: any, index: number) => {
-    addItem('FIXED_DEPOSIT', x.amountInr || x.valueInr, {
-      assetType: x.assetType || `Fixed Deposit ${index + 1}`,
-      bankId: x.bankId || this.getBankIdByName(x.bankName),
-      bankName: x.bankName || '',
-      description: x.description || x.title || '',
-      maturityDate: x.maturityDate || ''
+    // INVESTMENTS
+    (data.investments || []).forEach((x: any) => {
+      const investmentCode = this.getInvestmentCode(x.type || x.assetType);
+
+      addItem(investmentCode, x.valueInr, {
+        assetType: x.assetType || x.type || investmentCode,
+        type: x.type || x.assetType || ''
+      });
     });
-  });
 
-  // INVESTMENTS
-  (data.investments || []).forEach((x: any) => {
-    const investmentCode = this.getInvestmentCode(x.type || x.assetType);
-
-    addItem(investmentCode, x.valueInr, {
-      assetType: x.assetType || x.type || investmentCode,
-      type: x.type || x.assetType || ''
+    // OTHER ASSETS
+    (data.otherAssets || []).forEach((x: any) => {
+      addItem('OTHER', x.valueInr || x.amountInr, {
+        assetType: x.assetType || x.type || ''
+      });
     });
-  });
 
-  // OTHER ASSETS
-  (data.otherAssets || []).forEach((x: any) => {
-    addItem('OTHER', x.valueInr || x.amountInr, {
-      assetType: x.assetType || x.type || ''
-    });
-  });
+    if (!items.length) return null;
 
-  if (!items.length) return null;
+    return {
+      applicantId: this.getApiApplicantId(),
+      totalAssets: data.totalAssets || 0,
+      items
+    };
+  }
+  private cleanAmount(value: any): number {
+    if (value == null || value === '') return 0;
+    return Number(value.toString().replace(/,/g, '')) || 0;
+  }
 
-  return {
-    applicantId: this.getApiApplicantId(),
-    totalAssets: data.totalAssets || 0,
-    items
-  };
-}
-private cleanAmount(value: any): number {
-  if (value == null || value === '') return 0;
-  return Number(value.toString().replace(/,/g, '')) || 0;
-}
+  private getBankIdByName(bankName: string): string {
+    if (!bankName) return '';
 
-private getBankIdByName(bankName: string): string {
-  if (!bankName) return '';
+    return this.selectBanks.find(
+      b => b.label?.toLowerCase().trim() === bankName.toLowerCase().trim()
+    )?.value || '';
+  }
 
-  return this.selectBanks.find(
-    b => b.label?.toLowerCase().trim() === bankName.toLowerCase().trim()
-  )?.value || '';
-}
+  private getInvestmentCode(value: string): string {
+    const text = (value || '').toLowerCase();
 
-private getInvestmentCode(value: string): string {
-  const text = (value || '').toLowerCase();
+    if (text.includes('stock')) return 'STOCKS';
+    if (text.includes('mutual')) return 'MUTUAL_FUNDS';
+    if (text.includes('bond')) return 'BONDS';
+    if (text.includes('debenture')) return 'DEBENTURES';
+    if (text.includes('other')) return 'OTHERS';
 
-  if (text.includes('stock')) return 'STOCKS';
-  if (text.includes('mutual')) return 'MUTUAL_FUNDS';
-  if (text.includes('bond')) return 'BONDS';
-  if (text.includes('debenture')) return 'DEBENTURES';
-  if (text.includes('other')) return 'OTHERS';
-
-  return value?.toUpperCase?.() || 'OTHERS';
-}
+    return value?.toUpperCase?.() || 'OTHERS';
+  }
   get f() {
     return this.assetsForm.controls;
   }
@@ -1141,7 +1144,7 @@ private getInvestmentCode(value: string): string {
 
   }
 
-  onchange(values: string | string[], type: 'property' | 'investment' | 'propertyOwnertype' | 'bank'): void {
+  onchange(values: string | string[], type: 'property' | 'investment' | 'propertyOwnertype' | 'bank') {
 
     const ids = Array.isArray(values) ? values : [values];
     if (type === 'property') {
@@ -1371,6 +1374,21 @@ private getInvestmentCode(value: string): string {
     titleCtrl?.updateValueAndValidity();
   }
 
+  private loadPropertyMaster(): Promise<void> {
+    return new Promise((resolve) => {
+      this.formSvc.selectedAssets('PROPERTY_LAND_ASSETS').subscribe((res: any) => {
+        const list = res.data ?? res;
+
+        this.selectPorperty = list.map((s: any) => ({
+          value: s.id,
+          label: s.name,
+          code: s.code
+        }));
+
+        resolve();
+      });
+    });
+  }
 
   isOtherSelected(fd: AbstractControl): boolean {
     const selectedId = fd.get('bankname')?.value;
@@ -1473,10 +1491,14 @@ private getInvestmentCode(value: string): string {
     this.patchAssetsData();
     this.lastSavedPayload = this.buildAssetsPayload();
   }
-  patchAssetsData() {
-    const data = this.isCoApplicant
-      ? this.formSvc.co_aseetsInfoData
-      : this.formSvc.aseetsInfoData;
+  patchAssetsData(inputData?: any) {
+
+    const data = inputData || (
+      this.isCoApplicant
+        ? this.formSvc.co_aseetsInfoData
+        : this.formSvc.aseetsInfoData
+    );
+
 
     if (!data || !data.items) return;
 
@@ -1496,12 +1518,12 @@ private getInvestmentCode(value: string): string {
       const code1 = Object.keys(this.assetCodeMap)
         .find(key => (this.assetCodeMap[key] === item.assetItemMasterId));
 
-     
-const code =
-  item.assetCode ||
-  Object.keys(this.assetCodeMap).find(
-    key => this.assetCodeMap[key] === item.assetItemMasterId
-  );
+
+      const code =
+        item.assetCode ||
+        Object.keys(this.assetCodeMap).find(
+          key => this.assetCodeMap[key] === item.assetItemMasterId
+        );
 
 
 
@@ -1553,7 +1575,7 @@ const code =
 
         group.patchValue({
           bankname: item.bankId || this.getBankIdByName(item.bankName),
-           description: item.description || '',
+          description: item.description || '',
           bankamt: item.valueInr,
           maturitydate: item.maturityDate
         });
@@ -1705,7 +1727,7 @@ const code =
           console.log('properties true:');
         } else {
           addItem('PROPERTY', ctrl.value.marketval, {
-            propertyId: ctrl.value.propertyId,
+            propertyId: ctrl.value.propertyId || ctrl.value.propertytype,
             // propertyType: ctrl.value.propertytype,
             ownershipType: ctrl.value.ownershiptype,
             location: ctrl.value.location,
@@ -1822,140 +1844,140 @@ const code =
 
     };
   }
-//draft payload 
-buildDraftAssetsPayloadWithApplicantId(): {
-  invalid: boolean;
-  applicantId?: any;
-  items: any[];
-} {
-  const form = this.assetsForm.getRawValue();
-  const items: any[] = [];
+  //draft payload 
+  buildDraftAssetsPayloadWithApplicantId(): {
+    invalid: boolean;
+    applicantId?: any;
+    items: any[];
+  } {
+    const form = this.assetsForm.getRawValue();
+    const items: any[] = [];
 
-  const addItem = (code: string, value: any, extra: any = {}) => {
-    const assetItemMasterId = this.assetCodeMap[code];
+    const addItem = (code: string, value: any, extra: any = {}) => {
+      const assetItemMasterId = this.assetCodeMap[code];
 
-    // For draft save, skip only if absolutely nothing exists
-    if (!assetItemMasterId && code !== 'LIQUID_CASH') {
-      console.warn('Missing asset code mapping for:', code);
-      return;
-    }
+      // For draft save, skip only if absolutely nothing exists
+      if (!assetItemMasterId && code !== 'LIQUID_CASH') {
+        console.warn('Missing asset code mapping for:', code);
+        return;
+      }
 
-    items.push({
-      assetItemMasterId,
-      assetCode: code,
-      valueInr: this.cleanAmount(value),
-      ...extra
-    });
-  };
+      items.push({
+        assetItemMasterId,
+        assetCode: code,
+        valueInr: this.cleanAmount(value),
+        ...extra
+      });
+    };
 
-  // GOLD
-  if (this.selectedAssets.includes('Gold') && this.hasValue(form.gold?.goldvalue)) {
-    addItem('GOLD', form.gold.goldvalue, {
-      assetType: 'GOLD'
-    });
-  }
-
-  // LIQUID
-  if (this.selectedAssets.includes('Liquid Assets')) {
-    if (this.hasValue(form.liquidAssets?.cashinhand)) {
-      addItem('LIQUID_CASH', form.liquidAssets.cashinhand, {
-        assetType: 'Cash In Hand'
+    // GOLD
+    if (this.selectedAssets.includes('Gold') && this.hasValue(form.gold?.goldvalue)) {
+      addItem('GOLD', form.gold.goldvalue, {
+        assetType: 'GOLD'
       });
     }
 
-    if (this.hasValue(form.liquidAssets?.savingbalance)) {
-      addItem('LIQUID_CASH', form.liquidAssets.savingbalance, {
-        assetType: 'Savings Account Balance (INR)'
-      });
+    // LIQUID
+    if (this.selectedAssets.includes('Liquid Assets')) {
+      if (this.hasValue(form.liquidAssets?.cashinhand)) {
+        addItem('LIQUID_CASH', form.liquidAssets.cashinhand, {
+          assetType: 'Cash In Hand'
+        });
+      }
+
+      if (this.hasValue(form.liquidAssets?.savingbalance)) {
+        addItem('LIQUID_CASH', form.liquidAssets.savingbalance, {
+          assetType: 'Savings Account Balance (INR)'
+        });
+      }
     }
-  }
 
-  // PROPERTY
-  if (this.selectedAssets.includes('Property/ Land Assets')) {
-    this.properties.controls.forEach((ctrl: any, index: number) => {
-      const row = ctrl.value;
+    // PROPERTY
+    if (this.selectedAssets.includes('Property/ Land Assets')) {
+      this.properties.controls.forEach((ctrl: any, index: number) => {
+        const row = ctrl.value;
 
-      if (this.hasAnyValue(row, ['propertytype', 'ownershiptype', 'marketval', 'location'])) {
-        addItem('PROPERTY', row.marketval || 0, {
-          propertyId: row.propertyId || '',
-          // propertyType: row.propertytype || '',
-          ownershipType: row.ownershiptype || '',
-          location: row.location || '',
-          assetType: `Property ${index + 1}`
-        });
-      }
-    });
-  }
-
-  // FIXED DEPOSIT
-  if (this.selectedAssets.includes('Fixed Deposit')) {
-    this.fixedDeposits.controls.forEach((ctrl: any, index: number) => {
-      const row = ctrl.value;
-
-      if (this.hasAnyValue(row, ['bankname', 'description', 'bankamt', 'maturitydate'])) {
-        addItem('FIXED_DEPOSIT', row.bankamt || 0, {
-          bankId: row.bankname || '',
-          description: row.description || '',
-          maturityDate: this.formatDateForPayload(row.maturitydate),
-          assetType: `Fixed Deposit ${index + 1}`
-        });
-      }
-    });
-  }
-
-  // INVESTMENTS
-  if (this.selectedAssets.includes('Investments')) {
-    this.investmentsArray.controls.forEach((ctrl: any) => {
-      const row = ctrl.value;
-
-      if (this.hasAnyValue(row, ['type', 'value', 'name'])) {
-        let typeCode = '';
-        switch ((row.type || '').toLowerCase()) {
-          case 'stocks':
-            typeCode = 'STOCKS';
-            break;
-          case 'mutual funds':
-            typeCode = 'MUTUAL_FUNDS';
-            break;
-          case 'bonds':
-            typeCode = 'BONDS';
-            break;
-          case 'debentures':
-            typeCode = 'DEBENTURES';
-            break;
-          case 'others':
-            typeCode = 'OTHERS';
-            break;
-        }
-
-        if (typeCode) {
-          addItem(typeCode, row.value || 0, {
-            assetType: row.type === 'Others' ? (row.name || 'Others') : row.type
+        if (this.hasAnyValue(row, ['propertytype', 'ownershiptype', 'marketval', 'location'])) {
+          addItem('PROPERTY', row.marketval || 0, {
+            propertyId: row.propertytype || row.propertyId || '',
+            // propertyType: row.propertytype || '',
+            ownershipType: row.ownershiptype || '',
+            location: row.location || '',
+            assetType: `Property ${index + 1}`
           });
         }
-      }
-    });
+      });
+    }
+
+    // FIXED DEPOSIT
+    if (this.selectedAssets.includes('Fixed Deposit')) {
+      this.fixedDeposits.controls.forEach((ctrl: any, index: number) => {
+        const row = ctrl.value;
+
+        if (this.hasAnyValue(row, ['bankname', 'description', 'bankamt', 'maturitydate'])) {
+          addItem('FIXED_DEPOSIT', row.bankamt || 0, {
+            bankId: row.bankname || '',
+            description: row.description || '',
+            maturityDate: this.formatDateForPayload(row.maturitydate),
+            assetType: `Fixed Deposit ${index + 1}`
+          });
+        }
+      });
+    }
+
+    // INVESTMENTS
+    if (this.selectedAssets.includes('Investments')) {
+      this.investmentsArray.controls.forEach((ctrl: any) => {
+        const row = ctrl.value;
+
+        if (this.hasAnyValue(row, ['type', 'value', 'name'])) {
+          let typeCode = '';
+          switch ((row.type || '').toLowerCase()) {
+            case 'stocks':
+              typeCode = 'STOCKS';
+              break;
+            case 'mutual funds':
+              typeCode = 'MUTUAL_FUNDS';
+              break;
+            case 'bonds':
+              typeCode = 'BONDS';
+              break;
+            case 'debentures':
+              typeCode = 'DEBENTURES';
+              break;
+            case 'others':
+              typeCode = 'OTHERS';
+              break;
+          }
+
+          if (typeCode) {
+            addItem(typeCode, row.value || 0, {
+              assetType: row.type === 'Others' ? (row.name || 'Others') : row.type
+            });
+          }
+        }
+      });
+    }
+
+    // OTHER ASSETS
+    if (this.selectedAssets.includes('Other')) {
+      this.otherassets.controls.forEach((ctrl: any) => {
+        const row = ctrl.value;
+
+        if (this.hasAnyValue(row, ['assettype', 'assetamt'])) {
+          addItem('OTHER', row.assetamt || 0, {
+            assetType: row.assettype || ''
+          });
+        }
+      });
+    }
+
+    return {
+      invalid: false,
+      applicantId: this.getApiApplicantId(),
+      items
+    };
   }
-
-  // OTHER ASSETS
-  if (this.selectedAssets.includes('Other')) {
-    this.otherassets.controls.forEach((ctrl: any) => {
-      const row = ctrl.value;
-
-      if (this.hasAnyValue(row, ['assettype', 'assetamt'])) {
-        addItem('OTHER', row.assetamt || 0, {
-          assetType: row.assettype || ''
-        });
-      }
-    });
-  }
-
-  return {
-    invalid: false,
-    applicantId: this.getApiApplicantId(),
-    items
-  };
-}
 
   buildAssetsPayloadWithApplicantId(): {
     invalid: boolean;
@@ -2016,7 +2038,11 @@ buildDraftAssetsPayloadWithApplicantId(): {
     });
   }
   saveExit() {
-
+ this.msgBox.open({
+      title: 'Are you sure you want to exit?',
+      message: ``,
+      showCancel: true,
+      onOk: () => {
     // const result1 = this.buildAssetsPayload();
 
     const result = this.buildDraftAssetsPayloadWithApplicantId(); //this.buildAssetsPayloadWithApplicantId();
@@ -2069,18 +2095,20 @@ buildDraftAssetsPayloadWithApplicantId(): {
       }
 
     });
-
+ this.router.navigate(['/admin/losoperation']);
+     }
+    });
   }
   getStepRoute() {
     return this.isCoApplicant ? 'co-assetsinfo' : 'assetsinfo';
   }
   private hasValue(val: any): boolean {
-  return val !== null && val !== undefined && val !== '';
-}
+    return val !== null && val !== undefined && val !== '';
+  }
 
-private hasAnyValue(obj: any, keys: string[]): boolean {
-  return keys.some(key => this.hasValue(obj?.[key]));
-}
+  private hasAnyValue(obj: any, keys: string[]): boolean {
+    return keys.some(key => this.hasValue(obj?.[key]));
+  }
   next1() {
     let form = this.assetsForm.value
     console.log("form data Assets:", form);

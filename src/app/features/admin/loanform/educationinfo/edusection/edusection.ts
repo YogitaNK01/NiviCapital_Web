@@ -105,7 +105,7 @@ export class Edusection {
   otherDocuments: {
     id: number;
     title: string;
-    file: File | null;
+    file: File | null; key?: string;
   }[] = [];
 
   @ViewChild(Uploadbtn) uploadComponent!: Uploadbtn;
@@ -113,6 +113,7 @@ export class Edusection {
 
   @Input() uploadedFiles: Record<string, File | null> = {};
  @Input() savedFileMeta: Record<string, File | null> = {};
+ @Input() otherDocMap: Record<string, { title: string }> = {};
   @Input() stepKey!: '10th' | '12th' | 'diploma10' | 'diploma12' | 'ug' | 'pg' | 'others' | 'others12' | 'othersdiploma';
 
 
@@ -233,6 +234,16 @@ combineLatest([
     if (changes['sectionType'] || changes['title'] || changes['stepKey']) {
       this.initSection();      //   run every time step changes
     }
+    
+ if (
+    changes['uploadedFiles'] ||
+    changes['savedFileMeta'] ||
+    changes['otherDocMap'] ||
+    changes['stepKey']
+  ) {
+    this.rebuildOtherDocuments();
+  }
+
   }
 
 private initSection(): void {
@@ -472,15 +483,29 @@ private initSection(): void {
   }
 
 
-  hasLocal(doc: 'marksheet' | 'lc' | 'other', index?: number): boolean {
+  hasLocal1(doc: 'marksheet' | 'lc' | 'other', index?: number): boolean {
     return !!this.uploadedFiles?.[this.buildKey(doc, index)];
   }
 
 
-  getLocalName(doc: 'marksheet' | 'lc' | 'other', index?: number): string {
+  getLocalName1(doc: 'marksheet' | 'lc' | 'other', index?: number): string {
     return this.uploadedFiles?.[this.buildKey(doc, index)]?.name ?? '';
   }
+hasLocal(doc: 'marksheet' | 'lc' | 'other', index?: number): boolean {
+  return !!this.getStoredFile(doc, index);
+}
 
+getLocalName(doc: 'marksheet' | 'lc' | 'other', index?: number): string {
+  const file = this.getStoredFile(doc, index);
+
+  if (!file) return '';
+
+  if (file instanceof File) {
+    return file.name;
+  }
+
+  return file.fileName || file.name || '';
+}
 
   buildKey(doc: DocType, index?: number): string {
     // return index
@@ -558,7 +583,7 @@ return index !== undefined
     window.open(url, '_blank');
   }
 
-  viewLocalFile(doc: DocType, index?: number): void {
+  viewLocalFile1(doc: DocType, index?: number): void {
     const key = this.buildKey(doc, index);
     const file = this.uploadedFiles[key] as
       | File
@@ -593,7 +618,24 @@ return index !== undefined
     console.warn('No view URL found for file:', file);
 
   }
-  downloadLocalFile(doc: DocType, index?: number): void {
+  viewLocalFile(doc: DocType, index?: number): void {
+  const file = this.getStoredFile(doc, index);
+  if (!file) return;
+
+  if (file instanceof File) {
+    const url = URL.createObjectURL(file);
+    window.open(url, '_blank');
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+    return;
+  }
+
+  const savedUrl = file.viewUrl || file.fileUrl || file.publicUrl || '';
+  if (savedUrl) {
+    window.open(savedUrl, '_blank');
+  }
+}
+
+  downloadLocalFile1(doc: DocType, index?: number): void {
   const key = this.buildKey(doc, index);
 
   const file: any =
@@ -626,6 +668,29 @@ return index !== undefined
     console.warn('No downloadable URL found for file:', file);
     return;
   }
+
+  const a = document.createElement('a');
+  a.href = savedUrl;
+  a.target = '_blank';
+  a.download = file.fileName || file.name || 'document';
+  a.click();
+}
+downloadLocalFile(doc: DocType, index?: number): void {
+  const file = this.getStoredFile(doc, index);
+  if (!file) return;
+
+  if (file instanceof File) {
+    const url = URL.createObjectURL(file);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = file.name || 'document';
+    a.click();
+    URL.revokeObjectURL(url);
+    return;
+  }
+
+  const savedUrl = file.viewUrl || file.fileUrl || file.publicUrl || '';
+  if (!savedUrl) return;
 
   const a = document.createElement('a');
   a.href = savedUrl;
@@ -919,11 +984,27 @@ return index !== undefined
     })
   }
 
-  viewOther(doc: any) {
+  viewOther1(doc: any) {
     window.open(URL.createObjectURL(doc.file), '_blank');
   }
+  viewOther(slot: any): void {
+  const file = slot.file;
+  if (!file) return;
 
-  downloadOther(doc: any) {
+  if (file instanceof File) {
+    const url = URL.createObjectURL(file);
+    window.open(url, '_blank');
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+    return;
+  }
+
+  const url = file.viewUrl || file.fileUrl || file.publicUrl || '';
+  if (url) {
+    window.open(url, '_blank');
+  }
+}
+
+  downloadOther1(doc: any) {
     const url = URL.createObjectURL(doc.file);
     const a = document.createElement('a');
     a.href = url;
@@ -931,6 +1012,31 @@ return index !== undefined
     a.click();
     URL.revokeObjectURL(url);
   }
+  downloadOther(slot: any): void {
+  const file = slot.file;
+  if (!file) return;
+
+  if (file instanceof File) {
+    const url = URL.createObjectURL(file);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = file.name || 'document';
+    a.click();
+    URL.revokeObjectURL(url);
+    return;
+  }
+
+  const url = file.viewUrl || file.fileUrl || file.publicUrl || '';
+  if (!url) return;
+
+  const a = document.createElement('a');
+  a.href = url;
+  a.target = '_blank';
+  a.download = file.fileName || file.name || 'document';
+  a.click();
+}
+
+
   //delete other block (title +img)
   removeOtherDocument(doc: { id: number; title: string; file: File | null }): void {
     this.msgBox.open({
@@ -973,7 +1079,61 @@ return index !== undefined
       gropudata: { title: value }
     });
   }
+private rebuildOtherDocuments(): void {
+  if (!this.stepKey) return;
 
+  // ✅ use stepKey, not educationType
+  const prefix = `${this.stepKey}_other_`;
+
+  const keys = [
+    ...Object.keys(this.otherDocMap || {}).filter(k => k.startsWith(prefix)),
+    ...Object.keys(this.uploadedFiles || {}).filter(k => k.startsWith(prefix)),
+    ...Object.keys(this.savedFileMeta || {}).filter(k => k.startsWith(prefix))
+  ];
+
+  const uniqueKeys = [...new Set(keys)].sort((a, b) => {
+    return this.extractOtherIndex(a) - this.extractOtherIndex(b);
+  });
+
+  this.otherDocuments = uniqueKeys.map((key) => {
+    const index = this.extractOtherIndex(key);
+
+    const file =
+      this.uploadedFiles[key] ||
+      this.savedFileMeta[key] ||
+      null;
+
+    const metaTitle = file && !(file instanceof File)
+      ? (file as any)?.title
+      : null;
+
+    return {
+      id: index,   // ✅ keep actual index
+      key,
+      title:
+        this.otherDocMap[key]?.title ||
+        (metaTitle && metaTitle !== 'OTHER' ? metaTitle : '') ||
+        '',
+      file
+    };
+  });
+
+  // keep counter in sync so Add More gives next correct id
+  this.slotCounter = this.otherDocuments.length
+    ? Math.max(...this.otherDocuments.map(x => x.id))
+    : 0;
+
+  this.cd.detectChanges();
+}
+
+private extractOtherIndex(key: string): number {
+  const match = key.match(/_other_(\d+)$/);
+  return match ? Number(match[1]) : 0;
+}
+private getStoredFile(doc: DocType, index?: number): any {
+  const key = this.buildKey(doc, index);
+  return this.uploadedFiles?.[key] || this.savedFileMeta?.[key] || null;
+}
 
   back() {
 

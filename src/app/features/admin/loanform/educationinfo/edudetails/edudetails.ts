@@ -123,7 +123,7 @@ export class Edudetails {
   isSummaryEditMode = false;
   viewOnly = false;
 
-  constructor(private fb: FormBuilder, private stepperService: Loanstepperservice, private cd: ChangeDetectorRef, private formSvc: Loanformservice, private msgbox: Msgboxservice,
+  constructor(private fb: FormBuilder, private stepperService: Loanstepperservice, private cd: ChangeDetectorRef, private formSvc: Loanformservice, private msgBox:Msgboxservice,private msgbox: Msgboxservice,
     private route: ActivatedRoute, private router: Router) { }
   async ngOnInit() {
 
@@ -1200,7 +1200,11 @@ private isEducationBasicComplete(data: any): boolean {
     )?.value || '';
   }
   saveExit() {
-
+  this.msgBox.open({
+      title: 'Are you sure you want to exit?',
+      message: ``,
+      showCancel: true,
+      onOk: () => {
     if (!this.basicform) return;
     // const key = `educationdetailsData_${this.applicantId}`;
 const key = this.getEducationDetailsStorageKey();
@@ -1227,7 +1231,9 @@ const key = this.getEducationDetailsStorageKey();
     }
   });
 
-
+ this.router.navigate(['/admin/losoperation']);
+     }
+    });
   }
   private finishAfterSaveOrNoChange(qualificationId: string) {
     if (this.isSummaryEditMode) {

@@ -1288,7 +1288,11 @@ let data = res.data.data;
   }
 
   saveExit() {
-
+  this.msgBox.open({
+      title: 'Are you sure you want to exit?',
+      message: ``,
+      showCancel: true,
+      onOk: () => {
     // const result = this.buildMonthlyExpPayloadWithApplicantId();
 
   const result = this.buildDraftMonthlyExpPayloadWithApplicantId();
@@ -1328,6 +1332,9 @@ let data = res.data.data;
       next: () => {
         this.lastSavedPayload = { ...input };
       }
+    });
+     this.router.navigate(['/admin/losoperation']);
+     }
     });
   }
   getStepRoute() {

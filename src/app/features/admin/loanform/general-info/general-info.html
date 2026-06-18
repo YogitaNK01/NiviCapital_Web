@@ -309,7 +309,7 @@
 
                     </div>
                     <div class="col-lg-4 col-sm-12 mt-20">
-                        <app-dropdown [options]="selectrelation" [placeholder]="'Select Relation'" [required]="true"
+                        <app-dropdown [options]="selectrelationship" [placeholder]="'Select Relation'" [required]="true"
                             (selectedValueChange)="coapp_registerForm.get('relationship')?.setValue($event)"
                             [avatarUrl]="avatarUrl" formControlName="relationship" [hasAvatar]="hasAvatar"
                             [label]="'Relation with Applicant'">

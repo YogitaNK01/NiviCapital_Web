@@ -287,7 +287,7 @@ export class Customer implements OnInit, OnDestroy {
   //search and filter methods
   onSearchChange(value: string): void {
     this.searchText = value.toLowerCase();
-
+    var type;
 
     if (this.searchText.length === 0) {
       this.nodata = false;
@@ -300,15 +300,34 @@ export class Customer implements OnInit, OnDestroy {
     }
 
 
-    if (this.searchText.length !== 10) {
-      return;
+
+    if (this.searchText.includes('@')) {
+      type = 'EMAIL'
+
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+      if (!emailRegex.test(this.searchText)) {
+        return; // stop if invalid email
+      }
+
+    } else {
+      type = 'MOBILE'
+
+      
+ const mobileRegex = /^[0-9]{10}$/;
+
+  if (!mobileRegex.test(this.searchText)) {
+    return; 
+  }
+
     }
+
 
     let input = {
       identifier: this.searchText,
-      type: "MOBILE",
+      type: type,
       isSearch: true,
-      "applicantType": "PRIMARY", //// PRIMARY / CO_APPLICANT
+      "applicantType": "PRIMARY", // PRIMARY / CO_APPLICANT
       "coApplicantIndex": 0,
 
     }

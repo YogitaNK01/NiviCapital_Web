@@ -568,7 +568,7 @@ private async loadKycForBothFlows() {
         this.lastSavedPayload = this.normalizeKycPayload(kycPayload);
         // this.nextStep.emit();
         if (this.isCoApplicant) {
-          this.custName = res.ncId
+          this.custName = res.name
           this.NCId = res.ncId
           this.issuccess = true;
           this.stepperService.markStepCompleted('co-kyc');
@@ -1020,7 +1020,11 @@ private async loadKycForBothFlows() {
 
 
   saveExit() {
-
+ this.msgBox.open({
+      title: 'Are you sure you want to exit?',
+      message: ``,
+      showCancel: true,
+      onOk: () => {
     if (!this.kycForm) {
       console.error('KYC form not found');
       return;
@@ -1064,6 +1068,9 @@ private async loadKycForBothFlows() {
         console.error('KYC save and exit failed', err);
       }
 
+    });
+     this.router.navigate(['/admin/losoperation']);
+     }
     });
   }
   getSavedKycInfo(applicantId: any): Promise<any> {

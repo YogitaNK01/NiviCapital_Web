@@ -68,18 +68,6 @@ export class Loanstepperservice {
       this.coursetypeug = JSON.parse(saved);
     }
 
-    // const saved1 = localStorage.getItem(this.completedStepsKey);
-
-//     const saved1 = localStorage.getItem('main_completedSteps');
-
-// if (saved1) {
-//   const parsed = JSON.parse(saved1);
-
-//   this.completedSteps = Array.isArray(parsed)
-//     ? new Set<string>(parsed)
-//     : new Set<string>();
-// }
-
 
   }
   rebuildSteps() {

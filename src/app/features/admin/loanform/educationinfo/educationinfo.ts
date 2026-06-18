@@ -235,7 +235,7 @@ export class Educationinfo implements OnInit {
 
 
 
-  constructor(private fb: FormBuilder, private stepperService: Loanstepperservice, private cd: ChangeDetectorRef, private formSvc: Loanformservice,
+  constructor(private fb: FormBuilder, private stepperService: Loanstepperservice, private cd: ChangeDetectorRef, private formSvc: Loanformservice,private msgBox:Msgboxservice,
     private route: ActivatedRoute, private router: Router, private msgbox: Msgboxservice, public main: Main) { }
   ngOnInit(): void {
 
@@ -281,7 +281,7 @@ export class Educationinfo implements OnInit {
 
 
 
-        this.loadAllEducationDrafts();
+        // this.loadAllEducationDrafts();
 
         //   build submenu only when flow qualificationId changes
         const qid = params['qualificationId'];
@@ -667,9 +667,9 @@ export class Educationinfo implements OnInit {
 
   }
 
-getFile(step: StepKey, doc: DocType, index?: number) {
-  return this.getStoredFileMeta(step, doc, index);
-}
+  getFile(step: StepKey, doc: DocType, index?: number) {
+    return this.getStoredFileMeta(step, doc, index);
+  }
 
 
   //resotre form data
@@ -690,13 +690,18 @@ getFile(step: StepKey, doc: DocType, index?: number) {
     form.markAsPristine();
     form.updateValueAndValidity({ emitEvent: false });
 
-
-
-
   }
 
 
+  //------------convert viewurl to binary file
+  async urlToFile(url: string, filename: string) {
+    const res = await fetch(url);
+    const blob = await res.blob();
 
+    return new File([blob], filename, {
+      type: blob.type || 'image/jpeg'
+    });
+  }
 
   getEducationGroup(key: string): FormGroup {
     return this.educationForm.get(key) as FormGroup;
@@ -753,32 +758,32 @@ getFile(step: StepKey, doc: DocType, index?: number) {
     }
   }
   viewLocal(level: any, docType: DocType, index?: number): void {
-  const file: any = this.getStoredFileMeta(
-    level as StepKey,
-    docType,
-    index
-  );
+    const file: any = this.getStoredFileMeta(
+      level as StepKey,
+      docType,
+      index
+    );
 
-  if (!file) return;
+    if (!file) return;
 
-  if (file instanceof File) {
-    const url = URL.createObjectURL(file);
-    window.open(url, '_blank');
+    if (file instanceof File) {
+      const url = URL.createObjectURL(file);
+      window.open(url, '_blank');
 
-    setTimeout(() => URL.revokeObjectURL(url), 1000);
-    return;
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+      return;
+    }
+
+    const url =
+      file.viewUrl ||
+      file.fileUrl ||
+      file.publicUrl ||
+      '';
+
+    if (url) {
+      window.open(url, '_blank');
+    }
   }
-
-  const url =
-    file.viewUrl ||
-    file.fileUrl ||
-    file.publicUrl ||
-    '';
-
-  if (url) {
-    window.open(url, '_blank');
-  }
-}
   private getSavedFileUrl(key: string): string {
     const meta = this.savedFileMeta[key];
 
@@ -837,14 +842,14 @@ getFile(step: StepKey, doc: DocType, index?: number) {
 
   }
   hasLocalFile(level: any, docType: DocType, index?: number): boolean {
-  const file = this.getStoredFileMeta(
-    level as StepKey,
-    docType,
-    index
-  );
+    const file = this.getStoredFileMeta(
+      level as StepKey,
+      docType,
+      index
+    );
 
-  return !!file;
-}
+    return !!file;
+  }
 
   getLocalFileName1(level: EducationType, docType: DocType, index?: number): string {
     const f = this.uploadedFiles[this.buildDocKey(level, docType, index)] as File | null;
@@ -870,34 +875,34 @@ getFile(step: StepKey, doc: DocType, index?: number) {
       '';
   }
   getLocalFileName(level: any, docType: DocType, index?: number): string {
-  const file: any = this.getStoredFileMeta(
-    level as StepKey,
-    docType,
-    index
-  );
+    const file: any = this.getStoredFileMeta(
+      level as StepKey,
+      docType,
+      index
+    );
 
-  if (!file) return '';
+    if (!file) return '';
 
-  if (file instanceof File) {
-    return file.name;
+    if (file instanceof File) {
+      return file.name;
+    }
+
+    return file.fileName || file.name || '';
   }
+  private getStoredFileMeta(step: StepKey, docType: DocType, index?: number): any {
+    const normalizedDoc = this.normalizeDocType(docType);
 
-  return file.fileName || file.name || '';
-}
-private getStoredFileMeta(step: StepKey, docType: DocType, index?: number): any {
-  const normalizedDoc = this.normalizeDocType(docType);
+    const keyWithIndex = this.buildKey(step, normalizedDoc, index);
+    const keyWithoutIndex = this.buildKey(step, normalizedDoc);
 
-  const keyWithIndex = this.buildKey(step, normalizedDoc, index);
-  const keyWithoutIndex = this.buildKey(step, normalizedDoc);
-
-  return (
-    this.uploadedFiles[keyWithIndex] ||
-    this.savedFileMeta[keyWithIndex] ||
-    this.uploadedFiles[keyWithoutIndex] ||
-    this.savedFileMeta[keyWithoutIndex] ||
-    null
-  );
-}
+    return (
+      this.uploadedFiles[keyWithIndex] ||
+      this.savedFileMeta[keyWithIndex] ||
+      this.uploadedFiles[keyWithoutIndex] ||
+      this.savedFileMeta[keyWithoutIndex] ||
+      null
+    );
+  }
   downloadLocal1(level: EducationType, docType: DocType, index?: number): void {
     const f = this.uploadedFiles[this.buildDocKey(level, docType, index)] as File | null;
     if (!f) return;
@@ -945,40 +950,40 @@ private getStoredFileMeta(step: StepKey, docType: DocType, index?: number): any 
       });
   }
   downloadLocal(level: any, docType: DocType, index?: number): void {
-  const file: any = this.getStoredFileMeta(
-    level as StepKey,
-    docType,
-    index
-  );
+    const file: any = this.getStoredFileMeta(
+      level as StepKey,
+      docType,
+      index
+    );
 
-  if (!file) return;
+    if (!file) return;
 
-  if (file instanceof File) {
-    const url = URL.createObjectURL(file);
+    if (file instanceof File) {
+      const url = URL.createObjectURL(file);
+
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = file.name || 'document';
+      a.click();
+
+      URL.revokeObjectURL(url);
+      return;
+    }
+
+    const url =
+      file.viewUrl ||
+      file.fileUrl ||
+      file.publicUrl ||
+      '';
+
+    if (!url) return;
 
     const a = document.createElement('a');
     a.href = url;
-    a.download = file.name || 'document';
+    a.target = '_blank';
+    a.download = file.fileName || file.name || 'document';
     a.click();
-
-    URL.revokeObjectURL(url);
-    return;
   }
-
-  const url =
-    file.viewUrl ||
-    file.fileUrl ||
-    file.publicUrl ||
-    '';
-
-  if (!url) return;
-
-  const a = document.createElement('a');
-  a.href = url;
-  a.target = '_blank';
-  a.download = file.fileName || file.name || 'document';
-  a.click();
-}
 
 
   viewImage(url: string): void {
@@ -1182,6 +1187,17 @@ private getStoredFileMeta(step: StepKey, docType: DocType, index?: number): any 
 
     this.otherDocMap[key] = { title: '' };
     this.uploadedFiles[key] = null;
+  }
+  private ensureOtherDocEntry(step: StepKey, index: number, title: string = 'Other Document') {
+    const key = this.buildKey(step, 'other', index);
+
+    if (!this.otherDocMap[key]) {
+      this.otherDocMap[key] = { title };
+    }
+
+    if (!(key in this.uploadedFiles) && this.savedFileMeta[key]) {
+      this.uploadedFiles[key] = this.savedFileMeta[key] as any;
+    }
   }
   //check for pg data
   private hasPgData(form: FormGroup, step: StepKey): boolean {
@@ -1453,23 +1469,124 @@ private getStoredFileMeta(step: StepKey, docType: DocType, index?: number): any 
       };
     }
 
-    if (Array.isArray(data.files)) {
-      data.files.forEach((fileMeta: any) => {
-        if (!fileMeta?.key) return;
 
-        this.savedFileMeta[fileMeta.key] = {
-          name: fileMeta.fileName || fileMeta.name || '',
-          fileName: fileMeta.fileName || fileMeta.name || '',
-          title: fileMeta.title || '',
-          uploaded: true,
-          fileUrl: fileMeta.fileUrl || fileMeta.url || '',
-          publicUrl: fileMeta.publicUrl || '',
-          objectName: fileMeta.objectName || ''
 
+    const uploadedDocuments =
+      data.uploadedDocuments ||
+      data.documents ||
+      [];
+
+    const uploadedFiles =
+      data.uploadedFiles ||
+      data.files ||
+      [];
+
+    const documentsToRestore =
+      Array.isArray(uploadedDocuments) && uploadedDocuments.length > 0
+        ? uploadedDocuments
+        : uploadedFiles;
+
+    let marksheetCounter = 0;
+    let otherCounter = 0;
+
+    documentsToRestore.forEach((doc: any, index: number) => {
+      const fallbackFile = uploadedFiles[index] || {};
+
+      const type = doc.type || fallbackFile.type;
+      if (!type) return;
+
+      // let key = '';
+
+      const key = this.getFileKeyFromApiType(
+        step,
+        type,
+        marksheetCounter,
+        otherCounter
+      );
+
+      if (type === 'MARKSHEET') {
+        // key = this.buildKey(step, 'marksheet', marksheetCounter);
+        marksheetCounter++;
+      } else if (
+        type === 'SCHOOL_LEAVING_CERT' ||
+        type === 'LEAVING_CERTIFICATE'
+      ) {
+        // key = this.buildKey(step, 'lc');
+      } else if (type === 'OTHER') {
+        // key = this.buildKey(step, 'other', otherCounter);
+        this.ensureOtherDocEntry(
+          step,
+          otherCounter,
+          doc.title || fallbackFile.title || 'Other Document'
+        );
+        otherCounter++;
+
+        this.otherDocMap[key] = {
+          title: doc.title || fallbackFile.title || 'Other Document'
         };
-      });
-      this.savedFileMeta = { ...this.savedFileMeta };
-    }
+      } else if (
+        type === 'UPLOAD_CERTIFICATE' ||
+        type === 'IELTS'
+      ) {
+        if (step === 'ielts') {
+          // key = this.buildKey(step, 'ielts');
+        } else if (step === 'offerletter') {
+          // key = this.buildKey(step, 'offerletter');
+        }
+      } else if (type === 'OFFERLETTER') {
+        // key = this.buildKey(step, 'offerletter');
+      }
+
+      if (!key) return;
+
+      const meta = {
+        key,
+        name:
+          doc.fileName ||
+          fallbackFile.fileName ||
+          doc.name ||
+          fallbackFile.name ||
+          '',
+        fileName:
+          doc.fileName ||
+          fallbackFile.fileName ||
+          doc.name ||
+          fallbackFile.name ||
+          '',
+        title:
+          doc.title ||
+          fallbackFile.title ||
+          type,
+        type,
+        viewUrl:
+          doc.viewUrl ||
+          fallbackFile.viewUrl ||
+          '',
+        fileUrl:
+          doc.fileUrl ||
+          fallbackFile.fileUrl ||
+          '',
+        publicUrl:
+          doc.publicUrl ||
+          fallbackFile.publicUrl ||
+          '',
+        objectKey:
+          doc.objectKey ||
+          fallbackFile.objectKey ||
+          '',
+        documentId:
+          doc.documentId ||
+          fallbackFile.documentId,
+        uploaded: true
+      };
+
+      this.savedFileMeta[key] = meta;
+      this.uploadedFiles[key] = meta as any;
+    });
+
+    this.savedFileMeta = { ...this.savedFileMeta };
+    this.uploadedFiles = { ...this.uploadedFiles };
+    this.otherDocMap = { ...this.otherDocMap };
 
     this.stepperService.setEducationStepData(step, form.getRawValue());
 
@@ -1540,6 +1657,7 @@ private getStoredFileMeta(step: StepKey, docType: DocType, index?: number): any 
     marksheetCounter: number = 0,
     index: number = 0
   ): string {
+
     if (type === 'MARKSHEET') {
       return this.buildKey(step, 'marksheet', marksheetCounter);
     }
@@ -1552,7 +1670,8 @@ private getStoredFileMeta(step: StepKey, docType: DocType, index?: number): any 
     }
 
     if (type === 'OTHER') {
-      return `${step}_other_${index + 1}`;
+      // return `${step}_other_${index + 1}`;
+      return this.buildKey(step, 'other', index);
     }
 
     if (
@@ -1896,7 +2015,7 @@ private getStoredFileMeta(step: StepKey, docType: DocType, index?: number): any 
           : uploadedFiles;
 
       let marksheetCounter = 0;
-      let otherCounter = 1;
+      let otherCounter = 0;
 
       documentsToRestore.forEach((doc: any, index: number) => {
         const fallbackFile = uploadedFiles[index] || {};
@@ -1910,19 +2029,32 @@ private getStoredFileMeta(step: StepKey, docType: DocType, index?: number): any 
 
         if (!type) return;
 
-        let key = '';
+        // let key = '';
 
+        const key = this.getFileKeyFromApiType(
+          step,
+          type,
+          marksheetCounter,
+          otherCounter
+        );
+        if (!key) return;
         if (type === 'MARKSHEET') {
-          key = this.buildKey(step, 'marksheet', marksheetCounter);
+          // key = this.buildKey(step, 'marksheet', marksheetCounter);
           marksheetCounter++;
         } else if (
           type === 'SCHOOL_LEAVING_CERT' ||
           type === 'LEAVING_CERTIFICATE'
         ) {
-          key = this.buildKey(step, 'lc');
+          // key = this.buildKey(step, 'lc');
         } else if (type === 'OTHER') {
-          key = `${step}_other_${otherCounter}`;
-          otherCounter++;
+          // key = `${step}_other_${otherCounter}`;
+          // key = this.buildKey(step, 'other', otherCounter);
+
+          this.ensureOtherDocEntry(
+            step,
+            otherCounter,
+            doc.title || fallbackFile.title || 'Other Document'
+          );
 
           this.otherDocMap[key] = {
             title:
@@ -1930,17 +2062,19 @@ private getStoredFileMeta(step: StepKey, docType: DocType, index?: number): any 
               fallbackFile.title ||
               'Other Document'
           };
-        } else if (
+          otherCounter++;
+        }
+        else if (
           type === 'UPLOAD_CERTIFICATE' ||
           type === 'IELTS'
         ) {
           if (step === 'ielts') {
-            key = this.buildKey(step, 'ielts');
+            // key = this.buildKey(step, 'ielts');
           } else if (step === 'offerletter') {
-            key = this.buildKey(step, 'offerletter');
+            // key = this.buildKey(step, 'offerletter');
           }
         } else if (type === 'OFFERLETTER') {
-          key = this.buildKey(step, 'offerletter');
+          // key = this.buildKey(step, 'offerletter');
         }
 
         if (!key) return;
@@ -2055,7 +2189,11 @@ private getStoredFileMeta(step: StepKey, docType: DocType, index?: number): any 
     return null;
   }
   saveExit() {
-
+  this.msgBox.open({
+      title: 'Are you sure you want to exit?',
+      message: ``,
+      showCancel: true,
+      onOk: () => {
 
     const step = this.activeEducation as StepKey;
     const form = this.educationForms[step] as FormGroup;
@@ -2101,7 +2239,9 @@ private getStoredFileMeta(step: StepKey, docType: DocType, index?: number): any 
       }
     });
 
-
+ this.router.navigate(['/admin/losoperation']);
+     }
+    });
   }
 
   private buildEducationSaveExitFormData(sectionKey: string): FormData {
@@ -2178,7 +2318,7 @@ private getStoredFileMeta(step: StepKey, docType: DocType, index?: number): any 
 
     return fd;
   }
-  next() {
+  async next() {
     console.log("next---");
 
     const step = this.activeEducation as StepKey;
@@ -2260,8 +2400,24 @@ private getStoredFileMeta(step: StepKey, docType: DocType, index?: number): any 
         fd.append('files[0].type', 'UPLOAD_CERTIFICATE');
         fd.append('files[0].file', file);
 
-      } else {
-        console.log('IELTS file already saved, skipping upload');
+      }else if (this.savedFileMeta[key]) {
+        console.log('Already saved file, skipping upload:', key);
+
+        const meta = this.savedFileMeta[key];
+
+
+        if (meta.viewUrl) {
+          const fileFromUrl = await this.urlToFile(
+            meta.viewUrl,
+            meta.fileName || 'file.jpg'
+          );
+          fd.append(`files[0].type`, meta.type );
+          fd.append(`files[0].file`, fileFromUrl); 
+          
+        } else {
+          console.warn('No viewUrl to convert file:', key);
+        }
+
       }
 
 
@@ -2270,7 +2426,7 @@ private getStoredFileMeta(step: StepKey, docType: DocType, index?: number): any 
     else if (step === 'offerletter') {
       const key = this.buildKey(step, 'offerletter');
       const file = this.uploadedFiles[key];
-
+      
       if (!this.hasFileOrSavedMeta(step, 'offerletter')) {
         alert('Please upload offer letter.');
         return;
@@ -2279,8 +2435,24 @@ private getStoredFileMeta(step: StepKey, docType: DocType, index?: number): any 
       if (file instanceof File) {
         fd.append('files[0].type', 'UPLOAD_CERTIFICATE');
         fd.append('files[0].file', file);
-      } else {
-        console.log('Offer letter already saved, skipping upload');
+      } else if (this.savedFileMeta[key]) {
+        console.log('Already saved file, skipping upload:', key);
+
+        const meta = this.savedFileMeta[key];
+
+
+        if (meta.viewUrl) {
+          const fileFromUrl = await this.urlToFile(
+            meta.viewUrl,
+            meta.fileName || 'file.jpg'
+          );
+          fd.append(`files[0].type`, meta.type );
+          fd.append(`files[0].file`, fileFromUrl); 
+         
+        } else {
+          console.warn('No viewUrl to convert file:', key);
+        }
+
       }
     }
     else {
@@ -2297,19 +2469,10 @@ private getStoredFileMeta(step: StepKey, docType: DocType, index?: number): any 
       }
 
 
-      // reqDocs.forEach((r, index) => {
-      //   const file = this.getFile(step, r.doc as DocType, r.index);
-      //   if (!file) return;
 
-
-      //   fd.append(`files[${index}].type`, r.apiType);
-      //   fd.append(`files[${index}].file`, file);
-      // });
-
-      // let fileIndex = reqDocs.length;
       let fileIndex = 0;
 
-      reqDocs.forEach(r => {
+      reqDocs.forEach(async r => {
         const key = this.buildKey(step, r.doc as DocType, r.index);
         const file = this.uploadedFiles[key];
 
@@ -2319,6 +2482,27 @@ private getStoredFileMeta(step: StepKey, docType: DocType, index?: number): any 
           fileIndex++;
         } else if (this.savedFileMeta[key]) {
           console.log('Already saved file, skipping upload:', key);
+
+          const meta = this.savedFileMeta[key];
+
+          // fd.append(`files[${fileIndex}].type`, meta.type || r.apiType);
+          // fd.append(`files[${fileIndex}].file`, meta.fileName);
+          // fileIndex++;
+
+          if (meta.viewUrl) {
+            const fileFromUrl = await this.urlToFile(
+              meta.viewUrl,
+              meta.fileName || 'file.jpg'
+            );
+
+            fd.append(`files[${fileIndex}].type`, meta.type || r.apiType);
+            fd.append(`files[${fileIndex}].file`, fileFromUrl); // ✅ correct
+
+            fileIndex++;
+          } else {
+            console.warn('No viewUrl to convert file:', key);
+          }
+
         }
       });
 
@@ -2354,25 +2538,51 @@ private getStoredFileMeta(step: StepKey, docType: DocType, index?: number): any 
 
       Object.keys(this.uploadedFiles)
         .filter(key => key.startsWith(`${step}_other_`))
-        .forEach(key => {
-          const file = this.uploadedFiles[key];
-          if (!file) return;
+      // .forEach(key => {
+      //   const file = this.uploadedFiles[key];
+      //   if (!file) return;
 
-          const meta = this.otherDocMap[key];
+      //   const meta = this.otherDocMap[key];
 
 
+
+      //   fd.append(`files[${fileIndex}].type`, 'OTHER');
+      //   fd.append(
+      //     `files[${fileIndex}].title`,
+      //     meta?.title || 'Other Document'
+      //   );
+      //   fd.append(`files[${fileIndex}].file`, file);
+
+      //   fileIndex++;
+      // });
+
+      for (const key of Object.keys(this.uploadedFiles)
+        .filter(key => key.startsWith(`${step}_other_`))) {
+
+        const file = this.uploadedFiles[key];
+        if (!file) continue;
+
+        const meta = this.otherDocMap[key];
+
+        if (file instanceof File) {
+          fd.append(`files[${fileIndex}].type`, 'OTHER');
+          fd.append(`files[${fileIndex}].title`, meta?.title || 'Other Document');
+          fd.append(`files[${fileIndex}].file`, file);
+        } else if (this.savedFileMeta[key]?.viewUrl) {
+          const saved = this.savedFileMeta[key];
+
+          const fileFromUrl = await this.urlToFile(
+            saved.viewUrl,
+            saved.fileName
+          );
 
           fd.append(`files[${fileIndex}].type`, 'OTHER');
-          fd.append(
-            `files[${fileIndex}].title`,
-            meta?.title || 'Other Document'
-          );
-          fd.append(`files[${fileIndex}].file`, file);
+          fd.append(`files[${fileIndex}].title`, meta?.title || 'Other Document');
+          fd.append(`files[${fileIndex}].file`, fileFromUrl);
+        }
 
-          fileIndex++;
-        });
-
-
+        fileIndex++;
+      }
 
 
       fd.append('instituteId', form.get('institutename')?.value);

@@ -180,6 +180,15 @@ private summaryRequest$?: Observable<ApiResponse<any>>;
 
     );
   }
+  
+
+//------------coapplicant relationship with applicant
+   getRelationShip(): Observable<ApiResponse<any>> {
+    return this.http.get<ApiResponse<any>>(
+      `${this.baseUrl}/v1/los/applications/relations`,
+
+    );
+  }
 
   // ************************* Australian states and cities api *************************
 

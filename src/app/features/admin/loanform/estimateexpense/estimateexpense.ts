@@ -1252,6 +1252,11 @@ private normalizeEstimatedExpense(data: any): any {
 
   //save and exit 
   saveExit() {
+      this.msgBox.open({
+      title: 'Are you sure you want to exit?',
+      message: ``,
+      showCancel: true,
+      onOk: () => {
     let formdata = this.expenseForm.value
     console.log("form data Expenses:", formdata);
 
@@ -1266,7 +1271,7 @@ private normalizeEstimatedExpense(data: any): any {
       miscellaneousExpenseItemMasterId: item.category,
       frequency: item.securityfrequency?.toUpperCase(),
       amountInr: Number(item.amountINR.replace(/,/g, '')),
-      description: item.description || ''
+      description: item.descriptionmisc || item.description || ''
     }));
 
 
@@ -1284,6 +1289,9 @@ private normalizeEstimatedExpense(data: any): any {
     };
 
     this.loanformservice.saveandExit(inputdata).subscribe();
+     this.router.navigate(['/admin/losoperation']);
+     }
+    });
   }
   //get api for saved data
   getSavedEstExpense(): Promise<any> {

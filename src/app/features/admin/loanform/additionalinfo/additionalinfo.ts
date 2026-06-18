@@ -587,7 +587,10 @@ private async loadAdditionalInfoForBothFlows() {
       this.additionalinfoForm.get('uploadphoto')?.markAsTouched();
       return;
     }
-
+if (result?.file) {
+  this.uploadedFiles[key] = result.file;
+  this.uploadedPreviewUrls[key] = URL.createObjectURL(result.file);
+}
     const applicantId = this.getApiApplicantId();
 
     if (!applicantId) {
@@ -661,9 +664,10 @@ private async loadAdditionalInfoForBothFlows() {
 
 
   //file upload preview
-  hasLocalFile(key: string): boolean {
-    return !!this.uploadedFiles[key];
-  }
+ hasLocalFile(key: string): boolean {
+  return !!this.uploadedFiles[key] || !!this.localFiles[key];
+}
+
 
   setExistingFile(type: string, fileName: string, fileUrl: string) {
     this.localFiles[type] = {
@@ -673,13 +677,26 @@ private async loadAdditionalInfoForBothFlows() {
     };
   }
 
-  getLocalFileName(key: string): string {
-    return this.uploadedFiles[key]?.name || 'No file uploaded';
+ getLocalFileName(key: string): string {
+  if (this.uploadedFiles[key]) {
+    return this.uploadedFiles[key].name;
   }
+  if (this.localFiles[key]) {
+    return this.localFiles[key].name;
+  }
+  return 'No file uploaded';
+}
 
-  getLocalFileUrl(key: string): string {
-    return this.uploadedPreviewUrls[key] || '';
+getLocalFileUrl(key: string): string {
+  if (this.uploadedPreviewUrls[key]) {
+    return this.uploadedPreviewUrls[key];
   }
+  if (this.localFiles[key]) {
+    return this.localFiles[key].url;
+  }
+  return '';
+}
+
 
   viewLocalFile(key: string): void {
     const url = this.getLocalFileUrl(key);
@@ -901,6 +918,11 @@ private async loadAdditionalInfoForBothFlows() {
   }
 
   saveExit() {
+     this.msgBox.open({
+      title: 'Are you sure you want to exit?',
+      message: ``,
+      showCancel: true,
+      onOk: () => {
     let formdata = this.additionalinfoForm.getRawValue();
     const input = this.buildAdditionalPayload(formdata);
 
@@ -934,6 +956,9 @@ private async loadAdditionalInfoForBothFlows() {
       next: () => {
         this.lastSavedPayload = { ...input };
       }
+    });
+     this.router.navigate(['/admin/losoperation']);
+     }
     });
   }
   getSavedAdditionalInfo(applicantId: any): Promise<any> {

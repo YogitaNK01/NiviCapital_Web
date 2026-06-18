@@ -91,7 +91,7 @@
                             } @else{
                             <app-uploadbtn [config]="basicConfig" [uploadViaApi]="true" [required]="true"
                                 label="Salary Slip 1"
-                                (uploadStarted)="onUploadStarted($event, 'salary1','INCOME','LAST_3_MONTHS','SALARY_SLIP')"
+                                (uploadStarted)="onUploadStarted($event, 'salary1','INCOME','LAST_3_MONTHS','SALARY_SLIP', '', 0)"
                                 [fileuploadresponse]="handleresponse">
                             </app-uploadbtn>
                             }
@@ -115,7 +115,7 @@
 
                             } @else{
                             <app-uploadbtn [config]="basicConfig"
-                                (uploadStarted)="onUploadStarted($event, 'salary2' ,'INCOME' ,'LAST_3_MONTHS','SALARY_SLIP')"
+                                (uploadStarted)="onUploadStarted($event, 'salary2' ,'INCOME' ,'LAST_3_MONTHS','SALARY_SLIP', '', 1)"
                                 [uploadViaApi]="true" [fileuploadresponse]="handleresponse" [required]="true"
                                 label="Salary Slip 2">
                             </app-uploadbtn>
@@ -139,7 +139,7 @@
 
                             } @else{
                             <app-uploadbtn [config]="basicConfig"
-                                (uploadStarted)="onUploadStarted($event, 'salary3','INCOME' , 'LAST_3_MONTHS','SALARY_SLIP')"
+                                (uploadStarted)="onUploadStarted($event, 'salary3','INCOME' , 'LAST_3_MONTHS','SALARY_SLIP', '', 2)"
                                 [uploadViaApi]="true" [fileuploadresponse]="handleresponse" [required]="true"
                                 label="Salary Slip 3">
                             </app-uploadbtn>
@@ -277,7 +277,7 @@
 
                             } @else{
                             <app-uploadbtn [config]="basicConfig"
-                                (uploadStarted)="onUploadStarted($event, 'ay1','INCOME','ITR_LAST_3_YEARS','ITR')"
+                                (uploadStarted)="onUploadStarted($event, 'ay1','INCOME','ITR_LAST_3_YEARS','ITR', '', 0)"
                                 [uploadViaApi]="true" [fileuploadresponse]="handleresponse" [required]="true"
                                 label="Year 1">
                             </app-uploadbtn>
@@ -301,7 +301,7 @@
 
                             } @else{
                             <app-uploadbtn [config]="basicConfig"
-                                (uploadStarted)="onUploadStarted($event, 'ay2','INCOME','ITR_LAST_3_YEARS','ITR')"
+                                (uploadStarted)="onUploadStarted($event, 'ay2','INCOME','ITR_LAST_3_YEARS','ITR','', 1)"
                                 [uploadViaApi]="true" [fileuploadresponse]="handleresponse" [required]="true"
                                 label="Year 2">
                             </app-uploadbtn>
@@ -326,7 +326,7 @@
                             } @else{
 
                             <app-uploadbtn [config]="basicConfig"
-                                (uploadStarted)="onUploadStarted($event, 'ay3','INCOME','ITR_LAST_3_YEARS','ITR')"
+                                (uploadStarted)="onUploadStarted($event, 'ay3','INCOME','ITR_LAST_3_YEARS','ITR', '', 1)"
                                 [uploadViaApi]="true" [fileuploadresponse]="handleresponse" [required]="true"
                                 label="Year 3">
                             </app-uploadbtn>
@@ -491,7 +491,7 @@
 
                             } @else{
                             <app-uploadbtn [config]="basicConfig"
-                                (uploadStarted)="onUploadStarted($event,  'year1' ,'BUSINESS','BUSINESS_FINANCE_3_YEARS','BUSINESS_FINANCE')"
+                                (uploadStarted)="onUploadStarted($event,  'year1' ,'BUSINESS','BUSINESS_FINANCE_3_YEARS','BUSINESS_FINANCE', '', 0)"
                                 [uploadViaApi]="true" [fileuploadresponse]="handleresponse" [required]="true"
                                 label="Year 1">
                             </app-uploadbtn>}
@@ -515,7 +515,7 @@
 
                             } @else{
                             <app-uploadbtn [config]="basicConfig"
-                                (uploadStarted)="onUploadStarted($event,  'year2' ,'BUSINESS','BUSINESS_FINANCE_3_YEARS','BUSINESS_FINANCE')"
+                                (uploadStarted)="onUploadStarted($event,  'year2' ,'BUSINESS','BUSINESS_FINANCE_3_YEARS','BUSINESS_FINANCE', '', 1)"
                                 [uploadViaApi]="true" [fileuploadresponse]="handleresponse" [required]="true"
                                 label="Year 2">
                             </app-uploadbtn>}
@@ -538,7 +538,7 @@
 
                             } @else{
                             <app-uploadbtn [config]="basicConfig"
-                                (uploadStarted)="onUploadStarted($event,  'year3' ,'BUSINESS','BUSINESS_FINANCE_3_YEARS','BUSINESS_FINANCE')"
+                                (uploadStarted)="onUploadStarted($event,  'year3' ,'BUSINESS','BUSINESS_FINANCE_3_YEARS','BUSINESS_FINANCE', '', 2)"
                                 [uploadViaApi]="true" [fileuploadresponse]="handleresponse" [required]="true"
                                 label="Year 3">
                             </app-uploadbtn>}
@@ -582,7 +582,7 @@
 
                             } @else{
                             <app-uploadbtn [config]="basicConfig"
-                                (uploadStarted)="onUploadStarted($event,  'businessITR1' ,'BUSINESS','BUSINESS_ITR_3_YEARS','BUSINESS_ITR')"
+                                (uploadStarted)="onUploadStarted($event,  'businessITR1' ,'BUSINESS','BUSINESS_ITR_3_YEARS','BUSINESS_ITR', '', 0)"
                                 [uploadViaApi]="true" [fileuploadresponse]="handleresponse" [required]="true"
                                 label="Year 1">
                             </app-uploadbtn>}
@@ -605,7 +605,7 @@
 
                             } @else{
                             <app-uploadbtn [config]="basicConfig"
-                                (uploadStarted)="onUploadStarted($event,  'businessITR2' ,'BUSINESS','BUSINESS_ITR_3_YEARS','BUSINESS_ITR')"
+                                (uploadStarted)="onUploadStarted($event,  'businessITR2' ,'BUSINESS','BUSINESS_ITR_3_YEARS','BUSINESS_ITR', '', 1)"
                                 [uploadViaApi]="true" [fileuploadresponse]="handleresponse" [required]="true"
                                 label="Year 2">
                             </app-uploadbtn>}
@@ -628,7 +628,7 @@
 
                             } @else{
                             <app-uploadbtn [config]="basicConfig"
-                                (uploadStarted)="onUploadStarted($event,  'businessITR3','BUSINESS' ,'BUSINESS_ITR_3_YEARS','BUSINESS_ITR')"
+                                (uploadStarted)="onUploadStarted($event,  'businessITR3','BUSINESS' ,'BUSINESS_ITR_3_YEARS','BUSINESS_ITR', '', 2)"
                                 [uploadViaApi]="true" [fileuploadresponse]="handleresponse" [required]="true"
                                 label="Year 3">
                             </app-uploadbtn>}

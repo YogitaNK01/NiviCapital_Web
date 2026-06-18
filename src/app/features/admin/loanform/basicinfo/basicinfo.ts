@@ -13,6 +13,8 @@ import { Loanformservice } from '../../../../core/service/loanformservice';
 import { Loanstepper } from '../loanstepper/loanstepper';
 import { Loanstepperservice } from '../../../../core/service/loanstepperservice';
 import { firstValueFrom } from 'rxjs';
+import { Messagebox } from '../../../systemdesign/messagebox/messagebox';
+import { Msgboxservice } from '../../../../core/service/msgboxservice';
 @Component({
   selector: 'app-basicinfo',
   imports: [CommonModule, Inputfield, Buttons, ReactiveFormsModule, Checkbox, Otpsection],
@@ -64,7 +66,7 @@ export class Basicinfo {
   viewOnly = false;
   // @Input() prefillPhone: string = '';
 
-  constructor(private fb: FormBuilder, public main: Main, private addcustomerservice: Addcustomerservice, private cd: ChangeDetectorRef,
+  constructor(private fb: FormBuilder, public main: Main, private addcustomerservice: Addcustomerservice, private cd: ChangeDetectorRef,private msgBox:Msgboxservice,
     private router: Router, private loanform: Loanformservice, private stepperService: Loanstepperservice, private route: ActivatedRoute) { }
 
 
@@ -76,6 +78,15 @@ export class Basicinfo {
     );
     this.stepperService.restoreLoanEditContext();
     this.stepperService.restoreLoanIdFromSession();
+
+
+        this.route.queryParams.subscribe(params => {
+  const index = Number(params['coApplicantIndex']) || 1;
+
+  this.stepperService.setCurrentCoApplicantIndex(index);
+
+  this.reloadFormForCoapp();
+});
 
     let Allids = this.stepperService.getLoanId();
 
@@ -749,6 +760,11 @@ export class Basicinfo {
     this.stepperService.next();
   }
   saveExit() {
+     this.msgBox.open({
+      title: 'Are you sure you want to exit?',
+      message: ``,
+      showCancel: true,
+      onOk: () => {
     let formdata = this.registerForm.getRawValue();
     const input = this.buildBasicPayload(formdata);
 
@@ -778,6 +794,9 @@ export class Basicinfo {
       next: () => {
         this.lastSavedPayload = { ...input };
       }
+    });
+     this.router.navigate(['/admin/losoperation']);
+     }
     });
   }
   getSavedbasicInfo(coApplicantApplicantId: any): Promise<any> {
@@ -840,7 +859,25 @@ export class Basicinfo {
     }
   }
 
+  reloadFormForCoapp() {
+  const key = this.getStorageKey();
 
+  const saved = localStorage.getItem(key);
+  const parsed = saved ? JSON.parse(saved) : null;
+
+  if (!parsed) {
+    this.registerForm.reset();
+    return;
+  }
+
+  //  if (this.isCoApplicant) {
+  //     this.patchCoApplicantInfo(parsed);
+  //   } else {
+     this.patchBasicInfo(parsed);
+    // }
+
+  // this.patchCoApplicantInfo(parsed); // or patchGeneralInfo / patchAdditionalInfo
+}
   back() {
     this.loanform.coappStep = 1;
     this.router.navigate(['../coapplicantinfo']);
