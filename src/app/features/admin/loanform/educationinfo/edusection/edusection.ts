@@ -189,43 +189,7 @@ combineLatest([
     this.selectpassingyr = this.buildYearOptions(20);
     this.initSection();
 
-    // if (this.sectionType === 'school' && this.title.toLowerCase().includes('12')) {
-    //   this.marksheetCount = 1;
-    //   this.educationType = '_12TH';
-    // }
-    // else if (this.sectionType === 'school') {
-    //   this.marksheetCount = 1;
-    //   this.educationType = '_10TH';
-    // }
-
-
-    // if (this.sectionType === 'diploma') {
-    //   this.marksheetCount = 3;
-    //   // this.showLC = false;
-    //   this.educationType = 'DIPLOMA';
-    // }
-
-    // if (this.sectionType === 'bachelors') {
-    //   this.marksheetCount = 4;
-    //   // this.showLC = false;
-    //   this.educationType = 'UNDERGRADUATE';
-    // }
-
-    // if (this.sectionType === 'postgrad') {
-    //   this.marksheetCount = 2;
-    //   // this.showLC = false;
-    //   this.educationType = 'POSTGRADUATE';
-    // }
-    // if (this.sectionType === 'others' && this.title.toLowerCase().includes('after 12th')) {
-    //   this.marksheetCount = 1;
-    //   // this.showLC = false;
-    //   this.educationType = 'OTHER_AFTER_12';
-    // }
-    // if (this.sectionType === 'others' && this.title.toLowerCase().includes('diploma')) {
-    //   this.marksheetCount = 1;
-    //   // this.showLC = false;
-    //   this.educationType = 'OTHER_AFTER_DIPLOMA';
-    // }
+   
 
   }
   

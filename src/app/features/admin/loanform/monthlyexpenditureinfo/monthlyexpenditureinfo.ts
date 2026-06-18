@@ -11,6 +11,7 @@ import { Inputfield } from '../../../systemdesign/inputfield/inputfield';
 import { debounceTime } from 'rxjs/operators';
 import { Msgboxservice } from '../../../../core/service/msgboxservice';
 import { firstValueFrom } from 'rxjs';
+import { Storage } from '../../../../core/service/storage';
 @Component({
   selector: 'app-monthlyexpenditureinfo',
   imports: [CommonModule, ReactiveFormsModule, Buttons, Dropdown, Inputfield],
@@ -100,7 +101,7 @@ export class Monthlyexpenditureinfo {
   lastSavedPayload: any = null;
     isSummaryEditMode = false;
   viewOnly = false;
-  constructor(private fb: FormBuilder, public main: Main, private route: ActivatedRoute, private msgBox: Msgboxservice, private router: Router,
+  constructor(private fb: FormBuilder, public main: Main, private route: ActivatedRoute, private msgBox: Msgboxservice, private router: Router,private storageservice:Storage,
     private stepperService: Loanstepperservice, private formSvc: Loanformservice, private cd: ChangeDetectorRef) { }
 
 
@@ -207,18 +208,29 @@ await this.loadMonthlyExpenditureForBothFlows();
 
   }
 
-  getStorageKey() {
+  getStorageKey1() {
      const index = this.stepperService.getCurrentCoApplicantIndex();
          const coApplicantId = this.stepperService.getCo_appId()?.[0];
-    return this.isCoApplicant
-      ? `monthlyExpenditureData_coapp_${coApplicantId || 'temp_' + index}`
-      : `monthlyExpenditureData_main_${this.stepperService.getLoanId()?.[0]}`;
-
-    // return `kycinfo_coapp_${this.applicantId}_${index}`;
-    // return this.isCoApplicant
-    //   ? `monthlyExpenditureData_coapp_${this.applicantId}_${index}`
-    //   : `monthlyExpenditureData_main_${this.applicantId}`;
+   return this.isCoApplicant
+      ? `monthlyExpenditureData_coapp_${this.applicationId}_${index}`
+      : `monthlyExpenditureData_main_${this.applicationId}_${this.stepperService.getLoanId()?.[0]}`;
   }
+    getStorageKey() {
+    const main_ApplicantId = this.stepperService.getLoanId()?.[0];
+    const co_ApplicantId = this.stepperService.getCo_appId()?.[0];
+    const index = this.stepperService.getCurrentCoApplicantIndex();
+
+    return this.storageservice.getStorageKey(
+      'monthlyExpenditureData',
+      this.applicationId,
+      this.applicantId,
+      this.isCoApplicant,
+      main_ApplicantId ?? undefined,
+      co_ApplicantId ?? undefined, 
+      index
+    );
+  }
+
     getCurrentCoApplicantFromList() {
     const mainApplicantId = this.stepperService.getLoanId()?.[0];
     const index = this.stepperService.getCurrentCoApplicantIndex();
@@ -264,8 +276,15 @@ private async getSummarySection(sectionKey: string): Promise<any> {
 private async loadMonthlyExpenditureForBothFlows() {
   const key = this.getStorageKey();
 
-  const localData = localStorage.getItem(key);
-  const parsedLocal = localData ? JSON.parse(localData) : null;
+  // const localData = localStorage.getItem(key);
+  // const parsedLocal = localData ? JSON.parse(localData) : null;
+
+   const parsedLocal = this.storageservice.getStoredSectionData(
+      'monthlyExpenditureData',
+      this.applicationId,
+      this.applicantId,
+      this.isCoApplicant
+    );
 
   const applicantId = this.getApiApplicantId();
 
@@ -334,7 +353,14 @@ const normalizedSummary = this.normalizeMonthlyExpenditure(summarySection);
         items: snapshot.items
       };
 
-  localStorage.setItem(key, JSON.stringify(finalData));
+  // localStorage.setItem(key, JSON.stringify(finalData));
+    this.storageservice.saveSectionData(
+            'monthlyExpenditureData',
+            this.applicationId,
+            this.applicantId,
+            this.isCoApplicant,
+            JSON.stringify(finalData)
+          );
 
   this.calculateGrandTotal();
   this.stepperService.markStepCompleted(this.getStepRoute());
@@ -1311,8 +1337,14 @@ let data = res.data.data;
     }
 
     const key = this.getStorageKey();
-    localStorage.setItem(key, JSON.stringify(input));
-
+    // localStorage.setItem(key, JSON.stringify(input));
+ this.storageservice.saveSectionData(
+            'monthlyExpenditureData',
+            this.applicationId,
+            this.applicantId,
+            this.isCoApplicant,
+            JSON.stringify(input)
+          );
 
     if (this.isCoApplicant) {
       this.formSvc.co_monthlyExpenditureData = input;
@@ -1379,7 +1411,14 @@ let data = res.data.data;
             this.formSvc.monthlyExpenditureData = payload;
           }
 
-          localStorage.setItem(this.getStorageKey(), JSON.stringify(payload));
+          // localStorage.setItem(this.getStorageKey(), JSON.stringify(payload));
+           this.storageservice.saveSectionData(
+            'monthlyExpenditureData',
+            this.applicationId,
+            this.applicantId,
+            this.isCoApplicant,
+            JSON.stringify(payload)
+          );
 
           this.stepperService.markStepCompleted(stepRoute);
           this.stepperService.setStepData(stepRoute, this.monthlyExpenditureForm.getRawValue());

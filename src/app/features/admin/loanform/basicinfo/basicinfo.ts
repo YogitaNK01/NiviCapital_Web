@@ -15,6 +15,7 @@ import { Loanstepperservice } from '../../../../core/service/loanstepperservice'
 import { firstValueFrom } from 'rxjs';
 import { Messagebox } from '../../../systemdesign/messagebox/messagebox';
 import { Msgboxservice } from '../../../../core/service/msgboxservice';
+import { Storage } from '../../../../core/service/storage';
 @Component({
   selector: 'app-basicinfo',
   imports: [CommonModule, Inputfield, Buttons, ReactiveFormsModule, Checkbox, Otpsection],
@@ -64,10 +65,11 @@ export class Basicinfo {
 
   isSummaryEditMode = false;
   viewOnly = false;
+  hasExistingCif = false;
   // @Input() prefillPhone: string = '';
 
-  constructor(private fb: FormBuilder, public main: Main, private addcustomerservice: Addcustomerservice, private cd: ChangeDetectorRef,private msgBox:Msgboxservice,
-    private router: Router, private loanform: Loanformservice, private stepperService: Loanstepperservice, private route: ActivatedRoute) { }
+  constructor(private fb: FormBuilder, public main: Main, private addcustomerservice: Addcustomerservice, private cd: ChangeDetectorRef, private msgBox: Msgboxservice,
+    private router: Router, private loanform: Loanformservice, private stepperService: Loanstepperservice, private route: ActivatedRoute, private storageservice: Storage) { }
 
 
   async ngOnInit() {
@@ -80,13 +82,10 @@ export class Basicinfo {
     this.stepperService.restoreLoanIdFromSession();
 
 
-        this.route.queryParams.subscribe(params => {
-  const index = Number(params['coApplicantIndex']) || 1;
 
-  this.stepperService.setCurrentCoApplicantIndex(index);
+    const index = Number(this.route.snapshot.queryParams['coApplicantIndex']) || 1;
+    this.stepperService.setCurrentCoApplicantIndex(index);
 
-  this.reloadFormForCoapp();
-});
 
     let Allids = this.stepperService.getLoanId();
 
@@ -100,22 +99,22 @@ export class Basicinfo {
 
     this.stepperService.setCurrentCoApplicantIndex(currentIndex);
 
-  const isNewCoappFlow = this.isCoApplicant && mode === 'new';
+    const isNewCoappFlow = this.isCoApplicant && mode === 'new';
 
-  // ✅ restore old co-app only for EXISTING flow
-  if (this.isCoApplicant && !isNewCoappFlow) {
-    this.stepperService.restoreCoAppIdFromSession();
-  } else if (isNewCoappFlow) {
-    this.stepperService.clearCoAppId?.();
-    sessionStorage.removeItem('coAppIds');
-    sessionStorage.removeItem('coapp_cifdetails');
-  }
+    // ✅ restore old co-app only for EXISTING flow
+    if (this.isCoApplicant && !isNewCoappFlow) {
+      this.stepperService.restoreCoAppIdFromSession();
+    } else if (isNewCoappFlow) {
+      this.stepperService.clearCoAppId?.();
+      sessionStorage.removeItem('coAppIds');
+      sessionStorage.removeItem('coapp_cifdetails');
+    }
 
 
     const pendingContextRaw = sessionStorage.getItem('pendingCoAppContext');
     const pendingContext = pendingContextRaw ? JSON.parse(pendingContextRaw) : null;
 
-    
+
     this.sendotpId = isNewCoappFlow
       ? pendingContext?.userInitiateId || ''
       : params['id'];
@@ -170,114 +169,67 @@ export class Basicinfo {
 
     const currentCoapp = this.getCurrentCoApplicantFromList();
 
-  if (!isNewCoappFlow && currentCoapp?.applicantId) {
-    this.stepperService.setCo_appId(
-      currentCoapp.applicantId,
-      currentCoapp.applicationId || this.applicationId,
-      currentCoapp.name || '',
-      undefined,
-      this.stepperService.getCurrentCoApplicantIndex()
-    );
-  }
+const existingCoApplicantId =
+  currentCoapp?.applicantId ||
+  this.stepperService.getCo_appId()?.[0] ||
+  null;
 
-  const finalPhone = isNewCoappFlow
-    ? (queryPhone || '')
-    : (queryPhone || currentCoapp?.phone || '');
+this.hasExistingCif = !!existingCoApplicantId;
 
-  this.prefillPhone = finalPhone;
+if (this.hasExistingCif) {
+  this.otpVerifiedOk = true;
+  this.otpsent = false;
+}
 
-  this.registerForm.patchValue({
-    phone: finalPhone
-  }, { emitEvent: false });
 
-  // ✅ BRAND NEW COAPP: blank page, no old Roshan patch
-  if (isNewCoappFlow) {
-    this.resetBasicFormForNewCoapp(finalPhone);
+    if (!isNewCoappFlow && currentCoapp?.applicantId) {
+      this.stepperService.setCo_appId(
+        currentCoapp.applicantId,
+        currentCoapp.applicationId || this.applicationId,
+        currentCoapp.name || '',
+        undefined,
+        this.stepperService.getCurrentCoApplicantIndex()
+      );
+    }
+
+    const finalPhone = isNewCoappFlow
+      ? (queryPhone || '')
+      : (queryPhone || currentCoapp?.phone || '');
+
+    this.prefillPhone = finalPhone;
+
+    this.registerForm.patchValue({
+      phone: finalPhone
+    }, { emitEvent: false });
+
+    // ✅ BRAND NEW COAPP: blank page, no old Roshan patch
+    if (isNewCoappFlow) {
+      this.resetBasicFormForNewCoapp(finalPhone);
+
+      if (this.viewOnly) {
+        this.registerForm.disable({ emitEvent: false });
+      }
+
+      return;
+    }
+
+    // ✅ EXISTING COAPP: patch from summary/draft/local
+    await this.loadBasicForBothFlows();
+
+    const isSubmittedCoapp =
+      ['COMPLETED', 'SUBMITTED'].includes(
+        (currentCoapp?.status || '').toUpperCase()
+      );
+
+    if (!this.lastSavedPayload && !isSubmittedCoapp) {
+      this.resetBasicFormForNewCoapp(finalPhone);
+    }
 
     if (this.viewOnly) {
       this.registerForm.disable({ emitEvent: false });
     }
 
-    return;
-  }
 
-  // ✅ EXISTING COAPP: patch from summary/draft/local
-  await this.loadBasicForBothFlows();
-
-  const isSubmittedCoapp =
-    ['COMPLETED', 'SUBMITTED'].includes(
-      (currentCoapp?.status || '').toUpperCase()
-    );
-
-  if (!this.lastSavedPayload && !isSubmittedCoapp) {
-    this.resetBasicFormForNewCoapp(finalPhone);
-  }
-
-  if (this.viewOnly) {
-    this.registerForm.disable({ emitEvent: false });
-  }
-
-
-
-    // if (this.loanform.isEditFlow()) {
-    //   this.patchFromSummary();
-    //   return;
-    // }
-
-
-    // const key = this.getStorageKey();
-    // const localData = localStorage.getItem(key);
-    // const parsedLocal = localData ? JSON.parse(localData) : null;
-
-    // // const apiData = await this.getSavedbasicInfo();
-
-    // let finalData = null;
-
-
-    // //  1. First priority: indexed local data
-    // if (parsedLocal && this.isBasicInfoComplete(parsedLocal)) {
-    //   finalData = parsedLocal;
-    // }
-
-    // //  2. API only if CIF already generated for this coapp
-    // const coApplicantApplicantId = this.getCoApplicantApplicantId();
-
-    // if (!finalData && coApplicantApplicantId) {
-    //   const apiData = await this.getSavedbasicInfo(coApplicantApplicantId);
-
-    //   if (apiData && this.isBasicInfoComplete(apiData)) {
-    //     finalData = apiData;
-    //     localStorage.setItem(key, JSON.stringify(apiData));
-    //   }
-    // }
-
-    // //  3. Patch only if actual coapp data found
-    // if (finalData) {
-    //   this.loanform.co_basicInfoData = finalData;
-
-    //   this.patchBasicInfo(finalData);
-
-    //   this.lastSavedPayload = this.buildBasicPayload(
-    //     this.registerForm.getRawValue()
-    //   );
-
-    //   this.stepperService.markStepCompleted('co-basicinfo');
-
-    // } else {
-    //   //  new coapp: keep only phone prefilled
-    //   this.registerForm.patchValue({
-    //     fname: '',
-    //     mname: '',
-    //     lname: '',
-    //     email: '',
-    //     phone: finalPhone
-    //   }, { emitEvent: false });
-
-    //   this.ismiddlename = false;
-    //   this.registerForm.get('mname')?.enable({ emitEvent: false });
-
-    //   this.lastSavedPayload = null;
-    // }
 
   }
   get f() {
@@ -352,7 +304,16 @@ export class Basicinfo {
 
       if (apiData && this.isBasicInfoComplete(apiData)) {
         finalData = apiData;
-        localStorage.setItem(key, JSON.stringify(apiData));
+        // localStorage.setItem(key, JSON.stringify(apiData));
+
+        this.storageservice.saveSectionData(
+          'basicInfo',
+          this.applicationId,
+          this.applicantId,
+          this.isCoApplicant,
+          JSON.stringify(apiData)
+        );
+
       }
     }
 
@@ -366,6 +327,7 @@ export class Basicinfo {
     }
   }
   resendOtp() {
+     if (this.hasExistingCif) return;
     this.resetCounter++;
     console.log("Resend OTP API call here");
 
@@ -391,6 +353,7 @@ export class Basicinfo {
 
   sendOtp() {
     console.log("send otp");
+     if (this.hasExistingCif) return;
     this.loanform.setMobileNumber(this.prefillPhone);
     this.otpsent = true;
     const input = {
@@ -485,19 +448,35 @@ export class Basicinfo {
 
   getTempStorageKey() {
     const index = this.stepperService.getCurrentCoApplicantIndex();
-    return `basicInfoData_coapp_temp_${index}`;
+    return `basicInfoData_coapp_temp_${this.applicationId}_${index}`;
   }
 
-  getStorageKey() {
+  getStorageKey1() {
+    const index = this.stepperService.getCurrentCoApplicantIndex();
     const coApplicantId = this.stepperService.getCo_appId()?.[0];
 
     if (coApplicantId) {
-      return `basicInfoData_coapp_${coApplicantId}`;
+      return `basicInfoData_coapp_${this.applicationId}_${index}`
+      //`basicInfoData_coapp_${coApplicantId}`;
     }
-
     return this.getTempStorageKey();
   }
+ 
+  getStorageKey() {
+    const main_ApplicantId = this.stepperService.getLoanId()?.[0];
+    const co_ApplicantId = this.stepperService.getCo_appId()?.[0];
+    const index = this.stepperService.getCurrentCoApplicantIndex();
 
+    return this.storageservice.getStorageKey(
+      'basicInfo',
+      this.applicationId,
+      this.applicantId,
+      this.isCoApplicant,
+      main_ApplicantId ?? undefined,
+      co_ApplicantId ?? undefined, 
+      index
+    );
+  }
   getMainApplicantId() {
     return this.stepperService.getLoanId()?.[0];
   }
@@ -514,8 +493,15 @@ export class Basicinfo {
   private async loadBasicForBothFlows() {
     const key = this.getStorageKey();
 
-    const localData = localStorage.getItem(key);
-    const parsedLocal = localData ? JSON.parse(localData) : null;
+    // const localData = localStorage.getItem(key);
+    // const parsedLocal = localData ? JSON.parse(localData) : null;
+
+    const parsedLocal = this.storageservice.getStoredSectionData(
+      'basicInfo',
+      this.applicationId,
+      this.applicantId,
+      this.isCoApplicant
+    );
 
 
     const currentCoapp = this.getCurrentCoApplicantFromList();
@@ -561,7 +547,16 @@ export class Basicinfo {
       this.registerForm.getRawValue()
     );
 
-    localStorage.setItem(key, JSON.stringify(finalData));
+    // localStorage.setItem(key, JSON.stringify(finalData));
+
+    this.storageservice.saveSectionData(
+      'basicInfo',
+      this.applicationId,
+      this.applicantId,
+      this.isCoApplicant,
+      finalData
+    );
+
 
     this.stepperService.markStepCompleted('co-basicinfo');
     this.cd.detectChanges();
@@ -579,10 +574,19 @@ export class Basicinfo {
       this.registerForm.getRawValue()
     );
 
-    localStorage.setItem(
-      this.getStorageKey(),
-      JSON.stringify(this.lastSavedPayload)
+    // localStorage.setItem(
+    //   this.getStorageKey(),
+    //   JSON.stringify(this.lastSavedPayload)
+    // );
+
+    this.storageservice.saveSectionData(
+      'basicInfo',
+      this.applicationId,
+      this.applicantId,
+      this.isCoApplicant,
+      this.lastSavedPayload
     );
+
   }
 
   patchBasicInfo(data: any) {
@@ -630,10 +634,7 @@ export class Basicinfo {
   updateCoApplicantListAfterCif() {
     const index = this.stepperService.getCurrentCoApplicantIndex();
 
-    // always use MAIN applicant id for dashboard list
-    const mainApplicantId = this.stepperService.getLoanId()?.[0];
-
-    const listKey = `coApplicants_${mainApplicantId}`;
+    const listKey = `coApplicants_${this.applicationId}`;
 
     const saved = localStorage.getItem(listKey);
 
@@ -677,7 +678,7 @@ export class Basicinfo {
 
     localStorage.setItem(listKey, JSON.stringify(list));
   }
-  
+
   getCurrentCoApplicantFromList() {
     const mainApplicantId = this.stepperService.getLoanId()?.[0];
     const index = this.stepperService.getCurrentCoApplicantIndex();
@@ -760,43 +761,52 @@ export class Basicinfo {
     this.stepperService.next();
   }
   saveExit() {
-     this.msgBox.open({
+    this.msgBox.open({
       title: 'Are you sure you want to exit?',
       message: ``,
       showCancel: true,
       onOk: () => {
-    let formdata = this.registerForm.getRawValue();
-    const input = this.buildBasicPayload(formdata);
+        let formdata = this.registerForm.getRawValue();
+        const input = this.buildBasicPayload(formdata);
 
-    const key = this.getStorageKey();
-    localStorage.setItem(key, JSON.stringify(input));
-    this.loanform.co_basicInfoData = input;
+        const key = this.getStorageKey();
+        // localStorage.setItem(key, JSON.stringify(input));
+
+        this.storageservice.saveSectionData(
+          'basicInfo',
+          this.applicationId,
+          this.applicantId,
+          this.isCoApplicant,
+          input
+        );
+
+        this.loanform.co_basicInfoData = input;
 
 
-    const coApplicantApplicantId = this.stepperService.getCo_appId()?.[0];
+        const coApplicantApplicantId = this.stepperService.getCo_appId()?.[0];
 
-    // Before CIF, save only local
-    if (!coApplicantApplicantId) {
-      this.lastSavedPayload = { ...input };
-      return;
-    }
+        // Before CIF, save only local
+        if (!coApplicantApplicantId) {
+          this.lastSavedPayload = { ...input };
+          return;
+        }
 
 
-    const inputdata = {
-      action: "auto-save",
-      sectionKey: "BASIC_INFO",
-      applicationId: this.applicationId,
-      applicantId: coApplicantApplicantId,
-      jsonData: input
-    };
+        const inputdata = {
+          action: "auto-save",
+          sectionKey: "BASIC_INFO",
+          applicationId: this.applicationId,
+          applicantId: coApplicantApplicantId,
+          jsonData: input
+        };
 
-    this.loanform.saveandExitBasicinfo(inputdata).subscribe({
-      next: () => {
-        this.lastSavedPayload = { ...input };
+        this.loanform.saveandExitBasicinfo(inputdata).subscribe({
+          next: () => {
+            this.lastSavedPayload = { ...input };
+          }
+        });
+        this.router.navigate(['/admin/losoperation']);
       }
-    });
-     this.router.navigate(['/admin/losoperation']);
-     }
     });
   }
   getSavedbasicInfo(coApplicantApplicantId: any): Promise<any> {
@@ -860,24 +870,24 @@ export class Basicinfo {
   }
 
   reloadFormForCoapp() {
-  const key = this.getStorageKey();
+    const key = this.getStorageKey();
 
-  const saved = localStorage.getItem(key);
-  const parsed = saved ? JSON.parse(saved) : null;
+    const saved = localStorage.getItem(key);
+    const parsed = saved ? JSON.parse(saved) : null;
 
-  if (!parsed) {
-    this.registerForm.reset();
-    return;
-  }
+    if (!parsed) {
+      this.registerForm.reset();
+      return;
+    }
 
-  //  if (this.isCoApplicant) {
-  //     this.patchCoApplicantInfo(parsed);
-  //   } else {
-     this.patchBasicInfo(parsed);
+    //  if (this.isCoApplicant) {
+    //     this.patchCoApplicantInfo(parsed);
+    //   } else {
+    this.patchBasicInfo(parsed);
     // }
 
-  // this.patchCoApplicantInfo(parsed); // or patchGeneralInfo / patchAdditionalInfo
-}
+    // this.patchCoApplicantInfo(parsed); // or patchGeneralInfo / patchAdditionalInfo
+  }
   back() {
     this.loanform.coappStep = 1;
     this.router.navigate(['../coapplicantinfo']);
@@ -902,7 +912,16 @@ export class Basicinfo {
 
 
     if (existingCoApplicantId) {
-      localStorage.setItem(this.getStorageKey(), JSON.stringify(input));
+      // localStorage.setItem(this.getStorageKey(), JSON.stringify(input));
+
+      this.storageservice.saveSectionData(
+        'basicInfo',
+        this.applicationId,
+        this.applicantId,
+        this.isCoApplicant,
+        input
+      );
+
       this.loanform.co_basicInfoData = input;
       this.lastSavedPayload = { ...input };
 
@@ -915,11 +934,14 @@ export class Basicinfo {
     this.addcustomerservice.generateCIF(input).subscribe({
       next: (res) => {
         console.log("cif genrated", res);
+        this.hasExistingCif = true;
+        this.otpVerifiedOk = true;
+        this.otpsent = false;
         this.loanform.co_basicInfoData = input
 
         const index = this.stepperService.getCurrentCoApplicantIndex();
         sessionStorage.setItem('coapp_cifdetails', JSON.stringify(res.data));
-       
+
         this.co_applicantId = res.data.applicantId
         this.co_applicationId = res.data.applicationId
         this.co_applicantName = res.data.fullName || `${formdata.fname} ${formdata.lname}`.trim();
@@ -945,14 +967,24 @@ export class Basicinfo {
 
         sessionStorage.setItem('co-loanContextData', JSON.stringify(payload));
 
-        const finalKey = `basicInfoData_coapp_${this.co_applicantId}`;
+
+        // const finalKey = `basicInfoData_coapp_${this.co_applicantId}`;
         const tempKey = this.getTempStorageKey();
 
-        localStorage.setItem(finalKey, JSON.stringify(input));
+        // localStorage.setItem(finalKey, JSON.stringify(input));
+
+        this.storageservice.saveSectionData(
+          'basicInfo',
+          this.applicationId,
+          this.applicantId,
+          this.isCoApplicant,
+          input
+        );
+        this.updateCoApplicantListAfterCif();
+
         localStorage.removeItem(tempKey);
 
 
-        this.updateCoApplicantListAfterCif();
 
         this.lastSavedPayload = { ...input };
 
@@ -965,7 +997,7 @@ export class Basicinfo {
           queryParams: {
             mode: 'existing',
             coApplicantIndex: this.stepperService.getCurrentCoApplicantIndex(),
-           
+
           },
           queryParamsHandling: 'merge',
           replaceUrl: true

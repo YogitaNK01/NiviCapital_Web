@@ -11,6 +11,7 @@ import { Main } from '../../../../core/service/main';
 import { Msgboxservice } from '../../../../core/service/msgboxservice';
 import { groupBy } from 'rxjs';
 import { firstValueFrom } from 'rxjs';
+import { Storage } from '../../../../core/service/storage';
 interface OptionItem {
   label: string;
   value: string;
@@ -81,7 +82,7 @@ export class Estimateexpense {
   isSummaryEditMode = false;
   viewOnly = false;
   constructor(private fb: FormBuilder, private stepperService: Loanstepperservice, private cd: ChangeDetectorRef, private loanformservice: Loanformservice,
-    private router: Router, private route: ActivatedRoute, public main: Main, private msgBox: Msgboxservice) { }
+    private router: Router, private route: ActivatedRoute, public main: Main, private msgBox: Msgboxservice,private storageservice:Storage) { }
 
   async ngOnInit() {
     this.isCoApplicant = this.router.url.includes('co-applicant');
@@ -243,11 +244,32 @@ export class Estimateexpense {
 
   }
 
-  getStorageKey() {
-    return `estimateExpenseData_main_${this.stepperService.getLoanId()?.[0]}`;
-    // return this.isCoApplicant
-    //   ? `estimateExpenseData_coapp_${this.applicantId}`
-    //   : `estimateExpenseData_main_${this.applicantId}`;
+  getStorageKey11() {
+    return `estimateExpenseData_main_${this.applicationId}_${this.stepperService.getLoanId()?.[0]}`;
+    
+  }
+   getStorageKey() {
+    return this.storageservice.getStorageKey(
+      'estimateExpenseData',
+      this.applicationId,
+      this.applicantId,
+      this.isCoApplicant
+    );
+  }
+    getStorageKey1() {
+    const main_ApplicantId = this.stepperService.getLoanId()?.[0];
+    const co_ApplicantId = this.stepperService.getCo_appId()?.[0];
+    const index = this.stepperService.getCurrentCoApplicantIndex();
+
+    return this.storageservice.getStorageKey(
+      'estimateExpenseData',
+      this.applicationId,
+      this.applicantId,
+      this.isCoApplicant,
+      main_ApplicantId ?? undefined,
+      co_ApplicantId ?? undefined, 
+      index
+    );
   }
   getStepRoute() {
     return this.isCoApplicant ? 'co-expense' : 'expense';

@@ -207,11 +207,27 @@ export class Referenceinfo implements OnInit {
   }
   getStorageKey() {
     const index = this.stepperService.getCurrentCoApplicantIndex();
-    // return `kycinfo_coapp_${this.applicantId}_${index}`;
-    return this.isCoApplicant
-      ? `referenceinfoData_coapp_${this.applicantId}_${index}`
-      : `referenceinfoData_main_${this.applicantId}`;
+    // return this.isCoApplicant
+    //   ? `referenceinfoData_coapp_${this.applicantId}_${index}`
+    //   : `referenceinfoData_main_${this.applicantId}`;
+
+      return  `referenceinfoData_main_${this.applicationId}_${this.stepperService.getLoanId()?.[0]}`;
   }
+  //   getStorageKey1() {
+  //   const main_ApplicantId = this.stepperService.getLoanId()?.[0];
+  //   const co_ApplicantId = this.stepperService.getCo_appId()?.[0];
+  //   const index = this.stepperService.getCurrentCoApplicantIndex();
+
+  //   return this.storageservice.getStorageKey(
+  //     'referenceinfoData',
+  //     this.applicationId,
+  //     this.applicantId,
+  //     this.isCoApplicant,
+  //     main_ApplicantId ?? undefined,
+  //     co_ApplicantId ?? undefined, 
+  //     index
+  //   );
+  // }
   getStepRoute() {
     return this.isCoApplicant ? 'co-referenceinfo' : 'referenceinfo';
   }

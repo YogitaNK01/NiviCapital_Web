@@ -2586,11 +2586,11 @@ export class Educationinfo implements OnInit {
 
 
       fd.append('instituteId', form.get('institutename')?.value);
-      fd.append('title', form.get('institutetitle')?.value);
+      fd.append('otherInstituteName', form.get('institutetitle')?.value);
       fd.append('yearOfPassing', form.get('passingyear')?.value);
       fd.append('percentageCgpa', form.get('per_cgpa')?.value);
       fd.append('locationId', form.get('location')?.value);
-      fd.append('otherLocation', form.get('otherLocation')?.value);
+      fd.append('otherLocationName', form.get('otherLocation')?.value);
 
     }
 

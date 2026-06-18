@@ -11,7 +11,7 @@ import { Main } from '../../../../core/service/main';
 import { Msgboxservice } from '../../../../core/service/msgboxservice';
 import { Title } from '@angular/platform-browser';
 import { forkJoin, firstValueFrom } from 'rxjs';
-
+import { Storage } from '../../../../core/service/storage';
 interface Bank_lenderOption {
   value: string;
   label: string;
@@ -114,7 +114,7 @@ export class Liabilitiesinfo {
   isSummaryEditMode = false;
   viewOnly = false;
   private isPatching = false;
-  constructor(private fb: FormBuilder, public main: Main, private route: ActivatedRoute, private msgBox: Msgboxservice, private router: Router,
+  constructor(private fb: FormBuilder, public main: Main, private route: ActivatedRoute, private msgBox: Msgboxservice, private router: Router,private storageservice:Storage,
     private stepperService: Loanstepperservice, private formSvc: Loanformservice, private cd: ChangeDetectorRef) { }
 
 
@@ -230,15 +230,29 @@ export class Liabilitiesinfo {
 
   }
 
-  getStorageKey() {
+  getStorageKey1() {
     const index = this.stepperService.getCurrentCoApplicantIndex();
     const coApplicantId = this.stepperService.getCo_appId()?.[0];
 
-    return this.isCoApplicant
-      ? `liabilitiesinfoData_coapp_${coApplicantId || 'temp_' + index}`
-      : `liabilitiesinfoData_main_${this.stepperService.getLoanId()?.[0]}`;
+return this.isCoApplicant
+      ? `liabilitiesinfoData_coapp_${this.applicationId}_${index}`
+      : `liabilitiesinfoData_main_${this.applicationId}_${this.stepperService.getLoanId()?.[0]}`;
+  }
 
+    getStorageKey() {
+    const main_ApplicantId = this.stepperService.getLoanId()?.[0];
+    const co_ApplicantId = this.stepperService.getCo_appId()?.[0];
+    const index = this.stepperService.getCurrentCoApplicantIndex();
 
+    return this.storageservice.getStorageKey(
+      'liabilitiesinfoData',
+      this.applicationId,
+      this.applicantId,
+      this.isCoApplicant,
+      main_ApplicantId ?? undefined,
+      co_ApplicantId ?? undefined, 
+      index
+    );
   }
   getCurrentCoApplicantFromList() {
     const mainApplicantId = this.stepperService.getLoanId()?.[0];
@@ -349,15 +363,19 @@ export class Liabilitiesinfo {
   private async loadliabilityForBothFlows() {
     const key = this.getStorageKey();
 
-    const localData = localStorage.getItem(key);
-    const parsedLocal = localData ? JSON.parse(localData) : null;
+    // const localData = localStorage.getItem(key);
+    // const parsedLocal = localData ? JSON.parse(localData) : null;
+
+     const parsedLocal = this.storageservice.getStoredSectionData(
+      'liabilitiesinfoData',
+      this.applicationId,
+      this.applicantId,
+      this.isCoApplicant
+    );
 
     const apiApplicantId = this.getApiApplicantId();
 
-    // const draftData = apiApplicantId
-    //   ? await this.getSavedLiability(apiApplicantId)
-    //   : null;
-    // const summarySection = await this.getSummarySection('liabilities');
+  
 
     const [draftData, summarySection] = await Promise.all([
       apiApplicantId ? this.getSavedLiability(apiApplicantId) : Promise.resolve(null),
@@ -424,7 +442,14 @@ export class Liabilitiesinfo {
         items: snapshot.items
       });
 
-    localStorage.setItem(key, JSON.stringify(finalData));
+    // localStorage.setItem(key, JSON.stringify(finalData));
+      this.storageservice.saveSectionData(
+            'liabilitiesinfoData',
+            this.applicationId,
+            this.applicantId,
+            this.isCoApplicant,
+             JSON.stringify(finalData)
+          );
 
     this.liabilityForm.markAsPristine();
     this.calculateGrandTotal();
@@ -1897,7 +1922,14 @@ export class Liabilitiesinfo {
       items: []
     };
 
-    localStorage.setItem(this.getStorageKey(), JSON.stringify(input));
+    // localStorage.setItem(this.getStorageKey(), JSON.stringify(input));
+      this.storageservice.saveSectionData(
+            'liabilitiesinfoData',
+            this.applicationId,
+            this.applicantId,
+            this.isCoApplicant,
+             JSON.stringify(input)
+          );
 
     if (this.isCoApplicant) {
       this.formSvc.co_liabilitiesInfoData = input;
@@ -1933,8 +1965,14 @@ export class Liabilitiesinfo {
 
 
     const key = this.getStorageKey();
-    localStorage.setItem(key, JSON.stringify(input));
-
+    // localStorage.setItem(key, JSON.stringify(input));
+  this.storageservice.saveSectionData(
+            'liabilitiesinfoData',
+            this.applicationId,
+            this.applicantId,
+            this.isCoApplicant,
+             JSON.stringify(input)
+          );
 
     if (this.isCoApplicant) {
       this.formSvc.co_liabilitiesInfoData = input;
@@ -2264,7 +2302,14 @@ export class Liabilitiesinfo {
         this.formSvc.liabilitiesInfoData = payload;
       }
 
-      localStorage.setItem(this.getStorageKey(), JSON.stringify(payload));
+      // localStorage.setItem(this.getStorageKey(), JSON.stringify(payload));
+        this.storageservice.saveSectionData(
+            'liabilitiesinfoData',
+            this.applicationId,
+            this.applicantId,
+            this.isCoApplicant,
+             JSON.stringify(payload)
+          );
 
       const stepRoute = this.getStepRoute();
       this.stepperService.markStepCompleted(stepRoute);
@@ -2314,8 +2359,15 @@ export class Liabilitiesinfo {
           }
 
 
-          const key = this.getStorageKey();
-          localStorage.setItem(key, JSON.stringify(payload));
+          // const key = this.getStorageKey();
+          // localStorage.setItem(key, JSON.stringify(payload));
+            this.storageservice.saveSectionData(
+            'liabilitiesinfoData',
+            this.applicationId,
+            this.applicantId,
+            this.isCoApplicant,
+             JSON.stringify(payload)
+          );
           this.stepperService.markStepCompleted(stepRoute);
           this.stepperService.setStepData(stepRoute, this.liabilityForm.getRawValue());
           this.stepperService.next();
@@ -2467,8 +2519,16 @@ export class Liabilitiesinfo {
         console.log("resp---", res);
         if (res.status == "success") {
           this.formSvc.liabilitiesInfoData = payload
-          const key = `liabilitiesinfoData_main_${this.applicantId}`;
-          localStorage.setItem(key, JSON.stringify(payload));
+          // const key = `liabilitiesinfoData_main_${this.applicantId}`;
+          // localStorage.setItem(key, JSON.stringify(payload));
+
+            this.storageservice.saveSectionData(
+            'liabilitiesinfoData',
+            this.applicationId,
+            this.applicantId,
+            this.isCoApplicant,
+             JSON.stringify(payload)
+          );
           this.stepperService.markStepCompleted('liabilitiesinfo');
           this.stepperService.setStepData('liabilitiesinfo', this.liabilityForm.getRawValue());
           this.stepperService.next();

@@ -126,21 +126,21 @@
                                 <app-inputfield type="tel" formControlName="phone" name="phone" [required]="true"
                                     pattern="^[6-9][0-9]{9}$" label="Mobile Number" placeholder="Enter Mobile Number"
                                     helpText="Help text" class="w-100" minlength="10" [maxlength]="10"
-                                    [readonly]="!otpsent || !otpVerifiedOk"
+                                    [readonly]="hasExistingCif  || !otpVerifiedOk"
                                     (input)="main.restrictInput($event, 'number')" [showPhonePrefix]="true"
                                     [showPhonePrefixnumber]="true"
                                     [rightButtonText]="!otpsent && !otpVerifiedOk ? 'Send OTP' : ''"
                                     (rightButtonClick)="sendOtp()" [state]="otpState"></app-inputfield>
 
                             </div>
-                            <div *ngIf="!otpsent" class="d-flex">
+                            <div *ngIf="!hasExistingCif && !otpsent" class="d-flex">
 
                                 <app-buttons label="Send OTP" class="btncustomClass primary" [outline]="true"
                                     style="width: 135px;" (click)="sendOtp()"></app-buttons>
                             </div>
                         </div>
 
-                        @if (otpsent && !otpVerifiedOk) {
+                        @if (!hasExistingCif && otpsent && !otpVerifiedOk) {
                         <div class="col-lg-6 col-sm-12 d-flex align-items-end justify-content-center ">
                             <app-otpsection [length]="6" (otpSubmit)="onOtpSubmit($event)" (timer)="onTimer($event)"
                                 [resetTrigger]="resetCounter" (otpVerifiedSuccess)="onOtpVerifiedSuccess($event)"
@@ -159,7 +159,7 @@
                     </div>
                 </div>
 
-                @if (otpsent && !otpVerifiedOk) {
+                @if (!hasExistingCif && otpsent && !otpVerifiedOk) {
                 <div class="row">
                     <div class="col-6"></div>
 
@@ -223,7 +223,7 @@
             </app-buttons>
             <!-- <app-buttons type="button" label="Next" class="btn btncustomClass" color="primary" (click)="next1()"  [disabled]="registerForm.invalid || !otpVerifiedOk"></app-buttons> -->
             <app-buttons type="button" label="Next" class="btn btncustomClass" color="primary" (click)="next()" 
-                [disabled]="registerForm.invalid || !otpVerifiedOk"> </app-buttons>
+                [disabled]="registerForm.invalid || (!otpVerifiedOk && !hasExistingCif)"> </app-buttons>
 
         </div>
     </div>

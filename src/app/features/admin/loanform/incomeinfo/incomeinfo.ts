@@ -15,6 +15,7 @@ import { Msgboxservice } from '../../../../core/service/msgboxservice';
 import { forkJoin, of } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
 import { firstValueFrom } from 'rxjs';
+import { Storage } from '../../../../core/service/storage';
 interface Document {
   title: string;
   name?: string;
@@ -268,7 +269,7 @@ export class Incomeinfo {
   isSummaryEditMode = false;
   viewOnly = false;
 
-  constructor(private fb: FormBuilder, private stepperService: Loanstepperservice, private router: Router, private cd: ChangeDetectorRef, private msgBox: Msgboxservice, public loanformservice: Loanformservice, private route: ActivatedRoute, public main: Main) { }
+  constructor(private fb: FormBuilder, private stepperService: Loanstepperservice, private router: Router, private cd: ChangeDetectorRef, private msgBox: Msgboxservice, public loanformservice: Loanformservice, private route: ActivatedRoute, public main: Main, private storageservice: Storage) { }
   async ngOnInit(): Promise<void> {
     this.isCoApplicant = this.router.url.includes('co-applicant');
 
@@ -350,79 +351,54 @@ export class Incomeinfo {
     await this.loadIncomeForBothFlows();
 
     const key = this.getStorageKey();
-    // 1 try stepper cache
-    // const stepData = this.stepperService.getStepData(this.getStepRoute());
 
-    // if (stepData) {
-    //   this.uploadedrespfiles = stepData.uploadedFiles || [];
-    //   this.otherIncomeSlots = stepData.otherIncomeSlots || [];
-    //   this.otherBusinessSlots = stepData.otherBusinessSlots || [];
-
-
-    //   this.getAllDocuments();
-    //   this.restoreSlotsFromDocuments();
-    //   return;
-
-
-    // }
-    // if (this.loanformservice.isEditFlow()) {
-    //   setTimeout(() => {
-    //     this.patchFromSummary();
-    //   }, 300);
-    // } else {
-
-    //   //2. Then try localStorage
-
-    //   const stored = localStorage.getItem(this.getStorageKey());
-    //   if (stored) {
-    //     const parsed = JSON.parse(stored);
-    //     this.uploadedrespfiles = parsed.uploadedFiles || parsed || [];
-    //     this.otherIncomeSlots = parsed.otherIncomeSlots || [];
-    //     this.otherBusinessSlots = parsed.otherBusinessSlots || [];
-
-    //     this.getAllDocuments();
-    //     this.restoreSlotsFromDocuments();
-
-    //     if (this.allDocuments.length > 0) {
-    //       return; // ✅ already restored, no API needed
-    //     }
-
-    //   }
-
-
-
-    //   // 3. Then call API.
-    //   const applicantId = this.getApiApplicantId();
-
-    //   if (!applicantId) {
-    //     console.error('ApplicantId not found for photo upload');
-    //     return;
-    //   }
-
-    //   const savedDraftData = await this.getSavedIncomeData(applicantId);
-
-    //   if (savedDraftData?.length) {
-    //     this.restoreIncomeDraftData(savedDraftData);
-    //   }
-    // }
   }
 
-  getStorageKey() {
+  getStorageKey1() {
     const index = this.stepperService.getCurrentCoApplicantIndex();
     const coApplicantId = this.stepperService.getCo_appId()?.[0];
     return this.isCoApplicant
-      ? `IncomeInfoData_coapp_${coApplicantId || 'temp_' + index}`
-      : `IncomeInfoData_main_${this.stepperService.getLoanId()?.[0]}`;
+      ? `IncomeInfoData_coapp_${this.applicationId}_${index}`
+      : `IncomeInfoData_main_${this.applicationId}_${this.stepperService.getLoanId()?.[0]}`;
+  }
+  getStorageKey() {
+    const main_ApplicantId = this.stepperService.getLoanId()?.[0];
+    const co_ApplicantId = this.stepperService.getCo_appId()?.[0];
+    const index = this.stepperService.getCurrentCoApplicantIndex();
 
-
+    return this.storageservice.getStorageKey(
+      'IncomeInfoData',
+      this.applicationId,
+      this.applicantId,
+      this.isCoApplicant,
+      main_ApplicantId ?? undefined,
+      co_ApplicantId ?? undefined,
+      index
+    );
   }
   private async loadIncomeForBothFlows() {
     const key = this.getStorageKey();
 
     // 1. Restore stepper cache/local first only for quick UI
     const stepData = this.stepperService.getStepData(this.getStepRoute());
-    const localData = localStorage.getItem(key);
-    const parsedLocal = localData ? JSON.parse(localData) : null;
+    // const localData = localStorage.getItem(key);
+    // const parsedLocal = localData ? JSON.parse(localData) : null;
+
+    const parsedLocal = this.storageservice.getStoredSectionData(
+      'IncomeInfoData',
+      this.applicationId,
+      this.applicantId,
+      this.isCoApplicant
+    );
+    let safeLocal = parsedLocal;
+
+    if (typeof safeLocal === 'string') {
+      try {
+        safeLocal = JSON.parse(safeLocal);
+      } catch {
+        safeLocal = null;
+      }
+    }
 
     if (stepData) {
       this.restoreIncomeStepData(stepData);
@@ -540,6 +516,15 @@ export class Incomeinfo {
   private restoreIncomeStepData(data: any) {
     if (!data) return;
 
+    
+ if (typeof data === 'string') {
+    try {
+      data = JSON.parse(data);
+    } catch {
+      return;
+    }
+  }
+
     this.uploadedrespfiles = data.uploadedFiles || data || [];
     this.otherIncomeSlots = data.otherIncomeSlots || [];
     this.otherBusinessSlots = data.otherBusinessSlots || [];
@@ -586,7 +571,7 @@ export class Incomeinfo {
     const mainApplicantId = this.stepperService.getLoanId()?.[0];
     const index = this.stepperService.getCurrentCoApplicantIndex();
 
-    const saved = localStorage.getItem(`coApplicants_${mainApplicantId}`);
+    const saved = localStorage.getItem(`coApplicants_${this.applicationId}`);
     const list = saved ? JSON.parse(saved) : [];
 
     return list.find((x: any) => Number(x.index) === Number(index));
@@ -721,7 +706,14 @@ export class Incomeinfo {
           otherBusinessSlots: this.otherBusinessSlots
         };
 
-        localStorage.setItem(this.getStorageKey(), JSON.stringify(stepData));
+        // localStorage.setItem(this.getStorageKey(), JSON.stringify(stepData));
+        this.storageservice.saveSectionData(
+          'IncomeInfoData',
+          this.applicationId,
+          this.applicantId,
+          this.isCoApplicant,
+          stepData
+        );
         this.stepperService.setStepData(this.getStepRoute(), stepData);
 
         this.getAllDocuments();
@@ -1016,7 +1008,15 @@ export class Incomeinfo {
           otherBusinessSlots: this.otherBusinessSlots
         };
 
-        localStorage.setItem(this.getStorageKey(), JSON.stringify(stepData));
+        // localStorage.setItem(this.getStorageKey(), JSON.stringify(stepData));
+        this.storageservice.saveSectionData(
+          'IncomeInfoData',
+          this.applicationId,
+          this.applicantId,
+          this.isCoApplicant,
+          stepData
+        );
+
         this.stepperService.setStepData(this.getStepRoute(), stepData);
 
         // localStorage.setItem(keyLocal, JSON.stringify(this.uploadedrespfiles));
@@ -1272,7 +1272,14 @@ export class Incomeinfo {
       otherBusinessSlots: this.otherBusinessSlots
     };
 
-    localStorage.setItem(this.getStorageKey(), JSON.stringify(stepData));
+    // localStorage.setItem(this.getStorageKey(), JSON.stringify(stepData));
+    this.storageservice.saveSectionData(
+      'IncomeInfoData',
+      this.applicationId,
+      this.applicantId,
+      this.isCoApplicant,
+      stepData
+    );
     this.stepperService.setStepData(this.getStepRoute(), stepData);
 
     if (this.isCoApplicant) {
@@ -1470,8 +1477,14 @@ export class Incomeinfo {
 
     this.stepperService.setStepData(this.getStepRoute(), stepData);
 
-    localStorage.setItem(this.getStorageKey(), JSON.stringify(stepData));
-
+    // localStorage.setItem(this.getStorageKey(), JSON.stringify(stepData));
+    this.storageservice.saveSectionData(
+      'IncomeInfoData',
+      this.applicationId,
+      this.applicantId,
+      this.isCoApplicant,
+      stepData
+    );
     this.cd.detectChanges();
   }
   restoreIncomeDraftData(savedResponses: any[]): void {
@@ -1722,7 +1735,14 @@ export class Incomeinfo {
     }
 
     this.stepperService.setStepData(this.getStepRoute(), stepData);
-    localStorage.setItem(this.getStorageKey(), JSON.stringify(stepData));
+    // localStorage.setItem(this.getStorageKey(), JSON.stringify(stepData));
+    this.storageservice.saveSectionData(
+      'IncomeInfoData',
+      this.applicationId,
+      this.applicantId,
+      this.isCoApplicant,
+      stepData
+    );
 
     this.cd.detectChanges();
 
@@ -1969,58 +1989,64 @@ export class Incomeinfo {
     }
   }
   saveExit() {
-      this.msgBox.open({
+    this.msgBox.open({
       title: 'Are you sure you want to exit?',
       message: ``,
       showCancel: true,
       onOk: () => {
-    const key = this.getStorageKey();
+        const key = this.getStorageKey();
 
-    const stepData = {
-      uploadedFiles: this.uploadedrespfiles,
-      otherIncomeSlots: this.otherIncomeSlots,
-      otherBusinessSlots: this.otherBusinessSlots
-    };
+        const stepData = {
+          uploadedFiles: this.uploadedrespfiles,
+          otherIncomeSlots: this.otherIncomeSlots,
+          otherBusinessSlots: this.otherBusinessSlots
+        };
 
-    localStorage.setItem(key, JSON.stringify(stepData));
+        // localStorage.setItem(key, JSON.stringify(stepData));
+        this.storageservice.saveSectionData(
+          'IncomeInfoData',
+          this.applicationId,
+          this.applicantId,
+          this.isCoApplicant,
+          stepData
+        );
+        const requests = this.buildDraftUploadRequests();
 
-    const requests = this.buildDraftUploadRequests();
+        if (!requests.length) {
+          console.log('No files selected for draft save');
 
-    if (!requests.length) {
-      console.log('No files selected for draft save');
-
-      return;
-    }
-
-    forkJoin(requests).subscribe({
-      next: (responses) => {
-        console.log('Income draft saved successfully:', responses);
-
-
-        if (this.isCoApplicant) {
-          this.loanformservice.co_incomeInfoData = stepData;
-        } else {
-          this.loanformservice.incomeInfoData = stepData;
+          return;
         }
 
+        forkJoin(requests).subscribe({
+          next: (responses) => {
+            console.log('Income draft saved successfully:', responses);
 
-        this.stepperService.setStepData(this.getStepRoute(), stepData);
+
+            if (this.isCoApplicant) {
+              this.loanformservice.co_incomeInfoData = stepData;
+            } else {
+              this.loanformservice.incomeInfoData = stepData;
+            }
 
 
-      },
-      error: (err) => {
-        console.error('Income draft save failed:', err);
+            this.stepperService.setStepData(this.getStepRoute(), stepData);
 
-        const errorMsg = err.error?.message || 'Failed to save income draft';
-        this.msgBox.open({
-          title: 'Error',
-          message: errorMsg,
-          showCancel: false
+
+          },
+          error: (err) => {
+            console.error('Income draft save failed:', err);
+
+            const errorMsg = err.error?.message || 'Failed to save income draft';
+            this.msgBox.open({
+              title: 'Error',
+              message: errorMsg,
+              showCancel: false
+            });
+          }
         });
+        this.router.navigate(['/admin/losoperation']);
       }
-    });
-     this.router.navigate(['/admin/losoperation']);
-     }
     });
   }
 
@@ -2105,8 +2131,14 @@ export class Incomeinfo {
       const stepRoute = this.getStepRoute();
       const completedRoute = this.isCoApplicant ? 'co-incomeinfo' : 'incomeinfo';
 
-      localStorage.setItem(key, JSON.stringify(stepData));
-
+      // localStorage.setItem(key, JSON.stringify(stepData));
+      this.storageservice.saveSectionData(
+        'IncomeInfoData',
+        this.applicationId,
+        this.applicantId,
+        this.isCoApplicant,
+        stepData
+      );
       if (this.isCoApplicant) {
         this.loanformservice.co_incomeInfoData = stepData;
 

@@ -253,7 +253,8 @@ private async loadKycForBothFlows() {
      const coApplicantId = this.stepperService.getCo_appId()?.[0];
     const index = this.stepperService.getCurrentCoApplicantIndex();
     // return `kycinfo_coapp_${this.applicantId}_${index}`;
-     return `kycinfo_coapp_${coApplicantId || 'temp_' + index}` 
+     return `kycinfo_coapp_${this.applicationId}_${index}` 
+     
   }
 
   isPassportRequired(): boolean {
@@ -715,7 +716,7 @@ private async loadKycForBothFlows() {
     this.loadPerCities(id);
   }
 
-  loadPerCities(id: any) {
+  loadPerCities(id: any,cityName?: string) {
     this.main.getIndianstatescities(id).subscribe((res: any) => {
       const list = res.data ?? res;
 
@@ -723,6 +724,23 @@ private async loadKycForBothFlows() {
         value: c.id,
         label: c.name
       }));
+      
+    if (cityName) {
+      const matched = this.cityOptions.find(
+        (c: any) => c.label?.trim().toLowerCase() === cityName.trim().toLowerCase()
+      );
+
+      if (matched) {
+        this.perCitySelectedOption = matched.value;
+        this.perselectedCityId = matched.value;
+        this.perselectedCityLabel = matched.label;
+
+        this.kycForm.form.patchValue({
+          percity: matched.value
+        }, { emitEvent: false });
+      }
+    }
+
     });
   }
 
@@ -745,7 +763,7 @@ private async loadKycForBothFlows() {
     this.loadCurrCities(id);
   }
 
-  loadCurrCities(id: any) {
+  loadCurrCities(id: any, cityName?: string) {
     this.main.getIndianstatescities(id).subscribe((res: any) => {
       const list = res.data ?? res;
 
@@ -753,6 +771,23 @@ private async loadKycForBothFlows() {
         value: c.id,
         label: c.name
       }));
+      
+if (cityName) {
+      const matched = this.currcityOptions.find(
+        (c: any) => c.label?.trim().toLowerCase() === cityName.trim().toLowerCase()
+      );
+
+      if (matched) {
+        this.currCitySelectedOption = matched.value;
+        this.currselectedCityId = matched.value;
+        this.currselectedCityLabel = matched.label;
+
+        this.kycForm.form.patchValue({
+          currcity: matched.value
+        }, { emitEvent: false });
+      }
+    }
+
     });
   }
 
@@ -1345,9 +1380,14 @@ private async loadKycForBothFlows() {
       (a: any) => a.addressType === 'PERMANENT'
     );
 
-    const otherAddress = data.addresses?.find(
-      (a: any) => a.addressType === 'OTHER'
-    );
+    // const otherAddress = data.addresses?.find(
+    //   (a: any) => a.addressType === 'OTHER'
+    // );
+
+ const otherAddress =
+    data.addresses?.find((a: any) => a.addressType === 'OTHER') ||
+    data.addresses?.find((a: any) => a.addressType === 'CURRENT');
+
 
     this.addressType = data.addressType || 'same';
     this.isDifferentAddress = !!data.isDifferentAddress;
@@ -1360,20 +1400,23 @@ private async loadKycForBothFlows() {
 
     this.selectedSecondaryProof = data.selectedSecondaryProof || null;
 
+  // State values
     this.perStateSelectedOption = permanentAddress?.stateId || '';
-    this.perCitySelectedOption = permanentAddress?.cityId || '';
-
     this.perselectedStateId = permanentAddress?.stateId || '';
-    this.perselectedCityId = permanentAddress?.cityId || '';
-    this.perselectedStateLabel = permanentAddress?.state || '';
+        this.perselectedStateLabel = permanentAddress?.state || '';
+
+            this.currStateSelectedOption = otherAddress?.stateId || '';
+  this.currselectedStateId = otherAddress?.stateId || '';
+      this.currselectedStateLabel = otherAddress?.state || '';
+
+
+    this.perCitySelectedOption = permanentAddress?.cityId || '';
+    this.perselectedCityId = permanentAddress?.cityId  || '';
     this.perselectedCityLabel = permanentAddress?.city || '';
 
-    this.currStateSelectedOption = otherAddress?.stateId || '';
     this.currCitySelectedOption = otherAddress?.cityId || '';
 
-    this.currselectedStateId = otherAddress?.stateId || '';
     this.currselectedCityId = otherAddress?.cityId || '';
-    this.currselectedStateLabel = otherAddress?.state || '';
     this.currselectedCityLabel = otherAddress?.city || '';
 
     this.kycForm.form.patchValue({
@@ -1387,18 +1430,18 @@ private async loadKycForBothFlows() {
       addressline3: permanentAddress?.addressLine2 || '',
       perpincode: permanentAddress?.zipCode || '',
 
-      currentaddressline1: otherAddress?.addressLine || '',
-      currentaddressline2: otherAddress?.addressLine1 || '',
-      currentaddressline3: otherAddress?.addressLine2 || '',
-      currpincode: otherAddress?.zipCode || ''
+      currentaddressline1: this.addressType == "different" ? otherAddress?.addressLine || '' :permanentAddress?.addressLine || '',
+      currentaddressline2: this.addressType == "different" ? otherAddress?.addressLine1 || '':permanentAddress?.addressLine1 || '',
+      currentaddressline3: this.addressType == "different" ? otherAddress?.addressLine2 || '':permanentAddress?.addressLine2 || '',
+      currpincode:this.addressType == "different" ? otherAddress?.zipCode || '' :permanentAddress?.zipCode || '',
     });
 
     if (this.perselectedStateId) {
-      this.loadPerCities(this.perselectedStateId);
+      this.loadPerCities(this.perselectedStateId,permanentAddress?.city || '');
     }
 
     if (this.currselectedStateId) {
-      this.loadCurrCities(this.currselectedStateId);
+      this.loadCurrCities(this.currselectedStateId,otherAddress?.city || '');
     }
     if (data.fileMeta) {
       this.uploadedFileMeta = data.fileMeta;

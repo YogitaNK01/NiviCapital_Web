@@ -1,25 +1,23 @@
 <div class="base-layout" [ngClass]="{'coapplicant-layout': isCoApplicant}">
 
-    <div class="header "  *ngIf="!isCoApplicant">
+    <div class="header " *ngIf="!isCoApplicant">
 
-            <div class="text-datepicker blue-text d-flex flex-column gap-2 ">General Information
-                <div class="text-body-1 fw-normal">
-                    <span><svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 22 22"
-                            fill="none">
-                            <path
-                                d="M10.9997 20.1667C16.0413 20.1667 20.1663 16.0417 20.1663 11C20.1663 5.95833 16.0413 1.83333 10.9997 1.83333C5.95801 1.83333 1.83301 5.95833 1.83301 11C1.83301 16.0417 5.95801 20.1667 10.9997 20.1667Z"
-                                stroke="#25262F" stroke-width="1.28125" stroke-linecap="round"
-                                stroke-linejoin="round" />
-                            <path d="M11 7.33333V11.9167" stroke="#25262F" stroke-width="1.28125" stroke-linecap="round"
-                                stroke-linejoin="round" />
-                            <path d="M10.9961 14.6667H11.0043" stroke="#25262F" stroke-width="1.28125"
-                                stroke-linecap="round" stroke-linejoin="round" />
-                        </svg></span>
-                    Click the “Next” button to save your changes
-                </div>
+        <div class="text-datepicker blue-text d-flex flex-column gap-2 ">General Information
+            <div class="text-body-1 fw-normal">
+                <span><svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 22 22" fill="none">
+                        <path
+                            d="M10.9997 20.1667C16.0413 20.1667 20.1663 16.0417 20.1663 11C20.1663 5.95833 16.0413 1.83333 10.9997 1.83333C5.95801 1.83333 1.83301 5.95833 1.83301 11C1.83301 16.0417 5.95801 20.1667 10.9997 20.1667Z"
+                            stroke="#25262F" stroke-width="1.28125" stroke-linecap="round" stroke-linejoin="round" />
+                        <path d="M11 7.33333V11.9167" stroke="#25262F" stroke-width="1.28125" stroke-linecap="round"
+                            stroke-linejoin="round" />
+                        <path d="M10.9961 14.6667H11.0043" stroke="#25262F" stroke-width="1.28125"
+                            stroke-linecap="round" stroke-linejoin="round" />
+                    </svg></span>
+                Click the “Next” button to save your changes
             </div>
-
         </div>
+
+    </div>
     <div class="accordion d-flex flex-column gap-4 mb-4">
 
         <div class="accordion-item b-0" *ngFor="let acc of accordions; let i = index">
@@ -44,7 +42,7 @@
                         <ng-container
                             *ngTemplateOutlet="isCoApplicant ? coapplicantTemplate : identityTemplate"></ng-container>
                     </ng-container>
-                    
+
 
                 </div>
             </div>
@@ -62,7 +60,8 @@
                     <!-- <div class="text-label fw-bold ">Last Qualification Details</div> -->
                     <div class="col-lg-12 col-sm-12 mt-20">
                         <app-dropdown [options]="selectoccupation" [placeholder]="'Select Current Occupation'"
-                            [required]="true" (selectedValueChange)="registerForm.get('occupation')?.setValue($event);handleOccupationChange($event)"
+                            [required]="true"
+                            (selectedValueChange)="registerForm.get('occupation')?.setValue($event);handleOccupationChange($event)"
                             [avatarUrl]="avatarUrl" formControlName="occupation" [hasAvatar]="hasAvatar"
                             [label]="occupationlabel">
                         </app-dropdown>
@@ -289,8 +288,8 @@
         <form [formGroup]="coapp_registerForm" (ngSubmit)="submit()" class="common-details-box d-flex flex-column">
             <div class="container-fluid">
                 <div class="row">
-
-                    <div class="col-lg-4 col-sm-12 mt-20">
+                    <div [ngClass]="{'col-3': isOtherRelationship, 'col-4': !isOtherRelationship  }">
+                        <!-- <div class="col-lg-4 col-sm-12 mt-20"> -->
                         <app-dropdown [options]="selectoccupation" [placeholder]="'Select Current Occupation'"
                             [required]="true"
                             (selectedValueChange)="coapp_registerForm.get('occupation')?.setValue($event);handleCoApplicantOccupationChange($event)"
@@ -299,7 +298,8 @@
                         </app-dropdown>
 
                     </div>
-                    <div class="col-lg-4 col-sm-12 mt-20">
+                    <!-- </div> -->
+                    <div [ngClass]="{'col-3': isOtherRelationship, 'col-4': !isOtherRelationship  }">
                         <app-dropdown [options]="selectAnnualIncome" [placeholder]="'Select Annual Income'"
                             [required]="true"
                             (selectedValueChange)="coapp_registerForm.get('annualincome')?.setValue($event)"
@@ -308,14 +308,34 @@
                         </app-dropdown>
 
                     </div>
-                    <div class="col-lg-4 col-sm-12 mt-20">
+                    <div [ngClass]="{'col-3': isOtherRelationship, 'col-4': !isOtherRelationship  }">
                         <app-dropdown [options]="selectrelationship" [placeholder]="'Select Relation'" [required]="true"
-                            (selectedValueChange)="coapp_registerForm.get('relationship')?.setValue($event)"
+                            (selectedValueChange)="Selectedrelation($event);"
                             [avatarUrl]="avatarUrl" formControlName="relationship" [hasAvatar]="hasAvatar"
                             [label]="'Relation with Applicant'">
                         </app-dropdown>
 
                     </div>
+                    <div class="col-3" *ngIf="isOtherRelationship">
+                        <div class="form-group">
+                            <app-inputfield formControlName="OtherRelationship" name="OtherRelationship" label="Other Location"
+                                [maxlength]="100" placeholder="Enter Location Name" [required]="true">
+                            </app-inputfield>
+
+                            <div class="text-danger"
+                            *ngIf="coapp_registerForm.get('OtherRelationship')?.touched && coapp_registerForm.get('OtherRelationship')?.invalid">
+                            Location is required
+                        </div>
+                        <div class="text-danger" *ngIf="coapp_registerForm.get('OtherRelationship')?.errors?.['minlength']">
+                            Minimum 2 characters required
+                        </div>
+                        <div class="text-danger" *ngIf="coapp_registerForm.get('OtherRelationship')?.errors?.['maxlength']">
+                            Maximum 100 characters allowed
+                        </div>
+                        </div>
+
+                    </div>
+
                     <div class="col-lg-12 mt-20">
                         <div class=" d-flex flex-column">
 
@@ -353,7 +373,7 @@
         <!-- <app-buttons type="button" label="Next" class="btn btncustomClass" color="primary" (click)="next()"
             [disabled]="!registerForm.valid || !checkboxasset"> </app-buttons> -->
         <app-buttons type="button" label="Next" class="btn btncustomClass" color="primary" (click)="next()"
-            [disabled]="!activeForm.valid || !checkboxasset"> </app-buttons>
+            [disabled]="!(activeForm?.valid) || !checkboxasset"> </app-buttons>
 
     </div>
 </div>

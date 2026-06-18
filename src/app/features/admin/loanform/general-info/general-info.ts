@@ -11,8 +11,9 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { Loanstepperservice } from '../../../../core/service/loanstepperservice';
 import { Main } from '../../../../core/service/main';
 import { generalerrors } from './generalerror';
-import { firstValueFrom } from 'rxjs';
+import { findIndex, firstValueFrom } from 'rxjs';
 import { Msgboxservice } from '../../../../core/service/msgboxservice';
+import { Storage } from '../../../../core/service/storage';
 interface OptionItem {
   label: string;
   value: string;
@@ -107,6 +108,7 @@ export class GeneralInfo implements OnInit {
   isOthercoursename = false;
 
   //coapplicant 
+    isOtherRelationship = false;
   isCoApplicant: boolean = false;
   coapp_registerForm!: FormGroup;
 
@@ -141,7 +143,7 @@ export class GeneralInfo implements OnInit {
   isSummaryEditMode = false;
   viewOnly = false;
 
-  constructor(private fb: FormBuilder, private formSvc: Loanformservice, private router: Router, private stepperService: Loanstepperservice, private msgBox: Msgboxservice,private route: ActivatedRoute, public mainservice: Main) { }
+  constructor(private fb: FormBuilder, private formSvc: Loanformservice, private router: Router, private storageservice: Storage, private stepperService: Loanstepperservice, private msgBox: Msgboxservice, private route: ActivatedRoute, public mainservice: Main) { }
   async ngOnInit() {
 
     this.isCoApplicant = this.router.url.includes('co-applicant');
@@ -157,13 +159,8 @@ export class GeneralInfo implements OnInit {
     this.stepperService.restoreLoanEditContext();
     this.stepperService.restoreLoanIdFromSession();
 
-    this.route.queryParams.subscribe(params => {
-  const index = Number(params['coApplicantIndex']) || 1;
-
-  this.stepperService.setCurrentCoApplicantIndex(index);
-
-  this.reloadFormForCoapp();
-});
+    const index = Number(this.route.snapshot.queryParams['coApplicantIndex']) || 1;
+    this.stepperService.setCurrentCoApplicantIndex(index);
 
 
     let Allids = this.stepperService.getLoanId();
@@ -246,7 +243,7 @@ export class GeneralInfo implements OnInit {
       // courseduration: [''],
       coursestartdate: ['', [Validators.required, this.dateMinValidator(() => new Date())]],
       courseenddate: ['', [Validators.required, this.endDateValidator()]],
-      checkedasset: [false, Validators.required],
+      checkedasset: [null, Validators.required],
       lendingpartner: ['', Validators.required],
 
 
@@ -258,7 +255,8 @@ export class GeneralInfo implements OnInit {
       occupation: ['', Validators.required],
       annualincome: ['', Validators.required],
       relationship: ['', Validators.required],
-      co_checkedasset: [false, Validators.required],
+      OtherRelationship:[''],
+      co_checkedasset: [null, Validators.required],
     });
 
 
@@ -296,81 +294,45 @@ export class GeneralInfo implements OnInit {
     this.listenToChanges();
     await this.loadGeneralInfoForBothFlows()
 
-    // if (this.formSvc.isEditFlow()) {
-    //   this.patchFromSummary();
-    // } else {
-
-
-
-    //   const key = this.getStorageKey();
-
-    //   const localData = localStorage.getItem(key);
-    //   let parsedLocal = localData ? JSON.parse(localData) : null;
-
-    //   //  call API
-    //   const apiData = await this.getSavedGeneralInfo();
-
-    //   //  PRIORITY LOGIC
-    //   let finalData = null;
-
-    //   if (apiData) {
-    //     finalData = apiData;
-    //     localStorage.setItem(key, JSON.stringify(apiData));
-    //   }
-    //   else if (parsedLocal) {
-    //     finalData = this.mapLocalToApiFormat(parsedLocal);
-    //   }
-
-
-    //   if (finalData) {
-    //     if (this.isCoApplicant) {
-    //       this.patchCoApplicantInfo(finalData);
-
-    //       this.co_checkassetOnChange(finalData.hasAssets ? 'Yes' : 'No');
-    //       this.handleCoApplicantOccupationChange(
-    //         finalData.currentOccupationId ||
-    //         finalData.occupation ||
-    //         finalData.occupationId
-    //       );
-
-    //     } else {
-    //       this.patchGeneralInfo(finalData);
-
-
-    //       this.checkassetOnChange(finalData.hasAssets ? 'Yes' : 'No');
-    //       this.handleOccupationChange(finalData.currentOccupationId || finalData.occupation);
-    //     }
-    //     //  store last saved snapshot in comparable format
-    //     this.lastSavedPayload = this.isCoApplicant
-    //       ? this.buildCoApplicantPayload(this.coapp_registerForm.value)
-    //       : this.buildMainPayload(this.registerForm.value);
-    //   } else {
-    //     this.lastSavedPayload = null;
-    //   }
-    // }
 
   }
-  getStorageKey() {
+  getStorageKey1() {
     const coApplicantId = this.stepperService.getCo_appId()?.[0];
     const index = this.stepperService.getCurrentCoApplicantIndex();
 
-    
-return this.isCoApplicant
-  ? `generalInfo_coapp_${index}`
-  : `generalInfo_main_${this.stepperService.getLoanId()?.[0]}`;
+    return this.isCoApplicant
+      ? `generalInfo_coapp_${this.applicationId}_${index}`
+      : `generalInfo_main_${this.applicationId}_${this.stepperService.getLoanId()?.[0]}`;
+  }
 
-    // return this.isCoApplicant
-    //   ? `generalInfo_coapp_${coApplicantId || 'temp_' + index}`
-    //   : `generalInfo_main_${this.stepperService.getLoanId()?.[0]}`;
+  getStorageKey() {
+    const main_ApplicantId = this.stepperService.getLoanId()?.[0];
+    const co_ApplicantId = this.stepperService.getCo_appId()?.[0];
+    const index = this.stepperService.getCurrentCoApplicantIndex();
+
+    return this.storageservice.getStorageKey(
+      'generalInfo',
+      this.applicationId,
+      this.applicantId,
+      this.isCoApplicant,
+      main_ApplicantId ?? undefined,
+      co_ApplicantId ?? undefined, 
+      index
+    );
   }
 
   //store data in form
   private async loadGeneralInfoForBothFlows() {
     const key = this.getStorageKey();
 
-    const localData = localStorage.getItem(key);
-    const parsedLocal = localData ? JSON.parse(localData) : null;
 
+
+    const parsedLocal = this.storageservice.getStoredSectionData(
+      'generalInfo',
+      this.applicationId,
+      this.applicantId,
+      this.isCoApplicant
+    );
     const draftData = await this.getSavedGeneralInfo();
 
     const summaryData = await this.getGeneralInfoFromSummaryForCurrentApplicant();
@@ -408,7 +370,7 @@ return this.isCoApplicant
       );
 
       this.lastSavedPayload = this.buildCoApplicantPayload(
-        this.coapp_registerForm.value
+        this.coapp_registerForm.getRawValue()
       );
     } else {
       this.patchGeneralInfo(finalData);
@@ -421,10 +383,17 @@ return this.isCoApplicant
         finalData.occupation
       );
 
-      this.lastSavedPayload = this.buildMainPayload(this.registerForm.value);
+      this.lastSavedPayload = this.buildMainPayload(this.registerForm.getRawValue());
     }
 
-    localStorage.setItem(key, JSON.stringify(finalData));
+    // localStorage.setItem(key, JSON.stringify(finalData));
+    this.storageservice.saveSectionData(
+      'generalInfo',
+      this.applicationId,
+      this.applicantId,
+      this.isCoApplicant,
+      finalData
+    );
   }
 
   private async getGeneralInfoFromSummaryForCurrentApplicant(): Promise<any> {
@@ -552,7 +521,7 @@ return this.isCoApplicant
       annualIncome: formdata.annualincome,
       relationWithApplicantId: formdata.relationship,
       relationship: formdata.relationship,
-      hasAssets: this.checkboxasset === 'Yes'
+      hasAssets: formdata.co_checkedasset === 'Yes'
     };
   }
 
@@ -660,6 +629,12 @@ return this.isCoApplicant
 
     this.checkboxasset = value;
 
+    //   this.registerForm.get('checkedasset')?.setValue(value, {
+    //   emitEvent: false
+    // });
+    // this.registerForm.get('checkedasset')?.markAsTouched();
+    // this.registerForm.get('checkedasset')?.updateValueAndValidity();
+
     this.stepperService.setApplicantValues('main', {
       isasset: isAsset,
       isincome: this.formSvc.applicantState.isincome,
@@ -676,6 +651,13 @@ return this.isCoApplicant
     const isAsset = value === 'Yes';
 
     this.checkboxasset = value;
+
+
+    this.coapp_registerForm.get('co_checkedasset')?.setValue(value, {
+      emitEvent: false
+    });
+    // this.coapp_registerForm.get('co_checkedasset')?.markAsTouched();
+    // this.coapp_registerForm.get('co_checkedasset')?.updateValueAndValidity();
 
     this.stepperService.setApplicantValues('coapp', {
       isasset: isAsset,
@@ -979,7 +961,7 @@ return this.isCoApplicant
     // this.selectCourseType(id);
   }
 
-    getRealtionShipwith() {
+  getRealtionShipwith() {
     this.formSvc.getRelationShip().subscribe((res: any) => {
       const list = res.data ?? res;
 
@@ -989,13 +971,30 @@ return this.isCoApplicant
 
       }));
 
-
-      // if (this.formSvc.isEditFlow()) {
-      //   this.patchFromSummary();
-      // }
-
     });
 
+
+  }
+    Selectedrelation(values: string | string[]) {
+    const ids = Array.isArray(values) ? values : [values];
+
+    const selected = this.selectrelationship.filter(s =>
+      ids.includes(s.value)
+    );
+
+    // this.selectedLocationLabel = selected.map(s => s.label).join(', ');
+    // this.selectedInstituteID = selected.map(s => s.value).join(', ');
+
+    // this.group.get('location')?.setValue(this.selectedLocationLabel);
+
+    this.isOtherRelationship = selected.some(
+      s => s.label.trim().toLowerCase() === 'other'
+    )
+
+    const control = this.coapp_registerForm.get('relationship');
+    control?.setValue(ids); 
+    control?.markAsTouched();
+    control?.updateValueAndValidity();
 
   }
 
@@ -1104,17 +1103,17 @@ return this.isCoApplicant
     return {
       applicationId: this.applicationId,
       applicantId: this.applicantId,
-      currentOccupationId: formdata.occupation,
-      stateId: formdata.state,
-      otherStateName: formdata.otherstatetitle,
-      universityId: formdata.university,
-      otherUniversityName: formdata.otherunititle,
-      courseId: formdata.coursename,
-      otherCourseName: formdata.othercoursenametitle,
+      currentOccupationId: formdata.occupation || formdata.occupationId,
+      stateId: formdata.state || formdata.stateId,
+      otherStateName: formdata.otherstatetitle || formdata.otherStateName || formdata.otherstatetitle,
+      universityId: formdata.university || formdata.universityId,
+      otherUniversityName: formdata.otherunititle || formdata.otherUniversityName,
+      courseId: formdata.coursename || formdata.courseId,
+      otherCourseName: formdata.othercoursenametitle || formdata.otherCourseName,
       courseStartDate: this.formatDate(formdata.coursestartdate),
       courseEndDate: this.formatDate(formdata.courseenddate),
       hasAssets: this.checkboxasset === 'Yes',
-      lendingPartnerId: formdata.lendingpartner,
+      lendingPartnerId: formdata.lendingpartner || formdata.lendingPartnerId,
       coursetype: formdata.coursetype
     };
   }
@@ -1242,7 +1241,12 @@ return this.isCoApplicant
 
       occupation: data.currentOccupationId,
       state: data.stateId,
+
       otherstatetitle: data.otherStateName ?? '',
+      university: data.universityId,
+      otherunititle: data.otherUniversityName ?? '',
+      coursename: data.courseId || data.courseName,
+      othercoursenametitle: data.otherCourseName ?? '',
       checkedasset: data.hasAssets ? 'Yes' : 'No',
       coursestartdate: this.parseDate(data.courseStartDate),
       courseenddate: this.parseDate(data.courseEndDate),
@@ -1254,6 +1258,20 @@ return this.isCoApplicant
 
     this.restoreDependentDropdowns(data);
   }
+
+  //  state: ['', Validators.required],
+  //     otherstatetitle: [''],
+  //     university: ['', Validators.required],
+  //     otherunititle: [''],
+  //     coursetype: ['', Validators.required],
+  //     othercoursetypetitle: [''],
+  //     coursename: ['', Validators.required],
+  //     othercoursenametitle: [''],
+  //     // courseduration: [''],
+  //     coursestartdate: ['', [Validators.required, this.dateMinValidator(() => new Date())]],
+  //     courseenddate: ['', [Validators.required, this.endDateValidator()]],
+  //     checkedasset: [null, Validators.required],
+  //     lendingpartner: ['', Validators.required],
 
   //patch co-applicant form
   patchCoApplicantInfo(data: any) {
@@ -1301,49 +1319,56 @@ return this.isCoApplicant
   //save and exit 
 
   saveExit() {
-     this.msgBox.open({
+    this.msgBox.open({
       title: 'Are you sure you want to exit?',
       message: ``,
       showCancel: true,
       onOk: () => {
-    const formdata = this.activeForm.value;
+        const formdata = this.activeForm.value;
 
-    const key = this.getStorageKey();
+        const key = this.getStorageKey();
 
-    let input: any;
+        let input: any;
 
-    if (this.isCoApplicant) {
-      input = {
+        if (this.isCoApplicant) {
+          input = {
 
-        applicationId: this.applicationId,
-        applicantId: this.applicantId,
-        occupationId: formdata.occupation,
-        occupation: formdata.occupation,
-        annualIncome: formdata.annualincome,
-        relationship: formdata.relationship,
-        relationWithApplicant: formdata.relationship,
-        hasAssets: this.checkboxasset === 'Yes'
+            applicationId: this.applicationId,
+            applicantId: this.applicantId,
+            occupationId: formdata.occupation,
+            occupation: formdata.occupation,
+            annualIncome: formdata.annualincome,
+            relationship: formdata.relationship,
+            relationWithApplicant: formdata.relationship,
+            hasAssets: this.checkboxasset === 'Yes'
 
-      };
-    } else {
+          };
+        } else {
 
-      input = this.buildMainPayload(formdata);
+          input = this.buildMainPayload(formdata);
 
-    }
+        }
 
-    localStorage.setItem(key, JSON.stringify(input));
+        // localStorage.setItem(key, JSON.stringify(input));
+        this.storageservice.saveSectionData(
+          'generalInfo',
+          this.applicationId,
+          this.applicantId,
+          this.isCoApplicant,
+          input
+        );
 
-    const inputdata = {
-      action: "auto-save",
-      sectionKey: "GENERAL_INFO",
-      applicationId: this.applicationId,
-      applicantId: this.applicantId,
-      jsonData: input
-    };
+        const inputdata = {
+          action: "auto-save",
+          sectionKey: "GENERAL_INFO",
+          applicationId: this.applicationId,
+          applicantId: this.applicantId,
+          jsonData: input
+        };
 
-    this.formSvc.saveandExit(inputdata).subscribe();
-    this.router.navigate(['/admin/losoperation']);
-     }
+        this.formSvc.saveandExit(inputdata).subscribe();
+        this.router.navigate(['/admin/losoperation']);
+      }
     });
 
   }
@@ -1396,10 +1421,17 @@ return this.isCoApplicant
         this.stepperService.next();
 
         this.formSvc.generalInfoData = { ...input, coursetype: formdata.coursetype };
-        const key = `generalInfoData_${this.applicantId}`;
-        localStorage.setItem(
-          `generalInfo_main_${this.applicantId}`,
-          JSON.stringify(this.formSvc.generalInfoData)
+
+        // localStorage.setItem(
+        //   this.getStorageKey(),
+        //   JSON.stringify(this.formSvc.generalInfoData)
+        // );
+        this.storageservice.saveSectionData(
+          'generalInfo',
+          this.applicationId,
+          this.applicantId,
+          this.isCoApplicant,
+          input
         );
 
         this.stepperService.markStepCompleted('genralinfo');
@@ -1418,7 +1450,7 @@ return this.isCoApplicant
       applicantId: this.stepperService.getCo_appId()?.[0],
       occupationId: payload.occupation,
       annualIncome: payload.annualIncome,
-      relationWithApplicantId: payload.relationWithApplicantId?.toUpperCase(),
+      relationWithApplicantId: payload.relationWithApplicantId,
       hasAssets: payload.hasAssets// this.checkboxasset === "Yes",
     };
 
@@ -1433,9 +1465,16 @@ return this.isCoApplicant
         this.lastSavedPayload = { ...payload };
 
         this.formSvc.co_generalInfoData = { ...localPayload };
-        localStorage.setItem(
-          this.getStorageKey(),
-          JSON.stringify(this.formSvc.co_generalInfoData)
+        // localStorage.setItem(
+        //   this.getStorageKey(),
+        //   JSON.stringify(this.formSvc.co_generalInfoData)
+        // );
+        this.storageservice.saveSectionData(
+          'generalInfo',
+          this.applicationId,
+          this.applicantId,
+          this.isCoApplicant,
+          localPayload
         );
 
         this.stepperService.markStepCompleted('co-generalinfo');
@@ -1456,25 +1495,7 @@ return this.isCoApplicant
     return JSON.stringify(currentPayload) !== JSON.stringify(savedPayload);
   }
 
-  reloadFormForCoapp() {
-  const key = this.getStorageKey();
 
-  const saved = localStorage.getItem(key);
-  const parsed = saved ? JSON.parse(saved) : null;
-
-  if (!parsed) {
-    this.registerForm.reset();
-    return;
-  }
-
-   if (this.isCoApplicant) {
-      this.patchCoApplicantInfo(parsed);
-    } else {
-     this.patchGeneralInfo(parsed);
-    }
-
-  // this.patchCoApplicantInfo(parsed); // or patchGeneralInfo / patchAdditionalInfo
-}
 
   next() {
     const form = this.activeForm;
@@ -1484,10 +1505,10 @@ return this.isCoApplicant
       return;
     }
 
-    if(form.value.occupation && this.isCoApplicant){
+    if (form.value.occupation && this.isCoApplicant) {
       const occupationType: any = this.selectoccupation.filter((item: any) => item.value === form.value.occupation);
       console.log(occupationType, this.checkboxasset);
-      if((occupationType?.[0]?.label === "Housewife / Homemaker" || occupationType?.[0]?.label === "Unemployed") && this.checkboxasset === "No"){
+      if ((occupationType?.[0]?.label === "Housewife / Homemaker" || occupationType?.[0]?.label === "Unemployed") && this.checkboxasset === "No") {
         this.msgBox.open({
           title: 'You are not eligible as a co-applicant. Please ask the main applicant to add another co-applicant.',
           message: ``,
@@ -1497,12 +1518,12 @@ return this.isCoApplicant
           //   this.router.navigate(['/loanform/co-applicantdetails/coapplicantinfo/co-generalinfo']);
           // }
         });
-         return;
+        return;
       }
 
-     
+
     }
-    
+
     const currentPayload = this.isCoApplicant
       ? this.buildCoApplicantPayload(form.value)
       : this.buildMainPayload(form.value);
@@ -1564,9 +1585,16 @@ return this.isCoApplicant
           // this.formSvc.generalInfoData = input;
           this.formSvc.generalInfoData = { ...input, coursetype: formdata.coursetype };
           const key = `generalInfoData_${this.applicantId}`;
-          localStorage.setItem(
-            key,
-            JSON.stringify(this.formSvc.generalInfoData)
+          // localStorage.setItem(
+          //   key,
+          //   JSON.stringify(this.formSvc.generalInfoData)
+          // );
+          this.storageservice.saveSectionData(
+            'generalInfo',
+            this.applicationId,
+            this.applicantId,
+            this.isCoApplicant,
+            input
           );
 
           this.stepperService.markStepCompleted('genralinfo');

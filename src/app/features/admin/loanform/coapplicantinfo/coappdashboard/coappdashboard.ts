@@ -521,8 +521,8 @@ localStorage.setItem(
     `coapp_completedSteps_${mainApplicantId}_${index}`,
     `coapp_currentStep_${mainApplicantId}_${index}`,
 
-    `basicInfoData_coapp_${coApplicantId || 'temp_' + index}`,
-    `generalInfoData_coapp_${coApplicantId || 'temp_' + index}`,
+    `basicInfo_coapp_${coApplicantId || 'temp_' + index}`,
+    `generalInfo_coapp_${coApplicantId || 'temp_' + index}`,
     `additionalinfo_coapp_${coApplicantId || 'temp_' + index}`,
     `kycInfoData_coapp_${coApplicantId || 'temp_' + index}`,
     `IncomeInfoData_coapp_${coApplicantId || 'temp_' + index}`,

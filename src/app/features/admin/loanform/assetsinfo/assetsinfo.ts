@@ -11,7 +11,7 @@ import { Inputfield } from "../../../systemdesign/inputfield/inputfield";
 import { Datepickernew } from '../../../systemdesign/datepickernew/datepickernew';
 import { Msgboxservice } from '../../../../core/service/msgboxservice';
 import { firstValueFrom } from 'rxjs';
-
+import { Storage } from '../../../../core/service/storage';
 interface BankOption {
   value: string;
   label: string;
@@ -107,7 +107,7 @@ export class Assetsinfo implements OnInit {
   isSummaryEditMode = false;
   viewOnly = false;
 
-  constructor(private fb: FormBuilder, public main: Main, private route: ActivatedRoute, private msgBox: Msgboxservice,
+  constructor(private fb: FormBuilder, public main: Main, private route: ActivatedRoute, private msgBox: Msgboxservice,private storageservice:Storage,
     private stepperService: Loanstepperservice, private formSvc: Loanformservice, private cd: ChangeDetectorRef, private router: Router) { }
 
 
@@ -215,16 +215,30 @@ export class Assetsinfo implements OnInit {
 
   }
 
-  getStorageKey() {
+  getStorageKey1() {
     const coApplicantId = this.stepperService.getCo_appId()?.[0];
     const index = this.stepperService.getCurrentCoApplicantIndex();
 
     return this.isCoApplicant
-      ? `assetsinfoData_coapp_${coApplicantId || 'temp_' + index}`
-      : `assetsinfoData_main_${this.stepperService.getLoanId()?.[0]}`;
-
+      ? `assetsinfoData_coapp_${this.applicationId}_${index}`
+      : `assetsinfoData_main_${this.applicationId}_${this.stepperService.getLoanId()?.[0]}`;
   }
+  
+    getStorageKey() {
+    const main_ApplicantId = this.stepperService.getLoanId()?.[0];
+    const co_ApplicantId = this.stepperService.getCo_appId()?.[0];
+    const index = this.stepperService.getCurrentCoApplicantIndex();
 
+    return this.storageservice.getStorageKey(
+      'assetsinfoData',
+      this.applicationId,
+      this.applicantId,
+      this.isCoApplicant,
+      main_ApplicantId ?? undefined,
+      co_ApplicantId ?? undefined, 
+      index
+    );
+  }
   getCurrentCoApplicantFromList() {
     const mainApplicantId = this.stepperService.getLoanId()?.[0];
     const index = this.stepperService.getCurrentCoApplicantIndex();
@@ -246,8 +260,15 @@ export class Assetsinfo implements OnInit {
   private async loadAssetsForBothFlows() {
     const key = this.getStorageKey();
 
-    const localData = localStorage.getItem(key);
-    const parsedLocal = localData ? JSON.parse(localData) : null;
+    // const localData = localStorage.getItem(key);
+    // const parsedLocal = localData ? JSON.parse(localData) : null;
+
+      const parsedLocal = this.storageservice.getStoredSectionData(
+      'assetsinfoData',
+      this.applicationId,
+      this.applicantId,
+      this.isCoApplicant
+    );
 
     const apiApplicantId = this.getApiApplicantId();
 
@@ -304,8 +325,14 @@ export class Assetsinfo implements OnInit {
 
     this.lastSavedPayload = this.buildAssetsPayloadWithApplicantId();
 
-    localStorage.setItem(key, JSON.stringify(finalData));
-
+    // localStorage.setItem(key, JSON.stringify(finalData));
+ this.storageservice.saveSectionData(
+          'assetsinfoData',
+          this.applicationId,
+          this.applicantId,
+          this.isCoApplicant,
+          JSON.stringify(finalData)
+        );
     this.stepperService.markStepCompleted(this.getStepRoute());
   }
 
@@ -334,7 +361,7 @@ export class Assetsinfo implements OnInit {
     };
   }
 
- 
+
   //avoid duplicate
   private dedupeAssetItems(items: any[]): any[] {
     const map = new Map<string, any>();
@@ -2038,65 +2065,71 @@ export class Assetsinfo implements OnInit {
     });
   }
   saveExit() {
- this.msgBox.open({
+    this.msgBox.open({
       title: 'Are you sure you want to exit?',
       message: ``,
       showCancel: true,
       onOk: () => {
-    // const result1 = this.buildAssetsPayload();
+        // const result1 = this.buildAssetsPayload();
 
-    const result = this.buildDraftAssetsPayloadWithApplicantId(); //this.buildAssetsPayloadWithApplicantId();
+        const result = this.buildDraftAssetsPayloadWithApplicantId(); //this.buildAssetsPayloadWithApplicantId();
 
-    if (!result) {
-      console.log("Invalid form - not saving");
-      return;
-    }
+        if (!result) {
+          console.log("Invalid form - not saving");
+          return;
+        }
 
-    // const input = { items: result.items };
+        // const input = { items: result.items };
 
-    const input = {
-      applicantId: result.applicantId,
-      items: result.items
-    };
+        const input = {
+          applicantId: result.applicantId,
+          items: result.items
+        };
 
-    console.log(input);
+        console.log(input);
 
-    const key = this.getStorageKey();
-    localStorage.setItem(key, JSON.stringify(input));
+        // const key = this.getStorageKey();
+        // localStorage.setItem(key, JSON.stringify(input));
+ this.storageservice.saveSectionData(
+          'assetsinfoData',
+          this.applicationId,
+          this.applicantId,
+          this.isCoApplicant,
+          input
+        );
+
+        if (this.isCoApplicant) {
+          this.formSvc.co_aseetsInfoData = input;
+        } else {
+          this.formSvc.aseetsInfoData = input;
+        }
+
+        const applicantId = this.getApiApplicantId();
+
+        if (!applicantId) {
+          console.error('ApplicantId not found for photo upload');
+          return;
+        }
 
 
-    if (this.isCoApplicant) {
-      this.formSvc.co_aseetsInfoData = input;
-    } else {
-      this.formSvc.aseetsInfoData = input;
-    }
+        const inputdata = {
+          action: "auto-save",
+          sectionKey: "SAVE_ASSETS",
+          applicationId: this.applicationId,
+          applicantId: applicantId,
+          jsonData: input
+        };
 
-    const applicantId = this.getApiApplicantId();
+        this.formSvc.saveandExit(inputdata).subscribe({
+          next: () => {
+            this.lastSavedPayload = { ...input };
+          }, error: (err) => {
+            console.error("Assets saveExit error:", err);
+          }
 
-    if (!applicantId) {
-      console.error('ApplicantId not found for photo upload');
-      return;
-    }
-
-
-    const inputdata = {
-      action: "auto-save",
-      sectionKey: "SAVE_ASSETS",
-      applicationId: this.applicationId,
-      applicantId: applicantId,
-      jsonData: input
-    };
-
-    this.formSvc.saveandExit(inputdata).subscribe({
-      next: () => {
-        this.lastSavedPayload = { ...input };
-      }, error: (err) => {
-        console.error("Assets saveExit error:", err);
+        });
+        this.router.navigate(['/admin/losoperation']);
       }
-
-    });
- this.router.navigate(['/admin/losoperation']);
-     }
     });
   }
   getStepRoute() {
@@ -2278,8 +2311,15 @@ export class Assetsinfo implements OnInit {
         console.log("resp---", res);
         if (res.status == "success") {
           this.formSvc.aseetsInfoData = payload
-          const key = `assetsinfoData_main_${this.applicantId}`;
-          localStorage.setItem(key, JSON.stringify(payload));
+          // const key = `assetsinfoData_main_${this.applicantId}`;
+          // localStorage.setItem(key, JSON.stringify(payload));
+           this.storageservice.saveSectionData(
+          'assetsinfoData',
+          this.applicationId,
+          this.applicantId,
+          this.isCoApplicant,
+           JSON.stringify(payload)
+        );
           this.stepperService.markStepCompleted('assetsinfo');
           this.stepperService.setStepData('assetsinfo', this.assetsForm.getRawValue());
 
@@ -2331,7 +2371,14 @@ export class Assetsinfo implements OnInit {
           }
 
 
-          localStorage.setItem(this.getStorageKey(), JSON.stringify(payload));
+          // localStorage.setItem(this.getStorageKey(), JSON.stringify(payload));
+           this.storageservice.saveSectionData(
+          'assetsinfoData',
+          this.applicationId,
+          this.applicantId,
+          this.isCoApplicant,
+          JSON.stringify(payload)
+        );
           this.stepperService.markStepCompleted(stepRoute);
           this.stepperService.setStepData(stepRoute, this.assetsForm.getRawValue());
 

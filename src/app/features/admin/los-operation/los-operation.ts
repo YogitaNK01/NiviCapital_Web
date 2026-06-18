@@ -440,7 +440,7 @@ export class LosOperation {
 
   //disable edit btn from row
   disableEditCondition = (row: any) => {
- console.log("edit-----",row)
+//  console.log("edit-----",row)
     return false;
 
 
