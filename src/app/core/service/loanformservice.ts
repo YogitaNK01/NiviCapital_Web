@@ -168,7 +168,7 @@ private summaryRequest$?: Observable<ApiResponse<any>>;
     );
   }
 
-  getCoursetype(id: string): Observable<ApiResponse<any>> {
+     getCoursetype(id: string): Observable<ApiResponse<any>> {
     return this.http.get<ApiResponse<any>>(
       `${this.baseUrl}/v1/masters/course-types/${id}`,
 

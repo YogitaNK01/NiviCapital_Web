@@ -519,8 +519,8 @@ export class GeneralInfo implements OnInit {
       applicantId: this.applicantId,
       occupation: formdata.occupation,
       annualIncome: formdata.annualincome,
-      relationWithApplicantId: formdata.relationship,
-      relationship: formdata.relationship,
+      relationWithApplicantId: formdata.relationship[0],
+      relationship: formdata.relationship[0],
       hasAssets: formdata.co_checkedasset === 'Yes'
     };
   }
@@ -629,9 +629,9 @@ export class GeneralInfo implements OnInit {
 
     this.checkboxasset = value;
 
-    //   this.registerForm.get('checkedasset')?.setValue(value, {
-    //   emitEvent: false
-    // });
+      this.registerForm.get('checkedasset')?.setValue(value, {
+      emitEvent: false
+    });
     // this.registerForm.get('checkedasset')?.markAsTouched();
     // this.registerForm.get('checkedasset')?.updateValueAndValidity();
 
@@ -1192,6 +1192,7 @@ export class GeneralInfo implements OnInit {
       this.Australianstate,
       course.state
     );
+ 
 
     const lendingPartnerId = this.getValueByLabel(
       this.selectlendingpartner,
@@ -1206,14 +1207,14 @@ export class GeneralInfo implements OnInit {
       otherStateName: course.otherStateName || '',
 
       // these may still be names if dropdown child data is not loaded yet
-      universityId: course.universityName || '',
+      universityId: course.universityId || course.universityName || '',
       universityName: course.universityName || '',
       otherUniversityName: course.otherUniversityName || '',
 
       coursetype: course.courseType || '',
 
-      courseId: course.courseName || '',
-      courseName: course.courseName || '',
+      courseId: course.courseId|| course.courseName || '',
+      courseName:  course.courseName || '',
       otherCourseName: course.otherCourseName || '',
 
       courseStartDate: course.startDate || '',

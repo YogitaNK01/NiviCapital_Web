@@ -69,11 +69,11 @@ const address = [
   // common-education-fields.ts
 export const COMMON_EDUCATION_FIELDS = [
   { label: 'Institute Name', key: 'instituteName' },
-  { label: 'Other Institute Name', key: 'addressLine1' },
+  { label: 'Other Institute Name', key: 'otherInstituteName' },
   { label: 'Year of Passing', key: 'yearOfPassing' },
   { label: 'Percentage / CGPA', key: 'percentageOrCgpa' },
   { label: 'Location', key: 'location' },
-  { label: 'Other Location', key: 'otherLocation' },
+  { label: 'Other Location', key: 'otherLocationName' },
   { label: 'Marksheet', key: 'marksheetUrl' },
   { label: 'Leaving Certificate', key: 'leavingCertificateUrl' },
   { label: 'Other Document Name', key: 'title' },

@@ -108,7 +108,7 @@
             </div>
           </div>
           } @else {
-          <app-uploadbtn [config]="basicConfig" [required]="true" (fileChange)="onFileChange($event, 'applicantphoto')"
+          <app-uploadbtn [config]="basicConfig"  (fileChange)="onFileChange($event, 'applicantphoto')"
             label="Upload Applicant Photo">
           </app-uploadbtn>
           }

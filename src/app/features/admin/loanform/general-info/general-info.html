@@ -318,13 +318,13 @@
                     </div>
                     <div class="col-3" *ngIf="isOtherRelationship">
                         <div class="form-group">
-                            <app-inputfield formControlName="OtherRelationship" name="OtherRelationship" label="Other Location"
-                                [maxlength]="100" placeholder="Enter Location Name" [required]="true">
+                            <app-inputfield formControlName="OtherRelationship" name="OtherRelationship" label="Other Relation"
+                                [maxlength]="100" placeholder="Enter Relation Name" [required]="true">
                             </app-inputfield>
 
                             <div class="text-danger"
                             *ngIf="coapp_registerForm.get('OtherRelationship')?.touched && coapp_registerForm.get('OtherRelationship')?.invalid">
-                            Location is required
+                            Relation is required
                         </div>
                         <div class="text-danger" *ngIf="coapp_registerForm.get('OtherRelationship')?.errors?.['minlength']">
                             Minimum 2 characters required

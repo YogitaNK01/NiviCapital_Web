@@ -435,7 +435,10 @@ private normalizeMonthlyExpenditure(data: any): any {
     'GROCERIES_HOUSEHOLD',
     data.groceriesHousehold?.amountInr
   );
-
+  addItem(
+    'TELEPHONE',
+    data.telephoneInternetBills?.amountInr
+  );
   (data.utilitiesElectricityWaterGas || []).forEach((item: any) => {
     const name = item.name || '';
 
