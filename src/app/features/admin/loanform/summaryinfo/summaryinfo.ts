@@ -155,6 +155,8 @@ export class Summaryinfo {
   monthlyExpenditureFields = [
     { key: 'rentHomeMaintenance', label: 'Rent / Home Maintenance' },
     { key: 'groceriesHousehold', label: 'Groceries and Household' },
+    { key: 'telephoneInternetBills', label: 'Telephone and Internet bills' },
+    { key: 'telephoneInternetBills', label: 'Telephone and Internet bills' },
     { key: 'utilitiesElectricityWaterGas', label: 'Utilities / Bills (Electricity, Water, Gas)' },
     { key: 'transportation', label: 'Transportation' },
     { key: 'schoolEducationFees', label: 'School Education Fees' },
@@ -178,9 +180,10 @@ export class Summaryinfo {
     diploma: [],
     bachelors: [],
     postgraduate: [],
+    others: [],
     ieltsPte: [],
-    offerLetter: []
-
+    offerLetter: [],
+   
   };
   educationSections = [
     { title: '10th', key: 'tenth' },
@@ -188,6 +191,8 @@ export class Summaryinfo {
     { title: 'Diploma', key: 'diploma' },
     { title: 'Undergraduate', key: 'bachelors' },
     { title: 'Postgraduate', key: 'postgraduate' },
+    { title: 'Other', key: 'others' },
+ 
   ];
 
 
@@ -408,6 +413,7 @@ export class Summaryinfo {
     const monthlyFields = [
       { key: 'rentHomeMaintenance', label: 'Rent / Home Maintenance' },
       { key: 'groceriesHousehold', label: 'Groceries and Household' },
+      { key: 'telephoneInternetBills', label: 'Telephone and Internet bills' },
       { key: 'utilitiesElectricityWaterGas', label: 'Utilities / Bills (Electricity, Water, Gas)' },
       { key: 'transportation', label: 'Transportation' },
       { key: 'schoolEducationFees', label: 'School Education Fees' },
@@ -887,45 +893,21 @@ export class Summaryinfo {
 
     return val !== '';
   }
-
-  goToEdit1(sectionKey: string, event: Event) {
-    event.stopPropagation();
-    event.preventDefault();
-
-    const editUrlMap: any = {
-      general: this.summaryData?.generalInfo?.editUrl,
-      expense: this.summaryData?.estimatedExpense?.editUrl,
-      additional: this.summaryData?.additionalInfo?.editUrl,
-      kyc: this.summaryData?.kyc?.editUrl,
-      education: this.summaryData?.educationDetails?.editUrl,
-      income: this.summaryData?.incomeDetails?.editUrl,
-      assets: this.summaryData?.assets?.editUrl,
-      liabilities: this.summaryData?.liabilities?.editUrl,
-      monthly: this.summaryData?.monthlyExpenditure?.editUrl,
-    };
-
-    const editUrl = editUrlMap[sectionKey];
-
-    if (!editUrl) return;
-
-    this.formSvc.startSummaryEditFlow(this.summaryData, 'MAIN');
-    this.router.navigateByUrl(`${editUrl}?fromSummary=true&mode=view`);
-  }
   goToEdit(sectionKey: string, event: Event) {
     event.stopPropagation();
     event.preventDefault();
 
-    const frontendRouteMap: any = {
+ const frontendRouteMap: any = {
       general: '/loanform/genralinfo',
-      expense: '/loanform/estimatedexpense',
+      expense: '/loanform/expense',
       additional: '/loanform/additionalinfo',
-      kyc: '/loanform/kyc',
-      education: '/loanform/educationdetails',
-      income: '/loanform/incomedetails',
-      assets: '/loanform/assets',
-      liabilities: '/loanform/liabilities',
-      monthly: '/loanform/monthlyexpenditure',
-      reference: '/loanform/reference'
+      kyc: '/loanform/kycinfo',
+      education: '/loanform/educationDetails',
+      income: '/loanform/incomeinfo',
+      assets: '/loanform/assetsinfo',
+      liabilities: '/loanform/liabilitiesinfo',
+      monthly: '/loanform/monthlyexpinfo',
+      reference: '/loanform/referenceinfo'
     };
 
     const route = frontendRouteMap[sectionKey];

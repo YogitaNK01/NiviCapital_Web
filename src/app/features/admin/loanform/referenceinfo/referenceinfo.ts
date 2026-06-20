@@ -89,7 +89,13 @@ export class Referenceinfo implements OnInit {
   lastSavedPayload: any = null;
   isSummaryEditMode = false;
   viewOnly = false;
-  constructor(private fb: FormBuilder, private stepperService: Loanstepperservice, private cd: ChangeDetectorRef, private loanformservice: Loanformservice,
+
+  //edit from summary
+  isFromSummary = false;
+  isViewMode = false;
+  isEditMode = false;
+  originalFormValue: any = null;
+  constructor(private fb: FormBuilder, private stepperService: Loanstepperservice, private cd: ChangeDetectorRef, private loanformservice: Loanformservice,private msgBox:Msgboxservice,
     private router: Router, private route: ActivatedRoute, public main: Main, private apiservice: Addcustomerservice) { }
   async ngOnInit() {
     this.isCoApplicant = this.router.url.includes('co-applicant');
@@ -204,14 +210,38 @@ export class Referenceinfo implements OnInit {
     }
 
     await this.loadReferencesForBothFlows();
+
+    this.isFromSummary = this.loanformservice.isSummaryEditFlow();
+    console.log(this.isFromSummary);
+
+    if(this.isFromSummary){
+      this.isViewMode = true;
+      this.referenceForm.disable();
+    }
   }
   getStorageKey() {
     const index = this.stepperService.getCurrentCoApplicantIndex();
-    // return `kycinfo_coapp_${this.applicantId}_${index}`;
-    return this.isCoApplicant
-      ? `referenceinfoData_coapp_${this.applicantId}_${index}`
-      : `referenceinfoData_main_${this.applicantId}`;
+    // return this.isCoApplicant
+    //   ? `referenceinfoData_coapp_${this.applicantId}_${index}`
+    //   : `referenceinfoData_main_${this.applicantId}`;
+
+      return  `referenceinfoData_main_${this.applicationId}_${this.stepperService.getLoanId()?.[0]}`;
   }
+  //   getStorageKey1() {
+  //   const main_ApplicantId = this.stepperService.getLoanId()?.[0];
+  //   const co_ApplicantId = this.stepperService.getCo_appId()?.[0];
+  //   const index = this.stepperService.getCurrentCoApplicantIndex();
+
+  //   return this.storageservice.getStorageKey(
+  //     'referenceinfoData',
+  //     this.applicationId,
+  //     this.applicantId,
+  //     this.isCoApplicant,
+  //     main_ApplicantId ?? undefined,
+  //     co_ApplicantId ?? undefined, 
+  //     index
+  //   );
+  // }
   getStepRoute() {
     return this.isCoApplicant ? 'co-referenceinfo' : 'referenceinfo';
   }
@@ -886,7 +916,8 @@ export class Referenceinfo implements OnInit {
   }
 
   // ==================== SAVE REFERENCE ====================
-  saveReference() {
+  saveReference(edit: boolean) {
+    console.log(edit);
     this.submitAttempted = true;
     const isRef1 = this.currentRefIndex === 0;
     const currentArray = isRef1
@@ -946,7 +977,7 @@ export class Referenceinfo implements OnInit {
       }
     };
 
-    this.loanformservice.saveReference(input, this.applicationId).subscribe({
+    this.loanformservice.saveReference(input, this.applicationId, edit).subscribe({
       next: (res: any) => {
         if (res.status === 'success') {
           if (isRef1) {
@@ -1168,37 +1199,45 @@ export class Referenceinfo implements OnInit {
     });
   }
   saveExit() {
-    const input = this.buildReferencePayload();
+    this.msgBox.open({
+      title: 'Are you sure you want to exit?',
+      message: ``,
+      showCancel: true,
+      onOk: () => {
+        const input = this.buildReferencePayload();
 
-    const key = this.getStorageKey();
-    localStorage.setItem(key, JSON.stringify(input));
+        const key = this.getStorageKey();
+        localStorage.setItem(key, JSON.stringify(input));
 
 
-    const applicantId = this.getApiApplicantId();
+        const applicantId = this.getApiApplicantId();
 
-    if (!applicantId) {
-      this.lastSavedPayload = { ...input };
-      return;
-    }
+        if (!applicantId) {
+          this.lastSavedPayload = { ...input };
+          return;
+        }
 
-    const inputdata = {
-      action: "auto-save",
-      sectionKey: "SAVE_REFERENCES",
-      applicationId: this.applicationId,
-      applicantId: applicantId,
-      jsonData: input
-    };
+        const inputdata = {
+          action: "auto-save",
+          sectionKey: "SAVE_REFERENCES",
+          applicationId: this.applicationId,
+          applicantId: applicantId,
+          jsonData: input
+        };
 
-    this.loanformservice.saveandExit(inputdata).subscribe({
+        this.loanformservice.saveandExit(inputdata).subscribe({
 
-      next: () => {
-        this.lastSavedPayload = { ...input };
-        console.log('Reference draft saved successfully');
-      },
-      error: (err) => {
-        console.error('Save & Exit failed', err);
+          next: () => {
+            this.lastSavedPayload = { ...input };
+            console.log('Reference draft saved successfully');
+          },
+          error: (err) => {
+            console.error('Save & Exit failed', err);
+          }
+
+        });
+        this.router.navigate(['/admin/losoperation']);
       }
-
     });
   }
 
@@ -1241,5 +1280,28 @@ export class Referenceinfo implements OnInit {
     }
 
 
+  }
+
+  enableForm(){
+    this.isViewMode = false;
+    this.isEditMode = true;
+    this.referenceForm.enable();
+    this.loanformservice.clearSummaryEditFlow();
+  }
+
+  cancelSummaryEdit() {
+    if (this.isEditMode && this.originalFormValue) {
+      this.referenceForm.patchValue(this.originalFormValue);
+    }
+
+    this.isViewMode = false;
+    this.isEditMode = false;
+    this.loanformservice.clearSummaryEditFlow();
+
+    this.router.navigate(['/applications', this.applicationId, 'summaryinfo']);
+  }
+
+  saveSummaryEdit() {
+    this.next();
   }
 }

@@ -141,7 +141,7 @@
         <div class="col-lg-6 loan-mt-4 col-sm-12">
 
 
-          <app-inputfield type="text" name="pan" ngModel [required]="isPassportRequired()" #pan="ngModel" label="PAN Number"
+          <app-inputfield type="text" name="pan" ngModel [required]="true" #pan="ngModel" label="PAN Number"
             placeholder="Enter your 10 digit Pan number" helpText="Help text" pattern="^[A-Za-z]{5}[0-9]{4}[A-Za-z]{1}$"
             [maxlength]="10" [uppercase]="true">
           </app-inputfield>
@@ -159,7 +159,7 @@
 
         <div class="col-lg-6 loan-mt-4 col-sm-12">
 
- @if (hasLocalFile('pan')) {
+          @if (hasLocalFile('pan')) {
           <label class="text-label">
             PAN Card<span class="text-danger">*</span>
           </label>
@@ -196,9 +196,9 @@
         <div class="col-lg-6 loan-mt-4 col-sm-12">
 
 
-          <app-inputfield type="text" name="Passport" ngModel [required]="true" #Passport="ngModel" label="Passport"
-            placeholder="Enter your 8 digit passport number" helpText="Help text" pattern="^[A-Z][0-9]{7}$"
-            [maxlength]="8" [uppercase]="true">
+          <app-inputfield type="text" name="Passport" ngModel [required]="isPassportRequired()" #Passport="ngModel"
+            label="Passport" placeholder="Enter your 8 digit passport number" helpText="Help text"
+            pattern="^[A-Z][0-9]{7}$" [maxlength]="8" [uppercase]="true">
           </app-inputfield>
 
           <div class="text-danger mt-1" *ngIf="Passport.invalid && Passport.touched">
@@ -215,7 +215,7 @@
 
         <div class="col-lg-6 loan-mt-4 col-sm-12">
 
- @if (hasLocalFile('passport')) {
+          @if (hasLocalFile('passport')) {
           <label class="text-label">
             Passport<span class="text-danger">*</span>
           </label>
@@ -238,7 +238,7 @@
             </div>
           </div>
           } @else {
-          <app-uploadbtn [config]="basicConfig" [required]="true" (fileChange)="onFileChange($event, 'passport')"
+          <app-uploadbtn [config]="basicConfig" [required]="isPassportRequired()" (fileChange)="onFileChange($event, 'passport')"
             label="Passport">
           </app-uploadbtn>
           }
@@ -390,7 +390,7 @@
             label="Secondary Address Proof"></app-dropdown>
         </div>
         <div class="col-lg-6  col-sm-12 ">
-           @if (hasLocalFile('secaddress')) {
+          @if (hasLocalFile('secaddress')) {
           <label class="text-label">
             Secondary Address Proof Name<span class="text-danger">*</span>
           </label>
@@ -552,29 +552,28 @@
   </form>
 
 
-<div class="success-modal" *ngIf="isCoApplicant && issuccess">
-  <div class="modal-overlay"></div>
+  <div class="success-modal" *ngIf="isCoApplicant && issuccess">
+    <div class="modal-overlay"></div>
 
-  <div class="modal-container">
-   <button class="close-btn" (click)="onCancel()" >
-      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
-        <path d="M3 3L15 15L3 3Z" fill="#F4F6FF" />
-        <path d="M3 3L15 15" stroke="#F4F6FF" stroke-width="1.125" stroke-linecap="round" stroke-linejoin="round" />
-        <path d="M3 15L15 3" stroke="#F4F6FF" stroke-width="1.125" stroke-linecap="round" stroke-linejoin="round" />
-      </svg></button>
+    <div class="modal-container">
+      <button class="close-btn" (click)="onCancel()">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
+          <path d="M3 3L15 15L3 3Z" fill="#F4F6FF" />
+          <path d="M3 3L15 15" stroke="#F4F6FF" stroke-width="1.125" stroke-linecap="round" stroke-linejoin="round" />
+          <path d="M3 15L15 3" stroke="#F4F6FF" stroke-width="1.125" stroke-linecap="round" stroke-linejoin="round" />
+        </svg></button>
 
-        <app-successbox title="Your NCID has been created!" [description]="`The customer's KYC details have been submitted and 
-the profile is now active.`" [boxText]="custName"
-          [id]="NCId" [buttons]="[
+      <app-successbox title="Your NCID has been created!" [description]="`The customer's KYC details have been submitted and 
+the profile is now active.`" [boxText]="custName" [id]="NCId" [buttons]="[
     { label: '', action: '', outline: true, color: '',class: 'd-none'  },
     { label: 'Ok', action: '', outline: false, color: 'primary',class: 'btncustomClass'  }
   ]" (actionClick)="handleSuccessAction()">
-        </app-successbox>
+      </app-successbox>
 
-      </div>
-      </div>
-      
+    </div>
+  </div>
 
-      
+
+
 
 </div>

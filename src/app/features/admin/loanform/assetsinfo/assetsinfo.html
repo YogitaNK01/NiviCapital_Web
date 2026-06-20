@@ -1,25 +1,39 @@
 <div class="vh-container" >
     <div class="base-layout base-height" [ngClass]="{'coapplicant-layout': isCoApplicant}">
 
-          <div class="header " *ngIf="!isCoApplicant">
-
-            <div class="text-datepicker blue-text d-flex flex-column gap-2 ">Assets
-                <div class="text-body-1 fw-normal">
-                    <span><svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 22 22"
-                            fill="none">
-                            <path
-                                d="M10.9997 20.1667C16.0413 20.1667 20.1663 16.0417 20.1663 11C20.1663 5.95833 16.0413 1.83333 10.9997 1.83333C5.95801 1.83333 1.83301 5.95833 1.83301 11C1.83301 16.0417 5.95801 20.1667 10.9997 20.1667Z"
-                                stroke="#25262F" stroke-width="1.28125" stroke-linecap="round"
-                                stroke-linejoin="round" />
-                            <path d="M11 7.33333V11.9167" stroke="#25262F" stroke-width="1.28125" stroke-linecap="round"
-                                stroke-linejoin="round" />
-                            <path d="M10.9961 14.6667H11.0043" stroke="#25262F" stroke-width="1.28125"
-                                stroke-linecap="round" stroke-linejoin="round" />
-                        </svg></span>
-                    Click the “Next” button to save your changes
+          <div class="header w-100" *ngIf="!isCoApplicant">
+            <div class="d-flex justify-content-between">
+                <div class="text-datepicker blue-text d-flex flex-column gap-2 ">Assets
+                    <div class="text-body-1 fw-normal" *ngIf="!isFromSummary">
+                        <span><svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 22 22"
+                                fill="none">
+                                <path
+                                    d="M10.9997 20.1667C16.0413 20.1667 20.1663 16.0417 20.1663 11C20.1663 5.95833 16.0413 1.83333 10.9997 1.83333C5.95801 1.83333 1.83301 5.95833 1.83301 11C1.83301 16.0417 5.95801 20.1667 10.9997 20.1667Z"
+                                    stroke="#25262F" stroke-width="1.28125" stroke-linecap="round"
+                                    stroke-linejoin="round" />
+                                <path d="M11 7.33333V11.9167" stroke="#25262F" stroke-width="1.28125" stroke-linecap="round"
+                                    stroke-linejoin="round" />
+                                <path d="M10.9961 14.6667H11.0043" stroke="#25262F" stroke-width="1.28125"
+                                    stroke-linecap="round" stroke-linejoin="round" />
+                            </svg></span>
+                        Click the “Next” button to save your changes
+                    </div>
                 </div>
-            </div>
+            
 
+                <div>
+                    <app-buttons
+                        *ngIf="isFromSummary"
+                        type="button"
+                        label="Edit"
+                        class="btn btn-icon edit btncustomClass editBtnClass"
+                        color="primary"
+                        (click)="enableForm()"
+                        [disabled]="!isViewMode">
+                        <img src="/assets/images/icons/edit-white.svg" alt="edit">
+                    </app-buttons>
+                </div>
+          </div>
         </div>
 
         <div class=" w-100 d-flex blue-head-box d-flex  justify-content-center ">
@@ -32,7 +46,7 @@
                     <app-dropdown [options]="assetsCatagories" [multiSelect]="true" [(selectedValue)]="selectedAssets"
                         [placeholder]="'Select Assets type'"
                         (selectedValueChange)="onAssetChange($event); SelectedAssetvalue($event)"
-                        [avatarUrl]="avatarUrl" [hasAvatar]="hasAvatar" [label]="'Assets'">
+                        [avatarUrl]="avatarUrl" [hasAvatar]="hasAvatar" [label]="'Assets'" [disabled]="isViewMode">
                     </app-dropdown>
                 </div>
             </div>
@@ -231,7 +245,7 @@
                                             [(selectedValue)]="selectedPropertyIds"
                                             [placeholder]="'Select Property Type'" [required]="true"
                                             (selectedValueChange)="onchange($event,'property')" [avatarUrl]="avatarUrl"
-                                            [hasAvatar]="hasAvatar" [label]="'Property Type'">
+                                            [hasAvatar]="hasAvatar" [label]="'Property Type'" [disabled]="isViewMode">
                                         </app-dropdown>
 
                                     </div>
@@ -241,7 +255,7 @@
                                         <app-dropdown [options]="selectOwnertype" formControlName="ownershiptype"
                                             [placeholder]="'Select Ownership type'" [required]="true"
                                             (selectedValueChange)="onchange($event,'propertyOwnertype')"
-                                            [avatarUrl]="avatarUrl" [hasAvatar]="hasAvatar" [label]="'Ownership Type'">
+                                            [avatarUrl]="avatarUrl" [hasAvatar]="hasAvatar" [label]="'Ownership Type'" [disabled]="isViewMode">
                                         </app-dropdown>
 
 
@@ -289,7 +303,7 @@
                             @if(i === properties.length - 1 ) {
                             <div class="row common-details-box pt-0 pb-0 ">
 
-                                <div class="form-group mb-3">
+                                <div class="form-group mb-3" [ngClass]="{'disabled-div': isViewMode}">
                                     <app-buttons label="Add Property" class="btn btn-icon Add btncustomClass"
                                         [outline]="true" (click)="addProperty()">
                                         <img src="/assets/images/icons/addred.svg">
@@ -344,7 +358,7 @@
                                     <div class="form-group">
                                         <app-dropdown [options]="selectBanks" formControlName="bankname"
                                             [label]="'Bank Name'" [required]="true" [searchable]="true"
-                                            (selectedValueChange)="onBankSelected($event,fd)">
+                                            (selectedValueChange)="onBankSelected($event,fd)" [disabled]="isViewMode">
                                         </app-dropdown>
                                     </div>
                                 </div>
@@ -389,7 +403,7 @@
                                 <div class="col-4" *ngIf="!isOtherSelected(fd)">
                                     <div class="form-group">
                                         <app-datepickernew formControlName="maturitydate" label="Maturity Date"
-                                            [disablePastDates]="true" placeholder="DD/MM/YYYY">
+                                            [disablePastDates]="true" placeholder="DD/MM/YYYY" [ngClass]="{'disabled-div' : isViewMode}">
                                         </app-datepickernew>
                                         <div class="text-danger"
                                             *ngIf="fd.get('maturitydate')?.touched && fd.get('maturitydate')?.errors?.['minDateError']">
@@ -420,9 +434,9 @@
                                     </div>
 
                                     <div class="col-6 mt-3">
-                                        <div class="form-group">
+                                        <div class="form-group" >
                                             <app-datepickernew formControlName="maturitydate" label="Maturity Date"
-                                                [disablePastDates]="true" placeholder="DD/MM/YYYY">
+                                                [disablePastDates]="true" placeholder="DD/MM/YYYY" [ngClass]="{'disabled-div' : isViewMode}">
                                             </app-datepickernew>
                                             <div class="text-danger"
                                                 *ngIf="fd.get('maturitydate')?.touched && fd.get('maturitydate')?.errors?.['minDateError']">
@@ -436,7 +450,7 @@
                             @if(i === fixedDeposits.length - 1 ) {
                             <div class="row common-details-box pt-0 pb-0 ">
 
-                                <div class="form-group mb-3">
+                                <div class="form-group mb-3" [ngClass]="{'disabled-div': isViewMode}">
                                     <app-buttons label="Add Fixed Deposit" class="btn btn-icon Add btncustomClass"
                                         [outline]="true" (click)="addFD()">
                                         <img src="/assets/images/icons/addred.svg">
@@ -457,7 +471,7 @@
                             <app-dropdown [options]="selectInvestments" [(selectedValue)]="selectedInvestmentIds"
                                 [placeholder]="'Select type'" [required]="true" [multiSelect]="true"
                                 (selectedValueChange)="onchangeinvestment($event)" [avatarUrl]="avatarUrl"
-                                [hasAvatar]="hasAvatar" [label]="'Select Type'">
+                                [hasAvatar]="hasAvatar" [label]="'Select Type'" [disabled]="isViewMode">
                             </app-dropdown>
 
                         </div>
@@ -640,7 +654,7 @@
                             @if(i === otherassets.length - 1 ) {
                             <div class="row common-details-box pt-0 pb-0 ">
 
-                                <div class="form-group mb-3">
+                                <div class="form-group mb-3" [ngClass]="{'disabled-div': isViewMode}">
                                     <app-buttons label="Add Other Assets" class="btn btn-icon Add btncustomClass"
                                         [outline]="true" (click)="addOther()">
                                         <img src="/assets/images/icons/addred.svg">
@@ -661,17 +675,44 @@
     <hr class="footer-hr-class">
     <div class="loan-footerbtns row w-100  d-flex justify-content-between align-items-center">
 
-        <div class="col-lg-4 pointer">
-            <img src="../assets/images/icons/save.svg">
-            <span class="text-dp-3-regular mx-2 blue-text" (click)="saveExit()"> Save and Exit</span>
-        </div>
-        <div class="col-lg-4  d-flex justify-content-end">
-            <app-buttons type="button" label="Back" class="btn btncustomClass" [outline]="true" (click)="back()">
-            </app-buttons>
-            <app-buttons type="button" label="Next" class="btn btncustomClass" color="primary" (click)="next()"
-                [disabled]="isNextDisabled">
-            </app-buttons>
+        <ng-container *ngIf="!isFromSummary">
 
-        </div>
+            <div class="col-lg-4 pointer">
+                <img src="../assets/images/icons/save.svg">
+                <span class="text-dp-3-regular mx-2 blue-text" (click)="saveExit()"> Save and Exit</span>
+            </div>
+            <div class="col-lg-4  d-flex justify-content-end">
+                <app-buttons type="button" label="Back" class="btn btncustomClass" [outline]="true" (click)="back()">
+                </app-buttons>
+                <app-buttons type="button" label="Next" class="btn btncustomClass" color="primary" (click)="next()"
+                    [disabled]="isNextDisabled">
+                </app-buttons>
+
+            </div>
+        </ng-container>
+
+        <ng-container *ngIf="isFromSummary">
+            <div class="col-lg-12 d-flex justify-content-end gap-2">
+
+                <app-buttons
+                    type="button"
+                    label="Cancel"
+                    class="btn btncustomClass"
+                    [outline]="true"
+                    (click)="cancelSummaryEdit()">
+                </app-buttons>
+
+                <app-buttons
+                    *ngIf="isEditMode"
+                    type="button"
+                    label="Save"
+                    class="btn btncustomClass"
+                    color="primary"
+                    (click)="saveSummaryEdit()"
+                    [disabled]="isNextDisabled">
+                </app-buttons>
+
+            </div>
+        </ng-container>
     </div>
 </div>

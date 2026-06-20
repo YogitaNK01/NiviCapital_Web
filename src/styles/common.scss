@@ -1107,3 +1107,16 @@ p {
 .pointer{
   cursor: pointer;
 }
+
+// disable any div
+.disabled-div {
+    pointer-events: none; /* Blocks all clicks, hovers, and pointer events */
+    opacity: 0.5;        /* Visually indicates the section is inactive */
+}
+
+// edit button styling
+.editBtnClass{
+  width: 100%;
+  min-width: 100px;
+
+}

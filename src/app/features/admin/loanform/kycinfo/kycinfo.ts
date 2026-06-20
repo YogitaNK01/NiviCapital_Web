@@ -10,7 +10,7 @@ import { Loanstepperservice } from '../../../../core/service/loanstepperservice'
 import { Buttons } from '../../../systemdesign/buttons/buttons';
 import { Loanformservice } from '../../../../core/service/loanformservice';
 import { Uploadkyc } from "../../customer/uploadkyc/uploadkyc";
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 
 @Component({
   selector: 'app-kycinfo',
@@ -65,7 +65,13 @@ export class Kycinfo {
   passportuploadfailure:boolean = false;
 selectedPassportFile: File | null = null;
 
-  constructor(private fb: FormBuilder, private stepperService: Loanstepperservice, private cd: ChangeDetectorRef, private loanformservice: Loanformservice, private route: ActivatedRoute) { }
+  //edit from summary
+  isFromSummary = false;
+  isViewMode = false;
+  isEditMode = false;
+  originalFormValue: any = null;
+
+  constructor(private fb: FormBuilder, private stepperService: Loanstepperservice, private cd: ChangeDetectorRef, private loanformservice: Loanformservice, private route: ActivatedRoute, private router: Router) { }
 
   ngOnInit(): void {
 this.stepperService.rebuildSteps();
@@ -139,6 +145,13 @@ this.stepperService.rebuildSteps();
             ?.setValue(false, { emitEvent: false });
         }
       });
+
+    this.isFromSummary = this.loanformservice.isSummaryEditFlow();
+
+    if(this.isFromSummary){
+      this.isViewMode = true;
+      this.kycdocumentsForm.disable();
+    }
 
   }
 
@@ -325,5 +338,56 @@ this.stepperService.rebuildSteps();
 
     });
   }
+
+  enableForm(){
+    this.isViewMode = false;
+    this.isEditMode = true;
+    this.kycdocumentsForm.enable();
+    this.loanformservice.clearSummaryEditFlow();
+  }
+
+  cancelSummaryEdit() {
+    if (this.isEditMode && this.originalFormValue) {
+      this.kycdocumentsForm.patchValue(this.originalFormValue);
+    }
+
+    this.isViewMode = false;
+    this.isEditMode = false;
+    this.loanformservice.clearSummaryEditFlow();
+
+    this.router.navigate(['/applications', this.applicationId, 'summaryinfo']);
+  }
+
+  // saveSummaryEdit() {
+  //   const input = this.buildExpensePayload();
+
+  //   this.loanformservice.estimateExpense(input, this.applicationId, true).subscribe({
+  //     next: (res: any) => {
+  //       if (res.status === 'success') {
+  //         const key = this.getStorageKey();
+  //         localStorage.setItem(key, JSON.stringify(input));
+
+  //         if (this.isCoApplicant) {
+  //           this.loanformservice.co_additionalInfoData = input;
+  //         } else {
+  //           this.loanformservice.additionalInfoData = input;
+  //         }
+
+  //         this.lastSavedPayload = { ...input };
+
+  //         console.log(res);
+
+  //         this.isEditMode = false;
+
+  //         this.isViewMode = false;
+
+  //         // this.router.navigate(['/loanform/summaryinfo']);
+  //       }
+  //     },
+  //     error: (err) => {
+  //       console.error('Additional info update failed', err);
+  //     }
+  //   });
+  // }
 
 }

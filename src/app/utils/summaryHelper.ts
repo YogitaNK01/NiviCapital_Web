@@ -10,7 +10,7 @@ type Field = {
 export class SummaryHelper {
 
   static extractcoappBasicInfo(data: any) {
-    if (!data) return { };
+    if (!data) return {};
     const course = data;
     const basicDetailsFields = [
       { label: 'First Name', value: course.firstName },
@@ -19,7 +19,7 @@ export class SummaryHelper {
       { label: 'Email ID', value: course.emailId },
       { label: 'Mobile Number', value: course.mobileNumber },
 
-    
+
     ].filter(field => field.value !== null && field.value !== '');
 
     return { basicDetailsFields };
@@ -64,7 +64,7 @@ export class SummaryHelper {
       { label: 'Annual Income', value: generalInfo.annualIncome },
       { label: 'Relation with Applicant', value: generalInfo.relationWithApplicant },
       { label: 'Do you have Assets?', value: (generalInfo.hasAssets ? 'Yes' : 'No') },
-      
+
     ].filter(field => field.value !== null && field.value !== '');
 
     return { currentOccupation, courseDetailsFields };
@@ -124,7 +124,7 @@ export class SummaryHelper {
   }
 
 
-  static extractAdditionalInfo(additionalInfo: any,applicantType: 'MAIN' | 'CO_APPLICANT' = 'CO_APPLICANT') {
+  static extractAdditionalInfo(additionalInfo: any, applicantType: 'MAIN' | 'CO_APPLICANT' = 'CO_APPLICANT') {
     const isMainApplicant = applicantType === 'MAIN';
 
     const labels = {
@@ -160,10 +160,10 @@ export class SummaryHelper {
       return obj[key] || '';
     };
 
-    
-  const applicantSource = isMainApplicant
-    ? additionalInfo?.mainApplicant
-    : additionalInfo?.applicantDetails;
+
+    const applicantSource = isMainApplicant
+      ? additionalInfo?.mainApplicant
+      : additionalInfo?.applicantDetails;
 
     // Extract values for each section based on labels
     const values = {
@@ -172,14 +172,14 @@ export class SummaryHelper {
       //   value: getValue(additionalInfo?.mainApplicant, field.key)
       // })).filter(field => field.value && field.value !== ''),
 
-    applicantDetails: labels.applicantDetails
-      .map(field => ({
-        label: field.label,
-        value: getValue(additionalInfo?.applicantDetails, field.key)
-      }))
-      .filter(field => field.value !== null && field.value !== undefined && field.value !== ''),
+      applicantDetails: labels.applicantDetails
+        .map(field => ({
+          label: field.label,
+          value: getValue(additionalInfo?.applicantDetails, field.key)
+        }))
+        .filter(field => field.value !== null && field.value !== undefined && field.value !== ''),
 
-      
+
       spouse: labels.spouse.map(field => ({
         label: field.label,
         value: getValue(additionalInfo?.spouse, field.key)
@@ -326,7 +326,7 @@ export class SummaryHelper {
       diploma: COMMON_EDUCATION_FIELDS,
       bachelors: COMMON_EDUCATION_FIELDS,
       postgraduate: COMMON_EDUCATION_FIELDS,
-
+      others: COMMON_EDUCATION_FIELDS,
       ieltsPte: [
         { label: 'Score', key: 'score' },
         { label: 'Certificate', key: 'marksheetUrl' },
@@ -366,14 +366,7 @@ export class SummaryHelper {
 
 
 
-          // const marksheets = [
-          //   ...new Set(
-          //     data
-          //       .filter(d => d.type === 'MARKSHEET')
-          //       .map(d => d.marksheetUrl?.trim())
-          //       .filter(Boolean)
-          //   )
-          // ];
+
 
 
           //  For 10th & 12th → return single string
@@ -396,16 +389,7 @@ export class SummaryHelper {
           const lc = data.find(d => d.type === 'OTHER');
           return lc?.marksheetUrl || '';
 
-          // const otherDocs = [
-          //   ...new Set(
-          //     data
-          //       .filter(d => d.type === 'OTHER')
-          //       .map(d => d.marksheetUrl?.trim())
-          //       .filter(Boolean)
-          //   )
-          // ];
 
-          // return otherDocs.length ? otherDocs.join(', ') : '';
 
         }
 
@@ -414,16 +398,7 @@ export class SummaryHelper {
           const otherDoc = data.find(d => d.type === 'OTHER');
           return otherDoc?.title || '';
 
-          // const titles = [
-          //   ...new Set(
-          //     data
-          //       .filter(d => d.type === 'OTHER')
-          //       .map(d => d.title?.trim())
-          //       .filter(Boolean)
-          //   )
-          // ];
 
-          // return titles.length ? titles.join(', ') : '';
 
         }
 
@@ -465,7 +440,10 @@ export class SummaryHelper {
         label: field.label, key: field.key,
         value: getValue(educationDetails?.postgraduate, field.key)
       })).filter(field => field.value && field.value !== '' && field.value !== '-'),
-
+      others: labels.others.map(field => ({
+        label: field.label, key: field.key,
+        value: getValue(educationDetails?.others, field.key)
+      })).filter(field => field.value && field.value !== '' && field.value !== '-'),
       ieltsPte: labels.ieltsPte.map(field => ({
         label: field.label, key: field.key,
         value: getValue(educationDetails?.ieltsPte, field.key)
@@ -497,7 +475,7 @@ export class SummaryHelper {
             {
               label: 'Bank / Lender',
               // value: loan.bankLender
-              value: loan.bankLender === 'Other' ? 'Other' : loan.bankLender
+              value: loan.bankLender
             },
           ]
 
@@ -544,7 +522,8 @@ export class SummaryHelper {
           const fields: Field[] = [
             {
               label: 'Bank Name',
-              value: cc.bankName === 'Other' ? cc.title : cc.bankName
+              // value: cc.bankName === 'Other' ? cc.title : cc.bankName
+              value: cc.bankName
             },
           ];
 
@@ -705,7 +684,7 @@ export class SummaryHelper {
           const fields: Field[] = [
             {
               label: 'Bank Name',
-              value: fd.bankName === 'Other' ? fd.description : fd.bankName
+              value: fd.bankName
             },
           ];
 
@@ -767,7 +746,7 @@ export class SummaryHelper {
   }
 
   static extractReferenceInfo(references: any[]) {
-if (!Array.isArray(references)) return [];
+    if (!Array.isArray(references)) return [];
     const labels = [
       { label: 'First Name', key: 'firstName' },
       { label: 'Middle Name', key: 'middleName' },

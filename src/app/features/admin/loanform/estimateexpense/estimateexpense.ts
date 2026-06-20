@@ -11,6 +11,7 @@ import { Main } from '../../../../core/service/main';
 import { Msgboxservice } from '../../../../core/service/msgboxservice';
 import { groupBy } from 'rxjs';
 import { firstValueFrom } from 'rxjs';
+import { Storage } from '../../../../core/service/storage';
 interface OptionItem {
   label: string;
   value: string;
@@ -80,8 +81,15 @@ export class Estimateexpense {
 
   isSummaryEditMode = false;
   viewOnly = false;
+
+  //edit from summary
+  isFromSummary = false;
+  isViewMode = false;
+  isEditMode = false;
+  originalFormValue: any = null;
+
   constructor(private fb: FormBuilder, private stepperService: Loanstepperservice, private cd: ChangeDetectorRef, private loanformservice: Loanformservice,
-    private router: Router, private route: ActivatedRoute, public main: Main, private msgBox: Msgboxservice) { }
+    private router: Router, private route: ActivatedRoute, public main: Main, private msgBox: Msgboxservice,private storageservice:Storage) { }
 
   async ngOnInit() {
     this.isCoApplicant = this.router.url.includes('co-applicant');
@@ -241,13 +249,41 @@ export class Estimateexpense {
 
     await this.loadEstimatedExpenseForBothFlows();
 
+    this.isFromSummary = this.loanformservice.isSummaryEditFlow();
+
+    if(this.isFromSummary){
+      this.isViewMode = true;
+      this.expenseForm.disable();
+    }
+
   }
 
-  getStorageKey() {
-    return `estimateExpenseData_main_${this.stepperService.getLoanId()?.[0]}`;
-    // return this.isCoApplicant
-    //   ? `estimateExpenseData_coapp_${this.applicantId}`
-    //   : `estimateExpenseData_main_${this.applicantId}`;
+  getStorageKey11() {
+    return `estimateExpenseData_main_${this.applicationId}_${this.stepperService.getLoanId()?.[0]}`;
+    
+  }
+   getStorageKey() {
+    return this.storageservice.getStorageKey(
+      'estimateExpenseData',
+      this.applicationId,
+      this.applicantId,
+      this.isCoApplicant
+    );
+  }
+    getStorageKey1() {
+    const main_ApplicantId = this.stepperService.getLoanId()?.[0];
+    const co_ApplicantId = this.stepperService.getCo_appId()?.[0];
+    const index = this.stepperService.getCurrentCoApplicantIndex();
+
+    return this.storageservice.getStorageKey(
+      'estimateExpenseData',
+      this.applicationId,
+      this.applicantId,
+      this.isCoApplicant,
+      main_ApplicantId ?? undefined,
+      co_ApplicantId ?? undefined, 
+      index
+    );
   }
   getStepRoute() {
     return this.isCoApplicant ? 'co-expense' : 'expense';
@@ -479,6 +515,13 @@ private normalizeEstimatedExpense(data: any): any {
       this.openIndex.push(index);
     }
     this.cd.detectChanges();
+  }
+
+  enableForm(){
+    this.isViewMode = false;
+    this.isEditMode = true;
+    this.expenseForm.enable();
+    this.loanformservice.clearSummaryEditFlow();
   }
 
   submit() {
@@ -1252,6 +1295,11 @@ private normalizeEstimatedExpense(data: any): any {
 
   //save and exit 
   saveExit() {
+      this.msgBox.open({
+      title: 'Are you sure you want to exit?',
+      message: ``,
+      showCancel: true,
+      onOk: () => {
     let formdata = this.expenseForm.value
     console.log("form data Expenses:", formdata);
 
@@ -1266,7 +1314,7 @@ private normalizeEstimatedExpense(data: any): any {
       miscellaneousExpenseItemMasterId: item.category,
       frequency: item.securityfrequency?.toUpperCase(),
       amountInr: Number(item.amountINR.replace(/,/g, '')),
-      description: item.description || ''
+      description: item.descriptionmisc || item.description || ''
     }));
 
 
@@ -1284,6 +1332,9 @@ private normalizeEstimatedExpense(data: any): any {
     };
 
     this.loanformservice.saveandExit(inputdata).subscribe();
+     this.router.navigate(['/admin/losoperation']);
+     }
+    });
   }
   //get api for saved data
   getSavedEstExpense(): Promise<any> {
@@ -1391,7 +1442,7 @@ private finishAfterSaveOrNoChange() {
       items: [...livingExpenses, ...miscExpenses]
     }
 
-    this.loanformservice.estimateExpense(input, this.applicationId).pipe().subscribe({
+    this.loanformservice.estimateExpense(input, this.applicationId, false).pipe().subscribe({
       next: (res) => {
         console.log("resp---", res);
         if (res.status == "success") {
@@ -1407,6 +1458,50 @@ private finishAfterSaveOrNoChange() {
     });
 
 
+  }
+
+  cancelSummaryEdit() {
+    if (this.isEditMode && this.originalFormValue) {
+      this.expenseForm.patchValue(this.originalFormValue);
+    }
+
+    this.isViewMode = false;
+    this.isEditMode = false;
+    this.loanformservice.clearSummaryEditFlow();
+
+    this.router.navigate(['/applications', this.applicationId, 'summaryinfo']);
+  }
+
+  saveSummaryEdit() {
+    const input = this.buildExpensePayload();
+
+    this.loanformservice.estimateExpense(input, this.applicationId, true).subscribe({
+      next: (res: any) => {
+        if (res.status === 'success') {
+          const key = this.getStorageKey();
+          localStorage.setItem(key, JSON.stringify(input));
+
+          if (this.isCoApplicant) {
+            this.loanformservice.co_estExpenseInfoData = input;
+          } else {
+            this.loanformservice.estExpenseInfoData = input;
+          }
+
+          this.lastSavedPayload = { ...input };
+
+          console.log(res);
+
+          this.isEditMode = false;
+
+          this.isViewMode = false;
+
+          // this.router.navigate(['/loanform/summaryinfo']);
+        }
+      },
+      error: (err) => {
+        console.error('Additional info update failed', err);
+      }
+    });
   }
 
 }

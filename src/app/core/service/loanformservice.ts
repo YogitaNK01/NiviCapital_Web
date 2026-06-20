@@ -4,6 +4,7 @@ import { FormGroup } from '@angular/forms';
 import { BehaviorSubject, firstValueFrom, map, Observable, of, shareReplay, tap } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { HttpClient } from '@angular/common/http';
+import { Loanstepperservice } from './loanstepperservice';
 
 export interface ApiResponse<T> {
   status: string;
@@ -97,7 +98,7 @@ private readonly SUMMARY_STORAGE_KEY = 'summaryData';
 private summaryRequest$?: Observable<ApiResponse<any>>;
 
   
-  constructor(private http: HttpClient,) { this.restoreFromStorage(); }
+  constructor(private http: HttpClient) { this.restoreFromStorage(); }
 
 
   restoreFromStorage() {
@@ -167,7 +168,7 @@ private summaryRequest$?: Observable<ApiResponse<any>>;
     );
   }
 
-  getCoursetype(id: string): Observable<ApiResponse<any>> {
+     getCoursetype(id: string): Observable<ApiResponse<any>> {
     return this.http.get<ApiResponse<any>>(
       `${this.baseUrl}/v1/masters/course-types/${id}`,
 
@@ -180,10 +181,13 @@ private summaryRequest$?: Observable<ApiResponse<any>>;
 
     );
   }
+  
 
-  getRelationList(id: string): Observable<ApiResponse<any>> {
+//------------coapplicant relationship with applicant
+   getRelationShip(): Observable<ApiResponse<any>> {
     return this.http.get<ApiResponse<any>>(
-      `${this.baseUrl}/v1/applications/relations`,
+      `${this.baseUrl}/v1/los/applications/relations`,
+
     );
   }
 
@@ -205,7 +209,14 @@ private summaryRequest$?: Observable<ApiResponse<any>>;
   }
 
   // ************************* save general info api  *************************
-  submitGenralInfo(payload: any, id: string): Observable<ApiResponse<any>> {
+  submitGenralInfo(payload: any, id: string, edit: boolean): Observable<ApiResponse<any>> {
+    if(edit){
+      return this.http.put<ApiResponse<any>>(
+        `${this.baseUrl}/v1/los/applications/${id}/general-info`,
+        payload
+      );
+    }
+
     return this.http.post<ApiResponse<any>>(
       `${this.baseUrl}/v1/los/applications/${id}/general-info`,
       payload
@@ -230,7 +241,13 @@ private summaryRequest$?: Observable<ApiResponse<any>>;
     );
   }
 
-  submitAdditionalInfo(payload: any, id: string): Observable<ApiResponse<any>> {
+  submitAdditionalInfo(payload: any, id: string, edit: any): Observable<ApiResponse<any>> {
+    if(edit){
+      return this.http.put<ApiResponse<any>>(
+        `${this.baseUrl}/v1/los/applications/${id}/personal-info`,
+        payload
+      );
+    }
     return this.http.post<ApiResponse<any>>(
       `${this.baseUrl}/v1/los/applications/${id}/personal-info`,
       payload
@@ -280,8 +297,15 @@ private summaryRequest$?: Observable<ApiResponse<any>>;
     );
   }
 
-  estimateExpense(data: any, id: string): Observable<ApiResponse<any>> {
+  estimateExpense(data: any, id: string, edit: any): Observable<ApiResponse<any>> {
     console.log("service--", data);
+
+    if(edit){
+      return this.http.put<ApiResponse<any>>(
+        `${this.baseUrl}/v1/los/applications/${id}/estimated-expenses`,
+        data
+      );
+    }
 
     return this.http.post<ApiResponse<any>>(
       `${this.baseUrl}/v1/los/applications/${id}/estimated-expenses`,
@@ -315,7 +339,13 @@ private summaryRequest$?: Observable<ApiResponse<any>>;
     );
   }
 
-  getAssets(data: any, id: string): Observable<ApiResponse<any>> {
+  getAssets(data: any, id: string, edit: boolean): Observable<ApiResponse<any>> {
+    if(edit){
+      return this.http.put<ApiResponse<any>>(
+        `${this.baseUrl}/v1/los/applications/${id}/assets`,
+        data
+      );
+    }
 
     return this.http.post<ApiResponse<any>>(
       `${this.baseUrl}/v1/los/applications/${id}/assets`,
@@ -350,8 +380,13 @@ private summaryRequest$?: Observable<ApiResponse<any>>;
     )
   };
 
-  submitliability(data: any, id: string): Observable<ApiResponse<any>> {
-
+  submitliability(data: any, id: string, edit: boolean): Observable<ApiResponse<any>> {
+    if(edit){
+      return this.http.put<ApiResponse<any>>(
+        `${this.baseUrl}/v1/los/applications/${id}/liabilities`,
+        data
+      );
+    }
     return this.http.post<ApiResponse<any>>(
       `${this.baseUrl}/v1/los/applications/${id}/liabilities`,
       data
@@ -359,8 +394,13 @@ private summaryRequest$?: Observable<ApiResponse<any>>;
   }
 
   // ************************* Monthly Expenditure   *************************
-  MonthlyExpenditure(data: any, id: string): Observable<ApiResponse<any>> {
-
+  MonthlyExpenditure(data: any, id: string, edit: boolean): Observable<ApiResponse<any>> {
+    if(edit){
+      return this.http.put<ApiResponse<any>>(
+        `${this.baseUrl}/v1/los/applications/${id}/monthly-expenses`,
+        data
+      );  
+    }
     return this.http.post<ApiResponse<any>>(
       `${this.baseUrl}/v1/los/applications/${id}/monthly-expenses`,
       data
@@ -440,8 +480,13 @@ private summaryRequest$?: Observable<ApiResponse<any>>;
   }
   // *************************Reference *************************
 
-  saveReference(data: any, id: string): Observable<ApiResponse<any>> {
-
+  saveReference(data: any, id: string, edit: boolean): Observable<ApiResponse<any>> {
+    if(edit){
+      return this.http.put<ApiResponse<any>>(
+        `${this.baseUrl}/v1/los/applications/${id}/references`,
+        data
+      );  
+    }
     return this.http.post<ApiResponse<any>>(
       `${this.baseUrl}/v1/los/applications/${id}/references`,
       data
@@ -474,9 +519,9 @@ private summaryRequest$?: Observable<ApiResponse<any>>;
   // *************************submit Summary *************************
 
   // submit summary form
-  submitMainApplicationSummary(applicationId: string, data: any): Observable<ApiResponse<any>> {
+  submitMainApplicationSummary(applicantId: string, data: any): Observable<ApiResponse<any>> {
     return this.http.post<ApiResponse<any>>(
-      `${this.baseUrl}/v1/los/applications/${applicationId}/submit`, data
+      `${this.baseUrl}/v1/los/applications/${applicantId}/submit`, data
     )
   }
 

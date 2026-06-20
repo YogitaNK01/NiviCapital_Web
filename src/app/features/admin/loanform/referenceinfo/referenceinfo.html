@@ -1,13 +1,47 @@
 <div class="vh-container" [ngClass]="{'coapplicant-layout': isCoApplicant}">
     <div class="base-layout base-height">
 
+        <div class="header w-100"  *ngIf="!isCoApplicant">
+            <div class="d-flex justify-content-between">
+                <div class="text-datepicker blue-text d-flex flex-column gap-2 ">Reference
+                    <div class="text-body-1 fw-normal" *ngIf="!isFromSummary">
+                        <span><svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 22 22"
+                                fill="none">
+                                <path
+                                    d="M10.9997 20.1667C16.0413 20.1667 20.1663 16.0417 20.1663 11C20.1663 5.95833 16.0413 1.83333 10.9997 1.83333C5.95801 1.83333 1.83301 5.95833 1.83301 11C1.83301 16.0417 5.95801 20.1667 10.9997 20.1667Z"
+                                    stroke="#25262F" stroke-width="1.28125" stroke-linecap="round"
+                                    stroke-linejoin="round" />
+                                <path d="M11 7.33333V11.9167" stroke="#25262F" stroke-width="1.28125" stroke-linecap="round"
+                                    stroke-linejoin="round" />
+                                <path d="M10.9961 14.6667H11.0043" stroke="#25262F" stroke-width="1.28125"
+                                    stroke-linecap="round" stroke-linejoin="round" />
+                            </svg></span>
+                        Click the “Next” button to save your changes
+                    </div>
+                </div>
+            
+                <div>
+                    <app-buttons
+                        *ngIf="isFromSummary"
+                        type="button"
+                        label="Edit"
+                        class="btn btn-icon edit btncustomClass editBtnClass"
+                        color="primary"
+                        (click)="enableForm()"
+                        [disabled]="!isViewMode">
+                        <img src="/assets/images/icons/edit-white.svg" alt="edit">
+                    </app-buttons>
+                </div>
+            </div>
+        </div>
+
         <form [formGroup]="referenceForm" (ngSubmit)="submit()" id="referenceForm" class="w-100 ">
 
 
 
             <!-- Button to open popup (you can place this where your Reference fields were) -->
             <div class="d-flex flex-column gap-3">
-                <button class="btn referencetitle" (click)="openModal(0)">
+                <button class="btn referencetitle" (click)="openModal(0)" [disabled]="isViewMode">
                     <span class="text-common fw-bold blue-text">Reference 1<span class="text-danger">*</span></span>
 
 
@@ -30,7 +64,7 @@
 
                 </button>
 
-                <button class="btn referencetitle" (click)="openModal(1)">
+                <button class="btn referencetitle" (click)="openModal(1)" [disabled]="isViewMode">
                     <span class="text-common fw-bold blue-text">Reference 2<span class="text-danger">*</span></span>
 
                     <span class="icons d-flex gap-4">
@@ -136,9 +170,11 @@
                         <!-- Footer only shows in Step 2 -->
                         <div class="modal-footer d-flex justify-content-start" *ngIf="popupStep === 2">
                             <app-buttons type="button" label="Save" class="btn btncustomClass" color="primary"
-                                (click)="saveReference()" [disabled]=" !canSaveReference || !isFormChanged() ">
+                                (click)="saveReference(false)" [disabled]=" !canSaveReference || !isFormChanged() " *ngIf="!isFromSummary">
                             </app-buttons>
-
+                            <app-buttons type="button" label="Save" class="btn btncustomClass" color="primary"
+                                (click)="saveReference(true)" [disabled]=" !canSaveReference || !isFormChanged() " *ngIf="isFromSummary">
+                            </app-buttons>
 
                         </div>
 
@@ -719,19 +755,45 @@
     <hr class="footer-hr-class">
     <div class="loan-footerbtns row w-100  d-flex justify-content-between align-items-center">
 
-        <div class="col-lg-4 pointer">
-            <img src="../assets/images/icons/save.svg">
-            <span class="text-dp-3-regular mx-2 blue-text" (click)="saveExit()"> Save and Exit</span>
-        </div>
-        <div class="col-lg-4  d-flex justify-content-end">
-            <app-buttons type="button" label="Back" class="btn btncustomClass" [outline]="true" (click)="back()">
+        <ng-container *ngIf="!isFromSummary">
+            <div class="col-lg-4 pointer">
+                <img src="../assets/images/icons/save.svg">
+                <span class="text-dp-3-regular mx-2 blue-text" (click)="saveExit()"> Save and Exit</span>
+            </div>
+            <div class="col-lg-4  d-flex justify-content-end">
+                <app-buttons type="button" label="Back" class="btn btncustomClass" [outline]="true" (click)="back()">
+                </app-buttons>
+                <app-buttons type="button" label="Next" class="btn btncustomClass" color="primary" (click)="next()"
+                    [disabled]="!reference2Filled || !reference1Filled">
+                </app-buttons>
+
+
+            </div>
+        </ng-container>
+
+        <ng-container *ngIf="isFromSummary">
+            <div class="col-lg-12 d-flex justify-content-end gap-2">
+
+            <app-buttons
+                type="button"
+                label="Cancel"
+                class="btn btncustomClass"
+                [outline]="true"
+                (click)="cancelSummaryEdit()">
             </app-buttons>
-            <app-buttons type="button" label="Next" class="btn btncustomClass" color="primary" (click)="next()"
+
+            <app-buttons
+                *ngIf="isEditMode"
+                type="button"
+                label="Save"
+                class="btn btncustomClass"
+                color="primary"
+                (click)="saveSummaryEdit()"
                 [disabled]="!reference2Filled || !reference1Filled">
             </app-buttons>
 
-
-        </div>
+            </div>
+        </ng-container>
     </div>
 </div>
 

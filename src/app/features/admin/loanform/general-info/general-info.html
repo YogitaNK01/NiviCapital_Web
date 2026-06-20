@@ -1,9 +1,9 @@
 <div class="base-layout" [ngClass]="{'coapplicant-layout': isCoApplicant}">
 
-    <div class="header "  *ngIf="!isCoApplicant">
-
+    <div class="header w-100"  *ngIf="!isCoApplicant">
+        <div class="d-flex justify-content-between">
             <div class="text-datepicker blue-text d-flex flex-column gap-2 ">General Information
-                <div class="text-body-1 fw-normal">
+                <div class="text-body-1 fw-normal" *ngIf="!isFromSummary">
                     <span><svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 22 22"
                             fill="none">
                             <path
@@ -19,7 +19,20 @@
                 </div>
             </div>
 
+            <div>
+                <app-buttons
+                    *ngIf="isFromSummary"
+                    type="button"
+                    label="Edit"
+                    class="btn btn-icon edit btncustomClass editBtnClass"
+                    color="primary"
+                    (click)="enableForm()"
+                    [disabled]="!isViewMode">
+                    <img src="/assets/images/icons/edit-white.svg" alt="edit">
+                </app-buttons>
+            </div>
         </div>
+    </div>
     <div class="accordion d-flex flex-column gap-4 mb-4">
 
         <div class="accordion-item b-0" *ngFor="let acc of accordions; let i = index">
@@ -44,7 +57,7 @@
                         <ng-container
                             *ngTemplateOutlet="isCoApplicant ? coapplicantTemplate : identityTemplate"></ng-container>
                     </ng-container>
-                    
+
 
                 </div>
             </div>
@@ -62,9 +75,10 @@
                     <!-- <div class="text-label fw-bold ">Last Qualification Details</div> -->
                     <div class="col-lg-12 col-sm-12 mt-20">
                         <app-dropdown [options]="selectoccupation" [placeholder]="'Select Current Occupation'"
-                            [required]="true" (selectedValueChange)="registerForm.get('occupation')?.setValue($event);handleOccupationChange($event)"
+                            [required]="true"
+                            (selectedValueChange)="registerForm.get('occupation')?.setValue($event);handleOccupationChange($event)"
                             [avatarUrl]="avatarUrl" formControlName="occupation" [hasAvatar]="hasAvatar"
-                            [label]="occupationlabel">
+                            [label]="occupationlabel" [disabled]="isViewMode">
                         </app-dropdown>
 
                     </div>
@@ -91,7 +105,7 @@
                                 <app-dropdown [options]="Australianstate" [placeholder]="'Select '+state"
                                     [required]="true" (selectedValueChange)="selectPerState($event)"
                                     [avatarUrl]="avatarUrl" formControlName="state" [hasAvatar]="hasAvatar"
-                                    [label]="state" [searchable]="true">
+                                    [label]="state" [searchable]="true" [disabled]="isViewMode">
                                 </app-dropdown>
                             </div>
 
@@ -125,7 +139,7 @@
                                 <app-dropdown [options]="AustralianUniversities" [placeholder]="'Select '+university"
                                     [required]="true" (selectedValueChange)="selecteduniversity($event)"
                                     [avatarUrl]="avatarUrl" formControlName="university" [hasAvatar]="hasAvatar"
-                                    [label]="university" [searchable]="true">
+                                    [label]="university" [searchable]="true" [disabled]="isViewMode">
                                 </app-dropdown>
                             </div>
 
@@ -160,7 +174,7 @@
                                 <app-dropdown [options]="selectcourse" [placeholder]="'Select '+coursetype"
                                     [required]="true" (selectedValueChange)="selectedcoursetype($event)"
                                     [avatarUrl]="avatarUrl" formControlName="coursetype" [hasAvatar]="hasAvatar"
-                                    [label]="coursetype">
+                                    [label]="coursetype" [disabled]="isViewMode">
                                 </app-dropdown>
                             </div>
 
@@ -193,7 +207,7 @@
                                 <app-dropdown [options]="selectcoursename" [placeholder]="'Select '+coursename"
                                     [required]="true" (selectedValueChange)="selectedCoursename($event)"
                                     [avatarUrl]="avatarUrl" [searchable]="true" formControlName="coursename"
-                                    [hasAvatar]="hasAvatar" [label]="coursename">
+                                    [hasAvatar]="hasAvatar" [label]="coursename" [disabled]="isViewMode">
                                 </app-dropdown>
                             </div>
 
@@ -227,7 +241,7 @@
                     <!-- Course Start Date* -->
                     <div class="col-lg-6 col-sm-12 mt-20">
                         <app-datepickernew formControlName="coursestartdate" label="Course Start Date"
-                            placeholder="DD/MM/YYYY" [disablePastDates]="true">
+                            placeholder="DD/MM/YYYY" [disablePastDates]="true" [ngClass]="{'disabled-div' : isViewMode}">
                         </app-datepickernew>
                         <div class="text-danger"
                             *ngIf="f['coursestartdate'].touched && f['coursestartdate'].errors?.['minDateError']">
@@ -237,7 +251,7 @@
                     <!-- Course End Date* -->
                     <div class="col-lg-6 col-sm-12 mt-20">
                         <app-datepickernew formControlName="courseenddate" label="Course End Date"
-                            placeholder="DD/MM/YYYY" [disabled]="!f['coursestartdate'].value" [disablePastDates]="true">
+                            placeholder="DD/MM/YYYY" [disabled]="!f['coursestartdate'].value" [disablePastDates]="true" [ngClass]="{'disabled-div' : isViewMode}">
                         </app-datepickernew>
                         <div class="text-danger"
                             *ngIf="f['courseenddate'].touched && f['courseenddate'].errors?.['invalidEndDate']"> End
@@ -255,12 +269,12 @@
                             </div>
                             <div class="d-flex flex-row">
                                 <app-radiobuttons name="optionsGroup1" label="Yes" value="Yes"
-                                    formControlName="checkedasset" (checkedChange)="checkassetOnChange('Yes')">
+                                    formControlName="checkedasset" (checkedChange)="checkassetOnChange('Yes')" [disabled]="isViewMode">
                                 </app-radiobuttons>
 
 
                                 <app-radiobuttons name="optionsGroup1" (checkedChange)="checkassetOnChange('No')"
-                                    label="No" value="No" formControlName="checkedasset">
+                                    label="No" value="No" formControlName="checkedasset" [disabled]="isViewMode">
                                 </app-radiobuttons>
                             </div>
                         </div>
@@ -272,7 +286,7 @@
                             [required]="true"
                             (selectedValueChange)="registerForm.get('lendingpartner')?.setValue($event)"
                             [avatarUrl]="avatarUrl" formControlName="lendingpartner" [hasAvatar]="hasAvatar"
-                            [label]="lendingpartner">
+                            [label]="lendingpartner" [disabled]="isViewMode">
                         </app-dropdown>
                     </div>
                 </div>
@@ -289,33 +303,54 @@
         <form [formGroup]="coapp_registerForm" (ngSubmit)="submit()" class="common-details-box d-flex flex-column">
             <div class="container-fluid">
                 <div class="row">
-
-                    <div class="col-lg-4 col-sm-12 mt-20">
+                    <div [ngClass]="{'col-3': isOtherRelationship, 'col-4': !isOtherRelationship  }">
+                        <!-- <div class="col-lg-4 col-sm-12 mt-20"> -->
                         <app-dropdown [options]="selectoccupation" [placeholder]="'Select Current Occupation'"
                             [required]="true"
                             (selectedValueChange)="coapp_registerForm.get('occupation')?.setValue($event);handleCoApplicantOccupationChange($event)"
                             [avatarUrl]="avatarUrl" formControlName="occupation" [hasAvatar]="hasAvatar"
-                            [label]="occupationlabel">
+                            [label]="occupationlabel" [disabled]="isViewMode">
                         </app-dropdown>
 
                     </div>
-                    <div class="col-lg-4 col-sm-12 mt-20">
+                    <!-- </div> -->
+                    <div [ngClass]="{'col-3': isOtherRelationship, 'col-4': !isOtherRelationship  }">
                         <app-dropdown [options]="selectAnnualIncome" [placeholder]="'Select Annual Income'"
                             [required]="true"
                             (selectedValueChange)="coapp_registerForm.get('annualincome')?.setValue($event)"
                             [avatarUrl]="avatarUrl" formControlName="annualincome" [hasAvatar]="hasAvatar"
-                            [label]="'Annual Income'">
+                            [label]="'Annual Income'" [disabled]="isViewMode">
                         </app-dropdown>
 
                     </div>
-                    <div class="col-lg-4 col-sm-12 mt-20">
-                        <app-dropdown [options]="selectrelation" [placeholder]="'Select Relation'" [required]="true"
-                            (selectedValueChange)="coapp_registerForm.get('relationship')?.setValue($event)"
+                    <div [ngClass]="{'col-3': isOtherRelationship, 'col-4': !isOtherRelationship  }">
+                        <app-dropdown [options]="selectrelationship" [placeholder]="'Select Relation'" [required]="true"
+                            (selectedValueChange)="Selectedrelation($event);"
                             [avatarUrl]="avatarUrl" formControlName="relationship" [hasAvatar]="hasAvatar"
-                            [label]="'Relation with Applicant'">
+                            [label]="'Relation with Applicant'" [disabled]="isViewMode">
                         </app-dropdown>
 
                     </div>
+                    <div class="col-3" *ngIf="isOtherRelationship">
+                        <div class="form-group">
+                            <app-inputfield formControlName="OtherRelationship" name="OtherRelationship" label="Other Relation"
+                                [maxlength]="100" placeholder="Enter Relation Name" [required]="true">
+                            </app-inputfield>
+
+                            <div class="text-danger"
+                            *ngIf="coapp_registerForm.get('OtherRelationship')?.touched && coapp_registerForm.get('OtherRelationship')?.invalid">
+                            Relation is required
+                        </div>
+                        <div class="text-danger" *ngIf="coapp_registerForm.get('OtherRelationship')?.errors?.['minlength']">
+                            Minimum 2 characters required
+                        </div>
+                        <div class="text-danger" *ngIf="coapp_registerForm.get('OtherRelationship')?.errors?.['maxlength']">
+                            Maximum 100 characters allowed
+                        </div>
+                        </div>
+
+                    </div>
+
                     <div class="col-lg-12 mt-20">
                         <div class=" d-flex flex-column">
 
@@ -324,12 +359,12 @@
                             </div>
                             <div class="d-flex flex-row">
                                 <app-radiobuttons name="optionsGroup1" label="Yes" value="Yes"
-                                    formControlName="co_checkedasset" (checkedChange)="co_checkassetOnChange('Yes')">
+                                    formControlName="co_checkedasset" (checkedChange)="co_checkassetOnChange('Yes')" [disabled]="isViewMode">
                                 </app-radiobuttons>
 
 
                                 <app-radiobuttons name="optionsGroup1" (checkedChange)="co_checkassetOnChange('No')"
-                                    label="No" value="No" formControlName="co_checkedasset">
+                                    label="No" value="No" formControlName="co_checkedasset" [disabled]="isViewMode">
                                 </app-radiobuttons>
                             </div>
                         </div>
@@ -343,17 +378,43 @@
 <hr class="footer-hr-class">
 <div class="loan-footerbtns row w-100  d-flex justify-content-between align-items-center">
 
-    <div class="col-lg-4 pointer">
-        <img src="../assets/images/icons/save.svg">
-        <span class="text-dp-3-regular mx-2 blue-text" (click)="saveExit()"> Save and Exit</span>
-    </div>
-    <div class="col-lg-4  d-flex justify-content-end">
-        <app-buttons type="button" label="Back" class="btn btncustomClass" [outline]="true" (click)="back()">
-        </app-buttons>
-        <!-- <app-buttons type="button" label="Next" class="btn btncustomClass" color="primary" (click)="next()"
-            [disabled]="!registerForm.valid || !checkboxasset"> </app-buttons> -->
-        <app-buttons type="button" label="Next" class="btn btncustomClass" color="primary" (click)="next()"
-            [disabled]="!activeForm.valid || !checkboxasset"> </app-buttons>
+    <ng-container *ngIf="!isFromSummary">
+        <div class="col-lg-4 pointer">
+            <img src="../assets/images/icons/save.svg">
+            <span class="text-dp-3-regular mx-2 blue-text" (click)="saveExit()"> Save and Exit</span>
+        </div>
+        <div class="col-lg-4  d-flex justify-content-end">
+            <app-buttons type="button" label="Back" class="btn btncustomClass" [outline]="true" (click)="back()">
+            </app-buttons>
+            <!-- <app-buttons type="button" label="Next" class="btn btncustomClass" color="primary" (click)="next()"
+                [disabled]="!registerForm.valid || !checkboxasset"> </app-buttons> -->
+            <app-buttons type="button" label="Next" class="btn btncustomClass" color="primary" (click)="next()"
+                [disabled]="!activeForm.valid || !checkboxasset"> </app-buttons>
 
-    </div>
+        </div>
+    </ng-container>
+
+    <ng-container *ngIf="isFromSummary">
+        <div class="col-lg-12 d-flex justify-content-end gap-2">
+
+        <app-buttons
+            type="button"
+            label="Cancel"
+            class="btn btncustomClass"
+            [outline]="true"
+            (click)="cancelSummaryEdit()">
+        </app-buttons>
+
+        <app-buttons
+            *ngIf="isEditMode"
+            type="button"
+            label="Save"
+            class="btn btncustomClass"
+            color="primary"
+            (click)="saveSummaryEdit()"
+            [disabled]="!activeForm.valid || !checkboxasset">
+        </app-buttons>
+
+        </div>
+  </ng-container>
 </div>
