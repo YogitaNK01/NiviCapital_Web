@@ -521,7 +521,6 @@ private normalizeEstimatedExpense(data: any): any {
     this.isViewMode = false;
     this.isEditMode = true;
     this.expenseForm.enable();
-    this.loanformservice.clearSummaryEditFlow();
   }
 
   submit() {
@@ -1467,7 +1466,6 @@ private finishAfterSaveOrNoChange() {
 
     this.isViewMode = false;
     this.isEditMode = false;
-    this.loanformservice.clearSummaryEditFlow();
 
     this.router.navigate(['/applications', this.applicationId, 'summaryinfo']);
   }

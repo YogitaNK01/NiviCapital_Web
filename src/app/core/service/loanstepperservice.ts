@@ -929,5 +929,14 @@ restoreApplicantStatesFromStorage() {
   }
 }
 
+  getCoApplicantStateKey(): string {
+    const applicationId = this.getCo_appId()?.[1];
+    const coApplicantId = this.getCo_appId()?.[0];
+    const coApplicantIndex = this.getCurrentCoApplicantIndex();
+    return coApplicantId
+      ? `coApplicantState_${applicationId}_${coApplicantId}`
+      : `coApplicantState_${applicationId}_temp_${coApplicantIndex}`;
+  }
+
 
 }

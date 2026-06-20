@@ -316,8 +316,13 @@ private summaryRequest$?: Observable<ApiResponse<any>>;
 
   // ************************* Income   *************************
 
-  uploadIncome(data: any, id: string): Observable<ApiResponse<any>> {
-
+  uploadIncome(data: any, id: string, edit: boolean): Observable<ApiResponse<any>> {
+    if(edit){
+      return this.http.put<ApiResponse<any>>(
+      `${this.baseUrl}/v1/los/applications/${id}/documents/batch`,
+      data
+    );
+    }
     return this.http.post<ApiResponse<any>>(
       `${this.baseUrl}/v1/los/applications/${id}/documents/batch`,
       data

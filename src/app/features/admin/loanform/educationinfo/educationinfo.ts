@@ -2601,7 +2601,7 @@ export class Educationinfo implements OnInit {
     console.log("Uploading Batch:", keysArr);
 
 
-    this.formSvc.uploadIncome(fd, this.applicationId).subscribe({
+    this.formSvc.uploadIncome(fd, this.applicationId, false).subscribe({
       next: (res) => {
 
 

@@ -1583,7 +1583,6 @@ let data = res.data.data;
     this.isViewMode = false;
     this.isEditMode = true;
     this.monthlyExpenditureForm.enable();
-    this.formSvc.clearSummaryEditFlow();
   }
 
   cancelSummaryEdit() {
@@ -1593,7 +1592,6 @@ let data = res.data.data;
 
     this.isViewMode = false;
     this.isEditMode = false;
-    this.formSvc.clearSummaryEditFlow();
 
     this.router.navigate(['/applications', this.applicationId, 'summaryinfo']);
   }

@@ -954,7 +954,7 @@ export class Referenceinfo implements OnInit {
     const custID = localStorage.getItem('custId')
     const refForm = currentArray.at(0).value;
 
-    const input = {
+    let input : any = {
       reference: {
         referenceType: isRef1 ? 'reference1' : 'reference2',
         mobileNumber: refForm.phone,
@@ -977,6 +977,16 @@ export class Referenceinfo implements OnInit {
       }
     };
 
+    const editInput = {
+      applicantId: this.applicantId,
+      items: [input.reference]
+    }
+
+    if(edit){
+      input = editInput;
+    }
+
+    
     this.loanformservice.saveReference(input, this.applicationId, edit).subscribe({
       next: (res: any) => {
         if (res.status === 'success') {
@@ -984,6 +994,11 @@ export class Referenceinfo implements OnInit {
             this.reference1Filled = true;
           } else {
             this.reference2Filled = true;
+          }
+
+          if(edit){
+            this.isViewMode = false;
+            this.isEditMode = false;
           }
 
           this.closeReferenceModalOnly();
@@ -1286,7 +1301,6 @@ export class Referenceinfo implements OnInit {
     this.isViewMode = false;
     this.isEditMode = true;
     this.referenceForm.enable();
-    this.loanformservice.clearSummaryEditFlow();
   }
 
   cancelSummaryEdit() {
@@ -1296,7 +1310,6 @@ export class Referenceinfo implements OnInit {
 
     this.isViewMode = false;
     this.isEditMode = false;
-    this.loanformservice.clearSummaryEditFlow();
 
     this.router.navigate(['/applications', this.applicationId, 'summaryinfo']);
   }

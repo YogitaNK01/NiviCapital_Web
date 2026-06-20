@@ -587,13 +587,6 @@ export class Additionalinfo implements OnInit {
     console.log(this.additionalinfoForm.value);
   }
 
-  enableForm(){
-    this.isViewMode = false;
-    this.isEditMode = true;
-    this.additionalinfoForm.enable();
-    this.formSvc.clearSummaryEditFlow();
-  }
-
   onmiddlename(value: boolean): void {
     this.isspousemiddlename = value;
   }
@@ -1200,6 +1193,13 @@ export class Additionalinfo implements OnInit {
       queryParamsHandling: 'merge'
     });
   }
+  
+  enableForm(){
+    this.isViewMode = false;
+    this.isEditMode = true;
+    this.additionalinfoForm.enable();
+  }
+
   cancelSummaryEdit() {
     if (this.isEditMode && this.originalFormValue) {
       this.additionalinfoForm.patchValue(this.originalFormValue);
@@ -1207,7 +1207,6 @@ export class Additionalinfo implements OnInit {
 
     this.isViewMode = false;
     this.isEditMode = false;
-    this.formSvc.clearSummaryEditFlow();
 
     this.router.navigate(['/applications', this.applicationId, 'summaryinfo']);
   }

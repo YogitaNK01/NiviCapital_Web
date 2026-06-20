@@ -343,7 +343,6 @@ this.stepperService.rebuildSteps();
     this.isViewMode = false;
     this.isEditMode = true;
     this.kycdocumentsForm.enable();
-    this.loanformservice.clearSummaryEditFlow();
   }
 
   cancelSummaryEdit() {

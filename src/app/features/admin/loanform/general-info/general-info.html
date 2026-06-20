@@ -21,7 +21,7 @@
 
             <div>
                 <app-buttons
-                    *ngIf="isFromSummary"
+                    *ngIf="isFromSummary && !isEditMode"
                     type="button"
                     label="Edit"
                     class="btn btn-icon edit btncustomClass editBtnClass"
@@ -395,7 +395,7 @@
     </ng-container>
 
     <ng-container *ngIf="isFromSummary">
-        <div class="col-lg-12 d-flex justify-content-end gap-2">
+        <div class="col-lg-12 d-flex justify-content-end gap-2" *ngIf="isEditMode">
 
         <app-buttons
             type="button"
@@ -406,7 +406,6 @@
         </app-buttons>
 
         <app-buttons
-            *ngIf="isEditMode"
             type="button"
             label="Save"
             class="btn btncustomClass"
@@ -417,4 +416,25 @@
 
         </div>
   </ng-container>
+</div>
+
+<div class="edit-success-modal" *ngIf="editSuccess">
+    <div class="edit-modal-overlay"></div>
+
+    <div class="edit-modal-container">
+      <button class="edit-close-btn" (click)="onCancel()">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
+          <path d="M3 3L15 15L3 3Z" fill="#F4F6FF" />
+          <path d="M3 3L15 15" stroke="#F4F6FF" stroke-width="1.125" stroke-linecap="round" stroke-linejoin="round" />
+          <path d="M3 15L15 3" stroke="#F4F6FF" stroke-width="1.125" stroke-linecap="round" stroke-linejoin="round" />
+        </svg></button>
+
+      <app-successbox [title]="description1"
+        [buttons]="[
+            { label: 'OK', action: '', outline: false, color: 'primary',class: 'btncustomClass w-50'  },
+        ]" (actionClick)="handleSuccessAction($event)"
+    >
+    </app-successbox>
+
+    </div>
 </div>

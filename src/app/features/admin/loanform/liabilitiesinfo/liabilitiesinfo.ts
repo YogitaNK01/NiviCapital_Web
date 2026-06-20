@@ -2563,7 +2563,6 @@ console.log(items)
     this.isViewMode = false;
     this.isEditMode = true;
     this.liabilityForm.enable();
-    this.formSvc.clearSummaryEditFlow();
   }
 
   cancelSummaryEdit() {
@@ -2573,7 +2572,6 @@ console.log(items)
 
     this.isViewMode = false;
     this.isEditMode = false;
-    this.formSvc.clearSummaryEditFlow();
 
     this.router.navigate(['/applications', this.applicationId, 'summaryinfo']);
   }
@@ -2589,7 +2587,7 @@ console.log(items)
 
     const input = { applicantId: result.applicantId, items: result.items };
 
-    this.formSvc.submitliability(input, this.applicationId, true).subscribe({
+    this.formSvc.submitliability(input, this.applicationId, false).subscribe({
       next: (res: any) => {
         if (res.status === 'success') {
           const key = this.getStorageKey();

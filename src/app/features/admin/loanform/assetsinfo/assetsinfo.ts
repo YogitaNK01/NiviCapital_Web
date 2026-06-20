@@ -2410,7 +2410,6 @@ export class Assetsinfo implements OnInit {
     this.isViewMode = false;
     this.isEditMode = true;
     this.assetsForm.enable();
-    this.formSvc.clearSummaryEditFlow();
   }
 
   cancelSummaryEdit() {
@@ -2420,7 +2419,6 @@ export class Assetsinfo implements OnInit {
 
     this.isViewMode = false;
     this.isEditMode = false;
-    this.formSvc.clearSummaryEditFlow();
 
     this.router.navigate(['/applications', this.applicationId, 'summaryinfo']);
   }

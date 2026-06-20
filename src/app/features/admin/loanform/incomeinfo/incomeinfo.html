@@ -1,8 +1,8 @@
 <div class="base-layout" [ngClass]="{'coapplicant-layout': isCoApplicant}">
         <div class="header w-100"  *ngIf="!isCoApplicant">
-            <div class="d-flex justify-content-between" *ngIf="!isFromSummary">
+            <div class="d-flex justify-content-between">
                 <div class="text-datepicker blue-text d-flex flex-column gap-2 ">Income Details
-                    <div class="text-body-1 fw-normal" *ngIf="">
+                    <div class="text-body-1 fw-normal" *ngIf="!isFromSummary">
                         <span><svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 22 22"
                                 fill="none">
                                 <path
@@ -17,19 +17,19 @@
                         Click the “Next” button to save your changes
                     </div>
                 </div>
-            </div>
-
-            <div>
-                <app-buttons
-                    *ngIf="isFromSummary"
-                    type="button"
-                    label="Edit"
-                    class="btn btn-icon edit btncustomClass editBtnClass"
-                    color="primary"
-                    (click)="enableForm()"
-                    [disabled]="!isViewMode">
-                    <img src="/assets/images/icons/edit-white.svg" alt="edit">
-                </app-buttons>
+                
+                <div>
+                    <app-buttons
+                        *ngIf="isFromSummary"
+                        type="button"
+                        label="Edit"
+                        class="btn btn-icon edit btncustomClass editBtnClass"
+                        color="primary"
+                        (click)="enableForm()"
+                        [disabled]="!isViewMode">
+                        <img src="/assets/images/icons/edit-white.svg" alt="edit">
+                    </app-buttons>
+                </div>
             </div>
 
         </div>
@@ -89,7 +89,7 @@
 
                             @if( hasDocument('salary1')){
                             <label class="text-label">Salary Slip 1<span class="text-danger">*</span></label>
-                            <div class="addcust-img-box mt-2">
+                            <div class="addcust-img-box mt-2" [ngClass]="{'disabled-div' : isViewMode}">
                                 <p class="text-label">{{ getDocumentName('salary1') }}</p>
                                 <div class="icons">
                                     <span class="view" (click)="viewImage(getDocumentUrl('salary1'))"><img
@@ -106,7 +106,7 @@
                             <app-uploadbtn [config]="basicConfig" [uploadViaApi]="true" [required]="true"
                                 label="Salary Slip 1"
                                 (uploadStarted)="onUploadStarted($event, 'salary1','INCOME','LAST_3_MONTHS','SALARY_SLIP', '', 0)"
-                                [fileuploadresponse]="handleresponse">
+                                [fileuploadresponse]="handleresponse" [disabled]="isViewMode">
                             </app-uploadbtn>
                             }
 
@@ -114,7 +114,7 @@
                         <div class="col-lg-4 col-sm-12">
                             @if( hasDocument('salary2')){
                             <label class="text-label">Salary Slip 2<span class="text-danger">*</span></label>
-                            <div class="addcust-img-box mt-2">
+                            <div class="addcust-img-box mt-2" [ngClass]="{'disabled-div' : isViewMode}">
                                 <p class="text-label">{{ getDocumentName('salary2') }}</p>
                                 <div class="icons">
                                     <span class="view" (click)="viewImage(getDocumentUrl('salary2'))"><img
@@ -131,14 +131,14 @@
                             <app-uploadbtn [config]="basicConfig"
                                 (uploadStarted)="onUploadStarted($event, 'salary2' ,'INCOME' ,'LAST_3_MONTHS','SALARY_SLIP', '', 1)"
                                 [uploadViaApi]="true" [fileuploadresponse]="handleresponse" [required]="true"
-                                label="Salary Slip 2">
+                                label="Salary Slip 2" [disabled]="isViewMode">
                             </app-uploadbtn>
                             }
                         </div>
                         <div class="col-lg-4 col-sm-12">
                             @if( hasDocument('salary3')){
                             <label class="text-label">Salary Slip 3<span class="text-danger">*</span></label>
-                            <div class="addcust-img-box mt-2">
+                            <div class="addcust-img-box mt-2" [ngClass]="{'disabled-div' : isViewMode}">
                                 <p class="text-label">{{ getDocumentName('salary3') }}</p>
                                 <div class="icons">
                                     <span class="view" (click)="viewImage(getDocumentUrl('salary3'))"><img
@@ -155,7 +155,7 @@
                             <app-uploadbtn [config]="basicConfig"
                                 (uploadStarted)="onUploadStarted($event, 'salary3','INCOME' , 'LAST_3_MONTHS','SALARY_SLIP', '', 2)"
                                 [uploadViaApi]="true" [fileuploadresponse]="handleresponse" [required]="true"
-                                label="Salary Slip 3">
+                                label="Salary Slip 3" [disabled]="isViewMode">
                             </app-uploadbtn>
                             }
                         </div>
@@ -185,7 +185,7 @@
                         <div class="col-lg-4 col-sm-12">
                             @if( hasDocument('Form16')){
                             <label class="text-label">Form 16<span class="text-danger">*</span></label>
-                            <div class="addcust-img-box mt-2">
+                            <div class="addcust-img-box mt-2" [ngClass]="{'disabled-div' : isViewMode}">
                                 <p class="text-label">{{ getDocumentName('Form16') }}</p>
                                 <div class="icons">
                                     <span class="view" (click)="viewImage(getDocumentUrl('Form16'))"><img
@@ -202,7 +202,7 @@
                             <app-uploadbtn [config]="basicConfig"
                                 (uploadStarted)="onUploadStarted($event, 'Form16' ,'INCOME','FORM_16','FORM_16')"
                                 [uploadViaApi]="true" [fileuploadresponse]="handleresponse" [required]="true"
-                                label="Form 16">
+                                label="Form 16" [disabled]="isViewMode">
                             </app-uploadbtn>
                             }
                         </div>
@@ -230,7 +230,7 @@
                         <div class="col-lg-4 col-sm-12">
                             @if( hasDocument('oneyearbankstatement')){
                             <label class="text-label">1 Year bank statement<span class="text-danger">*</span></label>
-                            <div class="addcust-img-box mt-2">
+                            <div class="addcust-img-box mt-2" [ngClass]="{'disabled-div' : isViewMode}">
                                 <p class="text-label">{{ getDocumentName('oneyearbankstatement') }}</p>
                                 <div class="icons">
                                     <span class="view" (click)="viewImage(getDocumentUrl('oneyearbankstatement'))"><img
@@ -247,7 +247,7 @@
                             <app-uploadbtn [config]="basicConfig"
                                 (uploadStarted)="onUploadStarted($event, 'oneyearbankstatement','INCOME','BANK_STATEMENT_1_YEAR', 'BANK_STATEMENT')"
                                 [uploadViaApi]="true" [fileuploadresponse]="handleresponse" [required]="true"
-                                label="1 Year bank statement">
+                                label="1 Year bank statement" [disabled]="isViewMode">
                             </app-uploadbtn>
                             }
                         </div>
@@ -276,7 +276,7 @@
                         <div class="col-lg-4 col-sm-12">
                             @if( hasDocument('ay1')){
                             <label class="text-label">Year 1<span class="text-danger">*</span></label>
-                            <div class="addcust-img-box mt-2">
+                            <div class="addcust-img-box mt-2" [ngClass]="{'disabled-div' : isViewMode}">
                                 <p class="text-label">{{ getDocumentName('ay1') }}</p>
                                 <div class="icons">
                                     <span class="view" (click)="viewImage(getDocumentUrl('ay1'))"><img
@@ -293,14 +293,14 @@
                             <app-uploadbtn [config]="basicConfig"
                                 (uploadStarted)="onUploadStarted($event, 'ay1','INCOME','ITR_LAST_3_YEARS','ITR', '', 0)"
                                 [uploadViaApi]="true" [fileuploadresponse]="handleresponse" [required]="true"
-                                label="Year 1">
+                                label="Year 1" [disabled]="isViewMode">
                             </app-uploadbtn>
                             }
                         </div>
                         <div class="col-lg-4 col-sm-12">
                             @if( hasDocument('ay2')){
                             <label class="text-label">Year 2<span class="text-danger">*</span></label>
-                            <div class="addcust-img-box mt-2">
+                            <div class="addcust-img-box mt-2" [ngClass]="{'disabled-div' : isViewMode}">
                                 <p class="text-label">{{ getDocumentName('ay2') }}</p>
                                 <div class="icons">
                                     <span class="view" (click)="viewImage(getDocumentUrl('ay2'))"><img
@@ -317,14 +317,14 @@
                             <app-uploadbtn [config]="basicConfig"
                                 (uploadStarted)="onUploadStarted($event, 'ay2','INCOME','ITR_LAST_3_YEARS','ITR','', 1)"
                                 [uploadViaApi]="true" [fileuploadresponse]="handleresponse" [required]="true"
-                                label="Year 2">
+                                label="Year 2" [disabled]="isViewMode">
                             </app-uploadbtn>
                             }
                         </div>
                         <div class="col-lg-4 col-sm-12">
                             @if( hasDocument('ay3')){
                             <label class="text-label">Year 3<span class="text-danger">*</span></label>
-                            <div class="addcust-img-box mt-2">
+                            <div class="addcust-img-box mt-2" [ngClass]="{'disabled-div' : isViewMode}">
                                 <p class="text-label">{{ getDocumentName('ay3') }}</p>
                                 <div class="icons">
                                     <span class="view" (click)="viewImage(getDocumentUrl('ay3'))"><img
@@ -342,7 +342,7 @@
                             <app-uploadbtn [config]="basicConfig"
                                 (uploadStarted)="onUploadStarted($event, 'ay3','INCOME','ITR_LAST_3_YEARS','ITR', '', 2)"
                                 [uploadViaApi]="true" [fileuploadresponse]="handleresponse" [required]="true"
-                                label="Year 3">
+                                label="Year 3" [disabled]="isViewMode">
                             </app-uploadbtn>
                             }
                         </div>
@@ -392,7 +392,7 @@
 
                                
 
-                                <div class="addcust-img-box mt-4">
+                                <div class="addcust-img-box mt-4" [ngClass]="{'disabled-div' : isViewMode}">
                                     <p class="text-label">
                                         {{ getDocumentName(slot.title) }}
                                     </p>
@@ -420,7 +420,7 @@
                                 <app-uploadbtn [config]="basicConfig"
                                     (uploadStarted)="onUploadStarted($event,  slot.title,'OTHER' ,'OTHER_INCOME','OTHER')"
                                     [disabled]="!slot.title && slot.title.trim().length === 0" [uploadViaApi]="true"
-                                    [fileuploadresponse]="handleresponse" [required]="true" label="Other Documents">
+                                    [fileuploadresponse]="handleresponse" [required]="true" label="Other Documents" [disabled]="isViewMode">
                                 </app-uploadbtn>
 
                                 }
@@ -454,9 +454,9 @@
                         }
                     </div>
 
-                    <div class="col-lg-4 col-sm-12 mt-20">
+                    <div class="col-lg-4 col-sm-12 mt-20" [ngClass]="{'disabled-div' : isViewMode}">
                         <app-buttons label="Add Other Document" class="btn btn-icon Add btncustomClass" [outline]="true"
-                            (click)="addOtherIncomeDocument()">
+                            (click)="addOtherIncomeDocument()" [disabled]="isViewMode">
                             <img src="/assets/images/icons/addred.svg">
                         </app-buttons>
                     </div>
@@ -490,7 +490,7 @@
                         <div class="col-lg-4 col-sm-12">
                             @if( hasDocument('year1')){
                             <label class="text-label">Year 1<span class="text-danger">*</span></label>
-                            <div class="addcust-img-box mt-2">
+                            <div class="addcust-img-box mt-2" [ngClass]="{'disabled-div' : isViewMode}">
                                 <p class="text-label">{{ getDocumentName('year1') }}</p>
                                 <div class="icons">
                                     <span class="view" (click)="viewImage(getDocumentUrl('year1'))"><img
@@ -507,14 +507,14 @@
                             <app-uploadbtn [config]="basicConfig"
                                 (uploadStarted)="onUploadStarted($event,  'year1' ,'BUSINESS','BUSINESS_FINANCE_3_YEARS','BUSINESS_FINANCE', '', 0)"
                                 [uploadViaApi]="true" [fileuploadresponse]="handleresponse" [required]="true"
-                                label="Year 1">
+                                label="Year 1" [disabled]="isViewMode">
                             </app-uploadbtn>}
                         </div>
 
                         <div class="col-lg-4 col-sm-12">
                             @if( hasDocument('year2')){
                             <label class="text-label">Year 2<span class="text-danger">*</span></label>
-                            <div class="addcust-img-box mt-2">
+                            <div class="addcust-img-box mt-2" [ngClass]="{'disabled-div' : isViewMode}">
                                 <p class="text-label">{{ getDocumentName('year2') }}</p>
                                 <div class="icons">
                                     <span class="view" (click)="viewImage(getDocumentUrl('year2'))"><img
@@ -531,13 +531,13 @@
                             <app-uploadbtn [config]="basicConfig"
                                 (uploadStarted)="onUploadStarted($event,  'year2' ,'BUSINESS','BUSINESS_FINANCE_3_YEARS','BUSINESS_FINANCE', '', 1)"
                                 [uploadViaApi]="true" [fileuploadresponse]="handleresponse" [required]="true"
-                                label="Year 2">
+                                label="Year 2" [disabled]="isViewMode">
                             </app-uploadbtn>}
                         </div>
                         <div class="col-lg-4 col-sm-12">
                             @if( hasDocument('year3')){
                             <label class="text-label">Year 3<span class="text-danger">*</span></label>
-                            <div class="addcust-img-box mt-2">
+                            <div class="addcust-img-box mt-2" [ngClass]="{'disabled-div' : isViewMode}">
                                 <p class="text-label">{{ getDocumentName('year3') }}</p>
                                 <div class="icons">
                                     <span class="view" (click)="viewImage(getDocumentUrl('year3'))"><img
@@ -554,7 +554,7 @@
                             <app-uploadbtn [config]="basicConfig"
                                 (uploadStarted)="onUploadStarted($event,  'year3' ,'BUSINESS','BUSINESS_FINANCE_3_YEARS','BUSINESS_FINANCE', '', 2)"
                                 [uploadViaApi]="true" [fileuploadresponse]="handleresponse" [required]="true"
-                                label="Year 3">
+                                label="Year 3" [disabled]="isViewMode">
                             </app-uploadbtn>}
                         </div>
                     </div>
@@ -581,7 +581,7 @@
                         <div class="col-lg-4 col-sm-12">
                             @if( hasDocument('businessITR1')){
                             <label class="text-label">Year 1<span class="text-danger">*</span></label>
-                            <div class="addcust-img-box mt-2">
+                            <div class="addcust-img-box mt-2" [ngClass]="{'disabled-div' : isViewMode}">
                                 <p class="text-label">{{ getDocumentName('businessITR1') }}</p>
                                 <div class="icons">
                                     <span class="view" (click)="viewImage(getDocumentUrl('businessITR1'))"><img
@@ -598,13 +598,13 @@
                             <app-uploadbtn [config]="basicConfig"
                                 (uploadStarted)="onUploadStarted($event,  'businessITR1' ,'BUSINESS','BUSINESS_ITR_3_YEARS','BUSINESS_ITR', '', 0)"
                                 [uploadViaApi]="true" [fileuploadresponse]="handleresponse" [required]="true"
-                                label="Year 1">
+                                label="Year 1" [disabled]="isViewMode">
                             </app-uploadbtn>}
                         </div>
                         <div class="col-lg-4 col-sm-12">
                             @if( hasDocument('businessITR2')){
                             <label class="text-label">Year 2<span class="text-danger">*</span></label>
-                            <div class="addcust-img-box mt-2">
+                            <div class="addcust-img-box mt-2" [ngClass]="{'disabled-div' : isViewMode}">
                                 <p class="text-label">{{ getDocumentName('businessITR2') }}</p>
                                 <div class="icons">
                                     <span class="view" (click)="viewImage(getDocumentUrl('businessITR2'))"><img
@@ -621,13 +621,13 @@
                             <app-uploadbtn [config]="basicConfig"
                                 (uploadStarted)="onUploadStarted($event,  'businessITR2' ,'BUSINESS','BUSINESS_ITR_3_YEARS','BUSINESS_ITR', '', 1)"
                                 [uploadViaApi]="true" [fileuploadresponse]="handleresponse" [required]="true"
-                                label="Year 2">
+                                label="Year 2" [disabled]="isViewMode">
                             </app-uploadbtn>}
                         </div>
                         <div class="col-lg-4 col-sm-12">
                             @if( hasDocument('businessITR3')){
                             <label class="text-label">Year 3<span class="text-danger">*</span></label>
-                            <div class="addcust-img-box mt-2">
+                            <div class="addcust-img-box mt-2" [ngClass]="{'disabled-div' : isViewMode}">
                                 <p class="text-label">{{ getDocumentName('businessITR3') }}</p>
                                 <div class="icons">
                                     <span class="view" (click)="viewImage(getDocumentUrl('businessITR3'))"><img
@@ -644,7 +644,7 @@
                             <app-uploadbtn [config]="basicConfig"
                                 (uploadStarted)="onUploadStarted($event,  'businessITR3','BUSINESS' ,'BUSINESS_ITR_3_YEARS','BUSINESS_ITR', '', 2)"
                                 [uploadViaApi]="true" [fileuploadresponse]="handleresponse" [required]="true"
-                                label="Year 3">
+                                label="Year 3" [disabled]="isViewMode">
                             </app-uploadbtn>}
                         </div>
 
@@ -670,7 +670,7 @@
                         <div class="col-lg-4 col-sm-12">
                             @if( hasDocument('businessGST')){
                             <label class="text-label">1 Year GST Return<span class="text-danger">*</span></label>
-                            <div class="addcust-img-box mt-2">
+                            <div class="addcust-img-box mt-2" [ngClass]="{'disabled-div' : isViewMode}">
                                 <p class="text-label">{{ getDocumentName('businessGST') }}</p>
                                 <div class="icons">
                                     <span class="view" (click)="viewImage(getDocumentUrl('businessGST'))"><img
@@ -687,7 +687,7 @@
                             <app-uploadbtn [config]="basicConfig"
                                 (uploadStarted)="onUploadStarted($event,  'businessGST','BUSINESS' ,'BUSINESS_GST_1_YEAR','BUSINESS_GST')"
                                 [uploadViaApi]="true" [fileuploadresponse]="handleresponse" [required]="true"
-                                label="1 Year GST Return">
+                                label="1 Year GST Return" [disabled]="isViewMode">
                             </app-uploadbtn>}
                         </div>
 
@@ -714,7 +714,7 @@
                         <div class="col-lg-4 col-sm-12">
                             @if( hasDocument('businessBankstatement')){
                             <label class="text-label">1 Year bank statement<span class="text-danger">*</span></label>
-                            <div class="addcust-img-box mt-2">
+                            <div class="addcust-img-box mt-2" [ngClass]="{'disabled-div' : isViewMode}">
                                 <p class="text-label">{{ getDocumentName('businessBankstatement') }}</p>
                                 <div class="icons">
                                     <span class="view" (click)="viewImage(getDocumentUrl('businessBankstatement'))"><img
@@ -731,7 +731,7 @@
                             <app-uploadbtn [config]="basicConfig"
                                 (uploadStarted)="onUploadStarted($event,  'businessBankstatement' ,'BUSINESS','BUSINESS_BANK_STATEMENT_1_YEAR','BUSINESS_BANK_STATEMENT')"
                                 [uploadViaApi]="true" [fileuploadresponse]="handleresponse" [required]="true"
-                                label="1 Year bank statement">
+                                label="1 Year bank statement" [disabled]="isViewMode">
                             </app-uploadbtn>}
                         </div>
 
@@ -784,7 +784,7 @@
 
                                     @if ( getDocumentByKey(slot.title)) {
 
-                                    <div class="addcust-img-box mt-4">
+                                    <div class="addcust-img-box mt-4" [ngClass]="{'disabled-div' : isViewMode}">
                                         <p class="text-label">
                                             {{ getDocumentName(slot.title) }}
                                         </p>
@@ -809,7 +809,7 @@
 
                                     <app-uploadbtn label="Other Documents" [config]="basicConfig" [required]="true"
                                         [disabled]="!slot.title && slot.title.trim().length === 0" [uploadViaApi]="true"
-                                        [fileuploadresponse]="handleresponse"
+                                        [fileuploadresponse]="handleresponse" [disabled]="isViewMode"
                                         (uploadStarted)="onUploadStarted($event, slot.title,'BUSINESS', 'OTHER_BUSSINESS_INCOME', 'OTHER', slot.key)">
                                     </app-uploadbtn>
 
@@ -849,9 +849,9 @@
                         </div>
 
                         <!-- Add button -->
-                        <div class="col-lg-4 col-sm-12 mt-20">
+                        <div class="col-lg-4 col-sm-12 mt-20" [ngClass]="{'disabled-div' : isViewMode}">
                             <app-buttons label="Add Other Document" class="btn btn-icon Add btncustomClass"
-                                [outline]="true" (click)="addOtherBusinessDocument()">
+                                [outline]="true" (click)="addOtherBusinessDocument()" [disabled]="isViewMode">
 
                             </app-buttons>
                         </div>
@@ -867,16 +867,42 @@
 <hr class="footer-hr-class">
 <div class="loan-footerbtns row w-100  d-flex justify-content-between align-items-center">
 
-    <div class="col-lg-4 pointer">
-        <img src="../assets/images/icons/save.svg">
-        <span class="text-dp-3-regular mx-2 blue-text" (click)="saveExit()"> Save and Exit</span>
-    </div>
-    <div class="col-lg-4  d-flex justify-content-end">
-        <app-buttons type="button" label="Back" class="btn btncustomClass" [outline]="true" (click)="back()">
+    <ng-container *ngIf="!isFromSummary">
+        <div class="col-lg-4 pointer">
+            <img src="../assets/images/icons/save.svg">
+            <span class="text-dp-3-regular mx-2 blue-text" (click)="saveExit()"> Save and Exit</span>
+        </div>
+        <div class="col-lg-4  d-flex justify-content-end">
+            <app-buttons type="button" label="Back" class="btn btncustomClass" [outline]="true" (click)="back()">
+            </app-buttons>
+            <app-buttons type="button" label="Next" class="btn btncustomClass" color="primary" (click)="next()"
+                [disabled]="!allRequiredFilesUploaded">
+            </app-buttons>
+
+        </div>
+    </ng-container>
+
+    <ng-container *ngIf="isFromSummary">
+        <div class="col-lg-12 d-flex justify-content-end gap-2">
+
+        <app-buttons
+            type="button"
+            label="Cancel"
+            class="btn btncustomClass"
+            [outline]="true"
+            (click)="cancelSummaryEdit()">
         </app-buttons>
-        <app-buttons type="button" label="Next" class="btn btncustomClass" color="primary" (click)="next()"
+
+        <app-buttons
+            *ngIf="isEditMode"
+            type="button"
+            label="Save"
+            class="btn btncustomClass"
+            color="primary"
+            (click)="saveSummaryEdit()"
             [disabled]="!allRequiredFilesUploaded">
         </app-buttons>
 
-    </div>
+        </div>
+    </ng-container>
 </div>
