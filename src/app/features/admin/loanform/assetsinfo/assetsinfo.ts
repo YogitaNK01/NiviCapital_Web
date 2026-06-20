@@ -107,6 +107,12 @@ export class Assetsinfo implements OnInit {
   isSummaryEditMode = false;
   viewOnly = false;
 
+    //edit from summary
+  isFromSummary = false;
+  isViewMode = false;
+  isEditMode = false;
+  originalFormValue: any = null;
+
   constructor(private fb: FormBuilder, public main: Main, private route: ActivatedRoute, private msgBox: Msgboxservice,private storageservice:Storage,
     private stepperService: Loanstepperservice, private formSvc: Loanformservice, private cd: ChangeDetectorRef, private router: Router) { }
 
@@ -157,11 +163,12 @@ export class Assetsinfo implements OnInit {
         ];
 
         // restore back into service
+        this.stepperService.setCurrentCoApplicantIndex(parsed.coApplicantIndex || 1);
         this.stepperService.setCo_appId(
           parsed.applicantId,
           parsed.applicationId,
           parsed.fullName,
-          undefined, this.stepperService.getCurrentCoApplicantIndex()
+          undefined, parsed.coApplicantIndex || 1
         );
       }
     }
@@ -213,6 +220,12 @@ export class Assetsinfo implements OnInit {
 
     await this.loadAssetsForBothFlows()
 
+     this.isFromSummary = this.formSvc.isSummaryEditFlow();
+
+    if(this.isFromSummary){
+      this.isViewMode = true;
+      this.assetsForm.disable();
+    }
   }
 
   getStorageKey1() {
@@ -234,9 +247,7 @@ export class Assetsinfo implements OnInit {
       this.applicationId,
       this.applicantId,
       this.isCoApplicant,
-      main_ApplicantId ?? undefined,
-      co_ApplicantId ?? undefined, 
-      index
+     
     );
   }
   getCurrentCoApplicantFromList() {
@@ -2306,7 +2317,7 @@ export class Assetsinfo implements OnInit {
 
 
 
-    this.formSvc.getAssets(payload, this.applicationId).pipe().subscribe({
+    this.formSvc.getAssets(payload, this.applicationId,false).pipe().subscribe({
       next: (res) => {
         console.log("resp---", res);
         if (res.status == "success") {
@@ -2357,7 +2368,7 @@ export class Assetsinfo implements OnInit {
     }
 
 
-    this.formSvc.getAssets(payload, this.applicationId).pipe().subscribe({
+    this.formSvc.getAssets(payload, this.applicationId,false).pipe().subscribe({
       next: (res) => {
         console.log("resp---", res);
         if (res.status == "success") {
@@ -2392,5 +2403,66 @@ export class Assetsinfo implements OnInit {
 
     });
 
+  }
+
+
+  //edit from summary
+   enableForm(){
+    this.isViewMode = false;
+    this.isEditMode = true;
+    this.assetsForm.enable();
+    this.formSvc.clearSummaryEditFlow();
+  }
+
+  cancelSummaryEdit() {
+    if (this.isEditMode && this.originalFormValue) {
+      this.assetsForm.patchValue(this.originalFormValue);
+    }
+
+    this.isViewMode = false;
+    this.isEditMode = false;
+    this.formSvc.clearSummaryEditFlow();
+
+    this.router.navigate(['/applications', this.applicationId, 'summaryinfo']);
+  }
+
+  saveSummaryEdit() {
+    const input = this.buildAssetsPayloadWithApplicantId();//{ items: result.items, applicantId: this.applicantId, };
+
+    if (input.invalid) {
+
+      console.log("Form invalid - stop navigation");
+      this.assetsForm.markAllAsTouched();
+      return;
+
+    }
+
+    this.formSvc.getAssets(input, this.applicationId, true).subscribe({
+      next: (res: any) => {
+        if (res.status === 'success') {
+          const key = this.getStorageKey();
+          localStorage.setItem(key, JSON.stringify(input));
+
+          if (this.isCoApplicant) {
+            this.formSvc.co_aseetsInfoData = input;
+          } else {
+            this.formSvc.aseetsInfoData = input;
+          }
+
+          this.lastSavedPayload = { ...input };
+
+          console.log(res);
+
+          this.isEditMode = false;
+
+          this.isViewMode = false;
+
+          // this.router.navigate(['/loanform/summaryinfo']);
+        }
+      },
+      error: (err) => {
+        console.error('Additional info update failed', err);
+      }
+    });
   }
 }

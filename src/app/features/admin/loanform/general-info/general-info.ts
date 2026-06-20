@@ -108,7 +108,7 @@ export class GeneralInfo implements OnInit {
   isOthercoursename = false;
 
   //coapplicant 
-    isOtherRelationship = false;
+  isOtherRelationship = false;
   isCoApplicant: boolean = false;
   coapp_registerForm!: FormGroup;
 
@@ -143,6 +143,13 @@ export class GeneralInfo implements OnInit {
   isSummaryEditMode = false;
   viewOnly = false;
 
+    //edit from summary
+  isFromSummary = false;
+  isViewMode = false;
+  isEditMode = false;
+  originalFormValue: any = null;
+
+
   constructor(private fb: FormBuilder, private formSvc: Loanformservice, private router: Router, private storageservice: Storage, private stepperService: Loanstepperservice, private msgBox: Msgboxservice, private route: ActivatedRoute, public mainservice: Main) { }
   async ngOnInit() {
 
@@ -159,7 +166,19 @@ export class GeneralInfo implements OnInit {
     this.stepperService.restoreLoanEditContext();
     this.stepperService.restoreLoanIdFromSession();
 
-    const index = Number(this.route.snapshot.queryParams['coApplicantIndex']) || 1;
+    let storedCoAppData: any = {};
+
+    try {
+      storedCoAppData = JSON.parse(sessionStorage.getItem('coAppIds') || '{}');
+    } catch {
+      storedCoAppData = {};
+    }
+
+    const index =
+      storedCoAppData?.coApplicantIndex ||
+      Number(this.route.snapshot.queryParams['coApplicantIndex']) ||
+      1;
+
     this.stepperService.setCurrentCoApplicantIndex(index);
 
 
@@ -198,11 +217,12 @@ export class GeneralInfo implements OnInit {
           ];
 
           // restore back into service
+          this.stepperService.setCurrentCoApplicantIndex(parsed.coApplicantIndex || 1);
           this.stepperService.setCo_appId(
             parsed.applicantId,
             parsed.applicationId,
             parsed.fullName, parsed.custARN,
-            this.stepperService.getCurrentCoApplicantIndex());
+            parsed.coApplicantIndex || 1);
 
         } else {
           console.error('Invalid coAppIds in sessionStorage:', parsed);
@@ -255,7 +275,7 @@ export class GeneralInfo implements OnInit {
       occupation: ['', Validators.required],
       annualincome: ['', Validators.required],
       relationship: ['', Validators.required],
-      OtherRelationship:[''],
+      OtherRelationship: [''],
       co_checkedasset: [null, Validators.required],
     });
 
@@ -294,6 +314,19 @@ export class GeneralInfo implements OnInit {
     this.listenToChanges();
     await this.loadGeneralInfoForBothFlows()
 
+      this.isFromSummary = this.formSvc.isSummaryEditFlow();
+
+    if(this.isFromSummary){
+      this.isViewMode = true;
+      this.activeForm.disable();
+      //   if (this.isCoApplicant) {
+      //   this.coapp_registerForm.disable();
+      // } else {
+      //   this.registerForm.disable();
+      // }
+      
+    }
+
 
   }
   getStorageKey1() {
@@ -315,9 +348,9 @@ export class GeneralInfo implements OnInit {
       this.applicationId,
       this.applicantId,
       this.isCoApplicant,
-      main_ApplicantId ?? undefined,
-      co_ApplicantId ?? undefined, 
-      index
+      // main_ApplicantId ?? undefined,
+      // co_ApplicantId ?? undefined,
+      // index
     );
   }
 
@@ -629,7 +662,7 @@ export class GeneralInfo implements OnInit {
 
     this.checkboxasset = value;
 
-      this.registerForm.get('checkedasset')?.setValue(value, {
+    this.registerForm.get('checkedasset')?.setValue(value, {
       emitEvent: false
     });
     // this.registerForm.get('checkedasset')?.markAsTouched();
@@ -683,10 +716,14 @@ export class GeneralInfo implements OnInit {
       this.formSvc.coApplicantState.isincome = isIncome;
       this.formSvc.coApplicantState.issalaried = isSalaried;
 
+      // localStorage.setItem(
+      //   'coApplicantState',
+      //   JSON.stringify(this.formSvc.coApplicantState)
+      // );
       localStorage.setItem(
-        'coApplicantState',
-        JSON.stringify(this.formSvc.coApplicantState)
-      );
+  this.stepperService.getCoApplicantStateKey(),
+  JSON.stringify(this.formSvc.coApplicantState)
+);
 
       this.stepperService.setApplicantValues('coapp', this.formSvc.coApplicantState);
     } else {
@@ -975,7 +1012,7 @@ export class GeneralInfo implements OnInit {
 
 
   }
-    Selectedrelation(values: string | string[]) {
+  Selectedrelation(values: string | string[]) {
     const ids = Array.isArray(values) ? values : [values];
 
     const selected = this.selectrelationship.filter(s =>
@@ -992,7 +1029,7 @@ export class GeneralInfo implements OnInit {
     )
 
     const control = this.coapp_registerForm.get('relationship');
-    control?.setValue(ids); 
+    control?.setValue(ids);
     control?.markAsTouched();
     control?.updateValueAndValidity();
 
@@ -1192,7 +1229,7 @@ export class GeneralInfo implements OnInit {
       this.Australianstate,
       course.state
     );
- 
+
 
     const lendingPartnerId = this.getValueByLabel(
       this.selectlendingpartner,
@@ -1213,8 +1250,8 @@ export class GeneralInfo implements OnInit {
 
       coursetype: course.courseType || '',
 
-      courseId: course.courseId|| course.courseName || '',
-      courseName:  course.courseName || '',
+      courseId: course.courseId || course.courseName || '',
+      courseName: course.courseName || '',
       otherCourseName: course.otherCourseName || '',
 
       courseStartDate: course.startDate || '',
@@ -1260,19 +1297,6 @@ export class GeneralInfo implements OnInit {
     this.restoreDependentDropdowns(data);
   }
 
-  //  state: ['', Validators.required],
-  //     otherstatetitle: [''],
-  //     university: ['', Validators.required],
-  //     otherunititle: [''],
-  //     coursetype: ['', Validators.required],
-  //     othercoursetypetitle: [''],
-  //     coursename: ['', Validators.required],
-  //     othercoursenametitle: [''],
-  //     // courseduration: [''],
-  //     coursestartdate: ['', [Validators.required, this.dateMinValidator(() => new Date())]],
-  //     courseenddate: ['', [Validators.required, this.endDateValidator()]],
-  //     checkedasset: [null, Validators.required],
-  //     lendingpartner: ['', Validators.required],
 
   //patch co-applicant form
   patchCoApplicantInfo(data: any) {
@@ -1415,7 +1439,7 @@ export class GeneralInfo implements OnInit {
 
     let input = this.buildMainPayload(formdata);
 
-    this.formSvc.submitGenralInfo(input, this.applicationId).subscribe(res => {
+    this.formSvc.submitGenralInfo(input, this.applicationId,false).subscribe(res => {
       if (res.status === "success") {
         this.lastSavedPayload = { ...input };
 
@@ -1455,7 +1479,7 @@ export class GeneralInfo implements OnInit {
       hasAssets: payload.hasAssets// this.checkboxasset === "Yes",
     };
 
-    this.formSvc.submit_Coapp_GenralInfo(input, this.applicationId).subscribe(res => {
+    this.formSvc.submit_Coapp_GenralInfo(input, this.applicationId,false).subscribe(res => {
       if (res.status === "success") {
 
         const localPayload = {
@@ -1577,7 +1601,7 @@ export class GeneralInfo implements OnInit {
     }
 
     console.log(input);
-    this.formSvc.submitGenralInfo(input, this.applicationId).pipe().subscribe({
+    this.formSvc.submitGenralInfo(input, this.applicationId,false).pipe().subscribe({
       next: (res) => {
 
         if (res.status == "success") {
@@ -1613,6 +1637,60 @@ export class GeneralInfo implements OnInit {
 
 
 
+  }
+
+
+    //edit from summary enable and disbale
+
+      enableForm(){
+    this.isViewMode = false;
+    this.isEditMode = true;
+    this.activeForm.enable();
+    this.formSvc.clearSummaryEditFlow();
+  }
+
+  cancelSummaryEdit() {
+    if (this.isEditMode && this.originalFormValue) {
+      this.registerForm.patchValue(this.originalFormValue);
+    }
+
+    this.isViewMode = false;
+    this.isEditMode = false;
+    this.formSvc.clearSummaryEditFlow();
+
+    this.router.navigate(['/applications', this.applicationId, 'summaryinfo']);
+  }
+  saveSummaryEdit() {
+    const formdata = this.activeForm.getRawValue();
+    const input = this.buildMainPayload(formdata);
+
+    this.formSvc.submitGenralInfo(input, this.applicationId, true).subscribe({
+      next: (res: any) => {
+        if (res.status === 'success') {
+          const key = this.getStorageKey();
+          localStorage.setItem(key, JSON.stringify(input));
+
+          if (this.isCoApplicant) {
+            this.formSvc.co_generalInfoData = input;
+          } else {
+            this.formSvc.generalInfoData = input;
+          }
+
+          this.lastSavedPayload = { ...input };
+
+          console.log(res);
+
+          this.isEditMode = false;
+
+          this.isViewMode = false;
+
+          // this.router.navigate(['/loanform/summaryinfo']);
+        }
+      },
+      error: (err) => {
+        console.error('Additional info update failed', err);
+      }
+    });
   }
 
 }

@@ -56,19 +56,35 @@ export class Coapplicantinfo implements OnInit {
 
 
 
-      this.coApplicantIndex = Number(params['coApplicantIndex']) || 1;
+      // this.coApplicantIndex = Number(params['coApplicantIndex']) || 1;
+      // this.loanStepper.setCurrentCoApplicantIndex(this.coApplicantIndex);
+      const sessionCoApp = JSON.parse(sessionStorage.getItem('coAppIds') || '{}');
 
+      this.coApplicantIndex = Number(
+        params['coApplicantIndex'] ||
+        sessionCoApp?.coApplicantIndex ||
+        1
+      );
 
       this.loanStepper.setCurrentCoApplicantIndex(this.coApplicantIndex);
 
+      if (sessionCoApp?.applicantId) {
+        this.loanStepper.setCo_appId(
+          sessionCoApp.applicantId,
+          sessionCoApp.applicationId,
+          sessionCoApp.fullName || '',
+          sessionCoApp.custARN,
+          this.coApplicantIndex
+        );
+      }
 
       const mode = params['mode'] || '';
-      
- const cleanUrl = this.router.url.split('?')[0];
 
-  const isChildStepperRoute = this.coApplicantChildRoutes.some(route =>
-    cleanUrl.includes(route)
-  );
+      const cleanUrl = this.router.url.split('?')[0];
+
+      const isChildStepperRoute = this.coApplicantChildRoutes.some(route =>
+        cleanUrl.includes(route)
+      );
 
 
       if (mode === 'new' && !isChildStepperRoute) {
@@ -101,9 +117,9 @@ export class Coapplicantinfo implements OnInit {
     // }
 
   }
-private getCoApplicantListKey(): string {
-  return `coApplicants_${this.applicationId}`;
-}
+  private getCoApplicantListKey(): string {
+    return `coApplicants_${this.applicationId}`;
+  }
   isPhoneValid(): boolean {
     return this.prefillPhone && this.prefillPhone.toString().length === 10;
   }
@@ -115,7 +131,7 @@ private getCoApplicantListKey(): string {
     'co-basicinfo',
     'co-generalinfo',
     'co-additionalinfo',
-    'co-kycinfo',
+    'co-kyc',
     'co-incomeinfo',
     'co-assetsinfo',
     'co-liabilitiesinfo',
@@ -138,57 +154,57 @@ private getCoApplicantListKey(): string {
     const saved = localStorage.getItem(`coapp_mobile_submitted_${this.applicantId}_${this.coApplicantIndex}`);
     // this.mobileSubmitted = saved === 'true';
   }
- restoreCoApplicantState() {
-  const cleanUrl = this.router.url.split('?')[0];
+  restoreCoApplicantState() {
+    const cleanUrl = this.router.url.split('?')[0];
 
-  const isStepperRoute = this.coApplicantChildRoutes.some(route =>
-    cleanUrl.includes(route)
-  );
+    const isStepperRoute = this.coApplicantChildRoutes.some(route =>
+      cleanUrl.includes(route)
+    );
 
-  const listKey =this.getCoApplicantListKey();
-  const savedList = localStorage.getItem(listKey);
-  const coApplicants = savedList ? JSON.parse(savedList) : [];
+    const listKey = this.getCoApplicantListKey();
+    const savedList = localStorage.getItem(listKey);
+    const coApplicants = savedList ? JSON.parse(savedList) : [];
 
-  const current = coApplicants.find(
-    (x: any) => Number(x.index) === Number(this.coApplicantIndex)
-  );
+    const current = coApplicants.find(
+      (x: any) => Number(x.index) === Number(this.coApplicantIndex)
+    );
 
-  const pendingContextRaw = sessionStorage.getItem('pendingCoAppContext');
-  const pendingContext = pendingContextRaw ? JSON.parse(pendingContextRaw) : null;
+    const pendingContextRaw = sessionStorage.getItem('pendingCoAppContext');
+    const pendingContext = pendingContextRaw ? JSON.parse(pendingContextRaw) : null;
 
-  // ✅ prefer pending context for freshly added coapplicant
-  if (
-    pendingContext &&
-    Number(pendingContext.coApplicantIndex) === Number(this.coApplicantIndex)
-  ) {
-    this.prefillPhone = pendingContext.phone || '';
-    this.loanform.coapppmobile = pendingContext.phone || '';
-  } else if (current?.phone) {
-    this.prefillPhone = current.phone;
-    this.loanform.coapppmobile = current.phone;
+    // ✅ prefer pending context for freshly added coapplicant
+    if (
+      pendingContext &&
+      Number(pendingContext.coApplicantIndex) === Number(this.coApplicantIndex)
+    ) {
+      this.prefillPhone = pendingContext.phone || '';
+      this.loanform.coapppmobile = pendingContext.phone || '';
+    } else if (current?.phone) {
+      this.prefillPhone = current.phone;
+      this.loanform.coapppmobile = current.phone;
+    }
+
+    if (isStepperRoute) {
+      this.mobileSubmitted = true;
+      return;
+    }
+
+    const saved = localStorage.getItem(
+      `coapp_mobile_submitted_${this.applicantId}_${this.coApplicantIndex}`
+    );
+
+    this.mobileSubmitted = saved === 'true';
+
+    if (!this.mobileSubmitted) {
+      this.prefillPhone = '';
+      this.loanform.coapppmobile = '';
+      this.loanform.coappStep = 1;
+    }
+
+    if (current?.phone && !this.prefillPhone) {
+      this.prefillPhone = current.phone;
+    }
   }
-
-  if (isStepperRoute) {
-    this.mobileSubmitted = true;
-    return;
-  }
-
-  const saved = localStorage.getItem(
-    `coapp_mobile_submitted_${this.applicantId}_${this.coApplicantIndex}`
-  );
-
-  this.mobileSubmitted = saved === 'true';
-
-  if (!this.mobileSubmitted) {
-    this.prefillPhone = '';
-    this.loanform.coapppmobile = '';
-    this.loanform.coappStep = 1;
-  }
-
-  if (current?.phone && !this.prefillPhone) {
-    this.prefillPhone = current.phone;
-  }
-}
   getPhoneFieldState(phone: any): 'default' | 'error' | 'success' {
     if (phone.touched && phone.invalid) {
       return 'error';
@@ -201,39 +217,39 @@ private getCoApplicantListKey(): string {
   }
   back() { }
 
- saveCoApplicantToList(userid: any) {
-  const key = this.getCoApplicantListKey();
+  saveCoApplicantToList(userid: any) {
+    const key = this.getCoApplicantListKey();
 
-  const saved = localStorage.getItem(key);
-  let list = saved ? JSON.parse(saved) : [];
+    const saved = localStorage.getItem(key);
+    let list = saved ? JSON.parse(saved) : [];
 
-  const index = Number(this.loanStepper.getCurrentCoApplicantIndex());
+    const index = Number(this.loanStepper.getCurrentCoApplicantIndex());
 
-  const existingIndex = list.findIndex(
-    (x: any) => Number(x.index) === index
-  );
+    const existingIndex = list.findIndex(
+      (x: any) => Number(x.index) === index
+    );
 
-  const data = {
-    index: this.coApplicantIndex,
-    userInitiateId: userid,
-    phone: this.prefillPhone,
-    name: '',
-    status: 'IN_PROGRESS'
-  };
-
-  if (existingIndex > -1) {
-    list[existingIndex] = {
-      ...list[existingIndex],
-      ...data
+    const data = {
+      index: this.coApplicantIndex,
+      userInitiateId: userid,
+      phone: this.prefillPhone,
+      name: '',
+      status: 'IN_PROGRESS'
     };
-  } else {
-    list.push(data);
+
+    if (existingIndex > -1) {
+      list[existingIndex] = {
+        ...list[existingIndex],
+        ...data
+      };
+    } else {
+      list.push(data);
+    }
+
+    list = list.sort((a: any, b: any) => Number(a.index) - Number(b.index));
+
+    localStorage.setItem(key, JSON.stringify(list));
   }
-
-  list = list.sort((a: any, b: any) => Number(a.index) - Number(b.index));
-
-  localStorage.setItem(key, JSON.stringify(list));
-}
 
   next() {
     if (!this.isPhoneValid() || this.searchLoading) return;
@@ -241,7 +257,7 @@ private getCoApplicantListKey(): string {
     this.searchLoading = true;
     this.norecordfound = false;
     this.showmsg = false;
-   
+
     const input = {
       identifier: this.prefillPhone,
       type: "MOBILE",
@@ -275,13 +291,13 @@ private getCoApplicantListKey(): string {
               userInitiateId: userid,
               phone: this.prefillPhone,
               coApplicantIndex: this.coApplicantIndex,
-              
+
             })
           );
 
-this.loanStepper.clearCoAppId?.();
-        this.loanStepper.setStepperType('CO_APPLICANT');
-        this.loanStepper.setCurrentCoApplicantIndex(this.coApplicantIndex);
+          this.loanStepper.clearCoAppId?.();
+          this.loanStepper.setStepperType('CO_APPLICANT');
+          this.loanStepper.setCurrentCoApplicantIndex(this.coApplicantIndex);
 
           this.saveCoApplicantToList(userid);
 
@@ -291,8 +307,8 @@ this.loanStepper.clearCoAppId?.();
               relativeTo: this.route,
               queryParams: {
 
-            
-                mode:'new',
+
+                mode: 'new',
                 coApplicantIndex: this.coApplicantIndex
               }, replaceUrl: true
               // queryParamsHandling: 'merge'

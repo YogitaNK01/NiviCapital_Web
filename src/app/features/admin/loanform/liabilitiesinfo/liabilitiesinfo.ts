@@ -114,6 +114,14 @@ export class Liabilitiesinfo {
   isSummaryEditMode = false;
   viewOnly = false;
   private isPatching = false;
+
+    //edit from summary
+  isFromSummary = false;
+  isViewMode = false;
+  isEditMode = false;
+  originalFormValue: any = null;
+
+
   constructor(private fb: FormBuilder, public main: Main, private route: ActivatedRoute, private msgBox: Msgboxservice, private router: Router,private storageservice:Storage,
     private stepperService: Loanstepperservice, private formSvc: Loanformservice, private cd: ChangeDetectorRef) { }
 
@@ -165,11 +173,12 @@ export class Liabilitiesinfo {
         ];
 
         // restore back into service
+        this.stepperService.setCurrentCoApplicantIndex(parsed.coApplicantIndex || 1);
         this.stepperService.setCo_appId(
           parsed.applicantId,
           parsed.applicationId,
           parsed.fullName,
-          undefined, this.stepperService.getCurrentCoApplicantIndex()
+          undefined,parsed.coApplicantIndex || 1
         );
       }
     }
@@ -225,6 +234,12 @@ export class Liabilitiesinfo {
     }
     await this.loadliabilityForBothFlows()
 
+  this.isFromSummary = this.formSvc.isSummaryEditFlow();
+
+    if(this.isFromSummary){
+      this.isViewMode = true;
+      this.liabilityForm.disable();
+    }
 
 
 
@@ -249,9 +264,7 @@ return this.isCoApplicant
       this.applicationId,
       this.applicantId,
       this.isCoApplicant,
-      main_ApplicantId ?? undefined,
-      co_ApplicantId ?? undefined, 
-      index
+    
     );
   }
   getCurrentCoApplicantFromList() {
@@ -2062,7 +2075,8 @@ return this.isCoApplicant
             outstandingBalanceInr: cleanAmount(loan.value.outstanding),
             emiAmountInr: cleanAmount(loan.value.emiamount),
             remainingTenureMonths: loan.value.remtenure,
-            liabilityTypeText: loan.value.type
+            liabilityTypeText: loan.value.type,
+              liabilityId: this.liabilityCodeMap["EXISTING_LOAN"],
           });
         }
       });
@@ -2084,7 +2098,8 @@ return this.isCoApplicant
             ...(this.isOtherSelectedcc(card) && { title: card.value.title }),
             outstandingBalanceInr: cleanAmount(card.value.ccoutstandingBalance),
             creditLimitInr: cleanAmount(card.value.cccreditLimit),
-            liabilityTypeText: `CREDIT_CARD_OUTSTANDING ${index + 1}`
+            liabilityTypeText: `CREDIT_CARD_OUTSTANDING ${index + 1}`,
+             liabilityId: this.liabilityCodeMap["CREDIT_CARD_OUTSTANDING"],
           });
         }
       });
@@ -2107,7 +2122,8 @@ return this.isCoApplicant
             creditLimitInr: cleanAmount(bnpl.value.creditLimit),
             monthlyEmiInr: cleanAmount(bnpl.value.monthlyEMI),
             ...(this.isOtherSelectedbnpl(bnpl) && { title: bnpl.value.title }),
-            liabilityTypeText: `BNPL ${index + 1}`
+               liabilityTypeText: `BNPL ${index + 1}`,
+            liabilityId: this.liabilityCodeMap["BNPL"],
           });
         }
       });
@@ -2127,6 +2143,7 @@ return this.isCoApplicant
             liabilityTypeText: other.value.LiabilityType,
             amountInr: cleanAmount(other.value.libamount),
             monthlyRepaymentInr: cleanAmount(other.value.MonthlyRepaymentLimit),
+              liabilityId: this.liabilityCodeMap["OTHER_LIABILITY"],
 
           });
         }
@@ -2344,7 +2361,7 @@ return this.isCoApplicant
       return;
     }
 
-    this.formSvc.submitliability(payload, this.applicationId).pipe().subscribe({
+    this.formSvc.submitliability(payload, this.applicationId,false).pipe().subscribe({
       next: (res) => {
         console.log("resp---", res);
         if (res.status == "success") {
@@ -2514,7 +2531,7 @@ return this.isCoApplicant
 
 
 
-    this.formSvc.submitliability(payload, this.applicationId).pipe().subscribe({
+    this.formSvc.submitliability(payload, this.applicationId,false).pipe().subscribe({
       next: (res) => {
         console.log("resp---", res);
         if (res.status == "success") {
@@ -2539,6 +2556,65 @@ return this.isCoApplicant
       // }
     });
 
+  }
+
+  //edit from summary enable and disbale
+
+  enableForm(){
+    this.isViewMode = false;
+    this.isEditMode = true;
+    this.liabilityForm.enable();
+  }
+
+  cancelSummaryEdit() {
+    if (this.isEditMode && this.originalFormValue) {
+      this.liabilityForm.patchValue(this.originalFormValue);
+    }
+
+    this.isViewMode = false;
+    this.isEditMode = false;
+
+    this.router.navigate(['/applications', this.applicationId, 'summaryinfo']);
+  }
+
+  saveSummaryEdit() {
+    const result = this.buildLiabilityPayloadWithApplicantId();
+
+    if (result.invalid) {
+      console.log('Form invalid - stop navigation');
+      return;
+    }
+
+
+    const input = { applicantId: result.applicantId, items: result.items };
+
+    this.formSvc.submitliability(input, this.applicationId, false).subscribe({
+      next: (res: any) => {
+        if (res.status === 'success') {
+          const key = this.getStorageKey();
+          localStorage.setItem(key, JSON.stringify(input));
+
+          if (this.isCoApplicant) {
+            this.formSvc.liabilitiesInfoData = input;
+          } else {
+            this.formSvc.co_liabilitiesInfoData = input;
+          }
+
+          this.lastSavedPayload = { ...input };
+
+          console.log(res);
+
+          this.isEditMode = false;
+
+          this.isViewMode = false;
+
+          // this.router.navigate(['/loanform/summaryinfo']);
+        }
+      },
+      error: (err) => {
+        console.error('Additional info update failed', err);
+      }
+    });
   }
 
 }

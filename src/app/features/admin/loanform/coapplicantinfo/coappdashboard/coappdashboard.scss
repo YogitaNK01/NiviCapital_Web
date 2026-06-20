@@ -17,12 +17,16 @@
     margin-top: $spacing_9;
     ;
 }
-
+.gap-30{
+    gap:30px
+}
 .blue-text {
     color: $secondary-900;
     // font-weight: 700;
 }
-
+.removedcoapp-blue{
+      color: $secondary-700;
+}
 .gap-data {
     gap: $spacing_14;
 }

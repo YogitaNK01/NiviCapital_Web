@@ -1,74 +1,88 @@
 <div class="base-layout" [ngClass]="{'coapplicant-layout': isCoApplicant}">
 
- <div class="header "  *ngIf="!isCoApplicant">
+ <div class="header w-100"  >
+            <div class="d-flex justify-content-between">
+                <div class="text-datepicker blue-text d-flex flex-column gap-2 ">Additional Information
+                    <div class="text-body-1 fw-normal" *ngIf="!isFromSummary">
+                        <span ><svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 22 22"
+                                fill="none">
+                                <path
+                                    d="M10.9997 20.1667C16.0413 20.1667 20.1663 16.0417 20.1663 11C20.1663 5.95833 16.0413 1.83333 10.9997 1.83333C5.95801 1.83333 1.83301 5.95833 1.83301 11C1.83301 16.0417 5.95801 20.1667 10.9997 20.1667Z"
+                                    stroke="#25262F" stroke-width="1.28125" stroke-linecap="round"
+                                    stroke-linejoin="round" />
+                                <path d="M11 7.33333V11.9167" stroke="#25262F" stroke-width="1.28125" stroke-linecap="round"
+                                    stroke-linejoin="round" />
+                                <path d="M10.9961 14.6667H11.0043" stroke="#25262F" stroke-width="1.28125"
+                                    stroke-linecap="round" stroke-linejoin="round" />
+                            </svg></span>
+                        Click the “Next” button to save your changes
+                    </div>
+                </div>
 
-            <div class="text-datepicker blue-text d-flex flex-column gap-2 ">Additional Information
-                <div class="text-body-1 fw-normal">
-                    <span><svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 22 22"
-                            fill="none">
-                            <path
-                                d="M10.9997 20.1667C16.0413 20.1667 20.1663 16.0417 20.1663 11C20.1663 5.95833 16.0413 1.83333 10.9997 1.83333C5.95801 1.83333 1.83301 5.95833 1.83301 11C1.83301 16.0417 5.95801 20.1667 10.9997 20.1667Z"
-                                stroke="#25262F" stroke-width="1.28125" stroke-linecap="round"
-                                stroke-linejoin="round" />
-                            <path d="M11 7.33333V11.9167" stroke="#25262F" stroke-width="1.28125" stroke-linecap="round"
-                                stroke-linejoin="round" />
-                            <path d="M10.9961 14.6667H11.0043" stroke="#25262F" stroke-width="1.28125"
-                                stroke-linecap="round" stroke-linejoin="round" />
-                        </svg></span>
-                    Click the “Next” button to save your changes
+                <div>
+                    <app-buttons
+                        *ngIf="isFromSummary"
+                        type="button"
+                        label="Edit"
+                        class="btn btn-icon edit btncustomClass editBtnClass"
+                        color="primary"
+                        (click)="enableForm()"
+                        [disabled]="!isViewMode">
+                        <img src="assets/images/icons/edit-white.svg" alt="edit">
+                    </app-buttons>
                 </div>
             </div>
-
         </div>
 
-    <div class="accordion d-flex flex-column gap-4 mb-4">
 
-        <div class="accordion-item b-0" *ngFor="let acc of accordions; let i = index">
+<div class="accordion d-flex flex-column gap-4 mb-4">
 
-            <h2 class="accordion-header">
-                <button class="accordion-button table-head" [class.collapsed]="openIndex !== i" type="button"
-                    (click)="toggle(i)">
-                    {{ acc.title }}
-                </button>
-            </h2>
+    <div class="accordion-item b-0" *ngFor="let acc of accordions; let i = index">
 
-            <div class="accordion-collapse collapse" [class.show]="openIndex === i">
+        <h2 class="accordion-header">
+            <button class="accordion-button table-head" [class.collapsed]="openIndex !== i" type="button"
+                (click)="toggle(i)">
+                {{ acc.title }}
+            </button>
+        </h2>
 
-                <div class="accordion-body p-0" *ngIf="openIndex === i">
+        <div class="accordion-collapse collapse" [class.show]="openIndex === i">
 
-                    <ng-container *ngIf="i === 0">
-                        <ng-container *ngTemplateOutlet="identityTemplate; context:{index:i}">
-                        </ng-container>
+            <div class="accordion-body p-0" *ngIf="openIndex === i">
+
+                <ng-container *ngIf="i === 0">
+                    <ng-container *ngTemplateOutlet="identityTemplate; context:{index:i}">
                     </ng-container>
+                </ng-container>
 
-                </div>
             </div>
-
         </div>
 
     </div>
 
-    <ng-template #identityTemplate let-i="index">
+</div>
 
-        <form [formGroup]="additionalinfoForm" (ngSubmit)="submit()" class="common-details-box d-flex flex-column">
+<ng-template #identityTemplate let-i="index">
 
-           <div class=" container-fluid">
+    <form [formGroup]="additionalinfoForm" (ngSubmit)="submit()" class="common-details-box d-flex flex-column">
+
+        <div class=" container-fluid">
             <div class="row">
 
-                   <div class="col-lg-4 col-sm-12 ">
+                <div class="col-lg-4 col-sm-12 ">
                     <div class="dropdown-label1 all-label ">Gender<span class="text-danger">*</span></div>
                     <div class="d-flex flex-row">
                         <app-radiobuttons name="optionsGroup" (checkedChange)="gendercheck('Male')" label="Male"
-                            value="Male" formControlName="gender">
+                            value="Male" formControlName="gender"  [disabled]="isViewMode">
                         </app-radiobuttons>
 
 
                         <app-radiobuttons name="optionsGroup" (checkedChange)="gendercheck('Female')" label="Female"
-                            value="Female" formControlName="gender">
+                            value="Female" formControlName="gender"  [disabled]="isViewMode">
                         </app-radiobuttons>
 
                         <app-radiobuttons name="optionsGroup" (checkedChange)="gendercheck('Third')"
-                            label="Third Gender" value="Third Gender" formControlName="gender">
+                            label="Third Gender" value="Third Gender" formControlName="gender"  [disabled]="isViewMode">
                         </app-radiobuttons>
                     </div>
 
@@ -78,48 +92,48 @@
                     <app-dropdown [options]="marital_status" [placeholder]="maritalstatus"
                         formControlName="maritalstatus" [required]="true"
                         (selectedValueChange)="additionalinfoForm.get('maritalstatus')?.setValue($event)"
-                        [avatarUrl]="avatarUrl" [hasAvatar]="hasAvatar" [label]="maritalstatus">
+                        [avatarUrl]="avatarUrl" [hasAvatar]="hasAvatar" [label]="maritalstatus"  [disabled]="isViewMode">
                     </app-dropdown>
 
 
 
                 </div>
                 <div class="col-lg-4 col-sm-12 ">
-                     @if (hasLocalFile('applicantphoto')) {
-          <label class="text-label">
-            Secondary Address Proof Name<span class="text-danger">*</span>
-          </label>
+                    @if (hasLocalFile('applicantphoto')) {
+                    <label class="text-label">
+                        Secondary Address Proof Name<span class="text-danger">*</span>
+                    </label>
 
-          <div class="addcust-img-box mt-2">
-            <p class="text-label">{{ getLocalFileName('applicantphoto') }}</p>
+                    <div class="addcust-img-box mt-2">
+                        <p class="text-label">{{ getLocalFileName('applicantphoto') }}</p>
 
-            <div class="icons">
-              <span class="view" (click)="viewLocalFile('applicantphoto')">
-                <img src="/assets/images/icons/eyered.svg" alt="view">
-              </span>
+                        <div class="icons">
+                            <span class="view" (click)="viewLocalFile('applicantphoto')">
+                                <img src="/assets/images/icons/eyered.svg" alt="view">
+                            </span>
 
-              <span class="download" (click)="downloadLocalFile('applicantphoto')">
-                <img src="/assets/images/icons/import-red.svg" alt="Download">
-              </span>
+                            <span class="download" (click)="downloadLocalFile('applicantphoto')">
+                                <img src="/assets/images/icons/import-red.svg" alt="Download">
+                            </span>
 
-              <span class="delete" (click)="deleteLocalFile('applicantphoto')">
-                <img src="/assets/images/icons/close.svg" alt="Delete">
-              </span>
-            </div>
-          </div>
-          } @else {
-          <app-uploadbtn [config]="basicConfig"  (fileChange)="onFileChange($event, 'applicantphoto')"
-            label="Upload Applicant Photo">
-          </app-uploadbtn>
-          }
-          
+                            <span class="delete" (click)="deleteLocalFile('applicantphoto')">
+                                <img src="/assets/images/icons/close.svg" alt="Delete">
+                            </span>
+                        </div>
+                    </div>
+                    } @else {
+                    <app-uploadbtn [config]="basicConfig" (fileChange)="onFileChange($event, 'applicantphoto')"
+                        label="Upload Applicant Photo">
+                    </app-uploadbtn>
+                    }
+
                     <!-- <app-uploadbtn [config]="basicConfig" formControlName="uploadphoto"
                         (fileChange)="onFileChange($event, 'applicantphoto')" label="Upload Applicant Photo">
                     </app-uploadbtn> -->
 
                 </div>
 
-             
+
 
                 <div class="col-lg-4 col-sm-12 mt-20">
 
@@ -395,21 +409,21 @@
 
 
             </div>
-</div>
+        </div>
 
 
 
-        </form>
+    </form>
 
-    </ng-template>
+</ng-template>
 
 </div>
 <hr class="footer-hr-class">
 <div class="loan-footerbtns row w-100  d-flex justify-content-between align-items-center">
 
-    
- <!-- Normal flow footer -->
-  <!-- <ng-container *ngIf="!isFromSummary"> -->
+
+    <!-- Normal flow footer -->
+    <ng-container *ngIf="!isFromSummary">
 
     <div class="col-lg-4 pointer">
         <img src="../assets/images/icons/save.svg">
@@ -421,15 +435,13 @@
         <app-buttons type="button" label="Next" class="btn btncustomClass" color="primary" (click)="next()"
             [disabled]="!canProceed && !submitAttempted">
         </app-buttons>
-        <!-- <app-buttons type="button" label="Next" class="btn btncustomClass" color="primary" (click)="next()"
-            [disabled]="additionalinfoForm.invalid || (additionalinfoForm.get('maritalstatus')?.value == 'Married' && (!isspousemiddlename && !f['s_mname'].value ))|| (!isfathermiddlename && !f['f_mname'].value) || (!ismothermiddlename && !f['m_mname'].value )">
-        </app-buttons> -->
+       
 
     </div>
-    <!-- </ng-container>
+    </ng-container>
     
   <ng-container *ngIf="isFromSummary">
-    <div class="col-lg-12 d-flex justify-content-end gap-2">
+    <div class="col-lg-12 d-flex justify-content-end gap-2"  *ngIf="isEditMode">
 
       <app-buttons
         type="button"
@@ -440,16 +452,16 @@
       </app-buttons>
 
       <app-buttons
-        *ngIf="isEditMode"
+       
         type="button"
         label="Save"
         class="btn btncustomClass"
         color="primary"
         (click)="saveSummaryEdit()"
-        [disabled]="!canProceed">
+        >
       </app-buttons>
 
     </div>
-  </ng-container> -->
+  </ng-container>
 
 </div>

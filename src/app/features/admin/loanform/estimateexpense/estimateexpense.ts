@@ -81,6 +81,14 @@ export class Estimateexpense {
 
   isSummaryEditMode = false;
   viewOnly = false;
+
+    //edit from summary
+  isFromSummary = false;
+  isViewMode = false;
+  isEditMode = false;
+  originalFormValue: any = null;
+
+
   constructor(private fb: FormBuilder, private stepperService: Loanstepperservice, private cd: ChangeDetectorRef, private loanformservice: Loanformservice,
     private router: Router, private route: ActivatedRoute, public main: Main, private msgBox: Msgboxservice,private storageservice:Storage) { }
 
@@ -129,11 +137,12 @@ export class Estimateexpense {
         ];
 
         // restore back into service
+        this.stepperService.setCurrentCoApplicantIndex(parsed.coApplicantIndex || 1);
         this.stepperService.setCo_appId(
           parsed.applicantId,
           parsed.applicationId,
           parsed.fullName,
-          undefined, this.stepperService.getCurrentCoApplicantIndex());
+          undefined, parsed.coApplicantIndex || 1);
       }
     }
 
@@ -242,6 +251,13 @@ export class Estimateexpense {
 
     await this.loadEstimatedExpenseForBothFlows();
 
+      this.isFromSummary = this.loanformservice.isSummaryEditFlow();
+
+    if(this.isFromSummary){
+      this.isViewMode = true;
+      this.expenseForm.disable();
+    }
+
   }
 
   getStorageKey11() {
@@ -266,9 +282,9 @@ export class Estimateexpense {
       this.applicationId,
       this.applicantId,
       this.isCoApplicant,
-      main_ApplicantId ?? undefined,
-      co_ApplicantId ?? undefined, 
-      index
+      // main_ApplicantId ?? undefined,
+      // co_ApplicantId ?? undefined, 
+      // index
     );
   }
   getStepRoute() {
@@ -1421,7 +1437,7 @@ private finishAfterSaveOrNoChange() {
       items: [...livingExpenses, ...miscExpenses]
     }
 
-    this.loanformservice.estimateExpense(input, this.applicationId).pipe().subscribe({
+    this.loanformservice.estimateExpense(input, this.applicationId,false).pipe().subscribe({
       next: (res) => {
         console.log("resp---", res);
         if (res.status == "success") {
@@ -1439,4 +1455,56 @@ private finishAfterSaveOrNoChange() {
 
   }
 
+    //edit from summary enable and disbale
+
+      enableForm(){
+    this.isViewMode = false;
+    this.isEditMode = true;
+    this.expenseForm.enable();
+    this.loanformservice.clearSummaryEditFlow();
+  }
+
+    cancelSummaryEdit() {
+    if (this.isEditMode && this.originalFormValue) {
+      this.expenseForm.patchValue(this.originalFormValue);
+    }
+
+    this.isViewMode = false;
+    this.isEditMode = false;
+    this.loanformservice.clearSummaryEditFlow();
+
+    this.router.navigate(['/applications', this.applicationId, 'summaryinfo']);
+  }
+
+  saveSummaryEdit() {
+    const input = this.buildExpensePayload();
+
+    this.loanformservice.estimateExpense(input, this.applicationId, true).subscribe({
+      next: (res: any) => {
+        if (res.status === 'success') {
+          const key = this.getStorageKey();
+          localStorage.setItem(key, JSON.stringify(input));
+
+          if (this.isCoApplicant) {
+            this.loanformservice.co_estExpenseInfoData = input;
+          } else {
+            this.loanformservice.estExpenseInfoData = input;
+          }
+
+          this.lastSavedPayload = { ...input };
+
+          console.log(res);
+
+          this.isEditMode = false;
+
+          this.isViewMode = false;
+
+          // this.router.navigate(['/loanform/summaryinfo']);
+        }
+      },
+      error: (err) => {
+        console.error('Additional info update failed', err);
+      }
+    });
+  }
 }

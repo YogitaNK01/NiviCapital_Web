@@ -40,7 +40,8 @@ export class Coappstepper implements OnInit, OnDestroy {
 
   ngOnInit() {
     const params = this.route.snapshot.queryParams;
-    this.coApplicantIndex = params['coApplicantIndex'] || 1;
+    // this.coApplicantIndex = params['coApplicantIndex'] || 1;
+    this.coApplicantIndex = this.getActiveCoApplicantIndex();
 
     this.stepperService.setCurrentCoApplicantIndex(this.coApplicantIndex);
     this.stepperService.setStepperType('CO_APPLICANT');
@@ -59,8 +60,8 @@ export class Coappstepper implements OnInit, OnDestroy {
       .pipe(filter(e => e instanceof NavigationEnd))
       .subscribe(() => {
         const qp = this.route.snapshot.queryParams;
-        const newIndex = qp['coApplicantIndex'] || 1;
-
+        // const newIndex = qp['coApplicantIndex'] || 1;
+        const newIndex = this.getActiveCoApplicantIndex();
         if (Number(newIndex) !== Number(this.coApplicantIndex)) {
           this.coApplicantIndex = newIndex;
           this.stepperService.setCurrentCoApplicantIndex(this.coApplicantIndex);
@@ -182,6 +183,20 @@ export class Coappstepper implements OnInit, OnDestroy {
     return false;
   }
 
+  //check current coapp index
+
+  private getActiveCoApplicantIndex(): number {
+    const currentParams = this.route.snapshot.queryParams;
+    const parentParams = this.route.parent?.snapshot.queryParams;
+    const sessionCoApp = JSON.parse(sessionStorage.getItem('coAppIds') || '{}');
+
+    return Number(
+      currentParams['coApplicantIndex'] ||
+      parentParams?.['coApplicantIndex'] ||
+      sessionCoApp?.coApplicantIndex ||
+      1
+    );
+  }
 
   ngOnDestroy() {
     // Important when leaving co-applicant flow

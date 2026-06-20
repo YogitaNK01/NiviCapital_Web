@@ -214,6 +214,7 @@ export class Summaryinfo {
     private router: Router, private route: ActivatedRoute, public main: Main, private apiservice: Addcustomerservice, private sanitizer: DomSanitizer) { }
 
   ngOnInit(): void {
+    this.stepperService.markStepCompleted('summaryinfo');
     let Allids = this.stepperService.getLoanId();
 
     this.applicantId = Allids[0];
@@ -240,11 +241,12 @@ export class Summaryinfo {
         ];
 
         // restore back into service
+        this.stepperService.setCurrentCoApplicantIndex(parsed.coApplicantIndex || 1);
         this.stepperService.setCo_appId(
           parsed.applicantId,
           parsed.applicationId,
           parsed.fullName,
-          undefined, this.stepperService.getCurrentCoApplicantIndex());
+          undefined, parsed.coApplicantIndex || 1);
 
       }
     }

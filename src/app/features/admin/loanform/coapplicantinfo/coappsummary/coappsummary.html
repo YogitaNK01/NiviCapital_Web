@@ -22,8 +22,8 @@
                             </div>
                             <div class="flex-grow-1"></div>
                             <div class="ms-auto d-flex align-items-center p-0">
-                                <!-- <app-buttons type="button" label="Edit" class="btn editbtn p-0"
-                                    [outline]="true"></app-buttons> -->
+                                <app-buttons type="button" label="Edit" class="btn editbtn p-0"  (click)="goTocoappEdit(acc.key, $event)" 
+                                    [outline]="true"></app-buttons>
 
                                 <!-- <span class="delete-icon px-2" (click)="removeAccordion(acc.key, i, $event)" (click)="removeAccordion(acc, i, $event)"> -->
                                 <span class="delete-icon px-2"></span>

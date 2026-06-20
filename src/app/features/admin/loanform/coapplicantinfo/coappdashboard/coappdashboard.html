@@ -1,6 +1,6 @@
 <div class="vh-container">
 
-    <div class="base-layout base-height" *ngIf="!isChildActive">
+    <div class="base-layout base-height d-flex justify-content-between" *ngIf="!isChildActive">
 
         <div class="header w-100">
 
@@ -96,7 +96,7 @@
 
                 <div>
                     <app-buttons type="button" label="Add " class="btn btncustomClass p-0" [outline]="true"
-                        (click)="add()" [disabled]="coApplicants.length >= 4">
+                        (click)="add()" [disabled]="!canAddMoreCoApplicants">
                         <img src="/assets/images/icons/addred.svg">
                     </app-buttons>
 
@@ -106,7 +106,51 @@
             </div>
 
         </div>
+        <div class="w-100 d-flex flex-column gap-30 " *ngIf="removedCoApplicants.length > 0">
+            <div class="text-label-data fw-bold removedcoapp-blue ">Removed Co-applicant
+                <div class="text-label-data fw-normal fst-italic mt-2">
+                    The following Co-applicants with filled details have been removed or deleted. We have archived their
+                    information for you.
+                    To retrieve it click the icon..
+                </div>
+            </div>
 
+
+            <div class="w-100">
+                <div class="coapp mb-3" *ngFor="let coapp of removedCoApplicants; let i = index"
+                    [ngClass]="removedCoApplicants.length === 1 ? 'col-12' : 'col-lg-12 col-md-12 col-sm-12'">
+
+                    <div class="coapp-card d-flex align-items-center w-100 archived-card">
+                        <div class="coapp-name d-flex flex-column gap-2">
+                            <div class="text-dp-3-regular fw-bold">
+                                {{ coapp.name || 'Co-Applicant ' + coapp.index }}
+                            </div>
+                            <div class="text-body-1">
+                                Co-Applicant {{ coapp.index }}
+                            </div>
+                        </div>
+
+                        <div class="coapp-icons d-flex gap-3 align-items-center ms-auto">
+                            <!-- <span class="text-body-2 warning-color">Removed</span> -->
+
+                            <span class="cursor-pointer" (click)="restoreCoApplicant(coapp.index, $event)"
+                                title="Retrieve Co-Applicant">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="33" height="33" viewBox="0 0 33 33"
+                                    fill="none">
+                                    <path
+                                        d="M20.0062 29.7962C25.905 28.2425 30.25 22.88 30.25 16.5C30.25 8.91 24.145 2.75 16.5 2.75C7.32875 2.75 2.75 10.395 2.75 10.395M8.855 10.395H5.51375H2.75V4.125"
+                                        stroke="#25262F" stroke-width="2.0625" stroke-linecap="round"
+                                        stroke-linejoin="round" />
+                                    <path d="M2.75 16.5C2.75 24.09 8.91 30.25 16.5 30.25" stroke="#25262F"
+                                        stroke-width="2.0625" stroke-linecap="round" stroke-linejoin="round"
+                                        stroke-dasharray="4.12 4.12" />
+                                </svg>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
 
 
     </div>

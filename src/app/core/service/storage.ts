@@ -9,86 +9,160 @@ export class Storage {
 constructor(private stepperService:Loanstepperservice){}
   //----------separte key storage for main and coapplicant--------------------------------------
 
-  getStorageKey1(
+  
+private getCurrentContext(
+  
+ applicationId: string,
+  applicantId: string,
+  isCoApplicant: boolean,
+  explicit?: {
+    mainApplicantId?: string;
+    coApplicantId?: string | null;
+    coApplicantIndex?: number | null;
+  }
+) {
+  let sessionCoApp: any = {};
+
+  try {
+    sessionCoApp = JSON.parse(sessionStorage.getItem('coAppIds') || '{}');
+  } catch {
+    sessionCoApp = {};
+  }
+
+  const mainApplicantId =
+    explicit?.mainApplicantId ||
+    this.stepperService.getLoanId()?.[0] ||
+    '';
+
+  const coApplicantId = isCoApplicant
+    ? (
+        explicit?.coApplicantId ??  applicantId ??
+        this.stepperService.getCo_appId()?.[0] ??
+        sessionCoApp?.applicantId ??
+        null
+      )
+    : null;
+
+  const coApplicantIndex = isCoApplicant
+    ? (
+        explicit?.coApplicantIndex ??
+        this.stepperService.getCurrentCoApplicantIndex() ??
+        sessionCoApp?.coApplicantIndex ??
+        1
+      )
+    : null;
+
+  return {
+    mainApplicantId,
+    coApplicantId,
+    coApplicantIndex
+  };
+}
+
+  getStorageKey(
     section: string,
     applicationId: string,
     applicantId: string,
     isCoApplicant: boolean,
-    
+    explicit?: {
+      mainApplicantId?: string;
+      coApplicantId?: string | null;
+      coApplicantIndex?: number | null;
+    }
   ): string {
-    const mainApplicantId = this.stepperService.getLoanId()?.[0];
-    const index = this.stepperService.getCurrentCoApplicantIndex();
+    const { mainApplicantId, coApplicantId, coApplicantIndex } =
+      this.getCurrentContext(applicationId, applicantId,isCoApplicant,explicit);
 
-    return isCoApplicant
-      ? `${section}_coapp_${applicationId}_${index}`
-      : `${section}_main_${applicationId}_${mainApplicantId || applicantId}`;
-  }
-getStorageKey(
-  section: string,
-  applicationId: string,
-  applicantId: string,
-  isCoApplicant: boolean,
-  mainApplicantId?: string,
-  coApplicantId?: string,
-  coApplicantIndex?: number
-): string {
-  if (isCoApplicant) {
-    return coApplicantId
-      ? `${section}_coapp_${applicationId}_${coApplicantId}`
-      : `${section}_coapp_${applicationId}_temp_${coApplicantIndex}`;
-  }
 
-  return `${section}_main_${applicationId}_${mainApplicantId || applicantId}`;
-}
+  // const mainApplicantId =
+  //   explicit?.mainApplicantId || this.stepperService.getLoanId()?.[0] || '';
+
+  // const coApplicantId =
+  //   explicit?.coApplicantId ?? this.stepperService.getCo_appId()?.[0] ?? '';
+
+  // const coApplicantIndex =
+  //   explicit?.coApplicantIndex ?? this.stepperService.getCurrentCoApplicantIndex() ?? 1;
+
+
+    if (isCoApplicant) {
+      return coApplicantId
+        ? `${section}_coapp_${applicationId}_${coApplicantId}`
+        : `${section}_coapp_${applicationId}_temp_${coApplicantIndex}`;
+    }
+
+    return `${section}_main_${applicationId}_${mainApplicantId || applicantId}`;
+  }
 
   getPossibleStorageKeys(
-  section: string,
-  applicationId: string,
-  applicantId: string,
-  isCoApplicant: boolean,
-  mainApplicantId?: string,
-  coApplicantId?: string,
-  coApplicantIndex?: number
-): string[] {
-  if (!isCoApplicant) {
-    return [
-      `${section}_main_${applicationId}_${mainApplicantId || applicantId}`,
-      `${section}_main_${applicantId}`
-    ].filter(Boolean);
-  }
+    section: string,
+    applicationId: string,
+    applicantId: string,
+    isCoApplicant: boolean,
+    explicit?: {
+      mainApplicantId?: string;
+      coApplicantId?: string | null;
+      coApplicantIndex?: number | null;
+    }
+  ): string[] {
+    const { mainApplicantId, coApplicantId, coApplicantIndex } =
+      this.getCurrentContext(applicationId, applicantId,isCoApplicant, explicit);
 
-  return [
-    `${section}_coapp_${applicationId}_${coApplicantId}`,         // preferred stable key
-    `${section}_coapp_${applicationId}_temp_${coApplicantIndex}`, // pre-CIF old temp key
-    `${section}_coapp_${applicationId}_${coApplicantIndex}`,      // old index-based key
-    `${section}_coapp_${coApplicantId}`,
-    `${section}_coapp_${coApplicantIndex}`
-  ].filter(Boolean);
-}
+    if (!isCoApplicant) {
+      return [
+        `${section}_main_${applicationId}_${mainApplicantId || applicantId}`,
+        `${section}_main_${applicantId}`
+      ].filter(Boolean);
+    }
+
+    const keys = [
+      coApplicantId
+        ? `${section}_coapp_${applicationId}_${coApplicantId}`
+        : '',
+      coApplicantIndex != null
+        ? `${section}_coapp_${applicationId}_temp_${coApplicantIndex}`
+        : '',
+      coApplicantIndex != null
+        ? `${section}_coapp_${applicationId}_${coApplicantIndex}`
+        : '',
+      coApplicantId
+        ? `${section}_coapp_${coApplicantId}`
+        : '',
+      coApplicantIndex != null
+        ? `${section}_coapp_${coApplicantIndex}`
+        : ''
+    ].filter(Boolean);
+
+    return [...new Set(keys)];
+  }
 
   getStoredSectionData(
     section: string,
     applicationId: string,
     applicantId: string,
-    isCoApplicant: boolean
+    isCoApplicant: boolean,
+    explicit?: {
+      mainApplicantId?: string;
+      coApplicantId?: string | null;
+      coApplicantIndex?: number | null;
+    }
   ): any {
     const keys = this.getPossibleStorageKeys(
       section,
       applicationId,
       applicantId,
-      isCoApplicant
+      isCoApplicant,
+      explicit
     );
 
     for (const key of keys) {
       const raw = localStorage.getItem(key);
+      if (!raw) continue;
 
-      if (raw) {
-        try {
-          return JSON.parse(raw);
-        } catch (error) {
-          console.error(`Invalid JSON in localStorage for key: ${key}`, error);
-          return null;
-        }
+      try {
+        return JSON.parse(raw);
+      } catch (error) {
+        console.error(`Invalid JSON in localStorage for key: ${key}`, error);
+        return null;
       }
     }
 
@@ -100,9 +174,21 @@ getStorageKey(
     applicationId: string,
     applicantId: string,
     isCoApplicant: boolean,
-    data: any
+    data: any,
+    explicit?: {
+      mainApplicantId?: string;
+      coApplicantId?: string | null;
+      coApplicantIndex?: number | null;
+    }
   ): void {
-    const key = this.getStorageKey(section, applicationId, applicantId, isCoApplicant);
+    const key = this.getStorageKey(
+      section,
+      applicationId,
+      applicantId,
+      isCoApplicant,
+      explicit
+    );
+
     localStorage.setItem(key, JSON.stringify(data));
   }
 
@@ -110,17 +196,43 @@ getStorageKey(
     section: string,
     applicationId: string,
     applicantId: string,
-    isCoApplicant: boolean
+    isCoApplicant: boolean,
+    explicit?: {
+      mainApplicantId?: string;
+      coApplicantId?: string | null;
+      coApplicantIndex?: number | null;
+    }
   ): void {
-    const possibleKeys = this.getPossibleStorageKeys(
+    const keys = this.getPossibleStorageKeys(
       section,
       applicationId,
       applicantId,
-      isCoApplicant
+      isCoApplicant,
+      explicit
     );
 
-    possibleKeys.forEach(key => localStorage.removeItem(key));
+    keys.forEach(key => localStorage.removeItem(key));
   }
+
+  migrateCoApplicantTempToStable(
+    section: string,
+    applicationId: string,
+    coApplicantId: string,
+    coApplicantIndex: number
+  ): void {
+    const tempKey = `${section}_coapp_${applicationId}_temp_${coApplicantIndex}`;
+    const stableKey = `${section}_coapp_${applicationId}_${coApplicantId}`;
+
+    const raw = localStorage.getItem(tempKey);
+
+    if (raw) {
+      localStorage.setItem(stableKey, raw);
+      localStorage.removeItem(tempKey);
+    }
+  }
+
+
+
 
   removeAllCoApplicantSectionData(applicationId: string, index: number, coApplicantId?: string): void {
     const sections = [
@@ -148,5 +260,6 @@ getStorageKey(
       });
     });
   }
+
 
 }

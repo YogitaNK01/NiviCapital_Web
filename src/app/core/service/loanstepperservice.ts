@@ -74,41 +74,41 @@ export class Loanstepperservice {
     this.buildSteps();
   }
 
-private stageRouteMap: Record<string, string> = {
-  LOAN_INFO: 'loaninfo',
+  private stageRouteMap: Record<string, string> = {
+    LOAN_INFO: 'loaninfo',
 
-  PERSONAL_INFO: 'genralinfo',
-  SAVE_GENERAL_INFO: 'genralinfo',
+    PERSONAL_INFO: 'genralinfo',
+    SAVE_GENERAL_INFO: 'genralinfo',
 
-  SAVE_ESTIMATED_EXPENSES: 'expense',
-  SAVE_EXPENSE: 'expense',
+    SAVE_ESTIMATED_EXPENSES: 'expense',
+    SAVE_EXPENSE: 'expense',
 
-  SAVE_ADDITIONAL_INFO: 'additionalinfo',
+    SAVE_ADDITIONAL_INFO: 'additionalinfo',
 
-  FETCH_KYC: 'kycinfo',
-  SAVE_KYC: 'kycinfo',
+    FETCH_KYC: 'kycinfo',
+    SAVE_KYC: 'kycinfo',
 
-  SAVE_EDUCATION_DETAILS: 'educationDetails',
+    SAVE_EDUCATION_DETAILS: 'educationDetails',
 
-  SAVE_INCOME_DETAILS: 'incomeinfo',
+    SAVE_INCOME_DETAILS: 'incomeinfo',
 
-  SAVE_ASSETS: 'assetsinfo',
+    SAVE_ASSETS: 'assetsinfo',
 
-  SAVE_LIABILITIES: 'liabilitiesinfo',
+    SAVE_LIABILITIES: 'liabilitiesinfo',
 
-  SAVE_MONTHLY_EXPENSES: 'monthlyexpinfo',
+    SAVE_MONTHLY_EXPENSES: 'monthlyexpinfo',
 
-  SAVE_REFERENCES: 'referenceinfo',
+    SAVE_REFERENCES: 'referenceinfo',
 
-  SAVE_CO_APPLICANT: 'co-applicantdetails',
+    SAVE_CO_APPLICANT: 'co-applicantdetails',
 
-  SUMMARY: 'summaryinfo'
-};
+    SUMMARY: 'summaryinfo'
+  };
 
-getRouteFromStage(stage: string | null | undefined): string {
-  if (!stage) return 'loaninfo';
-  return this.stageRouteMap[stage] || 'loaninfo';
-}
+  getRouteFromStage(stage: string | null | undefined): string {
+    if (!stage) return 'loaninfo';
+    return this.stageRouteMap[stage] || 'loaninfo';
+  }
   private buildSteps1() {
 
     const baseSteps: Step[] = [
@@ -158,8 +158,8 @@ getRouteFromStage(stage: string | null | undefined): string {
     const main = this.formSvc.applicantState;
 
     const baseSteps: Step[] = [
-      { label: 'Loan Info', route: 'loaninfo' }, 
-      { label: 'General Info', route: 'genralinfo' },  
+      { label: 'Loan Info', route: 'loaninfo' },
+      { label: 'General Info', route: 'genralinfo' },
       { label: 'Estimated Expense', route: 'expense' },
       { label: 'Additional Info', route: 'additionalinfo' },
       { label: 'KYC', route: 'kycinfo' },
@@ -199,7 +199,7 @@ getRouteFromStage(stage: string | null | undefined): string {
     this.stepsSubject.next(finalSteps);
   }
 
-   // Co-applicant horizontal stepper
+  // Co-applicant horizontal stepper
   private buildCoApplicantSteps() {
     const co = this.formSvc.coApplicantState;
 
@@ -238,125 +238,134 @@ getRouteFromStage(stage: string | null | undefined): string {
   }
 
   setCurrentCoApplicantIndex(index: any) {
-  this.currentCoApplicantIndex = index || 1;
-  this.restoreCompletedSteps()
-}
-getCurrentCoApplicantIndex(): number {
-  return Number(this.currentCoApplicantIndex) || 1;
-}
+    this.currentCoApplicantIndex = index || 1;
+    this.restoreCompletedSteps()
+  }
+  getCurrentCoApplicantIndex(): number {
+    return Number(this.currentCoApplicantIndex) || 1;
+  }
 
 
 
-isStepCompleted(route: string): boolean {
+  isStepCompleted(route: string): boolean {
     return this.completedSteps.has(route);
   }
-  
+
 
   isMainStepCompleted(route: string): boolean {
-  const set = this.getCompletedSetFromKey(this.getMainCompletedKey());
-  return set.has(route);
-}
+    const set = this.getCompletedSetFromKey(this.getMainCompletedKey());
+    return set.has(route);
+  }
 
-isCoApplicantStepCompleted(route: string): boolean {
-  const set = this.getCompletedSetFromKey(this.getCoApplicantCompletedKey());
-  return set.has(route);
-}
+  isCoApplicantStepCompleted(route: string): boolean {
+    const set = this.getCompletedSetFromKey(this.getCoApplicantCompletedKey());
+    return set.has(route);
+  }
 
-switchToMainApplicantFlow() {
-  this.stepperType = 'MAIN';
-  this.completedSteps = this.getCompletedSetFromKey(this.getMainCompletedKey());
-  this.buildSteps();
-}
+  switchToMainApplicantFlow() {
+    this.stepperType = 'MAIN';
+    this.completedSteps = this.getCompletedSetFromKey(this.getMainCompletedKey());
+    this.buildSteps();
+  }
 
 
-private getCompletedStepsKey(): string {
-  return this.stepperType === 'CO_APPLICANT'
-    ? this.getCoApplicantCompletedKey()
-    : this.getMainCompletedKey();
-}
+  private getCompletedStepsKey(): string {
+    return this.stepperType === 'CO_APPLICANT'
+      ? this.getCoApplicantCompletedKey()
+      : this.getMainCompletedKey();
+  }
 
-//switching main and coapplicant
-private getMainCompletedKey(): string {
-  return `main_completedSteps_${this.applicantId || 'defaultApplicant'}_${this.applicationId || 'defaultApplication'}`;
-}
+  //switching main and coapplicant
+  private getMainCompletedKey(): string {
+    return `main_completedSteps_${this.applicantId || 'defaultApplicant'}_${this.applicationId || 'defaultApplication'}`;
+  }
 
-getCoApplicantCompletedKey(): string {
-  const coloanIds = this.getCo_appId();
+  getCoApplicantCompletedKey1(): string {
+    const coloanIds = this.getCo_appId();
 
-  const applicantId = coloanIds?.[0] || 'defaultApplicant';
-  const applicationId = coloanIds?.[1] || 'defaultApplication';
+    const applicantId = coloanIds?.[0] || 'defaultApplicant';
+    const applicationId = coloanIds?.[1] || 'defaultApplication';
 
-  return `coapp_completedSteps_${applicantId}_${applicationId}_${this.currentCoApplicantIndex}`;
+    return `coapp_completedSteps_${applicantId}_${applicationId}_${this.currentCoApplicantIndex}`;
+  }
+  getCoApplicantCompletedKey(): string {
+  const mainApplicantId = this.getLoanId()?.[0] || 'defaultMainApplicant';
+  const coApplicantId = this.getCo_appId()?.[0];
+  const index = this.getCurrentCoApplicantIndex();
+
+  return coApplicantId
+    ? `coapp_completedSteps_${mainApplicantId}_${coApplicantId}`
+    : `coapp_completedSteps_${mainApplicantId}_temp_${index}`;
 }
   markStepCompleted(route: string) {
-  this.completedSteps.add(route);
+    this.completedSteps.add(route);
 
-  localStorage.setItem(
-    this.getCompletedStepsKey(),
-    JSON.stringify([...this.completedSteps])
-  );
+    localStorage.setItem(
+      this.getCompletedStepsKey(),
+      JSON.stringify([...this.completedSteps])
+    );
 
-  this.rebuildSteps();
-}
+    this.rebuildSteps();
+  }
 
   markStepCompleted1(route: string) {
-  if (!this.completedSteps.has(route)) {
-    this.completedSteps.add(route);
+    if (!this.completedSteps.has(route)) {
+      this.completedSteps.add(route);
+    }
+
+
+    const key =
+      this.stepperType === 'CO_APPLICANT'
+        ? this.getCoApplicantCompletedKey()
+        : this.getMainCompletedKey();
+
+    localStorage.setItem(
+      key,
+      JSON.stringify([...this.completedSteps])
+    );
+
+
+    this.rebuildSteps();
   }
 
- 
-  const key =
-    this.stepperType === 'CO_APPLICANT'
-      ? this.getCoApplicantCompletedKey()
-      : this.getMainCompletedKey();
+  restoreCompletedSteps1() {
+    if (!this.applicantId) return;
 
-  localStorage.setItem(
-    key,
-    JSON.stringify([...this.completedSteps])
-  );
+    const key =
+      this.stepperType === 'CO_APPLICANT'
+        ? this.getCoApplicantCompletedKey()
+        : this.getMainCompletedKey();
 
+    const saved = localStorage.getItem(key);
 
-  this.rebuildSteps();
-}
-
-restoreCompletedSteps1() {
-  if (!this.applicantId) return;
-
-  const key =
-    this.stepperType === 'CO_APPLICANT'
-      ? this.getCoApplicantCompletedKey()
-      : this.getMainCompletedKey();
-
-  const saved = localStorage.getItem(key);
-
- if (saved) {
-    const parsed = JSON.parse(saved);
-
-    this.completedSteps = Array.isArray(parsed)
-      ? new Set<string>(parsed)
-      : new Set<string>();
-  } else {
-    this.completedSteps = new Set<string>();
-  }
-
-}
-restoreCompletedSteps() {
-  const saved = localStorage.getItem(this.getCompletedStepsKey());
-
-  if (saved) {
-    try {
+    if (saved) {
       const parsed = JSON.parse(saved);
+
       this.completedSteps = Array.isArray(parsed)
         ? new Set<string>(parsed)
         : new Set<string>();
-    } catch {
+    } else {
       this.completedSteps = new Set<string>();
     }
-  } else {
-    this.completedSteps = new Set<string>();
+
   }
-}
-// ========================================================
+  restoreCompletedSteps() {
+    const saved = localStorage.getItem(this.getCompletedStepsKey());
+
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        this.completedSteps = Array.isArray(parsed)
+          ? new Set<string>(parsed)
+          : new Set<string>();
+      } catch {
+        this.completedSteps = new Set<string>();
+      }
+    } else {
+      this.completedSteps = new Set<string>();
+    }
+  }
+  // ========================================================
   get steps(): Step[] {
     return this.stepsSubject.getValue();
   }
@@ -491,85 +500,85 @@ restoreCompletedSteps() {
 
 
 
-  
+
   markCompletedStepsTillRoute(route: string) {
-  const steps = this.stepsSubject.getValue();
+    const steps = this.stepsSubject.getValue();
 
-  const index = steps.findIndex(s => s.route === route);
+    const index = steps.findIndex(s => s.route === route);
 
-  if (index === -1) return;
+    if (index === -1) return;
 
-  for (let i = 0; i <= index; i++) {
-    this.completedSteps.add(steps[i].route);
+    for (let i = 0; i <= index; i++) {
+      this.completedSteps.add(steps[i].route);
+    }
+
+    const key =
+      this.stepperType === 'CO_APPLICANT'
+        ? this.getCoApplicantCompletedKey()
+        : this.getMainCompletedKey();
+
+    if (this.applicantId) {
+      localStorage.setItem(
+        key,
+        JSON.stringify([...this.completedSteps])
+      );
+    }
+
+    this.buildSteps();
   }
+  restoreLoanEditContext1() {
+    const stored = sessionStorage.getItem('loanContextData');
 
-const key =
-  this.stepperType === 'CO_APPLICANT'
-    ? this.getCoApplicantCompletedKey()
-    : this.getMainCompletedKey();
+    if (!stored) return null;
 
-  if (this.applicantId) {
-    localStorage.setItem(
-      key,
-      JSON.stringify([...this.completedSteps])
+    const parsed = JSON.parse(stored);
+
+    this.setLoanId(
+      parsed.applicantId,
+      parsed.applicationId,
+      parsed.custName,
+      parsed.custARN
     );
+
+    return parsed;
+  }
+  restoreLoanEditContext() {
+    const stored =
+      sessionStorage.getItem('loanContextData') ||
+      sessionStorage.getItem('loanEditData');
+
+    if (!stored) return null;
+
+    const parsed = JSON.parse(stored);
+
+    this.applicantId = parsed.applicantId;
+    this.applicationId = parsed.applicationId;
+    this.custName = parsed.custName;
+    this.custARN = parsed.custARN;
+
+    this.restoreEducationProgress();
+    this.restoreCompletedSteps();
+    this.buildSteps();
+
+    return parsed;
   }
 
-  this.buildSteps();
-}
-restoreLoanEditContext1() {
-  const stored = sessionStorage.getItem('loanContextData');
-
-  if (!stored) return null;
-
-  const parsed = JSON.parse(stored);
-
-  this.setLoanId(
-    parsed.applicantId,
-    parsed.applicationId,
-    parsed.custName,
-    parsed.custARN
-  );
-
-  return parsed;
-}
-restoreLoanEditContext() {
-  const stored =
-    sessionStorage.getItem('loanContextData') ||
-    sessionStorage.getItem('loanEditData');
-
-  if (!stored) return null;
-
-  const parsed = JSON.parse(stored);
-
-  this.applicantId = parsed.applicantId;
-  this.applicationId = parsed.applicationId;
-  this.custName = parsed.custName;
-  this.custARN = parsed.custARN;
-
-  this.restoreEducationProgress();
-  this.restoreCompletedSteps();
-  this.buildSteps();
-
-  return parsed;
-}
-
-//for main applicant
+  //for main applicant
   setLoanId(id1: string, id2: string, name: string, arn: string) {
     this.applicantId = id1;
     this.applicationId = id2;
     this.custName = name;
     this.custARN = arn;
-    
-sessionStorage.setItem(
-    'loanContextData',
-    JSON.stringify({
-      applicantId: id1,
-      applicationId: id2,
-      custName: name,
-      custARN: arn
-    })
-  );
+
+    sessionStorage.setItem(
+      'loanContextData',
+      JSON.stringify({
+        applicantId: id1,
+        applicationId: id2,
+        custName: name,
+        custARN: arn
+      })
+    );
 
     this.restoreEducationProgress();
     this.restoreCompletedSteps();
@@ -580,11 +589,16 @@ sessionStorage.setItem(
   }
 
   //coapplicant data store
-  setCo_appId(id1: string, id2: string, name: string, arn?: string,index?: number) {
+  setCo_appId(id1: string, id2: string, name: string, arn?: string, index?: number) {
     this.co_applicantId = id1;
     this.co_applicationId = id2;
     this.co_custName = name;
     this.co_custARN = arn || null;
+
+  if (index) {
+    this.currentCoApplicantIndex = Number(index);
+  }
+
 
     sessionStorage.setItem(
       'coAppIds',
@@ -596,21 +610,21 @@ sessionStorage.setItem(
         coApplicantIndex: index || this.getCurrentCoApplicantIndex()
       })
     );
-
+ this.restoreCompletedSteps(); 
     this.buildSteps();
   }
 
   getCo_appId() {
     return [this.co_applicantId, this.co_applicationId, this.co_custName, this.co_custARN];
   }
-clearCoAppId() {
-  this.co_applicantId = null;
-  this.co_applicationId = null;
-  this.co_custName = null;
-  this.co_custARN = null;
+  clearCoAppId() {
+    this.co_applicantId = null;
+    this.co_applicationId = null;
+    this.co_custName = null;
+    this.co_custARN = null;
 
-  sessionStorage.removeItem('coAppIds');
-}
+    sessionStorage.removeItem('coAppIds');
+  }
   restoreCoAppIdFromSession() {
     const storedCoApp = sessionStorage.getItem('coAppIds');
 
@@ -622,29 +636,29 @@ clearCoAppId() {
     this.co_applicationId = parsed.applicationId;
     this.co_custName = parsed.fullName;
     this.co_custARN = parsed.custARN || null;
-    
-if (parsed.coApplicantIndex) {
-    this.currentCoApplicantIndex = Number(parsed.coApplicantIndex);
-  }
+
+    if (parsed.coApplicantIndex) {
+      this.currentCoApplicantIndex = Number(parsed.coApplicantIndex);
+    }
 
   }
 
-restoreLoanIdFromSession() {
-  const stored = sessionStorage.getItem('loanEditData');
+  restoreLoanIdFromSession() {
+    const stored = sessionStorage.getItem('loanEditData');
 
-  if (!stored) return;
+    if (!stored) return;
 
-  const parsed = JSON.parse(stored);
+    const parsed = JSON.parse(stored);
 
-  this.applicantId = parsed.applicantId;
-  this.applicationId = parsed.applicationId;
-  this.custName = parsed.custName;
-  this.custARN = parsed.custARN;
+    this.applicantId = parsed.applicantId;
+    this.applicationId = parsed.applicationId;
+    this.custName = parsed.custName;
+    this.custARN = parsed.custARN;
 
-  this.restoreEducationProgress();
-  this.restoreCompletedSteps();
-  this.buildSteps();
-}
+    this.restoreEducationProgress();
+    this.restoreCompletedSteps();
+    this.buildSteps();
+  }
   setvalues(isAsset?: boolean, isIncome?: boolean, issalaried?: boolean, coursetypeug?: boolean) {
     this.formSvc.setValues(isAsset, isIncome, issalaried, coursetypeug);
     this.buildSteps();
@@ -670,11 +684,11 @@ restoreLoanIdFromSession() {
       this.formSvc.isincome = this.formSvc.applicantState.isincome;
       this.formSvc.issalaried = this.formSvc.applicantState.issalaried;
       this.formSvc.coursetypeug = this.formSvc.applicantState.coursetypeug;
-      
- localStorage.setItem(
-      'applicantState',
-      JSON.stringify(this.formSvc.applicantState)
-    );
+
+      localStorage.setItem(
+        'applicantState',
+        JSON.stringify(this.formSvc.applicantState)
+      );
 
     } else {
       this.formSvc.coApplicantState = {
@@ -686,12 +700,15 @@ restoreLoanIdFromSession() {
       this.formSvc.co_isasset = this.formSvc.coApplicantState.isasset;
       this.formSvc.co_isincome = this.formSvc.coApplicantState.isincome;
       this.formSvc.co_issalaried = this.formSvc.coApplicantState.issalaried;
-      
-localStorage.setItem(
-      'coApplicantState',
-      JSON.stringify(this.formSvc.coApplicantState)
-    );
 
+      // localStorage.setItem(
+      //       'coApplicantState',
+      //       JSON.stringify(this.formSvc.coApplicantState)
+      //     );
+      localStorage.setItem(
+        this.getCoApplicantStateKey(),
+        JSON.stringify(this.formSvc.coApplicantState)
+      );
     }
 
     this.buildSteps();
@@ -878,56 +895,78 @@ localStorage.setItem(
   clear() {
     this.formData = {};
   }
-  
-removeStepCompleted(route: string) {
-  this.completedSteps.delete(route);
 
-  localStorage.setItem(
-    this.getCompletedStepsKey(),
-    JSON.stringify([...this.completedSteps])
-  );
-  this.rebuildSteps();
-}
+  removeStepCompleted(route: string) {
+    this.completedSteps.delete(route);
 
-
-
-private getCompletedSetFromKey(key: string): Set<string> {
-  const saved = localStorage.getItem(key);
-
-  if (!saved) return new Set<string>();
-
-  try {
-    const parsed = JSON.parse(saved);
-    return Array.isArray(parsed)
-      ? new Set<string>(parsed)
-      : new Set<string>();
-  } catch {
-    return new Set<string>();
-  }
-}
-
-
-
-
-//coapplicant asset hides 
-restoreApplicantStatesFromStorage() {
-  const mainState = localStorage.getItem('applicantState');
-  const coState = localStorage.getItem('coApplicantState');
-
-  if (mainState) {
-    this.formSvc.applicantState = {
-      ...this.formSvc.applicantState,
-      ...JSON.parse(mainState)
-    };
+    localStorage.setItem(
+      this.getCompletedStepsKey(),
+      JSON.stringify([...this.completedSteps])
+    );
+    this.rebuildSteps();
   }
 
-  if (coState) {
-    this.formSvc.coApplicantState = {
-      ...this.formSvc.coApplicantState,
-      ...JSON.parse(coState)
-    };
-  }
-}
 
+
+  private getCompletedSetFromKey(key: string): Set<string> {
+    const saved = localStorage.getItem(key);
+
+    if (!saved) return new Set<string>();
+
+    try {
+      const parsed = JSON.parse(saved);
+      return Array.isArray(parsed)
+        ? new Set<string>(parsed)
+        : new Set<string>();
+    } catch {
+      return new Set<string>();
+    }
+  }
+
+
+
+
+  //coapplicant asset hides 
+  restoreApplicantStatesFromStorage() {
+    const mainState = localStorage.getItem('applicantState');
+    // const coState = localStorage.getItem('coApplicantState');
+
+    const coState = localStorage.getItem(this.getCoApplicantStateKey());
+    if (mainState) {
+      try {
+        this.formSvc.applicantState = {
+          ...this.formSvc.applicantState,
+          ...JSON.parse(mainState)
+        };
+
+      } catch (e) {
+        console.error('Invalid applicantState JSON', e);
+      }
+
+    }
+
+    if (coState) {
+        try {
+      this.formSvc.coApplicantState = {
+        ...this.formSvc.coApplicantState,
+        ...JSON.parse(coState)
+      };
+      
+ } catch (e) {
+      console.error('Invalid applicantState JSON', e);
+    }
+
+    }
+  }
+
+
+  getCoApplicantStateKey(): string {
+    const applicationId = this.getCo_appId()?.[1];
+    const coApplicantId = this.getCo_appId()?.[0];
+    const coApplicantIndex = this.getCurrentCoApplicantIndex();
+    return coApplicantId
+      ? `coApplicantState_${applicationId}_${coApplicantId}`
+      : `coApplicantState_${applicationId}_temp_${coApplicantIndex}`;
+  }
 
 }

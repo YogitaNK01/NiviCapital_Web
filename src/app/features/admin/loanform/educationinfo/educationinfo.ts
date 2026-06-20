@@ -12,7 +12,7 @@ import { Inputfield } from '../../../systemdesign/inputfield/inputfield';
 import { Edusection } from './edusection/edusection';
 import { Loanformservice } from '../../../../core/service/loanformservice';
 import { ActivatedRoute, Router } from '@angular/router';
-import { forkJoin, of } from 'rxjs';
+import { firstValueFrom, forkJoin, of } from 'rxjs';
 import { Messagebox } from '../../../systemdesign/messagebox/messagebox';
 import { Msgboxservice } from '../../../../core/service/msgboxservice';
 import { catchError, map } from 'rxjs/operators';
@@ -235,9 +235,10 @@ export class Educationinfo implements OnInit {
 
 
 
-  constructor(private fb: FormBuilder, private stepperService: Loanstepperservice, private cd: ChangeDetectorRef, private formSvc: Loanformservice,private msgBox:Msgboxservice,
+  constructor(private fb: FormBuilder, private stepperService: Loanstepperservice, private cd: ChangeDetectorRef, private formSvc: Loanformservice, private msgBox: Msgboxservice,
     private route: ActivatedRoute, private router: Router, private msgbox: Msgboxservice, public main: Main) { }
-  ngOnInit(): void {
+  async ngOnInit(): Promise<void> {
+
 
     let Allids = this.stepperService.getLoanId();
 
@@ -259,6 +260,7 @@ export class Educationinfo implements OnInit {
       others12: this.createForm(),
       othersdiploma: this.createForm()
     }
+    await this.loadEducationFromSummary();
 
     //  2. QUERY PARAMS
     this.route.queryParams.subscribe(params => {
@@ -274,9 +276,11 @@ export class Educationinfo implements OnInit {
         this.activeEducation = step;
 
         this.restoreEducationStateFromLocalStorage();
-        setTimeout(() => {
+        setTimeout(async () => {
           this.restoreFormState(step);
           this.loadSavedEducationInfoFromApi(step);
+          await this.loadEducationFromSummary();
+          this.restoreFormState(step);
         }, 200)
 
 
@@ -287,22 +291,27 @@ export class Educationinfo implements OnInit {
         const qid = params['qualificationId'];
         if (qid && qid !== this.flowQualificationId) {
           this.flowQualificationId = qid;
-
+          this.educationOrder = [];
           this.formSvc.getselectedEducation(qid).subscribe((res: any) => {
             this.educationdetails = res.data ?? res;
 
             //   ONLY ONCE per flow
             this.stepperService.setEducationSubSteps(this.educationdetails);
 
-            if (!this.isEducationFlowInitialized) {
-              const orderFromApi = this.educationdetails.map((d: any) =>
-                this.normalizeQualification(d.qualificationName)
-              );
+            // if (!this.isEducationFlowInitialized) {
+            // const orderFromApi = this.educationdetails.map((d: any) =>
+            //   this.normalizeQualification(d.qualificationName)
+            // );
 
-              this.educationOrder = [...new Set([...orderFromApi, 'ielts', 'offerletter'])];
-              this.isEducationFlowInitialized = true;
-              this.saveEducationStateToLocalStorage();
-            }
+
+            const orderFromApi = this.educationdetails
+              .map((d: any) => this.normalizeQualification(d.qualificationName))
+              .filter((x: StepKey | string) => !!x);
+
+            this.educationOrder = [...new Set([...orderFromApi, 'ielts', 'offerletter'])] as Array<'10th' | '12th' | 'diploma10' | 'diploma12' | 'ug' | 'pg' | 'ielts' | 'offerletter' | 'others' | 'others12' | 'othersdiploma'>;
+            this.isEducationFlowInitialized = true;
+            this.saveEducationStateToLocalStorage();
+            // }
 
             // ✅ after API
             this.restoreEducationStateFromLocalStorage();
@@ -693,15 +702,7 @@ export class Educationinfo implements OnInit {
   }
 
 
-  //------------convert viewurl to binary file
-  async urlToFile(url: string, filename: string) {
-    const res = await fetch(url);
-    const blob = await res.blob();
 
-    return new File([blob], filename, {
-      type: blob.type || 'image/jpeg'
-    });
-  }
 
   getEducationGroup(key: string): FormGroup {
     return this.educationForm.get(key) as FormGroup;
@@ -798,21 +799,40 @@ export class Educationinfo implements OnInit {
 
     // return `${window.location.origin}${url}`;
   }
-  removeLocal1(level: EducationType, docType: DocType, index?: number): void {
-    this.msgbox.open({
+  onFileRemovedFromSection(e: {
+    step: StepKey;
+    control: 'marksheet' | 'lc' | 'other';
+    index?: number;
+  }) {
+    const normalizedDoc = this.normalizeDocType(e.control);
+    const idx = e.control === 'marksheet' ? (e.index ?? 0) : undefined;
+    const key = this.buildKey(e.step, normalizedDoc, idx);
 
-      title: 'Are you sure want to Remove',
-      message: ``,
-      showCancel: true,
+    // remove from both stores
+    delete this.uploadedFiles[key];
+    delete this.savedFileMeta[key];
 
+    // if other doc, also clear title map
+    if (e.control === 'other') {
+      delete this.otherDocMap[key];
+    }
 
-      onOk: () => {
-        const key = this.buildDocKey(level, docType, index);
-        this.uploadedFiles[key] = null;
-        this.uploadedFiles = { ...this.uploadedFiles };
-        this.cd.detectChanges();
-      }
-    });
+    this.uploadedFiles = { ...this.uploadedFiles };
+    this.savedFileMeta = { ...this.savedFileMeta };
+    this.otherDocMap = { ...this.otherDocMap };
+
+    // clear control
+    const fg = this.educationForms[e.step] as FormGroup;
+    if (fg?.get(e.control)) {
+      fg.get(e.control)?.setValue(null);
+      fg.get(e.control)?.markAsDirty();
+      fg.get(e.control)?.updateValueAndValidity();
+    }
+
+    this.hasUnsavedChanges = true;
+    this.saveCurrentFormState();
+    this.saveEducationStateToLocalStorage();
+    this.cd.detectChanges();
   }
   removeLocal(level: any, docType: DocType, index?: number): void {
     this.msgbox.open({
@@ -1220,51 +1240,6 @@ export class Educationinfo implements OnInit {
     return `educationState_${this.applicantId}`;
   }
 
-  private saveEducationStateToLocalStorage1() {
-    if (!this.applicantId) return;
-
-    const forms: Record<string, any> = {};
-
-    Object.keys(this.educationForms).forEach(step => {
-
-
-      const form = this.educationForms[step];
-      if (form) {
-        forms[step] = form.getRawValue();
-      }
-
-
-    });
-
-    const uploadedFileMeta: Record<string, any> = {
-
-      ...this.savedFileMeta
-    };
-
-
-
-    Object.keys(this.uploadedFiles).forEach(key => {
-      const file: any = this.uploadedFiles[key];
-
-      if (file) {
-        uploadedFileMeta[key] = {
-          fileName: file.name,
-          name: file.name,
-          uploaded: true
-        };
-      }
-    });
-
-    const payload = {
-      activeEducation: this.activeEducation,
-      educationFormState: forms,
-      uploadedFileMeta,
-      otherDocMap: this.otherDocMap,
-      educationOrder: this.educationOrder
-    };
-
-    localStorage.setItem(this.getEducationStateKey(), JSON.stringify(payload));
-  }
   private saveEducationStateToLocalStorage() {
     if (!this.applicantId) return;
 
@@ -1330,7 +1305,8 @@ export class Educationinfo implements OnInit {
       },
       educationOrder: this.educationOrder?.length
         ? this.educationOrder
-        : oldParsed.educationOrder
+        : oldParsed.educationOrder,
+      flowQualificationId: this.flowQualificationId
     };
 
     localStorage.setItem(storageKey, JSON.stringify(payload));
@@ -1373,8 +1349,9 @@ export class Educationinfo implements OnInit {
       ...(parsed.otherDocMap || {})
     };
 
-    this.educationOrder = parsed.educationOrder || this.educationOrder;
-    // this.activeEducation = parsed.activeEducation || this.activeEducation;
+    if (!this.educationOrder || !this.educationOrder.length) {
+      this.educationOrder = parsed.educationOrder || this.educationOrder;
+    }    // this.activeEducation = parsed.activeEducation || this.activeEducation;
     this.activeEducation = this.activeEducation || parsed.activeEducation;
 
     Object.keys(this.educationFormState).forEach(step => {
@@ -1431,7 +1408,7 @@ export class Educationinfo implements OnInit {
     const sectionKey = this.getCurrentEducationSectionKey();
     const localKey = `educationInfoData_${this.applicantId}_${sectionKey}`;
     localStorage.setItem(localKey, JSON.stringify(savedData));
-
+    this.saveEducationStateToLocalStorage();
     this.cd.detectChanges();
 
   }
@@ -1725,6 +1702,11 @@ export class Educationinfo implements OnInit {
 
     return 'OTHER';
   }
+
+  private getEducationSectionKeyForStep(step: StepKey): string {
+    return this.educationSectionKeyMap[step] || 'BATCH_UPLOAD_10';
+  }
+
   getSavedSectionEducationInfo(): Promise<any> {
     const sectionkey = this.getCurrentEducationSectionKey();
 
@@ -1746,64 +1728,7 @@ export class Educationinfo implements OnInit {
         });
     });
   }
-  private async loadAllEducationDrafts(): Promise<void> {
-    const savedDrafts = await this.getSavedEducationDrafts();
 
-    if (savedDrafts?.length) {
-      this.restoreEducationDraftData(savedDrafts);
-    }
-  }
-
-  getSavedEducationDrafts1(): Promise<any[]> {
-    const requests = this.educationDraftGetRequests.map(section => {
-      return this.formSvc.getUploadedData(
-        this.applicationId,
-        this.applicantId,
-        section.sectionKey,
-        section.category,
-        section.subcategory,
-        section.documentType
-      ).pipe(
-        map((res: any) => {
-          return {
-            section: {
-              ...section
-            },
-            data: res?.status === 'success'
-              ? (res.data?.data || res.data || null)
-              : null
-          };
-        }),
-        catchError(err => {
-          console.error(
-            'Education draft get failed for:',
-            section.sectionKey,
-            section.subcategory,
-            section.documentType,
-            err
-          );
-
-          return of({
-            section: {
-              ...section
-            },
-            data: null
-          });
-        })
-      );
-    });
-
-    return new Promise(resolve => {
-      forkJoin(requests).subscribe({
-        next: (responses: any[]) => {
-          resolve(responses);
-        },
-        error: () => {
-          resolve([]);
-        }
-      });
-    });
-  }
   getSavedEducationDrafts(): Promise<any[]> {
     const requests: any[] = [];
 
@@ -2160,10 +2085,170 @@ export class Educationinfo implements OnInit {
     this.cd.detectChanges();
     console.log('savedFileMeta after restore:', this.savedFileMeta);
   }
-  private getExistingMarksheetCount(step: StepKey): number {
-    return Object.keys(this.savedFileMeta || {})
-      .filter(key => key.startsWith(`${step}_marksheet_`))
-      .length;
+  //patch from summary 
+  private async loadEducationFromSummary(): Promise<void> {
+    if (!this.applicationId) return;
+
+    try {
+      const res: any = await firstValueFrom(
+        this.formSvc.getSummary(this.applicationId)
+      );
+
+      if (!res || res.status !== 'success') return;
+
+
+      const applicants = res?.data?.applicants || [];
+
+      if (!Array.isArray(applicants) || !applicants.length) return;
+
+      // ✅ for main applicant page
+      const selectedApplicant =
+        applicants.find((a: any) => a.applicantType === 'PRIMARY') || null;
+
+      const summaryEducation =
+        selectedApplicant?.educationDetails || null;
+
+
+      if (!summaryEducation) return;
+
+      this.patchEducationFromSummary(summaryEducation);
+    } catch (error) {
+      console.error('Failed to load education summary:', error);
+    }
+  }
+  private patchEducationFromSummary(summaryEducation: any): void {
+    if (!summaryEducation) return;
+
+    const mapping: Array<{ summaryKey: string; step: StepKey }> = [
+      { summaryKey: 'tenth', step: '10th' },
+      { summaryKey: 'twelfth', step: '12th' },
+      { summaryKey: 'diploma', step: 'diploma10' },   // or diploma12 depending on your flow
+      { summaryKey: 'bachelors', step: 'ug' },
+      { summaryKey: 'postgraduate', step: 'pg' },
+      { summaryKey: 'ieltsPte', step: 'ielts' }
+    ];
+
+    mapping.forEach(({ summaryKey, step }) => {
+      const docs = summaryEducation?.[summaryKey];
+
+      if (!Array.isArray(docs) || !docs.length) return;
+
+      const form = this.educationForms[step] as FormGroup;
+      if (!form) return;
+
+      // -----------------------------
+      // 1. Patch form fields from first row
+      // -----------------------------
+      const first = docs[0];
+
+      if (step === 'ielts') {
+        form.patchValue({
+          score: first.score || ''
+        }, { emitEvent: false });
+      } else {
+        form.patchValue({
+          institutename: this.normalizeDropdownValue(
+            first.instituteName || ''
+          ),
+          institutetitle: first.otherInstituteName || '',
+          passingyear: this.normalizeDropdownValue(
+            first.yearOfPassing || ''
+          ),
+          per_cgpa: first.percentageOrCgpa || '',
+          location: this.normalizeDropdownValue(
+            first.location || ''
+          ),
+          otherLocation: first.otherLocationName || ''
+        }, { emitEvent: false });
+      }
+
+      this.educationFormState[step] = form.getRawValue();
+      this.stepperService.setEducationStepData(step, this.educationFormState[step]);
+
+      // -----------------------------
+      // 2. Patch files into savedFileMeta
+      // -----------------------------
+      let marksheetCounter = 0;
+      let otherCounter = 0;
+
+      docs.forEach((doc: any) => {
+        const type = doc.type;
+        if (!type) return;
+
+        let key = '';
+
+        if (type === 'MARKSHEET') {
+          key = this.buildKey(step, 'marksheet', marksheetCounter);
+          marksheetCounter++;
+        } else if (
+          type === 'SCHOOL_LEAVING_CERT' ||
+          type === 'LEAVING_CERTIFICATE'
+        ) {
+          key = this.buildKey(step, 'lc');
+        } else if (type === 'OTHER') {
+          key = this.buildKey(step, 'other', otherCounter);
+
+          this.otherDocMap[key] = {
+            title: doc.title || 'Other Document'
+          };
+
+          otherCounter++;
+        } else if (type === 'UPLOAD_CERTIFICATE') {
+          if (step === 'ielts') {
+            key = this.buildKey(step, 'ielts');
+          }
+        }
+
+        if (!key) return;
+
+        this.savedFileMeta[key] = {
+          key,
+          name: doc.fileName || doc.marksheetUrl || '',
+          fileName: doc.fileName || doc.marksheetUrl || '',
+          title: doc.title || type,
+          type: doc.type || '',
+          viewUrl: doc.viewUrl || '',
+          fileUrl: doc.viewUrl || '',
+          publicUrl: doc.viewUrl || '',
+          objectKey: doc.objectKey || '',
+          documentId: doc.documentId || '',
+          uploaded: true
+        };
+
+        // so child component can use uploadedFiles OR savedFileMeta
+        this.uploadedFiles[key] = this.savedFileMeta[key] as any;
+      });
+    });
+
+    // -----------------------------
+    // 3. Offer letter (special case)
+    // -----------------------------
+    if (summaryEducation?.offerLetter) {
+      const key = this.buildKey('offerletter', 'offerletter');
+
+      this.savedFileMeta[key] = {
+        key,
+        name: summaryEducation.offerLetter,
+        fileName: summaryEducation.offerLetter,
+        title: 'Offer Letter',
+        type: 'UPLOAD_CERTIFICATE',
+        viewUrl: '', // no viewUrl available in summary
+        fileUrl: '',
+        publicUrl: '',
+        objectKey: '',
+        documentId: '',
+        uploaded: true
+      };
+
+      this.uploadedFiles[key] = this.savedFileMeta[key] as any;
+    }
+
+    this.savedFileMeta = { ...this.savedFileMeta };
+    this.uploadedFiles = { ...this.uploadedFiles };
+    this.otherDocMap = { ...this.otherDocMap };
+
+    this.saveEducationStateToLocalStorage();
+    this.cd.detectChanges();
   }
 
   private getStepFromSection(sectionKey: string, subcategory?: string): StepKey | null {
@@ -2189,58 +2274,61 @@ export class Educationinfo implements OnInit {
     return null;
   }
   saveExit() {
-  this.msgBox.open({
+    this.msgBox.open({
       title: 'Are you sure you want to exit?',
       message: ``,
       showCancel: true,
       onOk: () => {
 
-    const step = this.activeEducation as StepKey;
-    const form = this.educationForms[step] as FormGroup;
+        const step = this.activeEducation as StepKey;
+        const form = this.educationForms[step] as FormGroup;
 
-    if (!form) return;
+        if (!form) return;
 
-    this.saveCurrentFormState();
-    this.saveEducationStateToLocalStorage();
+        this.saveCurrentFormState();
+        this.saveEducationStateToLocalStorage();
 
-    const sectionKey = this.getCurrentEducationSectionKey()
-    const payload = this.buildEducationInfoPayload();
+        const sectionKey = this.getCurrentEducationSectionKey()
+        const payload = this.buildEducationInfoPayload();
 
-    const localKey = `educationInfoData_${this.applicantId}_${sectionKey}`;
-    localStorage.setItem(localKey, JSON.stringify(payload));
+        const localKey = `educationInfoData_${this.applicantId}_${sectionKey}`;
+        localStorage.setItem(localKey, JSON.stringify(payload));
 
-    const fd = this.buildEducationSaveExitFormData(sectionKey);
-    // fd.append('sectionKey', sectionKey);
+        const fd = this.buildEducationSaveExitFormData(sectionKey);
+        // fd.append('sectionKey', sectionKey);
 
-    this.formSvc.saveandExit(fd).subscribe({
-      next: (res: any) => {
+        this.formSvc.saveandExit(fd).subscribe({
+          next: async (res: any) => {
 
-        console.log('Education save and exit success:', res);
+            console.log('Education save and exit success:', res);
 
-        if (res?.data) {
-          this.restoreEducationDraftData([
-            {
-              section: {
-                sectionKey,
-                category: 'EDUCATION',
-                subcategory: this.stepToSubcategory[step]
-              },
-              data: res.data
+            if (res?.data) {
+              this.restoreEducationDraftData([
+                {
+                  section: {
+                    sectionKey,
+                    category: 'EDUCATION',
+                    subcategory: this.stepToSubcategory[step]
+                  },
+                  data: res.data
+                }
+              ]);
             }
-          ]);
-        }
 
-        this.hasUnsavedChanges = false;
+            await this.loadSavedEducationInfoFromApi(step);
+            await this.loadEducationFromSummary();
 
-      },
-      error: (err: any) => {
-        console.error('Education save and exit failed:', err);
-        alert('Failed to save education details.');
+            this.hasUnsavedChanges = false;
+
+          },
+          error: (err: any) => {
+            console.error('Education save and exit failed:', err);
+            alert('Failed to save education details.');
+          }
+        });
+
+        this.router.navigate(['/admin/losoperation']);
       }
-    });
-
- this.router.navigate(['/admin/losoperation']);
-     }
     });
   }
 
@@ -2318,6 +2406,16 @@ export class Educationinfo implements OnInit {
 
     return fd;
   }
+  //------------convert viewurl to binary file
+  async urlToFile(url: string, filename: string, fallbackType: string = 'application/octet-stream') {
+    const res = await fetch(url);
+    const blob = await res.blob();
+
+    return new File([blob], filename || 'document', {
+      type: blob.type || fallbackType
+    });
+  }
+
   async next() {
     console.log("next---");
 
@@ -2400,7 +2498,7 @@ export class Educationinfo implements OnInit {
         fd.append('files[0].type', 'UPLOAD_CERTIFICATE');
         fd.append('files[0].file', file);
 
-      }else if (this.savedFileMeta[key]) {
+      } else if (this.savedFileMeta[key]) {
         console.log('Already saved file, skipping upload:', key);
 
         const meta = this.savedFileMeta[key];
@@ -2411,9 +2509,9 @@ export class Educationinfo implements OnInit {
             meta.viewUrl,
             meta.fileName || 'file.jpg'
           );
-          fd.append(`files[0].type`, meta.type );
-          fd.append(`files[0].file`, fileFromUrl); 
-          
+          fd.append(`files[0].type`, meta.type);
+          fd.append(`files[0].file`, fileFromUrl, fileFromUrl.name);
+
         } else {
           console.warn('No viewUrl to convert file:', key);
         }
@@ -2426,7 +2524,7 @@ export class Educationinfo implements OnInit {
     else if (step === 'offerletter') {
       const key = this.buildKey(step, 'offerletter');
       const file = this.uploadedFiles[key];
-      
+
       if (!this.hasFileOrSavedMeta(step, 'offerletter')) {
         alert('Please upload offer letter.');
         return;
@@ -2446,9 +2544,9 @@ export class Educationinfo implements OnInit {
             meta.viewUrl,
             meta.fileName || 'file.jpg'
           );
-          fd.append(`files[0].type`, meta.type );
-          fd.append(`files[0].file`, fileFromUrl); 
-         
+          fd.append(`files[0].type`, meta.type);
+          fd.append(`files[0].file`, fileFromUrl, fileFromUrl.name);
+
         } else {
           console.warn('No viewUrl to convert file:', key);
         }
@@ -2472,72 +2570,129 @@ export class Educationinfo implements OnInit {
 
       let fileIndex = 0;
 
-      reqDocs.forEach(async r => {
+      // reqDocs.forEach(async r => {
+      //   const key = this.buildKey(step, r.doc as DocType, r.index);
+      //   const file = this.uploadedFiles[key];
+
+      //   if (file instanceof File) {
+      //     fd.append(`files[${fileIndex}].type`, r.apiType);
+      //     fd.append(`files[${fileIndex}].file`, file);
+      //     fileIndex++;
+      //   } else if (this.savedFileMeta[key]) {
+      //     console.log('Already saved file, skipping upload:', key);
+
+      //     const meta = this.savedFileMeta[key];
+
+      //     if (meta.viewUrl) {
+      //       const fileFromUrl = await this.urlToFile(
+      //         meta.viewUrl,
+      //         meta.fileName || 'file.jpg'
+      //       );
+
+      //       fd.append(`files[${fileIndex}].type`, meta.type || r.apiType);
+      //       fd.append(`files[${fileIndex}].file`, fileFromUrl); // ✅ correct
+
+      //       fileIndex++;
+      //     } else {
+      //       console.warn('No viewUrl to convert file:', key);
+      //     }
+
+      //   }
+      // });
+
+
+      for (const r of reqDocs) {
         const key = this.buildKey(step, r.doc as DocType, r.index);
         const file = this.uploadedFiles[key];
 
         if (file instanceof File) {
           fd.append(`files[${fileIndex}].type`, r.apiType);
-          fd.append(`files[${fileIndex}].file`, file);
+          fd.append(`files[${fileIndex}].file`, file, file.name);
           fileIndex++;
-        } else if (this.savedFileMeta[key]) {
-          console.log('Already saved file, skipping upload:', key);
+          continue;
+        }
 
-          const meta = this.savedFileMeta[key];
-
-          // fd.append(`files[${fileIndex}].type`, meta.type || r.apiType);
-          // fd.append(`files[${fileIndex}].file`, meta.fileName);
-          // fileIndex++;
+        const meta = this.savedFileMeta[key];
+        if (meta) {
+          console.log('Restoring saved file for upload:', key, meta);
 
           if (meta.viewUrl) {
             const fileFromUrl = await this.urlToFile(
               meta.viewUrl,
-              meta.fileName || 'file.jpg'
+              meta.fileName || 'file.jpg',
+              meta.mimeType || meta.contentType || 'image/jpeg'
             );
 
             fd.append(`files[${fileIndex}].type`, meta.type || r.apiType);
-            fd.append(`files[${fileIndex}].file`, fileFromUrl); // ✅ correct
-
+            fd.append(`files[${fileIndex}].file`, fileFromUrl, fileFromUrl.name);
             fileIndex++;
           } else {
-            console.warn('No viewUrl to convert file:', key);
+            console.warn('No viewUrl to convert file:', key, meta);
           }
-
         }
-      });
+      }
 
 
       //  ADD EXTRA MARKSHEETS (after required ones)
-      Object.keys(this.uploadedFiles)
-        .filter(key =>
-          key.startsWith(`${step}_marksheet_`)
-        )
-        .forEach(key => {
-          const file = this.uploadedFiles[key];
-          if (!file) return;
+
+      for (const key of Object.keys(this.uploadedFiles)
+        .filter(key => key.startsWith(`${step}_marksheet_`))) {
+
+        const file = this.uploadedFiles[key];
+        if (!file) continue;
+
+        const isRequired = key.includes('marksheet1') || key.includes('marksheet_0');
+        if (isRequired) continue;
+
+        if (file instanceof File) {
+          fd.append(`files[${fileIndex}].type`, 'MARKSHEET');
+          fd.append(`files[${fileIndex}].file`, file, file.name);
+          fileIndex++;
+        } else if (this.savedFileMeta[key]?.viewUrl) {
+          const saved = this.savedFileMeta[key];
+
+          const fileFromUrl = await this.urlToFile(
+            saved.viewUrl,
+            saved.fileName || 'file.jpg',
+            saved.mimeType || saved.contentType || 'image/jpeg'
+          );
+
+          fd.append(`files[${fileIndex}].type`, 'MARKSHEET');
+          fd.append(`files[${fileIndex}].file`, fileFromUrl, fileFromUrl.name);
+          fileIndex++;
+        }
+      }
+      // Object.keys(this.uploadedFiles)
+      //   .filter(key =>
+      //     key.startsWith(`${step}_marksheet_`)
+      //   )
+      //   .forEach(key => {
+      //     const file = this.uploadedFiles[key];
+      //     if (!file) return;
 
 
-          const isRequired = key.includes('marksheet1') || key.includes('marksheet_0');
-          if (isRequired) return;
+      //     const isRequired = key.includes('marksheet1') || key.includes('marksheet_0');
+      //     if (isRequired) return;
 
 
-          if (file instanceof File) {
-            fd.append(`files[${fileIndex}].type`, 'MARKSHEET');
-            fd.append(`files[${fileIndex}].file`, file);
+      //     if (file instanceof File) {
+      //       fd.append(`files[${fileIndex}].type`, 'MARKSHEET');
+      //       fd.append(`files[${fileIndex}].file`, file);
 
-            fileIndex++;
-          }
-          else if (this.savedFileMeta[key]) {
-            console.log('Already saved file, skipping upload:', key);
-          } else {
-            console.warn('Missing required file:', key);
-          }
+      //       fileIndex++;
+      //     }
+      //     else if (this.savedFileMeta[key]) {
+      //       console.log('Already saved file, skipping upload:', key);
+      //     } else {
+      //       console.warn('Missing required file:', key);
+      //     }
 
-        });
+      //   });
 
 
       Object.keys(this.uploadedFiles)
         .filter(key => key.startsWith(`${step}_other_`))
+
       // .forEach(key => {
       //   const file = this.uploadedFiles[key];
       //   if (!file) return;
@@ -2594,21 +2749,39 @@ export class Educationinfo implements OnInit {
 
     }
 
-    let keysArr = [];
-    for (let key of fd.keys()) {
-      keysArr.push(key);
-    }
-    console.log("Uploading Batch:", keysArr);
+    // let keysArr = [];
+    // for (let key of fd.keys()) {
+    //   keysArr.push(key);
+    // }
+    // console.log("Uploading Batch:", keysArr);
 
+    for (const [key, value] of fd.entries()) {
+      if (value instanceof File) {
+        console.log(key, 'FILE =>', {
+          name: value.name,
+          type: value.type,
+          size: value.size
+        });
+      } else {
+        console.log(key, '=>', value);
+      }
+    }
 
     this.formSvc.uploadIncome(fd, this.applicationId).subscribe({
-      next: (res) => {
+      next: async (res) => {
 
 
         this.hasUnsavedChanges = false;
 
         this.saveCurrentFormState();
         this.saveEducationStateToLocalStorage();
+
+
+        //  refresh current step data from saved section API
+        await this.loadSavedEducationInfoFromApi(step);
+
+        //  then refresh summary (if summary now contains latest saved docs)
+        await this.loadEducationFromSummary();
 
         this.uploadedFiles = { ...this.uploadedFiles };
         this.cd.detectChanges();

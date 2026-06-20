@@ -89,7 +89,15 @@ export class Referenceinfo implements OnInit {
   lastSavedPayload: any = null;
   isSummaryEditMode = false;
   viewOnly = false;
-  constructor(private fb: FormBuilder, private stepperService: Loanstepperservice, private cd: ChangeDetectorRef, private loanformservice: Loanformservice,private msgBox:Msgboxservice,
+
+  //edit from summary
+  isFromSummary = false;
+  isViewMode = false;
+  isEditMode = false;
+  originalFormValue: any = null;
+
+
+  constructor(private fb: FormBuilder, private stepperService: Loanstepperservice, private cd: ChangeDetectorRef, private loanformservice: Loanformservice, private msgBox: Msgboxservice,
     private router: Router, private route: ActivatedRoute, public main: Main, private apiservice: Addcustomerservice) { }
   async ngOnInit() {
     this.isCoApplicant = this.router.url.includes('co-applicant');
@@ -135,11 +143,12 @@ export class Referenceinfo implements OnInit {
         ];
 
         // restore back into service
+        this.stepperService.setCurrentCoApplicantIndex(parsed.coApplicantIndex || 1);
         this.stepperService.setCo_appId(
           parsed.applicantId,
           parsed.applicationId,
           parsed.fullName,
-          undefined, this.stepperService.getCurrentCoApplicantIndex());
+          undefined, parsed.coApplicantIndex || 1);
       }
     }
     if (this.isCoApplicant) {
@@ -163,40 +172,7 @@ export class Referenceinfo implements OnInit {
 
     this.states()
 
-    // if (this.loanformservice.isEditFlow()) {
-    //   setTimeout(() => {
-    //     this.patchFromSummary();
-    //   }, 300);
-    // } else {
 
-    //   const key = this.getStorageKey();
-    //   const localData = localStorage.getItem(key);
-    //   const parsedLocal = localData ? JSON.parse(localData) : null;
-
-    //   const apiData = await this.getSavedReferenceInfo();
-
-    //   let finalData = null;
-
-    //   if (apiData) {
-    //     finalData = apiData;
-    //     localStorage.setItem(key, JSON.stringify(apiData));
-    //   } else if (parsedLocal) {
-    //     finalData = parsedLocal;
-    //   }
-
-    //   if (finalData) {
-    //     this.loanformservice.referenceInfoData = finalData;
-    //     this.patchReferenceData();
-
-    //     this.reference1Filled = finalData.reference1Filled || false;
-    //     this.reference2Filled = finalData.reference2Filled || false;
-
-    //     this.lastSavedPayload = this.buildReferencePayload();
-
-    //     this.stepperService.markStepCompleted('referenceinfo');
-    //   }
-
-    // }
     await this.statesAsync();
 
     if (this.viewOnly) {
@@ -204,6 +180,14 @@ export class Referenceinfo implements OnInit {
     }
 
     await this.loadReferencesForBothFlows();
+
+    this.isFromSummary = this.loanformservice.isSummaryEditFlow();
+
+    if (this.isFromSummary) {
+      this.isViewMode = true;
+      this.referenceForm.disable();
+    }
+
   }
   getStorageKey() {
     const index = this.stepperService.getCurrentCoApplicantIndex();
@@ -211,23 +195,9 @@ export class Referenceinfo implements OnInit {
     //   ? `referenceinfoData_coapp_${this.applicantId}_${index}`
     //   : `referenceinfoData_main_${this.applicantId}`;
 
-      return  `referenceinfoData_main_${this.applicationId}_${this.stepperService.getLoanId()?.[0]}`;
+    return `referenceinfoData_main_${this.applicationId}_${this.stepperService.getLoanId()?.[0]}`;
   }
-  //   getStorageKey1() {
-  //   const main_ApplicantId = this.stepperService.getLoanId()?.[0];
-  //   const co_ApplicantId = this.stepperService.getCo_appId()?.[0];
-  //   const index = this.stepperService.getCurrentCoApplicantIndex();
 
-  //   return this.storageservice.getStorageKey(
-  //     'referenceinfoData',
-  //     this.applicationId,
-  //     this.applicantId,
-  //     this.isCoApplicant,
-  //     main_ApplicantId ?? undefined,
-  //     co_ApplicantId ?? undefined, 
-  //     index
-  //   );
-  // }
   getStepRoute() {
     return this.isCoApplicant ? 'co-referenceinfo' : 'referenceinfo';
   }
@@ -902,7 +872,7 @@ export class Referenceinfo implements OnInit {
   }
 
   // ==================== SAVE REFERENCE ====================
-  saveReference() {
+  saveReference(edit: boolean) {
     this.submitAttempted = true;
     const isRef1 = this.currentRefIndex === 0;
     const currentArray = isRef1
@@ -939,7 +909,7 @@ export class Referenceinfo implements OnInit {
     const custID = localStorage.getItem('custId')
     const refForm = currentArray.at(0).value;
 
-    const input = {
+    let input: any = {
       reference: {
         referenceType: isRef1 ? 'reference1' : 'reference2',
         mobileNumber: refForm.phone,
@@ -962,7 +932,17 @@ export class Referenceinfo implements OnInit {
       }
     };
 
-    this.loanformservice.saveReference(input, this.applicationId).subscribe({
+    const editInput = {
+      applicantId: this.applicantId,
+      items: [input.reference]
+    }
+
+    if (edit) {
+      input = editInput;
+    }
+
+
+    this.loanformservice.saveReference(input, this.applicationId, edit).subscribe({
       next: (res: any) => {
         if (res.status === 'success') {
           if (isRef1) {
@@ -970,7 +950,10 @@ export class Referenceinfo implements OnInit {
           } else {
             this.reference2Filled = true;
           }
-
+          if (edit) {
+            this.isViewMode = false;
+            this.isEditMode = false;
+          }
           this.closeReferenceModalOnly();
           setTimeout(() => {
             const successEl = document.getElementById('successModal');
@@ -1265,5 +1248,28 @@ export class Referenceinfo implements OnInit {
     }
 
 
+  }
+
+
+  //edit from summary enable and disbale
+   enableForm(){
+    this.isViewMode = false;
+    this.isEditMode = true;
+    this.referenceForm.enable();
+  }
+
+  cancelSummaryEdit() {
+    if (this.isEditMode && this.originalFormValue) {
+      this.referenceForm.patchValue(this.originalFormValue);
+    }
+
+    this.isViewMode = false;
+    this.isEditMode = false;
+
+    this.router.navigate(['/applications', this.applicationId, 'summaryinfo']);
+  }
+
+  saveSummaryEdit() {
+    this.next();
   }
 }

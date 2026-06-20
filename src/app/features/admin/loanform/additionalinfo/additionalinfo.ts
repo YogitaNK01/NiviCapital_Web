@@ -93,7 +93,7 @@ export class Additionalinfo implements OnInit {
   viewOnly = false;
 
   constructor(private fb: FormBuilder, public main: Main, private route: ActivatedRoute, private router: Router, private stepperService: Loanstepperservice,
-    private formSvc: Loanformservice, private msgBox: Msgboxservice,private storageservice:Storage) { }
+    private formSvc: Loanformservice, private msgBox: Msgboxservice, private storageservice: Storage) { }
   async ngOnInit() {
 
     this.isCoApplicant = this.router.url.includes('co-applicant');
@@ -115,7 +115,19 @@ export class Additionalinfo implements OnInit {
     this.stepperService.restoreLoanEditContext();
     this.stepperService.restoreLoanIdFromSession();
 
-    const index = Number(this.route.snapshot.queryParams['coApplicantIndex']) || 1;
+    let storedCoAppData: any = {};
+
+    try {
+      storedCoAppData = JSON.parse(sessionStorage.getItem('coAppIds') || '{}');
+    } catch {
+      storedCoAppData = {};
+    }
+
+    const index =
+      storedCoAppData?.coApplicantIndex ||
+      Number(this.route.snapshot.queryParams['coApplicantIndex']) ||
+      1;
+
     this.stepperService.setCurrentCoApplicantIndex(index);
 
     //application and applicant id of main-applicant 
@@ -150,11 +162,14 @@ export class Additionalinfo implements OnInit {
         ];
 
         // restore back into service
+
+        this.stepperService.setCurrentCoApplicantIndex(parsed.coApplicantIndex || 1);
+
         this.stepperService.setCo_appId(
           parsed.applicantId,
           parsed.applicationId,
           parsed.fullName,
-          undefined, this.stepperService.getCurrentCoApplicantIndex());
+          undefined, parsed.coApplicantIndex || 1);
       }
     }
 
@@ -167,7 +182,7 @@ export class Additionalinfo implements OnInit {
       this.applicationId = Allids?.[1];
     }
 
-    this.stepperService.rebuildSteps();
+
     this.additionalinfoForm = this.fb.group({
 
       uploadphoto: [''],
@@ -188,7 +203,7 @@ export class Additionalinfo implements OnInit {
       motherNoMiddleName: [false],
 
     });
-
+    this.stepperService.rebuildSteps();
 
     if (this.viewOnly) {
       this.additionalinfoForm.disable({ emitEvent: false });
@@ -205,6 +220,12 @@ export class Additionalinfo implements OnInit {
 
     await this.loadAdditionalInfoForBothFlows();
 
+    this.isFromSummary = this.formSvc.isSummaryEditFlow();
+
+    if (this.isFromSummary) {
+      this.isViewMode = true;
+      this.additionalinfoForm.disable();
+    }
 
   }
 
@@ -229,9 +250,7 @@ export class Additionalinfo implements OnInit {
       this.applicationId,
       this.applicantId,
       this.isCoApplicant,
-      main_ApplicantId ?? undefined,
-      co_ApplicantId ?? undefined, 
-      index
+
     );
   }
 
@@ -242,7 +261,9 @@ export class Additionalinfo implements OnInit {
       'additionalinfo',
       this.applicationId,
       this.applicantId,
-      this.isCoApplicant
+      this.isCoApplicant,
+
+
     );
 
     const apiApplicantId = this.getApiApplicantId();
@@ -335,7 +356,9 @@ export class Additionalinfo implements OnInit {
       this.applicationId,
       this.applicantId,
       this.isCoApplicant,
-      finalData
+      finalData,
+
+
     );
 
     // Blue tick only if fully completed
@@ -346,6 +369,7 @@ export class Additionalinfo implements OnInit {
 
     this.additionalinfoForm.markAsPristine();
   }
+
 
 
   private async getSummarySection(sectionKey: string): Promise<any> {
@@ -887,7 +911,8 @@ export class Additionalinfo implements OnInit {
           this.applicationId,
           this.applicantId,
           this.isCoApplicant,
-          input
+          input,
+
         );
 
         if (this.isCoApplicant) {
@@ -956,10 +981,10 @@ export class Additionalinfo implements OnInit {
   }
   buildAdditionalPayload(formdata: any) {
 
-    const existingData = this.isCoApplicant
+    const existingData1 = this.isCoApplicant
       ? this.formSvc.co_additionalInfoData
       : this.formSvc.additionalInfoData;
-
+    const existingData = this.lastSavedPayload || {};
 
     return {
       applicantId: this.getApiApplicantId(),
@@ -1038,7 +1063,7 @@ export class Additionalinfo implements OnInit {
 
 
 
-    this.formSvc.submitAdditionalInfo(input, this.applicationId).subscribe({
+    this.formSvc.submitAdditionalInfo(input, this.applicationId, false).subscribe({
       next: (res) => {
         console.log(res);
         if (res.status == "success") {
@@ -1099,6 +1124,12 @@ export class Additionalinfo implements OnInit {
   }
 
   //edit from summary enable and disbale
+  enableForm() {
+    this.isViewMode = false;
+    this.isEditMode = true;
+    this.additionalinfoForm.enable();
+    this.formSvc.clearSummaryEditFlow();
+  }
 
   disableAdditionalInfoForm() {
     this.additionalinfoForm.disable({ emitEvent: false });
@@ -1130,8 +1161,10 @@ export class Additionalinfo implements OnInit {
     if (this.isEditMode && this.originalFormValue) {
       this.additionalinfoForm.patchValue(this.originalFormValue);
     }
-
-    this.router.navigate(['/applications', this.applicationId, 'summary']);
+    this.isViewMode = false;
+    this.isEditMode = false;
+    this.formSvc.clearSummaryEditFlow();
+    // this.router.navigate(['/applications', this.applicationId, 'summary']);
   }
   saveSummaryEdit() {
     this.submitAttempted = true;
@@ -1144,7 +1177,7 @@ export class Additionalinfo implements OnInit {
     const formdata = this.additionalinfoForm.getRawValue();
     const input = this.buildAdditionalPayload(formdata);
 
-    this.formSvc.submitAdditionalInfo(input, this.applicationId).subscribe({
+    this.formSvc.submitAdditionalInfo(input, this.applicationId, true).subscribe({
       next: (res: any) => {
         if (res.status === 'success') {
           const key = this.getStorageKey();
@@ -1164,7 +1197,10 @@ export class Additionalinfo implements OnInit {
 
           this.lastSavedPayload = { ...input };
 
-          this.router.navigate(['/applications', this.applicationId, 'summary']);
+ this.isViewMode = true;
+          this.isEditMode = false;
+this.additionalinfoForm.disable({ emitEvent: false });
+         
         }
       },
       error: (err) => {

@@ -101,6 +101,14 @@ export class Monthlyexpenditureinfo {
   lastSavedPayload: any = null;
     isSummaryEditMode = false;
   viewOnly = false;
+
+    //edit from summary
+  isFromSummary = false;
+  isViewMode = false;
+  isEditMode = false;
+  originalFormValue: any = null;
+
+
   constructor(private fb: FormBuilder, public main: Main, private route: ActivatedRoute, private msgBox: Msgboxservice, private router: Router,private storageservice:Storage,
     private stepperService: Loanstepperservice, private formSvc: Loanformservice, private cd: ChangeDetectorRef) { }
 
@@ -151,11 +159,12 @@ const queryParams = this.route.snapshot.queryParams;
         ];
 
         // restore back into service
+        this.stepperService.setCurrentCoApplicantIndex(parsed.coApplicantIndex || 1);
         this.stepperService.setCo_appId(
           parsed.applicantId,
           parsed.applicationId,
           parsed.fullName,
-        undefined,this.stepperService.getCurrentCoApplicantIndex());
+        undefined,parsed.coApplicantIndex || 1);
       }
     }
     if (this.isCoApplicant) {
@@ -206,6 +215,14 @@ if (this.viewOnly) {
 
 await this.loadMonthlyExpenditureForBothFlows();
 
+  this.isFromSummary = this.formSvc.isSummaryEditFlow();
+
+    if(this.isFromSummary){
+      this.isViewMode = true;
+      this.monthlyExpenditureForm.disable();
+    }
+
+
   }
 
   getStorageKey1() {
@@ -225,9 +242,7 @@ await this.loadMonthlyExpenditureForBothFlows();
       this.applicationId,
       this.applicantId,
       this.isCoApplicant,
-      main_ApplicantId ?? undefined,
-      co_ApplicantId ?? undefined, 
-      index
+    
     );
   }
 
@@ -1559,6 +1574,66 @@ let data = res.data.data;
 
           this.stepperService.next();
         }
+      }
+    });
+  }
+
+
+  //edit from summary enable and disbale
+
+   enableForm(){
+    this.isViewMode = false;
+    this.isEditMode = true;
+    this.monthlyExpenditureForm.enable();
+  }
+
+  cancelSummaryEdit() {
+    if (this.isEditMode && this.originalFormValue) {
+      this.monthlyExpenditureForm.patchValue(this.originalFormValue);
+    }
+
+    this.isViewMode = false;
+    this.isEditMode = false;
+
+    this.router.navigate(['/applications', this.applicationId, 'summaryinfo']);
+  }
+
+  saveSummaryEdit() {
+    const result = this.buildMonthlyExpPayloadWithApplicantId();
+
+    if (result.invalid) {
+      console.log('Form invalid - stop navigation');
+      return;
+    }
+
+
+    const input = { items: result.items, applicantId: result.applicantId, };
+
+    this.formSvc.MonthlyExpenditure(input, this.applicationId).subscribe({
+      next: (res: any) => {
+        if (res.status === 'success') {
+          const key = this.getStorageKey();
+          localStorage.setItem(key, JSON.stringify(input));
+
+          if (this.isCoApplicant) {
+            this.formSvc.co_monthlyExpenditureData = input;
+          } else {
+            this.formSvc.monthlyExpenditureData = input;
+          }
+
+          this.lastSavedPayload = { ...input };
+
+          console.log(res);
+
+          this.isEditMode = false;
+
+          this.isViewMode = false;
+
+          // this.router.navigate(['/loanform/summaryinfo']);
+        }
+      },
+      error: (err) => {
+        console.error('Additional info update failed', err);
       }
     });
   }

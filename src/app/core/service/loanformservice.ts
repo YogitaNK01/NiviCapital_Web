@@ -86,18 +86,18 @@ export class Loanformservice {
   private instituteCache: OptionItem[] | null = null;
   private instituteRequest$!: Observable<OptionItem[]>;
 
-   mobileNumber = signal<string | null>(null);
+  mobileNumber = signal<string | null>(null);
 
   summaryData: any = null;
-summaryLoaded = false;
+  summaryLoaded = false;
 
-//edit from summary
-private readonly SUMMARY_EDIT_CONTEXT_KEY = 'summaryEditContextData';
-private readonly SUMMARY_STORAGE_KEY = 'summaryData';
+  //edit from summary
+  private readonly SUMMARY_EDIT_CONTEXT_KEY = 'summaryEditContextData';
+  private readonly SUMMARY_STORAGE_KEY = 'summaryData';
 
-private summaryRequest$?: Observable<ApiResponse<any>>;
+  private summaryRequest$?: Observable<ApiResponse<any>>;
 
-  
+
   constructor(private http: HttpClient) { this.restoreFromStorage(); }
 
 
@@ -168,7 +168,7 @@ private summaryRequest$?: Observable<ApiResponse<any>>;
     );
   }
 
-     getCoursetype(id: string): Observable<ApiResponse<any>> {
+  getCoursetype(id: string): Observable<ApiResponse<any>> {
     return this.http.get<ApiResponse<any>>(
       `${this.baseUrl}/v1/masters/course-types/${id}`,
 
@@ -181,10 +181,10 @@ private summaryRequest$?: Observable<ApiResponse<any>>;
 
     );
   }
-  
 
-//------------coapplicant relationship with applicant
-   getRelationShip(): Observable<ApiResponse<any>> {
+
+  //------------coapplicant relationship with applicant
+  getRelationShip(): Observable<ApiResponse<any>> {
     return this.http.get<ApiResponse<any>>(
       `${this.baseUrl}/v1/los/applications/relations`,
 
@@ -209,7 +209,13 @@ private summaryRequest$?: Observable<ApiResponse<any>>;
   }
 
   // ************************* save general info api  *************************
-  submitGenralInfo(payload: any, id: string): Observable<ApiResponse<any>> {
+  submitGenralInfo(payload: any, id: string,edit: boolean): Observable<ApiResponse<any>> {
+    if(edit){
+      return this.http.put<ApiResponse<any>>(
+        `${this.baseUrl}/v1/los/applications/${id}/general-info`,
+        payload
+      );
+    }
     return this.http.post<ApiResponse<any>>(
       `${this.baseUrl}/v1/los/applications/${id}/general-info`,
       payload
@@ -217,11 +223,17 @@ private summaryRequest$?: Observable<ApiResponse<any>>;
   }
 
   //coapplicant genrela info 
-  submit_Coapp_GenralInfo(payload: any, id: string): Observable<ApiResponse<any>> {
-    return this.http.post<ApiResponse<any>>(
-      `${this.baseUrl}/v1/los/applications/coApp-general-info`,
-      payload
-    );
+  submit_Coapp_GenralInfo(payload: any, id: string,edit:boolean): Observable<ApiResponse<any>> {
+    // return this.http.post<ApiResponse<any>>(
+    //   `${this.baseUrl}/v1/los/applications/coApp-general-info`,
+    //   payload
+    // );
+
+     const url = `${this.baseUrl}/v1/los/applications/coApp-general-info`;
+
+  return edit
+    ? this.http.put<ApiResponse<any>>(url, payload)
+    : this.http.post<ApiResponse<any>>(url, payload);
   }
 
   // ************************* additional info api  *************************
@@ -234,13 +246,30 @@ private summaryRequest$?: Observable<ApiResponse<any>>;
     );
   }
 
-  submitAdditionalInfo(payload: any, id: string): Observable<ApiResponse<any>> {
+  submitAdditionalInfo1(payload: any, id: string, edit: boolean): Observable<ApiResponse<any>> {
+     if(edit){
+      return this.http.put<ApiResponse<any>>(
+        `${this.baseUrl}/v1/los/applications/${id}/personal-info`,
+        payload
+      );
+    }
+    
     return this.http.post<ApiResponse<any>>(
       `${this.baseUrl}/v1/los/applications/${id}/personal-info`,
       payload
     );
   }
+submitAdditionalInfo(
+  payload: any,
+  id: string,
+  edit: boolean = false
+): Observable<ApiResponse<any>> {
+  const url = `${this.baseUrl}/v1/los/applications/${id}/personal-info`;
 
+  return edit
+    ? this.http.put<ApiResponse<any>>(url, payload)
+    : this.http.post<ApiResponse<any>>(url, payload);
+}
   // ************************* save kyc info api *************************
 
   setKycId(id: string) {
@@ -284,24 +313,38 @@ private summaryRequest$?: Observable<ApiResponse<any>>;
     );
   }
 
-  estimateExpense(data: any, id: string): Observable<ApiResponse<any>> {
-    console.log("service--", data);
+  estimateExpense(payload: any, id: string, edit: any): Observable<ApiResponse<any>> {
+    console.log("service--", payload);
 
-    return this.http.post<ApiResponse<any>>(
-      `${this.baseUrl}/v1/los/applications/${id}/estimated-expenses`,
-      data
-    );
+    // return this.http.post<ApiResponse<any>>(
+    //   `${this.baseUrl}/v1/los/applications/${id}/estimated-expenses`,
+    //   data
+    // );
+    const url = `${this.baseUrl}/v1/los/applications/${id}/estimated-expenses`;
+
+  return edit
+    ? this.http.put<ApiResponse<any>>(url, payload)
+    : this.http.post<ApiResponse<any>>(url, payload);
+
   }
 
 
   // ************************* Income   *************************
 
-  uploadIncome(data: any, id: string): Observable<ApiResponse<any>> {
+  uploadIncome(payload: any, id: string,edit:boolean): Observable<ApiResponse<any>> {
 
-    return this.http.post<ApiResponse<any>>(
-      `${this.baseUrl}/v1/los/applications/${id}/documents/batch`,
-      data
-    );
+    // return this.http.post<ApiResponse<any>>(
+    //   `${this.baseUrl}/v1/los/applications/${id}/documents/batch`,
+    //   payload
+    // );
+
+      const url = `${this.baseUrl}/v1/los/applications/${id}/documents/batch`;
+
+  return edit
+    ? this.http.put<ApiResponse<any>>(url, payload)
+    : this.http.post<ApiResponse<any>>(url, payload);
+
+  
   }
 
   // ************************* assets   *************************
@@ -319,12 +362,18 @@ private summaryRequest$?: Observable<ApiResponse<any>>;
     );
   }
 
-  getAssets(data: any, id: string): Observable<ApiResponse<any>> {
+  getAssets(payload: any, id: string, edit: boolean): Observable<ApiResponse<any>> {
 
-    return this.http.post<ApiResponse<any>>(
-      `${this.baseUrl}/v1/los/applications/${id}/assets`,
-      data
-    );
+    // return this.http.post<ApiResponse<any>>(
+    //   `${this.baseUrl}/v1/los/applications/${id}/assets`,
+    //   payload
+    // );
+
+     const url = `${this.baseUrl}/v1/los/applications/${id}/assets`;
+
+  return edit
+    ? this.http.put<ApiResponse<any>>(url, payload)
+    : this.http.post<ApiResponse<any>>(url, payload);
   }
   getallBanks(): Observable<ApiResponse<any>> {
     return this.http.get<ApiResponse<any>>(
@@ -354,12 +403,17 @@ private summaryRequest$?: Observable<ApiResponse<any>>;
     )
   };
 
-  submitliability(data: any, id: string): Observable<ApiResponse<any>> {
+  submitliability(payload: any, id: string, edit: boolean): Observable<ApiResponse<any>> {
 
-    return this.http.post<ApiResponse<any>>(
-      `${this.baseUrl}/v1/los/applications/${id}/liabilities`,
-      data
-    );
+    // return this.http.post<ApiResponse<any>>(
+    //   `${this.baseUrl}/v1/los/applications/${id}/liabilities`,
+    //   payload
+    // );
+     const url = `${this.baseUrl}/v1/los/applications/${id}/liabilities`;
+
+  return edit
+    ? this.http.put<ApiResponse<any>>(url, payload)
+    : this.http.post<ApiResponse<any>>(url, payload);
   }
 
   // ************************* Monthly Expenditure   *************************
@@ -444,12 +498,17 @@ private summaryRequest$?: Observable<ApiResponse<any>>;
   }
   // *************************Reference *************************
 
-  saveReference(data: any, id: string): Observable<ApiResponse<any>> {
+  saveReference(payload: any, id: string, edit: boolean): Observable<ApiResponse<any>> {
 
-    return this.http.post<ApiResponse<any>>(
-      `${this.baseUrl}/v1/los/applications/${id}/references`,
-      data
-    );
+    // return this.http.post<ApiResponse<any>>(
+    //   `${this.baseUrl}/v1/los/applications/${id}/references`,
+    //   payload
+    // );
+     const url = `${this.baseUrl}/v1/los/applications/${id}/references`;
+
+  return edit
+    ? this.http.put<ApiResponse<any>>(url, payload)
+    : this.http.post<ApiResponse<any>>(url, payload);
   }
   // *************************Summary *************************
 
@@ -459,6 +518,14 @@ private summaryRequest$?: Observable<ApiResponse<any>>;
 
     );
   }
+  // submit main summary form
+  submitMainApplicationSummary(applicantId: string, data: any): Observable<ApiResponse<any>> {
+    return this.http.post<ApiResponse<any>>(
+      `${this.baseUrl}/v1/los/applications/${applicantId}/submit`, data
+    )
+  }
+
+  // *************************coapplicant *************************
 
   //coapplicant summary - single summary coapplicant
   getCoappSummary(id1: string, id2: string): Observable<ApiResponse<any>> {
@@ -475,39 +542,43 @@ private summaryRequest$?: Observable<ApiResponse<any>>;
 
     );
   }
-  // *************************submit Summary *************************
-
-  // submit summary form
-  submitMainApplicationSummary(applicantId: string, data: any): Observable<ApiResponse<any>> {
-    return this.http.post<ApiResponse<any>>(
-      `${this.baseUrl}/v1/los/applications/${applicantId}/submit`, data
-    )
-  }
-
-  // open summary pdf file
-  openPdfFileApplicationSummary(applicationId: string): Observable<Blob> {
-    return this.http.get(
-      `${this.baseUrl}/v1/los/applications/${applicationId}/summary/pdf`, {
-        responseType: 'blob'
-      }
-    )
-  }
-
   //coapplicant summary
-  submitCoappSummary(data:any): Observable<ApiResponse<any>> {
+  submitCoappSummary(data: any): Observable<ApiResponse<any>> {
     return this.http.post<ApiResponse<any>>(
       `${this.baseUrl}/v1/los/applications/applicant/submit`,
-data
+      data
     );
   }
 
   //get coapplicant against main applicant
-    getAllCoapp(id1: string): Observable<ApiResponse<any>> {
+  getAllCoapp(id1: string): Observable<ApiResponse<any>> {
     return this.http.get<ApiResponse<any>>(
       `${this.baseUrl}/v1/los/applications/${id1}/co-applicants`,
 
     );
   }
+
+  // retrive coappliacnt
+   retriveCoapp(id1: string,id2: string): Observable<ApiResponse<any>> {
+    return this.http.put<ApiResponse<any>>(
+      `${this.baseUrl}/v1/los/applications/${id1}/co-applicants/${id2}/retrieve`,{}
+        
+    );
+  }
+
+  // *************************pdf *************************
+
+
+  // open summary pdf file
+  openPdfFileApplicationSummary(applicationId: string): Observable<Blob> {
+    return this.http.get(
+      `${this.baseUrl}/v1/los/applications/${applicationId}/summary/pdf`, {
+      responseType: 'blob'
+    }
+    )
+  }
+
+
 
   // ************************* Save and Exit data *************************
 
@@ -558,236 +629,236 @@ data
     );
   }
 
-   // *************************edit flow from summary*************************
+  // *************************edit flow from summary*************************
 
-startSummaryEditFlow(
-  data: any,
-  applicantType: 'MAIN' | 'CO_APPLICANT' = 'MAIN'
-) {
-  const context = {
-    edit: true,
-    fromSummary: true,
-    applicantType
-  };
+  startSummaryEditFlow(
+    data: any,
+    applicantType: 'MAIN' | 'CO_APPLICANT' = 'MAIN'
+  ) {
+    const context = {
+      edit: true,
+      fromSummary: true,
+      applicantType
+    };
 
-  sessionStorage.setItem(this.SUMMARY_EDIT_CONTEXT_KEY, JSON.stringify(context));
-  this.setSummary(data);
-}
-
-isSummaryEditFlow(): boolean {
-  const ctx = sessionStorage.getItem(this.SUMMARY_EDIT_CONTEXT_KEY);
-
-  if (!ctx) return false;
-
-  try {
-    return JSON.parse(ctx)?.edit === true;
-  } catch {
-    return false;
-  }
-}
-
-isFromSummaryFlow(): boolean {
-  const ctx = sessionStorage.getItem(this.SUMMARY_EDIT_CONTEXT_KEY);
-
-  if (!ctx) return false;
-
-  try {
-    return JSON.parse(ctx)?.fromSummary === true;
-  } catch {
-    return false;
-  }
-}
-
-getSummaryEditApplicantType(): 'MAIN' | 'CO_APPLICANT' {
-  const ctx = sessionStorage.getItem(this.SUMMARY_EDIT_CONTEXT_KEY);
-
-  if (!ctx) return 'MAIN';
-
-  try {
-    return JSON.parse(ctx)?.applicantType || 'MAIN';
-  } catch {
-    return 'MAIN';
-  }
-}
-
-setSummary(data: any) {
-  this.summaryData = data;
-  this.summaryLoaded = true;
-
-  sessionStorage.setItem(this.SUMMARY_STORAGE_KEY, JSON.stringify(data));
-}
-
-getSummaryData() {
-  if (this.summaryData) {
-    return this.summaryData;
+    sessionStorage.setItem(this.SUMMARY_EDIT_CONTEXT_KEY, JSON.stringify(context));
+    this.setSummary(data);
   }
 
-  const stored = sessionStorage.getItem(this.SUMMARY_STORAGE_KEY);
+  isSummaryEditFlow(): boolean {
+    const ctx = sessionStorage.getItem(this.SUMMARY_EDIT_CONTEXT_KEY);
 
-  if (!stored) return null;
+    if (!ctx) return false;
 
-  try {
-    this.summaryData = JSON.parse(stored);
+    try {
+      return JSON.parse(ctx)?.edit === true;
+    } catch {
+      return false;
+    }
+  }
+
+  isFromSummaryFlow(): boolean {
+    const ctx = sessionStorage.getItem(this.SUMMARY_EDIT_CONTEXT_KEY);
+
+    if (!ctx) return false;
+
+    try {
+      return JSON.parse(ctx)?.fromSummary === true;
+    } catch {
+      return false;
+    }
+  }
+
+  getSummaryEditApplicantType(): 'MAIN' | 'CO_APPLICANT' {
+    const ctx = sessionStorage.getItem(this.SUMMARY_EDIT_CONTEXT_KEY);
+
+    if (!ctx) return 'MAIN';
+
+    try {
+      return JSON.parse(ctx)?.applicantType || 'MAIN';
+    } catch {
+      return 'MAIN';
+    }
+  }
+
+  setSummary(data: any) {
+    this.summaryData = data;
     this.summaryLoaded = true;
-    return this.summaryData;
-  } catch {
-    return null;
+
+    sessionStorage.setItem(this.SUMMARY_STORAGE_KEY, JSON.stringify(data));
   }
-}
 
-getSummarySection(section: string) {
-  const data = this.getSummaryData();
-  return data?.[section] || null;
-}
+  getSummaryData() {
+    if (this.summaryData) {
+      return this.summaryData;
+    }
 
-clearSummaryEditFlow() {
-  sessionStorage.removeItem(this.SUMMARY_EDIT_CONTEXT_KEY);
-}
+    const stored = sessionStorage.getItem(this.SUMMARY_STORAGE_KEY);
 
-clearSummary() {
-  this.summaryData = null;
-  this.summaryLoaded = false;
-  sessionStorage.removeItem(this.SUMMARY_STORAGE_KEY);
-}
+    if (!stored) return null;
+
+    try {
+      this.summaryData = JSON.parse(stored);
+      this.summaryLoaded = true;
+      return this.summaryData;
+    } catch {
+      return null;
+    }
+  }
+
+  getSummarySection(section: string) {
+    const data = this.getSummaryData();
+    return data?.[section] || null;
+  }
+
+  clearSummaryEditFlow() {
+    sessionStorage.removeItem(this.SUMMARY_EDIT_CONTEXT_KEY);
+  }
+
+  clearSummary() {
+    this.summaryData = null;
+    this.summaryLoaded = false;
+    sessionStorage.removeItem(this.SUMMARY_STORAGE_KEY);
+  }
 
   // *************************Edit flow from table*********************************
 
- 
-isEditFlow(): boolean {
-  const ctx = sessionStorage.getItem('loanContextData');
-  if (!ctx) return false;
 
-  try {
-    return JSON.parse(ctx)?.edit === true;
-  } catch {
-    return false;
-  }
-}
+  isEditFlow(): boolean {
+    const ctx = sessionStorage.getItem('loanContextData');
+    if (!ctx) return false;
 
-loadSummaryIfEdit(applicationId: string,applicantId:string) {
-  if (!this.isEditFlow()) return null;
-
-  if (this.summaryLoaded && this.summaryData) {
-    return null;
+    try {
+      return JSON.parse(ctx)?.edit === true;
+    } catch {
+      return false;
+    }
   }
 
-  return this.getCoappSummary(applicationId,applicantId);
-}
-///--------------------------------------
-getApplicantType(applicant: any): string {
-  return String(
-    applicant?.applicantType ||
-    applicant?.applicantype ||
-    applicant?.applicant_type ||
-    ''
-  )
-    .toUpperCase()
-    .trim();
-}
+  loadSummaryIfEdit(applicationId: string, applicantId: string) {
+    if (!this.isEditFlow()) return null;
 
-getCoApplicantIndexFromType(applicant: any): number {
-  const type = this.getApplicantType(applicant);
-  const match = type.match(/^CO_APPLICANT(\d+)$/);
-
-  return match ? Number(match[1]) + 1 : 1;
-}
-
-getApplicantFromSummary(
-  applicants: any[],
-  options: {
-    isCoApplicant: boolean;
-    coApplicantId?: string | null;
-    coApplicantIndex?: number | string | null;
-  }
-): any {
-  if (!Array.isArray(applicants)) return null;
-
-  if (!options.isCoApplicant) {
-    return applicants.find((x: any) =>
-      this.getApplicantType(x) === 'PRIMARY'
-    ) || null;
-  }
-
-  const currentCoIndex = Number(options.coApplicantIndex || 1);
-
-  return (
-    applicants.find((x: any) =>
-      x?.applicantId &&
-      options.coApplicantId &&
-      x.applicantId === options.coApplicantId
-    ) ||
-    applicants.find((x: any) =>
-      this.getApplicantType(x).startsWith('CO_APPLICANT') &&
-      this.getCoApplicantIndexFromType(x) === currentCoIndex
-    ) ||
-    null
-  );
-}
-
-getApplicantSectionFromSummary(
-  summaryResponse: any,
-  sectionKey: string,
-  options: {
-    isCoApplicant: boolean;
-    coApplicantId?: string | null;
-    coApplicantIndex?: number | string | null;
-  }
-): any {
-  const applicants = Array.isArray(summaryResponse?.data?.applicants)
-    ? summaryResponse.data.applicants
-    : [];
-
-  const applicant = this.getApplicantFromSummary(applicants, options);
-
-  return applicant?.[sectionKey] || null;
-}
-getApplicantFromSummaryResponse(
-  summaryResponse: any,
-  options: {
-    isCoApplicant: boolean;
-    coApplicantId?: string | null;
-    coApplicantIndex?: number | string | null;
-  }
-): any {
-  const applicants = Array.isArray(summaryResponse?.data?.applicants)
-    ? summaryResponse.data.applicants
-    : [];
-
-  return this.getApplicantFromSummary(applicants, options);
-}
-
-
-async getSummarySectionForApplicant(
-  applicationId: string,
-  sectionKey: string,
-  options: {
-    isCoApplicant?: boolean;
-    coApplicantId?: string | null;
-    coApplicantIndex?: number | null;
-  } = {}
-): Promise<any> {
-  if (!applicationId) return null;
-
-  try {
-    const res: any = await firstValueFrom(this.getSummary(applicationId));
-
-    if (!res || res.status !== 'success') {
+    if (this.summaryLoaded && this.summaryData) {
       return null;
     }
 
-    return this.getApplicantSectionFromSummary(
-      res,
-      sectionKey,
-      {
-        isCoApplicant: !!options.isCoApplicant,
-        coApplicantId: options.coApplicantId || null,
-        coApplicantIndex: options.coApplicantIndex ?? null
-      }
-    );
-  } catch (error) {
-    console.error(`Failed to get summary section: ${sectionKey}`, error);
-    return null;
+    return this.getCoappSummary(applicationId, applicantId);
   }
-}
+  ///--------------------------------------
+  getApplicantType(applicant: any): string {
+    return String(
+      applicant?.applicantType ||
+      applicant?.applicantype ||
+      applicant?.applicant_type ||
+      ''
+    )
+      .toUpperCase()
+      .trim();
+  }
+
+  getCoApplicantIndexFromType(applicant: any): number {
+    const type = this.getApplicantType(applicant);
+    const match = type.match(/^CO_APPLICANT(\d+)$/);
+
+    return match ? Number(match[1]) + 1 : 1;
+  }
+
+  getApplicantFromSummary(
+    applicants: any[],
+    options: {
+      isCoApplicant: boolean;
+      coApplicantId?: string | null;
+      coApplicantIndex?: number | string | null;
+    }
+  ): any {
+    if (!Array.isArray(applicants)) return null;
+
+    if (!options.isCoApplicant) {
+      return applicants.find((x: any) =>
+        this.getApplicantType(x) === 'PRIMARY'
+      ) || null;
+    }
+
+    const currentCoIndex = Number(options.coApplicantIndex || 1);
+
+    return (
+      applicants.find((x: any) =>
+        x?.applicantId &&
+        options.coApplicantId &&
+        x.applicantId === options.coApplicantId
+      ) ||
+      applicants.find((x: any) =>
+        this.getApplicantType(x).startsWith('CO_APPLICANT') &&
+        this.getCoApplicantIndexFromType(x) === currentCoIndex
+      ) ||
+      null
+    );
+  }
+
+  getApplicantSectionFromSummary(
+    summaryResponse: any,
+    sectionKey: string,
+    options: {
+      isCoApplicant: boolean;
+      coApplicantId?: string | null;
+      coApplicantIndex?: number | string | null;
+    }
+  ): any {
+    const applicants = Array.isArray(summaryResponse?.data?.applicants)
+      ? summaryResponse.data.applicants
+      : [];
+
+    const applicant = this.getApplicantFromSummary(applicants, options);
+
+    return applicant?.[sectionKey] || null;
+  }
+  getApplicantFromSummaryResponse(
+    summaryResponse: any,
+    options: {
+      isCoApplicant: boolean;
+      coApplicantId?: string | null;
+      coApplicantIndex?: number | string | null;
+    }
+  ): any {
+    const applicants = Array.isArray(summaryResponse?.data?.applicants)
+      ? summaryResponse.data.applicants
+      : [];
+
+    return this.getApplicantFromSummary(applicants, options);
+  }
+
+
+  async getSummarySectionForApplicant(
+    applicationId: string,
+    sectionKey: string,
+    options: {
+      isCoApplicant?: boolean;
+      coApplicantId?: string | null;
+      coApplicantIndex?: number | null;
+    } = {}
+  ): Promise<any> {
+    if (!applicationId) return null;
+
+    try {
+      const res: any = await firstValueFrom(this.getSummary(applicationId));
+
+      if (!res || res.status !== 'success') {
+        return null;
+      }
+
+      return this.getApplicantSectionFromSummary(
+        res,
+        sectionKey,
+        {
+          isCoApplicant: !!options.isCoApplicant,
+          coApplicantId: options.coApplicantId || null,
+          coApplicantIndex: options.coApplicantIndex ?? null
+        }
+      );
+    } catch (error) {
+      console.error(`Failed to get summary section: ${sectionKey}`, error);
+      return null;
+    }
+  }
 
 }

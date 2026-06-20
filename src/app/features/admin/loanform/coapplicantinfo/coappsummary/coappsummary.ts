@@ -138,7 +138,7 @@ export class Coappsummary {
   totalMonthlyExpenditure: any;
 
   isSubmittingSummary = false;
-isSummarySubmitted = false;
+  isSummarySubmitted = false;
 
   constructor(private fb: FormBuilder, private formSvc: Loanformservice, private stepperService: Loanstepperservice, private cd: ChangeDetectorRef, private loanformservice: Loanformservice,
     private router: Router, private route: ActivatedRoute, public main: Main, private apiservice: Addcustomerservice) { }
@@ -170,63 +170,64 @@ isSummarySubmitted = false;
         ];
 
         // restore back into service
+        this.stepperService.setCurrentCoApplicantIndex(parsed.coApplicantIndex || 1);
         this.stepperService.setCo_appId(
           parsed.applicantId,
           parsed.applicationId,
           parsed.fullName,
-        undefined,this.stepperService.getCurrentCoApplicantIndex());
+          undefined, parsed.coApplicantIndex || 1);
       }
     }
 
 
     this.applicantId = AllCoapp_ids[0];
-  this.applicationId = AllCoapp_ids?.[1];
+    this.applicationId = AllCoapp_ids?.[1];
 
-this.syncSubmitButtonState();
+    this.syncSubmitButtonState();
 
-this.stepperService.rebuildSteps();
-this.getcoappSummarydetails();
-this.buildForm();
+    this.stepperService.rebuildSteps();
+    this.getcoappSummarydetails();
+    this.buildForm();
 
 
   }
 
 
-private getCurrentCoApplicantIndex(): number {
-  return Number(
-    this.route.snapshot.queryParamMap.get('coApplicantIndex') ||
-    this.stepperService.getCurrentCoApplicantIndex() ||
-    1
-  );
-}
-
-private syncSubmitButtonState(): void {
-  const loanIds = this.stepperService.getLoanId();
-  const mainApplicantId = loanIds?.[0];
-
-  if (!mainApplicantId) {
-    this.isSummarySubmitted = false;
-    return;
+  private getCurrentCoApplicantIndex(): number {
+    return Number(
+      this.route.snapshot.queryParamMap.get('coApplicantIndex') ||
+      this.stepperService.getCurrentCoApplicantIndex() ||
+      1
+    );
   }
 
-  const key = `coApplicants_${mainApplicantId}`;
-  const saved = localStorage.getItem(key);
-  const coApplicants = saved ? JSON.parse(saved) : [];
+  private syncSubmitButtonState(): void {
+    const loanIds = this.stepperService.getLoanId();
+    const mainApplicantId = loanIds?.[0];
 
-  const currentIndex = this.getCurrentCoApplicantIndex();
+    if (!mainApplicantId) {
+      this.isSummarySubmitted = false;
+      return;
+    }
 
-  const currentCoapp = coApplicants.find(
-    (x: any) =>
-      Number(x.index) === Number(currentIndex) ||
-      (this.applicantId && String(x.applicantId) === String(this.applicantId))
-  );
+    const key = `coApplicants_${mainApplicantId}`;
+    const saved = localStorage.getItem(key);
+    const coApplicants = saved ? JSON.parse(saved) : [];
 
-  this.isSummarySubmitted = !!currentCoapp?.completed;
-}
+    const currentIndex = this.getCurrentCoApplicantIndex();
 
-get isSubmitDisabled(): boolean {
-  return this.isSubmittingSummary || this.isSummarySubmitted;
-}
+    const currentCoapp = coApplicants.find(
+      (x: any) =>
+        Number(x.index) === Number(currentIndex) ||
+        (this.applicantId && String(x.applicantId) === String(this.applicantId))
+    );
+
+    this.isSummarySubmitted = !!currentCoapp?.completed;
+  }
+
+  get isSubmitDisabled(): boolean {
+    return this.isSubmittingSummary || this.isSummarySubmitted;
+  }
 
   trackByKey(index: number, field: any) {
     return field.key;
@@ -363,12 +364,12 @@ get isSubmitDisabled(): boolean {
   }
 
   submitsummary() {
-    
- if (this.isSubmitDisabled) {
-    return;
-  }
 
-  this.isSubmittingSummary = true;
+    if (this.isSubmitDisabled) {
+      return;
+    }
+
+    this.isSubmittingSummary = true;
 
     let input = {
       "applicationId": this.applicationId,
@@ -379,10 +380,10 @@ get isSubmitDisabled(): boolean {
         console.log(res)
         if (res.status === "success") {
           this.saveCoApplicantOnDashboard();
-          
-this.isSummarySubmitted = true;
-        this.isSubmittingSummary = false;
 
+          this.isSummarySubmitted = true;
+          this.isSubmittingSummary = false;
+          this.formSvc.getAllCoapp(this.applicationId).subscribe()
           this.router.navigate(['/loanform/co-applicantdetails']);
         }
       },
@@ -514,25 +515,38 @@ this.isSummarySubmitted = true;
 
   //
 
-  goToEdit(sectionKey: string, event: Event) {
+  goTocoappEdit(sectionKey: string, event: Event) {
     event.stopPropagation();
+    event.preventDefault();
 
-    const editUrlMap: any = {
-      general: this.summaryData?.generalInfo?.editUrl,
-      additional: this.summaryData?.additionalInfo?.editUrl,
-      kyc: this.summaryData?.kyc?.editUrl,
-      education: this.summaryData?.educationDetails?.editUrl,
-      income: this.summaryData?.incomeDetails?.editUrl,
-      assets: this.summaryData?.assets?.editUrl,
-      liabilities: this.summaryData?.liabilities?.editUrl,
-      monthly: this.summaryData?.monthlyExpenditure?.editUrl,
+    const frontendRouteMap: any = {
+      basic: '/loanform/co-applicantdetails/coapplicantinfo/co-basicinfo',
+      general: '/loanform/co-applicantdetails/coapplicantinfo/co-generalinfo',
+      additional: '/loanform/co-applicantdetails/coapplicantinfo/co-additionalinfo',
+      kyc: '/loanform/co-applicantdetails/coapplicantinfo/co-kyc',
+      income: '/loanform/co-applicantdetails/coapplicantinfo/co-incomeinfo',
+      assets: '/loanform/co-applicantdetails/coapplicantinfo/co-assetsinfo',
+      liabilities: '/loanform/co-applicantdetails/coapplicantinfo/co-liabilitiesinfo',
+      monthly: '/loanform/co-applicantdetails/coapplicantinfo/co-monthlyexpinfo'
     };
 
-    const editUrl = editUrlMap[sectionKey];
+    const route = frontendRouteMap[sectionKey];
 
-    if (!editUrl) return;
+    if (!route) {
+      console.warn('No frontend route found for section:', sectionKey);
+      return;
+    }
 
-   this.formSvc.startSummaryEditFlow(this.summaryData, 'CO_APPLICANT');
-this.router.navigateByUrl(`${editUrl}?fromSummary=true&mode=view`);
+    this.formSvc.startSummaryEditFlow(this.summaryData, 'CO_APPLICANT');
+
+  const coApplicantIndex = this.stepperService.getCurrentCoApplicantIndex();
+
+    this.router.navigate([route], {
+      queryParams: {
+        fromSummary: true,
+        mode: 'view',
+        section: sectionKey, coApplicantIndex: coApplicantIndex
+      }
+    });
   }
 }

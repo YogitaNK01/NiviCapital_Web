@@ -150,6 +150,12 @@ export class Edusection {
   maxOtherDocuments = 5;
   @Output() otherDocAdded = new EventEmitter<number>();
 
+//delete img
+@Output() fileRemoved = new EventEmitter<{
+  step: any;
+  control: 'marksheet' | 'lc' | 'other';
+  index?: number;
+}>();
   constructor(private fb: FormBuilder, private stepperService: Loanstepperservice, private cd: ChangeDetectorRef, private route: ActivatedRoute,
     public main: Main, private msgBox: Msgboxservice, public loanformservice: Loanformservice) { }
 
@@ -670,10 +676,25 @@ downloadLocalFile(doc: DocType, index?: number): void {
       showCancel: true,
       onOk: () => {
 
-        const key = this.buildKey(doc, index);
+        // const key = this.buildKey(doc, index);
 
-        this.uploadedFiles[key] = null;
-        this.uploadedFiles = { ...this.uploadedFiles };
+        // this.uploadedFiles[key] = null;
+        // this.uploadedFiles = { ...this.uploadedFiles };
+
+        
+const control =
+        doc === 'marksheet'
+          ? 'marksheet'
+          : doc === 'lc'
+          ? 'lc'
+          : 'other';
+
+      this.fileRemoved.emit({
+        step: this.stepKey,
+        control,
+        index
+      });
+
       }
     })
   }
