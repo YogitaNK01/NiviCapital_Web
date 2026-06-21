@@ -11,7 +11,8 @@ import { Loanformservice } from '../../../../../core/service/loanformservice';
 import { Loanstepperservice } from '../../../../../core/service/loanstepperservice';
 import { Msgboxservice } from '../../../../../core/service/msgboxservice';
 import { firstValueFrom } from 'rxjs';
-
+import { Successbox } from '../../../customer/successbox/successbox';
+import { Messagebox } from "../../../../systemdesign/messagebox/messagebox";
 interface OptionItem {
   label: string;
   value: string;
@@ -26,7 +27,7 @@ interface CourseTypeSelection {
 }
 @Component({
   selector: 'app-edudetails',
-  imports: [CommonModule, Buttons, ReactiveFormsModule, Uploadbtn, Inputfield, Edusection, Dropdown, RouterOutlet],
+  imports: [CommonModule, Buttons, ReactiveFormsModule, Uploadbtn, Inputfield, Edusection, Dropdown, RouterOutlet,Successbox,Messagebox],
   standalone: true,
   templateUrl: './edudetails.html',
   styleUrl: './edudetails.scss'
@@ -122,7 +123,16 @@ export class Edudetails {
   lastSavedPayload: any = null;
   isSummaryEditMode = false;
   viewOnly = false;
+  //edit from summary
+  isFromSummary = false;
+  isViewMode = false;
+  isEditMode = false;
+  originalFormValue: any = null;
+  
+  editSuccess: any = false;
+  description1 = `Great ! Your Additional Info Details\n Uploaded Successfully.`;
 
+  
   constructor(private fb: FormBuilder, private stepperService: Loanstepperservice, private cd: ChangeDetectorRef, private formSvc: Loanformservice, private msgBox:Msgboxservice,private msgbox: Msgboxservice,
     private route: ActivatedRoute, private router: Router) { }
   async ngOnInit() {

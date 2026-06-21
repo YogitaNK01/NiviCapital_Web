@@ -45,7 +45,7 @@
                 <div class="w-100 gap-3">
                     <!-- all categories -->
                     <app-dropdown [options]="assetsCatagories" [multiSelect]="true" [(selectedValue)]="selectedAssets"
-                        [placeholder]="'Select Assets type'"
+                        [placeholder]="'Select Assets type'" [disabled]="isViewMode"
                         (selectedValueChange)="onAssetChange($event); SelectedAssetvalue($event)"
                         [avatarUrl]="avatarUrl" [hasAvatar]="hasAvatar" [label]="'Assets'">
                     </app-dropdown>
@@ -243,7 +243,7 @@
                                 <div class="col-lg-6">
                                     <div class="form-group mb-3">
                                         <app-dropdown [options]="selectPorperty" formControlName="propertytype"
-                                            [(selectedValue)]="selectedPropertyIds"
+                                            [(selectedValue)]="selectedPropertyIds" [disabled]="isViewMode"
                                             [placeholder]="'Select Property Type'" [required]="true"
                                             (selectedValueChange)="onchange($event,'property')" [avatarUrl]="avatarUrl"
                                             [hasAvatar]="hasAvatar" [label]="'Property Type'">
@@ -254,7 +254,7 @@
                                 <div class="col-lg-6">
                                     <div class="form-group mb-3">
                                         <app-dropdown [options]="selectOwnertype" formControlName="ownershiptype"
-                                            [placeholder]="'Select Ownership type'" [required]="true"
+                                            [placeholder]="'Select Ownership type'" [required]="true" [disabled]="isViewMode"
                                             (selectedValueChange)="onchange($event,'propertyOwnertype')"
                                             [avatarUrl]="avatarUrl" [hasAvatar]="hasAvatar" [label]="'Ownership Type'">
                                         </app-dropdown>
@@ -304,7 +304,8 @@
                             @if(i === properties.length - 1 ) {
                             <div class="row common-details-box pt-0 pb-0 ">
 
-                                <div class="form-group mb-3">
+                                                               <div class="form-group mb-3" [ngClass]="{'disabled-div': isViewMode}">
+
                                     <app-buttons label="Add Property" class="btn btn-icon Add btncustomClass"
                                         [outline]="true" (click)="addProperty()">
                                         <img src="/assets/images/icons/addred.svg">
@@ -357,7 +358,7 @@
                                 <!-- Bank Name -->
                                 <div [class.col-4]="!isOtherSelected(fd)" [class.col-6]="isOtherSelected(fd)">
                                     <div class="form-group">
-                                        <app-dropdown [options]="selectBanks" formControlName="bankname"
+                                        <app-dropdown [options]="selectBanks" formControlName="bankname" [disabled]="isViewMode"
                                             [label]="'Bank Name'" [required]="true" [searchable]="true"
                                             (selectedValueChange)="onBankSelected($event,fd)">
                                         </app-dropdown>
@@ -403,7 +404,7 @@
                                 <!-- Maturity Date (Normal banks only – SAME ROW) -->
                                 <div class="col-4" *ngIf="!isOtherSelected(fd)">
                                     <div class="form-group">
-                                        <app-datepickernew formControlName="maturitydate" label="Maturity Date"
+                                        <app-datepickernew formControlName="maturitydate" label="Maturity Date" [ngClass]="{'disabled-div': isViewMode}"
                                             [disablePastDates]="true" placeholder="DD/MM/YYYY">
                                         </app-datepickernew>
                                         <div class="text-danger"
@@ -436,7 +437,7 @@
 
                                     <div class="col-6 mt-3">
                                         <div class="form-group">
-                                            <app-datepickernew formControlName="maturitydate" label="Maturity Date"
+                                            <app-datepickernew formControlName="maturitydate" label="Maturity Date" [ngClass]="{'disabled-div': isViewMode}"
                                                 [disablePastDates]="true" placeholder="DD/MM/YYYY">
                                             </app-datepickernew>
                                             <div class="text-danger"
@@ -451,7 +452,7 @@
                             @if(i === fixedDeposits.length - 1 ) {
                             <div class="row common-details-box pt-0 pb-0 ">
 
-                                <div class="form-group mb-3">
+                                <div class="form-group mb-3" [ngClass]="{'disabled-div': isViewMode}">
                                     <app-buttons label="Add Fixed Deposit" class="btn btn-icon Add btncustomClass"
                                         [outline]="true" (click)="addFD()">
                                         <img src="/assets/images/icons/addred.svg">
@@ -470,7 +471,7 @@
                     <div class="col">
                         <div class="form-group mb-3">
                             <app-dropdown [options]="selectInvestments" [(selectedValue)]="selectedInvestmentIds"
-                                [placeholder]="'Select type'" [required]="true" [multiSelect]="true"
+                                [placeholder]="'Select type'" [required]="true" [multiSelect]="true" [disabled]="isViewMode"
                                 (selectedValueChange)="onchangeinvestment($event)" [avatarUrl]="avatarUrl"
                                 [hasAvatar]="hasAvatar" [label]="'Select Type'">
                             </app-dropdown>
@@ -655,7 +656,7 @@
                             @if(i === otherassets.length - 1 ) {
                             <div class="row common-details-box pt-0 pb-0 ">
 
-                                <div class="form-group mb-3">
+                                <div class="form-group mb-3" [ngClass]="{'disabled-div': isViewMode}">
                                     <app-buttons label="Add Other Assets" class="btn btn-icon Add btncustomClass"
                                         [outline]="true" (click)="addOther()">
                                         <img src="/assets/images/icons/addred.svg">
@@ -689,7 +690,7 @@
 
         </div>
         </ng-container>
-    <ng-container *ngIf="isFromSummary">
+    <ng-container *ngIf="isFromSummary && isEditMode">
             <div class="col-lg-12 d-flex justify-content-end gap-2">
 
                 <app-buttons
@@ -701,7 +702,7 @@
                 </app-buttons>
 
                 <app-buttons
-                    *ngIf="isEditMode"
+                    
                     type="button"
                     label="Save"
                     class="btn btncustomClass"
@@ -712,5 +713,25 @@
 
             </div>
         </ng-container>
+    </div>
+
+<div class="edit-success-modal" *ngIf="editSuccess">
+    <div class="edit-modal-overlay"></div>
+
+    <div class="edit-modal-container">
+      <button class="edit-close-btn" (click)="onCancel()">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
+          <path d="M3 3L15 15L3 3Z" fill="#F4F6FF" />
+          <path d="M3 3L15 15" stroke="#F4F6FF" stroke-width="1.125" stroke-linecap="round" stroke-linejoin="round" />
+          <path d="M3 15L15 3" stroke="#F4F6FF" stroke-width="1.125" stroke-linecap="round" stroke-linejoin="round" />
+        </svg></button>
+
+      <app-successbox [title]="description1"
+        [buttons]="[
+            { label: 'OK', action: '', outline: false, color: 'primary',class: 'btncustomClass w-50'  },
+        ]" (actionClick)="handleSuccessAction($event)"
+    >
+    </app-successbox>
+
     </div>
 </div>

@@ -14,6 +14,8 @@ import { generalerrors } from './generalerror';
 import { findIndex, firstValueFrom } from 'rxjs';
 import { Msgboxservice } from '../../../../core/service/msgboxservice';
 import { Storage } from '../../../../core/service/storage';
+import { Successbox } from '../../customer/successbox/successbox';
+import { Messagebox } from "../../../systemdesign/messagebox/messagebox";
 interface OptionItem {
   label: string;
   value: string;
@@ -22,7 +24,7 @@ interface OptionItem {
 
 @Component({
   selector: 'app-general-info',
-  imports: [CommonModule, Inputfield, Dropdown, Buttons, Radiobuttons, Datepickernew, ReactiveFormsModule],
+  imports: [CommonModule, Inputfield, Dropdown, Buttons, Radiobuttons, Datepickernew, ReactiveFormsModule,Successbox,Messagebox],
   standalone: true,
   templateUrl: './general-info.html',
   styleUrl: './general-info.scss'
@@ -148,7 +150,9 @@ export class GeneralInfo implements OnInit {
   isViewMode = false;
   isEditMode = false;
   originalFormValue: any = null;
-
+  
+  editSuccess: any = false;
+  description1 = `Great ! Your Additional Info Details\n Uploaded Successfully.`;
 
   constructor(private fb: FormBuilder, private formSvc: Loanformservice, private router: Router, private storageservice: Storage, private stepperService: Loanstepperservice, private msgBox: Msgboxservice, private route: ActivatedRoute, public mainservice: Main) { }
   async ngOnInit() {
@@ -1680,12 +1684,10 @@ export class GeneralInfo implements OnInit {
 
           console.log(res);
 
-          this.isEditMode = false;
-
-          this.isViewMode = false;
-
-          // this.router.navigate(['/loanform/summaryinfo']);
-        }
+         
+          this.editSuccess = true;
+         
+                 }
       },
       error: (err) => {
         console.error('Additional info update failed', err);
@@ -1693,4 +1695,17 @@ export class GeneralInfo implements OnInit {
     });
   }
 
+  // edit sucess popup
+   onCancel() {
+    this.editSuccess = false;
+  }
+
+  handleSuccessAction(action: string){
+    if(action === "OK"){
+      this.editSuccess = false;
+      this.isViewMode = true;
+      this.isEditMode = false;
+       this.activeForm.disable();
+    }
+  }
 }

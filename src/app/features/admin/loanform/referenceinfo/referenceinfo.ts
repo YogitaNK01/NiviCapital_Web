@@ -15,7 +15,7 @@ import * as bootstrap from 'bootstrap';
 import { Dropdown } from '../../../systemdesign/dropdown/dropdown';
 import { Successbox } from '../../customer/successbox/successbox';
 import { firstValueFrom } from 'rxjs';
-
+import { Messagebox } from "../../../systemdesign/messagebox/messagebox";
 
 interface OptionItem {
   label: string;
@@ -24,7 +24,7 @@ interface OptionItem {
 
 @Component({
   selector: 'app-referenceinfo',
-  imports: [CommonModule, Buttons, ReactiveFormsModule, Inputfield, Checkbox, FormsModule, Dropdown, Successbox],
+  imports: [CommonModule, Buttons, ReactiveFormsModule, Inputfield, Checkbox, FormsModule, Dropdown, Successbox,Messagebox],
   templateUrl: './referenceinfo.html',
   styleUrl: './referenceinfo.scss'
 })
@@ -91,10 +91,14 @@ export class Referenceinfo implements OnInit {
   viewOnly = false;
 
   //edit from summary
+   //edit from summary
   isFromSummary = false;
   isViewMode = false;
   isEditMode = false;
   originalFormValue: any = null;
+  
+  editSuccess: any = false;
+  description1 = `Great ! Your Additional Info Details\n Uploaded Successfully.`;
 
 
   constructor(private fb: FormBuilder, private stepperService: Loanstepperservice, private cd: ChangeDetectorRef, private loanformservice: Loanformservice, private msgBox: Msgboxservice,

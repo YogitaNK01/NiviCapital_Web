@@ -16,7 +16,8 @@ import { firstValueFrom, forkJoin, of } from 'rxjs';
 import { Messagebox } from '../../../systemdesign/messagebox/messagebox';
 import { Msgboxservice } from '../../../../core/service/msgboxservice';
 import { catchError, map } from 'rxjs/operators';
-
+import { Successbox } from '../../customer/successbox/successbox';
+import { Storage } from '../../../../core/service/storage';
 
 interface OptionItem {
   label: string;
@@ -54,7 +55,7 @@ type ApiDocumentType =
 
 @Component({
   selector: 'app-educationinfo',
-  imports: [CommonModule, Buttons, ReactiveFormsModule, Uploadbtn, Inputfield, Edusection, Dropdown],
+  imports: [CommonModule, Buttons, ReactiveFormsModule, Uploadbtn, Inputfield, Edusection, Dropdown,Successbox,Messagebox],
   standalone: true,
   templateUrl: './educationinfo.html',
   styleUrl: './educationinfo.scss'
@@ -233,10 +234,17 @@ export class Educationinfo implements OnInit {
   ];
 
 
-
+ //edit from summary
+  isFromSummary = false;
+  isViewMode = false;
+  isEditMode = false;
+  originalFormValue: any = null;
+  
+  editSuccess: any = false;
+  description1 = `Great ! Your Additional Info Details\n Uploaded Successfully.`;
 
   constructor(private fb: FormBuilder, private stepperService: Loanstepperservice, private cd: ChangeDetectorRef, private formSvc: Loanformservice, private msgBox: Msgboxservice,
-    private route: ActivatedRoute, private router: Router, private msgbox: Msgboxservice, public main: Main) { }
+    private route: ActivatedRoute, private router: Router, private msgbox: Msgboxservice, public main: Main,private storageservice:Storage) { }
   async ngOnInit(): Promise<void> {
 
 
@@ -2767,7 +2775,7 @@ export class Educationinfo implements OnInit {
       }
     }
 
-    this.formSvc.uploadIncome(fd, this.applicationId).subscribe({
+    this.formSvc.uploadIncome(fd, this.applicationId,false).subscribe({
       next: async (res) => {
 
 
@@ -2822,4 +2830,99 @@ export class Educationinfo implements OnInit {
   }
 
 
+  
+  //edit from summary enable and disbale
+  enableForm() {
+    this.isViewMode = false;
+    this.isEditMode = true;
+    this.group.enable();
+    this.formSvc.clearSummaryEditFlow();
+  }
+
+  disableAdditionalInfoForm() {
+    this.group.disable({ emitEvent: false });
+  }
+
+  enableAdditionalInfoForm() {
+    this.group.enable({ emitEvent: false });
+  }
+
+  onEditClick() {
+    this.isViewMode = false;
+    this.isEditMode = true;
+
+    this.enableAdditionalInfoForm();
+
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: {
+        fromSummary: true,
+        mode: 'edit'
+      },
+      queryParamsHandling: 'merge'
+    });
+  }
+  cancelSummaryEdit() {
+    if (this.isEditMode && this.originalFormValue) {
+      this.group.patchValue(this.originalFormValue);
+    }
+    this.isViewMode = false;
+    this.isEditMode = false;
+    this.formSvc.clearSummaryEditFlow();
+    // this.router.navigate(['/applications', this.applicationId, 'summary']);
+  }
+  saveSummaryEdit() {
+    // this.submitAttempted = true;
+
+    // if (!this.canProceed) {
+    //   this.registerForm.markAllAsTouched();
+    //   return;
+    // }
+
+    const formdata = this.group.getRawValue();
+    const input = this.buildEducationInfoPayload();
+
+    this.formSvc.submitAdditionalInfo(input, this.applicationId, true).subscribe({
+      next: (res: any) => {
+        if (res.status === 'success') {
+          // const key = this.getStorageKey();
+          // // localStorage.setItem(key, JSON.stringify(input));
+          // this.storageservice.saveSectionData(
+          //   'additionalinfo',
+          //   this.applicationId,
+          //   this.applicantId,
+          //   false,
+          //   input
+          // );
+         
+            this.formSvc.additionalInfoData = input;
+          
+
+          this.lastSavedPayload = { ...input };
+
+        
+            this.editSuccess = true;
+         
+
+        }
+      },
+      error: (err) => {
+        console.error('Additional info update failed', err);
+      }
+    });
+  }
+
+    // edit sucess popup
+  onCancel() {
+    this.editSuccess = false;
+  }
+
+  handleSuccessAction(action: string) {
+    if (action === "OK") {
+      this.editSuccess = false;
+      this.isViewMode = true;
+      this.isEditMode = false;
+      //  this.registerForm.disable({ emitEvent: false });
+    }
+  }
 }

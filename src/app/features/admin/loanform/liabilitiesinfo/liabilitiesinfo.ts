@@ -12,6 +12,8 @@ import { Msgboxservice } from '../../../../core/service/msgboxservice';
 import { Title } from '@angular/platform-browser';
 import { forkJoin, firstValueFrom } from 'rxjs';
 import { Storage } from '../../../../core/service/storage';
+import { Successbox } from '../../customer/successbox/successbox';
+import { Messagebox } from "../../../systemdesign/messagebox/messagebox";
 interface Bank_lenderOption {
   value: string;
   label: string;
@@ -25,7 +27,7 @@ interface LiabilityOption {
 
 @Component({
   selector: 'app-liabilitiesinfo',
-  imports: [CommonModule, ReactiveFormsModule, Buttons, Dropdown, Inputfield],
+  imports: [CommonModule, ReactiveFormsModule, Buttons, Dropdown, Inputfield,Successbox,Messagebox],
   standalone: true,
   templateUrl: './liabilitiesinfo.html',
   styleUrl: './liabilitiesinfo.scss'
@@ -116,10 +118,14 @@ export class Liabilitiesinfo {
   private isPatching = false;
 
     //edit from summary
+   //edit from summary
   isFromSummary = false;
   isViewMode = false;
   isEditMode = false;
   originalFormValue: any = null;
+  
+  editSuccess: any = false;
+  description1 = `Great ! Your Additional Info Details\n Uploaded Successfully.`;
 
 
   constructor(private fb: FormBuilder, public main: Main, private route: ActivatedRoute, private msgBox: Msgboxservice, private router: Router,private storageservice:Storage,
@@ -2604,11 +2610,7 @@ return this.isCoApplicant
 
           console.log(res);
 
-          this.isEditMode = false;
-
-          this.isViewMode = false;
-
-          // this.router.navigate(['/loanform/summaryinfo']);
+          this.editSuccess = true;
         }
       },
       error: (err) => {
@@ -2617,4 +2619,17 @@ return this.isCoApplicant
     });
   }
 
+   // edit sucess popup
+   onCancel() {
+    this.editSuccess = false;
+  }
+
+  handleSuccessAction(action: string){
+    if(action === "OK"){
+      this.editSuccess = false;
+      this.isViewMode = true;
+      this.isEditMode = false;
+      this.liabilityForm.disable();
+    }
+  }
 }

@@ -16,9 +16,11 @@ import { firstValueFrom } from 'rxjs';
 import { Messagebox } from '../../../systemdesign/messagebox/messagebox';
 import { Msgboxservice } from '../../../../core/service/msgboxservice';
 import { Storage } from '../../../../core/service/storage';
+import { Successbox } from '../../customer/successbox/successbox';
+
 @Component({
   selector: 'app-basicinfo',
-  imports: [CommonModule, Inputfield, Buttons, ReactiveFormsModule, Checkbox, Otpsection],
+  imports: [CommonModule, Inputfield, Buttons, ReactiveFormsModule, Checkbox, Otpsection,Successbox,Messagebox],
   standalone: true,
   templateUrl: './basicinfo.html',
   styleUrl: './basicinfo.scss'
@@ -68,6 +70,16 @@ export class Basicinfo {
   hasExistingCif = false;
   // @Input() prefillPhone: string = '';
 
+    //edit from summary
+  isFromSummary = false;
+  isViewMode = false;
+  isEditMode = false;
+  originalFormValue: any = null;
+  
+  editSuccess: any = false;
+  description1 = `Great ! Your Additional Info Details\n Uploaded Successfully.`;
+
+  
   constructor(private fb: FormBuilder, public main: Main, private addcustomerservice: Addcustomerservice, private cd: ChangeDetectorRef, private msgBox: Msgboxservice,
     private router: Router, private loanform: Loanformservice, private stepperService: Loanstepperservice, private route: ActivatedRoute, private storageservice: Storage) { }
 
@@ -250,7 +262,12 @@ export class Basicinfo {
     }
 
 
+  this.isFromSummary = this.loanform.isSummaryEditFlow();
 
+    if (this.isFromSummary) {
+      this.isViewMode = true;
+      this.registerForm.disable();
+    }
   }
   get f() {
     return this.registerForm.controls;
@@ -1087,5 +1104,100 @@ export class Basicinfo {
 
 
 
+  }
+
+  //edit from summary enable and disbale
+  enableForm() {
+    this.isViewMode = false;
+    this.isEditMode = true;
+    this.registerForm.enable();
+    this.loanform.clearSummaryEditFlow();
+  }
+
+  disableAdditionalInfoForm() {
+    this.registerForm.disable({ emitEvent: false });
+  }
+
+  enableAdditionalInfoForm() {
+    this.registerForm.enable({ emitEvent: false });
+  }
+
+  onEditClick() {
+    this.isViewMode = false;
+    this.isEditMode = true;
+
+    this.enableAdditionalInfoForm();
+
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: {
+        fromSummary: true,
+        mode: 'edit'
+      },
+      queryParamsHandling: 'merge'
+    });
+  }
+  cancelSummaryEdit() {
+    if (this.isEditMode && this.originalFormValue) {
+      this.registerForm.patchValue(this.originalFormValue);
+    }
+    this.isViewMode = false;
+    this.isEditMode = false;
+    this.loanform.clearSummaryEditFlow();
+    // this.router.navigate(['/applications', this.applicationId, 'summary']);
+  }
+  saveSummaryEdit() {
+    this.submitAttempted = true;
+
+    // if (!this.canProceed) {
+    //   this.registerForm.markAllAsTouched();
+    //   return;
+    // }
+
+    const formdata = this.registerForm.getRawValue();
+    const input = this.buildBasicPayload(formdata);
+
+    this.loanform.submitAdditionalInfo(input, this.applicationId, true).subscribe({
+      next: (res: any) => {
+        if (res.status === 'success') {
+          const key = this.getStorageKey();
+          // localStorage.setItem(key, JSON.stringify(input));
+          this.storageservice.saveSectionData(
+            'additionalinfo',
+            this.applicationId,
+            this.applicantId,
+            this.isCoApplicant,
+            input
+          );
+         
+            this.loanform.additionalInfoData = input;
+          
+
+          this.lastSavedPayload = { ...input };
+
+        
+            this.editSuccess = true;
+         
+
+        }
+      },
+      error: (err) => {
+        console.error('Additional info update failed', err);
+      }
+    });
+  }
+
+    // edit sucess popup
+  onCancel() {
+    this.editSuccess = false;
+  }
+
+  handleSuccessAction(action: string) {
+    if (action === "OK") {
+      this.editSuccess = false;
+      this.isViewMode = true;
+      this.isEditMode = false;
+       this.registerForm.disable({ emitEvent: false });
+    }
   }
 }

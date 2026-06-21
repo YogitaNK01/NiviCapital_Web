@@ -12,9 +12,11 @@ import { debounceTime } from 'rxjs/operators';
 import { Msgboxservice } from '../../../../core/service/msgboxservice';
 import { firstValueFrom } from 'rxjs';
 import { Storage } from '../../../../core/service/storage';
+import { Successbox } from '../../customer/successbox/successbox';
+import { Messagebox } from "../../../systemdesign/messagebox/messagebox";
 @Component({
   selector: 'app-monthlyexpenditureinfo',
-  imports: [CommonModule, ReactiveFormsModule, Buttons, Dropdown, Inputfield],
+  imports: [CommonModule, ReactiveFormsModule, Buttons, Dropdown, Inputfield,Successbox,Messagebox],
   standalone: true,
   templateUrl: './monthlyexpenditureinfo.html',
   styleUrl: './monthlyexpenditureinfo.scss'
@@ -103,10 +105,14 @@ export class Monthlyexpenditureinfo {
   viewOnly = false;
 
     //edit from summary
+     //edit from summary
   isFromSummary = false;
   isViewMode = false;
   isEditMode = false;
   originalFormValue: any = null;
+  
+  editSuccess: any = false;
+  description1 = `Great ! Your Additional Info Details\n Uploaded Successfully.`;
 
 
   constructor(private fb: FormBuilder, public main: Main, private route: ActivatedRoute, private msgBox: Msgboxservice, private router: Router,private storageservice:Storage,
@@ -1624,12 +1630,8 @@ let data = res.data.data;
           this.lastSavedPayload = { ...input };
 
           console.log(res);
-
-          this.isEditMode = false;
-
-          this.isViewMode = false;
-
-          // this.router.navigate(['/loanform/summaryinfo']);
+this.editSuccess = true;
+          
         }
       },
       error: (err) => {
@@ -1638,4 +1640,17 @@ let data = res.data.data;
     });
   }
 
+   // edit sucess popup
+   onCancel() {
+    this.editSuccess = false;
+  }
+
+  handleSuccessAction(action: string){
+    if(action === "OK"){
+      this.editSuccess = false;
+      this.isViewMode = true;
+      this.isEditMode = false;
+      this.monthlyExpenditureForm.disable();
+    }
+  }
 }

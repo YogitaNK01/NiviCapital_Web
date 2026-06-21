@@ -729,7 +729,7 @@ const control =
     fd.append('files[0].type', type);
     fd.append('files[0].file', result.file);
 
-    this.loanformservice.uploadIncome(fd, this.applicationId).subscribe({
+    this.loanformservice.uploadIncome(fd, this.applicationId,false).subscribe({
       next: (res) => {
 
 

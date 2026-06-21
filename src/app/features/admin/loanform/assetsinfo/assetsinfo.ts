@@ -12,6 +12,8 @@ import { Datepickernew } from '../../../systemdesign/datepickernew/datepickernew
 import { Msgboxservice } from '../../../../core/service/msgboxservice';
 import { firstValueFrom } from 'rxjs';
 import { Storage } from '../../../../core/service/storage';
+import { Successbox } from '../../customer/successbox/successbox';
+import { Messagebox } from "../../../systemdesign/messagebox/messagebox";
 interface BankOption {
   value: string;
   label: string;
@@ -19,7 +21,7 @@ interface BankOption {
 @Component({
   selector: 'app-assetsinfo',
   standalone: true,
-  imports: [CommonModule, Buttons, Dropdown, Inputfield, ReactiveFormsModule, Datepickernew],
+  imports: [CommonModule, Buttons, Dropdown, Inputfield, ReactiveFormsModule, Datepickernew,Successbox,Messagebox],
   templateUrl: './assetsinfo.html',
   styleUrl: './assetsinfo.scss'
 })
@@ -112,7 +114,9 @@ export class Assetsinfo implements OnInit {
   isViewMode = false;
   isEditMode = false;
   originalFormValue: any = null;
+  editSuccess: any = false;
 
+  description1 = `Great ! Your Additional Info Details\n Uploaded Successfully.`;
   constructor(private fb: FormBuilder, public main: Main, private route: ActivatedRoute, private msgBox: Msgboxservice,private storageservice:Storage,
     private stepperService: Loanstepperservice, private formSvc: Loanformservice, private cd: ChangeDetectorRef, private router: Router) { }
 
@@ -2453,16 +2457,27 @@ export class Assetsinfo implements OnInit {
 
           console.log(res);
 
-          this.isEditMode = false;
-
-          this.isViewMode = false;
-
-          // this.router.navigate(['/loanform/summaryinfo']);
+           this.editSuccess = true;
         }
       },
       error: (err) => {
         console.error('Additional info update failed', err);
       }
     });
+  }
+
+
+   // edit sucess popup
+   onCancel() {
+    this.editSuccess = false;
+  }
+
+  handleSuccessAction(action: string){
+    if(action === "OK"){
+      this.editSuccess = false;
+      this.isViewMode = true;
+      this.isEditMode = false;
+      this.assetsForm.disable();
+    }
   }
 }

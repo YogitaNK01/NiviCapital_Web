@@ -16,6 +16,8 @@ import { forkJoin, of } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
 import { firstValueFrom } from 'rxjs';
 import { Storage } from '../../../../core/service/storage';
+import { Successbox } from '../../customer/successbox/successbox';
+import { Messagebox } from "../../../systemdesign/messagebox/messagebox";
 interface Document {
   title: string;
   name?: string;
@@ -34,7 +36,7 @@ interface Document {
 }
 @Component({
   selector: 'app-incomeinfo',
-  imports: [CommonModule, Buttons, ReactiveFormsModule, Uploadbtn, FormsModule, Inputfield],
+  imports: [CommonModule, Buttons, ReactiveFormsModule, Uploadbtn, FormsModule, Inputfield,Successbox,Messagebox],
   standalone: true,
   templateUrl: './incomeinfo.html',
   styleUrl: './incomeinfo.scss'
@@ -270,10 +272,14 @@ export class Incomeinfo {
   viewOnly = false;
 
     //edit from summary
+   //edit from summary
   isFromSummary = false;
   isViewMode = false;
   isEditMode = false;
   originalFormValue: any = null;
+  
+  editSuccess: any = false;
+  description1 = `Great ! Your Additional Info Details\n Uploaded Successfully.`;
 
 
   constructor(private fb: FormBuilder, private stepperService: Loanstepperservice, private router: Router, private cd: ChangeDetectorRef, private msgBox: Msgboxservice, public loanformservice: Loanformservice, private route: ActivatedRoute, public main: Main, private storageservice: Storage) { }

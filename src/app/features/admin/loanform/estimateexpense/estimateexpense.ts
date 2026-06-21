@@ -12,6 +12,8 @@ import { Msgboxservice } from '../../../../core/service/msgboxservice';
 import { groupBy } from 'rxjs';
 import { firstValueFrom } from 'rxjs';
 import { Storage } from '../../../../core/service/storage';
+import { Successbox } from '../../customer/successbox/successbox';
+import { Messagebox } from "../../../systemdesign/messagebox/messagebox";
 interface OptionItem {
   label: string;
   value: string;
@@ -20,7 +22,7 @@ interface OptionItem {
 
 @Component({
   selector: 'app-estimateexpense',
-  imports: [Buttons, CommonModule, RouterModule, ReactiveFormsModule, Inputfield, Dropdown],
+  imports: [Buttons, CommonModule, RouterModule, ReactiveFormsModule, Inputfield, Dropdown,Messagebox,Successbox],
   templateUrl: './estimateexpense.html',
   styleUrl: './estimateexpense.scss'
 })
@@ -82,11 +84,15 @@ export class Estimateexpense {
   isSummaryEditMode = false;
   viewOnly = false;
 
-    //edit from summary
+  
+   //edit from summary
   isFromSummary = false;
   isViewMode = false;
   isEditMode = false;
   originalFormValue: any = null;
+  
+  editSuccess: any = false;
+  description1 = `Great ! Your Additional Info Details\n Uploaded Successfully.`;
 
 
   constructor(private fb: FormBuilder, private stepperService: Loanstepperservice, private cd: ChangeDetectorRef, private loanformservice: Loanformservice,
@@ -1495,16 +1501,27 @@ private finishAfterSaveOrNoChange() {
 
           console.log(res);
 
-          this.isEditMode = false;
-
-          this.isViewMode = false;
-
-          // this.router.navigate(['/loanform/summaryinfo']);
+         this.editSuccess = true;
         }
       },
       error: (err) => {
         console.error('Additional info update failed', err);
       }
     });
+  }
+
+
+   // edit sucess popup
+   onCancel() {
+    this.editSuccess = false;
+  }
+
+  handleSuccessAction(action: string){
+    if(action === "OK"){
+      this.editSuccess = false;
+      this.isViewMode = true;
+      this.isEditMode = false;
+      this.expenseForm.disable();
+    }
   }
 }

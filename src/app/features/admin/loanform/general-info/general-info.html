@@ -78,7 +78,7 @@
                             [required]="true"
                             (selectedValueChange)="registerForm.get('occupation')?.setValue($event);handleOccupationChange($event)"
                             [avatarUrl]="avatarUrl" formControlName="occupation" [hasAvatar]="hasAvatar"
-                            [label]="occupationlabel">
+                            [label]="occupationlabel" [disabled]="isViewMode" >
                         </app-dropdown>
 
                     </div>
@@ -105,7 +105,7 @@
                                 <app-dropdown [options]="Australianstate" [placeholder]="'Select '+state"
                                     [required]="true" (selectedValueChange)="selectPerState($event)"
                                     [avatarUrl]="avatarUrl" formControlName="state" [hasAvatar]="hasAvatar"
-                                    [label]="state" [searchable]="true">
+                                    [label]="state" [searchable]="true" [disabled]="isViewMode">
                                 </app-dropdown>
                             </div>
 
@@ -139,7 +139,7 @@
                                 <app-dropdown [options]="AustralianUniversities" [placeholder]="'Select '+university"
                                     [required]="true" (selectedValueChange)="selecteduniversity($event)"
                                     [avatarUrl]="avatarUrl" formControlName="university" [hasAvatar]="hasAvatar"
-                                    [label]="university" [searchable]="true">
+                                    [label]="university" [searchable]="true" [disabled]="isViewMode">
                                 </app-dropdown>
                             </div>
 
@@ -174,7 +174,7 @@
                                 <app-dropdown [options]="selectcourse" [placeholder]="'Select '+coursetype"
                                     [required]="true" (selectedValueChange)="selectedcoursetype($event)"
                                     [avatarUrl]="avatarUrl" formControlName="coursetype" [hasAvatar]="hasAvatar"
-                                    [label]="coursetype">
+                                    [label]="coursetype" [disabled]="isViewMode">
                                 </app-dropdown>
                             </div>
 
@@ -207,7 +207,7 @@
                                 <app-dropdown [options]="selectcoursename" [placeholder]="'Select '+coursename"
                                     [required]="true" (selectedValueChange)="selectedCoursename($event)"
                                     [avatarUrl]="avatarUrl" [searchable]="true" formControlName="coursename"
-                                    [hasAvatar]="hasAvatar" [label]="coursename">
+                                    [hasAvatar]="hasAvatar" [label]="coursename" [disabled]="isViewMode">
                                 </app-dropdown>
                             </div>
 
@@ -215,7 +215,7 @@
                                 <div class="form-group">
                                     <app-inputfield formControlName="othercoursenametitle" name="othercoursenametitle"
                                         (input)="mainservice.restrictInput($event,'text')" label="Other Course Name"
-                                        placeholder="Enter Title" [required]="true">
+                                        placeholder="Enter Title" [required]="true" >
                                     </app-inputfield>
 
                                     <div class="text-danger"
@@ -241,7 +241,7 @@
                     <!-- Course Start Date* -->
                     <div class="col-lg-6 col-sm-12 mt-20">
                         <app-datepickernew formControlName="coursestartdate" label="Course Start Date"
-                            placeholder="DD/MM/YYYY" [disablePastDates]="true">
+                            placeholder="DD/MM/YYYY" [disablePastDates]="true"  [ngClass]="{'disabled-div' : isViewMode}">
                         </app-datepickernew>
                         <div class="text-danger"
                             *ngIf="f['coursestartdate'].touched && f['coursestartdate'].errors?.['minDateError']">
@@ -250,7 +250,7 @@
                     </div>
                     <!-- Course End Date* -->
                     <div class="col-lg-6 col-sm-12 mt-20">
-                        <app-datepickernew formControlName="courseenddate" label="Course End Date"
+                        <app-datepickernew formControlName="courseenddate" label="Course End Date"  [ngClass]="{'disabled-div' : isViewMode}"
                             placeholder="DD/MM/YYYY" [disabled]="!f['coursestartdate'].value" [disablePastDates]="true">
                         </app-datepickernew>
                         <div class="text-danger"
@@ -268,12 +268,12 @@
                                     class="text-danger">*</span>
                             </div>
                             <div class="d-flex flex-row">
-                                <app-radiobuttons name="optionsGroup1" label="Yes" value="Yes"
+                                <app-radiobuttons name="optionsGroup1" label="Yes" value="Yes" [disabled]="isViewMode"
                                     formControlName="checkedasset" (checkedChange)="checkassetOnChange('Yes')">
                                 </app-radiobuttons>
 
 
-                                <app-radiobuttons name="optionsGroup1" (checkedChange)="checkassetOnChange('No')"
+                                <app-radiobuttons name="optionsGroup1" (checkedChange)="checkassetOnChange('No')" [disabled]="isViewMode"
                                     label="No" value="No" formControlName="checkedasset">
                                 </app-radiobuttons>
                             </div>
@@ -286,7 +286,7 @@
                             [required]="true"
                             (selectedValueChange)="registerForm.get('lendingpartner')?.setValue($event)"
                             [avatarUrl]="avatarUrl" formControlName="lendingpartner" [hasAvatar]="hasAvatar"
-                            [label]="lendingpartner">
+                            [label]="lendingpartner" [disabled]="isViewMode">
                         </app-dropdown>
                     </div>
                 </div>
@@ -306,7 +306,7 @@
                     <div [ngClass]="{'col-3': isOtherRelationship, 'col-4': !isOtherRelationship  }">
                         <!-- <div class="col-lg-4 col-sm-12 mt-20"> -->
                         <app-dropdown [options]="selectoccupation" [placeholder]="'Select Current Occupation'"
-                            [required]="true"
+                            [required]="true" [disabled]="isViewMode"
                             (selectedValueChange)="coapp_registerForm.get('occupation')?.setValue($event);handleCoApplicantOccupationChange($event)"
                             [avatarUrl]="avatarUrl" formControlName="occupation" [hasAvatar]="hasAvatar"
                             [label]="occupationlabel">
@@ -316,7 +316,7 @@
                     <!-- </div> -->
                     <div [ngClass]="{'col-3': isOtherRelationship, 'col-4': !isOtherRelationship  }">
                         <app-dropdown [options]="selectAnnualIncome" [placeholder]="'Select Annual Income'"
-                            [required]="true"
+                            [required]="true" [disabled]="isViewMode"
                             (selectedValueChange)="coapp_registerForm.get('annualincome')?.setValue($event)"
                             [avatarUrl]="avatarUrl" formControlName="annualincome" [hasAvatar]="hasAvatar"
                             [label]="'Annual Income'">
@@ -325,7 +325,7 @@
                     </div>
                     <div [ngClass]="{'col-3': isOtherRelationship, 'col-4': !isOtherRelationship  }">
                         <app-dropdown [options]="selectrelationship" [placeholder]="'Select Relation'" [required]="true"
-                            (selectedValueChange)="Selectedrelation($event);"
+                            (selectedValueChange)="Selectedrelation($event);" [disabled]="isViewMode"
                             [avatarUrl]="avatarUrl" formControlName="relationship" [hasAvatar]="hasAvatar"
                             [label]="'Relation with Applicant'">
                         </app-dropdown>
@@ -358,12 +358,12 @@
                                     class="text-danger">*</span>
                             </div>
                             <div class="d-flex flex-row">
-                                <app-radiobuttons name="optionsGroup1" label="Yes" value="Yes"
+                                <app-radiobuttons name="optionsGroup1" label="Yes" value="Yes" [disabled]="isViewMode"
                                     formControlName="co_checkedasset" (checkedChange)="co_checkassetOnChange('Yes')">
                                 </app-radiobuttons>
 
 
-                                <app-radiobuttons name="optionsGroup1" (checkedChange)="co_checkassetOnChange('No')"
+                                <app-radiobuttons name="optionsGroup1" (checkedChange)="co_checkassetOnChange('No')" [disabled]="isViewMode"
                                     label="No" value="No" formControlName="co_checkedasset">
                                 </app-radiobuttons>
                             </div>
@@ -394,7 +394,7 @@
         </div>
     </ng-container>
 
-    <ng-container *ngIf="isFromSummary">
+    <ng-container *ngIf="isFromSummary && isEditMode">
         <div class="col-lg-12 d-flex justify-content-end gap-2">
 
         <app-buttons
@@ -406,7 +406,7 @@
         </app-buttons>
 
         <app-buttons
-            *ngIf="isEditMode"
+           
             type="button"
             label="Save"
             class="btn btncustomClass"
@@ -417,4 +417,24 @@
 
         </div>
   </ng-container>
+</div>
+<div class="edit-success-modal" *ngIf="editSuccess">
+    <div class="edit-modal-overlay"></div>
+
+    <div class="edit-modal-container">
+      <button class="edit-close-btn" (click)="onCancel()">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
+          <path d="M3 3L15 15L3 3Z" fill="#F4F6FF" />
+          <path d="M3 3L15 15" stroke="#F4F6FF" stroke-width="1.125" stroke-linecap="round" stroke-linejoin="round" />
+          <path d="M3 15L15 3" stroke="#F4F6FF" stroke-width="1.125" stroke-linecap="round" stroke-linejoin="round" />
+        </svg></button>
+
+      <app-successbox [title]="description1"
+        [buttons]="[
+            { label: 'OK', action: '', outline: false, color: 'primary',class: 'btncustomClass w-50'  },
+        ]" (actionClick)="handleSuccessAction($event)"
+    >
+    </app-successbox>
+
+    </div>
 </div>

@@ -14,9 +14,11 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { Msgboxservice } from '../../../../core/service/msgboxservice';
 import { firstValueFrom } from 'rxjs';
 import { Storage } from '../../../../core/service/storage';
+import { Successbox } from '../../customer/successbox/successbox';
+import { Messagebox } from "../../../systemdesign/messagebox/messagebox";
 @Component({
   selector: 'app-additionalinfo',
-  imports: [CommonModule, Buttons, Checkbox, Dropdown, ReactiveFormsModule, Uploadbtn, Radiobuttons, Inputfield],
+  imports: [CommonModule, Buttons, Checkbox, Dropdown, ReactiveFormsModule, Uploadbtn, Radiobuttons, Inputfield, Successbox, Messagebox],
   standalone: true,
   templateUrl: './additionalinfo.html',
   styleUrl: './additionalinfo.scss'
@@ -92,6 +94,9 @@ export class Additionalinfo implements OnInit {
   isSummaryEditMode = false;
   viewOnly = false;
 
+  editSuccess: any = false;
+
+  description1 = `Great ! Your Additional Info Details\n Uploaded Successfully.`;
   constructor(private fb: FormBuilder, public main: Main, private route: ActivatedRoute, private router: Router, private stepperService: Loanstepperservice,
     private formSvc: Loanformservice, private msgBox: Msgboxservice, private storageservice: Storage) { }
   async ngOnInit() {
@@ -1197,10 +1202,10 @@ export class Additionalinfo implements OnInit {
 
           this.lastSavedPayload = { ...input };
 
- this.isViewMode = true;
-          this.isEditMode = false;
-this.additionalinfoForm.disable({ emitEvent: false });
+        
+            this.editSuccess = true;
          
+
         }
       },
       error: (err) => {
@@ -1208,4 +1213,19 @@ this.additionalinfoForm.disable({ emitEvent: false });
       }
     });
   }
+
+  // edit sucess popup
+  onCancel() {
+    this.editSuccess = false;
+  }
+
+  handleSuccessAction(action: string) {
+    if (action === "OK") {
+      this.editSuccess = false;
+      this.isViewMode = true;
+      this.isEditMode = false;
+       this.additionalinfoForm.disable({ emitEvent: false });
+    }
+  }
+
 }
