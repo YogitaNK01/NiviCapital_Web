@@ -21,7 +21,7 @@ interface BankOption {
 @Component({
   selector: 'app-assetsinfo',
   standalone: true,
-  imports: [CommonModule, Buttons, Dropdown, Inputfield, ReactiveFormsModule, Datepickernew,Successbox,Messagebox],
+  imports: [CommonModule, Buttons, Dropdown, Inputfield, ReactiveFormsModule, Datepickernew, Successbox, Messagebox],
   templateUrl: './assetsinfo.html',
   styleUrl: './assetsinfo.scss'
 })
@@ -109,7 +109,7 @@ export class Assetsinfo implements OnInit {
   isSummaryEditMode = false;
   viewOnly = false;
 
-    //edit from summary
+  //edit from summary
   isFromSummary = false;
   isViewMode = false;
   isEditMode = false;
@@ -117,7 +117,7 @@ export class Assetsinfo implements OnInit {
   editSuccess: any = false;
 
   description1 = `Great ! Your Additional Info Details\n Uploaded Successfully.`;
-  constructor(private fb: FormBuilder, public main: Main, private route: ActivatedRoute, private msgBox: Msgboxservice,private storageservice:Storage,
+  constructor(private fb: FormBuilder, public main: Main, private route: ActivatedRoute, private msgBox: Msgboxservice, private storageservice: Storage,
     private stepperService: Loanstepperservice, private formSvc: Loanformservice, private cd: ChangeDetectorRef, private router: Router) { }
 
 
@@ -206,6 +206,12 @@ export class Assetsinfo implements OnInit {
 
       otherassets: this.fb.array([]),
     });
+    this.isFromSummary = this.formSvc.isSummaryEditFlow();
+
+    if (this.isFromSummary) {
+      this.isViewMode = true;
+      this.assetsForm.disable();
+    }
     // this.allAssetCatagory();
     if (this.viewOnly) {
       this.assetsForm.disable({ emitEvent: false });
@@ -224,24 +230,12 @@ export class Assetsinfo implements OnInit {
 
     await this.loadAssetsForBothFlows()
 
-     this.isFromSummary = this.formSvc.isSummaryEditFlow();
 
-    if(this.isFromSummary){
-      this.isViewMode = true;
-      this.assetsForm.disable();
-    }
   }
 
-  getStorageKey1() {
-    const coApplicantId = this.stepperService.getCo_appId()?.[0];
-    const index = this.stepperService.getCurrentCoApplicantIndex();
 
-    return this.isCoApplicant
-      ? `assetsinfoData_coapp_${this.applicationId}_${index}`
-      : `assetsinfoData_main_${this.applicationId}_${this.stepperService.getLoanId()?.[0]}`;
-  }
-  
-    getStorageKey() {
+
+  getStorageKey() {
     const main_ApplicantId = this.stepperService.getLoanId()?.[0];
     const co_ApplicantId = this.stepperService.getCo_appId()?.[0];
     const index = this.stepperService.getCurrentCoApplicantIndex();
@@ -251,7 +245,7 @@ export class Assetsinfo implements OnInit {
       this.applicationId,
       this.applicantId,
       this.isCoApplicant,
-     
+
     );
   }
   getCurrentCoApplicantFromList() {
@@ -278,7 +272,7 @@ export class Assetsinfo implements OnInit {
     // const localData = localStorage.getItem(key);
     // const parsedLocal = localData ? JSON.parse(localData) : null;
 
-      const parsedLocal = this.storageservice.getStoredSectionData(
+    const parsedLocal = this.storageservice.getStoredSectionData(
       'assetsinfoData',
       this.applicationId,
       this.applicantId,
@@ -341,13 +335,13 @@ export class Assetsinfo implements OnInit {
     this.lastSavedPayload = this.buildAssetsPayloadWithApplicantId();
 
     // localStorage.setItem(key, JSON.stringify(finalData));
- this.storageservice.saveSectionData(
-          'assetsinfoData',
-          this.applicationId,
-          this.applicantId,
-          this.isCoApplicant,
-          JSON.stringify(finalData)
-        );
+    this.storageservice.saveSectionData(
+      'assetsinfoData',
+      this.applicationId,
+      this.applicantId,
+      this.isCoApplicant,
+      JSON.stringify(finalData)
+    );
     this.stepperService.markStepCompleted(this.getStepRoute());
   }
 
@@ -2105,7 +2099,7 @@ export class Assetsinfo implements OnInit {
 
         // const key = this.getStorageKey();
         // localStorage.setItem(key, JSON.stringify(input));
- this.storageservice.saveSectionData(
+        this.storageservice.saveSectionData(
           'assetsinfoData',
           this.applicationId,
           this.applicantId,
@@ -2321,20 +2315,20 @@ export class Assetsinfo implements OnInit {
 
 
 
-    this.formSvc.getAssets(payload, this.applicationId,false).pipe().subscribe({
+    this.formSvc.getAssets(payload, this.applicationId, false).pipe().subscribe({
       next: (res) => {
         console.log("resp---", res);
         if (res.status == "success") {
           this.formSvc.aseetsInfoData = payload
           // const key = `assetsinfoData_main_${this.applicantId}`;
           // localStorage.setItem(key, JSON.stringify(payload));
-           this.storageservice.saveSectionData(
-          'assetsinfoData',
-          this.applicationId,
-          this.applicantId,
-          this.isCoApplicant,
-           JSON.stringify(payload)
-        );
+          this.storageservice.saveSectionData(
+            'assetsinfoData',
+            this.applicationId,
+            this.applicantId,
+            this.isCoApplicant,
+            JSON.stringify(payload)
+          );
           this.stepperService.markStepCompleted('assetsinfo');
           this.stepperService.setStepData('assetsinfo', this.assetsForm.getRawValue());
 
@@ -2372,7 +2366,7 @@ export class Assetsinfo implements OnInit {
     }
 
 
-    this.formSvc.getAssets(payload, this.applicationId,false).pipe().subscribe({
+    this.formSvc.getAssets(payload, this.applicationId, false).pipe().subscribe({
       next: (res) => {
         console.log("resp---", res);
         if (res.status == "success") {
@@ -2387,13 +2381,13 @@ export class Assetsinfo implements OnInit {
 
 
           // localStorage.setItem(this.getStorageKey(), JSON.stringify(payload));
-           this.storageservice.saveSectionData(
-          'assetsinfoData',
-          this.applicationId,
-          this.applicantId,
-          this.isCoApplicant,
-          JSON.stringify(payload)
-        );
+          this.storageservice.saveSectionData(
+            'assetsinfoData',
+            this.applicationId,
+            this.applicantId,
+            this.isCoApplicant,
+            JSON.stringify(payload)
+          );
           this.stepperService.markStepCompleted(stepRoute);
           this.stepperService.setStepData(stepRoute, this.assetsForm.getRawValue());
 
@@ -2411,7 +2405,7 @@ export class Assetsinfo implements OnInit {
 
 
   //edit from summary
-   enableForm(){
+  enableForm() {
     this.isViewMode = false;
     this.isEditMode = true;
     this.assetsForm.enable();
@@ -2441,7 +2435,7 @@ export class Assetsinfo implements OnInit {
 
     }
 
-    this.formSvc.getAssets(input, this.applicationId, true).subscribe({
+    this.formSvc.getAssets(input, this.applicationId, false).subscribe({
       next: (res: any) => {
         if (res.status === 'success') {
           const key = this.getStorageKey();
@@ -2457,7 +2451,7 @@ export class Assetsinfo implements OnInit {
 
           console.log(res);
 
-           this.editSuccess = true;
+          this.editSuccess = true;
         }
       },
       error: (err) => {
@@ -2467,13 +2461,13 @@ export class Assetsinfo implements OnInit {
   }
 
 
-   // edit sucess popup
-   onCancel() {
+  // edit sucess popup
+  onCancel() {
     this.editSuccess = false;
   }
 
-  handleSuccessAction(action: string){
-    if(action === "OK"){
+  handleSuccessAction(action: string) {
+    if (action === "OK") {
       this.editSuccess = false;
       this.isViewMode = true;
       this.isEditMode = false;

@@ -41,9 +41,16 @@ export class Coappdashboard implements OnInit {
   ];
 
   //toretrive data
-
   removedCoApplicants: any[] = [];
 
+    //edit from summary
+  isFromSummary = false;
+  isViewMode = false;
+  isEditMode = false;
+  originalFormValue: any = null;
+  
+  editSuccess: any = false;
+  description1 = `Great ! Your Additional Info Details\n Uploaded Successfully.`;
 
   constructor(public service: Main, private router: Router, private addcustomerservice: Addcustomerservice, private msgBox: Msgboxservice,
     private route: ActivatedRoute, private cd: ChangeDetectorRef, private stepperService: Loanstepperservice, private loanfornservice: Loanformservice) { }
@@ -109,6 +116,8 @@ export class Coappdashboard implements OnInit {
       return;
     }
 
+   
+
     const nextIndex = this.getNextAvailableCoApplicantIndex();
     sessionStorage.removeItem('coAppIds');
     sessionStorage.removeItem('coapp_cifdetails');
@@ -145,6 +154,8 @@ export class Coappdashboard implements OnInit {
     );
 
   }
+
+
   getNextAvailableCoApplicantIndex(): number {
     const usedIndexes = this.coApplicants.map(x => Number(x.index));
 

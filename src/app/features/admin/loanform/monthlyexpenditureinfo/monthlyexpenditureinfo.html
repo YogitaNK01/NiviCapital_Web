@@ -1,7 +1,7 @@
 <div class="vh-container">
     <div class="base-layout base-height" [ngClass]="{'coapplicant-layout': isCoApplicant}">
 
-      <div class="header w-100"  *ngIf="!isCoApplicant">
+      <div class="header w-100" >
             <div class="d-flex justify-content-between">
                 <div class="text-datepicker blue-text d-flex flex-column gap-2 ">Monthly Expenditure
                     <div class="text-body-1 fw-normal">
@@ -19,7 +19,7 @@
                         Click the “Next” button to save your changes
                     </div>
                 </div>
-            </div>
+          
 
             <div>
               <app-buttons
@@ -33,7 +33,7 @@
                   <img src="/assets/images/icons/edit-white.svg" alt="edit">
               </app-buttons>
             </div>
-
+  </div>
         </div>
 
         <div class="row w-100 d-flex blue-head-box text-center">
@@ -43,7 +43,7 @@
             <div class=" d-flex  ">
                 <div class="w-100 gap-3">
                     <!-- all categories -->
-                    <app-dropdown [options]="monthlyExpenditure" [multiSelect]="true"
+                    <app-dropdown [options]="monthlyExpenditure" [multiSelect]="true" [disabled]="isViewMode"
                         [(selectedValue)]="selectedexpenditure" [placeholder]="'Select Monthly Expenditure'"
                         (selectedValueChange)="onChange($event)" [avatarUrl]="avatarUrl" [hasAvatar]="hasAvatar"
                         [label]="'Monthly Expenditure'">
@@ -390,7 +390,7 @@
             </svg></button>
 
         <app-successbox [title]="description1" [buttons]="[
-            { label: 'OK', action: '', outline: false, color: 'primary',class: 'btncustomClass w-50'  },
+            { label: 'OK', action: 'OK', outline: false, color: 'primary',class: 'btncustomClass w-50'  },
         ]" (actionClick)="handleSuccessAction($event)">
         </app-successbox>
 

@@ -4,7 +4,7 @@
 
     <div class="base-layout base-height" [ngClass]="{'coapplicant-layout': isCoApplicant}">
 
-       <div class="header w-100"  *ngIf="!isCoApplicant">
+       <div class="header w-100" >
             <div class="d-flex justify-content-between">
                 <div class="text-datepicker blue-text d-flex flex-column gap-2 ">Liabilities
                     <div class="text-body-1 fw-normal" *ngIf="!isFromSummary">
@@ -740,7 +740,7 @@
                 </svg></button>
 
             <app-successbox [title]="description1" [buttons]="[
-            { label: 'OK', action: '', outline: false, color: 'primary',class: 'btncustomClass w-50'  },
+            { label: 'OK', action: 'OK', outline: false, color: 'primary',class: 'btncustomClass w-50'  },
         ]" (actionClick)="handleSuccessAction($event)">
             </app-successbox>
 

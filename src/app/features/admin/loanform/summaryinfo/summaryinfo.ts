@@ -592,7 +592,7 @@ export class Summaryinfo {
       acc.amount = amount || 0;
     }
   }
-  editCoApplicant(coapp: any) {
+  editCoApplicant(coapp: any,section: string) {
     this.stepperService.setStepperType('CO_APPLICANT');
     this.stepperService.setCurrentCoApplicantIndex(coapp.index);
 
@@ -612,7 +612,7 @@ export class Summaryinfo {
     );
 
     this.router.navigate(
-      ['/loanform', 'co-applicantdetails', 'coapplicantinfo', 'co-basicinfo'],
+      ['/loanform', 'co-applicantdetails', 'coapplicantinfo',section],
       {
         queryParams: {
           coApplicantIndex: coapp.index,

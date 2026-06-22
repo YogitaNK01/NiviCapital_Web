@@ -1,38 +1,33 @@
 <div class="base-layout" [ngClass]="{'coapplicant-layout': isCoApplicant}">
 
-     <div class="header w-100"  >
-            <div class="d-flex justify-content-between">
-                <div class="text-datepicker blue-text d-flex flex-column gap-2 ">Basic Information
-                    <div class="text-body-1 fw-normal" *ngIf="!isFromSummary">
-                        <span ><svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 22 22"
-                                fill="none">
-                                <path
-                                    d="M10.9997 20.1667C16.0413 20.1667 20.1663 16.0417 20.1663 11C20.1663 5.95833 16.0413 1.83333 10.9997 1.83333C5.95801 1.83333 1.83301 5.95833 1.83301 11C1.83301 16.0417 5.95801 20.1667 10.9997 20.1667Z"
-                                    stroke="#25262F" stroke-width="1.28125" stroke-linecap="round"
-                                    stroke-linejoin="round" />
-                                <path d="M11 7.33333V11.9167" stroke="#25262F" stroke-width="1.28125" stroke-linecap="round"
-                                    stroke-linejoin="round" />
-                                <path d="M10.9961 14.6667H11.0043" stroke="#25262F" stroke-width="1.28125"
-                                    stroke-linecap="round" stroke-linejoin="round" />
-                            </svg></span>
-                        Click the “Next” button to save your changes
-                    </div>
-                </div>
-
-                <div>
-                    <app-buttons
-                        *ngIf="isFromSummary"
-                        type="button"
-                        label="Edit"
-                        class="btn btn-icon edit btncustomClass editBtnClass"
-                        color="primary"
-                        (click)="enableForm()"
-                        [disabled]="!isViewMode">
-                        <img src="assets/images/icons/edit-white.svg" alt="edit">
-                    </app-buttons>
+    <div class="header w-100">
+        <div class="d-flex justify-content-between">
+            <div class="text-datepicker blue-text d-flex flex-column gap-2 ">Basic Information
+                <div class="text-body-1 fw-normal" *ngIf="!isFromSummary">
+                    <span><svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 22 22"
+                            fill="none">
+                            <path
+                                d="M10.9997 20.1667C16.0413 20.1667 20.1663 16.0417 20.1663 11C20.1663 5.95833 16.0413 1.83333 10.9997 1.83333C5.95801 1.83333 1.83301 5.95833 1.83301 11C1.83301 16.0417 5.95801 20.1667 10.9997 20.1667Z"
+                                stroke="#25262F" stroke-width="1.28125" stroke-linecap="round"
+                                stroke-linejoin="round" />
+                            <path d="M11 7.33333V11.9167" stroke="#25262F" stroke-width="1.28125" stroke-linecap="round"
+                                stroke-linejoin="round" />
+                            <path d="M10.9961 14.6667H11.0043" stroke="#25262F" stroke-width="1.28125"
+                                stroke-linecap="round" stroke-linejoin="round" />
+                        </svg></span>
+                    Click the “Next” button to save your changes
                 </div>
             </div>
+
+            <div>
+                <app-buttons *ngIf="isFromSummary" type="button" label="Edit"
+                    class="btn btn-icon edit btncustomClass editBtnClass" color="primary" (click)="enableForm()"
+                    [disabled]="!isViewMode">
+                    <img src="assets/images/icons/edit-white.svg" alt="edit">
+                </app-buttons>
+            </div>
         </div>
+    </div>
 
     <div class="accordion d-flex flex-column gap-4 mb-4">
 
@@ -63,7 +58,7 @@
 
     <ng-template #basicinfoTemplate let-i="index">
 
-        <form [formGroup]="registerForm" (ngSubmit)="createcustId()" class="common-details-box d-flex flex-column">
+        <form *ngIf="registerForm" [formGroup]="registerForm" (ngSubmit)="createcustId()" class="common-details-box d-flex flex-column">
 
             <div class="row w-100 mb-3">
                 <!-- first name -->
@@ -71,7 +66,7 @@
                     <app-inputfield formControlName="fname" label="First Name" [required]="true"
                         placeholder="First Name" (input)="main.restrictInput($event, 'text')" [maxlength]="25">
                     </app-inputfield>
-                    <div class="text-danger text-body-2" *ngIf="f['fname'].touched && f['fname'].invalid">
+                    <div class="text-danger text-body-2" *ngIf="f['fname']?.touched && f['fname']?.invalid">
 
                         <div *ngIf="f['fname'].errors?.['required']">
                             First name is required
@@ -97,7 +92,7 @@
                     <app-inputfield formControlName="mname" label="Middle Name" placeholder="Middle Name"
                         (input)="main.restrictInput($event, 'text')" [disabled]="ismiddlename" [maxlength]="25">
                     </app-inputfield>
-                    <div class="text-danger text-body-2" *ngIf="f['mname'].touched && f['mname'].invalid">
+                    <div class="text-danger text-body-2" *ngIf="f['mname']?.touched && f['mname']?.invalid">
 
                         <div *ngIf="f['mname'].errors?.['minlength']">
                             Minimum 2 characters required
@@ -126,7 +121,7 @@
                     <app-inputfield formControlName="lname" label="Last Name" [required]="true" placeholder="Last Name"
                         (input)="main.restrictInput($event, 'text')" [maxlength]="25">
                     </app-inputfield>
-                    <div class="text-danger text-body-2" *ngIf="f['lname'].touched && f['lname'].invalid">
+                    <div class="text-danger text-body-2" *ngIf="f['lname']?.touched && f['lname']?.invalid">
 
                         <div *ngIf="f['lname'].errors?.['required']">
                             Last name is required
@@ -218,7 +213,7 @@
                         [maxlength]="40" placeholder="Enter Email Id" helpText="Help text" name="email">
                     </app-inputfield>
 
-                    <div class="text-danger text-body-2" *ngIf="f['email'].touched && f['email'].invalid">
+                    <div class="text-danger text-body-2" *ngIf="f['email']?.touched && f['email']?.invalid">
 
                         <div *ngIf="f['email'].errors?.['pattern'] && !f['email'].errors?.['minlength']">
                             Please enter a valid email address
@@ -247,63 +242,54 @@
 
     <hr class="footer-hr-class">
     <div class="loan-footerbtns row w-100  d-flex justify-content-between align-items-center">
-<ng-container *ngIf="!isFromSummary">
-        <div class="col-lg-4 pointer">
-            <img src="../assets/images/icons/save.svg">
-            <span class="text-dp-3-regular mx-2 blue-text" (click)="saveExit()"> Save and Exit</span>
-        </div>
-        <div class="col-lg-4  d-flex justify-content-end">
-            <app-buttons type="button" label="Back" class="btn btncustomClass" [outline]="true" (click)="back()">
-            </app-buttons>
-            <!-- <app-buttons type="button" label="Next" class="btn btncustomClass" color="primary" (click)="next1()"  [disabled]="registerForm.invalid || !otpVerifiedOk"></app-buttons> -->
-            <app-buttons type="button" label="Next" class="btn btncustomClass" color="primary" (click)="next()" 
-                [disabled]="registerForm.invalid || (!otpVerifiedOk && !hasExistingCif)"> </app-buttons>
+        <ng-container *ngIf="!isFromSummary">
+            <div class="col-lg-4 pointer">
+                <img src="../assets/images/icons/save.svg">
+                <span class="text-dp-3-regular mx-2 blue-text" (click)="saveExit()"> Save and Exit</span>
+            </div>
+            <div class="col-lg-4  d-flex justify-content-end">
+                <app-buttons type="button" label="Back" class="btn btncustomClass" [outline]="true" (click)="back()">
+                </app-buttons>
+                <!-- <app-buttons type="button" label="Next" class="btn btncustomClass" color="primary" (click)="next1()"  [disabled]="registerForm.invalid || !otpVerifiedOk"></app-buttons> -->
+                <app-buttons type="button" label="Next" class="btn btncustomClass" color="primary" (click)="next()"
+                    [disabled]="registerForm.invalid || (!otpVerifiedOk && !hasExistingCif)"> </app-buttons>
 
-        </div>
-         </ng-container>
+            </div>
+        </ng-container>
 
-    <ng-container *ngIf="isFromSummary && isEditMode">
-        <div class="col-lg-12 d-flex justify-content-end gap-2">
+        <ng-container *ngIf="isFromSummary && isEditMode">
+            <div class="col-lg-12 d-flex justify-content-end gap-2">
 
-        <app-buttons
-            type="button"
-            label="Cancel"
-            class="btn btncustomClass"
-            [outline]="true"
-            (click)="cancelSummaryEdit()">
-        </app-buttons>
+                <app-buttons type="button" label="Cancel" class="btn btncustomClass" [outline]="true"
+                    (click)="cancelSummaryEdit()">
+                </app-buttons>
 
-        <app-buttons
-           
-            type="button"
-            label="Save"
-            class="btn btncustomClass"
-            color="primary"
-            (click)="saveSummaryEdit()"
-            [disabled]="registerForm.invalid || (!otpVerifiedOk && !hasExistingCif)">
-        </app-buttons>
+                <app-buttons type="button" label="Save" class="btn btncustomClass" color="primary"
+                    (click)="saveSummaryEdit()"
+                    [disabled]="registerForm.invalid || (!otpVerifiedOk && !hasExistingCif)">
+                </app-buttons>
 
-        </div>
-  </ng-container>
+            </div>
+        </ng-container>
     </div>
 
     <div class="edit-success-modal" *ngIf="editSuccess">
-    <div class="edit-modal-overlay"></div>
+        <div class="edit-modal-overlay"></div>
 
-    <div class="edit-modal-container">
-      <button class="edit-close-btn" (click)="onCancel()">
-        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
-          <path d="M3 3L15 15L3 3Z" fill="#F4F6FF" />
-          <path d="M3 3L15 15" stroke="#F4F6FF" stroke-width="1.125" stroke-linecap="round" stroke-linejoin="round" />
-          <path d="M3 15L15 3" stroke="#F4F6FF" stroke-width="1.125" stroke-linecap="round" stroke-linejoin="round" />
-        </svg></button>
+        <div class="edit-modal-container">
+            <button class="edit-close-btn" (click)="onCancel()">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
+                    <path d="M3 3L15 15L3 3Z" fill="#F4F6FF" />
+                    <path d="M3 3L15 15" stroke="#F4F6FF" stroke-width="1.125" stroke-linecap="round"
+                        stroke-linejoin="round" />
+                    <path d="M3 15L15 3" stroke="#F4F6FF" stroke-width="1.125" stroke-linecap="round"
+                        stroke-linejoin="round" />
+                </svg></button>
 
-      <app-successbox [title]="description1"
-        [buttons]="[
-            { label: 'OK', action: '', outline: false, color: 'primary',class: 'btncustomClass w-50'  },
-        ]" (actionClick)="handleSuccessAction($event)"
-    >
-    </app-successbox>
+            <app-successbox [title]="description1" [buttons]="[
+            { label: 'OK', action: 'OK', outline: false, color: 'primary',class: 'btncustomClass w-50'  },
+        ]" (actionClick)="handleSuccessAction($event)">
+            </app-successbox>
 
+        </div>
     </div>
-</div>

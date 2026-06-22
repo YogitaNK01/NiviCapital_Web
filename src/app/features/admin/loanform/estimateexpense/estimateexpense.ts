@@ -22,7 +22,7 @@ interface OptionItem {
 
 @Component({
   selector: 'app-estimateexpense',
-  imports: [Buttons, CommonModule, RouterModule, ReactiveFormsModule, Inputfield, Dropdown,Messagebox,Successbox],
+  imports: [Buttons, CommonModule, RouterModule, ReactiveFormsModule, Inputfield, Dropdown, Messagebox, Successbox],
   templateUrl: './estimateexpense.html',
   styleUrl: './estimateexpense.scss'
 })
@@ -84,19 +84,19 @@ export class Estimateexpense {
   isSummaryEditMode = false;
   viewOnly = false;
 
-  
-   //edit from summary
+
+  //edit from summary
   isFromSummary = false;
   isViewMode = false;
   isEditMode = false;
   originalFormValue: any = null;
-  
+
   editSuccess: any = false;
   description1 = `Great ! Your Additional Info Details\n Uploaded Successfully.`;
 
 
   constructor(private fb: FormBuilder, private stepperService: Loanstepperservice, private cd: ChangeDetectorRef, private loanformservice: Loanformservice,
-    private router: Router, private route: ActivatedRoute, public main: Main, private msgBox: Msgboxservice,private storageservice:Storage) { }
+    private router: Router, private route: ActivatedRoute, public main: Main, private msgBox: Msgboxservice, private storageservice: Storage) { }
 
   async ngOnInit() {
     this.isCoApplicant = this.router.url.includes('co-applicant');
@@ -186,9 +186,13 @@ export class Estimateexpense {
       miscexpenses: this.fb.array([])
     })
 
-    // this.livingexp();
-    // this.miscgexp();
-   
+    this.isFromSummary = this.loanformservice.isSummaryEditFlow();
+
+    if (this.isFromSummary) {
+      this.isViewMode = true;
+      this.expenseForm.disable();
+    }
+
 
 
     this.expenseForm.get('tutionfees')?.valueChanges.subscribe(() => {
@@ -209,43 +213,6 @@ export class Estimateexpense {
       this.calculateGrandTotal();
     });
 
-    // if (this.loanformservice.isEditFlow()) {
-    //   setTimeout(() => {
-    //     this.patchFromSummary();
-    //   }, 300);
-    // } else {
-    //   const key = this.getStorageKey();
-
-    //   const localData = localStorage.getItem(key);
-    //   let parsedLocal = localData ? JSON.parse(localData) : null;
-
-    //   //  call API
-    //   const apiData = await this.getSavedEstExpense();
-
-    //   //  PRIORITY LOGIC
-    //   let finalData = null;
-
-    //   if (apiData) {
-    //     finalData = apiData;
-    //     localStorage.setItem(key, JSON.stringify(apiData));
-    //   }
-    //   else if (parsedLocal) {
-    //     finalData = parsedLocal;
-    //   }
-
-
-    //   if (finalData) {
-    //     this.loanformservice.estExpenseInfoData = finalData;
-    //     this.pendingSavedExpense = finalData;
-    //     this.tryPatchSavedExpense();
-    //   } else {
-    //     this.lastSavedPayload = null;
-    //   }
-
-
-    // }
-
-
     await Promise.all([
       this.livingexpAsync(),
       this.miscgexpAsync()
@@ -257,20 +224,14 @@ export class Estimateexpense {
 
     await this.loadEstimatedExpenseForBothFlows();
 
-      this.isFromSummary = this.loanformservice.isSummaryEditFlow();
-
-    if(this.isFromSummary){
-      this.isViewMode = true;
-      this.expenseForm.disable();
-    }
 
   }
 
   getStorageKey11() {
     return `estimateExpenseData_main_${this.applicationId}_${this.stepperService.getLoanId()?.[0]}`;
-    
+
   }
-   getStorageKey() {
+  getStorageKey() {
     return this.storageservice.getStorageKey(
       'estimateExpenseData',
       this.applicationId,
@@ -278,7 +239,7 @@ export class Estimateexpense {
       this.isCoApplicant
     );
   }
-    getStorageKey1() {
+  getStorageKey1() {
     const main_ApplicantId = this.stepperService.getLoanId()?.[0];
     const co_ApplicantId = this.stepperService.getCo_appId()?.[0];
     const index = this.stepperService.getCurrentCoApplicantIndex();
@@ -328,151 +289,151 @@ export class Estimateexpense {
     }
   }
 
-private normalizeEstimatedExpense(data: any): any {
-  if (!data) return null;
+  private normalizeEstimatedExpense(data: any): any {
+    if (!data) return null;
 
-  const cleanAmount = (value: any): number => {
-    if (value === null || value === undefined || value === '') return 0;
+    const cleanAmount = (value: any): number => {
+      if (value === null || value === undefined || value === '') return 0;
 
-    return Number(
-      value.toString().replace(/,/g, '')
-    ) || 0;
-  };
+      return Number(
+        value.toString().replace(/,/g, '')
+      ) || 0;
+    };
 
-  // Already saved/draft/local format
-  if (Array.isArray(data.items)) {
-    const tuitionFeesInr = cleanAmount(data.tuitionFeesInr);
+    // Already saved/draft/local format
+    if (Array.isArray(data.items)) {
+      const tuitionFeesInr = cleanAmount(data.tuitionFeesInr);
 
-    // Empty draft/local should not block summary fallback
-    if (!tuitionFeesInr && data.items.length === 0) {
-      return null;
+      // Empty draft/local should not block summary fallback
+      if (!tuitionFeesInr && data.items.length === 0) {
+        return null;
+      }
+
+      return {
+        applicantId: data.applicantId || this.getApiApplicantId(),
+        tuitionFeesInr,
+        items: data.items || []
+      };
     }
 
+    const items: any[] = [];
+
+    const findLivingId = (item: any) => {
+      const name = (
+        item.name ||
+        item.category ||
+        item.expenseName ||
+        item.livingExpenseName ||
+        item.title ||
+        ''
+      )
+        .toString()
+        .trim()
+        .toLowerCase();
+
+      return (
+        item.livingExpenseItemMasterId ||
+        item.categoryId ||
+        item.id ||
+        this.livCatagories.find(c =>
+          c.label?.toLowerCase().trim() === name ||
+          c.code?.toLowerCase().trim() === name
+        )?.value ||
+        ''
+      );
+    };
+
+    const findMiscId = (item: any) => {
+      const name = (
+        item.name ||
+        item.category ||
+        item.expenseName ||
+        item.miscellaneousExpenseName ||
+        item.title ||
+        ''
+      )
+        .toString()
+        .trim()
+        .toLowerCase();
+
+      return (
+        item.miscellaneousExpenseItemMasterId ||
+        item.categoryId ||
+        item.id ||
+        this.misCatagories.find(c =>
+          c.label?.toLowerCase().trim() === name ||
+          c.code?.toLowerCase().trim() === name
+        )?.value ||
+        ''
+      );
+    };
+
+    const livingList =
+      data.livingExpenses ||
+      data.livingExpense ||
+      data.living ||
+      [];
+
+    const miscList =
+      data.miscellaneousExpenses ||
+      data.miscExpenses ||
+      data.miscellaneous ||
+      data.misc ||
+      [];
+
+    livingList.forEach((item: any) => {
+      const categoryId = findLivingId(item);
+
+      if (!categoryId) return;
+
+      items.push({
+        livingExpenseItemMasterId: categoryId,
+        frequency: item.frequency || 'MONTHLY',
+        amountInr: cleanAmount(item.amountInr || item.amount),
+        description: item.description || ''
+      });
+    });
+
+    miscList.forEach((item: any) => {
+      const categoryId = findMiscId(item);
+
+      if (!categoryId) return;
+
+      items.push({
+        miscellaneousExpenseItemMasterId: categoryId,
+        frequency: item.frequency || 'MONTHLY',
+        amountInr: cleanAmount(item.amountInr || item.amount),
+        description: item.description || ''
+      });
+    });
+
+    const educationFees = data.educationFees || data.educationFee || {};
+
+    const tuitionFeesInr =
+      cleanAmount(data.tuitionFeesInr) ||
+      cleanAmount(data.tuitionFeeInr) ||
+      cleanAmount(data.educationFeesInr) ||
+
+      // ✅ Your current summary response key
+      cleanAmount(educationFees.tuitionInr) ||
+
+      // other possible keys
+      cleanAmount(educationFees.amountInr) ||
+      cleanAmount(educationFees.tuitionFeesInr) ||
+      cleanAmount(educationFees.feesInr) ||
+      cleanAmount(data.educationFees) ||
+      cleanAmount(data.tuitionFees?.amountInr) ||
+      0;
+
+    if (!tuitionFeesInr && !items.length) return null;
+
     return {
-      applicantId: data.applicantId || this.getApiApplicantId(),
+      applicantId: this.getApiApplicantId(),
       tuitionFeesInr,
-      items: data.items || []
+      items
     };
   }
 
-  const items: any[] = [];
-
-  const findLivingId = (item: any) => {
-    const name = (
-      item.name ||
-      item.category ||
-      item.expenseName ||
-      item.livingExpenseName ||
-      item.title ||
-      ''
-    )
-      .toString()
-      .trim()
-      .toLowerCase();
-
-    return (
-      item.livingExpenseItemMasterId ||
-      item.categoryId ||
-      item.id ||
-      this.livCatagories.find(c =>
-        c.label?.toLowerCase().trim() === name ||
-        c.code?.toLowerCase().trim() === name
-      )?.value ||
-      ''
-    );
-  };
-
-  const findMiscId = (item: any) => {
-    const name = (
-      item.name ||
-      item.category ||
-      item.expenseName ||
-      item.miscellaneousExpenseName ||
-      item.title ||
-      ''
-    )
-      .toString()
-      .trim()
-      .toLowerCase();
-
-    return (
-      item.miscellaneousExpenseItemMasterId ||
-      item.categoryId ||
-      item.id ||
-      this.misCatagories.find(c =>
-        c.label?.toLowerCase().trim() === name ||
-        c.code?.toLowerCase().trim() === name
-      )?.value ||
-      ''
-    );
-  };
-
-  const livingList =
-    data.livingExpenses ||
-    data.livingExpense ||
-    data.living ||
-    [];
-
-  const miscList =
-    data.miscellaneousExpenses ||
-    data.miscExpenses ||
-    data.miscellaneous ||
-    data.misc ||
-    [];
-
-  livingList.forEach((item: any) => {
-    const categoryId = findLivingId(item);
-
-    if (!categoryId) return;
-
-    items.push({
-      livingExpenseItemMasterId: categoryId,
-      frequency: item.frequency || 'MONTHLY',
-      amountInr: cleanAmount(item.amountInr || item.amount),
-      description: item.description || ''
-    });
-  });
-
-  miscList.forEach((item: any) => {
-    const categoryId = findMiscId(item);
-
-    if (!categoryId) return;
-
-    items.push({
-      miscellaneousExpenseItemMasterId: categoryId,
-      frequency: item.frequency || 'MONTHLY',
-      amountInr: cleanAmount(item.amountInr || item.amount),
-      description: item.description || ''
-    });
-  });
-
-  const educationFees = data.educationFees || data.educationFee || {};
-
-  const tuitionFeesInr =
-    cleanAmount(data.tuitionFeesInr) ||
-    cleanAmount(data.tuitionFeeInr) ||
-    cleanAmount(data.educationFeesInr) ||
-
-    // ✅ Your current summary response key
-    cleanAmount(educationFees.tuitionInr) ||
-
-    // other possible keys
-    cleanAmount(educationFees.amountInr) ||
-    cleanAmount(educationFees.tuitionFeesInr) ||
-    cleanAmount(educationFees.feesInr) ||
-    cleanAmount(data.educationFees) ||
-    cleanAmount(data.tuitionFees?.amountInr) ||
-    0;
-
-  if (!tuitionFeesInr && !items.length) return null;
-
-  return {
-    applicantId: this.getApiApplicantId(),
-    tuitionFeesInr,
-    items
-  };
-}
-  
   private async loadEstimatedExpenseForBothFlows() {
     const key = this.getStorageKey();
 
@@ -1296,45 +1257,45 @@ private normalizeEstimatedExpense(data: any): any {
 
   //save and exit 
   saveExit() {
-      this.msgBox.open({
+    this.msgBox.open({
       title: 'Are you sure you want to exit?',
       message: ``,
       showCancel: true,
       onOk: () => {
-    let formdata = this.expenseForm.value
-    console.log("form data Expenses:", formdata);
+        let formdata = this.expenseForm.value
+        console.log("form data Expenses:", formdata);
 
-    const livingExpenses = this.expenseForm.value.livingexpenses.map((item: any) => ({
-      livingExpenseItemMasterId: item.category,
-      frequency: item.securityfrequency?.toUpperCase(),
-      amountInr: Number(item.amountINR.replace(/,/g, '')),
-      description: item.description || ''
-    }));
+        const livingExpenses = this.expenseForm.value.livingexpenses.map((item: any) => ({
+          livingExpenseItemMasterId: item.category,
+          frequency: item.securityfrequency?.toUpperCase(),
+          amountInr: Number(item.amountINR.replace(/,/g, '')),
+          description: item.description || ''
+        }));
 
-    const miscExpenses = this.expenseForm.value.miscexpenses.map((item: any) => ({
-      miscellaneousExpenseItemMasterId: item.category,
-      frequency: item.securityfrequency?.toUpperCase(),
-      amountInr: Number(item.amountINR.replace(/,/g, '')),
-      description: item.descriptionmisc || item.description || ''
-    }));
+        const miscExpenses = this.expenseForm.value.miscexpenses.map((item: any) => ({
+          miscellaneousExpenseItemMasterId: item.category,
+          frequency: item.securityfrequency?.toUpperCase(),
+          amountInr: Number(item.amountINR.replace(/,/g, '')),
+          description: item.descriptionmisc || item.description || ''
+        }));
 
 
-    let input = {
-      tuitionFeesInr: Number(formdata.tutionfees.replace(/,/g, '')),
-      items: [...livingExpenses, ...miscExpenses]
-    }
+        let input = {
+          tuitionFeesInr: Number(formdata.tutionfees.replace(/,/g, '')),
+          items: [...livingExpenses, ...miscExpenses]
+        }
 
-    const inputdata = {
-      action: "auto-save",
-      sectionKey: "ESTIMATED_EXPENSE",
-      applicationId: this.applicationId,
-      applicantId: this.applicantId,
-      jsonData: input
-    };
+        const inputdata = {
+          action: "auto-save",
+          sectionKey: "ESTIMATED_EXPENSE",
+          applicationId: this.applicationId,
+          applicantId: this.applicantId,
+          jsonData: input
+        };
 
-    this.loanformservice.saveandExit(inputdata).subscribe();
-     this.router.navigate(['/admin/losoperation']);
-     }
+        this.loanformservice.saveandExit(inputdata).subscribe();
+        this.router.navigate(['/admin/losoperation']);
+      }
     });
   }
   //get api for saved data
@@ -1375,19 +1336,19 @@ private normalizeEstimatedExpense(data: any): any {
   }
 
 
-private finishAfterSaveOrNoChange() {
-  if (this.isSummaryEditMode) {
-    this.loanformservice.clearSummaryEditFlow();
+  private finishAfterSaveOrNoChange() {
+    if (this.isSummaryEditMode) {
+      this.loanformservice.clearSummaryEditFlow();
 
-    this.router.navigate(['/loanform', 'summaryinfo'], {
-      queryParamsHandling: 'merge'
-    });
+      this.router.navigate(['/loanform', 'summaryinfo'], {
+        queryParamsHandling: 'merge'
+      });
 
-    return;
+      return;
+    }
+
+    this.stepperService.next();
   }
-
-  this.stepperService.next();
-}
   next() {
 
     // alert(this.expenseForm.get('tutionfees')?.value)
@@ -1443,7 +1404,7 @@ private finishAfterSaveOrNoChange() {
       items: [...livingExpenses, ...miscExpenses]
     }
 
-    this.loanformservice.estimateExpense(input, this.applicationId,false).pipe().subscribe({
+    this.loanformservice.estimateExpense(input, this.applicationId, false).pipe().subscribe({
       next: (res) => {
         console.log("resp---", res);
         if (res.status == "success") {
@@ -1461,16 +1422,16 @@ private finishAfterSaveOrNoChange() {
 
   }
 
-    //edit from summary enable and disbale
+  //edit from summary enable and disbale
 
-      enableForm(){
+  enableForm() {
     this.isViewMode = false;
     this.isEditMode = true;
     this.expenseForm.enable();
     this.loanformservice.clearSummaryEditFlow();
   }
 
-    cancelSummaryEdit() {
+  cancelSummaryEdit() {
     if (this.isEditMode && this.originalFormValue) {
       this.expenseForm.patchValue(this.originalFormValue);
     }
@@ -1485,7 +1446,7 @@ private finishAfterSaveOrNoChange() {
   saveSummaryEdit() {
     const input = this.buildExpensePayload();
 
-    this.loanformservice.estimateExpense(input, this.applicationId, true).subscribe({
+    this.loanformservice.estimateExpense(input, this.applicationId, false).subscribe({
       next: (res: any) => {
         if (res.status === 'success') {
           const key = this.getStorageKey();
@@ -1501,7 +1462,7 @@ private finishAfterSaveOrNoChange() {
 
           console.log(res);
 
-         this.editSuccess = true;
+          this.editSuccess = true;
         }
       },
       error: (err) => {
@@ -1511,13 +1472,13 @@ private finishAfterSaveOrNoChange() {
   }
 
 
-   // edit sucess popup
-   onCancel() {
+  // edit sucess popup
+  onCancel() {
     this.editSuccess = false;
   }
 
-  handleSuccessAction(action: string){
-    if(action === "OK"){
+  handleSuccessAction(action: string) {
+    if (action === "OK") {
       this.editSuccess = false;
       this.isViewMode = true;
       this.isEditMode = false;

@@ -36,7 +36,7 @@ interface Document {
 }
 @Component({
   selector: 'app-incomeinfo',
-  imports: [CommonModule, Buttons, ReactiveFormsModule, Uploadbtn, FormsModule, Inputfield,Successbox,Messagebox],
+  imports: [CommonModule, Buttons, ReactiveFormsModule, Uploadbtn, FormsModule, Inputfield, Successbox, Messagebox],
   standalone: true,
   templateUrl: './incomeinfo.html',
   styleUrl: './incomeinfo.scss'
@@ -271,16 +271,16 @@ export class Incomeinfo {
   isSummaryEditMode = false;
   viewOnly = false;
 
-    //edit from summary
-   //edit from summary
+  //edit from summary
+  //edit from summary
   isFromSummary = false;
   isViewMode = false;
   isEditMode = false;
   originalFormValue: any = null;
-  
+
   editSuccess: any = false;
   description1 = `Great ! Your Additional Info Details\n Uploaded Successfully.`;
-
+  deletedDocs: any = []
 
   constructor(private fb: FormBuilder, private stepperService: Loanstepperservice, private router: Router, private cd: ChangeDetectorRef, private msgBox: Msgboxservice, public loanformservice: Loanformservice, private route: ActivatedRoute, public main: Main, private storageservice: Storage) { }
   async ngOnInit(): Promise<void> {
@@ -364,12 +364,12 @@ export class Incomeinfo {
 
     await this.loadIncomeForBothFlows();
 
-       const key = this.getStorageKey();
+    const key = this.getStorageKey();
 
     this.isFromSummary = this.loanformservice.isSummaryEditFlow();
     console.log(this.isFromSummary);
 
-    if(this.isFromSummary){
+    if (this.isFromSummary) {
       this.isViewMode = true;
       this.incomeForm.disable();
     }
@@ -690,7 +690,7 @@ export class Incomeinfo {
     fd.append('files[0].type', type);
     fd.append('files[0].file', result.file);
 
-    this.loanformservice.uploadIncome(fd, this.applicationId,false).subscribe({
+    this.loanformservice.uploadIncome(fd, this.applicationId, false).subscribe({
       next: (res) => {
         console.log("onFileChange", res);
 
@@ -725,14 +725,25 @@ export class Incomeinfo {
     fd.append('category', category);
     fd.append('subcategory', subcategory);
     fd.append('applicantId', apiApplicantId);
-    // fd.append('files[0].title', othertitle || key);
-    // fd.append('files[0].type', type);
-    // fd.append('files[0].file', result.file);
-    fd.append(`files[${index}].title`, othertitle || key);
-    fd.append(`files[${index}].type`, type);
-    fd.append(`files[${index}].file`, result.file);
 
-    this.loanformservice.uploadIncome(fd, this.applicationId,false).subscribe({
+    // fd.append(`files[${index}].title`, othertitle || key);
+    // fd.append(`files[${index}].type`, type);
+    // fd.append(`files[${index}].file`, result.file);
+
+    let doc: any = this.deletedDocs.find((item: any) => item.category === category && item.type === type);
+
+    if (this.isEditMode && doc) {
+      fd.append(`items[0].title`, othertitle || key);
+      fd.append(`items[0].file.type`, type);
+      fd.append(`items[0].file.file`, result.file);
+      fd.append(`items[0].documentId`, doc.documentId);
+    } else {
+      fd.append(`files[${index}].title`, othertitle || key);
+      fd.append(`files[${index}].type`, type);
+      fd.append(`files[${index}].file`, result.file);
+    }
+
+    this.loanformservice.uploadIncome(fd, this.applicationId, this.isEditMode).subscribe({
       next: (res) => {
 
 
@@ -746,7 +757,9 @@ export class Incomeinfo {
 
 
         // append new docs instead of rebuilding from uploadedrespfiles
-        const newDocs = uploadedData.uploadedDocuments || [];
+        const Docs = [...uploadedData?.uploadedDocuments, ...uploadedData?.updatedDocuments];
+        const newDocs = Docs.filter((item: any) => item.documentId === doc.documentId) || [];
+
         this.allDocuments = [...this.allDocuments, ...newDocs];
 
         this.rebuildDocumentMap();
@@ -975,10 +988,6 @@ export class Incomeinfo {
     const normalizedKey = key.toLowerCase();
     if (!doc) {
       doc = this.allDocuments.find(d =>
-        // (d.type && d.type.includes(key)) ||
-        // (d.title && d.title.includes(key)) ||
-        // (d.fileName && d.fileName.includes(key)) ||
-        // (d.slotKey && d.slotKey.includes(key))
 
         d.slotKey?.toLowerCase() === normalizedKey ||
         d.title?.toLowerCase() === normalizedKey ||
@@ -989,17 +998,7 @@ export class Incomeinfo {
     }
 
     return doc || null;
-    // return (
-    //   this.allDocuments.find(doc => doc.title === key) || null
-    // );
 
-    // return this.allDocuments.find(doc =>
-    //     doc.type === key ||
-    //     doc.title === key ||
-    //     doc.fileName === key ||
-    //     doc.title?.includes(key) ||
-    //     doc.fileName?.includes(key)
-    //   ) || null;
 
   }
 
@@ -1065,7 +1064,9 @@ export class Incomeinfo {
         const docToDelete = this.getDocumentByKey(key);
         if (!docToDelete) return;
         console.log("Deleting document:", docToDelete, this.allDocuments);
-
+        this.deletedDocs.push(this.allDocuments.find(doc =>
+          doc.documentId === docToDelete.documentId
+        ));
 
         this.allDocuments = this.allDocuments.filter(doc =>
           doc.documentId !== docToDelete.documentId
@@ -1087,7 +1088,7 @@ export class Incomeinfo {
         const keyLocal = this.getStorageKey();
         const stepData = {
           uploadedFiles: this.uploadedrespfiles,
-           allDocuments: this.allDocuments,
+          allDocuments: this.allDocuments,
           otherIncomeSlots: this.otherIncomeSlots,
           otherBusinessSlots: this.otherBusinessSlots
         };
@@ -1446,83 +1447,83 @@ export class Incomeinfo {
 
     if (hasBusinessDocs && business) {
       // if (!this.isSalariedUser() && business) {
-        // Business finance -> year1 year2 year3
-        (business.business_finance_3_years || []).forEach((item: any, i: number) => {
-          this.allDocuments.push(
-            this.buildSummaryDoc(
-              item,
-              `year${i + 1}`,
-              'BUSINESS_FINANCE',
-              'BUSINESS',
-              'BUSINESS_FINANCE_3_YEARS',
-              `year${i + 1}`
-            )
-          );
+      // Business finance -> year1 year2 year3
+      (business.business_finance_3_years || []).forEach((item: any, i: number) => {
+        this.allDocuments.push(
+          this.buildSummaryDoc(
+            item,
+            `year${i + 1}`,
+            'BUSINESS_FINANCE',
+            'BUSINESS',
+            'BUSINESS_FINANCE_3_YEARS',
+            `year${i + 1}`
+          )
+        );
+      });
+
+      // Business ITR -> businessITR1 businessITR2 businessITR3
+      (business.business_itr_3_years || []).forEach((item: any, i: number) => {
+        this.allDocuments.push(
+          this.buildSummaryDoc(
+            item,
+            `businessITR${i + 1}`,
+            'BUSINESS_ITR',
+            'BUSINESS',
+            'BUSINESS_ITR_3_YEARS',
+            `businessITR${i + 1}`
+          )
+        );
+      });
+
+      // GST
+      (business.business_gst_1_year || []).forEach((item: any) => {
+        this.allDocuments.push(
+          this.buildSummaryDoc(
+            item,
+            'businessGST',
+            'BUSINESS_GST',
+            'BUSINESS',
+            'BUSINESS_GST_1_YEAR',
+            'businessGST'
+          )
+        );
+      });
+
+      // bank statement
+      (business.business_bank_statement_1_year || []).forEach((item: any) => {
+        this.allDocuments.push(
+          this.buildSummaryDoc(
+            item,
+            'businessBankstatement',
+            'BUSINESS_BANK_STATEMENT',
+            'BUSINESS',
+            'BUSINESS_BANK_STATEMENT_1_YEAR',
+            'businessBankstatement'
+          )
+        );
+      });
+
+      // other business income
+      (business.otherBussinessincome || []).forEach((item: any, i: number) => {
+        const title = item.name || `Other Business ${i + 1}`;
+
+        this.otherBusinessSlots.push({
+          id: i + 1,
+          key: `other_business_${i + 1}`,
+          title
         });
 
-        // Business ITR -> businessITR1 businessITR2 businessITR3
-        (business.business_itr_3_years || []).forEach((item: any, i: number) => {
-          this.allDocuments.push(
-            this.buildSummaryDoc(
-              item,
-              `businessITR${i + 1}`,
-              'BUSINESS_ITR',
-              'BUSINESS',
-              'BUSINESS_ITR_3_YEARS',
-              `businessITR${i + 1}`
-            )
-          );
-        });
-
-        // GST
-        (business.business_gst_1_year || []).forEach((item: any) => {
-          this.allDocuments.push(
-            this.buildSummaryDoc(
-              item,
-              'businessGST',
-              'BUSINESS_GST',
-              'BUSINESS',
-              'BUSINESS_GST_1_YEAR',
-              'businessGST'
-            )
-          );
-        });
-
-        // bank statement
-        (business.business_bank_statement_1_year || []).forEach((item: any) => {
-          this.allDocuments.push(
-            this.buildSummaryDoc(
-              item,
-              'businessBankstatement',
-              'BUSINESS_BANK_STATEMENT',
-              'BUSINESS',
-              'BUSINESS_BANK_STATEMENT_1_YEAR',
-              'businessBankstatement'
-            )
-          );
-        });
-
-        // other business income
-        (business.otherBussinessincome || []).forEach((item: any, i: number) => {
-          const title = item.name || `Other Business ${i + 1}`;
-
-          this.otherBusinessSlots.push({
-            id: i + 1,
-            key: `other_business_${i + 1}`,
+        this.allDocuments.push(
+          this.buildSummaryDoc(
+            item,
+            title,
+            'OTHER',
+            'OTHER',
+            'OTHER_BUSSINESS_INCOME',
             title
-          });
-
-          this.allDocuments.push(
-            this.buildSummaryDoc(
-              item,
-              title,
-              'OTHER',
-              'OTHER',
-              'OTHER_BUSSINESS_INCOME',
-              title
-            )
-          );
-        });
+          )
+        );
+      });
       // }
     }
 
@@ -2222,7 +2223,7 @@ export class Incomeinfo {
   private restoreStepperFlagsAfterRefresh(): void {
     if (this.isCoApplicant) {
       // const coState = JSON.parse(localStorage.getItem('coApplicantState') || '{}');
-const coState = JSON.parse(localStorage.getItem(this.stepperService.getCoApplicantStateKey()) || '{}');
+      const coState = JSON.parse(localStorage.getItem(this.stepperService.getCoApplicantStateKey()) || '{}');
 
       this.loanformservice.coApplicantState = {
         ...this.loanformservice.coApplicantState,
@@ -2261,7 +2262,7 @@ const coState = JSON.parse(localStorage.getItem(this.stepperService.getCoApplica
 
         const stepData = {
           uploadedFiles: this.uploadedrespfiles,
-           allDocuments: this.allDocuments,
+          allDocuments: this.allDocuments,
           otherIncomeSlots: this.otherIncomeSlots,
           otherBusinessSlots: this.otherBusinessSlots
         };
@@ -2386,7 +2387,7 @@ const coState = JSON.parse(localStorage.getItem(this.stepperService.getCoApplica
 
       const stepData = {
         uploadedFiles: this.uploadedrespfiles,
-         allDocuments: this.allDocuments,
+        allDocuments: this.allDocuments,
         otherIncomeSlots: this.otherIncomeSlots,
         otherBusinessSlots: this.otherBusinessSlots
       };
@@ -2433,8 +2434,8 @@ const coState = JSON.parse(localStorage.getItem(this.stepperService.getCoApplica
     }
   }
 
-    //edit from summary enable and disbale
- enableForm(){
+  //edit from summary enable and disbale
+  enableForm() {
     this.isViewMode = false;
     this.isEditMode = true;
     this.incomeForm.enable();
@@ -2456,12 +2457,12 @@ const coState = JSON.parse(localStorage.getItem(this.stepperService.getCoApplica
   }
 
   // edit sucess popup
-   onCancel() {
+  onCancel() {
     this.editSuccess = false;
   }
 
-  handleSuccessAction(action: string){
-    if(action === "OK"){
+  handleSuccessAction(action: string) {
+    if (action === "OK") {
       this.editSuccess = false;
       this.isViewMode = true;
       this.isEditMode = false;

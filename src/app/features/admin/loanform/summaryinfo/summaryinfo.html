@@ -39,53 +39,7 @@
 
                                 <div class="accordion-body p-0 ">
 
-                                    <!-- <ng-container *ngIf="i === 0">
-                                        <ng-container *ngTemplateOutlet="generalTemplate; context:{index:i}">
-                                        </ng-container>
-                                    </ng-container>
-
-                                    <ng-container *ngIf="i === 1">
-                                        <ng-container *ngTemplateOutlet="estexpenseTemplate; context:{index:i}">
-                                        </ng-container>
-                                    </ng-container>
-
-                                    <ng-container *ngIf="i === 2">
-                                        <ng-container *ngTemplateOutlet="additonalTemplate; context:{index:i}">
-                                        </ng-container>
-                                    </ng-container>
-
-                                    <ng-container *ngIf="i === 3">
-                                        <ng-container *ngTemplateOutlet="kycTemplate; context:{index:i}">
-                                        </ng-container>
-                                    </ng-container>
-                                    <ng-container *ngIf="i === 4">
-                                        <ng-container *ngTemplateOutlet="educationTemplate; context:{index:i}">
-                                        </ng-container>
-                                    </ng-container>
-                                    <ng-container *ngIf="i === 5">
-                                        <ng-container *ngTemplateOutlet="incomeTemplate; context:{index:i}">
-                                        </ng-container>
-                                    </ng-container>
-
-                                    <ng-container *ngIf="i === 6">
-                                        <ng-container *ngTemplateOutlet="assetsTemplate; context:{index:i}">
-                                        </ng-container>
-                                    </ng-container>
-
-                                    <ng-container *ngIf="i === 7">
-                                        <ng-container *ngTemplateOutlet="liabilitiesTemplate; context:{index:i}">
-                                        </ng-container>
-                                    </ng-container>
-                                    <ng-container *ngIf="i === 8">
-                                        <ng-container *ngTemplateOutlet="monthlyexpTemplate; context:{index:i}">
-                                        </ng-container>
-                                    </ng-container>
-
-                                    <ng-container *ngIf="i === 9">
-                                        <ng-container *ngTemplateOutlet="referenceTemplate; context:{index:i}">
-                                        </ng-container>
-                                    </ng-container> -->
-
+                                   
                                     <ng-container [ngSwitch]="acc.key">
 
                                         <ng-container *ngSwitchCase="'general'">
@@ -215,9 +169,6 @@
                             </div>
                         </div>
                     </ng-template>
-
-
-
 
                     <ng-template #estexpenseTemplate let-i="index">
                         <div class="row common-details-box d-flex flex-row">
@@ -453,8 +404,6 @@
                         </div>
                     </ng-template>
 
-
-
                     <ng-template #additonalTemplate let-i="index">
 
                         <div class="row common-details-box d-flex flex-row">
@@ -670,50 +619,7 @@
                                     </div>
 
 
-                                    <!-- <div class="info-grid-img mt-10">
-
-                                        <ng-container *ngFor="let field of EducationInfoFields[section.key]">
-
-                                            <ng-container *ngIf="field.key === 'marksheetUrl'">
-
-                                            
-                                                <ng-container *ngIf="isArray(field.value); else singleMarksheet">
-
-                                                    <div *ngFor="let file of field.value; let i = index"
-                                                        class="info-item d-flex flex-column">
-
-                                                        <label class="text-label">
-                                                            {{ i + 1 }} Year Marksheet
-                                                        </label>
-
-                                                        <div class="text-label-data fw-bold">
-                                                            <a>
-                                                                {{ file.split('/').pop() }}
-                                                            </a>
-                                                        </div>
-
-                                                    </div>
-
-                                                </ng-container>
-
-                                        
-                                                <ng-template #singleMarksheet>
-                                                    <div class="info-item d-flex flex-column">
-                                                        <label class="text-label">Marksheet</label>
-                                                        <div class="text-label-data fw-bold">
-                                                            <a>
-                                                                {{ field.value.split('/').pop() }}
-                                                            </a>
-                                                        </div>
-                                                    </div>
-                                                </ng-template>
-
-                                            </ng-container>
-
-                                        </ng-container>
-
-                                    </div> -->
-
+                                    
                                 </div>
 
 
@@ -1093,7 +999,9 @@
 
                     </ng-template>
 
-            
+  
+   
+    
         <ng-template #coappChildTemplate let-coapp="coapp">
                         <ng-container>
                             <div class="row common-details-box d-flex flex-row">
@@ -1103,7 +1011,7 @@
                                         <div class="d-flex justify-content-between flex-row align-self-stretch">
                                             <label class="text-body-1 fw-bold blue-text">Basic Info</label>
                                             <button class="btn btn-sm btn-outline-danger px-4"
-                                                (click)="editCoApplicant(coapp)">
+                                                (click)="editCoApplicant(coapp,'co-basicinfo')">
                                                 Edit
                                             </button>
                                         </div>
@@ -1150,7 +1058,7 @@
                                         <div class="d-flex justify-content-between flex-row align-self-stretch">
                                             <label class="text-body-1 fw-bold blue-text">General Info</label>
                                             <button class="btn btn-sm btn-outline-danger px-4"
-                                                (click)="editCoApplicant(coapp)">
+                                                (click)="editCoApplicant(coapp, 'co-generalinfo')">
                                                 Edit
                                             </button>
                                         </div>
@@ -1185,7 +1093,7 @@
                                         <div class="d-flex justify-content-between flex-row align-self-stretch">
                                             <label class="text-body-1 fw-bold blue-text">Additional Info</label>
                                             <button class="btn btn-sm btn-outline-danger px-4"
-                                                (click)="editCoApplicant(coapp)">
+                                                (click)="editCoApplicant(coapp,'co-additionalinfo')">
                                                 Edit
                                             </button>
                                         </div>
@@ -1236,10 +1144,10 @@
                                     <div class="common-details-box1 mt-20">
                                         <div class="d-flex justify-content-between flex-row align-self-stretch">
                                             <label class="text-body-1 fw-bold blue-text">KYC</label>
-                                            <button class="btn btn-sm btn-outline-danger px-4"
+                                            <!-- <button class="btn btn-sm btn-outline-danger px-4"
                                                 (click)="editCoApplicant(coapp)">
                                                 Edit
-                                            </button>
+                                            </button> -->
                                         </div>
                                         <hr class="hrclass" />
         
@@ -1292,7 +1200,7 @@
                                         <div class="d-flex justify-content-between flex-row align-self-stretch">
                                             <label class="text-body-1 fw-bold blue-text">Income Details</label>
                                             <button class="btn btn-sm btn-outline-danger px-4"
-                                                (click)="editCoApplicant(coapp)">
+                                                (click)="editCoApplicant(coapp,'co-incomeinfo')">
                                                 Edit
                                             </button>
                                         </div>
@@ -1401,7 +1309,7 @@
                                             <label class="text-body-1 fw-bold blue-text">Assets - ₹ {{
                                                 formatInr(coapp.totalAssets) }}</label>
                                             <button class="btn btn-sm btn-outline-danger px-4"
-                                                (click)="editCoApplicant(coapp)">
+                                                (click)="editCoApplicant(coapp,'co-assetsinfo')">
                                                 Edit
                                             </button>
                                         </div>
@@ -1457,7 +1365,7 @@
                                             <label class="text-body-1 fw-bold blue-text">Liabilities - ₹ {{
                                                 formatInr(coapp.totalLiabilities) }}</label>
                                             <button class="btn btn-sm btn-outline-danger px-4"
-                                                (click)="editCoApplicant(coapp)">
+                                                (click)="editCoApplicant(coapp,'co-liabilitiesinfo')">
                                                 Edit
                                             </button>
                                         </div>
@@ -1509,7 +1417,7 @@
                                         <div class="d-flex justify-content-between flex-row align-self-stretch">
                                             <label class="text-body-1 fw-bold blue-text">Monthly Expense</label>
                                             <button class="btn btn-sm btn-outline-danger px-4"
-                                                (click)="editCoApplicant(coapp)">
+                                                (click)="editCoApplicant(coapp, 'co-monthlyexpinfo')">
                                                 Edit
                                             </button>
                                         </div>

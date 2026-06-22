@@ -41,11 +41,18 @@ verifyOTP(data:any): Observable<any> {
     );
   }
 
-  generateCIF(data:any): Observable<any> {
-    return this.http.post<any>(
-      `${this.baseUrl}/v1/user/generate-cif`,data,
+  generateCIF(payload:any,edit?:boolean): Observable<any> {
+
+
+    // return this.http.post<any>(
+    //   `${this.baseUrl}/v1/user/generate-cif`,data,
       
-    );
+    // );
+
+    const url = `${this.baseUrl}/v1/user/generate-cif`;
+ return edit
+    ? this.http.put<any>(url, payload)
+    : this.http.post<any>(url, payload);
   }
 
   uploadkycdocuments(data:any): Observable<any> {

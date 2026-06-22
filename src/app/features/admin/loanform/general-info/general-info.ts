@@ -24,7 +24,7 @@ interface OptionItem {
 
 @Component({
   selector: 'app-general-info',
-  imports: [CommonModule, Inputfield, Dropdown, Buttons, Radiobuttons, Datepickernew, ReactiveFormsModule,Successbox,Messagebox],
+  imports: [CommonModule, Inputfield, Dropdown, Buttons, Radiobuttons, Datepickernew, ReactiveFormsModule, Successbox, Messagebox],
   standalone: true,
   templateUrl: './general-info.html',
   styleUrl: './general-info.scss'
@@ -145,12 +145,12 @@ export class GeneralInfo implements OnInit {
   isSummaryEditMode = false;
   viewOnly = false;
 
-    //edit from summary
+  //edit from summary
   isFromSummary = false;
   isViewMode = false;
   isEditMode = false;
   originalFormValue: any = null;
-  
+
   editSuccess: any = false;
   description1 = `Great ! Your Additional Info Details\n Uploaded Successfully.`;
 
@@ -283,7 +283,18 @@ export class GeneralInfo implements OnInit {
       co_checkedasset: [null, Validators.required],
     });
 
+    this.isFromSummary = this.formSvc.isSummaryEditFlow();
 
+    if (this.isFromSummary) {
+      this.isViewMode = true;
+      this.activeForm.disable();
+      //   if (this.isCoApplicant) {
+      //   this.coapp_registerForm.disable();
+      // } else {
+      //   this.registerForm.disable();
+      // }
+
+    }
     if (this.viewOnly) {
       this.activeForm.disable({ emitEvent: false });
     }
@@ -318,18 +329,7 @@ export class GeneralInfo implements OnInit {
     this.listenToChanges();
     await this.loadGeneralInfoForBothFlows()
 
-      this.isFromSummary = this.formSvc.isSummaryEditFlow();
 
-    if(this.isFromSummary){
-      this.isViewMode = true;
-      this.activeForm.disable();
-      //   if (this.isCoApplicant) {
-      //   this.coapp_registerForm.disable();
-      // } else {
-      //   this.registerForm.disable();
-      // }
-      
-    }
 
 
   }
@@ -725,9 +725,9 @@ export class GeneralInfo implements OnInit {
       //   JSON.stringify(this.formSvc.coApplicantState)
       // );
       localStorage.setItem(
-  this.stepperService.getCoApplicantStateKey(),
-  JSON.stringify(this.formSvc.coApplicantState)
-);
+        this.stepperService.getCoApplicantStateKey(),
+        JSON.stringify(this.formSvc.coApplicantState)
+      );
 
       this.stepperService.setApplicantValues('coapp', this.formSvc.coApplicantState);
     } else {
@@ -1443,7 +1443,7 @@ export class GeneralInfo implements OnInit {
 
     let input = this.buildMainPayload(formdata);
 
-    this.formSvc.submitGenralInfo(input, this.applicationId,false).subscribe(res => {
+    this.formSvc.submitGenralInfo(input, this.applicationId, false).subscribe(res => {
       if (res.status === "success") {
         this.lastSavedPayload = { ...input };
 
@@ -1483,7 +1483,7 @@ export class GeneralInfo implements OnInit {
       hasAssets: payload.hasAssets// this.checkboxasset === "Yes",
     };
 
-    this.formSvc.submit_Coapp_GenralInfo(input, this.applicationId,false).subscribe(res => {
+    this.formSvc.submit_Coapp_GenralInfo(input, this.applicationId, false).subscribe(res => {
       if (res.status === "success") {
 
         const localPayload = {
@@ -1605,7 +1605,7 @@ export class GeneralInfo implements OnInit {
     }
 
     console.log(input);
-    this.formSvc.submitGenralInfo(input, this.applicationId,false).pipe().subscribe({
+    this.formSvc.submitGenralInfo(input, this.applicationId, false).pipe().subscribe({
       next: (res) => {
 
         if (res.status == "success") {
@@ -1644,9 +1644,9 @@ export class GeneralInfo implements OnInit {
   }
 
 
-    //edit from summary enable and disbale
+  //edit from summary enable and disbale
 
-      enableForm(){
+  enableForm() {
     this.isViewMode = false;
     this.isEditMode = true;
     this.activeForm.enable();
@@ -1684,10 +1684,10 @@ export class GeneralInfo implements OnInit {
 
           console.log(res);
 
-         
+
           this.editSuccess = true;
-         
-                 }
+
+        }
       },
       error: (err) => {
         console.error('Additional info update failed', err);
@@ -1696,16 +1696,16 @@ export class GeneralInfo implements OnInit {
   }
 
   // edit sucess popup
-   onCancel() {
+  onCancel() {
     this.editSuccess = false;
   }
 
-  handleSuccessAction(action: string){
-    if(action === "OK"){
+  handleSuccessAction(action: string) {
+    if (action === "OK") {
       this.editSuccess = false;
       this.isViewMode = true;
       this.isEditMode = false;
-       this.activeForm.disable();
+      this.activeForm.disable();
     }
   }
 }

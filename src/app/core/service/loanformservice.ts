@@ -6,6 +6,14 @@ import { environment } from '../../../environments/environment';
 import { HttpClient } from '@angular/common/http';
 import { Loanstepperservice } from './loanstepperservice';
 
+
+type SummaryFlowContext = {
+  edit: boolean;
+  fromSummary: boolean;
+  applicantType: 'MAIN' | 'CO_APPLICANT';
+  action: 'VIEW' | 'EDIT' | 'ADD_COAPPLICANT';
+};
+
 export interface ApiResponse<T> {
   status: string;
   code: number;
@@ -209,7 +217,7 @@ export class Loanformservice {
   }
 
   // ************************* save general info api  *************************
-  submitGenralInfo(payload: any, id: string,edit: boolean): Observable<ApiResponse<any>> {
+  submitGenralInfo(payload: any, id: string,edit?: boolean): Observable<ApiResponse<any>> {
     if(edit){
       return this.http.put<ApiResponse<any>>(
         `${this.baseUrl}/v1/los/applications/${id}/general-info`,
@@ -223,7 +231,7 @@ export class Loanformservice {
   }
 
   //coapplicant genrela info 
-  submit_Coapp_GenralInfo(payload: any, id: string,edit:boolean): Observable<ApiResponse<any>> {
+  submit_Coapp_GenralInfo(payload: any, id: string,edit?:boolean): Observable<ApiResponse<any>> {
     // return this.http.post<ApiResponse<any>>(
     //   `${this.baseUrl}/v1/los/applications/coApp-general-info`,
     //   payload
@@ -645,8 +653,8 @@ submitAdditionalInfo(
     this.setSummary(data);
   }
 
-  isSummaryEditFlow(): boolean {
-    const ctx = sessionStorage.getItem(this.SUMMARY_EDIT_CONTEXT_KEY);
+isSummaryEditFlow(): boolean {
+      const ctx = sessionStorage.getItem(this.SUMMARY_EDIT_CONTEXT_KEY);
 
     if (!ctx) return false;
 

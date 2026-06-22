@@ -20,7 +20,7 @@ import { Successbox } from '../../customer/successbox/successbox';
 
 @Component({
   selector: 'app-basicinfo',
-  imports: [CommonModule, Inputfield, Buttons, ReactiveFormsModule, Checkbox, Otpsection,Successbox,Messagebox],
+  imports: [CommonModule, Inputfield, Buttons, ReactiveFormsModule, Checkbox, Otpsection,Successbox],
   standalone: true,
   templateUrl: './basicinfo.html',
   styleUrl: './basicinfo.scss'
@@ -198,7 +198,12 @@ export class Basicinfo {
       ]]
     });
 
+this.isFromSummary = this.loanform.isSummaryEditFlow();
 
+    if (this.isFromSummary) {
+      this.isViewMode = true;
+      this.registerForm.disable();
+    }
     const currentCoapp = this.getCurrentCoApplicantFromList();
 
     const existingCoApplicantId =
@@ -262,15 +267,10 @@ export class Basicinfo {
     }
 
 
-  this.isFromSummary = this.loanform.isSummaryEditFlow();
-
-    if (this.isFromSummary) {
-      this.isViewMode = true;
-      this.registerForm.disable();
-    }
+  
   }
   get f() {
-    return this.registerForm.controls;
+    return this.registerForm.controls  || {};
   }
 
 
@@ -961,8 +961,14 @@ export class Basicinfo {
     this.router.navigate(['../coapplicantinfo']);
   }
   next() {
-    let formdata = this.registerForm.getRawValue();
-    if (this.registerForm.invalid) return;
+     console.log('FNAME =>', this.registerForm.get('fname')?.value);
+    
+  if (this.registerForm.invalid) {
+    this.registerForm.markAllAsTouched();
+    return;
+  }
+  let formdata = this.registerForm.getRawValue();
+  
 
     const input = this.buildBasicPayload(formdata);
     const hasChanged = this.isPayloadChanged(input, this.lastSavedPayload);
@@ -1149,28 +1155,28 @@ export class Basicinfo {
   saveSummaryEdit() {
     this.submitAttempted = true;
 
-    // if (!this.canProceed) {
-    //   this.registerForm.markAllAsTouched();
-    //   return;
-    // }
+    if (!this.registerForm.valid) {
+      this.registerForm.markAllAsTouched();
+      return;
+    }
 
     const formdata = this.registerForm.getRawValue();
     const input = this.buildBasicPayload(formdata);
 
-    this.loanform.submitAdditionalInfo(input, this.applicationId, true).subscribe({
+    this.addcustomerservice.generateCIF(input).subscribe({
       next: (res: any) => {
         if (res.status === 'success') {
           const key = this.getStorageKey();
           // localStorage.setItem(key, JSON.stringify(input));
           this.storageservice.saveSectionData(
-            'additionalinfo',
+            'basicInfo',
             this.applicationId,
             this.applicantId,
             this.isCoApplicant,
             input
           );
          
-            this.loanform.additionalInfoData = input;
+            this.loanform.co_basicInfoData = input;
           
 
           this.lastSavedPayload = { ...input };

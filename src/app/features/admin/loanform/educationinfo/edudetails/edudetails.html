@@ -1,22 +1,36 @@
 <div class="vh-container">
     <div class="base-layout base-height" *ngIf="!isChildActive">
 
-        <div class="header ">
+        <div class="header w-100 ">
+             <div class="d-flex justify-content-between">
+                <div class="text-datepicker blue-text d-flex flex-column gap-2 ">Education Details
+                    <div class="text-body-1 fw-normal" *ngIf="!isFromSummary">
+                        <span ><svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 22 22"
+                                fill="none">
+                                <path
+                                    d="M10.9997 20.1667C16.0413 20.1667 20.1663 16.0417 20.1663 11C20.1663 5.95833 16.0413 1.83333 10.9997 1.83333C5.95801 1.83333 1.83301 5.95833 1.83301 11C1.83301 16.0417 5.95801 20.1667 10.9997 20.1667Z"
+                                    stroke="#25262F" stroke-width="1.28125" stroke-linecap="round"
+                                    stroke-linejoin="round" />
+                                <path d="M11 7.33333V11.9167" stroke="#25262F" stroke-width="1.28125" stroke-linecap="round"
+                                    stroke-linejoin="round" />
+                                <path d="M10.9961 14.6667H11.0043" stroke="#25262F" stroke-width="1.28125"
+                                    stroke-linecap="round" stroke-linejoin="round" />
+                            </svg></span>
+                        Click the “Next” button to save your changes
+                    </div>
+                </div>
 
-            <div class="text-datepicker blue-text d-flex flex-column gap-2 ">Education Details
-                <div class="text-body-1 fw-normal">
-                    <span><svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 22 22"
-                            fill="none">
-                            <path
-                                d="M10.9997 20.1667C16.0413 20.1667 20.1663 16.0417 20.1663 11C20.1663 5.95833 16.0413 1.83333 10.9997 1.83333C5.95801 1.83333 1.83301 5.95833 1.83301 11C1.83301 16.0417 5.95801 20.1667 10.9997 20.1667Z"
-                                stroke="#25262F" stroke-width="1.28125" stroke-linecap="round"
-                                stroke-linejoin="round" />
-                            <path d="M11 7.33333V11.9167" stroke="#25262F" stroke-width="1.28125" stroke-linecap="round"
-                                stroke-linejoin="round" />
-                            <path d="M10.9961 14.6667H11.0043" stroke="#25262F" stroke-width="1.28125"
-                                stroke-linecap="round" stroke-linejoin="round" />
-                        </svg></span>
-                    Click the “Next” button to save your changes
+                <div>
+                    <app-buttons
+                        *ngIf="isFromSummary"
+                        type="button"
+                        label="Edit"
+                        class="btn btn-icon edit btncustomClass editBtnClass"
+                        color="primary"
+                        (click)="enableForm()"
+                        [disabled]="!isViewMode">
+                        <img src="assets/images/icons/edit-white.svg" alt="edit">
+                    </app-buttons>
                 </div>
             </div>
 
@@ -184,7 +198,7 @@
 
       <app-successbox [title]="description1"
         [buttons]="[
-            { label: 'OK', action: '', outline: false, color: 'primary',class: 'btncustomClass w-50'  },
+            { label: 'OK', action: 'OK', outline: false, color: 'primary',class: 'btncustomClass w-50'  },
         ]" (actionClick)="handleSuccessAction($event)"
     >
     </app-successbox>
