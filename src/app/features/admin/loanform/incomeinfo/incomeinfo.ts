@@ -2454,5 +2454,18 @@ const coState = JSON.parse(localStorage.getItem(this.stepperService.getCoApplica
   saveSummaryEdit() {
     this.next();
   }
+
+  // edit sucess popup
+   onCancel() {
+    this.editSuccess = false;
+  }
+
+  handleSuccessAction(action: string){
+    if(action === "OK"){
+      this.editSuccess = false;
+      this.isViewMode = true;
+      this.isEditMode = false;
+    }
+  }
 }
 

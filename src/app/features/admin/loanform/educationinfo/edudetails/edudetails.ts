@@ -13,6 +13,7 @@ import { Msgboxservice } from '../../../../../core/service/msgboxservice';
 import { firstValueFrom } from 'rxjs';
 import { Successbox } from '../../../customer/successbox/successbox';
 import { Messagebox } from "../../../../systemdesign/messagebox/messagebox";
+import { Storage } from '../../../../../core/service/storage';
 interface OptionItem {
   label: string;
   value: string;
@@ -134,7 +135,7 @@ export class Edudetails {
 
   
   constructor(private fb: FormBuilder, private stepperService: Loanstepperservice, private cd: ChangeDetectorRef, private formSvc: Loanformservice, private msgBox:Msgboxservice,private msgbox: Msgboxservice,
-    private route: ActivatedRoute, private router: Router) { }
+    private route: ActivatedRoute, private router: Router,private storageservice:Storage) { }
   async ngOnInit() {
 
 
@@ -1320,5 +1321,103 @@ const key = this.getEducationDetailsStorageKey();
 
 
 
+  }
+
+//edit from summary
+ enableForm() {
+    this.isViewMode = false;
+    this.isEditMode = true;
+    this.basicform.enable();
+    this.formSvc.clearSummaryEditFlow();
+  }
+
+  disableAdditionalInfoForm() {
+    this.basicform.disable({ emitEvent: false });
+  }
+
+  enableAdditionalInfoForm() {
+    this.basicform.enable({ emitEvent: false });
+
+    
+  }
+
+  onEditClick() {
+    this.isViewMode = false;
+    this.isEditMode = true;
+
+    this.enableAdditionalInfoForm();
+
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: {
+        fromSummary: true,
+        mode: 'edit'
+      },
+      queryParamsHandling: 'merge'
+    });
+  }
+  cancelSummaryEdit() {
+    if (this.isEditMode && this.originalFormValue) {
+      this.basicform.patchValue(this.originalFormValue);
+    }
+    this.isViewMode = false;
+    this.isEditMode = false;
+    this.formSvc.clearSummaryEditFlow();
+    // this.router.navigate(['/applications', this.applicationId, 'summary']);
+  }
+  saveSummaryEdit() {
+    // this.submitAttempted = true;
+
+    // if (!this.canProceed) {
+    //   this.basicform.markAllAsTouched();
+    //   return;
+    // }
+
+    const formdata = this.basicform.getRawValue();
+    const input = this.buildEduDetailsPayload();
+
+    this.formSvc.submitAdditionalInfo(input, this.applicationId, true).subscribe({
+      next: (res: any) => {
+        if (res.status === 'success') {
+          // const key = this.getStorageKey();
+          // localStorage.setItem(key, JSON.stringify(input));
+          this.storageservice.saveSectionData(
+            'additionalinfo',
+            this.applicationId,
+            this.applicantId,
+            this.isCoApplicant,
+            input
+          );
+          if (this.isCoApplicant) {
+            this.formSvc.co_additionalInfoData = input;
+          } else {
+            this.formSvc.additionalInfoData = input;
+          }
+
+          this.lastSavedPayload = { ...input };
+
+        
+            this.editSuccess = true;
+         
+
+        }
+      },
+      error: (err) => {
+        console.error('Additional info update failed', err);
+      }
+    });
+  }
+  // edit sucess popup
+   onCancel() {
+    this.editSuccess = false;
+  }
+
+  handleSuccessAction(action: string){
+    if(action === "OK"){
+      this.editSuccess = false;
+      this.isViewMode = true;
+      this.isEditMode = false;
+      //  this.activeForm.disable();
+    }
   }
 }
