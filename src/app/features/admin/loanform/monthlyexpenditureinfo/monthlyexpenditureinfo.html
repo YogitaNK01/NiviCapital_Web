@@ -328,7 +328,7 @@
                     @if(i == other.length - 1){
                     <div class="form-group common-details-box pt-0">
                         <app-buttons label="Add Other Recurring Expense" class="btn btn-icon Add btncustomClass"
-                            [outline]="true" (click)="addmore()">
+                            [outline]="true" (click)="addmore()" [ngClass]="{'disabled-div': isViewMode}">
                             <img src="/assets/images/icons/addred.svg">
                         </app-buttons>
 
@@ -353,7 +353,7 @@
                 </app-buttons>
                 <!-- <app-buttons type="button" label="Next" class="btn btncustomClass" color="primary" (click)="next1()" ></app-buttons> -->
                 <app-buttons type="button" label="Next" class="btn btncustomClass" color="primary" (click)="next()"
-                    [disabled]="isNextDisabled">
+                    [disabled]="isNextDisabled" [ngClass]="{'disabled-div': isNextDisabled}">
                 </app-buttons>
 
             </div>
@@ -367,7 +367,7 @@
                 </app-buttons>
 
                 <app-buttons type="button" label="Save" class="btn btncustomClass" color="primary"
-                    (click)="saveSummaryEdit()" [disabled]="isNextDisabled">
+                    (click)="saveSummaryEdit()" [disabled]="isNextDisabled" [ngClass]="{'disabled-div': isNextDisabled}">
                 </app-buttons>
 
             </div>

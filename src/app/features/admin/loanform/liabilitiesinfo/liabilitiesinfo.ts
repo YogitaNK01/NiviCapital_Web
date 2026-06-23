@@ -2578,9 +2578,8 @@ return this.isCoApplicant
     }
 
     this.isViewMode = false;
-    this.isEditMode = false;
-
-    this.router.navigate(['/applications', this.applicationId, 'summaryinfo']);
+    this.isEditMode = true;
+    this.liabilityForm.disable();
   }
 
   saveSummaryEdit() {

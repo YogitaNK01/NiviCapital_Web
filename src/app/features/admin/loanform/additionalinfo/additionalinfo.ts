@@ -1133,7 +1133,6 @@ export class Additionalinfo implements OnInit {
     this.isViewMode = false;
     this.isEditMode = true;
     this.additionalinfoForm.enable();
-    this.formSvc.clearSummaryEditFlow();
   }
 
   disableAdditionalInfoForm() {
@@ -1166,10 +1165,9 @@ export class Additionalinfo implements OnInit {
     if (this.isEditMode && this.originalFormValue) {
       this.additionalinfoForm.patchValue(this.originalFormValue);
     }
-    this.isViewMode = false;
+    this.isViewMode = true;
     this.isEditMode = false;
-    this.formSvc.clearSummaryEditFlow();
-    // this.router.navigate(['/applications', this.applicationId, 'summary']);
+    this.additionalinfoForm.disable({ emitEvent: false });
   }
   saveSummaryEdit() {
     this.submitAttempted = true;

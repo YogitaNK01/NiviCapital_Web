@@ -1117,7 +1117,6 @@ this.isFromSummary = this.loanform.isSummaryEditFlow();
     this.isViewMode = false;
     this.isEditMode = true;
     this.registerForm.enable();
-    this.loanform.clearSummaryEditFlow();
   }
 
   disableAdditionalInfoForm() {
@@ -1147,10 +1146,8 @@ this.isFromSummary = this.loanform.isSummaryEditFlow();
     if (this.isEditMode && this.originalFormValue) {
       this.registerForm.patchValue(this.originalFormValue);
     }
-    this.isViewMode = false;
+    this.isViewMode = true;
     this.isEditMode = false;
-    this.loanform.clearSummaryEditFlow();
-    // this.router.navigate(['/applications', this.applicationId, 'summary']);
   }
   saveSummaryEdit() {
     this.submitAttempted = true;

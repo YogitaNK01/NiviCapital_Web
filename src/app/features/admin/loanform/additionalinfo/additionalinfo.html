@@ -21,13 +21,13 @@
 
                 <div>
                     <app-buttons
-                        *ngIf="isFromSummary"
+                        *ngIf="isFromSummary && !isEditMode"
                         type="button"
                         label="Edit"
                         class="btn btn-icon edit btncustomClass editBtnClass"
                         color="primary"
                         (click)="enableForm()"
-                        [disabled]="!isViewMode">
+                        [disabled]="!isViewMode" [ngClass]="{'disabled-div' : !isViewMode}">
                         <img src="assets/images/icons/edit-white.svg" alt="edit">
                     </app-buttons>
                 </div>
@@ -208,8 +208,8 @@
 
                     </div>
 
-                    <app-checkbox [checked]="isspousemiddlename" [indeterminate]="false"
-                        label="I don’t have middle name" (checkedChange)="onmiddlename($event)">
+                    <app-checkbox [checked]="isspousemiddlename" [indeterminate]="false" 
+                        label="I don’t have middle name" (checkedChange)="onmiddlename($event)" [ngClass]="{'disabled-div' : isViewMode}">
                     </app-checkbox>
                     <div class="text-danger mt-1" *ngIf="
        additionalinfoForm.get('maritalstatus')?.value === 'Married' &&
@@ -292,7 +292,7 @@
                     </div>
 
                     <app-checkbox [checked]="isfathermiddlename" [indeterminate]="false"
-                        label="I don’t have middle name" (checkedChange)="onfathermiddlename($event)">
+                        label="I don’t have middle name" (checkedChange)="onfathermiddlename($event)" [ngClass]="{'disabled-div' : isViewMode}">
                     </app-checkbox>
                     <div class="text-danger mt-1" *ngIf="!isfathermiddlename && submitAttempted && !f['f_mname'].value">
                         Please enter Middle Name or select the checkbox.
@@ -372,7 +372,7 @@
 
                     </div>
                     <app-checkbox [checked]="ismothermiddlename" [indeterminate]="false"
-                        label="I don’t have middle name" (checkedChange)="onmothermiddlename($event)">
+                        label="I don’t have middle name" (checkedChange)="onmothermiddlename($event)" [ngClass]="{'disabled-div' : isViewMode}">
                     </app-checkbox>
                     <div class="text-danger mt-1" *ngIf="!ismothermiddlename && submitAttempted && !f['m_mname'].value">
                         Please enter Middle Name or select the checkbox.
@@ -433,7 +433,7 @@
         <app-buttons type="button" label="Back" class="btn btncustomClass" [outline]="true" (click)="back()">
         </app-buttons>
         <app-buttons type="button" label="Next" class="btn btncustomClass" color="primary" (click)="next()"
-            [disabled]="!canProceed && !submitAttempted">
+            [disabled]="!canProceed && !submitAttempted" [ngClass]="{'disabled-div' : !canProceed && !submitAttempted}">
         </app-buttons>
        
 
@@ -458,6 +458,7 @@
         class="btn btncustomClass"
         color="primary"
         (click)="saveSummaryEdit()"
+        [disabled]="!canProceed && !submitAttempted" [ngClass]="{'disabled-div' : !canProceed && !submitAttempted}"
         >
       </app-buttons>
 

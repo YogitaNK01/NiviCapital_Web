@@ -25,7 +25,7 @@
             
                 <div>
                     <app-buttons
-                        *ngIf="isFromSummary"
+                        *ngIf="isFromSummary && !isEditMode"
                         type="button"
                         label="Edit"
                         class="btn btn-icon edit btncustomClass editBtnClass"
@@ -418,7 +418,7 @@
 
                                 <div class="form-group mb-3">
                                     <app-buttons label="Add Card" class="btn btn-icon Add btncustomClass"
-                                        [outline]="true" (click)="addRow('creditcard', createCreditcard.bind(this))">
+                                        [outline]="true" (click)="addRow('creditcard', createCreditcard.bind(this))" [ngClass]="{'disabled-div': isViewMode}">
                                         <img src="/assets/images/icons/addred.svg">
                                     </app-buttons>
                                 </div>
@@ -559,7 +559,7 @@
                                 <div class="form-group mb-3">
                                     <app-buttons label="Add Buy Now Pay Later (BNPL)"
                                         class="btn btn-icon Add btncustomClass" [outline]="true"
-                                        (click)="addRow('bnpl', createBNPL.bind(this))">
+                                        (click)="addRow('bnpl', createBNPL.bind(this))" [ngClass]="{'disabled-div': isViewMode}">
                                         <img src="/assets/images/icons/addred.svg">
                                     </app-buttons>
                                 </div>
@@ -676,7 +676,7 @@
 
                                 <div class="form-group mb-3">
                                     <app-buttons label="Add Other Liabilities" class="btn btn-icon Add btncustomClass"
-                                        [outline]="true" (click)="addRow('other', createOther.bind(this))">
+                                        [outline]="true" (click)="addRow('other', createOther.bind(this))" [ngClass]="{'disabled-div': isViewMode}">
                                         <img src="/assets/images/icons/addred.svg">
                                     </app-buttons>
                                 </div>
@@ -704,7 +704,7 @@
                 <app-buttons type="button" label="Back" class="btn btncustomClass" [outline]="true" (click)="back()">
                 </app-buttons>
                 <app-buttons type="button" label="Next" class="btn btncustomClass" color="primary" (click)="next()"
-                    [disabled]="isNextDisabled && !hasNoLiabilitiesSelected">
+                    [disabled]="isNextDisabled && !hasNoLiabilitiesSelected" [ngClass]="{'disabled-div': isNextDisabled && !hasNoLiabilitiesSelected}">
                 </app-buttons>
 
             </div>
@@ -718,7 +718,7 @@
                 </app-buttons>
 
                 <app-buttons type="button" label="Save" class="btn btncustomClass" color="primary"
-                    (click)="saveSummaryEdit()"   [disabled]="isNextDisabled && !hasNoLiabilitiesSelected">
+                    (click)="saveSummaryEdit()"   [disabled]="isNextDisabled && !hasNoLiabilitiesSelected" [ngClass]="{'disabled-div': isNextDisabled && !hasNoLiabilitiesSelected}">
                 </app-buttons>
 
             </div>

@@ -1598,10 +1598,9 @@ let data = res.data.data;
       this.monthlyExpenditureForm.patchValue(this.originalFormValue);
     }
 
-    this.isViewMode = false;
+    this.isViewMode = true;
     this.isEditMode = false;
-
-    this.router.navigate(['/applications', this.applicationId, 'summaryinfo']);
+    this.monthlyExpenditureForm.disable();
   }
 
   saveSummaryEdit() {

@@ -1527,6 +1527,18 @@ export class Assetsinfo implements OnInit {
     this.patchAssetsData();
     this.lastSavedPayload = this.buildAssetsPayload();
   }
+  parseDate(dateStr: string): Date | null {
+    if (!dateStr) return null;
+
+    const parts = dateStr.split('/');
+
+    if (parts.length !== 3) return null;
+
+    const [day, month, year] = parts;
+
+    return new Date(+year, +month - 1, +day);
+  }
+
   patchAssetsData(inputData?: any) {
 
     const data = inputData || (
@@ -1613,7 +1625,7 @@ export class Assetsinfo implements OnInit {
           bankname: item.bankId || this.getBankIdByName(item.bankName),
           description: item.description || '',
           bankamt: item.valueInr,
-          maturitydate: item.maturityDate
+          maturitydate:  this.parseDate(item.maturityDate)
         });
 
         this.fixedDeposits.push(group);
@@ -2409,7 +2421,6 @@ export class Assetsinfo implements OnInit {
     this.isViewMode = false;
     this.isEditMode = true;
     this.assetsForm.enable();
-    this.formSvc.clearSummaryEditFlow();
   }
 
   cancelSummaryEdit() {
@@ -2417,11 +2428,9 @@ export class Assetsinfo implements OnInit {
       this.assetsForm.patchValue(this.originalFormValue);
     }
 
-    this.isViewMode = false;
+    this.isViewMode = true;
     this.isEditMode = false;
-    this.formSvc.clearSummaryEditFlow();
-
-    this.router.navigate(['/applications', this.applicationId, 'summaryinfo']);
+    this.assetsForm.disable();
   }
 
   saveSummaryEdit() {

@@ -1428,7 +1428,6 @@ export class Estimateexpense {
     this.isViewMode = false;
     this.isEditMode = true;
     this.expenseForm.enable();
-    this.loanformservice.clearSummaryEditFlow();
   }
 
   cancelSummaryEdit() {
@@ -1436,11 +1435,9 @@ export class Estimateexpense {
       this.expenseForm.patchValue(this.originalFormValue);
     }
 
-    this.isViewMode = false;
+    this.isViewMode = true;
     this.isEditMode = false;
-    this.loanformservice.clearSummaryEditFlow();
-
-    this.router.navigate(['/applications', this.applicationId, 'summaryinfo']);
+    this.expenseForm.disable();
   }
 
   saveSummaryEdit() {

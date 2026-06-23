@@ -24,7 +24,7 @@
             
                 <div>
                     <app-buttons
-                        *ngIf="isFromSummary"
+                        *ngIf="isFromSummary && !isEditMode"
                         type="button"
                         label="Edit"
                         class="btn btn-icon edit btncustomClass editBtnClass"

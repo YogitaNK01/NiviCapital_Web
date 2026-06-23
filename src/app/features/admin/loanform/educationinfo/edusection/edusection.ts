@@ -156,6 +156,15 @@ export class Edusection {
   control: 'marksheet' | 'lc' | 'other';
   index?: number;
 }>();
+
+  //edit from summary
+  isFromSummary = false;
+  isViewMode = false;
+  isEditMode = false;
+  originalFormValue: any = null;
+
+  editSuccess: any = false;
+  description1 = `Great ! Your Additional Info Details\n Uploaded Successfully.`;
   constructor(private fb: FormBuilder, private stepperService: Loanstepperservice, private cd: ChangeDetectorRef, private route: ActivatedRoute,
     public main: Main, private msgBox: Msgboxservice, public loanformservice: Loanformservice) { }
 

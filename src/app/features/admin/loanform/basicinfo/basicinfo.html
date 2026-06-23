@@ -20,7 +20,7 @@
             </div>
 
             <div>
-                <app-buttons *ngIf="isFromSummary" type="button" label="Edit"
+                <app-buttons *ngIf="isFromSummary && !isEditMode" type="button" label="Edit"
                     class="btn btn-icon edit btncustomClass editBtnClass" color="primary" (click)="enableForm()"
                     [disabled]="!isViewMode">
                     <img src="assets/images/icons/edit-white.svg" alt="edit">
@@ -155,11 +155,11 @@
                                 <app-inputfield type="tel" formControlName="phone" name="phone" [required]="true"
                                     pattern="^[6-9][0-9]{9}$" label="Mobile Number" placeholder="Enter Mobile Number"
                                     helpText="Help text" class="w-100" minlength="10" [maxlength]="10"
-                                    [readonly]="hasExistingCif  || !otpVerifiedOk"
+                                    [readonly]="!otpVerifiedOk"
                                     (input)="main.restrictInput($event, 'number')" [showPhonePrefix]="true"
                                     [showPhonePrefixnumber]="true"
                                     [rightButtonText]="!otpsent && !otpVerifiedOk ? 'Send OTP' : ''"
-                                    (rightButtonClick)="sendOtp()" [state]="otpState"></app-inputfield>
+                                    (rightButtonClick)="sendOtp()" [state]="otpState" [ngClass]="{'disabled-div': !otpVerifiedOk}"></app-inputfield>
 
                             </div>
                             <div *ngIf="!hasExistingCif && !otpsent" class="d-flex">

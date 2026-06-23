@@ -2452,10 +2452,9 @@ export class Incomeinfo {
       this.incomeForm.patchValue(this.originalFormValue);
     }
 
-    this.isViewMode = false;
+    this.isViewMode = true;
     this.isEditMode = false;
-
-    this.router.navigate(['/applications', this.applicationId, 'summaryinfo']);
+    this.incomeForm.disable();
   }
 
   saveSummaryEdit() {
@@ -2472,6 +2471,7 @@ export class Incomeinfo {
       this.editSuccess = false;
       this.isViewMode = true;
       this.isEditMode = false;
+      this.incomeForm.disable();
     }
   }
 }

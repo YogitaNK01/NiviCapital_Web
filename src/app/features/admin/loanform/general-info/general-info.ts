@@ -509,9 +509,9 @@ export class GeneralInfo implements OnInit {
         start.setHours(0, 0, 0, 0);
         this.calculatedEndDate = start;
 
-        const endCtrl = this.registerForm.get('courseenddate');
-        endCtrl?.reset();
-        endCtrl?.updateValueAndValidity();
+        // const endCtrl = this.registerForm.get('courseenddate');
+        // endCtrl?.reset();
+        // endCtrl?.updateValueAndValidity();
       });
     }
   }
@@ -1650,7 +1650,6 @@ export class GeneralInfo implements OnInit {
     this.isViewMode = false;
     this.isEditMode = true;
     this.activeForm.enable();
-    this.formSvc.clearSummaryEditFlow();
   }
 
   cancelSummaryEdit() {
@@ -1661,9 +1660,6 @@ export class GeneralInfo implements OnInit {
     this.isViewMode = true;
     this.isEditMode = false;
      this.activeForm.disable();
-    this.formSvc.clearSummaryEditFlow();
-
-    this.router.navigate(['/applications', this.applicationId, 'summaryinfo']);
   }
   saveSummaryEdit() {
     const formdata = this.activeForm.getRawValue();

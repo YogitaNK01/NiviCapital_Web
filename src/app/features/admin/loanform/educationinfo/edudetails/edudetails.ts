@@ -1361,9 +1361,7 @@ const key = this.getEducationDetailsStorageKey();
       this.basicform.patchValue(this.originalFormValue);
     }
     this.isViewMode = false;
-    this.isEditMode = false;
-    this.formSvc.clearSummaryEditFlow();
-    // this.router.navigate(['/applications', this.applicationId, 'summary']);
+    this.isEditMode = true;
   }
   saveSummaryEdit() {
     // this.submitAttempted = true;

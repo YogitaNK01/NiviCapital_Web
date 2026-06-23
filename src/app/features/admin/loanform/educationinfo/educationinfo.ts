@@ -2836,7 +2836,6 @@ export class Educationinfo implements OnInit {
     this.isViewMode = false;
     this.isEditMode = true;
     this.group.enable();
-    this.formSvc.clearSummaryEditFlow();
   }
 
   disableAdditionalInfoForm() {
@@ -2866,10 +2865,8 @@ export class Educationinfo implements OnInit {
     if (this.isEditMode && this.originalFormValue) {
       this.group.patchValue(this.originalFormValue);
     }
-    this.isViewMode = false;
+    this.isViewMode = true;
     this.isEditMode = false;
-    this.formSvc.clearSummaryEditFlow();
-    // this.router.navigate(['/applications', this.applicationId, 'summary']);
   }
   saveSummaryEdit() {
     // this.submitAttempted = true;

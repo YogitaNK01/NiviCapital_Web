@@ -21,13 +21,13 @@
 
           <div>
               <app-buttons
-                  *ngIf="isFromSummary"
+                  *ngIf="isFromSummary && !isEditMode"
                   type="button"
                   label="Edit"
                   class="btn btn-icon edit btncustomClass editBtnClass"
                   color="primary"
                   (click)="enableForm()"
-                  [disabled]="!isViewMode">
+                  [disabled]="!isViewMode" [ngClass]="{'disabled-div' : !isViewMode}">
                   <img src="/assets/images/icons/edit-white.svg" alt="edit">
               </app-buttons>
           </div>
@@ -240,9 +240,9 @@
           </div>
         </div>
         <div class="col">
-          <div class="form-group mb-3"  [ngClass]="{'disabled-div' : true}">
+          <div class="form-group mb-3">
             <app-inputfield type="flag" label="Amount (AUD)" placeholder="$ 0" formControlName="tutionfeesAUD" 
-              helpText="Help text" name="amount" [showaustralianflagPrefix]="true" [readonly]="true">
+              helpText="Help text" name="amount" [showaustralianflagPrefix]="true" [readonly]="true" [ngClass]="{'disabled-div' : true}">
             </app-inputfield>
           </div>
         </div>
@@ -297,16 +297,16 @@
                 <div class="col-lg-4 col-sm-12 mt-20">
                   <app-dropdown [options]="searchfrequencyOptions" [placeholder]="'Monthly'" [required]="true"
                     [avatarUrl]="avatarUrl" formControlName="securityfrequency" [hasAvatar]="hasAvatar" [disabled]="isViewMode"
-                    [label]="frequencylabelval">
+                    [label]="frequencylabelval" [ngClass]="{'disabled-div': isViewMode}">
                   </app-dropdown>
                 </div>
 
                 <!-- INR -->
                 <div class="col-lg-4 col-sm-12 mt-20">
-                  <app-inputfield type="flag" [label]="expense.get('categoryLabel')?.value + ' (INR)'"
+                  <app-inputfield type="flag" [label]="expense.get('categoryLabel')?.value + ' (INR)'" [disabled]="isViewMode"
                     formControlName="amountINR" placeholder="₹ 0" [showPhonePrefix]="true" [required]="true"
                     [showPhonePrefixnumber]="false" [maxlength]="10"
-                    (input)="handleAmountInput($event,'amountINR',expense);main.restrictInput($event, 'decimal')">
+                    (input)="handleAmountInput($event,'amountINR',expense);main.restrictInput($event, 'decimal')" [ngClass]="{'disabled-div': isViewMode}">
                   </app-inputfield>
                   <div class="text-danger"
                     *ngIf="expense.get('amountINR')?.touched && expense.get('amountINR')?.invalid">
@@ -329,7 +329,7 @@
                 <!-- AUD -->
                 <div class="col-lg-4 col-sm-12 mt-20">
                   <app-inputfield type="flag" label="Amount (AUD)" placeholder="$ 0" formControlName="amountAUD"
-                    [showaustralianflagPrefix]="true">
+                    [showaustralianflagPrefix]="true" [ngClass]="{'disabled-div' : true}">
                   </app-inputfield>
                 </div>
 
@@ -360,7 +360,7 @@
               <!-- Add More Button -->
               <div class="col-lg-4 col-sm-12 mt-20">
                 <app-buttons label="Add More Expenses" class="btn btn-icon Add btncustomClass" [outline]="true"
-                  (click)="addmore(expense.get('category')?.value)" [disabled]="isViewMode">
+                  (click)="addmore(expense.get('category')?.value)" [disabled]="isViewMode" [ngClass]="{'disabled-div' : isViewMode}">
                   <img src="/assets/images/icons/addred.svg">
                 </app-buttons>
               </div>
@@ -424,9 +424,9 @@
                 <!-- } -->
                 <!-- Frequency -->
                 <div class="col-lg-4 col-sm-12 mt-20">
-                  <app-dropdown [options]="searchfrequencyOptions"  [disabled]="isViewMode"
+                  <app-dropdown [options]="searchfrequencyOptions"
                     [placeholder]="'Monthly'" [required]="true" [avatarUrl]="avatarUrl"
-                    formControlName="securityfrequency" [hasAvatar]="hasAvatar" [label]="frequencylabelval">
+                    formControlName="securityfrequency" [hasAvatar]="hasAvatar" [label]="frequencylabelval" [disabled]="isViewMode" [ngClass]="{'disabled-div': isViewMode}">
                   </app-dropdown>               
                 </div>
 
@@ -434,8 +434,8 @@
                 <div class="col-lg-4 col-sm-12 mt-20">
                   <app-inputfield type="flag" [label]="expense.get('categoryLabel')?.value + '(INR)'" placeholder="₹ 0"
                     [showPhonePrefix]="true" [showPhonePrefixnumber]="false" formControlName="amountINR"
-                    [required]="true"
-                    (input)="handleAmountInput($event,'amountINR',expense );main.restrictInput($event, 'decimal')">
+                    [required]="true" [disabled]="isViewMode"
+                    (input)="handleAmountInput($event,'amountINR',expense );main.restrictInput($event, 'decimal')" [ngClass]="{'disabled-div': isViewMode}">
                   </app-inputfield>
 
                   <div class="text-danger"
@@ -457,7 +457,7 @@
                 <!-- AUD -->
                 <div class="col-lg-4 col-sm-12 mt-20">
                   <app-inputfield type="flag" label="Amount (AUD)" placeholder="$ 0" formControlName="amountAUD"
-                    [showaustralianflagPrefix]="true">
+                    [showaustralianflagPrefix]="true" [ngClass]="{'disabled-div' : true}">
                   </app-inputfield>
                 </div>
 
@@ -488,7 +488,7 @@
 
               <!-- Add More Button -->
               <div class="col-lg-4 col-sm-12 mt-20">
-                <app-buttons label="Add More Expenses" class="btn btn-icon Add btncustomClass" [outline]="true"
+                <app-buttons label="Add More Expenses" class="btn btn-icon Add btncustomClass" [outline]="true" [ngClass]="{'disabled-div' : isViewMode}"
                   (click)="miscaddmore(expense.get('category')?.value)" [disabled]="isViewMode">
                   <img src="/assets/images/icons/addred.svg">
                 </app-buttons>
@@ -521,7 +521,7 @@
       <div class="col-lg-4  d-flex justify-content-end">
         <app-buttons type="button" label="Back" class="btn btncustomClass" [outline]="true" (click)="back()">
         </app-buttons>
-        <app-buttons type="button" label="Next" class="btn btncustomClass" color="primary" (click)="next()"
+        <app-buttons type="button" label="Next" class="btn btncustomClass" color="primary" (click)="next()" [ngClass]="{'disabled-div' : !isExpenseValid()}"
           [disabled]="!isExpenseValid()">
         </app-buttons>
         <!-- <app-buttons type="button" label="Next" class="btn btncustomClass" color="primary" (click)="next1()">
@@ -547,7 +547,7 @@
             class="btn btncustomClass"
             color="primary"
             (click)="saveSummaryEdit()"
-            [disabled]="!isExpenseValid()">
+            [disabled]="!isExpenseValid()" [ngClass]="{'disabled-div' : !isExpenseValid()}">
         </app-buttons>
 
         </div>

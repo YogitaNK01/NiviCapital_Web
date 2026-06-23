@@ -1267,10 +1267,9 @@ export class Referenceinfo implements OnInit {
       this.referenceForm.patchValue(this.originalFormValue);
     }
 
-    this.isViewMode = false;
+    this.isViewMode = true;
     this.isEditMode = false;
-
-    this.router.navigate(['/applications', this.applicationId, 'summaryinfo']);
+    this.referenceForm.disable();
   }
 
   saveSummaryEdit() {
