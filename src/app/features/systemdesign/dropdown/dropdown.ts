@@ -202,13 +202,13 @@ writeValue(value: any): void {
     return;
   }
 
-  // ✅ MULTI SELECT
+  //    MULTI SELECT
   if (Array.isArray(value)) {
     this.selectedValues = [...value];
   } else {
     this.value = value;
 
-    // ✅ try to match option using value OR label
+    //    try to match option using value OR label
     const match = this.options?.find(opt =>
       opt.value === value || opt.label === value
     );
@@ -217,7 +217,7 @@ writeValue(value: any): void {
       this.selectedLabeldata = match.label;
       this.value = match.value; // normalize
     } else {
-      // ✅ fallback if options not loaded yet
+      //    fallback if options not loaded yet
       this.selectedLabeldata = value;
     }
   }
@@ -237,7 +237,7 @@ writeValue(value: any): void {
     opt.value === value || opt.label === value
   );
 
-  return match ? match.label : value; // ✅ fallback to raw value
+  return match ? match.label : value; //    fallback to raw value
 }
 
   registerOnChange(fn: any): void {

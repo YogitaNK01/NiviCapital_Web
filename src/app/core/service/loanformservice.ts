@@ -497,7 +497,7 @@ submitAdditionalInfo(
   }
 
 
-  selectedqualification(data: any, id: string): Observable<ApiResponse<any>> {
+  selectedqualification(data: any, id: string,edit?:boolean): Observable<ApiResponse<any>> {
 
     return this.http.post<ApiResponse<any>>(
       `${this.baseUrl}/v1/los/applications/${id}/save-last-qualification-details`,
@@ -728,6 +728,33 @@ isSummaryEditFlow(): boolean {
     this.summaryLoaded = false;
     sessionStorage.removeItem(this.SUMMARY_STORAGE_KEY);
   }
+// ***********************educatio edit*******************
+
+private summaryEducationEditFlow = false;
+private educationSubstepsUnlocked = false;
+
+startSummaryEducationEditFlow() {
+  this.summaryEducationEditFlow = true;
+  this.educationSubstepsUnlocked = false;
+}
+
+unlockEducationSubstepsForSummaryEdit() {
+  this.summaryEducationEditFlow = true;
+  this.educationSubstepsUnlocked = true;
+}
+
+clearSummaryEducationEditFlow() {
+  this.summaryEducationEditFlow = false;
+  this.educationSubstepsUnlocked = false;
+}
+
+isSummaryEditFlow1(): boolean {
+  return this.summaryEducationEditFlow;
+}
+
+areEducationSubstepsUnlocked(): boolean {
+  return this.educationSubstepsUnlocked;
+}
 
   // *************************Edit flow from table*********************************
 

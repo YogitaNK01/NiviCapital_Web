@@ -406,7 +406,7 @@ return this.isCoApplicant
     const normalizedDraft = this.normalizeLiabilities(draftData);
     const normalizedLocal = this.normalizeLiabilities(parsedLocal);
 
-    // ✅ after FINAL submit, summary must win
+    //    after FINAL submit, summary must win
     // const finalData =
     //   normalizedSummary ||
     //   normalizedDraft ||

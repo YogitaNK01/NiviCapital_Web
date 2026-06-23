@@ -55,6 +55,7 @@ export class Loanstepper implements OnInit {
       const label = params['qualificationlabel'];
       if (label) {
         this.activeEducation = label;
+        this.activeQualificationId = label;
         this.cdr.detectChanges();
       }
 
@@ -138,29 +139,21 @@ if (cleanUrl.includes('co-applicantdetails')) {
   }
 
 
-  canNavigateTo1(index: number): boolean {
-    const currentIdx = this.currentIndex;
-    const step = this.steps[index];
-    if (this.isCompleted(index)) {
-      return true;
-    }
-
-
-
-    if (index === currentIdx) {
-      return true;
-    }
-
-    return false;
-  }
   canNavigateTo(index: number): boolean {
+
+    let routeArr: any = localStorage.getItem(`main_completedSteps_${this.applicantId || 'defaultApplicant'}_${this.applicationId || 'defaultApplication'}`);
+    routeArr = JSON.parse(routeArr);
+    if(routeArr.find((item: any) => item === "summaryinfo")){
+      const isFromSummary = this.formSvc.isSummaryEditFlow();
+      if(!isFromSummary){
+        const summaryData = this.formSvc.getSummary(this.applicationId);
+        this.formSvc.startSummaryEditFlow(summaryData, 'MAIN');
+      }
+    }
+
     const step = this.steps[index];
   if (!step) return false;
-    //  allow if completed
-    // if (this.stepservice.isStepCompleted(step.route)) {
-    //   return true;
-    // }
-    
+  
  if (this.stepservice.isMainStepCompleted(step.route)) {
     return true;
   }
@@ -186,53 +179,28 @@ if (cleanUrl.includes('co-applicantdetails')) {
   }
 
 
-  goToStep1(route: string, index: number) {
-
-    const step = this.steps[index];
-this.stepperService.switchToMainApplicantFlow();
-    //  If education step → go to active child
-    if (route === 'educationDetails') {
-
-
-      this.router.navigate(
-        ['/loanform', 'educationDetails'],
-        {
-          queryParams: {
-            applicantId: this.applicantId,
-            applicationId: this.applicationId,
-            custName: this.custName,
-            custARN: this.custARN,
-          },
-
-          //  optional: remove child params so it never opens educationinfo
-          queryParamsHandling: 'merge'
-        }
-      );
-
-      return;
-
-    }
-
-
-    if (this.canNavigateTo(index)) {
-      console.log(` Navigating to ${route} (index ${index})`);
-      this.router.navigate(['/loanform', route], {
-        queryParams: {
-         
-        }
-      });
-    } else {
-      console.log(`Blocked navigation to index ${index}`);
-    }
-  }
-goToStep(route: string, index: number) {
+ goToStep(route: string, index: number) {
   if (!this.canNavigateTo(index)) {
     console.log(`Blocked navigation to index ${index}`);
     return;
   }
 
-  // Important: if user clicks vertical stepper while inside co-applicant,
-  // switch context back to MAIN applicant
+  this.stepperService.switchToMainApplicantFlow();
+
+  const currentParams = this.route.snapshot.queryParams;
+  const cleanedParams = this.stepperService.getCleanQueryParamsForRoute(route, currentParams);
+
+  this.router.navigate(['/loanform', route], {
+    queryParams: cleanedParams,
+    queryParamsHandling: 'merge'
+  });
+}
+goToStep1(route: string, index: number) {
+  if (!this.canNavigateTo(index)) {
+    console.log(`Blocked navigation to index ${index}`);
+    return;
+  }
+
   this.stepperService.switchToMainApplicantFlow();
 
   if (route === 'educationDetails') {
@@ -280,6 +248,13 @@ goToStep(route: string, index: number) {
     const parentStep = this.steps[parentIndex];
     if (!parentStep?.children) return false;
 
+    
+// lock all substeps until Edit button is clicked
+  if (this.stepservice.isSummaryEducationEditFlow()) {
+    return !this.stepservice.areSummaryEducationSubstepsUnlocked();
+  }
+
+
     const children = parentStep.children;
 
     // find active index
@@ -318,6 +293,11 @@ goToStep(route: string, index: number) {
 
   openEducationSubStep(sub: any, event: Event) {
     event.stopPropagation();
+    
+  if (this.stepservice.isEducationSubStepperLocked()) {
+    return;
+  }
+
     const stepKey = sub.key;
     this.activeQualificationId = stepKey;
 

@@ -757,8 +757,14 @@ export class Incomeinfo {
 
 
         // append new docs instead of rebuilding from uploadedrespfiles
-        const Docs = [...uploadedData?.uploadedDocuments, ...uploadedData?.updatedDocuments];
-        const newDocs = Docs.filter((item: any) => item.documentId === doc.documentId) || [];
+        // const Docs = [...uploadedData?.uploadedDocuments, ...uploadedData?.updatedDocuments];
+        // const newDocs = Docs.filter((item: any) => item.documentId === doc.documentId) || [];
+        let newDocs = [];
+        if (this.isEditMode && doc) {
+          newDocs = uploadedData?.updatedDocuments.filter((item: any) => item.documentId === doc.documentId) || [];
+        } else {
+          newDocs = uploadedData?.uploadedDocuments;
+        }
 
         this.allDocuments = [...this.allDocuments, ...newDocs];
 

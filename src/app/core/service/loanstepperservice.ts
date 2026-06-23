@@ -55,11 +55,17 @@ export class Loanstepperservice {
 
   private EDUCATION_PROGRESS_KEY = 'educationProgress';
 
+  private summaryEducationEditMode = false;
+  private summaryEducationSubstepsUnlocked = false;
+  private SUMMARY_EDUCATION_LOCK_KEY = 'summaryEducationLockState';
+
   private completedStepsKey = 'loan_completed_steps';
   currentCoApplicantIndex: any = 1;
 
 
   constructor(private formSvc: Loanformservice, private router: Router) {
+
+    this.restoreSummaryEducationLockState();
     this.buildSteps();
 
 
@@ -76,32 +82,20 @@ export class Loanstepperservice {
 
   private stageRouteMap: Record<string, string> = {
     LOAN_INFO: 'loaninfo',
-
     PERSONAL_INFO: 'genralinfo',
     SAVE_GENERAL_INFO: 'genralinfo',
-
     SAVE_ESTIMATED_EXPENSES: 'expense',
     SAVE_EXPENSE: 'expense',
-
     SAVE_ADDITIONAL_INFO: 'additionalinfo',
-
     FETCH_KYC: 'kycinfo',
     SAVE_KYC: 'kycinfo',
-
     SAVE_EDUCATION_DETAILS: 'educationDetails',
-
     SAVE_INCOME_DETAILS: 'incomeinfo',
-
     SAVE_ASSETS: 'assetsinfo',
-
     SAVE_LIABILITIES: 'liabilitiesinfo',
-
     SAVE_MONTHLY_EXPENSES: 'monthlyexpinfo',
-
     SAVE_REFERENCES: 'referenceinfo',
-
     SAVE_CO_APPLICANT: 'co-applicantdetails',
-
     SUMMARY: 'summaryinfo'
   };
 
@@ -289,14 +283,14 @@ export class Loanstepperservice {
     return `coapp_completedSteps_${applicantId}_${applicationId}_${this.currentCoApplicantIndex}`;
   }
   getCoApplicantCompletedKey(): string {
-  const mainApplicantId = this.getLoanId()?.[0] || 'defaultMainApplicant';
-  const coApplicantId = this.getCo_appId()?.[0];
-  const index = this.getCurrentCoApplicantIndex();
+    const mainApplicantId = this.getLoanId()?.[0] || 'defaultMainApplicant';
+    const coApplicantId = this.getCo_appId()?.[0];
+    const index = this.getCurrentCoApplicantIndex();
 
-  return coApplicantId
-    ? `coapp_completedSteps_${mainApplicantId}_${coApplicantId}`
-    : `coapp_completedSteps_${mainApplicantId}_temp_${index}`;
-}
+    return coApplicantId
+      ? `coapp_completedSteps_${mainApplicantId}_${coApplicantId}`
+      : `coapp_completedSteps_${mainApplicantId}_temp_${index}`;
+  }
   markStepCompleted(route: string) {
     this.completedSteps.add(route);
 
@@ -595,9 +589,9 @@ export class Loanstepperservice {
     this.co_custName = name;
     this.co_custARN = arn || null;
 
-  if (index) {
-    this.currentCoApplicantIndex = Number(index);
-  }
+    if (index) {
+      this.currentCoApplicantIndex = Number(index);
+    }
 
 
     sessionStorage.setItem(
@@ -610,7 +604,7 @@ export class Loanstepperservice {
         coApplicantIndex: index || this.getCurrentCoApplicantIndex()
       })
     );
- this.restoreCompletedSteps(); 
+    this.restoreCompletedSteps();
     this.buildSteps();
   }
 
@@ -787,7 +781,14 @@ export class Loanstepperservice {
 
 
       // this.router.navigate(['/loanform', nextRoute], {
+      // this.router.navigate([...basePath, nextRoute], {
+      //   queryParamsHandling: 'merge'
+      // });
+      const currentParams = this.router.routerState.snapshot.root.queryParams;
+      const cleanedParams = this.getCleanQueryParamsForRoute(nextRoute, currentParams);
+
       this.router.navigate([...basePath, nextRoute], {
+        queryParams: cleanedParams,
         queryParamsHandling: 'merge'
       });
     }
@@ -855,19 +856,24 @@ export class Loanstepperservice {
 
 
       // this.router.navigate(['/loanform', prevRoute], {
-      this.router.navigate([...basePath, prevRoute], {
-        queryParamsHandling: 'merge'
-      });
+      // this.router.navigate([...basePath, prevRoute], {
+      //   queryParamsHandling: 'merge'
+      // });
+      const currentParams = this.router.routerState.snapshot.root.queryParams;
+const cleanedParams = this.getCleanQueryParamsForRoute(prevRoute, currentParams);
+
+this.router.navigate([...basePath, prevRoute], {
+  queryParams: cleanedParams,
+  queryParamsHandling: 'merge'
+});
+
     }
 
     else if (this.stepperType === 'CO_APPLICANT') {
-      // ✅ go back to mobile screen when at first step
+      //    go back to mobile screen when at first step
       this.router.navigate(['/loanform', 'co-applicantdetails'], {
         queryParams: {
-          // applicantId: this.applicantId,
-          // applicationId: this.applicationId,
-          // custName: this.custName,
-          // custARN: this.custARN
+        
 
         }
       });
@@ -946,15 +952,15 @@ export class Loanstepperservice {
     }
 
     if (coState) {
-        try {
-      this.formSvc.coApplicantState = {
-        ...this.formSvc.coApplicantState,
-        ...JSON.parse(coState)
-      };
-      
- } catch (e) {
-      console.error('Invalid applicantState JSON', e);
-    }
+      try {
+        this.formSvc.coApplicantState = {
+          ...this.formSvc.coApplicantState,
+          ...JSON.parse(coState)
+        };
+
+      } catch (e) {
+        console.error('Invalid applicantState JSON', e);
+      }
 
     }
   }
@@ -969,4 +975,84 @@ export class Loanstepperservice {
       : `coApplicantState_${applicationId}_temp_${coApplicantIndex}`;
   }
 
+
+  //edit from summary for education substeps
+
+  private persistSummaryEducationLockState() {
+    sessionStorage.setItem(
+      this.SUMMARY_EDUCATION_LOCK_KEY,
+      JSON.stringify({
+        summaryEducationEditMode: this.summaryEducationEditMode,
+        summaryEducationSubstepsUnlocked: this.summaryEducationSubstepsUnlocked
+      })
+    );
+  }
+
+  restoreSummaryEducationLockState() {
+    const saved = sessionStorage.getItem(this.SUMMARY_EDUCATION_LOCK_KEY);
+    if (!saved) return;
+
+    try {
+      const parsed = JSON.parse(saved);
+      this.summaryEducationEditMode = !!parsed.summaryEducationEditMode;
+      this.summaryEducationSubstepsUnlocked = !!parsed.summaryEducationSubstepsUnlocked;
+    } catch {
+      this.summaryEducationEditMode = false;
+      this.summaryEducationSubstepsUnlocked = false;
+    }
+  }
+
+  startSummaryEducationEditFlow() {
+    // summary flow active + substeps locked
+    this.summaryEducationEditMode = true;
+    this.summaryEducationSubstepsUnlocked = false;
+    this.persistSummaryEducationLockState();
+  }
+
+  unlockSummaryEducationSubsteps() {
+    // summary flow active + substeps unlocked
+    this.summaryEducationEditMode = true;
+    this.summaryEducationSubstepsUnlocked = true;
+    this.persistSummaryEducationLockState();
+  }
+
+  clearSummaryEducationEditFlow() {
+    this.summaryEducationEditMode = false;
+    this.summaryEducationSubstepsUnlocked = false;
+    sessionStorage.removeItem(this.SUMMARY_EDUCATION_LOCK_KEY);
+  }
+
+  isSummaryEducationEditFlow(): boolean {
+    return this.summaryEducationEditMode;
+  }
+
+  areSummaryEducationSubstepsUnlocked(): boolean {
+    return this.summaryEducationSubstepsUnlocked;
+  }
+
+  isEducationSubStepperLocked(): boolean {
+    return this.summaryEducationEditMode && !this.summaryEducationSubstepsUnlocked;
+  }
+
+  // clear queryparam of education
+  getCleanQueryParamsForRoute(route: string, currentParams: any = {}) {
+    const isEducationRoute =
+      route === 'educationDetails' ||
+      route === 'educationinfo';
+
+    if (isEducationRoute) {
+      return {
+        ...currentParams
+      };
+    }
+
+    return {
+      ...currentParams,
+      qualificationlabel: null,
+      qualificationId: null,
+      section: null,
+      fromSummary: null,
+      mode: null
+    };
+  }
 }

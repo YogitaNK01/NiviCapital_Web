@@ -112,7 +112,7 @@
             <div class="col-lg-6 col-sm-12">
                 @if (hasLocalFile(activeEducation,'ielts')) {
                 <label class="text-label">Passing / Leaving Certificate <span class="text-danger">*</span></label>
-                <div class="addcust-img-box mt-2">
+                <div class="addcust-img-box mt-2" [ngClass]="{'disabled-div' : isViewMode}">
                     <p class="text-label">{{ getLocalFileName(activeEducation,'ielts') }}</p>
                     <div class="icons">
                         <span class="view" (click)="viewLocal(activeEducation,'ielts')">
@@ -127,7 +127,7 @@
                 </div>
 
                 } @else{
-                <app-uploadbtn [config]="basicConfig" [uploadViaApi]="false" [required]="true"
+                <app-uploadbtn [config]="basicConfig" [uploadViaApi]="false" [required]="true" [disabled]="isViewMode"
                     label="Upload Certificate " (fileChange)="onFileChange('ielts', 'ielts', $event)">
                 </app-uploadbtn>
                 }
@@ -157,7 +157,7 @@
             <div class="col-lg-4 col-sm-12">
                 @if (hasLocalFile(activeEducation,'offerletter')) {
                 <label class="text-label">Passing / Leaving Certificate <span class="text-danger">*</span></label>
-                <div class="addcust-img-box mt-2">
+                <div class="addcust-img-box mt-2" [ngClass]="{'disabled-div' : isViewMode}">
                     <p class="text-label">{{ getLocalFileName(activeEducation,'offerletter') }}</p>
                     <div class="icons">
                         <span class="view" (click)="viewLocal(activeEducation,'offerletter')">
@@ -172,7 +172,7 @@
                 </div>
 
                 } @else{
-                <app-uploadbtn [config]="basicConfig" [uploadViaApi]="false" [required]="true" label="Offer Letter"
+                <app-uploadbtn [config]="basicConfig" [uploadViaApi]="false" [required]="true" label="Offer Letter"  [disabled]="isViewMode"
                     (fileChange)="onFileChange('offerletter', 'offerletter', $event)">
                 </app-uploadbtn>
                 }

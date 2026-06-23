@@ -133,7 +133,7 @@ export class Basicinfo {
 
     const isNewCoappFlow = this.isCoApplicant && mode === 'new';
 
-    // ✅ restore old co-app only for EXISTING flow
+    //    restore old co-app only for EXISTING flow
     if (this.isCoApplicant && !isNewCoappFlow) {
       this.stepperService.restoreCoAppIdFromSession();
     } else if (isNewCoappFlow) {
@@ -239,7 +239,7 @@ this.isFromSummary = this.loanform.isSummaryEditFlow();
       phone: finalPhone
     }, { emitEvent: false });
 
-    // ✅ BRAND NEW COAPP: blank page, no old Roshan patch
+    //    BRAND NEW COAPP: blank page, no old Roshan patch
     if (isNewCoappFlow) {
       this.resetBasicFormForNewCoapp(finalPhone);
 
@@ -250,7 +250,7 @@ this.isFromSummary = this.loanform.isSummaryEditFlow();
       return;
     }
 
-    // ✅ EXISTING COAPP: patch from summary/draft/local
+    //    EXISTING COAPP: patch from summary/draft/local
     await this.loadBasicForBothFlows();
 
     const isSubmittedCoapp =

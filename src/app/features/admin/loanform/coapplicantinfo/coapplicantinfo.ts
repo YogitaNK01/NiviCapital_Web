@@ -172,7 +172,7 @@ export class Coapplicantinfo implements OnInit {
     const pendingContextRaw = sessionStorage.getItem('pendingCoAppContext');
     const pendingContext = pendingContextRaw ? JSON.parse(pendingContextRaw) : null;
 
-    // ✅ prefer pending context for freshly added coapplicant
+    //    prefer pending context for freshly added coapplicant
     if (
       pendingContext &&
       Number(pendingContext.coApplicantIndex) === Number(this.coApplicantIndex)

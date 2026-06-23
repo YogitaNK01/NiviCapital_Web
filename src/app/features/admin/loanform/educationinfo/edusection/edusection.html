@@ -2,25 +2,32 @@
 
     <div class="base-layout base-height" [formGroup]="group">
 
-        <div class="header ">
-
-            <div class="text-datepicker blue-text d-flex flex-column gap-2 ">{{title}}
-                <div class="text-body-1 fw-normal">
-                    <span><svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 22 22"
-                            fill="none">
-                            <path
-                                d="M10.9997 20.1667C16.0413 20.1667 20.1663 16.0417 20.1663 11C20.1663 5.95833 16.0413 1.83333 10.9997 1.83333C5.95801 1.83333 1.83301 5.95833 1.83301 11C1.83301 16.0417 5.95801 20.1667 10.9997 20.1667Z"
-                                stroke="#25262F" stroke-width="1.28125" stroke-linecap="round"
-                                stroke-linejoin="round" />
-                            <path d="M11 7.33333V11.9167" stroke="#25262F" stroke-width="1.28125" stroke-linecap="round"
-                                stroke-linejoin="round" />
-                            <path d="M10.9961 14.6667H11.0043" stroke="#25262F" stroke-width="1.28125"
-                                stroke-linecap="round" stroke-linejoin="round" />
-                        </svg></span>
-                    Click the “Next” button to save your changes
+        <div class="header w-100">
+            <div class="d-flex justify-content-between">
+                <div class="text-datepicker blue-text d-flex flex-column gap-2 ">{{title}}
+                    <div class="text-body-1 fw-normal">
+                        <span><svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 22 22"
+                                fill="none">
+                                <path
+                                    d="M10.9997 20.1667C16.0413 20.1667 20.1663 16.0417 20.1663 11C20.1663 5.95833 16.0413 1.83333 10.9997 1.83333C5.95801 1.83333 1.83301 5.95833 1.83301 11C1.83301 16.0417 5.95801 20.1667 10.9997 20.1667Z"
+                                    stroke="#25262F" stroke-width="1.28125" stroke-linecap="round"
+                                    stroke-linejoin="round" />
+                                <path d="M11 7.33333V11.9167" stroke="#25262F" stroke-width="1.28125"
+                                    stroke-linecap="round" stroke-linejoin="round" />
+                                <path d="M10.9961 14.6667H11.0043" stroke="#25262F" stroke-width="1.28125"
+                                    stroke-linecap="round" stroke-linejoin="round" />
+                            </svg></span>
+                        Click the “Next” button to save your changes
+                    </div>
+                </div>
+                <div>
+                    <app-buttons *ngIf="isFromSummary" type="button" label="Edit"
+                        class="btn btn-icon edit btncustomClass editBtnClass" color="primary" (click)="enableForm()"
+                        [disabled]="!isViewMode">
+                        <img src="assets/images/icons/edit-white.svg" alt="edit">
+                    </app-buttons>
                 </div>
             </div>
-
         </div>
         <div class="row  d-flex  align-items-start flex-column education-box">
 
@@ -33,8 +40,9 @@
 
                     <app-dropdown [options]="filteredInstitutes" [placeholder]="'Select Institute Name'"
                         [required]="!isPostGraduate" [searchable]="true" [label]="'Institution Name'"
-                        (searchChange)="filterInstitutes($event)" formControlName="institutename" [enableSearchEvent]="true"
-                        (selectedValueChange)="SelectedInstitute($event);" name="institutename">
+                        (searchChange)="filterInstitutes($event)" formControlName="institutename"
+                        [enableSearchEvent]="true" (selectedValueChange)="SelectedInstitute($event);"
+                        name="institutename">
                     </app-dropdown>
 
 
@@ -118,10 +126,10 @@
                 </div>
 
                 <div [ngClass]="{'col-3': isOtherLocation, 'col-4': !isOtherLocation  }">
-                    <app-dropdown [options]="filteredlocation" [placeholder]="'Select Location'"  (searchChange)="filtercities($event)" 
-                        [required]="!isPostGraduate" [avatarUrl]="avatarUrl" formControlName="location" [enableSearchEvent]="true"
-                        [searchable]="true" (selectedValueChange)="SelectedCity($event);" [hasAvatar]="hasAvatar"
-                        label="Location">
+                    <app-dropdown [options]="filteredlocation" [placeholder]="'Select Location'"
+                        (searchChange)="filtercities($event)" [required]="!isPostGraduate" [avatarUrl]="avatarUrl"
+                        formControlName="location" [enableSearchEvent]="true" [searchable]="true"
+                        (selectedValueChange)="SelectedCity($event);" [hasAvatar]="hasAvatar" label="Location">
                     </app-dropdown>
                     <div class="text-danger" *ngIf="group.get('location')?.touched && group.get('location')?.invalid">
 
@@ -132,8 +140,8 @@
                 </div>
                 <div class="col-3" *ngIf="isOtherLocation">
                     <div class="form-group">
-                        <app-inputfield formControlName="otherLocation" name="otherLocation" label="Other Location" [maxlength]="100"
-                            placeholder="Enter Location Name" [required]="!isPostGraduate">
+                        <app-inputfield formControlName="otherLocation" name="otherLocation" label="Other Location"
+                            [maxlength]="100" placeholder="Enter Location Name" [required]="!isPostGraduate">
                         </app-inputfield>
 
                         <div class="text-danger"
@@ -164,7 +172,7 @@
 
                         @if (hasLocal('marksheet' ,i)) {
                         <label class="text-label">Marksheet <span class="text-danger">*</span></label>
-                        <div class="addcust-img-box mt-2">
+                        <div class="addcust-img-box mt-2" [ngClass]="{'disabled-div' : isViewMode}">
                             <p class="text-label">{{ getLocalName('marksheet', i) }}</p>
                             <div class="icons">
 
@@ -185,7 +193,7 @@
 
                         }
                         @else{
-                        <app-uploadbtn [config]="basicConfig" [uploadViaApi]="false" [required]="true"
+                        <app-uploadbtn [config]="basicConfig" [uploadViaApi]="false" [required]="true" [disabled]="isViewMode"
                             label="Marksheet " (fileChange)="onFileChange($event, educationType, 'marksheet')">
                         </app-uploadbtn>
                         }
@@ -199,7 +207,7 @@
                         @if (hasLocal('lc')) {
                         <label class="text-label">Passing / Leaving Certificate <span
                                 class="text-danger">*</span></label>
-                        <div class="addcust-img-box mt-2">
+                        <div class="addcust-img-box mt-2" [ngClass]="{'disabled-div' : isViewMode}">
                             <p class="text-label">{{ getLocalName('lc') }}</p>
                             <div class="icons">
 
@@ -219,7 +227,7 @@
                         </div>
 
                         } @else{
-                        <app-uploadbtn [config]="basicConfig" [required]="true" label="Passing / Leaving Certificate "
+                        <app-uploadbtn [config]="basicConfig" [required]="true" label="Passing / Leaving Certificate " [disabled]="isViewMode"
                             (fileChange)="onFileChange($event, educationType,'lc')">
                         </app-uploadbtn>
                         }
@@ -244,7 +252,7 @@
                                 Marksheet Year {{ i + 1 }} <span class="text-danger">*</span>
                             </label>
 
-                            <div class="addcust-img-box mt-2">
+                            <div class="addcust-img-box mt-2" [ngClass]="{'disabled-div' : isViewMode}">
                                 <p class="text-label">{{ getLocalName('marksheet', i) }}</p>
                                 <div class="icons">
 
@@ -266,7 +274,7 @@
                             } @else {
 
 
-                            <app-uploadbtn [config]="basicConfig" [uploadViaApi]="false"
+                            <app-uploadbtn [config]="basicConfig" [uploadViaApi]="false" [disabled]="isViewMode"
                                 [required]="isMarksheetRequired(i)" label="Marksheet {{ i + 1 }}"
                                 (fileChange)="onFileChange($event, educationType, 'marksheet',i)">
                             </app-uploadbtn>
@@ -284,7 +292,7 @@
                             Passing / Leaving Certificate <span class="text-danger">*</span>
                         </label>
 
-                        <div class="addcust-img-box mt-2">
+                        <div class="addcust-img-box mt-2" [ngClass]="{'disabled-div' : isViewMode}">
                             <p class="text-label">{{ getLocalName('lc') }}</p>
                             <div class="icons">
 
@@ -307,7 +315,7 @@
 
 
 
-                        <app-uploadbtn [config]="basicConfig" [required]="!isPostGraduate"
+                        <app-uploadbtn [config]="basicConfig" [required]="!isPostGraduate" [disabled]="isViewMode"
                             label="Passing / Leaving Certificate "
                             (fileChange)="onFileChange($event, educationType,'lc')">
                         </app-uploadbtn>
@@ -353,8 +361,8 @@
                             <div class=" other-doc-upload" [ngClass]="slot.file ? 'mt-1' : 'mt-0'">
 
                                 @if (slot.file) {
-                                <div class="addcust-img-box mt-4">
-                                    <p class="text-label">{{   slot.file.name }}</p>
+                                <div class="addcust-img-box mt-4" [ngClass]="{'disabled-div' : isViewMode}">
+                                    <p class="text-label">{{ slot.file.name }}</p>
 
                                     <div class="icons">
                                         <span class="view" (click)="viewOther(slot)">
@@ -371,7 +379,7 @@
                                     </div>
                                 </div>
                                 } @else {
-                                <app-uploadbtn [config]="basicConfig" [required]="educationType !== 'POSTGRADUATE'"
+                                <app-uploadbtn [config]="basicConfig" [required]="educationType !== 'POSTGRADUATE'" [disabled]="isViewMode"
                                     label="Upload Document" (fileChange)="onOtherFileChange($event, slot)">
                                 </app-uploadbtn>
                                 }

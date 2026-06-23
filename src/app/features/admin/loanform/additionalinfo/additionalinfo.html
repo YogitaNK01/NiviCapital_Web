@@ -104,7 +104,7 @@
                         Secondary Address Proof Name<span class="text-danger">*</span>
                     </label>
 
-                    <div class="addcust-img-box mt-2">
+                    <div class="addcust-img-box mt-2" [ngClass]="{'disabled-div' : isViewMode}">
                         <p class="text-label">{{ getLocalFileName('applicantphoto') }}</p>
 
                         <div class="icons">
@@ -122,7 +122,7 @@
                         </div>
                     </div>
                     } @else {
-                    <app-uploadbtn [config]="basicConfig" (fileChange)="onFileChange($event, 'applicantphoto')"
+                    <app-uploadbtn [config]="basicConfig" (fileChange)="onFileChange($event, 'applicantphoto')" [disabled]="isViewMode"
                         label="Upload Applicant Photo">
                     </app-uploadbtn>
                     }

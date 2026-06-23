@@ -213,7 +213,12 @@ export class Additionalinfo implements OnInit {
     if (this.viewOnly) {
       this.additionalinfoForm.disable({ emitEvent: false });
     }
+   this.isFromSummary = this.formSvc.isSummaryEditFlow();
 
+    if (this.isFromSummary) {
+      this.isViewMode = true;
+      this.additionalinfoForm.disable();
+    }
 
     this.additionalinfoForm.get('maritalstatus')?.valueChanges.subscribe(value => {
 
@@ -225,12 +230,7 @@ export class Additionalinfo implements OnInit {
 
     await this.loadAdditionalInfoForBothFlows();
 
-    this.isFromSummary = this.formSvc.isSummaryEditFlow();
-
-    if (this.isFromSummary) {
-      this.isViewMode = true;
-      this.additionalinfoForm.disable();
-    }
+ 
 
   }
 
@@ -338,7 +338,7 @@ export class Additionalinfo implements OnInit {
     }
 
 
-    // ✅ patch partial or full saved data
+    //    patch partial or full saved data
     if (this.isCoApplicant) {
       this.formSvc.co_additionalInfoData = finalData;
     } else {

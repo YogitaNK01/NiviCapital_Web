@@ -630,7 +630,7 @@ export class Referenceinfo implements OnInit {
     const data = this.loanformservice.referenceInfoData;
     if (!data) return;
 
-    // ✅ clear first
+    //    clear first
     this.reference1Array.clear();
     this.reference2Array.clear();
 

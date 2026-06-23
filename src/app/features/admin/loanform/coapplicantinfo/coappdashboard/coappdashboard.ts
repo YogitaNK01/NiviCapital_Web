@@ -106,6 +106,13 @@ export class Coappdashboard implements OnInit {
 
     this.loadRemovedCoApplicants();
 
+    this.isFromSummary = this.loanfornservice.isSummaryEditFlow();
+ 
+    if (!this.isFromSummary) {
+      const summaryData = this.loanfornservice.getSummary(this.applicationId);
+      this.loanfornservice.startSummaryEditFlow(summaryData, 'MAIN');
+      this.isFromSummary = true;
+    }
   }
   add() {
 
@@ -140,7 +147,10 @@ export class Coappdashboard implements OnInit {
       mode: 'new'
     }));
 
-
+if(this.isFromSummary){
+      this.loanfornservice.clearSummaryEditFlow();
+      this.isFromSummary = false;
+    }
     this.router.navigate(
       ['coapplicantinfo'],
       {
@@ -283,7 +293,7 @@ export class Coappdashboard implements OnInit {
 
     if (!current) return;
 
-    // ✅ remove pending new co-app flow context
+    //    remove pending new co-app flow context
     sessionStorage.removeItem('pendingCoAppContext');
 
     this.stepperService.setStepperType('CO_APPLICANT');

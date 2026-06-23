@@ -4,7 +4,7 @@ import { COMMON_EDUCATION_FIELDS } from "../shared/config/custdetails.config";
 type Field = {
   label: string;
   value: any;
-  isCurrency?: boolean; // ✅ optional property
+  isCurrency?: boolean; //    optional property
 };
 
 export class SummaryHelper {

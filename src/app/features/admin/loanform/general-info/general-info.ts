@@ -1658,8 +1658,9 @@ export class GeneralInfo implements OnInit {
       this.registerForm.patchValue(this.originalFormValue);
     }
 
-    this.isViewMode = false;
+    this.isViewMode = true;
     this.isEditMode = false;
+     this.activeForm.disable();
     this.formSvc.clearSummaryEditFlow();
 
     this.router.navigate(['/applications', this.applicationId, 'summaryinfo']);

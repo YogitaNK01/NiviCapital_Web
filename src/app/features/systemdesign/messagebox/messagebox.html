@@ -93,14 +93,14 @@
               </div> -->
               <div class="text-common comparison-box">
 
-                <!-- ✅ ADDING -->
+                <!--    ADDING -->
                 <ng-container *ngIf="comparisonData?.addingSections?.length; else removingTpl">
                   <div *ngFor="let item of comparisonData?.addingSections">
                     • {{ item }}
                   </div>
                 </ng-container>
 
-                <!-- ✅ REMOVING -->
+                <!--    REMOVING -->
                 <ng-template #removingTpl>
                   <div *ngFor="let item of comparisonData?.removingSections">
                     • {{ item }}
