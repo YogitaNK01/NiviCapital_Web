@@ -21,11 +21,11 @@
                     </div>
                 </div>
                 <div>
-                    <!-- <app-buttons *ngIf="isFromSummary" type="button" label="Edit"
-                        class="btn btn-icon edit btncustomClass editBtnClass" color="primary" (click)="enableForm()"
-                        [disabled]="!isViewMode">
+                    <app-buttons *ngIf="isFromSummary && isViewModeon" type="button" label="Edit"
+                        class="btn btn-icon edit btncustomClass editBtnClass" color="primary" (click)="editClick.emit()"
+                        [disabled]="!isViewModeon">
                         <img src="assets/images/icons/edit-white.svg" alt="edit">
-                    </app-buttons> -->
+                    </app-buttons> 
                 </div>
             </div>
         </div>
@@ -172,7 +172,7 @@
 
                         @if (hasLocal('marksheet' ,i)) {
                         <label class="text-label">Marksheet <span class="text-danger">*</span></label>
-                        <div class="addcust-img-box mt-2" [ngClass]="{'disabled-div' : isViewMode}">
+                        <div class="addcust-img-box mt-2" [ngClass]="{'disabled-div' : isViewModeon}">
                             <p class="text-label">{{ getLocalName('marksheet', i) }}</p>
                             <div class="icons">
 
@@ -193,7 +193,7 @@
 
                         }
                         @else{
-                        <app-uploadbtn [config]="basicConfig" [uploadViaApi]="false" [required]="true" [disabled]="isViewMode"
+                        <app-uploadbtn [config]="basicConfig" [uploadViaApi]="false" [required]="true" [disabled]="isViewModeon"
                             label="Marksheet " (fileChange)="onFileChange($event, educationType, 'marksheet')">
                         </app-uploadbtn>
                         }
@@ -207,7 +207,7 @@
                         @if (hasLocal('lc')) {
                         <label class="text-label">Passing / Leaving Certificate <span
                                 class="text-danger">*</span></label>
-                        <div class="addcust-img-box mt-2" [ngClass]="{'disabled-div' : isViewMode}">
+                        <div class="addcust-img-box mt-2" [ngClass]="{'disabled-div' : isViewModeon}">
                             <p class="text-label">{{ getLocalName('lc') }}</p>
                             <div class="icons">
 
@@ -227,7 +227,7 @@
                         </div>
 
                         } @else{
-                        <app-uploadbtn [config]="basicConfig" [required]="true" label="Passing / Leaving Certificate " [disabled]="isViewMode"
+                        <app-uploadbtn [config]="basicConfig" [required]="true" label="Passing / Leaving Certificate " [disabled]="isViewModeon"
                             (fileChange)="onFileChange($event, educationType,'lc')">
                         </app-uploadbtn>
                         }
@@ -252,7 +252,7 @@
                                 Marksheet Year {{ i + 1 }} <span class="text-danger">*</span>
                             </label>
 
-                            <div class="addcust-img-box mt-2" [ngClass]="{'disabled-div' : isViewMode}">
+                            <div class="addcust-img-box mt-2" [ngClass]="{'disabled-div' : isViewModeon}">
                                 <p class="text-label">{{ getLocalName('marksheet', i) }}</p>
                                 <div class="icons">
 
@@ -274,7 +274,7 @@
                             } @else {
 
 
-                            <app-uploadbtn [config]="basicConfig" [uploadViaApi]="false" [disabled]="isViewMode"
+                            <app-uploadbtn [config]="basicConfig" [uploadViaApi]="false" [disabled]="isViewModeon"
                                 [required]="isMarksheetRequired(i)" label="Marksheet {{ i + 1 }}"
                                 (fileChange)="onFileChange($event, educationType, 'marksheet',i)">
                             </app-uploadbtn>
@@ -292,7 +292,7 @@
                             Passing / Leaving Certificate <span class="text-danger">*</span>
                         </label>
 
-                        <div class="addcust-img-box mt-2" [ngClass]="{'disabled-div' : isViewMode}">
+                        <div class="addcust-img-box mt-2" [ngClass]="{'disabled-div' : isViewModeon}">
                             <p class="text-label">{{ getLocalName('lc') }}</p>
                             <div class="icons">
 
@@ -315,7 +315,7 @@
 
 
 
-                        <app-uploadbtn [config]="basicConfig" [required]="!isPostGraduate" [disabled]="isViewMode"
+                        <app-uploadbtn [config]="basicConfig" [required]="!isPostGraduate" [disabled]="isViewModeon"
                             label="Passing / Leaving Certificate "
                             (fileChange)="onFileChange($event, educationType,'lc')">
                         </app-uploadbtn>
@@ -361,7 +361,7 @@
                             <div class=" other-doc-upload" [ngClass]="slot.file ? 'mt-1' : 'mt-0'">
 
                                 @if (slot.file) {
-                                <div class="addcust-img-box mt-4" [ngClass]="{'disabled-div' : isViewMode}">
+                                <div class="addcust-img-box mt-4" [ngClass]="{'disabled-div' : isViewModeon}">
                                     <p class="text-label">{{ slot.file.name }}</p>
 
                                     <div class="icons">
@@ -379,7 +379,7 @@
                                     </div>
                                 </div>
                                 } @else {
-                                <app-uploadbtn [config]="basicConfig" [required]="educationType !== 'POSTGRADUATE'" [disabled]="isViewMode"
+                                <app-uploadbtn [config]="basicConfig" [required]="educationType !== 'POSTGRADUATE'" [disabled]="isViewModeon"
                                     label="Upload Document" (fileChange)="onOtherFileChange($event, slot)">
                                 </app-uploadbtn>
                                 }

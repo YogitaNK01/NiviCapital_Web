@@ -3,6 +3,7 @@ import { Router } from '@angular/router';
 import { Loanformservice } from '../service/loanformservice';
 import { BehaviorSubject } from 'rxjs';
 import { ShowOnDirtyErrorStateMatcher } from '@angular/material/core';
+import { EDUCATION_SECTION_KEYS, INCOME_SECTION_KEYS } from '../../shared/config/custdetails.config';
 
 interface Step {
   label: string;
@@ -15,6 +16,22 @@ interface Step {
 
 }
 type StepperType = 'MAIN' | 'CO_APPLICANT';
+
+const EDUCATION_ROUTE_MAP: Record<string, string> = EDUCATION_SECTION_KEYS.reduce(
+  (acc, key) => {
+    acc[key] = 'educationDetails';
+    return acc;
+  },
+  {} as Record<string, string>
+);
+
+const INCOME_ROUTE_MAP: Record<string, string> = INCOME_SECTION_KEYS.reduce(
+  (acc, key) => {
+    acc[key] = 'incomeinfo';
+    return acc;
+  },
+  {} as Record<string, string>
+);
 
 @Injectable({
   providedIn: 'root'
@@ -61,7 +78,7 @@ export class Loanstepperservice {
 
   private completedStepsKey = 'loan_completed_steps';
   currentCoApplicantIndex: any = 1;
-
+ 
 
   constructor(private formSvc: Loanformservice, private router: Router) {
 
@@ -79,6 +96,7 @@ export class Loanstepperservice {
   rebuildSteps() {
     this.buildSteps();
   }
+ educationroute=EDUCATION_SECTION_KEYS;
 
   private stageRouteMap: Record<string, string> = {
     LOAN_INFO: 'loaninfo',
@@ -89,8 +107,8 @@ export class Loanstepperservice {
     SAVE_ADDITIONAL_INFO: 'additionalinfo',
     FETCH_KYC: 'kycinfo',
     SAVE_KYC: 'kycinfo',
-    SAVE_EDUCATION_DETAILS: 'educationDetails',
-    SAVE_INCOME_DETAILS: 'incomeinfo',
+   ...EDUCATION_ROUTE_MAP,
+   ...INCOME_ROUTE_MAP,
     SAVE_ASSETS: 'assetsinfo',
     SAVE_LIABILITIES: 'liabilitiesinfo',
     SAVE_MONTHLY_EXPENSES: 'monthlyexpinfo',
@@ -396,11 +414,7 @@ export class Loanstepperservice {
         key = 'diploma10';
       } else if (name.includes('diploma') && name.includes('12')) {
         key = 'diploma12';
-      } else if (name.includes('10th')) {
-        key = '10th';
-      } else if (name.includes('12th')) {
-        key = '12th';
-      }
+      } 
       else if (name.includes('others') && name.includes('12')) {
         key = 'others12';
 
@@ -416,6 +430,11 @@ export class Loanstepperservice {
       else if (name.includes('postgraduate')) {
         key = 'pg';
 
+      }
+      else if (name.includes('10th')) {
+        key = '10th';
+      } else if (name.includes('12th')) {
+        key = '12th';
       }
 
       return {

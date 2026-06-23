@@ -1,18 +1,17 @@
 <div class="vh-container">
     <div class="base-layout base-height" *ngIf="!isChildActive">
-
         <div class="header w-100 ">
-             <div class="d-flex justify-content-between">
+            <div class="d-flex justify-content-between">
                 <div class="text-datepicker blue-text d-flex flex-column gap-2 ">Education Details
                     <div class="text-body-1 fw-normal" *ngIf="!isFromSummary">
-                        <span ><svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 22 22"
+                        <span><svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 22 22"
                                 fill="none">
                                 <path
                                     d="M10.9997 20.1667C16.0413 20.1667 20.1663 16.0417 20.1663 11C20.1663 5.95833 16.0413 1.83333 10.9997 1.83333C5.95801 1.83333 1.83301 5.95833 1.83301 11C1.83301 16.0417 5.95801 20.1667 10.9997 20.1667Z"
                                     stroke="#25262F" stroke-width="1.28125" stroke-linecap="round"
                                     stroke-linejoin="round" />
-                                <path d="M11 7.33333V11.9167" stroke="#25262F" stroke-width="1.28125" stroke-linecap="round"
-                                    stroke-linejoin="round" />
+                                <path d="M11 7.33333V11.9167" stroke="#25262F" stroke-width="1.28125"
+                                    stroke-linecap="round" stroke-linejoin="round" />
                                 <path d="M10.9961 14.6667H11.0043" stroke="#25262F" stroke-width="1.28125"
                                     stroke-linecap="round" stroke-linejoin="round" />
                             </svg></span>
@@ -21,13 +20,8 @@
                 </div>
 
                 <div>
-                    <app-buttons
-                        *ngIf="isFromSummary"
-                        type="button"
-                        label="Edit"
-                        class="btn btn-icon edit btncustomClass editBtnClass"
-                        color="primary"
-                        (click)="enableForm()"
+                    <app-buttons *ngIf="isFromSummary" type="button" label="Edit"
+                        class="btn btn-icon edit btncustomClass editBtnClass" color="primary" (click)="enableForm()"
                         [disabled]="!isViewMode">
                         <img src="assets/images/icons/edit-white.svg" alt="edit">
                     </app-buttons>
@@ -35,6 +29,8 @@
             </div>
 
         </div>
+
+        <!-- <div class="w-100" > -->
 
         <div class="w-100 d-flex flex-column gap-3 pb-1">
             <div class="table-head d-flex flex-column  ">Qualification Details</div>
@@ -72,7 +68,7 @@
 
                                 <div class="text-danger"
                                     *ngIf="!basicform.get('qualificationtitle')?.errors?.['required']  && basicform.get('qualificationtitle')?.errors?.['minlength']">
-                                   Qualification name must be 2–100 characters
+                                    Qualification name must be 2–100 characters
                                 </div>
 
 
@@ -94,10 +90,12 @@
 
 
                         <app-dropdown [options]="filteredInstitutes" [placeholder]="'Select Last Insitution'"
-                            [required]="true" [searchable]="true" [label]="'Last Institution Name'"
+                            [required]="true" [searchable]="true" [label]="'Last Institution Name'"  [enableSearchEvent]="true"
                             formControlName="institute" name="institute" (searchChange)="filterInstitutes($event)"
                             (selectedValueChange)="SelectedInstitute($event);">
                         </app-dropdown>
+
+                        
                     </div>
 
                     <div class="col-6" *ngIf="isOtherEducation">
@@ -127,16 +125,16 @@
 
                             </div>
 
-                          
+
 
 
                         </div>
                     </div>
                 </div>
             </div>
+            <!-- </div> -->
+
         </div>
-
-
     </div>
     <!-- <router-outlet></router-outlet> -->
     <router-outlet (activate)="onChildActivate()" (deactivate)="onChildDeactivate()"></router-outlet>
@@ -144,65 +142,56 @@
     <div *ngIf="!isChildActive">
         <hr class="footer-hr-class" *ngIf="!isChildActive">
         <div class="loan-footerbtns row w-100  d-flex justify-content-between align-items-center">
-<ng-container *ngIf="!isFromSummary">
-            <div class="col-lg-4 pointer">
-                <img src="../assets/images/icons/save.svg">
-                <span class="text-dp-3-regular mx-2 blue-text" (click)="saveExit()"> Save and Exit</span>
-            </div>
-            <div class="col-lg-4  d-flex justify-content-end">
-                <app-buttons type="button" label="Back" class="btn btncustomClass" [outline]="true" (click)="back()">
-                </app-buttons>
-                <app-buttons type="button" label="Next" class="btn btncustomClass" color="primary" (click)="next()"
-                    [disabled]="basicform.invalid">
-                </app-buttons>
+            <ng-container *ngIf="!isFromSummary">
+                <div class="col-lg-4 pointer">
+                    <img src="../assets/images/icons/save.svg">
+                    <span class="text-dp-3-regular mx-2 blue-text" (click)="saveExit()"> Save and Exit</span>
+                </div>
+                <div class="col-lg-4  d-flex justify-content-end">
+                    <app-buttons type="button" label="Back" class="btn btncustomClass" [outline]="true"
+                        (click)="back()">
+                    </app-buttons>
+                    <app-buttons type="button" label="Next" class="btn btncustomClass" color="primary" (click)="next()"
+                        [disabled]="basicform.invalid">
+                    </app-buttons>
 
-            </div>
-             </ng-container>
+                </div>
+            </ng-container>
 
-    <ng-container *ngIf="isFromSummary && isEditMode">
-        <div class="col-lg-12 d-flex justify-content-end gap-2">
+            <ng-container *ngIf="isFromSummary && isEditMode">
+                <div class="col-lg-12 d-flex justify-content-end gap-2">
 
-        <app-buttons
-            type="button"
-            label="Cancel"
-            class="btn btncustomClass"
-            [outline]="true"
-            (click)="cancelSummaryEdit()">
-        </app-buttons>
+                    <app-buttons type="button" label="Cancel" class="btn btncustomClass" [outline]="true"
+                        (click)="cancelSummaryEdit()">
+                    </app-buttons>
 
-        <app-buttons
-           
-            type="button"
-            label="Save"
-            class="btn btncustomClass"
-            color="primary"
-            (click)="saveSummaryEdit()"
-            [disabled]="basicform.invalid">
-        </app-buttons>
+                    <app-buttons type="button" label="Save" class="btn btncustomClass" color="primary"
+                        (click)="saveSummaryEdit()" [disabled]="basicform.invalid">
+                    </app-buttons>
 
-        </div>
-  </ng-container>
+                </div>
+            </ng-container>
         </div>
     </div>
 
-<div class="edit-success-modal" *ngIf="editSuccess">
-    <div class="edit-modal-overlay"></div>
+    <div class="edit-success-modal" *ngIf="editSuccess">
+        <div class="edit-modal-overlay"></div>
 
-    <div class="edit-modal-container">
-      <button class="edit-close-btn" (click)="onCancel()">
-        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
-          <path d="M3 3L15 15L3 3Z" fill="#F4F6FF" />
-          <path d="M3 3L15 15" stroke="#F4F6FF" stroke-width="1.125" stroke-linecap="round" stroke-linejoin="round" />
-          <path d="M3 15L15 3" stroke="#F4F6FF" stroke-width="1.125" stroke-linecap="round" stroke-linejoin="round" />
-        </svg></button>
+        <div class="edit-modal-container">
+            <button class="edit-close-btn" (click)="onCancel()">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
+                    <path d="M3 3L15 15L3 3Z" fill="#F4F6FF" />
+                    <path d="M3 3L15 15" stroke="#F4F6FF" stroke-width="1.125" stroke-linecap="round"
+                        stroke-linejoin="round" />
+                    <path d="M3 15L15 3" stroke="#F4F6FF" stroke-width="1.125" stroke-linecap="round"
+                        stroke-linejoin="round" />
+                </svg></button>
 
-      <app-successbox [title]="description1"
-        [buttons]="[
+            <app-successbox [title]="description1" [buttons]="[
             { label: 'OK', action: 'OK', outline: false, color: 'primary',class: 'btncustomClass w-50'  },
-        ]" (actionClick)="handleSuccessAction($event)"
-    >
-    </app-successbox>
+        ]" (actionClick)="handleSuccessAction($event)">
+            </app-successbox>
 
+        </div>
     </div>
-</div>
 </div>

@@ -8,11 +8,12 @@ import { Inputfield } from '../../../../systemdesign/inputfield/inputfield';
 import { Radiobuttons } from '../../../../systemdesign/radiobuttons/radiobuttons';
 import { Uploadbtn, UploadConfig, UploadResult } from '../../../../systemdesign/uploadbtn/uploadbtn';
 import { Loanstepperservice } from '../../../../../core/service/loanstepperservice';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { Loanformservice } from '../../../../../core/service/loanformservice';
 import { Msgboxservice } from '../../../../../core/service/msgboxservice';
 import { Main } from '../../../../../core/service/main';
 import { combineLatest } from 'rxjs';
+import { Storage } from '../../../../../core/service/storage';
 
 interface Document {
   title: string;
@@ -63,8 +64,8 @@ export type SectionFileEvent = {
   styleUrl: './edusection.scss'
 })
 export class Edusection {
-  applicantId:any;
-  applicationId:any;
+  applicantId: any;
+  applicationId: any;
 
 
   files: any = {};
@@ -112,8 +113,8 @@ export class Edusection {
   @Output() fileSelected = new EventEmitter<SectionFileEvent>();
 
   @Input() uploadedFiles: Record<string, File | null> = {};
- @Input() savedFileMeta: Record<string, File | null> = {};
- @Input() otherDocMap: Record<string, { title: string }> = {};
+  @Input() savedFileMeta: Record<string, File | null> = {};
+  @Input() otherDocMap: Record<string, { title: string }> = {};
   @Input() stepKey!: '10th' | '12th' | 'diploma10' | 'diploma12' | 'ug' | 'pg' | 'others' | 'others12' | 'othersdiploma';
 
 
@@ -150,82 +151,105 @@ export class Edusection {
   maxOtherDocuments = 5;
   @Output() otherDocAdded = new EventEmitter<number>();
 
-//delete img
-@Output() fileRemoved = new EventEmitter<{
-  step: any;
-  control: 'marksheet' | 'lc' | 'other';
-  index?: number;
-}>();
+  //delete img
+  @Output() fileRemoved = new EventEmitter<{
+    step: any;
+    control: 'marksheet' | 'lc' | 'other';
+    index?: number;
+  }>();
 
+  lastSavedPayload: any = null;
+  isSummaryEditMode = false;
+  viewOnly = false;
   //edit from summary
-  isFromSummary = false;
-  isViewMode = false;
-  isEditMode = false;
-  originalFormValue: any = null;
+
+ @Input() isFromSummary = false;
+@Input() isViewModeon = false;
+@Input() isEditMode = false;
+@Output() editClick = new EventEmitter<void>();
+
 
   editSuccess: any = false;
   description1 = `Great ! Your Additional Info Details\n Uploaded Successfully.`;
-  constructor(private fb: FormBuilder, private stepperService: Loanstepperservice, private cd: ChangeDetectorRef, private route: ActivatedRoute,
-    public main: Main, private msgBox: Msgboxservice, public loanformservice: Loanformservice) { }
+  constructor(private fb: FormBuilder, private stepperService: Loanstepperservice, private cd: ChangeDetectorRef, private route: ActivatedRoute, private router: Router,
+    public main: Main, private msgBox: Msgboxservice, public loanformservice: Loanformservice, private storageservice: Storage) { }
 
 
   ngOnInit(): void {
 
 
 
-     let Allids = this.stepperService.getLoanId();
+    let Allids = this.stepperService.getLoanId();
 
     this.applicantId = Allids[0];
     this.applicationId = Allids[1];
     // this.custName = Allids[2];
     // this.custARN = Allids[3];
-    
-combineLatest([
-    this.loanformservice.getInstitutesCached(),
-    this.loanformservice.getAllCities()
-  ]).subscribe(([inst, citiesRes]: any) => {
 
-    this.seleactInstitute = inst;
-    this.filteredInstitutes = [...inst];
+    const queryParams = this.route.snapshot.queryParams;
+    this.isSummaryEditMode =
+      queryParams['fromSummary'] === true ||
+      queryParams['fromSummary'] === 'true' ||
+      this.loanformservice.isSummaryEditFlow();
 
-    const list = citiesRes.data ?? citiesRes;
-    this.selectlocation = list.map((c: any) => ({
-      value: c.id,
-      label: c.name
-    }));
-    this.filteredlocation = [...this.selectlocation];
+    this.viewOnly = this.isSummaryEditMode && (queryParams['mode'] === 'view' || queryParams['mode'] === undefined);
 
-    // ✅ restore only after both lists exist
-    this.restoreDropdownValues();
-  });
+    this.isFromSummary = this.loanformservice.isSummaryEditFlow();
+
+    if (this.isFromSummary) {
+      this.isViewModeon = true;
+      this.group.disable();
+    }
+    if (this.viewOnly) {
+      this.group.disable({ emitEvent: false });
+    }
+
+    combineLatest([
+      this.loanformservice.getInstitutesCached(),
+      this.loanformservice.getAllCities()
+    ]).subscribe(([inst, citiesRes]: any) => {
+
+      this.seleactInstitute = inst;
+      this.filteredInstitutes = [...inst];
+
+      const list = citiesRes.data ?? citiesRes;
+      this.selectlocation = list.map((c: any) => ({
+        value: c.id,
+        label: c.name
+      }));
+      this.filteredlocation = [...this.selectlocation];
+
+      //    restore only after both lists exist
+      this.restoreDropdownValues();
+    });
 
 
     this.cityNames();
     this.selectpassingyr = this.buildYearOptions(20);
     this.initSection();
 
-   
+
 
   }
-  
-  
+
+
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['sectionType'] || changes['title'] || changes['stepKey']) {
       this.initSection();      //   run every time step changes
     }
-    
- if (
-    changes['uploadedFiles'] ||
-    changes['savedFileMeta'] ||
-    changes['otherDocMap'] ||
-    changes['stepKey']
-  ) {
-    this.rebuildOtherDocuments();
-  }
+
+    if (
+      changes['uploadedFiles'] ||
+      changes['savedFileMeta'] ||
+      changes['otherDocMap'] ||
+      changes['stepKey']
+    ) {
+      this.rebuildOtherDocuments();
+    }
 
   }
 
-private initSection(): void {
+  private initSection(): void {
     // reset defaults
     this.marksheetCount = 1;
     this.showLC = false;
@@ -283,18 +307,7 @@ private initSection(): void {
     return years;
   }
 
-  // getInstituteName() {
-  //   this.loanformservice.getInstitutes().subscribe((res: any) => {
-  //     const list = res.data ?? res;
 
-  //     this.seleactInstitute = list.map((s: any) => ({
-  //       value: s.instituteName, //s.id,
-  //       label: s.instituteName,
-
-  //     }));
-  //      this.filteredInstitutes = [...this.seleactInstitute];
-  //   });
-  // }
 
   SelectedInstitute(values: string | string[]) {
     const ids = Array.isArray(values) ? values : [values];
@@ -357,10 +370,10 @@ private initSection(): void {
         label: s.name,
 
       }));
-      
- this.filteredlocation = [...this.selectlocation];
+
+      this.filteredlocation = [...this.selectlocation];
     });
-    
+
   }
   SelectedCity(values: string | string[]) {
     const ids = Array.isArray(values) ? values : [values];
@@ -380,13 +393,13 @@ private initSection(): void {
 
     const control = this.group.get('location');
     // control?.setValue(this.selectedLocationLabel);
-    control?.setValue(ids); 
+    control?.setValue(ids);
     control?.markAsTouched();
     control?.updateValueAndValidity();
 
   }
 
-    filtercities(searchText: any) {
+  filtercities(searchText: any) {
     const value = searchText.trim().toLowerCase();
 
     // Reset list when search is empty
@@ -414,39 +427,39 @@ private initSection(): void {
 
   restoreDropdownValues() {
 
-  const step = this.stepKey;
-  const saved = this.group.value;
+    const step = this.stepKey;
+    const saved = this.group.value;
 
-  if (!saved) return;
+    if (!saved) return;
 
-  //   Institute restore
-  if (saved.institutename) {
-    const found = this.seleactInstitute.find(i =>
-      i.value === saved.institutename
-    );
+    //   Institute restore
+    if (saved.institutename) {
+      const found = this.seleactInstitute.find(i =>
+        i.value === saved.institutename
+      );
 
-    if (found) {
-      this.selectedInstituteLabel = found.label;
-      this.isOtherEducation = (found?.label ?? '').trim().toLowerCase() === 'other';
-      this.group.get('institutename')?.setValue(found.value,{ emitEvent: false });
+      if (found) {
+        this.selectedInstituteLabel = found.label;
+        this.isOtherEducation = (found?.label ?? '').trim().toLowerCase() === 'other';
+        this.group.get('institutename')?.setValue(found.value, { emitEvent: false });
+      }
+    }
+
+    //  Location restore
+    if (saved.location) {
+      const foundLoc = this.selectlocation.find(l =>
+        l.value === saved.location
+      );
+
+      if (foundLoc) {
+        this.selectedLocationLabel = foundLoc.label;
+
+        this.isOtherLocation = (foundLoc?.label ?? '').trim().toLowerCase() === 'other';
+
+        this.group.get('location')?.setValue(foundLoc.value, { emitEvent: false });
+      }
     }
   }
-
-  //  Location restore
-  if (saved.location) {
-    const foundLoc = this.selectlocation.find(l =>
-      l.value === saved.location
-    );
-
-    if (foundLoc) {
-      this.selectedLocationLabel = foundLoc.label;
-      
-    this.isOtherLocation = (foundLoc?.label ?? '').trim().toLowerCase() === 'other';
-
-      this.group.get('location')?.setValue(foundLoc.value, { emitEvent: false });
-    }
-  }
-}
 
   getLevelFromTitle(title: string): EducationType {
     const t = (title || '').toLowerCase();
@@ -470,30 +483,30 @@ private initSection(): void {
   getLocalName1(doc: 'marksheet' | 'lc' | 'other', index?: number): string {
     return this.uploadedFiles?.[this.buildKey(doc, index)]?.name ?? '';
   }
-hasLocal(doc: 'marksheet' | 'lc' | 'other', index?: number): boolean {
-  return !!this.getStoredFile(doc, index);
-}
-
-getLocalName(doc: 'marksheet' | 'lc' | 'other', index?: number): string {
-  const file = this.getStoredFile(doc, index);
-
-  if (!file) return '';
-
-  if (file instanceof File) {
-    return file.name;
+  hasLocal(doc: 'marksheet' | 'lc' | 'other', index?: number): boolean {
+    return !!this.getStoredFile(doc, index);
   }
 
-  return file.fileName || file.name || '';
-}
+  getLocalName(doc: 'marksheet' | 'lc' | 'other', index?: number): string {
+    const file = this.getStoredFile(doc, index);
+
+    if (!file) return '';
+
+    if (file instanceof File) {
+      return file.name;
+    }
+
+    return file.fileName || file.name || '';
+  }
 
   buildKey(doc: DocType, index?: number): string {
     // return index
     //   ? `${this.stepKey}_${doc}_${index}`
     //   : `${this.stepKey}_${doc}`;
-    
-return index !== undefined
-    ? `${this.stepKey}_${doc}_${index}`
-    : `${this.stepKey}_${doc}`;
+
+    return index !== undefined
+      ? `${this.stepKey}_${doc}_${index}`
+      : `${this.stepKey}_${doc}`;
 
   }
   buildDocKey(level: EducationType, docType: DocType, index?: number): string {
@@ -598,85 +611,85 @@ return index !== undefined
 
   }
   viewLocalFile(doc: DocType, index?: number): void {
-  const file = this.getStoredFile(doc, index);
-  if (!file) return;
+    const file = this.getStoredFile(doc, index);
+    if (!file) return;
 
-  if (file instanceof File) {
-    const url = URL.createObjectURL(file);
-    window.open(url, '_blank');
-    setTimeout(() => URL.revokeObjectURL(url), 1000);
-    return;
-  }
+    if (file instanceof File) {
+      const url = URL.createObjectURL(file);
+      window.open(url, '_blank');
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+      return;
+    }
 
-  const savedUrl = file.viewUrl || file.fileUrl || file.publicUrl || '';
-  if (savedUrl) {
-    window.open(savedUrl, '_blank');
+    const savedUrl = file.viewUrl || file.fileUrl || file.publicUrl || '';
+    if (savedUrl) {
+      window.open(savedUrl, '_blank');
+    }
   }
-}
 
   downloadLocalFile1(doc: DocType, index?: number): void {
-  const key = this.buildKey(doc, index);
+    const key = this.buildKey(doc, index);
 
-  const file: any =
-    this.uploadedFiles[key] ||
-    this.savedFileMeta?.[key];
+    const file: any =
+      this.uploadedFiles[key] ||
+      this.savedFileMeta?.[key];
 
-  if (!file) return;
+    if (!file) return;
 
-  // Case 1: newly selected browser file
-  if (file instanceof File) {
-    const url = URL.createObjectURL(file);
+    // Case 1: newly selected browser file
+    if (file instanceof File) {
+      const url = URL.createObjectURL(file);
+
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = file.name || 'document';
+      a.click();
+
+      URL.revokeObjectURL(url);
+      return;
+    }
+
+    // Case 2: restored file metadata from API/localStorage
+    const savedUrl =
+      file.viewUrl ||
+      file.fileUrl ||
+      file.publicUrl ||
+      '';
+
+    if (!savedUrl) {
+      console.warn('No downloadable URL found for file:', file);
+      return;
+    }
 
     const a = document.createElement('a');
-    a.href = url;
-    a.download = file.name || 'document';
+    a.href = savedUrl;
+    a.target = '_blank';
+    a.download = file.fileName || file.name || 'document';
     a.click();
-
-    URL.revokeObjectURL(url);
-    return;
   }
+  downloadLocalFile(doc: DocType, index?: number): void {
+    const file = this.getStoredFile(doc, index);
+    if (!file) return;
 
-  // Case 2: restored file metadata from API/localStorage
-  const savedUrl =
-    file.viewUrl ||
-    file.fileUrl ||
-    file.publicUrl ||
-    '';
+    if (file instanceof File) {
+      const url = URL.createObjectURL(file);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = file.name || 'document';
+      a.click();
+      URL.revokeObjectURL(url);
+      return;
+    }
 
-  if (!savedUrl) {
-    console.warn('No downloadable URL found for file:', file);
-    return;
-  }
+    const savedUrl = file.viewUrl || file.fileUrl || file.publicUrl || '';
+    if (!savedUrl) return;
 
-  const a = document.createElement('a');
-  a.href = savedUrl;
-  a.target = '_blank';
-  a.download = file.fileName || file.name || 'document';
-  a.click();
-}
-downloadLocalFile(doc: DocType, index?: number): void {
-  const file = this.getStoredFile(doc, index);
-  if (!file) return;
-
-  if (file instanceof File) {
-    const url = URL.createObjectURL(file);
     const a = document.createElement('a');
-    a.href = url;
-    a.download = file.name || 'document';
+    a.href = savedUrl;
+    a.target = '_blank';
+    a.download = file.fileName || file.name || 'document';
     a.click();
-    URL.revokeObjectURL(url);
-    return;
   }
-
-  const savedUrl = file.viewUrl || file.fileUrl || file.publicUrl || '';
-  if (!savedUrl) return;
-
-  const a = document.createElement('a');
-  a.href = savedUrl;
-  a.target = '_blank';
-  a.download = file.fileName || file.name || 'document';
-  a.click();
-}
 
   removeLocalFile(doc: DocType, index?: number): void {
     this.msgBox.open({
@@ -690,19 +703,19 @@ downloadLocalFile(doc: DocType, index?: number): void {
         // this.uploadedFiles[key] = null;
         // this.uploadedFiles = { ...this.uploadedFiles };
 
-        
-const control =
-        doc === 'marksheet'
-          ? 'marksheet'
-          : doc === 'lc'
-          ? 'lc'
-          : 'other';
 
-      this.fileRemoved.emit({
-        step: this.stepKey,
-        control,
-        index
-      });
+        const control =
+          doc === 'marksheet'
+            ? 'marksheet'
+            : doc === 'lc'
+              ? 'lc'
+              : 'other';
+
+        this.fileRemoved.emit({
+          step: this.stepKey,
+          control,
+          index
+        });
 
       }
     })
@@ -738,7 +751,7 @@ const control =
     fd.append('files[0].type', type);
     fd.append('files[0].file', result.file);
 
-    this.loanformservice.uploadIncome(fd, this.applicationId,false).subscribe({
+    this.loanformservice.uploadIncome(fd, this.applicationId, false).subscribe({
       next: (res) => {
 
 
@@ -982,21 +995,21 @@ const control =
     window.open(URL.createObjectURL(doc.file), '_blank');
   }
   viewOther(slot: any): void {
-  const file = slot.file;
-  if (!file) return;
+    const file = slot.file;
+    if (!file) return;
 
-  if (file instanceof File) {
-    const url = URL.createObjectURL(file);
-    window.open(url, '_blank');
-    setTimeout(() => URL.revokeObjectURL(url), 1000);
-    return;
-  }
+    if (file instanceof File) {
+      const url = URL.createObjectURL(file);
+      window.open(url, '_blank');
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+      return;
+    }
 
-  const url = file.viewUrl || file.fileUrl || file.publicUrl || '';
-  if (url) {
-    window.open(url, '_blank');
+    const url = file.viewUrl || file.fileUrl || file.publicUrl || '';
+    if (url) {
+      window.open(url, '_blank');
+    }
   }
-}
 
   downloadOther1(doc: any) {
     const url = URL.createObjectURL(doc.file);
@@ -1007,28 +1020,28 @@ const control =
     URL.revokeObjectURL(url);
   }
   downloadOther(slot: any): void {
-  const file = slot.file;
-  if (!file) return;
+    const file = slot.file;
+    if (!file) return;
 
-  if (file instanceof File) {
-    const url = URL.createObjectURL(file);
+    if (file instanceof File) {
+      const url = URL.createObjectURL(file);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = file.name || 'document';
+      a.click();
+      URL.revokeObjectURL(url);
+      return;
+    }
+
+    const url = file.viewUrl || file.fileUrl || file.publicUrl || '';
+    if (!url) return;
+
     const a = document.createElement('a');
     a.href = url;
-    a.download = file.name || 'document';
+    a.target = '_blank';
+    a.download = file.fileName || file.name || 'document';
     a.click();
-    URL.revokeObjectURL(url);
-    return;
   }
-
-  const url = file.viewUrl || file.fileUrl || file.publicUrl || '';
-  if (!url) return;
-
-  const a = document.createElement('a');
-  a.href = url;
-  a.target = '_blank';
-  a.download = file.fileName || file.name || 'document';
-  a.click();
-}
 
 
   //delete other block (title +img)
@@ -1073,17 +1086,67 @@ const control =
       gropudata: { title: value }
     });
   }
-private rebuildOtherDocuments(): void {
+  private rebuildOtherDocuments1(): void {
+    if (!this.stepKey) return;
+
+    //    use stepKey, not educationType
+    const prefix = `${this.stepKey}_other_`;
+
+    const keys = [
+      ...Object.keys(this.otherDocMap || {}).filter(k => k.startsWith(prefix)),
+      ...Object.keys(this.uploadedFiles || {}).filter(k => k.startsWith(prefix)),
+      ...Object.keys(this.savedFileMeta || {}).filter(k => k.startsWith(prefix))
+    ];
+
+    const uniqueKeys = [...new Set(keys)].sort((a, b) => {
+      return this.extractOtherIndex(a) - this.extractOtherIndex(b);
+    });
+
+    this.otherDocuments = uniqueKeys.map((key) => {
+      const index = this.extractOtherIndex(key);
+
+      const file =
+        this.uploadedFiles[key] ||
+        this.savedFileMeta[key] ||
+        null;
+
+      const metaTitle = file && !(file instanceof File)
+        ? (file as any)?.title
+        : null;
+
+      return {
+        id: index,   //    keep actual index
+        key,
+        title:
+          this.otherDocMap[key]?.title ||
+          (metaTitle && metaTitle !== 'OTHER' ? metaTitle : '') ||
+          '',
+        file
+      };
+    });
+
+    // keep counter in sync so Add More gives next correct id
+    this.slotCounter = this.otherDocuments.length
+      ? Math.max(...this.otherDocuments.map(x => x.id))
+      : 0;
+
+    this.cd.detectChanges();
+  }
+  private rebuildOtherDocuments(): void {
   if (!this.stepKey) return;
 
-  // ✅ use stepKey, not educationType
   const prefix = `${this.stepKey}_other_`;
 
-  const keys = [
-    ...Object.keys(this.otherDocMap || {}).filter(k => k.startsWith(prefix)),
+  // ✅ FIX: ONLY use savedFileMeta (single source of truth)
+  const keys1 = Object.keys(this.savedFileMeta || {})
+    .filter(k => k.startsWith(prefix));
+    
+ const keys = [
+    ...Object.keys(this.savedFileMeta || {}).filter(k => k.startsWith(prefix)),
     ...Object.keys(this.uploadedFiles || {}).filter(k => k.startsWith(prefix)),
-    ...Object.keys(this.savedFileMeta || {}).filter(k => k.startsWith(prefix))
+    ...Object.keys(this.otherDocMap || {}).filter(k => k.startsWith(prefix)),
   ];
+
 
   const uniqueKeys = [...new Set(keys)].sort((a, b) => {
     return this.extractOtherIndex(a) - this.extractOtherIndex(b);
@@ -1092,27 +1155,16 @@ private rebuildOtherDocuments(): void {
   this.otherDocuments = uniqueKeys.map((key) => {
     const index = this.extractOtherIndex(key);
 
-    const file =
-      this.uploadedFiles[key] ||
-      this.savedFileMeta[key] ||
-      null;
-
-    const metaTitle = file && !(file instanceof File)
-      ? (file as any)?.title
-      : null;
+    const file = this.savedFileMeta[key] || null;
 
     return {
-      id: index,   // ✅ keep actual index
+      id: index,
       key,
-      title:
-        this.otherDocMap[key]?.title ||
-        (metaTitle && metaTitle !== 'OTHER' ? metaTitle : '') ||
-        '',
+      title: this.otherDocMap[key]?.title || '',
       file
     };
   });
 
-  // keep counter in sync so Add More gives next correct id
   this.slotCounter = this.otherDocuments.length
     ? Math.max(...this.otherDocuments.map(x => x.id))
     : 0;
@@ -1120,14 +1172,14 @@ private rebuildOtherDocuments(): void {
   this.cd.detectChanges();
 }
 
-private extractOtherIndex(key: string): number {
-  const match = key.match(/_other_(\d+)$/);
-  return match ? Number(match[1]) : 0;
-}
-private getStoredFile(doc: DocType, index?: number): any {
-  const key = this.buildKey(doc, index);
-  return this.uploadedFiles?.[key] || this.savedFileMeta?.[key] || null;
-}
+  private extractOtherIndex(key: string): number {
+    const match = key.match(/_other_(\d+)$/);
+    return match ? Number(match[1]) : 0;
+  }
+  private getStoredFile(doc: DocType, index?: number): any {
+    const key = this.buildKey(doc, index);
+    return this.uploadedFiles?.[key] || this.savedFileMeta?.[key] || null;
+  }
 
   back() {
 
@@ -1136,4 +1188,102 @@ private getStoredFile(doc: DocType, index?: number): any {
   next() {
 
   }
+
+
+
+  //////////////////////
+
+  //edit from summary
+
+
+
+  disableAdditionalInfoForm() {
+    this.group.disable({ emitEvent: false });
+  }
+
+  enableAdditionalInfoForm() {
+    this.group.enable({ emitEvent: false });
+
+
+  }
+
+  onEditClick() {
+    this.isViewModeon = false;
+    this.isEditMode = true;
+
+    this.enableAdditionalInfoForm();
+
+  this.stepperService.unlockSummaryEducationSubsteps();
+
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: {
+        fromSummary: true,
+        mode: 'edit'
+      },
+      queryParamsHandling: 'merge'
+    });
+  }
+  // cancelSummaryEdit() {
+  //   if (this.isEditMode && this.originalFormValue) {
+  //     this.group.patchValue(this.originalFormValue);
+  //   }
+  //   this.isViewModeon = false;
+  //   this.isEditMode = false;
+  //   this.loanformservice.clearSummaryEditFlow();
+  //   // this.router.navigate(['/applications', this.applicationId, 'summary']);
+  // }
+  // saveSummaryEdit() {
+  //   // this.submitAttempted = true;
+
+  //   // if (!this.canProceed) {
+  //   //   this.basicform.markAllAsTouched();
+  //   //   return;
+  //   // }
+
+  //   const formdata = this.group.getRawValue();
+  //   const input = '';
+
+  //   this.loanformservice.selectedqualification(input, this.applicationId).subscribe({
+  //     next: (res: any) => {
+  //       if (res.status === 'success') {
+  //         // const key = this.getStorageKey();
+  //         // localStorage.setItem(key, JSON.stringify(input));
+  //         this.storageservice.saveSectionData(
+  //           'additionalinfo',
+  //           this.applicationId,
+  //           this.applicantId,
+  //           false,
+  //           input
+  //         );
+
+  //         this.loanformservice.additionalInfoData = input;
+
+
+  //         // this.lastSavedPayload = { ...input };
+
+
+  //         // this.editSuccess = true;
+
+
+  //       }
+  //     },
+  //     error: (err) => {
+  //       console.error('Additional info update failed', err);
+  //     }
+  //   });
+  // }
+  // // edit sucess popup
+  // onCancel() {
+  //   this.editSuccess = false;
+  // }
+
+  // handleSuccessAction(action: string) {
+  //   if (action === "OK") {
+  //     this.editSuccess = false;
+  //     this.isViewModeon = true;
+  //     this.isEditMode = false;
+  //     //  this.activeForm.disable();
+  //   }
+  // }
 }

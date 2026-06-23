@@ -238,7 +238,7 @@
             </div>
           </div>
           } @else {
-          <app-uploadbtn [config]="basicConfig" [required]="isPassportRequired()" (fileChange)="onFileChange($event, 'passport')"
+          <app-uploadbtn [config]="basicConfig" (fileChange)="onFileChange($event, 'passport')"
             label="Passport">
           </app-uploadbtn>
           }

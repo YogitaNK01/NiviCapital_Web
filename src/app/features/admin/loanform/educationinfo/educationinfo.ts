@@ -12,7 +12,7 @@ import { Inputfield } from '../../../systemdesign/inputfield/inputfield';
 import { Edusection } from './edusection/edusection';
 import { Loanformservice } from '../../../../core/service/loanformservice';
 import { ActivatedRoute, Router } from '@angular/router';
-import { firstValueFrom, forkJoin, of } from 'rxjs';
+import { combineLatest, firstValueFrom, forkJoin, of } from 'rxjs';
 import { Messagebox } from '../../../systemdesign/messagebox/messagebox';
 import { Msgboxservice } from '../../../../core/service/msgboxservice';
 import { catchError, map } from 'rxjs/operators';
@@ -55,7 +55,7 @@ type ApiDocumentType =
 
 @Component({
   selector: 'app-educationinfo',
-  imports: [CommonModule, Buttons, ReactiveFormsModule, Uploadbtn, Inputfield, Edusection, Dropdown,Successbox,Messagebox],
+  imports: [CommonModule, Buttons, ReactiveFormsModule, Uploadbtn, Inputfield, Edusection, Dropdown, Successbox, Messagebox],
   standalone: true,
   templateUrl: './educationinfo.html',
   styleUrl: './educationinfo.scss'
@@ -150,7 +150,6 @@ export class Educationinfo implements OnInit {
 
   private isEducationFlowInitialized = false;
   uploadedFiles: Record<string, File | null> = {}; // central store
-  // savedFileMeta: Record<string, any> = {};
   private educationFormState: Record<string, any> = {};
 
   uploadeddata: any;
@@ -234,17 +233,34 @@ export class Educationinfo implements OnInit {
   ];
 
 
- //edit from summary
+  instituteOptions: { label: string; value: string }[] = [];
+  cityOptions: { label: string; value: string }[] = [];
+
+  //edit from summary
   isFromSummary = false;
   isViewMode = false;
   isEditMode = false;
   originalFormValue: any = null;
-  
+
   editSuccess: any = false;
   description1 = `Great ! Your Additional Info Details\n Uploaded Successfully.`;
 
+  private originalStepState: {
+    step: StepKey | null;
+    formValue: any;
+    uploadedFiles: Record<string, any>;
+    savedFileMeta: Record<string, any>;
+    otherDocMap: Record<string, any>;
+  } = {
+      step: null,
+      formValue: null,
+      uploadedFiles: {},
+      savedFileMeta: {},
+      otherDocMap: {}
+    };
+
   constructor(private fb: FormBuilder, private stepperService: Loanstepperservice, private cd: ChangeDetectorRef, private formSvc: Loanformservice, private msgBox: Msgboxservice,
-    private route: ActivatedRoute, private router: Router, private msgbox: Msgboxservice, public main: Main,private storageservice:Storage) { }
+    private route: ActivatedRoute, private router: Router, private msgbox: Msgboxservice, public main: Main, private storageservice: Storage) { }
   async ngOnInit(): Promise<void> {
 
 
@@ -270,16 +286,30 @@ export class Educationinfo implements OnInit {
     }
     await this.loadEducationFromSummary();
 
+    combineLatest([
+      this.formSvc.getInstitutesCached(),
+      this.formSvc.getAllCities()
+    ]).subscribe(([inst, citiesRes]: any) => {
+      this.instituteOptions = inst || [];
+
+      const list = citiesRes.data ?? citiesRes;
+      this.cityOptions = list.map((c: any) => ({
+        value: c.id,
+        label: c.name
+      }));
+
+      // optional, if you still use these elsewhere
+      this.selectlocation = [...this.cityOptions];
+    });
+
+
+
     //  2. QUERY PARAMS
     this.route.queryParams.subscribe(params => {
-
-
+      this.applySummaryMode(params);
       if (params['qualificationlabel']) {
 
         const step = params['qualificationlabel'] as StepKey;
-
-
-
 
         this.activeEducation = step;
 
@@ -289,11 +319,17 @@ export class Educationinfo implements OnInit {
           this.loadSavedEducationInfoFromApi(step);
           await this.loadEducationFromSummary();
           this.restoreFormState(step);
-        }, 200)
 
 
+          // ✅ keep currently active step enabled/disabled correctly
+          if (this.isEditMode) {
+            this.educationForms[step]?.enable({ emitEvent: false });
+          } else if (this.isViewMode) {
+            this.educationForms[step]?.disable({ emitEvent: false });
+          }
+        }, 200);
 
-        // this.loadAllEducationDrafts();
+
 
         //   build submenu only when flow qualificationId changes
         const qid = params['qualificationId'];
@@ -306,12 +342,6 @@ export class Educationinfo implements OnInit {
             //   ONLY ONCE per flow
             this.stepperService.setEducationSubSteps(this.educationdetails);
 
-            // if (!this.isEducationFlowInitialized) {
-            // const orderFromApi = this.educationdetails.map((d: any) =>
-            //   this.normalizeQualification(d.qualificationName)
-            // );
-
-
             const orderFromApi = this.educationdetails
               .map((d: any) => this.normalizeQualification(d.qualificationName))
               .filter((x: StepKey | string) => !!x);
@@ -319,15 +349,16 @@ export class Educationinfo implements OnInit {
             this.educationOrder = [...new Set([...orderFromApi, 'ielts', 'offerletter'])] as Array<'10th' | '12th' | 'diploma10' | 'diploma12' | 'ug' | 'pg' | 'ielts' | 'offerletter' | 'others' | 'others12' | 'othersdiploma'>;
             this.isEducationFlowInitialized = true;
             this.saveEducationStateToLocalStorage();
-            // }
-
-            // ✅ after API
             this.restoreEducationStateFromLocalStorage();
-
-
 
             setTimeout(() => {
               this.restoreFormState(step);
+
+              if (this.isEditMode) {
+                this.educationForms[step]?.enable({ emitEvent: false });
+              } else if (this.isViewMode) {
+                this.educationForms[step]?.disable({ emitEvent: false });
+              }
             }, 200);
 
           });
@@ -611,7 +642,7 @@ export class Educationinfo implements OnInit {
   }
 
 
-  onFileSelectedFromSection(e: {
+  onFileSelectedFromSection1(e: {
     step: StepKey;
     control: 'marksheet' | 'lc' | 'other';
     index?: number;
@@ -642,7 +673,7 @@ export class Educationinfo implements OnInit {
 
       const key = `${e.step}_other_${e.index}`;
 
-      if (e.file === null && e.gropudata === null) {
+      if (e.file === null) {
         delete this.otherDocMap[key];
         delete this.uploadedFiles[key];
 
@@ -671,7 +702,58 @@ export class Educationinfo implements OnInit {
 
     this.cd.detectChanges();
   }
+  onFileSelectedFromSection(e: {
+    step: StepKey;
+    control: 'marksheet' | 'lc' | 'other';
+    index?: number;
+    file: File | null;
+    gropudata?: { title?: string };
+  }) {
+    const fg = this.educationForms[e.step] as FormGroup;
 
+    fg?.get(e.control)?.setValue(e.file);
+    fg?.get(e.control)?.markAsTouched();
+    fg?.get(e.control)?.updateValueAndValidity();
+
+    this.hasUnsavedChanges = true;
+
+    // ✅ handle OTHER separately
+    if (e.control === 'other') {
+      const otherKey = `${e.step}_other_${e.index}`;
+
+      if (e.file === null) {
+        delete this.otherDocMap[otherKey];
+        delete this.uploadedFiles[otherKey];
+        delete this.savedFileMeta[otherKey];
+      } else {
+        this.otherDocMap[otherKey] = {
+          title: e.gropudata?.title ?? ''
+        };
+        this.uploadedFiles[otherKey] = e.file;
+      }
+
+      this.otherDocMap = { ...this.otherDocMap };
+      this.uploadedFiles = { ...this.uploadedFiles };
+      this.savedFileMeta = { ...this.savedFileMeta };
+
+      this.saveCurrentFormState();
+      this.saveEducationStateToLocalStorage();
+      this.cd.detectChanges();
+      return;
+    }
+
+    // ✅ normal docs
+    const normalizedDoc = this.normalizeDocType(e.control);
+    const idx = e.control === 'marksheet' ? (e.index ?? 0) : undefined;
+    const key = this.buildKey(e.step, normalizedDoc, idx);
+
+    this.uploadedFiles[key] = e.file;
+    this.uploadedFiles = { ...this.uploadedFiles };
+
+    this.saveCurrentFormState();
+    this.saveEducationStateToLocalStorage();
+    this.cd.detectChanges();
+  }
   getFile1(step: StepKey, doc: DocType, index?: number) {
 
     // return this.uploadedFiles[this.buildKey(step, doc, index)] ?? null;
@@ -812,10 +894,17 @@ export class Educationinfo implements OnInit {
     control: 'marksheet' | 'lc' | 'other';
     index?: number;
   }) {
-    const normalizedDoc = this.normalizeDocType(e.control);
-    const idx = e.control === 'marksheet' ? (e.index ?? 0) : undefined;
-    const key = this.buildKey(e.step, normalizedDoc, idx);
 
+    let key = '';
+
+    if (e.control === 'other') {
+      key = `${e.step}_other_${e.index}`;
+    } else {
+
+      const normalizedDoc = this.normalizeDocType(e.control);
+      const idx = e.control === 'marksheet' ? (e.index ?? 0) : undefined;
+      key = this.buildKey(e.step, normalizedDoc, idx);
+    }
     // remove from both stores
     delete this.uploadedFiles[key];
     delete this.savedFileMeta[key];
@@ -931,52 +1020,7 @@ export class Educationinfo implements OnInit {
       null
     );
   }
-  downloadLocal1(level: EducationType, docType: DocType, index?: number): void {
-    const f = this.uploadedFiles[this.buildDocKey(level, docType, index)] as File | null;
-    if (!f) return;
 
-    const url = URL.createObjectURL(f);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = f.name;
-    a.click();
-    URL.revokeObjectURL(url);
-  }
-  downloadLocal2(level: any, docType: DocType, index?: number): void {
-    const key = this.buildKey(level as StepKey, this.normalizeDocType(docType), index);
-
-    const file = this.uploadedFiles[key];
-
-    if (file instanceof File) {
-      const url = URL.createObjectURL(file);
-
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = file.name;
-      a.click();
-
-      URL.revokeObjectURL(url);
-      return;
-    }
-
-    const url = this.getSavedFileUrl(key);
-    const filename = this.savedFileMeta[key]?.fileName || 'document';
-
-    if (!url) return;
-
-    fetch(url)
-      .then(res => res.blob())
-      .then(blob => {
-        const blobUrl = URL.createObjectURL(blob);
-
-        const a = document.createElement('a');
-        a.href = blobUrl;
-        a.download = filename;
-        a.click();
-
-        URL.revokeObjectURL(blobUrl);
-      });
-  }
   downloadLocal(level: any, docType: DocType, index?: number): void {
     const file: any = this.getStoredFileMeta(
       level as StepKey,
@@ -1212,7 +1256,7 @@ export class Educationinfo implements OnInit {
   onOtherDocAdded(rowId: number) {
     const step = this.activeEducation as StepKey;
     const key = `${step}_other_${rowId}`;
-
+    if (this.otherDocMap[key]) return;
     this.otherDocMap[key] = { title: '' };
     this.uploadedFiles[key] = null;
   }
@@ -1379,16 +1423,16 @@ export class Educationinfo implements OnInit {
     });
 
 
-    // if (parsed.uploadedFileMeta) {
-    //   this.savedFileMeta = parsed.uploadedFileMeta || {};
-    //   this.savedFileMeta = { ...this.savedFileMeta }
-
-    // }
     if (parsed.uploadedFileMeta) {
+      // this.savedFileMeta = {
+      //   ...(this.savedFileMeta || {}),
+      //   ...(parsed.uploadedFileMeta || {})
+      // };
       this.savedFileMeta = {
-        ...(this.savedFileMeta || {}),
-        ...(parsed.uploadedFileMeta || {})
-      };
+  ...(parsed.uploadedFileMeta || {}),
+  ...(this.savedFileMeta || {})
+};
+
     }
 
     if (this.activeEducation) {
@@ -1421,6 +1465,7 @@ export class Educationinfo implements OnInit {
 
   }
   private patchSavedEducationData(step: StepKey, savedData: any) {
+    this.clearOtherDocsForStep(step);
     const form = this.educationForms[step] as FormGroup;
     if (!form) return;
 
@@ -2109,7 +2154,7 @@ export class Educationinfo implements OnInit {
 
       if (!Array.isArray(applicants) || !applicants.length) return;
 
-      // ✅ for main applicant page
+      //    for main applicant page
       const selectedApplicant =
         applicants.find((a: any) => a.applicantType === 'PRIMARY') || null;
 
@@ -2133,10 +2178,13 @@ export class Educationinfo implements OnInit {
       { summaryKey: 'diploma', step: 'diploma10' },   // or diploma12 depending on your flow
       { summaryKey: 'bachelors', step: 'ug' },
       { summaryKey: 'postgraduate', step: 'pg' },
-      { summaryKey: 'ieltsPte', step: 'ielts' }
+      { summaryKey: 'others', step: 'others12' },  // othersdiploma
+      { summaryKey: 'ieltsPte', step: 'ielts' },
+      { summaryKey: 'offerLetter', step: 'offerletter' },
     ];
 
     mapping.forEach(({ summaryKey, step }) => {
+      this.clearOtherDocsForStep(step);
       const docs = summaryEducation?.[summaryKey];
 
       if (!Array.isArray(docs) || !docs.length) return;
@@ -2205,6 +2253,9 @@ export class Educationinfo implements OnInit {
           if (step === 'ielts') {
             key = this.buildKey(step, 'ielts');
           }
+          else if (step === 'offerletter') {
+            key = this.buildKey(step, 'offerletter');
+          }
         }
 
         if (!key) return;
@@ -2237,14 +2288,14 @@ export class Educationinfo implements OnInit {
       this.savedFileMeta[key] = {
         key,
         name: summaryEducation.offerLetter,
-        fileName: summaryEducation.offerLetter,
+        fileName: summaryEducation.offerLetter[0].fileName,
         title: 'Offer Letter',
         type: 'UPLOAD_CERTIFICATE',
-        viewUrl: '', // no viewUrl available in summary
+        viewUrl: summaryEducation.offerLetter[0].viewUrl, // no viewUrl available in summary
         fileUrl: '',
         publicUrl: '',
-        objectKey: '',
-        documentId: '',
+        objectKey: summaryEducation.offerLetter[0].objectKey,
+        documentId: summaryEducation.offerLetter[0].documentId,
         uploaded: true
       };
 
@@ -2257,6 +2308,51 @@ export class Educationinfo implements OnInit {
 
     this.saveEducationStateToLocalStorage();
     this.cd.detectChanges();
+  }
+
+  private clearOtherDocsForStep1(step: StepKey): void {
+    const prefix = `${step}_other_`;
+
+    Object.keys(this.otherDocMap || {})
+      .filter(key => key.startsWith(prefix))
+      .forEach(key => delete this.otherDocMap[key]);
+
+    Object.keys(this.savedFileMeta || {})
+      .filter(key => key.startsWith(prefix))
+      .forEach(key => delete this.savedFileMeta[key]);
+
+    Object.keys(this.uploadedFiles || {})
+      .filter(key => key.startsWith(prefix))
+      .forEach(key => {
+        const value = this.uploadedFiles[key];
+        // remove only restored meta/null keys; keep actual fresh browser File if needed
+        if (!(value instanceof File)) {
+          delete this.uploadedFiles[key];
+        }
+      });
+
+    this.otherDocMap = { ...this.otherDocMap };
+    this.savedFileMeta = { ...this.savedFileMeta };
+    this.uploadedFiles = { ...this.uploadedFiles };
+  }
+  private clearOtherDocsForStep(step: StepKey): void {
+    const prefix = `${step}_`;
+
+    Object.keys(this.otherDocMap || {})
+      .filter(key => key.startsWith(prefix))
+      .forEach(key => delete this.otherDocMap[key]);
+
+    Object.keys(this.savedFileMeta || {})
+      .filter(key => key.startsWith(prefix))
+      .forEach(key => delete this.savedFileMeta[key]);
+
+    Object.keys(this.uploadedFiles || {})
+      .filter(key => key.startsWith(prefix))
+      .forEach(key => delete this.uploadedFiles[key]);
+
+    this.otherDocMap = { ...this.otherDocMap };
+    this.savedFileMeta = { ...this.savedFileMeta };
+    this.uploadedFiles = { ...this.uploadedFiles };
   }
 
   private getStepFromSection(sectionKey: string, subcategory?: string): StepKey | null {
@@ -2578,37 +2674,6 @@ export class Educationinfo implements OnInit {
 
       let fileIndex = 0;
 
-      // reqDocs.forEach(async r => {
-      //   const key = this.buildKey(step, r.doc as DocType, r.index);
-      //   const file = this.uploadedFiles[key];
-
-      //   if (file instanceof File) {
-      //     fd.append(`files[${fileIndex}].type`, r.apiType);
-      //     fd.append(`files[${fileIndex}].file`, file);
-      //     fileIndex++;
-      //   } else if (this.savedFileMeta[key]) {
-      //     console.log('Already saved file, skipping upload:', key);
-
-      //     const meta = this.savedFileMeta[key];
-
-      //     if (meta.viewUrl) {
-      //       const fileFromUrl = await this.urlToFile(
-      //         meta.viewUrl,
-      //         meta.fileName || 'file.jpg'
-      //       );
-
-      //       fd.append(`files[${fileIndex}].type`, meta.type || r.apiType);
-      //       fd.append(`files[${fileIndex}].file`, fileFromUrl); // ✅ correct
-
-      //       fileIndex++;
-      //     } else {
-      //       console.warn('No viewUrl to convert file:', key);
-      //     }
-
-      //   }
-      // });
-
-
       for (const r of reqDocs) {
         const key = this.buildKey(step, r.doc as DocType, r.index);
         const file = this.uploadedFiles[key];
@@ -2631,7 +2696,7 @@ export class Educationinfo implements OnInit {
               meta.mimeType || meta.contentType || 'image/jpeg'
             );
 
-            fd.append(`files[${fileIndex}].type`, meta.type || r.apiType);
+            fd.append(`files[${fileIndex}].type`, r.apiType);
             fd.append(`files[${fileIndex}].file`, fileFromUrl, fileFromUrl.name);
             fileIndex++;
           } else {
@@ -2643,14 +2708,60 @@ export class Educationinfo implements OnInit {
 
       //  ADD EXTRA MARKSHEETS (after required ones)
 
-      for (const key of Object.keys(this.uploadedFiles)
-        .filter(key => key.startsWith(`${step}_marksheet_`))) {
+      // const requiredMarksheetIndexes = this.requiredDocs(step)
+      //   .filter(d => d.doc === 'marksheet')
+      //   .map(d => d.index ?? -1);
 
-        const file = this.uploadedFiles[key];
-        if (!file) continue;
+      // for (const key of Object.keys(this.uploadedFiles)
+      //   .filter(key => key.startsWith(`${step}_marksheet_`))) {
 
-        const isRequired = key.includes('marksheet1') || key.includes('marksheet_0');
-        if (isRequired) continue;
+      //   const file = this.uploadedFiles[key];
+      //   if (!file) continue;
+
+      //   // const isRequired = key.includes('marksheet1') || key.includes('marksheet_0');
+      //   // if (isRequired) continue;
+
+      //   const match = key.match(/marksheet_(\d+)/);
+      //   const index = match ? Number(match[1]) : -1;
+
+
+      //   if (requiredMarksheetIndexes.includes(index)) {
+      //     continue;
+      //   }
+
+      const requiredMarksheetIndexes = new Set(
+        this.requiredDocs(step)
+          .filter(d => d.doc === 'marksheet')
+          .map(d => d.index ?? -1)
+      );
+
+      const maxAllowedMarksheetCount = this.getMarksheetCount(step);
+
+      const extraMarksheetKeys = Array.from(
+        new Set([
+          ...Object.keys(this.savedFileMeta || {}),
+          ...Object.keys(this.uploadedFiles || {})
+        ])
+      )
+        .filter(key => key.startsWith(`${step}_marksheet_`))
+        .map(key => {
+          const match = key.match(/marksheet_(\d+)/);
+          const index = match ? Number(match[1]) : -1;
+          return { key, index };
+        })
+        .filter(({ index }) =>
+          index >= 0 &&
+          index < maxAllowedMarksheetCount &&
+          !requiredMarksheetIndexes.has(index)
+        )
+        .sort((a, b) => a.index - b.index);
+
+      for (const { key } of extraMarksheetKeys) {
+        const file =
+          this.uploadedFiles[key] instanceof File
+            ? this.uploadedFiles[key]
+            : null;
+
 
         if (file instanceof File) {
           fd.append(`files[${fileIndex}].type`, 'MARKSHEET');
@@ -2670,54 +2781,11 @@ export class Educationinfo implements OnInit {
           fileIndex++;
         }
       }
-      // Object.keys(this.uploadedFiles)
-      //   .filter(key =>
-      //     key.startsWith(`${step}_marksheet_`)
-      //   )
-      //   .forEach(key => {
-      //     const file = this.uploadedFiles[key];
-      //     if (!file) return;
-
-
-      //     const isRequired = key.includes('marksheet1') || key.includes('marksheet_0');
-      //     if (isRequired) return;
-
-
-      //     if (file instanceof File) {
-      //       fd.append(`files[${fileIndex}].type`, 'MARKSHEET');
-      //       fd.append(`files[${fileIndex}].file`, file);
-
-      //       fileIndex++;
-      //     }
-      //     else if (this.savedFileMeta[key]) {
-      //       console.log('Already saved file, skipping upload:', key);
-      //     } else {
-      //       console.warn('Missing required file:', key);
-      //     }
-
-      //   });
 
 
       Object.keys(this.uploadedFiles)
         .filter(key => key.startsWith(`${step}_other_`))
 
-      // .forEach(key => {
-      //   const file = this.uploadedFiles[key];
-      //   if (!file) return;
-
-      //   const meta = this.otherDocMap[key];
-
-
-
-      //   fd.append(`files[${fileIndex}].type`, 'OTHER');
-      //   fd.append(
-      //     `files[${fileIndex}].title`,
-      //     meta?.title || 'Other Document'
-      //   );
-      //   fd.append(`files[${fileIndex}].file`, file);
-
-      //   fileIndex++;
-      // });
 
       for (const key of Object.keys(this.uploadedFiles)
         .filter(key => key.startsWith(`${step}_other_`))) {
@@ -2747,12 +2815,19 @@ export class Educationinfo implements OnInit {
         fileIndex++;
       }
 
+      // const instituteId = this.resolveInstituteId(form.get('institutename')?.value);
+      // const locationId = this.resolveLocationId(form.get('location')?.value);
+
 
       fd.append('instituteId', form.get('institutename')?.value);
+      // fd.append('instituteId', instituteId);
       fd.append('otherInstituteName', form.get('institutetitle')?.value);
       fd.append('yearOfPassing', form.get('passingyear')?.value);
       fd.append('percentageCgpa', form.get('per_cgpa')?.value);
       fd.append('locationId', form.get('location')?.value);
+
+      // fd.append('locationId', locationId);
+
       fd.append('otherLocationName', form.get('otherLocation')?.value);
 
     }
@@ -2775,7 +2850,7 @@ export class Educationinfo implements OnInit {
       }
     }
 
-    this.formSvc.uploadIncome(fd, this.applicationId,false).subscribe({
+    this.formSvc.uploadIncome(fd, this.applicationId, false).subscribe({
       next: async (res) => {
 
 
@@ -2828,29 +2903,128 @@ export class Educationinfo implements OnInit {
       }
     });
   }
+  //select location and institute id from dropdown
+  private getValueByLabel(list: any[], label: string) {
+    if (!label || !list?.length) return '';
+
+    return list.find((x: any) =>
+      x.label?.toString().trim().toLowerCase() ===
+      label.toString().trim().toLowerCase()
+    )?.value || '';
+  }
+
+  private resolveOptionValue(list: any[], rawValue: any): string {
+    const normalized = this.normalizeDropdownValue(rawValue);
+
+    if (!normalized) return '';
+
+    const existsAsValue = list.some((x: any) => x.value === normalized);
+    if (existsAsValue) return normalized;
+
+    return this.getValueByLabel(list, normalized);
+  }
+
+  private resolveInstituteId(rawValue: any): string {
+    return this.resolveOptionValue(this.instituteOptions, rawValue);
+  }
+
+  private resolveLocationId(rawValue: any): string {
+    return this.resolveOptionValue(this.cityOptions, rawValue);
+  }
 
 
-  
+
   //edit from summary enable and disbale
+  private applySummaryMode(params: any): void {
+    this.isFromSummary =
+      params['fromSummary'] === true ||
+      params['fromSummary'] === 'true' ||
+      this.formSvc.isSummaryEditFlow();
+
+    this.isEditMode = this.isFromSummary && params['mode'] === 'edit';
+    this.isViewMode = this.isFromSummary && !this.isEditMode;
+
+    // keep sidemenu clickable in summary flow
+    if (this.isFromSummary) {
+      this.stepperService.unlockSummaryEducationSubsteps();
+    }
+
+    const form = this.getCurrentForm();
+    if (!form) return;
+
+    if (this.isEditMode) {
+      this.enableAllEducationForms();
+    } else if (this.isViewMode) {
+      this.disableAllEducationForms();
+    }
+  }
+
   enableForm() {
+    const step = this.getCurrentStep();
+    const form = this.getCurrentForm();
+
+    const stepKeys = this.getStepKeys(step);
+
+    const uploadedFiles: Record<string, any> = {};
+    const savedFileMeta: Record<string, any> = {};
+    const otherDocMap: Record<string, any> = {};
+
+    stepKeys.forEach(key => {
+      if (key in this.uploadedFiles) uploadedFiles[key] = this.uploadedFiles[key];
+      if (key in this.savedFileMeta) savedFileMeta[key] = this.savedFileMeta[key];
+      if (key in this.otherDocMap) otherDocMap[key] = this.otherDocMap[key];
+    });
+
+    this.originalStepState = {
+      step,
+      formValue: form.getRawValue(),
+      uploadedFiles: { ...uploadedFiles },
+      savedFileMeta: { ...savedFileMeta },
+      otherDocMap: { ...otherDocMap }
+    };
+
     this.isViewMode = false;
     this.isEditMode = true;
-    this.group.enable();
+    form.enable({ emitEvent: false });
+
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: {
+        fromSummary: true,
+        mode: 'edit'
+      },
+      queryParamsHandling: 'merge'
+    });
+
+    this.cd.detectChanges();
   }
 
-  disableAdditionalInfoForm() {
-    this.group.disable({ emitEvent: false });
+
+
+  private disableAllEducationForms(): void {
+    Object.keys(this.educationForms).forEach((key) => {
+      const form = this.educationForms[key];
+      if (form) {
+        form.disable({ emitEvent: false });
+      }
+    });
   }
 
-  enableAdditionalInfoForm() {
-    this.group.enable({ emitEvent: false });
+  private enableAllEducationForms(): void {
+    Object.keys(this.educationForms).forEach((key) => {
+      const form = this.educationForms[key];
+      if (form) {
+        form.enable({ emitEvent: false });
+      }
+    });
   }
 
   onEditClick() {
     this.isViewMode = false;
     this.isEditMode = true;
 
-    this.enableAdditionalInfoForm();
+
+    this.enableAllEducationForms();
 
     this.router.navigate([], {
       relativeTo: this.route,
@@ -2862,64 +3036,379 @@ export class Educationinfo implements OnInit {
     });
   }
   cancelSummaryEdit() {
-    if (this.isEditMode && this.originalFormValue) {
-      this.group.patchValue(this.originalFormValue);
-    }
+
+
+    const step = this.originalStepState.step as StepKey | null;
+    if (!step) return;
+
+    const form = this.educationForms[step] as FormGroup;
+    if (!form) return;
+
+    // restore form
+    form.reset(this.originalStepState.formValue, { emitEvent: false });
+
+    // clear current step keys
+    this.getStepKeys(step).forEach(key => {
+      delete this.uploadedFiles[key];
+      delete this.savedFileMeta[key];
+      delete this.otherDocMap[key];
+    });
+
+    // restore old values
+    Object.assign(this.uploadedFiles, this.originalStepState.uploadedFiles);
+    Object.assign(this.savedFileMeta, this.originalStepState.savedFileMeta);
+    Object.assign(this.otherDocMap, this.originalStepState.otherDocMap);
+
+    this.uploadedFiles = { ...this.uploadedFiles };
+    this.savedFileMeta = { ...this.savedFileMeta };
+    this.otherDocMap = { ...this.otherDocMap };
+
     this.isViewMode = true;
     this.isEditMode = false;
-  }
-  saveSummaryEdit() {
-    // this.submitAttempted = true;
+    form.disable({ emitEvent: false });
 
-    // if (!this.canProceed) {
-    //   this.registerForm.markAllAsTouched();
-    //   return;
-    // }
 
-    const formdata = this.group.getRawValue();
-    const input = this.buildEducationInfoPayload();
-
-    this.formSvc.submitAdditionalInfo(input, this.applicationId, true).subscribe({
-      next: (res: any) => {
-        if (res.status === 'success') {
-          // const key = this.getStorageKey();
-          // // localStorage.setItem(key, JSON.stringify(input));
-          // this.storageservice.saveSectionData(
-          //   'additionalinfo',
-          //   this.applicationId,
-          //   this.applicantId,
-          //   false,
-          //   input
-          // );
-         
-            this.formSvc.additionalInfoData = input;
-          
-
-          this.lastSavedPayload = { ...input };
-
-        
-            this.editSuccess = true;
-         
-
-        }
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: {
+        fromSummary: true,
+        mode: 'view'
       },
-      error: (err) => {
-        console.error('Additional info update failed', err);
-      }
+      queryParamsHandling: 'merge'
     });
   }
 
-    // edit sucess popup
+  private appendUpdateItem(
+    fd: FormData,
+    itemIndex: number,
+    key: string,
+    apiType: string,
+    fileOrMeta: any,
+    form?: FormGroup,
+    title?: string
+  ) {
+    const meta = this.savedFileMeta[key];
+    const documentId = meta?.documentId || '';
+
+    // for PUT existing docs should always carry documentId
+    if (documentId) {
+      fd.append(`items[${itemIndex}].documentId`, documentId);
+    }
+
+
+    if (form) {
+      fd.append(
+        `items[${itemIndex}].yearOfPassing`,
+        this.normalizeDropdownValue(form.get('passingyear')?.value) || ''
+      );
+
+      fd.append(
+        `items[${itemIndex}].instituteId`,
+        this.resolveInstituteId(form.get('institutename')?.value) || ''
+      );
+
+      fd.append(
+        `items[${itemIndex}].locationId`,
+        this.resolveLocationId(form.get('location')?.value) || ''
+      );
+
+      fd.append(
+        `items[${itemIndex}].percentageCgpa`,
+        form.get('per_cgpa')?.value || ''
+      );
+
+      fd.append(
+        `items[${itemIndex}].otherInstituteName`,
+        form.get('institutetitle')?.value || ''
+      );
+
+      fd.append(
+        `items[${itemIndex}].otherLocationName`,
+        form.get('otherLocation')?.value || ''
+      );
+    }
+
+    fd.append(`items[${itemIndex}].file.type`, apiType);
+
+    if (title) {
+      fd.append(`items[${itemIndex}].title`, title);
+    }
+
+    // only send file if user changed/re-uploaded
+    if (fileOrMeta instanceof File) {
+      fd.append(`items[${itemIndex}].file.file`, fileOrMeta, fileOrMeta.name);
+    }
+  }
+  
+  private buildEducationUpdateFormData(): FormData {
+    const step = this.getCurrentStep();
+    const form = this.getCurrentForm();
+    const fd = new FormData();
+
+    fd.append('category', 'EDUCATION');
+    fd.append('subcategory', this.stepToSubcategory[step]);
+    fd.append('applicantId', this.applicantId);
+
+    let itemIndex = 0;
+
+    // ✅ IELTS
+    if (step === 'ielts') {
+      // fd.append('score', form.get('score')?.value || '');
+      fd.append(`items[${itemIndex}].score`, form.get('score')?.value || '');
+      const key = this.buildKey(step, 'ielts');
+
+      const fileOrMeta =
+        this.uploadedFiles[key] instanceof File
+          ? this.uploadedFiles[key]
+          : this.savedFileMeta[key];
+
+      if (fileOrMeta) {
+        this.appendUpdateItem(
+          fd,
+          itemIndex++,
+          key,
+          'UPLOAD_CERTIFICATE',
+          fileOrMeta
+        );
+      }
+
+      return fd;
+    }
+
+    // ✅ Offer Letter
+    if (step === 'offerletter') {
+      const key = this.buildKey(step, 'offerletter');
+
+      
+  console.log('offerletter key', key);
+  console.log('offerletter savedFileMeta', this.savedFileMeta[key]);
+  console.log('offerletter uploadedFiles', this.uploadedFiles[key]);
+
+      const fileOrMeta =
+        this.uploadedFiles[key] instanceof File
+          ? this.uploadedFiles[key]
+          : this.savedFileMeta[key];
+
+      if (fileOrMeta) {
+        this.appendUpdateItem(
+          fd,
+          itemIndex++,
+          key,
+          'UPLOAD_CERTIFICATE',
+          fileOrMeta
+        );
+      }
+
+      return fd;
+    }
+
+    // ✅ Required docs (MARKSHEET / LC)
+    this.requiredDocs(step).forEach(r => {
+      const key = this.buildKey(step, r.doc as DocType, r.index);
+
+      const fileOrMeta =
+        this.uploadedFiles[key] instanceof File
+          ? this.uploadedFiles[key]
+          : this.savedFileMeta[key];
+
+      if (!fileOrMeta) return;
+
+      this.appendUpdateItem(
+        fd,
+        itemIndex++,
+        key,
+        r.apiType,
+        fileOrMeta,
+        form
+      );
+    });
+
+    // ✅ Extra marksheets
+    // Object.keys({
+    //   ...this.savedFileMeta,
+    //   ...this.uploadedFiles
+    // })
+    //   .filter(key => key.startsWith(`${step}_marksheet_`))
+    //   .sort()
+    //   .forEach(key => {
+    //     const isRequired =
+    //       key === this.buildKey(step, 'marksheet', 0) ||
+    //       key === this.buildKey(step, 'marksheet', 1);
+
+    //     if (isRequired) return;
+
+
+    //     const fileOrMeta =
+    //       this.uploadedFiles[key] instanceof File
+    //         ? this.uploadedFiles[key]
+    //         : this.savedFileMeta[key];
+    //     if (!fileOrMeta) return;
+
+    //     this.appendUpdateItem(
+    //       fd,
+    //       itemIndex++,
+    //       key,
+    //       'MARKSHEET',
+    //       fileOrMeta,
+    //       form
+    //     );
+    //   });
+
+    const requiredMarksheetIndexes = new Set(
+  this.requiredDocs(step)
+    .filter(d => d.doc === 'marksheet')
+    .map(d => d.index ?? -1)
+);
+
+const maxAllowedMarksheetCount = this.getMarksheetCount(step);
+
+const extraMarksheetKeys = Array.from(
+  new Set([
+    ...Object.keys(this.savedFileMeta || {}),
+    ...Object.keys(this.uploadedFiles || {})
+  ])
+)
+  .filter(key => key.startsWith(`${step}_marksheet_`))
+  .map(key => {
+    const match = key.match(/marksheet_(\d+)/);
+    const index = match ? Number(match[1]) : -1;
+    return { key, index };
+  })
+  .filter(({ index }) =>
+    index >= 0 &&
+    index < maxAllowedMarksheetCount &&
+    !requiredMarksheetIndexes.has(index)
+  )
+  .sort((a, b) => a.index - b.index);
+
+extraMarksheetKeys.forEach(({ key }) => {
+  const fileOrMeta =
+    this.uploadedFiles[key] instanceof File
+      ? this.uploadedFiles[key]
+      : this.savedFileMeta[key];
+
+  if (!fileOrMeta) return;
+
+  this.appendUpdateItem(
+    fd,
+    itemIndex++,
+    key,
+    'MARKSHEET',
+    fileOrMeta,
+    form
+  );
+});
+
+
+    // ✅ Other docs
+    Object.keys({
+      ...this.savedFileMeta,
+      ...this.uploadedFiles
+    })
+      .filter(key => key.startsWith(`${step}_other_`))
+      .sort()
+      .forEach(key => {
+
+        const fileOrMeta =
+          this.uploadedFiles[key] instanceof File
+            ? this.uploadedFiles[key]
+            : this.savedFileMeta[key];
+        if (!fileOrMeta) return;
+
+        this.appendUpdateItem(
+          fd,
+          itemIndex++,
+          key,
+          'OTHER',
+          fileOrMeta,
+          form,
+          this.otherDocMap[key]?.title || fileOrMeta?.title || 'Other Document'
+        );
+      });
+
+    return fd;
+  }
+
+  saveSummaryEdit() {
+
+    const step = this.getCurrentStep();
+    const form = this.getCurrentForm();
+
+    if (!form || !this.canProceedToNext()) {
+      this.showValidationErrors(step);
+      return;
+    }
+
+    const fd = this.buildEducationUpdateFormData();
+
+    this.formSvc.uploadIncome(fd, this.applicationId, true).subscribe({
+      next: async (res: any) => {
+        if (res?.status === 'success') {
+          await this.loadSavedEducationInfoFromApi(step);
+          await this.loadEducationFromSummary();
+
+          this.isViewMode = true;
+          this.isEditMode = false;
+          form.disable({ emitEvent: false });
+
+
+          this.editSuccess = true;
+          this.cd.detectChanges();
+        }
+      },
+      error: (err) => {
+        console.error('PUT update failed', err);
+      }
+    });
+  }
+  // edit sucess popup
   onCancel() {
     this.editSuccess = false;
   }
 
   handleSuccessAction(action: string) {
-    if (action === "OK") {
+    if (action === 'OK') {
       this.editSuccess = false;
+
       this.isViewMode = true;
       this.isEditMode = false;
-      //  this.registerForm.disable({ emitEvent: false });
+
+      this.disableAllEducationForms();
+
+      if (this.isFromSummary) {
+        this.stepperService.unlockSummaryEducationSubsteps();
+      }
+
+
+      this.router.navigate([], {
+        relativeTo: this.route,
+        queryParams: {
+          fromSummary: true,
+          mode: 'view'
+        },
+        queryParamsHandling: 'merge'
+      });
+
+      this.cd.detectChanges();
     }
+  }
+
+  // check current step for edit
+  private getCurrentStep(): StepKey {
+    return this.activeEducation as StepKey;
+  }
+
+  private getCurrentForm(): FormGroup {
+    return this.educationForms[this.getCurrentStep()] as FormGroup;
+  }
+
+  private getStepKeys(step: StepKey): string[] {
+    const prefix = `${step}_`;
+
+    return [
+      ...Object.keys(this.uploadedFiles || {}).filter(k => k.startsWith(prefix)),
+      ...Object.keys(this.savedFileMeta || {}).filter(k => k.startsWith(prefix)),
+      ...Object.keys(this.otherDocMap || {}).filter(k => k.startsWith(prefix))
+    ].filter((v, i, arr) => arr.indexOf(v) === i);
   }
 }

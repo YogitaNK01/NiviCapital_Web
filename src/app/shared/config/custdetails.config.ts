@@ -1,5 +1,5 @@
 //PI data
- const piFields = [
+const piFields = [
   { label: 'First Name', key: 'firstName', type: 'text', controlType: 'input' },
   { label: 'Middle Name', key: 'middleName', type: 'text', controlType: 'input' },
   { label: 'Last Name', key: 'lastName', type: 'text', controlType: 'input' },
@@ -33,7 +33,7 @@ const otherFields = [
   { label: 'Middle Name', key: 'middleName', type: 'text', controlType: 'input' },
   { label: 'Last Name', key: 'lastName', type: 'text', controlType: 'input' }
 ];
-  //pii data 
+//pii data 
 const identity = [
   { label: 'Aadhaar Number', key: 'aadhaarNumber', type: 'text', controlType: 'input' },
   { label: 'Pan Number', key: 'panNumber', type: 'text', controlType: 'input' },
@@ -66,7 +66,7 @@ const address = [
 ];
 
 
-  // common-education-fields.ts
+// common-education-fields.ts
 export const COMMON_EDUCATION_FIELDS = [
   { label: 'Institute Name', key: 'instituteName' },
   { label: 'Other Institute Name', key: 'otherInstituteName' },
@@ -80,5 +80,30 @@ export const COMMON_EDUCATION_FIELDS = [
   { label: 'Other Document', key: 'otherDocumentUrl' },
 ];
 
+//income section key for route pass
 
-export { piFields,otherFields,identity,address };
+export const INCOME_SECTION_KEYS = [
+  'BATCH_UPLOAD_INCOME_LAST_3_MONTHS',
+  'BATCH_UPLOAD_INCOME_FORM_16',
+  'BATCH_UPLOAD_INCOME_BANK_STATEMENT_1_YEAR',
+  'BATCH_UPLOAD_INCOME_BANK_ITR_LAST_3_YEARS',
+  'BATCH_UPLOAD_BUSINESS_FINANCE_3_YEARS',
+  'BATCH_UPLOAD_BUSINESS_ITR_3_YEARS',
+  'BATCH_UPLOAD_BUSINESS_GST_1_YEAR',
+  'BATCH_UPLOAD_BUSINESS_BANK_STATEMENT_1_YEAR',
+
+] as const;
+export const EDUCATION_SECTION_KEYS = [
+  'SAVE_LAST_QUALIFICATION',
+  'BATCH_UPLOAD_10',
+  'BATCH_UPLOAD_12',
+  'BATCH_UPLOAD_DIPLOMA',
+  'BATCH_UPLOAD_DIPLOMA',
+  'BATCH_UPLOAD_UNDERGRADUATE',
+  'BATCH_UPLOAD_POSTGRADUATE',
+  'BATCH_UPLOAD_IELTS_PTE',
+  'BATCH_UPLOAD_OFFER_LETTER',
+  'BATCH_UPLOAD_12',
+  'BATCH_UPLOAD_DIPLOMA'
+];
+export { piFields, otherFields, identity, address };
