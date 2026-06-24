@@ -279,7 +279,7 @@ export class Incomeinfo {
   originalFormValue: any = null;
 
   editSuccess: any = false;
-  description1 = `Great ! Your Additional Info Details\n Uploaded Successfully.`;
+  description1 = `Great ! Your Income Details\n Uploaded Successfully.`;
   deletedDocs: any = []
 
   constructor(private fb: FormBuilder, private stepperService: Loanstepperservice, private router: Router, private cd: ChangeDetectorRef, private msgBox: Msgboxservice, public loanformservice: Loanformservice, private route: ActivatedRoute, public main: Main, private storageservice: Storage) { }
@@ -2421,8 +2421,6 @@ export class Incomeinfo {
 
       this.stepperService.setStepData(stepRoute, stepData);
       this.stepperService.markStepCompleted(completedRoute);
-
-
 
       // this.stepperService.next();
 

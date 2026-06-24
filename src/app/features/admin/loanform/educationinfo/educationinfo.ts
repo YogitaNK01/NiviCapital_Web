@@ -243,7 +243,7 @@ export class Educationinfo implements OnInit {
   originalFormValue: any = null;
 
   editSuccess: any = false;
-  description1 = `Great ! Your Additional Info Details\n Uploaded Successfully.`;
+  description1 = `Great ! Your Education Info Details\n Uploaded Successfully.`;
 
   private originalStepState: {
     step: StepKey | null;

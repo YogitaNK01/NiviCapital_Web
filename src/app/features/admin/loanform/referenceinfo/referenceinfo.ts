@@ -98,7 +98,7 @@ export class Referenceinfo implements OnInit {
   originalFormValue: any = null;
   
   editSuccess: any = false;
-  description1 = `Great ! Your Additional Info Details\n Uploaded Successfully.`;
+  description1 = `Great ! Your Reference Info Details\n Uploaded Successfully.`;
 
 
   constructor(private fb: FormBuilder, private stepperService: Loanstepperservice, private cd: ChangeDetectorRef, private loanformservice: Loanformservice, private msgBox: Msgboxservice,

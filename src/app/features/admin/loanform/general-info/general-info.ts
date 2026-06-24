@@ -152,7 +152,7 @@ export class GeneralInfo implements OnInit {
   originalFormValue: any = null;
 
   editSuccess: any = false;
-  description1 = `Great ! Your Additional Info Details\n Uploaded Successfully.`;
+  description1 = `Great ! Your General Info Details\n Uploaded Successfully.`;
 
   constructor(private fb: FormBuilder, private formSvc: Loanformservice, private router: Router, private storageservice: Storage, private stepperService: Loanstepperservice, private msgBox: Msgboxservice, private route: ActivatedRoute, public mainservice: Main) { }
   async ngOnInit() {

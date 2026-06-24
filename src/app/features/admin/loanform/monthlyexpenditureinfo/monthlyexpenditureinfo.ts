@@ -112,7 +112,7 @@ export class Monthlyexpenditureinfo {
   originalFormValue: any = null;
   
   editSuccess: any = false;
-  description1 = `Great ! Your Additional Info Details\n Uploaded Successfully.`;
+  description1 = `Great ! Your Monthly Expenditure Info Details\n Uploaded Successfully.`;
 
 
   constructor(private fb: FormBuilder, public main: Main, private route: ActivatedRoute, private msgBox: Msgboxservice, private router: Router,private storageservice:Storage,

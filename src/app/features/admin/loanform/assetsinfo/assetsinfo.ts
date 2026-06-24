@@ -127,7 +127,7 @@ export class Assetsinfo implements OnInit {
   originalFormValue: any = null;
   editSuccess: any = false;
 
-  description1 = `Great ! Your Additional Info Details\n Uploaded Successfully.`;
+  description1 = `Great ! Your Assets Info Details\n Uploaded Successfully.`;
   constructor(private fb: FormBuilder, public main: Main, private route: ActivatedRoute, private msgBox: Msgboxservice, private storageservice: Storage,
     private stepperService: Loanstepperservice, private formSvc: Loanformservice, private cd: ChangeDetectorRef, private router: Router) { }
 
