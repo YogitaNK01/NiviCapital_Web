@@ -258,6 +258,7 @@ export class Educationinfo implements OnInit {
       savedFileMeta: {},
       otherDocMap: {}
     };
+  private persistedEducationSteps: Partial<Record<StepKey, boolean>> = {};
 
   constructor(private fb: FormBuilder, private stepperService: Loanstepperservice, private cd: ChangeDetectorRef, private formSvc: Loanformservice, private msgBox: Msgboxservice,
     private route: ActivatedRoute, private router: Router, private msgbox: Msgboxservice, public main: Main, private storageservice: Storage) { }
