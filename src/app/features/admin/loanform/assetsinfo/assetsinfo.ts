@@ -103,6 +103,17 @@ export class Assetsinfo implements OnInit {
     'Other': { form: 'otherassets', type: 'array' }
   };
 
+  private readonly NO_ASSETS_CODE = "I don't have Assets";
+
+  private readonly REAL_ASSETS_CODES = [
+    "Gold", 
+    "Liquid Assets",
+    "Property/ Land Assets",
+    "Fixed Deposit",
+    "Investments",
+    "Other"
+  ];
+
 
   isCoApplicant: boolean = false;
   lastSavedPayload: any = null;
@@ -882,8 +893,17 @@ export class Assetsinfo implements OnInit {
 
   onAssetChange(values: string | string[]): void {
     const rawSelected = Array.isArray(values) ? values : [values];
-    const newSelected = rawSelected.map(v => this.normalizeToAccordionKey(v));
+    let newSelected = rawSelected.map(v => this.normalizeToAccordionKey(v));
 
+    const hasRealAssets = newSelected.some(code =>
+      this.REAL_ASSETS_CODES.includes(code)
+    );
+
+    if (newSelected.includes(this.NO_ASSETS_CODE) && hasRealAssets) {
+      newSelected = newSelected.filter(code => code !== this.NO_ASSETS_CODE);
+    }
+
+    console.log(newSelected);
 
     setTimeout(() => {
       this.openIndex = this.selectedAssets
@@ -894,8 +914,11 @@ export class Assetsinfo implements OnInit {
     });
 
 
-    if (newSelected.length === 0) {
-      this.selectedAssets = [];
+    if (
+      newSelected.length === 1 &&
+      newSelected.includes(this.NO_ASSETS_CODE)
+    ) {
+      this.selectedAssets = [this.NO_ASSETS_CODE];
       this.openIndex = [];
 
       this.assetsForm.get('gold')?.reset();
@@ -913,6 +936,10 @@ export class Assetsinfo implements OnInit {
       this.cd.detectChanges();
       return;
     }
+
+    this.selectedAssets = newSelected.filter(
+      code => code !== this.NO_ASSETS_CODE
+    );
 
     const deselected = this.selectedAssets.filter(k => !newSelected.includes(k));
     const newlySelected = newSelected.filter(k => !this.selectedAssets.includes(k));
@@ -2164,7 +2191,7 @@ export class Assetsinfo implements OnInit {
     return keys.some(key => this.hasValue(obj?.[key]));
   }
     get hasNoassetsSelected(): boolean {
-    return this.selectedAssets?.includes(`'I don't have Assets'`);
+    return this.selectedAssets?.includes(this.NO_ASSETS_CODE);
   }
 
   next() {
