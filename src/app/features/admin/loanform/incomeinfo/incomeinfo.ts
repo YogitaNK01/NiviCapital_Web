@@ -742,8 +742,10 @@ export class Incomeinfo {
       fd.append(`files[${index}].type`, type);
       fd.append(`files[${index}].file`, result.file);
     }
-
-    this.loanformservice.uploadIncome(fd, this.applicationId, this.isEditMode).subscribe({
+  const isDeletedFiles = !doc ? false : true;
+ 
+    this.loanformservice.uploadIncome(fd, this.applicationId, isDeletedFiles).subscribe({
+    // this.loanformservice.uploadIncome(fd, this.applicationId, this.isEditMode).subscribe({
       next: (res) => {
 
 
@@ -2456,7 +2458,7 @@ export class Incomeinfo {
   }
 
   saveSummaryEdit() {
-    this.next();
+     this.editSuccess = true;
   }
 
   // edit sucess popup

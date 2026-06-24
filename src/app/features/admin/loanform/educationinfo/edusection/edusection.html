@@ -344,7 +344,7 @@
 
                             <div class="other-doc-title">
 
-                                <app-inputfield label="Title" [required]="educationType !== 'POSTGRADUATE'"
+                                <app-inputfield label="Title" [required]="educationType !== 'POSTGRADUATE'" [disabled]="isViewModeon"
                                     placeholder="Enter text here"
                                     (input)="main.restrictInput($event, 'text');slot.title = $any($event.target).value"
                                     [maxlength]="100">

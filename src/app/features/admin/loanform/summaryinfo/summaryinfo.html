@@ -546,8 +546,8 @@
                                 </div>
 
                                 <div *ngFor="let section of educationSections" class="mt-20">
-                                    <label class="text-dp-2-bold fw-bold">{{ section.title }}</label>
-                                    <hr class="hrclass" />
+                                    <label class="text-dp-2-bold fw-bold" *ngIf="EducationInfoFields[section.key].length > 0">{{ section.title }}</label>
+                                    <hr class="hrclass" *ngIf="EducationInfoFields[section.key].length > 0" />
 
 
 

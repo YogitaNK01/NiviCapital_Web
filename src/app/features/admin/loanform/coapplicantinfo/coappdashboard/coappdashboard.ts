@@ -106,13 +106,13 @@ export class Coappdashboard implements OnInit {
 
     this.loadRemovedCoApplicants();
 
-    this.isFromSummary = this.loanfornservice.isSummaryEditFlow();
+    // this.isFromSummary = this.loanfornservice.isSummaryEditFlow();
  
-    if (!this.isFromSummary) {
-      const summaryData = this.loanfornservice.getSummary(this.applicationId);
-      this.loanfornservice.startSummaryEditFlow(summaryData, 'MAIN');
-      this.isFromSummary = true;
-    }
+    // if (!this.isFromSummary) {
+    //   const summaryData = this.loanfornservice.getSummary(this.applicationId);
+    //   this.loanfornservice.startSummaryEditFlow(summaryData, 'MAIN');
+    //   this.isFromSummary = true;
+    // }
   }
   add() {
 
@@ -512,9 +512,10 @@ if(this.isFromSummary){
     this.isChildRouteActive = false;
     this.loadCoApplicants();
   }
-  get hasAtLeastOneCoApplicant(): boolean {
-    return this.coApplicants.length > 0;
-  }
+ get hasAtLeastOneCoApplicant(): boolean {
+  return this.coApplicants.length > 0 &&
+         this.coApplicants.every(item => this.getCoApplicantStatus(item) === 'COMPLETED');
+}
 
   //delete
   deleteCoApplicant(index: number, event?: Event) {

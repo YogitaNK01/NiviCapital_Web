@@ -810,6 +810,35 @@ p {
 
 }
 
+.info-grid-img-coapp {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  column-gap: $spacing_11;
+  row-gap: $spacing_11;
+  // padding: 24px 0;
+
+  @media (max-width: 768px) {
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: $spacing_7;
+  }
+
+  @media (max-width: 480px) {
+
+    grid-template-columns: 1fr;
+    // gap: $spacing_2;
+
+    .text-label {
+      font-size: 14px;
+      line-height: 1rem;
+    }
+  }
+
+  .info-grid-img.info-item {
+    height: $spacing_23
+  }
+
+}
+
 //-----------------table--------------------
 .table-container {
   width: 100%;

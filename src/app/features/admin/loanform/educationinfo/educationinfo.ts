@@ -300,6 +300,25 @@ export class Educationinfo implements OnInit {
 
       // optional, if you still use these elsewhere
       this.selectlocation = [...this.cityOptions];
+
+
+      // re-normalize existing saved state to IDs after options load
+      Object.keys(this.educationFormState || {}).forEach((stepKey) => {
+        const stepState = this.educationFormState[stepKey];
+        if (!stepState) return;
+
+        this.educationFormState[stepKey] = {
+          ...stepState,
+          institutename: this.resolveInstituteId(stepState.institutename),
+          location: this.resolveLocationId(stepState.location),
+        };
+      });
+
+      if (this.activeEducation) {
+        this.restoreFormState(this.activeEducation as StepKey);
+        this.cd.detectChanges();
+      }
+
     });
 
 
@@ -315,10 +334,9 @@ export class Educationinfo implements OnInit {
 
         this.restoreEducationStateFromLocalStorage();
         setTimeout(async () => {
-          this.restoreFormState(step);
-          this.loadSavedEducationInfoFromApi(step);
-          await this.loadEducationFromSummary();
-          this.restoreFormState(step);
+        
+          await this.hydrateEducationStep(step);
+
 
 
           // ✅ keep currently active step enabled/disabled correctly
@@ -347,6 +365,8 @@ export class Educationinfo implements OnInit {
               .filter((x: StepKey | string) => !!x);
 
             this.educationOrder = [...new Set([...orderFromApi, 'ielts', 'offerletter'])] as Array<'10th' | '12th' | 'diploma10' | 'diploma12' | 'ug' | 'pg' | 'ielts' | 'offerletter' | 'others' | 'others12' | 'othersdiploma'>;
+           
+this.syncPersistedStepsWithCurrentOrder();
             this.isEducationFlowInitialized = true;
             this.saveEducationStateToLocalStorage();
             this.restoreEducationStateFromLocalStorage();
@@ -376,10 +396,16 @@ export class Educationinfo implements OnInit {
         if (this.activeEducation === step) {
           const raw = form.getRawValue();
 
+          this.hasUnsavedChanges = true;
+
           this.educationFormState[step] = {
             ...raw,
-            institutename: this.normalizeDropdownValue(raw.institutename),
-            location: this.normalizeDropdownValue(raw.location),
+
+            institutename: this.resolveInstituteId(raw.institutename),
+            institutetitle: raw.institutetitle || '',
+            location: this.resolveLocationId(raw.location),
+            otherLocation: raw.otherLocation || '',
+
             passingyear: this.normalizeDropdownValue(raw.passingyear),
           };
 
@@ -413,6 +439,23 @@ export class Educationinfo implements OnInit {
     }
 
 
+  }
+  //check which data to display priority wise
+  private async hydrateEducationStep(step: StepKey): Promise<void> {
+    if (!step) return;
+
+    // 1. local restore
+    this.restoreEducationStateFromLocalStorage();
+
+    // 2. summary for completed sections
+    await this.loadEducationFromSummary();
+
+    // 3. current step draft should override summary
+    await this.loadSavedEducationInfoFromApi(step);
+
+    // 4. restore form UI
+    this.restoreFormState(step);
+    this.cd.detectChanges();
   }
 
   toggle(index: number) {
@@ -642,66 +685,6 @@ export class Educationinfo implements OnInit {
   }
 
 
-  onFileSelectedFromSection1(e: {
-    step: StepKey;
-    control: 'marksheet' | 'lc' | 'other';
-    index?: number;
-    file: File | null;
-    gropudata?: { title?: string };
-  }) {
-
-    const fg = this.educationForms[e.step] as FormGroup;
-
-    fg?.get(e.control)?.setValue(e.file);
-    fg?.get(e.control)?.markAsTouched();
-    fg?.get(e.control)?.updateValueAndValidity();
-
-    const normalizedDoc = this.normalizeDocType(e.control);
-    const idx = e.control === 'marksheet' ? (e.index ?? 0) : undefined;
-    const key = this.buildKey(e.step, normalizedDoc, idx);
-    // const key = this.buildKey(e.step, normalizedDoc, e.index ?? 0);
-
-    // const key = this.buildKey(e.step, e.control, e.index);
-    this.uploadedFiles[key] = e.file;
-    this.hasUnsavedChanges = true;
-
-    if (e.control === 'other') {
-      // this.otherDocMap[key] = {
-      //   title: e.gropudata?.title || 'Other Document'
-      // };
-
-
-      const key = `${e.step}_other_${e.index}`;
-
-      if (e.file === null) {
-        delete this.otherDocMap[key];
-        delete this.uploadedFiles[key];
-
-        this.otherDocMap = { ...this.otherDocMap };
-        this.uploadedFiles = { ...this.uploadedFiles };
-        this.saveCurrentFormState();
-        this.saveEducationStateToLocalStorage();
-        return;
-      }
-
-      this.otherDocMap[key] = {
-        title: e.gropudata?.title ?? ''
-      };
-      this.uploadedFiles[key] = e.file;
-
-
-
-    }
-
-    this.uploadedFiles = { ...this.uploadedFiles };
-
-    this.saveCurrentFormState();
-    this.saveEducationStateToLocalStorage();
-
-    console.log("this.uploadedFiles---------", this.uploadedFiles);
-
-    this.cd.detectChanges();
-  }
   onFileSelectedFromSection(e: {
     step: StepKey;
     control: 'marksheet' | 'lc' | 'other';
@@ -754,17 +737,7 @@ export class Educationinfo implements OnInit {
     this.saveEducationStateToLocalStorage();
     this.cd.detectChanges();
   }
-  getFile1(step: StepKey, doc: DocType, index?: number) {
 
-    // return this.uploadedFiles[this.buildKey(step, doc, index)] ?? null;
-
-    const normalizedDoc = this.normalizeDocType(doc);
-    let data = this.uploadedFiles[this.buildKey(step, normalizedDoc, index)] ?? null;
-    // console.log("---------------------", data);
-
-    return data
-
-  }
 
   getFile(step: StepKey, doc: DocType, index?: number) {
     return this.getStoredFileMeta(step, doc, index);
@@ -778,7 +751,16 @@ export class Educationinfo implements OnInit {
 
     if (!form || !saved) return;
 
-    form.patchValue(saved, { emitEvent: false });
+
+    form.patchValue({
+      ...saved,
+      institutename: this.getOptionValue(this.instituteOptions, saved?.institutename),
+      institutetitle: saved?.institutetitle || saved?.otherInstituteName || saved?.title || '',
+      location: this.getOptionValue(this.cityOptions, saved?.location),
+      otherLocation: saved?.otherLocation || saved?.otherLocationName || '',
+      passingyear: this.normalizeDropdownValue(saved?.passingyear),
+    }, { emitEvent: false });
+
 
 
     setTimeout(() => {
@@ -827,27 +809,7 @@ export class Educationinfo implements OnInit {
     return f ? URL.createObjectURL(f) : '';
   }
 
-  viewLocal1(level: EducationType, docType: DocType, index?: number): void {
-    const url = this.getLocalFileUrl(level, docType, index);
-    if (url) window.open(url, '_blank');
-  }
-  viewLocal2(level: any, docType: DocType, index?: number): void {
-    const key = this.buildKey(level as StepKey, this.normalizeDocType(docType), index);
 
-    const file = this.uploadedFiles[key];
-
-    if (file instanceof File) {
-      const url = URL.createObjectURL(file);
-      window.open(url, '_blank');
-      return;
-    }
-
-    const savedUrl = this.getSavedFileUrl(key);
-
-    if (savedUrl) {
-      window.open(savedUrl, '_blank');
-    }
-  }
   viewLocal(level: any, docType: DocType, index?: number): void {
     const file: any = this.getStoredFileMeta(
       level as StepKey,
@@ -875,20 +837,7 @@ export class Educationinfo implements OnInit {
       window.open(url, '_blank');
     }
   }
-  private getSavedFileUrl(key: string): string {
-    const meta = this.savedFileMeta[key];
 
-    const url = meta?.viewUrl || meta?.fileUrl || meta?.publicUrl || '';
-
-    if (!url || url === 'NA') return '';
-
-    return url;
-    // if (url.startsWith('http')) {
-    //   return url;
-    // }
-
-    // return `${window.location.origin}${url}`;
-  }
   onFileRemovedFromSection(e: {
     step: StepKey;
     control: 'marksheet' | 'lc' | 'other';
@@ -1114,8 +1063,13 @@ export class Educationinfo implements OnInit {
 
     const normalized = {
       ...raw,
-      institutename: this.normalizeDropdownValue(raw.institutename),
-      location: this.normalizeDropdownValue(raw.location),
+
+      institutename: this.resolveInstituteId(raw.institutename),
+      institutetitle: raw.institutetitle || '',
+      location: this.resolveLocationId(raw.location),
+      otherLocation: raw.otherLocation || '',
+
+
       passingyear: this.normalizeDropdownValue(raw.passingyear)
     };
 
@@ -1318,8 +1272,13 @@ export class Educationinfo implements OnInit {
         forms[activeStep] = {
           ...forms[activeStep],
           ...raw,
-          institutename: this.normalizeDropdownValue(raw.institutename),
-          location: this.normalizeDropdownValue(raw.location),
+
+          institutename: this.resolveInstituteId(raw.institutename),
+          institutetitle: raw.institutetitle || '',
+          location: this.resolveLocationId(raw.location),
+          otherLocation: raw.otherLocation || '',
+
+
           passingyear: this.normalizeDropdownValue(raw.passingyear)
         };
 
@@ -1358,7 +1317,13 @@ export class Educationinfo implements OnInit {
       educationOrder: this.educationOrder?.length
         ? this.educationOrder
         : oldParsed.educationOrder,
-      flowQualificationId: this.flowQualificationId
+      flowQualificationId: this.flowQualificationId,
+
+      persistedEducationSteps: {
+        ...(oldParsed.persistedEducationSteps || {}),
+        ...(this.persistedEducationSteps || {})
+      }
+
     };
 
     localStorage.setItem(storageKey, JSON.stringify(payload));
@@ -1400,7 +1365,10 @@ export class Educationinfo implements OnInit {
       ...(this.otherDocMap || {}),
       ...(parsed.otherDocMap || {})
     };
-
+    this.persistedEducationSteps = {
+      ...(parsed.persistedEducationSteps || {}),
+      ...(this.persistedEducationSteps || {})
+    };
     if (!this.educationOrder || !this.educationOrder.length) {
       this.educationOrder = parsed.educationOrder || this.educationOrder;
     }    // this.activeEducation = parsed.activeEducation || this.activeEducation;
@@ -1414,8 +1382,10 @@ export class Educationinfo implements OnInit {
 
       form.patchValue({
         ...savedValue,
-        institutename: this.normalizeDropdownValue(savedValue?.institutename),
-        location: this.normalizeDropdownValue(savedValue?.location),
+        institutename: this.getOptionValue(this.instituteOptions, savedValue?.institutename),
+        institutetitle: savedValue?.institutetitle || savedValue?.otherInstituteName || savedValue?.title || '',
+        location: this.getOptionValue(this.cityOptions, savedValue?.location),
+        otherLocation: savedValue?.otherLocation || savedValue?.otherLocationName || '',
         passingyear: this.normalizeDropdownValue(savedValue?.passingyear),
       }, { emitEvent: false });
 
@@ -1429,9 +1399,9 @@ export class Educationinfo implements OnInit {
       //   ...(parsed.uploadedFileMeta || {})
       // };
       this.savedFileMeta = {
-  ...(parsed.uploadedFileMeta || {}),
-  ...(this.savedFileMeta || {})
-};
+        ...(parsed.uploadedFileMeta || {}),
+        ...(this.savedFileMeta || {})
+      };
 
     }
 
@@ -1446,6 +1416,29 @@ export class Educationinfo implements OnInit {
 
     this.cd.detectChanges();
   }
+  private getOptionValue(
+    list: { label: string; value: string }[],
+    rawValue: any
+  ): string {
+    const value = this.normalizeDropdownValue(rawValue);
+    if (!value) return '';
+
+    // already ID
+    const matchByValue = list.find(x => x.value === value);
+    if (matchByValue) return matchByValue.value;
+
+    // label -> convert to ID
+    const matchByLabel = list.find(
+      x =>
+        x.label?.toString().trim().toLowerCase() ===
+        value.toString().trim().toLowerCase()
+    );
+    if (matchByLabel) return matchByLabel.value;
+
+    return value; // fallback
+  }
+
+
   private async loadSavedEducationInfoFromApi(step: StepKey) {
     if (!this.applicationId || !this.applicantId || !step) return;
 
@@ -1481,12 +1474,21 @@ export class Educationinfo implements OnInit {
       // no normal form fields except file display
     } else {
       form.patchValue({
-        institutename: this.normalizeDropdownValue(data.institutename || data.instituteId),
-        institutetitle: data.title || data.institutetitle || '',
+
+        institutename: this.getOptionValue(
+          this.instituteOptions,
+          data.instituteId || data.institutename || data.instituteName || ''
+        ),
+
+        institutetitle: data.title || data.otherInstituteName || data.institutetitle || '',
         passingyear: this.normalizeDropdownValue(data.passingyear || data.yearOfPassing),
         per_cgpa: data.percentageCgpa || data.per_cgpa || '',
-        location: this.normalizeDropdownValue(data.location || data.locationId),
-        otherLocation: data.otherLocation || ''
+
+        location: this.getOptionValue(
+          this.cityOptions,
+          data.locationId || data.location || data.locationName || ''
+        ),
+        otherLocation: data.otherLocation || data.otherLocationName || ''
       }, { emitEvent: false });
     }
 
@@ -1620,6 +1622,17 @@ export class Educationinfo implements OnInit {
 
     this.stepperService.setEducationStepData(step, form.getRawValue());
 
+    const hasData =
+      !!data &&
+      (
+        this.hasMeaningfulEducationValue(form.getRawValue()) ||
+        documentsToRestore.length > 0
+      );
+
+    if (hasData) {
+      this.markStepPersisted(step);
+    }
+
     this.cd.detectChanges();
   }
   private hasFileOrSavedMeta(step: StepKey, doc: DocType, index?: number): boolean {
@@ -1674,8 +1687,8 @@ export class Educationinfo implements OnInit {
       step,
       category: 'EDUCATION',
       subcategory: this.stepToSubcategory[step],
-      institutename: this.normalizeDropdownValue(raw.institutename),
-      location: this.normalizeDropdownValue(raw.location),
+      institutename: this.resolveInstituteId(raw.institutename),
+      location: this.resolveLocationId(raw.location),
       passingyear: this.normalizeDropdownValue(raw.passingyear),
       files: filesMeta,
       otherDocMap: this.otherDocMap
@@ -1733,6 +1746,9 @@ export class Educationinfo implements OnInit {
     }
 
     if (
+
+      lowerKey.includes('_lc') ||
+      lowerKey.endsWith('lc') ||
       lowerKey.includes('school_leaving') ||
       lowerKey.includes('leaving') ||
       lowerKey.includes('schoolleaving')
@@ -1929,17 +1945,21 @@ export class Educationinfo implements OnInit {
           }, { emitEvent: false });
         } else if (step !== 'offerletter') {
           form.patchValue({
-            institutename: this.normalizeDropdownValue(
+
+            institutename: this.getOptionValue(
+              this.instituteOptions,
+              draftData.instituteId ||
               draftData.instituteName ||
               draftData.institutename ||
               draftData.institutionId ||
               ''
             ),
-
             institutetitle:
+              draftData.otherInstituteName ||
               draftData.title ||
               draftData.institutetitle ||
               '',
+
 
             passingyear: this.normalizeDropdownValue(
               draftData.yearOfPassing ||
@@ -1952,16 +1972,19 @@ export class Educationinfo implements OnInit {
               draftData.per_cgpa ||
               '',
 
-            location: this.normalizeDropdownValue(
-              draftData.locationName ||
+
+            location: this.getOptionValue(
+              this.cityOptions,
               draftData.locationId ||
+              draftData.locationName ||
               draftData.location ||
               ''
             ),
-
             otherLocation:
+              draftData.otherLocationName ||
               draftData.otherLocation ||
               ''
+
           }, { emitEvent: false });
         }
 
@@ -2175,7 +2198,11 @@ export class Educationinfo implements OnInit {
     const mapping: Array<{ summaryKey: string; step: StepKey }> = [
       { summaryKey: 'tenth', step: '10th' },
       { summaryKey: 'twelfth', step: '12th' },
-      { summaryKey: 'diploma', step: 'diploma10' },   // or diploma12 depending on your flow
+
+ {
+    summaryKey: 'diploma',
+    step: this.educationOrder.includes('diploma10') ? 'diploma10' : 'diploma12'
+  },
       { summaryKey: 'bachelors', step: 'ug' },
       { summaryKey: 'postgraduate', step: 'pg' },
       { summaryKey: 'others', step: 'others12' },  // othersdiploma
@@ -2201,21 +2228,43 @@ export class Educationinfo implements OnInit {
         form.patchValue({
           score: first.score || ''
         }, { emitEvent: false });
+        const hasData =
+          !!docs?.length &&
+          (
+            this.hasMeaningfulEducationValue(form.getRawValue()) ||
+            docs.length > 0
+          );
+
+        if (hasData) {
+          this.markStepPersisted(step);
+        }
       } else {
         form.patchValue({
-          institutename: this.normalizeDropdownValue(
-            first.instituteName || ''
+          institutename: this.getOptionValue(
+            this.instituteOptions,
+            first.instituteId || first.instituteName || ''
           ),
           institutetitle: first.otherInstituteName || '',
           passingyear: this.normalizeDropdownValue(
             first.yearOfPassing || ''
           ),
           per_cgpa: first.percentageOrCgpa || '',
-          location: this.normalizeDropdownValue(
-            first.location || ''
+          location: this.getOptionValue(
+            this.cityOptions,
+            first.locationId || first.location || ''
           ),
           otherLocation: first.otherLocationName || ''
         }, { emitEvent: false });
+        const hasData =
+          !!docs?.length &&
+          (
+            this.hasMeaningfulEducationValue(form.getRawValue()) ||
+            docs.length > 0
+          );
+
+        if (hasData) {
+          this.markStepPersisted(step);
+        }
       }
 
       this.educationFormState[step] = form.getRawValue();
@@ -2300,6 +2349,9 @@ export class Educationinfo implements OnInit {
       };
 
       this.uploadedFiles[key] = this.savedFileMeta[key] as any;
+      
+this.markStepPersisted('offerletter');
+
     }
 
     this.savedFileMeta = { ...this.savedFileMeta };
@@ -2310,31 +2362,7 @@ export class Educationinfo implements OnInit {
     this.cd.detectChanges();
   }
 
-  private clearOtherDocsForStep1(step: StepKey): void {
-    const prefix = `${step}_other_`;
 
-    Object.keys(this.otherDocMap || {})
-      .filter(key => key.startsWith(prefix))
-      .forEach(key => delete this.otherDocMap[key]);
-
-    Object.keys(this.savedFileMeta || {})
-      .filter(key => key.startsWith(prefix))
-      .forEach(key => delete this.savedFileMeta[key]);
-
-    Object.keys(this.uploadedFiles || {})
-      .filter(key => key.startsWith(prefix))
-      .forEach(key => {
-        const value = this.uploadedFiles[key];
-        // remove only restored meta/null keys; keep actual fresh browser File if needed
-        if (!(value instanceof File)) {
-          delete this.uploadedFiles[key];
-        }
-      });
-
-    this.otherDocMap = { ...this.otherDocMap };
-    this.savedFileMeta = { ...this.savedFileMeta };
-    this.uploadedFiles = { ...this.uploadedFiles };
-  }
   private clearOtherDocsForStep(step: StepKey): void {
     const prefix = `${step}_`;
 
@@ -2419,8 +2447,13 @@ export class Educationinfo implements OnInit {
               ]);
             }
 
-            await this.loadSavedEducationInfoFromApi(step);
+
+            // summary first for completed steps
             await this.loadEducationFromSummary();
+
+            // current draft step overrides summary
+            await this.loadSavedEducationInfoFromApi(step);
+
 
             this.hasUnsavedChanges = false;
 
@@ -2474,12 +2507,13 @@ export class Educationinfo implements OnInit {
       return fd;
     }
 
-    fd.append('instituteId', form.get('institutename')?.value || '');
-    fd.append('title', form.get('institutetitle')?.value || '');
+    fd.append('instituteId', this.resolveInstituteId(form.get('institutename')?.value || ''));
+
+      fd.append('otherInstituteName', form.get('institutetitle')?.value);
     fd.append('yearOfPassing', form.get('passingyear')?.value || '');
     fd.append('percentageCgpa', form.get('per_cgpa')?.value || '');
-    fd.append('locationId', form.get('location')?.value || '');
-    fd.append('otherLocation', form.get('otherLocation')?.value || '');
+    fd.append('locationId', this.resolveLocationId(form.get('location')?.value) || '');
+    fd.append('otherLocationName', form.get('otherLocation')?.value || '');
 
     let fileIndex = 0;
 
@@ -2526,7 +2560,7 @@ export class Educationinfo implements OnInit {
     const step = this.activeEducation as StepKey;
     const form = this.educationForms[step];
 
-    // 
+    
     if (step === 'pg' && !this.hasPgData(form, step)) {
       const idx = this.educationOrder.indexOf(step);
       const nextEducation = this.educationOrder[idx + 1];
@@ -2551,16 +2585,44 @@ export class Educationinfo implements OnInit {
       this.showValidationErrors(step);
       return;
     }
+    if (!this.shouldCallNextApi(step)) {
+      this.saveCurrentFormState();
+      this.persistEducationState();
+
+      this.stepperService.setEducationStepData(step, {
+        ...this.educationForms[step].getRawValue(),
+        institutename: this.resolveInstituteId(this.educationForms[step].get('institutename')?.value),
+        location: this.resolveLocationId(this.educationForms[step].get('location')?.value),
+        institutetitle: this.educationForms[step].get('institutetitle')?.value || '',
+        otherLocation: this.educationForms[step].get('otherLocation')?.value || ''
+      });
+
+      this.stepperService.markEducationSectionComplete(step);
+
+      const index = this.educationOrder.indexOf(step);
+      for (let i = 0; i <= index; i++) {
+        const prevStep = this.educationOrder[i];
+        this.stepperService.markEducationSectionComplete(prevStep);
+      }
+
+      this.moveToNextEducationStep(step);
+      return;
+    }
     this.saveCurrentFormState();
     this.persistEducationState();
 
     this.stepperService.setEducationStepData(
       step,
       // this.educationFormState[step]
-      this.educationForms[step].getRawValue()
-    );
+      // this.educationForms[step].getRawValue()
 
-
+      {
+        ...this.educationForms[step].getRawValue(),
+        institutename: this.resolveInstituteId(this.educationForms[step].get('institutename')?.value),
+        location: this.resolveLocationId(this.educationForms[step].get('location')?.value),
+        institutetitle: this.educationForms[step].get('institutetitle')?.value || '',
+        otherLocation: this.educationForms[step].get('otherLocation')?.value || ''
+      });
 
     this.stepperService.markEducationSectionComplete(step);
 
@@ -2708,26 +2770,6 @@ export class Educationinfo implements OnInit {
 
       //  ADD EXTRA MARKSHEETS (after required ones)
 
-      // const requiredMarksheetIndexes = this.requiredDocs(step)
-      //   .filter(d => d.doc === 'marksheet')
-      //   .map(d => d.index ?? -1);
-
-      // for (const key of Object.keys(this.uploadedFiles)
-      //   .filter(key => key.startsWith(`${step}_marksheet_`))) {
-
-      //   const file = this.uploadedFiles[key];
-      //   if (!file) continue;
-
-      //   // const isRequired = key.includes('marksheet1') || key.includes('marksheet_0');
-      //   // if (isRequired) continue;
-
-      //   const match = key.match(/marksheet_(\d+)/);
-      //   const index = match ? Number(match[1]) : -1;
-
-
-      //   if (requiredMarksheetIndexes.includes(index)) {
-      //     continue;
-      //   }
 
       const requiredMarksheetIndexes = new Set(
         this.requiredDocs(step)
@@ -2815,28 +2857,24 @@ export class Educationinfo implements OnInit {
         fileIndex++;
       }
 
-      // const instituteId = this.resolveInstituteId(form.get('institutename')?.value);
-      // const locationId = this.resolveLocationId(form.get('location')?.value);
+      const instituteId = this.resolveInstituteId(form.get('institutename')?.value);
+      const locationId = this.resolveLocationId(form.get('location')?.value);
 
 
-      fd.append('instituteId', form.get('institutename')?.value);
-      // fd.append('instituteId', instituteId);
+      // fd.append('instituteId', form.get('institutename')?.value);
+      fd.append('instituteId', instituteId || '');
       fd.append('otherInstituteName', form.get('institutetitle')?.value);
       fd.append('yearOfPassing', form.get('passingyear')?.value);
       fd.append('percentageCgpa', form.get('per_cgpa')?.value);
-      fd.append('locationId', form.get('location')?.value);
+      // fd.append('locationId', form.get('location')?.value);
 
-      // fd.append('locationId', locationId);
+      fd.append('locationId', locationId || '');
 
       fd.append('otherLocationName', form.get('otherLocation')?.value);
 
     }
 
-    // let keysArr = [];
-    // for (let key of fd.keys()) {
-    //   keysArr.push(key);
-    // }
-    // console.log("Uploading Batch:", keysArr);
+   
 
     for (const [key, value] of fd.entries()) {
       if (value instanceof File) {
@@ -2853,7 +2891,7 @@ export class Educationinfo implements OnInit {
     this.formSvc.uploadIncome(fd, this.applicationId, false).subscribe({
       next: async (res) => {
 
-
+        this.markStepPersisted(step);
         this.hasUnsavedChanges = false;
 
         this.saveCurrentFormState();
@@ -2903,26 +2941,35 @@ export class Educationinfo implements OnInit {
       }
     });
   }
-  //select location and institute id from dropdown
-  private getValueByLabel(list: any[], label: string) {
-    if (!label || !list?.length) return '';
 
-    return list.find((x: any) =>
-      x.label?.toString().trim().toLowerCase() ===
-      label.toString().trim().toLowerCase()
-    )?.value || '';
+  //move to next if nothing changes
+  private moveToNextEducationStep(step: StepKey): void {
+    const idx = this.educationOrder.indexOf(step);
+
+    if (idx === -1) {
+      console.error('Invalid education step:', step);
+      return;
+    }
+
+    if (idx < this.educationOrder.length - 1) {
+      const nextEducation = this.educationOrder[idx + 1];
+      this.activeEducation = nextEducation;
+      this.restoreFormState(this.activeEducation);
+
+      this.router.navigate([], {
+        relativeTo: this.route,
+        queryParams: {
+          qualificationlabel: nextEducation,
+        },
+        queryParamsHandling: 'merge'
+      });
+    } else {
+      this.stepperService.markStepCompleted('educationDetails');
+      this.stepperService.next();
+    }
   }
-
-  private resolveOptionValue(list: any[], rawValue: any): string {
-    const normalized = this.normalizeDropdownValue(rawValue);
-
-    if (!normalized) return '';
-
-    const existsAsValue = list.some((x: any) => x.value === normalized);
-    if (existsAsValue) return normalized;
-
-    return this.getValueByLabel(list, normalized);
-  }
+ 
+ //select location and institute id from dropdown
 
   private resolveInstituteId(rawValue: any): string {
     return this.resolveOptionValue(this.instituteOptions, rawValue);
@@ -2932,8 +2979,24 @@ export class Educationinfo implements OnInit {
     return this.resolveOptionValue(this.cityOptions, rawValue);
   }
 
+private resolveOptionValue(list: any[], rawValue: any): string {
+    const normalized = this.normalizeDropdownValue(rawValue);
 
+    if (!normalized) return '';
 
+    const existsAsValue = list.some((x: any) => x.value === normalized);
+    if (existsAsValue) return normalized;
+
+    return this.getValueByLabel(list, normalized);
+  }
+  private getValueByLabel(list: any[], label: string) {
+    if (!label || !list?.length) return '';
+
+    return list.find((x: any) =>
+      x.label?.toString().trim().toLowerCase() ===
+      label.toString().trim().toLowerCase()
+    )?.value || '';
+  }
   //edit from summary enable and disbale
   private applySummaryMode(params: any): void {
     this.isFromSummary =
@@ -3078,6 +3141,121 @@ export class Educationinfo implements OnInit {
     });
   }
 
+ private getMetaForUpdate(
+  key: string,
+  apiType: string,
+  fileOrMeta: any,
+  title?: string
+): any {
+  // 1) direct lookup
+  const direct =
+    this.savedFileMeta[key] ||
+    this.uploadedFiles[key] ||
+    fileOrMeta ||
+    null;
+
+  if (direct?.documentId) {
+    return direct;
+  }
+
+  const allMeta = Object.values(this.savedFileMeta || {}) as any[];
+
+  const currentObjectKey =
+    fileOrMeta?.objectKey ||
+    direct?.objectKey ||
+    '';
+
+  const currentViewUrl =
+    fileOrMeta?.viewUrl ||
+    direct?.viewUrl ||
+    '';
+
+  const currentFileName = (
+    fileOrMeta?.fileName ||
+    fileOrMeta?.name ||
+    direct?.fileName ||
+    direct?.name ||
+    ''
+  ).toString().trim().toLowerCase();
+
+  const currentTitle = (
+    title ||
+    this.otherDocMap[key]?.title ||
+    fileOrMeta?.title ||
+    direct?.title ||
+    ''
+  ).toString().trim().toLowerCase();
+
+  // ✅ OTHER docs need fallback because key/index may shift
+  if (apiType === 'OTHER') {
+    const matchedOther = allMeta.find((m: any) =>
+      m?.type === 'OTHER' &&
+      !!m?.documentId &&
+      (
+        (currentObjectKey && m?.objectKey === currentObjectKey) ||
+        (currentViewUrl && m?.viewUrl === currentViewUrl) ||
+        (
+          currentFileName &&
+          (m?.fileName || m?.name || '').toString().trim().toLowerCase() === currentFileName
+        ) ||
+        (
+          currentTitle &&
+          (m?.title || '').toString().trim().toLowerCase() === currentTitle
+        )
+      )
+    );
+
+    if (matchedOther) {
+      return matchedOther;
+    }
+  }
+
+  // ✅ Generic fallback for IELTS / OfferLetter / etc.
+  const matchedGeneric = allMeta.find((m: any) =>
+    !!m?.documentId &&
+    (
+      (currentObjectKey && m?.objectKey === currentObjectKey) ||
+      (currentViewUrl && m?.viewUrl === currentViewUrl) ||
+      (
+        currentFileName &&
+        (m?.fileName || m?.name || '').toString().trim().toLowerCase() === currentFileName
+      )
+    )
+  );
+
+  return matchedGeneric || direct;
+}
+private getExistingSingleDocMeta(step: StepKey, doc: 'ielts' | 'offerletter'): any {
+  const key = this.buildKey(step, doc);
+
+  // exact key match first
+  const direct =
+    this.savedFileMeta[key] ||
+    (!(this.uploadedFiles[key] instanceof File) ? this.uploadedFiles[key] : null);
+
+  if (direct?.documentId) {
+    return direct;
+  }
+
+  // fallback search by type
+  const allMeta = Object.values(this.savedFileMeta || {}) as any[];
+
+  if (doc === 'ielts') {
+    return allMeta.find((m: any) =>
+      !!m?.documentId &&
+      (m?.type === 'UPLOAD_CERTIFICATE' || m?.type === 'IELTS')
+    ) || null;
+  }
+
+  if (doc === 'offerletter') {
+    return allMeta.find((m: any) =>
+      !!m?.documentId &&
+      (m?.type === 'UPLOAD_CERTIFICATE' || m?.type === 'OFFERLETTER')
+    ) || null;
+  }
+
+  return null;
+}
   private appendUpdateItem(
     fd: FormData,
     itemIndex: number,
@@ -3085,10 +3263,24 @@ export class Educationinfo implements OnInit {
     apiType: string,
     fileOrMeta: any,
     form?: FormGroup,
-    title?: string
+    title?: string,
+     existingMeta?: any
   ) {
-    const meta = this.savedFileMeta[key];
-    const documentId = meta?.documentId || '';
+    
+
+  // const meta = this.getMetaForUpdate(key, apiType, fileOrMeta, title);
+  // const documentId = meta?.documentId || '';
+
+
+ const meta =
+    existingMeta ||
+    this.savedFileMeta[key] ||
+    (!(this.uploadedFiles[key] instanceof File) ? this.uploadedFiles[key] : null) ||
+    fileOrMeta ||
+    {};
+
+  const documentId = meta?.documentId || '';
+
 
     // for PUT existing docs should always carry documentId
     if (documentId) {
@@ -3139,7 +3331,7 @@ export class Educationinfo implements OnInit {
       fd.append(`items[${itemIndex}].file.file`, fileOrMeta, fileOrMeta.name);
     }
   }
-  
+
   private buildEducationUpdateFormData(): FormData {
     const step = this.getCurrentStep();
     const form = this.getCurrentForm();
@@ -3157,12 +3349,17 @@ export class Educationinfo implements OnInit {
       fd.append(`items[${itemIndex}].score`, form.get('score')?.value || '');
       const key = this.buildKey(step, 'ielts');
 
-      const fileOrMeta =
-        this.uploadedFiles[key] instanceof File
-          ? this.uploadedFiles[key]
-          : this.savedFileMeta[key];
+const newFile = this.uploadedFiles[key] instanceof File ? this.uploadedFiles[key] : null;
+  const existingMeta = this.getExistingSingleDocMeta(step, 'ielts');
 
-      if (fileOrMeta) {
+      
+const fileOrMeta =
+    this.savedFileMeta[key] ||
+    this.uploadedFiles[key] ||
+    this.getStoredFileMeta(step, 'ielts');
+
+
+      if (newFile || existingMeta) {
         this.appendUpdateItem(
           fd,
           itemIndex++,
@@ -3179,17 +3376,26 @@ export class Educationinfo implements OnInit {
     if (step === 'offerletter') {
       const key = this.buildKey(step, 'offerletter');
 
+  const newFile = this.uploadedFiles[key] instanceof File ? this.uploadedFiles[key] : null;
+  const existingMeta = this.getExistingSingleDocMeta(step, 'offerletter');
+
+
+      console.log('offerletter key', key);
+      console.log('offerletter savedFileMeta', this.savedFileMeta[key]);
+      console.log('offerletter uploadedFiles', this.uploadedFiles[key]);
+
+      // const fileOrMeta =
+      //   this.uploadedFiles[key] instanceof File
+      //     ? this.uploadedFiles[key]
+      //     : this.savedFileMeta[key];
       
-  console.log('offerletter key', key);
-  console.log('offerletter savedFileMeta', this.savedFileMeta[key]);
-  console.log('offerletter uploadedFiles', this.uploadedFiles[key]);
+const fileOrMeta =
+    this.savedFileMeta[key] ||
+    this.uploadedFiles[key] ||
+    this.getStoredFileMeta(step, 'offerletter');
 
-      const fileOrMeta =
-        this.uploadedFiles[key] instanceof File
-          ? this.uploadedFiles[key]
-          : this.savedFileMeta[key];
 
-      if (fileOrMeta) {
+      if (newFile || existingMeta) {
         this.appendUpdateItem(
           fd,
           itemIndex++,
@@ -3224,80 +3430,52 @@ export class Educationinfo implements OnInit {
     });
 
     // ✅ Extra marksheets
-    // Object.keys({
-    //   ...this.savedFileMeta,
-    //   ...this.uploadedFiles
-    // })
-    //   .filter(key => key.startsWith(`${step}_marksheet_`))
-    //   .sort()
-    //   .forEach(key => {
-    //     const isRequired =
-    //       key === this.buildKey(step, 'marksheet', 0) ||
-    //       key === this.buildKey(step, 'marksheet', 1);
-
-    //     if (isRequired) return;
-
-
-    //     const fileOrMeta =
-    //       this.uploadedFiles[key] instanceof File
-    //         ? this.uploadedFiles[key]
-    //         : this.savedFileMeta[key];
-    //     if (!fileOrMeta) return;
-
-    //     this.appendUpdateItem(
-    //       fd,
-    //       itemIndex++,
-    //       key,
-    //       'MARKSHEET',
-    //       fileOrMeta,
-    //       form
-    //     );
-    //   });
+  
 
     const requiredMarksheetIndexes = new Set(
-  this.requiredDocs(step)
-    .filter(d => d.doc === 'marksheet')
-    .map(d => d.index ?? -1)
-);
+      this.requiredDocs(step)
+        .filter(d => d.doc === 'marksheet')
+        .map(d => d.index ?? -1)
+    );
 
-const maxAllowedMarksheetCount = this.getMarksheetCount(step);
+    const maxAllowedMarksheetCount = this.getMarksheetCount(step);
 
-const extraMarksheetKeys = Array.from(
-  new Set([
-    ...Object.keys(this.savedFileMeta || {}),
-    ...Object.keys(this.uploadedFiles || {})
-  ])
-)
-  .filter(key => key.startsWith(`${step}_marksheet_`))
-  .map(key => {
-    const match = key.match(/marksheet_(\d+)/);
-    const index = match ? Number(match[1]) : -1;
-    return { key, index };
-  })
-  .filter(({ index }) =>
-    index >= 0 &&
-    index < maxAllowedMarksheetCount &&
-    !requiredMarksheetIndexes.has(index)
-  )
-  .sort((a, b) => a.index - b.index);
+    const extraMarksheetKeys = Array.from(
+      new Set([
+        ...Object.keys(this.savedFileMeta || {}),
+        ...Object.keys(this.uploadedFiles || {})
+      ])
+    )
+      .filter(key => key.startsWith(`${step}_marksheet_`))
+      .map(key => {
+        const match = key.match(/marksheet_(\d+)/);
+        const index = match ? Number(match[1]) : -1;
+        return { key, index };
+      })
+      .filter(({ index }) =>
+        index >= 0 &&
+        index < maxAllowedMarksheetCount &&
+        !requiredMarksheetIndexes.has(index)
+      )
+      .sort((a, b) => a.index - b.index);
 
-extraMarksheetKeys.forEach(({ key }) => {
-  const fileOrMeta =
-    this.uploadedFiles[key] instanceof File
-      ? this.uploadedFiles[key]
-      : this.savedFileMeta[key];
+    extraMarksheetKeys.forEach(({ key }) => {
+      const fileOrMeta =
+        this.uploadedFiles[key] instanceof File
+          ? this.uploadedFiles[key]
+          : this.savedFileMeta[key];
 
-  if (!fileOrMeta) return;
+      if (!fileOrMeta) return;
 
-  this.appendUpdateItem(
-    fd,
-    itemIndex++,
-    key,
-    'MARKSHEET',
-    fileOrMeta,
-    form
-  );
-});
+      this.appendUpdateItem(
+        fd,
+        itemIndex++,
+        key,
+        'MARKSHEET',
+        fileOrMeta,
+        form
+      );
+    });
 
 
     // ✅ Other docs
@@ -3312,7 +3490,7 @@ extraMarksheetKeys.forEach(({ key }) => {
         const fileOrMeta =
           this.uploadedFiles[key] instanceof File
             ? this.uploadedFiles[key]
-            : this.savedFileMeta[key];
+            : (this.savedFileMeta[key] || this.uploadedFiles[key]);
         if (!fileOrMeta) return;
 
         this.appendUpdateItem(
@@ -3328,7 +3506,27 @@ extraMarksheetKeys.forEach(({ key }) => {
 
     return fd;
   }
+//check step is copleted or not
+  private markStepPersisted(step: StepKey): void {
+    this.persistedEducationSteps[step] = true;
+  }
 
+  private isStepPersisted(step: StepKey): boolean {
+    return !!this.persistedEducationSteps[step];
+  }
+
+  private shouldCallNextApi(step: StepKey): boolean {
+    return this.hasUnsavedChanges || !this.isStepPersisted(step);
+  }
+  private syncPersistedStepsWithCurrentOrder(): void {
+  const allowed = new Set(this.educationOrder as StepKey[]);
+
+  Object.keys(this.persistedEducationSteps).forEach((key) => {
+    if (!allowed.has(key as StepKey)) {
+      delete this.persistedEducationSteps[key as StepKey];
+    }
+  });
+}
   saveSummaryEdit() {
 
     const step = this.getCurrentStep();
@@ -3344,6 +3542,10 @@ extraMarksheetKeys.forEach(({ key }) => {
     this.formSvc.uploadIncome(fd, this.applicationId, true).subscribe({
       next: async (res: any) => {
         if (res?.status === 'success') {
+          
+  this.markStepPersisted(step);
+    this.hasUnsavedChanges = false;
+
           await this.loadSavedEducationInfoFromApi(step);
           await this.loadEducationFromSummary();
 

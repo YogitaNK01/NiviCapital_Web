@@ -106,7 +106,7 @@ export class Assetsinfo implements OnInit {
   private readonly NO_ASSETS_CODE = "I don't have Assets";
 
   private readonly REAL_ASSETS_CODES = [
-    "Gold", 
+    "Gold",
     "Liquid Assets",
     "Property/ Land Assets",
     "Fixed Deposit",
@@ -690,6 +690,7 @@ export class Assetsinfo implements OnInit {
         }
 
         this.calculateGrandTotal();
+        // this.syncNoAssetsToGeneral();
         this.cd.detectChanges();
       }
     });
@@ -889,9 +890,20 @@ export class Assetsinfo implements OnInit {
   }
 
 
+  //i dont have asset will change in general
+  private syncNoAssetsToGeneral() {
+    const hasAssets = this.selectedAssets?.length > 0;
 
+    this.stepperService.setApplicantValues('main', {
+      isasset: hasAssets,
+      isincome: this.formSvc.applicantState.isincome,
+      issalaried: this.formSvc.applicantState.issalaried,
+      coursetypeug: this.formSvc.applicantState.coursetypeug
+    });
 
-  onAssetChange(values: string | string[]): void {
+    localStorage.setItem('main_isasset', JSON.stringify(hasAssets));
+  }
+  onAssetChange1(values: string | string[]): void {
     const rawSelected = Array.isArray(values) ? values : [values];
     let newSelected = rawSelected.map(v => this.normalizeToAccordionKey(v));
 
@@ -933,6 +945,7 @@ export class Assetsinfo implements OnInit {
       this.selectedownertype = [];
 
       this.calculateGrandTotal();
+      // this.syncNoAssetsToGeneral();
       this.cd.detectChanges();
       return;
     }
@@ -989,6 +1002,156 @@ export class Assetsinfo implements OnInit {
     this.calculateGrandTotal();
     this.cd.detectChanges();
   }
+ onAssetChange(values: string | string[]): void {
+  const rawSelected = Array.isArray(values) ? values : [values];
+
+  let normalizedSelected = rawSelected
+    .map(v => this.normalizeToAccordionKey(v))
+    .filter(Boolean);
+
+  // remove duplicates
+  normalizedSelected = [...new Set(normalizedSelected)];
+
+  const previousSelected = [...this.selectedAssets];
+
+  const hasNoAssets = normalizedSelected.includes(this.NO_ASSETS_CODE);
+
+  // remove "I don't have Assets" from real asset list
+  let realAssets = normalizedSelected.filter(
+    x => x !== this.NO_ASSETS_CODE
+  );
+
+  /**
+   * SELECT ALL CASE:
+   * If all real assets are selected, keep only real assets
+   * and force-remove "I don't have Assets".
+   */
+  const allRealAssetsSelected = this.REAL_ASSETS_CODES.every(asset =>
+    realAssets.includes(asset)
+  );
+
+  if (allRealAssetsSelected) {
+    realAssets = [...this.REAL_ASSETS_CODES];
+    this.selectedAssets = realAssets;
+
+    // initialize accordions/forms for all real assets
+    this.selectedAssets.forEach(key => {
+      const config = this.assetFieldMap[key];
+      if (!config) return;
+
+      const control = this.assetsForm.get(config.form);
+
+      if (control instanceof FormArray && control.length === 0) {
+        if (key === 'Property/ Land Assets') control.push(this.createProperty());
+        if (key === 'Fixed Deposit') control.push(this.createFD());
+        if (key === 'Other') control.push(this.createOther());
+      }
+    });
+
+    this.openIndex = this.selectedAssets
+      .map(val => this.accordions.findIndex(a => a.key === val))
+      .filter(i => i !== -1);
+
+    this.calculateGrandTotal();
+    this.syncNoAssetsToGeneral();
+    this.cd.detectChanges();
+    return;
+  }
+
+  /**
+   * If "I don't have Assets" is selected,
+   * it must override everything else.
+   */
+  if (hasNoAssets) {
+    this.selectedAssets = [this.NO_ASSETS_CODE];
+    this.clearAllAssetSelections();
+    this.syncNoAssetsToGeneral();
+    this.cd.detectChanges();
+    return;
+  }
+
+  /**
+   * Otherwise keep only real assets
+   */
+  this.selectedAssets = realAssets;
+
+  const deselected = previousSelected.filter(k => !realAssets.includes(k));
+  const newlySelected = realAssets.filter(k => !previousSelected.includes(k));
+
+  // reset deselected controls
+  deselected.forEach(key => {
+    const config = this.assetFieldMap[key];
+    if (!config) return;
+
+    const control = this.assetsForm.get(config.form);
+
+    if (control instanceof FormGroup) {
+      control.reset();
+    }
+
+    if (control instanceof FormArray) {
+      control.clear();
+    }
+
+    if (key === 'Investments') {
+      this.selectedInvestmentIds = [];
+    }
+
+    if (key === 'Property/ Land Assets') {
+      this.selectedPropertyIds = [];
+    }
+
+    if (key === 'Other') {
+      // optional additional cleanup if needed
+    }
+  });
+
+  // initialize newly selected arrays
+  newlySelected.forEach(key => {
+    const config = this.assetFieldMap[key];
+    if (!config) return;
+
+    const control = this.assetsForm.get(config.form);
+
+    if (control instanceof FormArray && control.length === 0) {
+      if (key === 'Property/ Land Assets') control.push(this.createProperty());
+      if (key === 'Fixed Deposit') control.push(this.createFD());
+      if (key === 'Other') control.push(this.createOther());
+    }
+  });
+
+  // open only selected accordions
+  this.openIndex = this.selectedAssets
+    .map(val => this.accordions.findIndex(a => a.key === val))
+    .filter(i => i !== -1);
+
+  this.calculateGrandTotal();
+  this.syncNoAssetsToGeneral();
+  this.cd.detectChanges();
+}
+
+  //clear the selected if idont asset selected
+  private clearAllAssetSelections(): void {
+  // reset form groups
+  this.resetGold();
+  this.resetLiquidAssets();
+
+  // clear form arrays completely
+  this.properties.clear();
+  this.fixedDeposits.clear();
+  this.investmentsArray.clear();
+  this.otherassets.clear();
+
+  // reset related dropdown selections
+  this.selectedInvestmentIds = [];
+  this.selectedPropertyIds = [];
+  this.selectedownertype = [];
+
+  // close all accordions
+  this.openIndex = [];
+
+  this.calculateGrandTotal();
+}
   private normalizeToAccordionKey(code: string): string {
     switch (code) {
       case 'GOLD': return 'Gold';
@@ -1160,6 +1323,12 @@ export class Assetsinfo implements OnInit {
   SelectedAssetvalue(values: string | string[]) {
     const ids = Array.isArray(values) ? values : [values];
 
+    
+  if (ids.includes(this.NO_ASSETS_CODE)) {
+    this.selectedAssetLabel = this.NO_ASSETS_CODE;
+    return;
+  }
+
     const selected = this.assetsCatagories.filter(s => ids.includes(s.value));
 
     this.selectedAssetLabel = selected.map(s => s.label).join(', ');
@@ -1267,7 +1436,25 @@ export class Assetsinfo implements OnInit {
     console.log('Investments shown:', this.investmentsArray.value);
   }
 
+  //get property id by label
+  private resolvePropertyId(rawValue: any): string {
+    return this.resolveOptionValue(this.selectPorperty, rawValue);
+  }
 
+  private resolveOptionValue(list: any[], rawValue: any): string {
+    if (!rawValue) return '';
+
+    const normalized = rawValue?.toString().trim();
+
+    // If already ID
+    const existsAsValue = list.some(x => x.value === normalized);
+    if (existsAsValue) return normalized;
+
+    // Convert label → value
+    return list.find(x =>
+      x.label?.toLowerCase().trim() === normalized.toLowerCase()
+    )?.value || '';
+  }
   removeitem(index: number, type: 'property' | 'fd' | 'other') {
     this.msgBox.open({
       title: 'Are you sure want to Remove',
@@ -1652,7 +1839,7 @@ export class Assetsinfo implements OnInit {
           bankname: item.bankId || this.getBankIdByName(item.bankName),
           description: item.description || '',
           bankamt: item.valueInr,
-          maturitydate:  this.parseDate(item.maturityDate)
+          maturitydate: this.parseDate(item.maturityDate)
         });
 
         this.fixedDeposits.push(group);
@@ -1719,7 +1906,7 @@ export class Assetsinfo implements OnInit {
       }
     });
 
-
+    // this.syncNoAssetsToGeneral();
     this.cd.detectChanges();
   }
   formatDateForPayload(dateValue: any): string {
@@ -1802,7 +1989,9 @@ export class Assetsinfo implements OnInit {
           console.log('properties true:');
         } else {
           addItem('PROPERTY', ctrl.value.marketval, {
-            propertyId: ctrl.value.propertyId || ctrl.value.propertytype,
+            propertyId: this.resolvePropertyId(
+              ctrl.value.propertyId || ctrl.value.propertytype
+            ),
             // propertyType: ctrl.value.propertytype,
             ownershipType: ctrl.value.ownershiptype,
             location: ctrl.value.location,
@@ -2190,7 +2379,7 @@ export class Assetsinfo implements OnInit {
   private hasAnyValue(obj: any, keys: string[]): boolean {
     return keys.some(key => this.hasValue(obj?.[key]));
   }
-    get hasNoassetsSelected(): boolean {
+  get hasNoassetsSelected(): boolean {
     return this.selectedAssets?.includes(this.NO_ASSETS_CODE);
   }
 
