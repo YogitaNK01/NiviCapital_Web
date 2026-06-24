@@ -251,7 +251,7 @@ export class Summaryinfo {
       }
     }
 
-   this.formSvc.startSummaryEditFlow(this.summaryData, 'MAIN');
+  //  this.formSvc.startSummaryEditFlow(this.summaryData, 'MAIN');
     this.getSummarydetails()
     this.buildForm();
   }
