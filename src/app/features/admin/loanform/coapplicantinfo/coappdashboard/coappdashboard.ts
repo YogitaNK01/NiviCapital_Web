@@ -106,13 +106,7 @@ export class Coappdashboard implements OnInit {
 
     this.loadRemovedCoApplicants();
 
-    // this.isFromSummary = this.loanfornservice.isSummaryEditFlow();
- 
-    // if (!this.isFromSummary) {
-    //   const summaryData = this.loanfornservice.getSummary(this.applicationId);
-    //   this.loanfornservice.startSummaryEditFlow(summaryData, 'MAIN');
-    //   this.isFromSummary = true;
-    // }
+    
   }
   add() {
 
@@ -147,10 +141,15 @@ export class Coappdashboard implements OnInit {
       mode: 'new'
     }));
 
-if(this.isFromSummary){
-      this.loanfornservice.clearSummaryEditFlow();
-      this.isFromSummary = false;
-    }
+// if(this.isFromSummary){
+//       this.loanfornservice.clearSummaryEditFlow();
+//       this.isFromSummary = false;
+//     }
+
+ this.loanfornservice.clearSummaryEditFlow();
+  this.loanfornservice.clearSummaryEducationEditFlow?.();
+  this.isFromSummary = false;
+
     this.router.navigate(
       ['coapplicantinfo'],
       {

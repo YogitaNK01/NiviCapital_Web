@@ -728,7 +728,7 @@ isSummaryEditFlow(): boolean {
     this.summaryLoaded = false;
     sessionStorage.removeItem(this.SUMMARY_STORAGE_KEY);
   }
-// ***********************educatio edit*******************
+// ***********************education edit*******************
 
 private summaryEducationEditFlow = false;
 private educationSubstepsUnlocked = false;

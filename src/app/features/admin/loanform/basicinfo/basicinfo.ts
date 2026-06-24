@@ -132,6 +132,14 @@ export class Basicinfo {
     this.stepperService.setCurrentCoApplicantIndex(currentIndex);
 
     const isNewCoappFlow = this.isCoApplicant && mode === 'new';
+if (isNewCoappFlow) {
+  this.loanform.clearSummaryEditFlow();
+  this.isFromSummary = false;
+  this.isSummaryEditMode = false;
+  this.viewOnly = false;
+  this.isViewMode = false;
+  this.isEditMode = false;
+}
 
     //    restore old co-app only for EXISTING flow
     if (this.isCoApplicant && !isNewCoappFlow) {
@@ -156,13 +164,13 @@ export class Basicinfo {
       : params['phone'] || ''
 
 
-    this.isSummaryEditMode =
-      params['fromSummary'] === true ||
+    this.isSummaryEditMode =!isNewCoappFlow &&
+     ( params['fromSummary'] === true ||
       params['fromSummary'] === 'true' ||
-      this.loanform.isSummaryEditFlow();
+      this.loanform.isSummaryEditFlow())
 
-    this.viewOnly = this.isSummaryEditMode && (params['mode'] === 'view' || params['mode'] === undefined);
-    // this.stepperService.setCurrentCoApplicantIndex(currentIndex);
+    
+this.viewOnly = this.isSummaryEditMode && (params['mode'] === 'view' || params['mode'] === undefined);
 
 
     this.registerForm = this.fb.group({
@@ -198,12 +206,18 @@ export class Basicinfo {
       ]]
     });
 
-this.isFromSummary = this.loanform.isSummaryEditFlow();
 
-    if (this.isFromSummary) {
-      this.isViewMode = true;
-      this.registerForm.disable();
-    }
+this.isFromSummary = !isNewCoappFlow && this.loanform.isSummaryEditFlow();
+
+if (this.isFromSummary) {
+  this.isViewMode = true;
+  this.registerForm.disable({ emitEvent: false });
+} else {
+  this.isViewMode = false;
+  this.isEditMode = false;
+  this.registerForm.enable({ emitEvent: false });
+}
+
     const currentCoapp = this.getCurrentCoApplicantFromList();
 
     const existingCoApplicantId =
