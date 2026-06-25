@@ -335,7 +335,7 @@ export class Educationinfo implements OnInit {
 
         this.restoreEducationStateFromLocalStorage();
         setTimeout(async () => {
-        
+
           await this.hydrateEducationStep(step);
 
 
@@ -366,8 +366,8 @@ export class Educationinfo implements OnInit {
               .filter((x: StepKey | string) => !!x);
 
             this.educationOrder = [...new Set([...orderFromApi, 'ielts', 'offerletter'])] as Array<'10th' | '12th' | 'diploma10' | 'diploma12' | 'ug' | 'pg' | 'ielts' | 'offerletter' | 'others' | 'others12' | 'othersdiploma'>;
-           
-this.syncPersistedStepsWithCurrentOrder();
+
+            this.syncPersistedStepsWithCurrentOrder();
             this.isEducationFlowInitialized = true;
             this.saveEducationStateToLocalStorage();
             this.restoreEducationStateFromLocalStorage();
@@ -485,7 +485,7 @@ this.syncPersistedStepsWithCurrentOrder();
       otherLocation: ['', [Validators.minLength(2), Validators.maxLength(100)]],
       marksheet: [null],
       lc: [null],
-
+     
       // score: ['', [ this.ieltsScoreValidator()]],
     });
   }
@@ -2200,10 +2200,10 @@ this.syncPersistedStepsWithCurrentOrder();
       { summaryKey: 'tenth', step: '10th' },
       { summaryKey: 'twelfth', step: '12th' },
 
- {
-    summaryKey: 'diploma',
-    step: this.educationOrder.includes('diploma10') ? 'diploma10' : 'diploma12'
-  },
+      {
+        summaryKey: 'diploma',
+        step: this.educationOrder.includes('diploma10') ? 'diploma10' : 'diploma12'
+      },
       { summaryKey: 'bachelors', step: 'ug' },
       { summaryKey: 'postgraduate', step: 'pg' },
       { summaryKey: 'others', step: 'others12' },  // othersdiploma
@@ -2294,6 +2294,12 @@ this.syncPersistedStepsWithCurrentOrder();
         } else if (type === 'OTHER') {
           key = this.buildKey(step, 'other', otherCounter);
 
+          this.ensureOtherDocEntry(
+            step,
+            otherCounter,
+            doc.title || 'Other Document'
+          );
+
           this.otherDocMap[key] = {
             title: doc.title || 'Other Document'
           };
@@ -2350,8 +2356,8 @@ this.syncPersistedStepsWithCurrentOrder();
       };
 
       this.uploadedFiles[key] = this.savedFileMeta[key] as any;
-      
-this.markStepPersisted('offerletter');
+
+      this.markStepPersisted('offerletter');
 
     }
 
@@ -2510,7 +2516,7 @@ this.markStepPersisted('offerletter');
 
     fd.append('instituteId', this.resolveInstituteId(form.get('institutename')?.value || ''));
 
-      fd.append('otherInstituteName', form.get('institutetitle')?.value);
+    fd.append('otherInstituteName', form.get('institutetitle')?.value);
     fd.append('yearOfPassing', form.get('passingyear')?.value || '');
     fd.append('percentageCgpa', form.get('per_cgpa')?.value || '');
     fd.append('locationId', this.resolveLocationId(form.get('location')?.value) || '');
@@ -2561,7 +2567,7 @@ this.markStepPersisted('offerletter');
     const step = this.activeEducation as StepKey;
     const form = this.educationForms[step];
 
-    
+
     if (step === 'pg' && !this.hasPgData(form, step)) {
       const idx = this.educationOrder.indexOf(step);
       const nextEducation = this.educationOrder[idx + 1];
@@ -2875,7 +2881,7 @@ this.markStepPersisted('offerletter');
 
     }
 
-   
+
 
     for (const [key, value] of fd.entries()) {
       if (value instanceof File) {
@@ -2969,8 +2975,8 @@ this.markStepPersisted('offerletter');
       this.stepperService.next();
     }
   }
- 
- //select location and institute id from dropdown
+
+  //select location and institute id from dropdown
 
   private resolveInstituteId(rawValue: any): string {
     return this.resolveOptionValue(this.instituteOptions, rawValue);
@@ -2980,7 +2986,7 @@ this.markStepPersisted('offerletter');
     return this.resolveOptionValue(this.cityOptions, rawValue);
   }
 
-private resolveOptionValue(list: any[], rawValue: any): string {
+  private resolveOptionValue(list: any[], rawValue: any): string {
     const normalized = this.normalizeDropdownValue(rawValue);
 
     if (!normalized) return '';
@@ -3142,55 +3148,77 @@ private resolveOptionValue(list: any[], rawValue: any): string {
     });
   }
 
- private getMetaForUpdate(
-  key: string,
-  apiType: string,
-  fileOrMeta: any,
-  title?: string
-): any {
-  // 1) direct lookup
-  const direct =
-    this.savedFileMeta[key] ||
-    this.uploadedFiles[key] ||
-    fileOrMeta ||
-    null;
+  private getMetaForUpdate(
+    key: string,
+    apiType: string,
+    fileOrMeta: any,
+    title?: string
+  ): any {
+    // 1) direct lookup
+    const direct =
+      this.savedFileMeta[key] ||
+      this.uploadedFiles[key] ||
+      fileOrMeta ||
+      null;
 
-  if (direct?.documentId) {
-    return direct;
-  }
+    if (direct?.documentId) {
+      return direct;
+    }
 
-  const allMeta = Object.values(this.savedFileMeta || {}) as any[];
+    const allMeta = Object.values(this.savedFileMeta || {}) as any[];
 
-  const currentObjectKey =
-    fileOrMeta?.objectKey ||
-    direct?.objectKey ||
-    '';
+    const currentObjectKey =
+      fileOrMeta?.objectKey ||
+      direct?.objectKey ||
+      '';
 
-  const currentViewUrl =
-    fileOrMeta?.viewUrl ||
-    direct?.viewUrl ||
-    '';
+    const currentViewUrl =
+      fileOrMeta?.viewUrl ||
+      direct?.viewUrl ||
+      '';
 
-  const currentFileName = (
-    fileOrMeta?.fileName ||
-    fileOrMeta?.name ||
-    direct?.fileName ||
-    direct?.name ||
-    ''
-  ).toString().trim().toLowerCase();
+    const currentFileName = (
+      fileOrMeta?.fileName ||
+      fileOrMeta?.name ||
+      direct?.fileName ||
+      direct?.name ||
+      ''
+    ).toString().trim().toLowerCase();
 
-  const currentTitle = (
-    title ||
-    this.otherDocMap[key]?.title ||
-    fileOrMeta?.title ||
-    direct?.title ||
-    ''
-  ).toString().trim().toLowerCase();
+    const currentTitle = (
+      title ||
+      this.otherDocMap[key]?.title ||
+      fileOrMeta?.title ||
+      direct?.title ||
+      ''
+    ).toString().trim().toLowerCase();
 
-  // ✅ OTHER docs need fallback because key/index may shift
-  if (apiType === 'OTHER') {
-    const matchedOther = allMeta.find((m: any) =>
-      m?.type === 'OTHER' &&
+    // ✅ OTHER docs need fallback because key/index may shift
+    if (apiType === 'OTHER') {
+      const matchedOther = allMeta.find((m: any) =>
+        m?.type === 'OTHER' &&
+        !!m?.documentId &&
+        (
+          (currentObjectKey && m?.objectKey === currentObjectKey) ||
+          (currentViewUrl && m?.viewUrl === currentViewUrl) ||
+          (
+            currentFileName &&
+            (m?.fileName || m?.name || '').toString().trim().toLowerCase() === currentFileName
+          ) ||
+          (
+            currentTitle &&
+            (m?.title || '').toString().trim().toLowerCase() === currentTitle
+          )
+        )
+      );
+
+      if (matchedOther) {
+        return matchedOther;
+      }
+    }
+
+    // ✅ Generic fallback for IELTS / OfferLetter / etc.
+    const matchedGeneric = allMeta.find((m: any) =>
       !!m?.documentId &&
       (
         (currentObjectKey && m?.objectKey === currentObjectKey) ||
@@ -3198,65 +3226,43 @@ private resolveOptionValue(list: any[], rawValue: any): string {
         (
           currentFileName &&
           (m?.fileName || m?.name || '').toString().trim().toLowerCase() === currentFileName
-        ) ||
-        (
-          currentTitle &&
-          (m?.title || '').toString().trim().toLowerCase() === currentTitle
         )
       )
     );
 
-    if (matchedOther) {
-      return matchedOther;
+    return matchedGeneric || direct;
+  }
+  private getExistingSingleDocMeta(step: StepKey, doc: 'ielts' | 'offerletter'): any {
+    const key = this.buildKey(step, doc);
+
+    // exact key match first
+    const direct =
+      this.savedFileMeta[key] ||
+      (!(this.uploadedFiles[key] instanceof File) ? this.uploadedFiles[key] : null);
+
+    if (direct?.documentId) {
+      return direct;
     }
+
+    // fallback search by type
+    const allMeta = Object.values(this.savedFileMeta || {}) as any[];
+
+    if (doc === 'ielts') {
+      return allMeta.find((m: any) =>
+        !!m?.documentId &&
+        (m?.type === 'UPLOAD_CERTIFICATE' || m?.type === 'IELTS')
+      ) || null;
+    }
+
+    if (doc === 'offerletter') {
+      return allMeta.find((m: any) =>
+        !!m?.documentId &&
+        (m?.type === 'UPLOAD_CERTIFICATE' || m?.type === 'OFFERLETTER')
+      ) || null;
+    }
+
+    return null;
   }
-
-  // ✅ Generic fallback for IELTS / OfferLetter / etc.
-  const matchedGeneric = allMeta.find((m: any) =>
-    !!m?.documentId &&
-    (
-      (currentObjectKey && m?.objectKey === currentObjectKey) ||
-      (currentViewUrl && m?.viewUrl === currentViewUrl) ||
-      (
-        currentFileName &&
-        (m?.fileName || m?.name || '').toString().trim().toLowerCase() === currentFileName
-      )
-    )
-  );
-
-  return matchedGeneric || direct;
-}
-private getExistingSingleDocMeta(step: StepKey, doc: 'ielts' | 'offerletter'): any {
-  const key = this.buildKey(step, doc);
-
-  // exact key match first
-  const direct =
-    this.savedFileMeta[key] ||
-    (!(this.uploadedFiles[key] instanceof File) ? this.uploadedFiles[key] : null);
-
-  if (direct?.documentId) {
-    return direct;
-  }
-
-  // fallback search by type
-  const allMeta = Object.values(this.savedFileMeta || {}) as any[];
-
-  if (doc === 'ielts') {
-    return allMeta.find((m: any) =>
-      !!m?.documentId &&
-      (m?.type === 'UPLOAD_CERTIFICATE' || m?.type === 'IELTS')
-    ) || null;
-  }
-
-  if (doc === 'offerletter') {
-    return allMeta.find((m: any) =>
-      !!m?.documentId &&
-      (m?.type === 'UPLOAD_CERTIFICATE' || m?.type === 'OFFERLETTER')
-    ) || null;
-  }
-
-  return null;
-}
   private appendUpdateItem(
     fd: FormData,
     itemIndex: number,
@@ -3265,22 +3271,22 @@ private getExistingSingleDocMeta(step: StepKey, doc: 'ielts' | 'offerletter'): a
     fileOrMeta: any,
     form?: FormGroup,
     title?: string,
-     existingMeta?: any
+    existingMeta?: any
   ) {
-    
-
-  // const meta = this.getMetaForUpdate(key, apiType, fileOrMeta, title);
-  // const documentId = meta?.documentId || '';
 
 
- const meta =
-    existingMeta ||
-    this.savedFileMeta[key] ||
-    (!(this.uploadedFiles[key] instanceof File) ? this.uploadedFiles[key] : null) ||
-    fileOrMeta ||
-    {};
+    // const meta = this.getMetaForUpdate(key, apiType, fileOrMeta, title);
+    // const documentId = meta?.documentId || '';
 
-  const documentId = meta?.documentId || '';
+
+    const meta =
+      existingMeta ||
+      this.savedFileMeta[key] ||
+      (!(this.uploadedFiles[key] instanceof File) ? this.uploadedFiles[key] : null) ||
+      fileOrMeta ||
+      {};
+
+    const documentId = meta?.documentId || '';
 
 
     // for PUT existing docs should always carry documentId
@@ -3350,14 +3356,14 @@ private getExistingSingleDocMeta(step: StepKey, doc: 'ielts' | 'offerletter'): a
       fd.append(`items[${itemIndex}].score`, form.get('score')?.value || '');
       const key = this.buildKey(step, 'ielts');
 
-const newFile = this.uploadedFiles[key] instanceof File ? this.uploadedFiles[key] : null;
-  const existingMeta = this.getExistingSingleDocMeta(step, 'ielts');
+      const newFile = this.uploadedFiles[key] instanceof File ? this.uploadedFiles[key] : null;
+      const existingMeta = this.getExistingSingleDocMeta(step, 'ielts');
 
-      
-const fileOrMeta =
-    this.savedFileMeta[key] ||
-    this.uploadedFiles[key] ||
-    this.getStoredFileMeta(step, 'ielts');
+
+      const fileOrMeta =
+        this.savedFileMeta[key] ||
+        this.uploadedFiles[key] ||
+        this.getStoredFileMeta(step, 'ielts');
 
 
       if (newFile || existingMeta) {
@@ -3377,8 +3383,8 @@ const fileOrMeta =
     if (step === 'offerletter') {
       const key = this.buildKey(step, 'offerletter');
 
-  const newFile = this.uploadedFiles[key] instanceof File ? this.uploadedFiles[key] : null;
-  const existingMeta = this.getExistingSingleDocMeta(step, 'offerletter');
+      const newFile = this.uploadedFiles[key] instanceof File ? this.uploadedFiles[key] : null;
+      const existingMeta = this.getExistingSingleDocMeta(step, 'offerletter');
 
 
       console.log('offerletter key', key);
@@ -3389,11 +3395,11 @@ const fileOrMeta =
       //   this.uploadedFiles[key] instanceof File
       //     ? this.uploadedFiles[key]
       //     : this.savedFileMeta[key];
-      
-const fileOrMeta =
-    this.savedFileMeta[key] ||
-    this.uploadedFiles[key] ||
-    this.getStoredFileMeta(step, 'offerletter');
+
+      const fileOrMeta =
+        this.savedFileMeta[key] ||
+        this.uploadedFiles[key] ||
+        this.getStoredFileMeta(step, 'offerletter');
 
 
       if (newFile || existingMeta) {
@@ -3431,7 +3437,7 @@ const fileOrMeta =
     });
 
     // ✅ Extra marksheets
-  
+
 
     const requiredMarksheetIndexes = new Set(
       this.requiredDocs(step)
@@ -3507,7 +3513,7 @@ const fileOrMeta =
 
     return fd;
   }
-//check step is copleted or not
+  //check step is copleted or not
   private markStepPersisted(step: StepKey): void {
     this.persistedEducationSteps[step] = true;
   }
@@ -3520,14 +3526,14 @@ const fileOrMeta =
     return this.hasUnsavedChanges || !this.isStepPersisted(step);
   }
   private syncPersistedStepsWithCurrentOrder(): void {
-  const allowed = new Set(this.educationOrder as StepKey[]);
+    const allowed = new Set(this.educationOrder as StepKey[]);
 
-  Object.keys(this.persistedEducationSteps).forEach((key) => {
-    if (!allowed.has(key as StepKey)) {
-      delete this.persistedEducationSteps[key as StepKey];
-    }
-  });
-}
+    Object.keys(this.persistedEducationSteps).forEach((key) => {
+      if (!allowed.has(key as StepKey)) {
+        delete this.persistedEducationSteps[key as StepKey];
+      }
+    });
+  }
   saveSummaryEdit() {
 
     const step = this.getCurrentStep();
@@ -3543,9 +3549,9 @@ const fileOrMeta =
     this.formSvc.uploadIncome(fd, this.applicationId, true).subscribe({
       next: async (res: any) => {
         if (res?.status === 'success') {
-          
-  this.markStepPersisted(step);
-    this.hasUnsavedChanges = false;
+
+          this.markStepPersisted(step);
+          this.hasUnsavedChanges = false;
 
           await this.loadSavedEducationInfoFromApi(step);
           await this.loadEducationFromSummary();

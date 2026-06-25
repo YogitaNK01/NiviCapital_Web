@@ -3,7 +3,6 @@ import { Router } from '@angular/router';
 import { Loanformservice } from '../service/loanformservice';
 import { BehaviorSubject } from 'rxjs';
 import { ShowOnDirtyErrorStateMatcher } from '@angular/material/core';
-import { EDUCATION_SECTION_KEYS, INCOME_SECTION_KEYS } from '../../shared/config/custdetails.config';
 
 interface Step {
   label: string;
@@ -17,21 +16,7 @@ interface Step {
 }
 type StepperType = 'MAIN' | 'CO_APPLICANT';
 
-const EDUCATION_ROUTE_MAP: Record<string, string> = EDUCATION_SECTION_KEYS.reduce(
-  (acc, key) => {
-    acc[key] = 'educationDetails';
-    return acc;
-  },
-  {} as Record<string, string>
-);
 
-const INCOME_ROUTE_MAP: Record<string, string> = INCOME_SECTION_KEYS.reduce(
-  (acc, key) => {
-    acc[key] = 'incomeinfo';
-    return acc;
-  },
-  {} as Record<string, string>
-);
 
 @Injectable({
   providedIn: 'root'
@@ -96,7 +81,7 @@ export class Loanstepperservice {
   rebuildSteps() {
     this.buildSteps();
   }
- educationroute=EDUCATION_SECTION_KEYS;
+ 
 
   private stageRouteMap: Record<string, string> = {
     LOAN_INFO: 'loaninfo',
@@ -107,8 +92,8 @@ export class Loanstepperservice {
     SAVE_ADDITIONAL_INFO: 'additionalinfo',
     FETCH_KYC: 'kycinfo',
     SAVE_KYC: 'kycinfo',
-   ...EDUCATION_ROUTE_MAP,
-   ...INCOME_ROUTE_MAP,
+    SAVE_LAST_QUALIFICATION: 'educationDetails',
+    INCOME: 'incomeinfo',
     SAVE_ASSETS: 'assetsinfo',
     SAVE_LIABILITIES: 'liabilitiesinfo',
     SAVE_MONTHLY_EXPENSES: 'monthlyexpinfo',

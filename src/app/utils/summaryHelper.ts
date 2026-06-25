@@ -333,7 +333,7 @@ export class SummaryHelper {
 
       ],
       offerLetter: [
-               { label: 'Offer letter', key: 'fileName' },
+               { label: '', key: 'fileName' },
 
 
       ],

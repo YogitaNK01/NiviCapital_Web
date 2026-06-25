@@ -25,7 +25,7 @@
                         class="btn btn-icon edit btncustomClass editBtnClass" color="primary" (click)="editClick.emit()"
                         [disabled]="!isViewModeon">
                         <img src="assets/images/icons/edit-white.svg" alt="edit">
-                    </app-buttons> 
+                    </app-buttons>
                 </div>
             </div>
         </div>
@@ -227,8 +227,8 @@
                         </div>
 
                         } @else{
-                        <app-uploadbtn [config]="basicConfig" [required]="true" label="Passing / Leaving Certificate " [disabled]="isViewModeon"
-                            (fileChange)="onFileChange($event, educationType,'lc')">
+                        <app-uploadbtn [config]="basicConfig" [required]="true" label="Passing / Leaving Certificate "
+                            [disabled]="isViewModeon" (fileChange)="onFileChange($event, educationType,'lc')">
                         </app-uploadbtn>
                         }
 
@@ -344,12 +344,15 @@
 
                             <div class="other-doc-title">
 
-                                <app-inputfield label="Title" [required]="educationType !== 'POSTGRADUATE'" [disabled]="isViewModeon"
+                                <!-- <app-inputfield label="Title" [required]="educationType !== 'POSTGRADUATE'" [disabled]="isViewModeon"
                                     placeholder="Enter text here"
                                     (input)="main.restrictInput($event, 'text');slot.title = $any($event.target).value"
                                     [maxlength]="100">
+                                </app-inputfield> -->
+                                <app-inputfield label="Title" [required]="educationType !== 'POSTGRADUATE'"
+                                    [disabled]="isViewModeon" placeholder="Enter text here" [valueslot]="slot.title"
+                                    (input)="onOtherTitleInput(slot, $event)" [maxlength]="100">
                                 </app-inputfield>
-
                                 <!-- <div class="text-danger" *ngIf="f['assettitle'].touched && f['assettitle'].invalid">
 
                                     <div *ngIf="f['title'].errors?.['minlength']">

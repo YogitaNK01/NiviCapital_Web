@@ -389,7 +389,11 @@ submitAdditionalInfo(
     )
   };
 
-
+  noAssetsSelected(payload: any, id1: any, id2: any) : Observable<ApiResponse<any>>{
+    return this.http.put<ApiResponse<any>>(
+      `${this.baseUrl}/v1/los/applications/${id1}/applicants/${id2}/has-assets`, payload
+    );
+  }
 
   // ************************* Liability   *************************
 

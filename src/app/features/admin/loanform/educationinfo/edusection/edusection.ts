@@ -1155,19 +1155,49 @@ export class Edusection {
   this.otherDocuments = uniqueKeys.map((key) => {
     const index = this.extractOtherIndex(key);
 
-    const file = this.savedFileMeta[key] || null;
+
+   const savedMeta = this.savedFileMeta[key] as any;
+    const uploadedMeta = this.uploadedFiles[key] as any;
+
+    const file = savedMeta || uploadedMeta || null;
 
     return {
       id: index,
       key,
-      title: this.otherDocMap[key]?.title || '',
+     
+ title:
+        this.otherDocMap[key]?.title ||
+        savedMeta?.title ||
+        uploadedMeta?.title ||
+        '',
+
       file
     };
   });
 
   this.slotCounter = this.otherDocuments.length
-    ? Math.max(...this.otherDocuments.map(x => x.id))
+    ? Math.max(...this.otherDocuments.map(x => x.id))+1
     : 0;
+
+  this.otherDocuments = [...this.otherDocuments];
+
+  this.cd.detectChanges();
+}
+onOtherTitleInput(slot: any, event: any): void {
+  this.main.restrictInput(event, 'text');
+
+  const value = event?.target?.value || '';
+  slot.title = value;
+
+  const key = slot.key;
+
+  this.otherDocMap = {
+    ...this.otherDocMap,
+    [key]: {
+      ...(this.otherDocMap[key] || {}),
+      title: value
+    }
+  };
 
   this.cd.detectChanges();
 }

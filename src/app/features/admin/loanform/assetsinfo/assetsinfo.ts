@@ -293,17 +293,15 @@ export class Assetsinfo implements OnInit {
     const apiApplicantId = this.getApiApplicantId();
 
 
-    const [draftData, summarySection] = await Promise.all([
+    let [draftData, summarySection, generalInfoData] = await Promise.all([
       apiApplicantId ? this.getSavedAssets(apiApplicantId) : Promise.resolve(null),
-      this.getSummarySection('assets')
+      this.getSummarySection('assets'), this.getSummarySection('generalInfo')
     ]);
+    if (generalInfoData && !generalInfoData?.hasAssets) {
+      summarySection = [];
+    }
 
 
-    // const draftData = apiApplicantId
-    //   ? await this.getSavedAssets(apiApplicantId)
-    //   : null;
-
-    // const summarySection = await this.getSummarySection('assets');
 
 
     const normalizedSummary = this.normalizeAssets(summarySection);
@@ -311,14 +309,19 @@ export class Assetsinfo implements OnInit {
     const normalizedLocal = this.normalizeAssets(parsedLocal);
 
 
+    let finalData;
+    if (this.isFromSummary) {
+      finalData = this.mergeAssetsData(
+        normalizedSummary,
+      );
+    } else {
+      finalData = this.mergeAssetsData(
+        normalizedSummary,
+        normalizedDraft,
+        normalizedLocal
+      );
 
-    const finalData = this.mergeAssetsData(
-      normalizedSummary,
-      normalizedDraft,
-      normalizedLocal
-    );
-
-
+    }
 
     // const finalData =
     //   normalizedSummary ||
@@ -1002,40 +1005,112 @@ export class Assetsinfo implements OnInit {
     this.calculateGrandTotal();
     this.cd.detectChanges();
   }
- onAssetChange(values: string | string[]): void {
-  const rawSelected = Array.isArray(values) ? values : [values];
+  onAssetChange(values: string | string[]): void {
+    const rawSelected = Array.isArray(values) ? values : [values];
 
-  let normalizedSelected = rawSelected
-    .map(v => this.normalizeToAccordionKey(v))
-    .filter(Boolean);
+    let normalizedSelected = rawSelected
+      .map(v => this.normalizeToAccordionKey(v))
+      .filter(Boolean);
 
-  // remove duplicates
-  normalizedSelected = [...new Set(normalizedSelected)];
+    // remove duplicates
+    normalizedSelected = [...new Set(normalizedSelected)];
 
-  const previousSelected = [...this.selectedAssets];
+    const previousSelected = [...this.selectedAssets];
 
-  const hasNoAssets = normalizedSelected.includes(this.NO_ASSETS_CODE);
+    const hasNoAssets = normalizedSelected.includes(this.NO_ASSETS_CODE);
 
-  // remove "I don't have Assets" from real asset list
-  let realAssets = normalizedSelected.filter(
-    x => x !== this.NO_ASSETS_CODE
-  );
+    // remove "I don't have Assets" from real asset list
+    let realAssets = normalizedSelected.filter(
+      x => x !== this.NO_ASSETS_CODE
+    );
 
-  /**
-   * SELECT ALL CASE:
-   * If all real assets are selected, keep only real assets
-   * and force-remove "I don't have Assets".
-   */
-  const allRealAssetsSelected = this.REAL_ASSETS_CODES.every(asset =>
-    realAssets.includes(asset)
-  );
+    /**
+     * SELECT ALL CASE:
+     * If all real assets are selected, keep only real assets
+     * and force-remove "I don't have Assets".
+     */
+    const allRealAssetsSelected = this.REAL_ASSETS_CODES.every(asset =>
+      realAssets.includes(asset)
+    );
 
-  if (allRealAssetsSelected) {
-    realAssets = [...this.REAL_ASSETS_CODES];
+    if (allRealAssetsSelected) {
+      realAssets = [...this.REAL_ASSETS_CODES];
+      this.selectedAssets = realAssets;
+
+      // initialize accordions/forms for all real assets
+      this.selectedAssets.forEach(key => {
+        const config = this.assetFieldMap[key];
+        if (!config) return;
+
+        const control = this.assetsForm.get(config.form);
+
+        if (control instanceof FormArray && control.length === 0) {
+          if (key === 'Property/ Land Assets') control.push(this.createProperty());
+          if (key === 'Fixed Deposit') control.push(this.createFD());
+          if (key === 'Other') control.push(this.createOther());
+        }
+      });
+
+      this.openIndex = this.selectedAssets
+        .map(val => this.accordions.findIndex(a => a.key === val))
+        .filter(i => i !== -1);
+
+      this.calculateGrandTotal();
+      this.syncNoAssetsToGeneral();
+      this.cd.detectChanges();
+      return;
+    }
+
+    /**
+     * If "I don't have Assets" is selected,
+     * it must override everything else.
+     */
+    if (hasNoAssets) {
+      this.selectedAssets = [this.NO_ASSETS_CODE];
+      this.clearAllAssetSelections();
+      this.syncNoAssetsToGeneral();
+      this.cd.detectChanges();
+      return;
+    }
+
+    /**
+     * Otherwise keep only real assets
+     */
     this.selectedAssets = realAssets;
 
-    // initialize accordions/forms for all real assets
-    this.selectedAssets.forEach(key => {
+    const deselected = previousSelected.filter(k => !realAssets.includes(k));
+    const newlySelected = realAssets.filter(k => !previousSelected.includes(k));
+
+    // reset deselected controls
+    deselected.forEach(key => {
+      const config = this.assetFieldMap[key];
+      if (!config) return;
+
+      const control = this.assetsForm.get(config.form);
+
+      if (control instanceof FormGroup) {
+        control.reset();
+      }
+
+      if (control instanceof FormArray) {
+        control.clear();
+      }
+
+      if (key === 'Investments') {
+        this.selectedInvestmentIds = [];
+      }
+
+      if (key === 'Property/ Land Assets') {
+        this.selectedPropertyIds = [];
+      }
+
+      if (key === 'Other') {
+        // optional additional cleanup if needed
+      }
+    });
+
+    // initialize newly selected arrays
+    newlySelected.forEach(key => {
       const config = this.assetFieldMap[key];
       if (!config) return;
 
@@ -1048,6 +1123,7 @@ export class Assetsinfo implements OnInit {
       }
     });
 
+    // open only selected accordions
     this.openIndex = this.selectedAssets
       .map(val => this.accordions.findIndex(a => a.key === val))
       .filter(i => i !== -1);
@@ -1055,103 +1131,30 @@ export class Assetsinfo implements OnInit {
     this.calculateGrandTotal();
     this.syncNoAssetsToGeneral();
     this.cd.detectChanges();
-    return;
   }
-
-  /**
-   * If "I don't have Assets" is selected,
-   * it must override everything else.
-   */
-  if (hasNoAssets) {
-    this.selectedAssets = [this.NO_ASSETS_CODE];
-    this.clearAllAssetSelections();
-    this.syncNoAssetsToGeneral();
-    this.cd.detectChanges();
-    return;
-  }
-
-  /**
-   * Otherwise keep only real assets
-   */
-  this.selectedAssets = realAssets;
-
-  const deselected = previousSelected.filter(k => !realAssets.includes(k));
-  const newlySelected = realAssets.filter(k => !previousSelected.includes(k));
-
-  // reset deselected controls
-  deselected.forEach(key => {
-    const config = this.assetFieldMap[key];
-    if (!config) return;
-
-    const control = this.assetsForm.get(config.form);
-
-    if (control instanceof FormGroup) {
-      control.reset();
-    }
-
-    if (control instanceof FormArray) {
-      control.clear();
-    }
-
-    if (key === 'Investments') {
-      this.selectedInvestmentIds = [];
-    }
-
-    if (key === 'Property/ Land Assets') {
-      this.selectedPropertyIds = [];
-    }
-
-    if (key === 'Other') {
-      // optional additional cleanup if needed
-    }
-  });
-
-  // initialize newly selected arrays
-  newlySelected.forEach(key => {
-    const config = this.assetFieldMap[key];
-    if (!config) return;
-
-    const control = this.assetsForm.get(config.form);
-
-    if (control instanceof FormArray && control.length === 0) {
-      if (key === 'Property/ Land Assets') control.push(this.createProperty());
-      if (key === 'Fixed Deposit') control.push(this.createFD());
-      if (key === 'Other') control.push(this.createOther());
-    }
-  });
-
-  // open only selected accordions
-  this.openIndex = this.selectedAssets
-    .map(val => this.accordions.findIndex(a => a.key === val))
-    .filter(i => i !== -1);
-
-  this.calculateGrandTotal();
-  this.syncNoAssetsToGeneral();
-  this.cd.detectChanges();
-}
 
   //clear the selected if idont asset selected
   private clearAllAssetSelections(): void {
-  // reset form groups
-  this.resetGold();
-  this.resetLiquidAssets();
+    // reset form groups
+    this.resetGold();
+    this.resetLiquidAssets();
 
-  // clear form arrays completely
-  this.properties.clear();
-  this.fixedDeposits.clear();
-  this.investmentsArray.clear();
-  this.otherassets.clear();
+    // clear form arrays completely
+    this.properties.clear();
+    this.fixedDeposits.clear();
+    this.investmentsArray.clear();
+    this.otherassets.clear();
 
-  // reset related dropdown selections
-  this.selectedInvestmentIds = [];
-  this.selectedPropertyIds = [];
-  this.selectedownertype = [];
+    // reset related dropdown selections
+    this.selectedInvestmentIds = [];
+    this.selectedPropertyIds = [];
+    this.selectedownertype = [];
 
-  // close all accordions
-  this.openIndex = [];
+    // close all accordions
+    this.openIndex = [];
 
-  this.calculateGrandTotal();
-}
+    this.calculateGrandTotal();
+  }
   private normalizeToAccordionKey(code: string): string {
     switch (code) {
       case 'GOLD': return 'Gold';
@@ -1323,11 +1326,11 @@ export class Assetsinfo implements OnInit {
   SelectedAssetvalue(values: string | string[]) {
     const ids = Array.isArray(values) ? values : [values];
 
-    
-  if (ids.includes(this.NO_ASSETS_CODE)) {
-    this.selectedAssetLabel = this.NO_ASSETS_CODE;
-    return;
-  }
+
+    if (ids.includes(this.NO_ASSETS_CODE)) {
+      this.selectedAssetLabel = this.NO_ASSETS_CODE;
+      return;
+    }
 
     const selected = this.assetsCatagories.filter(s => ids.includes(s.value));
 
@@ -2410,7 +2413,13 @@ export class Assetsinfo implements OnInit {
     }
 
 
-    this.formSvc.getAssets(payload, this.applicationId, false).pipe().subscribe({
+    // this.formSvc.getAssets(payload, this.applicationId, false).pipe().subscribe({
+    let request = this.formSvc.getAssets(payload, this.applicationId, false);
+
+    if (this.hasNoassetsSelected) {
+      request = this.formSvc.noAssetsSelected({ "hasAssets": false }, this.applicationId, this.applicantId);
+    }
+    request.subscribe({
       next: (res) => {
         console.log("resp---", res);
         if (res.status == "success") {
@@ -2476,7 +2485,12 @@ export class Assetsinfo implements OnInit {
 
     }
 
-    this.formSvc.getAssets(input, this.applicationId, false).subscribe({
+    // this.formSvc.getAssets(input, this.applicationId, false).subscribe({
+    let request = this.formSvc.getAssets(input, this.applicationId, false);
+    if (this.hasNoassetsSelected) {
+      request = this.formSvc.noAssetsSelected({ "hasAssets": false }, this.applicationId, this.applicantId);
+    }
+    request.subscribe({
       next: (res: any) => {
         if (res.status === 'success') {
           const key = this.getStorageKey();

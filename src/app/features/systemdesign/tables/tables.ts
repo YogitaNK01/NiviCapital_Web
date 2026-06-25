@@ -8,7 +8,6 @@ import { MatMenuModule } from '@angular/material/menu';
 import { MatButtonModule } from '@angular/material/button';
 import { Router } from '@angular/router';
 import { Loanstepperservice } from '../../../core/service/loanstepperservice';
-import {EDUCATION_SECTION_KEYS, INCOME_SECTION_KEYS} from  "../../../shared/config/custdetails.config";
 
 
 export interface TableColumn {
@@ -21,21 +20,7 @@ export interface TableColumn {
   onClick?: (row: any) => void;
 }
 
-const EDUCATION_ROUTE_MAP: Record<string, string> = EDUCATION_SECTION_KEYS.reduce(
-  (acc, key) => {
-    acc[key] = 'educationDetails';
-    return acc;
-  },
-  {} as Record<string, string>
-);
 
-const INCOME_ROUTE_MAP: Record<string, string> = INCOME_SECTION_KEYS.reduce(
-  (acc, key) => {
-    acc[key] = 'incomeinfo';
-    return acc;
-  },
-  {} as Record<string, string>
-);
 
 @Component({
   selector: 'app-tables',
@@ -70,8 +55,6 @@ export class Tables implements OnChanges {
   @Input() totalPages: number = 1;
   @Output() pageChange = new EventEmitter<number>();
   @Input() disableEditFn?: (row: any) => boolean;
- incomeroute =INCOME_SECTION_KEYS;
- educationroute=EDUCATION_SECTION_KEYS;
 
  
 
@@ -90,10 +73,8 @@ export class Tables implements OnChanges {
 
     FETCH_KYC: 'kycinfo',
     SAVE_KYC: 'kycinfo',
-
-   ...EDUCATION_ROUTE_MAP,
-
-    ...INCOME_ROUTE_MAP,
+  SAVE_LAST_QUALIFICATION: 'educationDetails',
+    INCOME: 'incomeinfo',
 
     SAVE_ASSETS: 'assetsinfo',
 

@@ -55,7 +55,16 @@ export class Inputfield implements ControlValueAccessor {
 @Input() step?: number;
 @Input() decimalPlaces?: number; 
 
-  // NEW output
+
+private _valueslot: any = '';
+
+@Input()
+set valueslot(val: any) {
+  this._valueslot = val ?? '';
+  this.value = this._valueslot;
+}
+
+// NEW output
   @Output() rightButtonClick = new EventEmitter<void>();
 
 
@@ -75,6 +84,10 @@ export class Inputfield implements ControlValueAccessor {
   get showPasswordToggle(): boolean {
     return this.type === 'password';
   }
+
+get valueslot(): any {
+  return this._valueslot;
+}
 
   get showStateIcon(): boolean {
     return (this.state === 'error' || this.state === 'success') && !this.showPasswordToggle;
