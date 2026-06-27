@@ -21,6 +21,7 @@
       [max]="maxDate"
       maxlength="10"
       (keypress)="allowOnlyDate($event)"
+      (input)="onManualInput($event)"
     />
 
     <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>

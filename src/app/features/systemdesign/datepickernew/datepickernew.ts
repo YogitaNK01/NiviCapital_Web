@@ -6,8 +6,8 @@ import { MatNativeDateModule } from '@angular/material/core';
 import { MAT_DATE_FORMATS } from '@angular/material/core';
 import { MY_DATE_FORMATS } from '../../../shared/config/date-format';
 import { MatMomentDateModule } from '@angular/material-moment-adapter';
-import { ControlValueAccessor, NG_VALUE_ACCESSOR, FormsModule } from '@angular/forms';
-
+import { ControlValueAccessor, NG_VALUE_ACCESSOR, NG_VALIDATORS, FormsModule, Validator, AbstractControl, ValidationErrors } from '@angular/forms';
+import moment from 'moment';
 
 @Component({
   selector: 'app-datepickernew',
@@ -21,10 +21,21 @@ import { ControlValueAccessor, NG_VALUE_ACCESSOR, FormsModule } from '@angular/f
       provide: NG_VALUE_ACCESSOR,
       useExisting: forwardRef(() => Datepickernew),
       multi: true
+    },
+    {
+      provide: NG_VALIDATORS,
+      useExisting: forwardRef(() => Datepickernew),
+      multi: true
     }
   ]
 })
-export class Datepickernew implements OnInit, ControlValueAccessor {
+export class Datepickernew implements OnInit, ControlValueAccessor, Validator {
+
+ validatorChange = () => {};
+
+registerOnValidatorChange(fn: () => void): void {
+  this.validatorChange = fn;
+}
   selectedDate: Date | null = null;
   @Input() label: string = '';
   @Input() disabled: boolean = false;
@@ -37,6 +48,7 @@ export class Datepickernew implements OnInit, ControlValueAccessor {
   @Input() minyear: number = 1960;
 
   @Input() maxDate: Date | null = null;
+  rawDateValue: string = '';
 
 
   onChange = (_: any) => { };
@@ -89,14 +101,91 @@ export class Datepickernew implements OnInit, ControlValueAccessor {
   }
 
   allowOnlyDate(event: KeyboardEvent) {
-  const allowedKeys = /[0-9\/]/;
+    const allowedKeys = /[0-9\/]/;
 
-  if (!allowedKeys.test(event.key)) {
-    event.preventDefault();
+    if (!allowedKeys.test(event.key)) {
+      event.preventDefault();
+    }
   }
+ validate(control: AbstractControl): ValidationErrors | null {
+  const value = this.rawDateValue;
+
+  if (this.required && (!value || value.trim() === '')) {
+    return { required: true };
+  }
+
+  if (!value) return null;
+
+  const validFormat = moment(value, 'DD/MM/YYYY', true).isValid();
+
+  if (!validFormat) {
+    return { invalidDate: true };
+  }
+
+  const enteredDate = moment(value, 'DD/MM/YYYY', true).toDate();
+  enteredDate.setHours(0, 0, 0, 0);
+
+  if (this.minDate) {
+    const min = new Date(this.minDate);
+    min.setHours(0, 0, 0, 0);
+
+    if (enteredDate < min) {
+      return { invalidDate: true };
+    }
+  }
+
+  if (this.maxDate) {
+    const max = new Date(this.maxDate);
+    max.setHours(0, 0, 0, 0);
+
+    if (enteredDate > max) {
+      return { invalidDate: true };
+    }
+  }
+
+  return null;
+}
+onManualInput(event: any) {
+  let value = event.target.value;
+
+  // allow only numbers and slash
+  value = value.replace(/[^0-9/]/g, '');
+
+  // max DD/MM/YYYY length
+  if (value.length > 10) {
+    value = value.substring(0, 10);
+  }
+
+  event.target.value = value;
+  this.rawDateValue = value;
+
+  if (!value) {
+    this.selectedDate = null;
+    this.onChange(null);
+    this.validatorChange();
+    return;
+  }
+
+  const parsed = moment(value, 'DD/MM/YYYY', true);
+
+  if (parsed.isValid()) {
+    const date = parsed.toDate();
+
+    this.selectedDate = date;
+
+    // ✅ this is important
+    // sends typed date to parent ngModel
+    this.onChange(date);
+  } else {
+    this.selectedDate = null;
+    this.onChange(null);
+  }
+
+  this.onTouched();
+  this.validatorChange();
 }
 
-  onDateChange(val: Date | null) {
+  onDateChange1(val: Date | null) {
     if (!val) {
       this.selectedDate = null;
       this.onChange(null);
@@ -108,6 +197,19 @@ export class Datepickernew implements OnInit, ControlValueAccessor {
     this.onChange(val);
     this.onTouched();
   }
+onDateChange(val: any) {
+  this.selectedDate = val;
+
+  if (val) {
+    this.rawDateValue = moment(val).format('DD/MM/YYYY');
+    this.onChange(val);
+  } else {
+    this.onChange(null);
+  }
+
+  this.onTouched();
+  this.validatorChange();
+}
   onPickerOpen() {
     setTimeout(() => {
       const overlay = document.querySelector('.cdk-overlay-pane .mat-datepicker-content');

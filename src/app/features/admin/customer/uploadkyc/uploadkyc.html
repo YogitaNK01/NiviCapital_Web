@@ -238,8 +238,7 @@
             </div>
           </div>
           } @else {
-          <app-uploadbtn [config]="basicConfig" (fileChange)="onFileChange($event, 'passport')"
-            label="Passport">
+          <app-uploadbtn [config]="basicConfig" (fileChange)="onFileChange($event, 'passport')" label="Passport">
           </app-uploadbtn>
           }
           <!-- <app-uploadbtn [config]="basicConfig" (fileChange)="onFileChange($event, 'passport')" label="Passport">
@@ -256,13 +255,28 @@
         </div>
 
 
-        <div class="text-danger error" *ngIf="(dob.invalid && dob.touched) || (!dobValid && dob.value)">
+        <!-- <div class="text-danger error" *ngIf="(dob.invalid && dob.touched) || (!dobValid && dob.value)">
           <small *ngIf="dob.errors?.['required']">DOB is required</small>
           <small *ngIf=" !dobValid && dob.value">
             Age must be 18 years or above
           </small>
-        </div>
+          <small *ngIf="dob.errors?.['invalidDate']"> Please enter valid date </small>
+        </div> -->
+        <div class="text-danger error" *ngIf="dob.touched || dobTouched">
 
+          <small *ngIf="dob.errors?.['required']">
+            DOB is required
+          </small>
+
+          <small *ngIf="!dob.errors?.['required'] && dob.errors?.['invalidDate']">
+            Please enter valid date
+          </small>
+
+          <small *ngIf="!dob.errors && !dobValid && dob.value">
+            Age must be 18 years or above
+          </small>
+
+        </div>
       </div>
 
 
