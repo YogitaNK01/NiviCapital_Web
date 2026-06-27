@@ -762,7 +762,7 @@ export class Incomeinfo {
         // const Docs = [...uploadedData?.uploadedDocuments, ...uploadedData?.updatedDocuments];
         // const newDocs = Docs.filter((item: any) => item.documentId === doc.documentId) || [];
         let newDocs = [];
-        if (this.isEditMode && doc) {
+        if (doc) {
           newDocs = uploadedData?.updatedDocuments.filter((item: any) => item.documentId === doc.documentId) || [];
         } else {
           newDocs = uploadedData?.uploadedDocuments;
@@ -1072,15 +1072,21 @@ export class Incomeinfo {
         const docToDelete = this.getDocumentByKey(key);
         if (!docToDelete) return;
         console.log("Deleting document:", docToDelete, this.allDocuments);
-        this.deletedDocs.push(this.allDocuments.find(doc =>
-          doc.documentId === docToDelete.documentId
-        ));
+
+        if(this.isEditMode){
+          this.deletedDocs.push(this.allDocuments.find(doc =>
+            doc.documentId === docToDelete.documentId
+          ));
+        }
 
         this.allDocuments = this.allDocuments.filter(doc =>
           doc.documentId !== docToDelete.documentId
         );
         console.log(this.allDocuments);
-
+        
+        if(docToDelete?.documentId){
+          this.deleteItemArr([docToDelete.documentId]);
+        }
 
         this.rebuildDocumentMap();
 
@@ -1121,6 +1127,22 @@ export class Incomeinfo {
       }
     });
   }
+
+  deleteItemArr(idArr: any){
+    this.loanformservice.deleteIncome({
+      applicationId: this.applicationId,
+      applicantId: this.applicantId,
+      documentIds: idArr
+    }).subscribe({
+      next: (res) => {
+        console.log(res);
+      },
+      error: (error) => {
+        console.log(error);
+      }
+    });
+  }
+
   restoreSlotsFromDocuments1() {
     let counter = 0;
 
@@ -1197,166 +1219,6 @@ export class Incomeinfo {
     this.otherBusinessSlots = [];
     this.uploadedrespfiles = [];
 
-    // if (this.isSalariedUser() && income) {
-    //   // salary slips -> salary1, salary2, salary3
-    //   (income.salarySlips || []).forEach((item: any, i: number) => {
-    //     this.allDocuments.push(
-    //       this.buildSummaryDoc(
-    //         item,
-    //         `salary${i + 1}`,
-    //         'SALARY_SLIP',
-    //         'INCOME',
-    //         'LAST_3_MONTHS',
-    //         `salary${i + 1}`
-    //       )
-    //     );
-    //   });
-
-    //   // form16
-    //   (income.form16 || []).forEach((item: any) => {
-    //     this.allDocuments.push(
-    //       this.buildSummaryDoc(
-    //         item,
-    //         'Form16',
-    //         'FORM_16',
-    //         'INCOME',
-    //         'FORM_16',
-    //         'Form16'
-    //       )
-    //     );
-    //   });
-
-    //   // bank statement
-    //   (income.bankStatements || []).forEach((item: any) => {
-    //     this.allDocuments.push(
-    //       this.buildSummaryDoc(
-    //         item,
-    //         'oneyearbankstatement',
-    //         'BANK_STATEMENT',
-    //         'INCOME',
-    //         'BANK_STATEMENT_1_YEAR',
-    //         'oneyearbankstatement'
-    //       )
-    //     );
-    //   });
-
-    //   // ITR -> ay1 ay2 ay3
-    //   (income.itrs || []).forEach((item: any, i: number) => {
-    //     this.allDocuments.push(
-    //       this.buildSummaryDoc(
-    //         item,
-    //         `ay${i + 1}`,
-    //         'ITR',
-    //         'INCOME',
-    //         'ITR_LAST_3_YEARS',
-    //         `ay${i + 1}`
-    //       )
-    //     );
-    //   });
-
-    //   // Other income
-    //   (income.otherIncome || []).forEach((item: any, i: number) => {
-    //     const title = item.name || `Other Income ${i + 1}`;
-
-    //     this.otherIncomeSlots.push({
-    //       id: i + 1,
-    //       key: `other_income_${i + 1}`,
-    //       title
-    //     });
-
-    //     this.allDocuments.push(
-    //       this.buildSummaryDoc(
-    //         item,
-    //         title,
-    //         'OTHER',
-    //         'OTHER',
-    //         'OTHER_INCOME',
-    //         title
-    //       )
-    //     );
-    //   });
-    // }
-
-    // if (!this.isSalariedUser() && business) {
-    //   // Business finance -> year1 year2 year3
-    //   (business.business_finance_3_years || []).forEach((item: any, i: number) => {
-    //     this.allDocuments.push(
-    //       this.buildSummaryDoc(
-    //         item,
-    //         `year${i + 1}`,
-    //         'BUSINESS_FINANCE',
-    //         'BUSINESS',
-    //         'BUSINESS_FINANCE_3_YEARS',
-    //         `year${i + 1}`
-    //       )
-    //     );
-    //   });
-
-    //   // Business ITR -> businessITR1 businessITR2 businessITR3
-    //   (business.business_itr_3_years || []).forEach((item: any, i: number) => {
-    //     this.allDocuments.push(
-    //       this.buildSummaryDoc(
-    //         item,
-    //         `businessITR${i + 1}`,
-    //         'BUSINESS_ITR',
-    //         'BUSINESS',
-    //         'BUSINESS_ITR_3_YEARS',
-    //         `businessITR${i + 1}`
-    //       )
-    //     );
-    //   });
-
-    //   // GST
-    //   (business.business_gst_1_year || []).forEach((item: any) => {
-    //     this.allDocuments.push(
-    //       this.buildSummaryDoc(
-    //         item,
-    //         'businessGST',
-    //         'BUSINESS_GST',
-    //         'BUSINESS',
-    //         'BUSINESS_GST_1_YEAR',
-    //         'businessGST'
-    //       )
-    //     );
-    //   });
-
-    //   // bank statement
-    //   (business.business_bank_statement_1_year || []).forEach((item: any) => {
-    //     this.allDocuments.push(
-    //       this.buildSummaryDoc(
-    //         item,
-    //         'businessBankstatement',
-    //         'BUSINESS_BANK_STATEMENT',
-    //         'BUSINESS',
-    //         'BUSINESS_BANK_STATEMENT_1_YEAR',
-    //         'businessBankstatement'
-    //       )
-    //     );
-    //   });
-
-    //   // other business income
-    //   (business.otherBussinessincome || []).forEach((item: any, i: number) => {
-    //     const title = item.name || `Other Business ${i + 1}`;
-
-    //     this.otherBusinessSlots.push({
-    //       id: i + 1,
-    //       key: `other_business_${i + 1}`,
-    //       title
-    //     });
-
-    //     this.allDocuments.push(
-    //       this.buildSummaryDoc(
-    //         item,
-    //         title,
-    //         'OTHER',
-    //         'OTHER',
-    //         'OTHER_BUSSINESS_INCOME',
-    //         title
-    //       )
-    //     );
-    //   });
-    // }
-
     const hasIncomeDocs =
       !!income?.salarySlips?.length ||
       !!income?.form16?.length ||
@@ -1378,11 +1240,11 @@ export class Incomeinfo {
         this.allDocuments.push(
           this.buildSummaryDoc(
             item,
-            `salary${i + 1}`,
+            item.name,
             'SALARY_SLIP',
             'INCOME',
             'LAST_3_MONTHS',
-            `salary${i + 1}`
+            item.name
           )
         );
       });
@@ -1420,11 +1282,11 @@ export class Incomeinfo {
         this.allDocuments.push(
           this.buildSummaryDoc(
             item,
-            `ay${i + 1}`,
+            item.name,
             'ITR',
             'INCOME',
             'ITR_LAST_3_YEARS',
-            `ay${i + 1}`
+            item.name
           )
         );
       });

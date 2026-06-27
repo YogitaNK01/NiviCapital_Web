@@ -123,7 +123,7 @@
       </svg>
     </div>
 
-    <input [attr.maxlength]="maxlength" [attr.type]="currentType" [placeholder]="placeholder" [value]="valueslot ?? value"
+    <input [attr.maxlength]="maxlength" [attr.type]="currentType" [placeholder]="placeholder" [value]=" value"
       (input)="onInputChange($any($event.target).value)" (blur)="onBlur()" [disabled]="disabled" 
       class="input-field percent-input " [readonly]="readonly" [attr.min]="min" [attr.max]="max" [attr.step]="step"
       [ngClass]="{

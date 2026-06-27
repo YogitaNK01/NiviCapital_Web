@@ -103,6 +103,15 @@ export class Assetsinfo implements OnInit {
     'Other': { form: 'otherassets', type: 'array' }
   };
 
+  summaryFieldMap: any = {
+    'Gold': { keyName: 'gold' },
+    'Liquid Assets': { keyName: 'liquidAssets' },
+    'Property/ Land Assets': { keyName: 'properties' },
+    'Fixed Deposit': { keyName: 'fixedDeposits' },
+    'Investments': { keyName: 'investments' },
+    'Other': { keyName: 'otherAssets' }
+  }
+
   private readonly NO_ASSETS_CODE = "I don't have Assets";
 
   private readonly REAL_ASSETS_CODES = [
@@ -128,6 +137,7 @@ export class Assetsinfo implements OnInit {
   editSuccess: any = false;
 
   description1 = `Great ! Your Assets Info Details\n Uploaded Successfully.`;
+  summarySection: any = {};
   constructor(private fb: FormBuilder, public main: Main, private route: ActivatedRoute, private msgBox: Msgboxservice, private storageservice: Storage,
     private stepperService: Loanstepperservice, private formSvc: Loanformservice, private cd: ChangeDetectorRef, private router: Router) { }
 
@@ -301,7 +311,7 @@ export class Assetsinfo implements OnInit {
       summarySection = [];
     }
 
-
+    this.summarySection = summarySection;
 
 
     const normalizedSummary = this.normalizeAssets(summarySection);
@@ -649,6 +659,17 @@ export class Assetsinfo implements OnInit {
 
 
   removeAccordion(key: string, index: number, event: Event) {
+    console.log(key);
+    let accArr: any = [];
+
+    if(this.summaryFieldMap?.[key]){
+      this.summarySection[this.summaryFieldMap[key].keyName].forEach((item: any) => {
+        accArr.push(item.id);
+      });
+    }
+
+    console.log(accArr)
+
     this.msgBox.open({
       title: 'Are you sure want to Remove',
       message: ``,
@@ -690,6 +711,10 @@ export class Assetsinfo implements OnInit {
             this.otherassets.clear();
             this.otherassets.push(this.createOther());
             break;
+        }
+
+        if(accArr){
+          this.deleteItemArr(accArr);
         }
 
         this.calculateGrandTotal();
@@ -1459,6 +1484,17 @@ export class Assetsinfo implements OnInit {
     )?.value || '';
   }
   removeitem(index: number, type: 'property' | 'fd' | 'other') {
+    let item: any = {};
+    if(this.summarySection?.properties && type === 'property'){
+      item = this.summarySection.properties[index];
+    }
+    if(this.summarySection?.fixedDeposits && type === 'fd'){
+      item = this.summarySection.fixedDeposits[index];
+    }
+    if(this.summarySection?.otherAssets && type === 'other'){
+      item = this.summarySection.otherAssets[index];
+    }
+
     this.msgBox.open({
       title: 'Are you sure want to Remove',
       message: ``,
@@ -1477,9 +1513,28 @@ export class Assetsinfo implements OnInit {
         }
         this.handleEmptyAccordion(type);
         this.calculateGrandTotal();  // Recalc total
+        if(item){
+          this.deleteItemArr([item.id]);
+        }
       }
     });
   }
+
+  deleteItemArr(idArr: any){
+    this.formSvc.deleteAssets({
+      applicationId: this.applicationId,
+      applicantId: this.applicantId,
+      assetIds: idArr
+    }).subscribe({
+      next: (res) => {
+        console.log(res);
+      },
+      error: (error) => {
+        console.log(error);
+      }
+    });
+  }
+
   handleEmptyAccordion(type: 'property' | 'fd' | 'other') {
     let array: FormArray;
     let accKey: string;

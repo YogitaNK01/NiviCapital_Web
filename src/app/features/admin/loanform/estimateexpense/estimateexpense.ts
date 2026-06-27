@@ -93,7 +93,7 @@ export class Estimateexpense {
 
   editSuccess: any = false;
   description1 = `Great ! Your Estimated Expense Details\n Uploaded Successfully.`;
-
+  summarySection: any = [];
 
   constructor(private fb: FormBuilder, private stepperService: Loanstepperservice, private cd: ChangeDetectorRef, private loanformservice: Loanformservice,
     private router: Router, private route: ActivatedRoute, public main: Main, private msgBox: Msgboxservice, private storageservice: Storage) { }
@@ -332,6 +332,7 @@ export class Estimateexpense {
         .toLowerCase();
 
       return (
+        item.expenseItemMasterId ||
         item.livingExpenseItemMasterId ||
         item.categoryId ||
         item.id ||
@@ -357,6 +358,7 @@ export class Estimateexpense {
         .toLowerCase();
 
       return (
+        item.expenseItemMasterId ||
         item.miscellaneousExpenseItemMasterId ||
         item.categoryId ||
         item.id ||
@@ -443,6 +445,8 @@ export class Estimateexpense {
     const draftData = await this.getSavedEstExpense();
 
     const summarySection = await this.getSummarySection('estimatedExpense');
+
+    this.summarySection = summarySection;
 
     let finalData = null;
 
@@ -1018,6 +1022,13 @@ export class Estimateexpense {
   }
 
   removeexpense(index: number, type: 'living' | 'misc') {
+    let item : any = {};
+    if(this.summarySection?.livingExpenses && type === 'living'){
+      item = this.summarySection.livingExpenses[index];
+    }
+    if(this.summarySection?.miscellaneousExpenses && type === 'misc'){
+      item = this.summarySection.miscellaneousExpenses[index];
+    }
 
     this.msgBox.open({
       title: 'Are you sure want to Remove',
@@ -1066,6 +1077,25 @@ export class Estimateexpense {
           this.selectedmisCategories = [...new Set(miscategories)];
         }
 
+        if(item){
+          this.deleteItem(item);
+        }
+
+      }
+    });
+  }
+
+  deleteItem(item: any){
+    this.loanformservice.deleteEstimatedExpense({
+      applicationId: this.applicationId,
+      applicantId: this.applicantId,
+      id: item.id
+    }).subscribe({
+      next: (res) => {
+        console.log(res);
+      },
+      error: (error) => {
+        console.log(error);
       }
     });
   }

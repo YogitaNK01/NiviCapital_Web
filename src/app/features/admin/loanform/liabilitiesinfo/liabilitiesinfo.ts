@@ -69,6 +69,13 @@ export class Liabilitiesinfo {
     'BNPL': { form: 'bnpl', api: 'Buy_Now_Pay_Later' },
     'OTHER_LIABILITY': { form: 'other', api: 'Other_Liabilities' }
   };
+
+  summaryFieldMap: any = {
+    'EXISTING_LOAN': { keyName: 'existingLoans' },
+    'CREDIT_CARD_OUTSTANDING': { keyName: 'creditCardOutstanding' },
+    'BNPL': { keyName: 'bnpl' },
+    'OTHER_LIABILITY': { keyName: 'otherLiabilities' }
+  }
   private liabilityFormMap: Record<string, string> = {
     'EXISTING_LOAN': 'loans',
     'CREDIT_CARD_OUTSTANDING': 'creditcard',
@@ -126,7 +133,7 @@ export class Liabilitiesinfo {
   
   editSuccess: any = false;
   description1 = `Great ! Your Liabilities Info Details\n Uploaded Successfully.`;
-
+  summarySection: any = [];
 
   constructor(private fb: FormBuilder, public main: Main, private route: ActivatedRoute, private msgBox: Msgboxservice, private router: Router,private storageservice:Storage,
     private stepperService: Loanstepperservice, private formSvc: Loanformservice, private cd: ChangeDetectorRef) { }
@@ -401,7 +408,7 @@ return this.isCoApplicant
       this.getSummarySection('liabilities')
     ]);
 
-
+    this.summarySection = summarySection;
     const normalizedSummary = this.normalizeLiabilities(summarySection);
     const normalizedDraft = this.normalizeLiabilities(draftData);
     const normalizedLocal = this.normalizeLiabilities(parsedLocal);
@@ -1650,6 +1657,16 @@ return this.isCoApplicant
     $event.stopPropagation();
     $event.preventDefault();
 
+    console.log(acc, index);
+
+    let accArr: any = [];
+
+    if(this.summaryFieldMap?.[acc?.key]){
+      this.summarySection[this.summaryFieldMap[acc.key].keyName].forEach((item: any) => {
+        accArr.push(item.id);
+      });
+    }
+
     this.msgBox.open({
       title: 'Are you sure want to Remove',
       message: ``,
@@ -1685,6 +1702,11 @@ return this.isCoApplicant
         }
 
         this.calculateGrandTotal();
+
+        if(accArr){
+          this.deleteItemArr(accArr);
+        }
+
         this.cd.detectChanges();
       }
     });
@@ -1694,6 +1716,20 @@ return this.isCoApplicant
 
   // 2. removeitem - FULL LOAN RESET
   removeitem(index: number, type: 'loantype' | 'creditcard' | 'bnpl' | 'other') {
+    let item : any = {};
+    if(this.summarySection?.existingLoans && type === 'loantype'){
+      item = this.summarySection.existingLoans[index];
+    }
+    if(this.summarySection?.creditCardOutstanding && type === 'creditcard'){
+      item = this.summarySection.creditCardOutstanding[index];
+    }
+    if(this.summarySection?.bnpl && type === 'bnpl'){
+      item = this.summarySection.bnpl[index];
+    }
+    if(this.summarySection?.otherLiabilities && type === 'other'){
+      item = this.summarySection.otherLiabilities[index];
+    }
+
     this.msgBox.open({
       title: 'Are you sure want to Remove',
       message: ``,
@@ -1718,10 +1754,31 @@ return this.isCoApplicant
         }
         this.checkAndDeselectEmptyArray(type);
         this.calculateGrandTotal();
+
+        if(item){
+          this.deleteItemArr([item.id]);
+        }
+
         this.cd.detectChanges();
       }
     });
   }
+
+  deleteItemArr(idArr: any){
+    this.formSvc.deleteLiability({
+      applicationId: this.applicationId,
+      applicantId: this.applicantId,
+      ids: idArr
+    }).subscribe({
+      next: (res) => {
+        console.log(res);
+      },
+      error: (error) => {
+        console.log(error);
+      }
+    });
+  }
+
 
   // 3. NEW METHOD - RESET DROPDOWN STATE
   resetLoanDropdownState() {

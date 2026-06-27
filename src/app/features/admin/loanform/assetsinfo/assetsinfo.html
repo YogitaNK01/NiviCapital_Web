@@ -63,7 +63,7 @@
                             <button class="accordion-button table-head" [class.collapsed]="!openIndex.includes(i)"
                                 type="button" (click)="toggle(i)">
                                 <span class="flex-grow-1">{{ acc.title }}</span>
-                                <span class="delete-icon px-2" (click)="removeAccordion(acc.key, i, $event)">
+                                <span class="delete-icon px-2" (click)="removeAccordion(acc.key, i, $event)" [ngClass]="{'disabled-div': isViewMode}">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
                                         fill="none">
                                         <path
@@ -215,7 +215,7 @@
 
                                 <div class="text-dp-3-regular d-flex align-items-center justify-content-between">
                                     Property {{ i + 1 }}
-                                    <span *ngIf="properties.length > 1" (click)="removeitem(i,'property')"
+                                    <span *ngIf="properties.length > 1" (click)="removeitem(i,'property')" [ngClass]="{'disabled-div': isViewMode}"
                                         class="delete-icon px-2">
                                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
                                             viewBox="0 0 24 24" fill="none">

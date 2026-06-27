@@ -3,7 +3,7 @@ import { FormGroup } from '@angular/forms';
 
 import { BehaviorSubject, firstValueFrom, map, Observable, of, shareReplay, tap } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Loanstepperservice } from './loanstepperservice';
 
 
@@ -336,6 +336,16 @@ submitAdditionalInfo(
 
   }
 
+  deleteEstimatedExpense(payload: any): Observable<ApiResponse<any>> {
+    const httpOptions = {
+      headers: new HttpHeaders({ 'Content-Type': 'application/json' }),
+      body: payload
+    };
+
+    return this.http.delete<ApiResponse<any>>(
+      `${this.baseUrl}/v1/los/applications/delete-estimated-expense`, httpOptions
+    );
+  }
 
   // ************************* Income   *************************
 
@@ -354,6 +364,17 @@ submitAdditionalInfo(
 
   
   }
+
+  deleteIncome(payload: any): Observable<ApiResponse<any>> {
+    const httpOptions = {
+      headers: new HttpHeaders({ 'Content-Type': 'application/json' }),
+      body: payload
+    };
+
+    return this.http.delete<ApiResponse<any>>(
+      `${this.baseUrl}/v1/los/applications/documents/delete-income-document`, httpOptions
+    );
+  }  
 
   // ************************* assets   *************************
 
@@ -395,6 +416,17 @@ submitAdditionalInfo(
     );
   }
 
+  deleteAssets(payload: any): Observable<ApiResponse<any>> {
+    const httpOptions = {
+      headers: new HttpHeaders({ 'Content-Type': 'application/json' }),
+      body: payload
+    };
+
+    return this.http.delete<ApiResponse<any>>(
+      `${this.baseUrl}/v1/los/applications/delete-asset`, httpOptions
+    );
+  }
+
   // ************************* Liability   *************************
 
   getAllLiabilities(): Observable<ApiResponse<any>> {
@@ -428,12 +460,34 @@ submitAdditionalInfo(
     : this.http.post<ApiResponse<any>>(url, payload);
   }
 
+  deleteLiability(payload: any): Observable<ApiResponse<any>> {
+    const httpOptions = {
+      headers: new HttpHeaders({ 'Content-Type': 'application/json' }),
+      body: payload
+    };
+
+    return this.http.delete<ApiResponse<any>>(
+      `${this.baseUrl}/v1/los/applications/delete-liability`, httpOptions
+    );
+  }
+
   // ************************* Monthly Expenditure   *************************
   MonthlyExpenditure(data: any, id: string): Observable<ApiResponse<any>> {
 
     return this.http.post<ApiResponse<any>>(
       `${this.baseUrl}/v1/los/applications/${id}/monthly-expenses`,
       data
+    );
+  }
+
+  deleteMonthlyExpenditure(payload: any): Observable<ApiResponse<any>> {
+    const httpOptions = {
+      headers: new HttpHeaders({ 'Content-Type': 'application/json' }),
+      body: payload
+    };
+
+    return this.http.delete<ApiResponse<any>>(
+      `${this.baseUrl}/v1/los/applications/delete-monthly-expense`, httpOptions
     );
   }
 

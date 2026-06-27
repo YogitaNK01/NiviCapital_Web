@@ -49,6 +49,17 @@ export class Monthlyexpenditureinfo {
     { label: 'Medical/ Medicines', value: 'Medical', icon: '' },
     { label: 'Others', value: 'Others', icon: '' },
   ];
+
+  summaryFieldMap: any = {
+    'RentHomeMaintenance': { keyName: 'rentHomeMaintenance' },
+    'GroceriesandHousehold': { keyName: 'groceriesHousehold' },
+    'Utilities': { keyName: 'utilitiesElectricityWaterGas' },
+    'Transportation': { keyName: 'transportation' },
+    'SchoolEducationFees': { keyName: 'schoolEducationFees' },
+    'Medical': { keyName: 'medicalMedicines' },
+    'Others': { keyName: 'otherRecurringExpenses' }
+  }
+
   selectedexpenditure: string[] = [];
 
   monthlyExpenditureForm!: FormGroup;
@@ -113,7 +124,7 @@ export class Monthlyexpenditureinfo {
   
   editSuccess: any = false;
   description1 = `Great ! Your Monthly Expenditure Info Details\n Uploaded Successfully.`;
-
+  summarySection : any = {};
 
   constructor(private fb: FormBuilder, public main: Main, private route: ActivatedRoute, private msgBox: Msgboxservice, private router: Router,private storageservice:Storage,
     private stepperService: Loanstepperservice, private formSvc: Loanformservice, private cd: ChangeDetectorRef) { }
@@ -314,7 +325,7 @@ private async loadMonthlyExpenditureForBothFlows() {
     : null;
 
   const summarySection = await this.getSummarySection('monthlyExpenditure');
-
+  this.summarySection = summarySection;
   
 const normalizedSummary = this.normalizeMonthlyExpenditure(summarySection);
   const normalizedDraft = this.normalizeMonthlyExpenditure(draftData);
@@ -648,6 +659,19 @@ private normalizeMonthlyExpenditure(data: any): any {
 
 
   removeAccordion(key: string, index: number, event: Event) {
+    let accArr: any = [];
+    if(this.summaryFieldMap?.[key]){
+      if(Array.isArray(this.summarySection[this.summaryFieldMap[key].keyName])){
+        this.summarySection[this.summaryFieldMap[key].keyName].forEach((item: any) => {
+          accArr.push(item.id);
+        });
+      } else {
+        accArr.push(this.summarySection[this.summaryFieldMap[key].keyName].id);
+      }
+    }
+
+    console.log(accArr);
+
     this.msgBox.open({
       title: 'Are you sure want to Remove',
       message: ``,
@@ -691,8 +715,26 @@ private normalizeMonthlyExpenditure(data: any): any {
           }
         }
 
+        if(accArr){
+          this.deleteItemArr(accArr);
+        }
 
         this.cd.detectChanges();
+      }
+    });
+  }
+
+  deleteItemArr(idArr: any){
+    this.formSvc.deleteMonthlyExpenditure({
+      applicationId: this.applicationId,
+      applicantId: this.applicantId,
+      ids: idArr
+    }).subscribe({
+      next: (res) => {
+        console.log(res);
+      },
+      error: (error) => {
+        console.log(error);
       }
     });
   }
