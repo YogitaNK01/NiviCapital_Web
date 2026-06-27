@@ -84,9 +84,19 @@ registerOnValidatorChange(fn: () => void): void {
   }
 
 
-  writeValue(value: Date | null): void {
-    this.selectedDate = value;
+writeValue(value: any): void {
+  this.selectedDate = value;
+
+  if (value) {
+    this.rawDateValue = moment(value).format('DD/MM/YYYY');
+  } else {
+    this.rawDateValue = '';
   }
+
+  setTimeout(() => {
+    this.validatorChange();
+  });
+}
 
   registerOnChange(fn: any): void {
     this.onChange = fn;

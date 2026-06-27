@@ -386,6 +386,10 @@ export class Uploadkyc implements OnDestroy, AfterViewInit {
 
   checkDob(value: any) {
     this.dobTouched = true;
+     if (!value) {  
+        this.dobValid = true;
+           return;  }
+
     this.dobValid = this.isAdult(value);
   }
   isAdult(date: any): boolean {
@@ -1403,6 +1407,9 @@ export class Uploadkyc implements OnDestroy, AfterViewInit {
 
 
     });
+    if (data.dob) { 
+      this.dobValid = this.isAdult(moment(data.dob, 'YYYY-MM-DD'));
+        this.dobTouched = false;}
 
     if (this.perselectedStateId) {
       this.loadPerCities(this.perselectedStateId, permanentAddress?.city || '');
