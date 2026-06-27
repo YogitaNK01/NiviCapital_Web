@@ -20,7 +20,7 @@ import { Successbox } from '../../customer/successbox/successbox';
 
 @Component({
   selector: 'app-basicinfo',
-  imports: [CommonModule, Inputfield, Buttons, ReactiveFormsModule, Checkbox, Otpsection,Successbox],
+  imports: [CommonModule, Inputfield, Buttons, ReactiveFormsModule, Checkbox, Otpsection, Successbox],
   standalone: true,
   templateUrl: './basicinfo.html',
   styleUrl: './basicinfo.scss'
@@ -70,16 +70,16 @@ export class Basicinfo {
   hasExistingCif = false;
   // @Input() prefillPhone: string = '';
 
-    //edit from summary
+  //edit from summary
   isFromSummary = false;
   isViewMode = false;
   isEditMode = false;
   originalFormValue: any = null;
-  
+
   editSuccess: any = false;
   description1 = `Great ! Your Additional Info Details\n Uploaded Successfully.`;
 
-  
+
   constructor(private fb: FormBuilder, public main: Main, private addcustomerservice: Addcustomerservice, private cd: ChangeDetectorRef, private msgBox: Msgboxservice,
     private router: Router, private loanform: Loanformservice, private stepperService: Loanstepperservice, private route: ActivatedRoute, private storageservice: Storage) { }
 
@@ -132,14 +132,14 @@ export class Basicinfo {
     this.stepperService.setCurrentCoApplicantIndex(currentIndex);
 
     const isNewCoappFlow = this.isCoApplicant && mode === 'new';
-if (isNewCoappFlow) {
-  this.loanform.clearSummaryEditFlow();
-  this.isFromSummary = false;
-  this.isSummaryEditMode = false;
-  this.viewOnly = false;
-  this.isViewMode = false;
-  this.isEditMode = false;
-}
+    if (isNewCoappFlow) {
+      this.loanform.clearSummaryEditFlow();
+      this.isFromSummary = false;
+      this.isSummaryEditMode = false;
+      this.viewOnly = false;
+      this.isViewMode = false;
+      this.isEditMode = false;
+    }
 
     //    restore old co-app only for EXISTING flow
     if (this.isCoApplicant && !isNewCoappFlow) {
@@ -163,14 +163,37 @@ if (isNewCoappFlow) {
       ? pendingContext?.phone || ''
       : params['phone'] || ''
 
+    const currentCoapp = this.getCurrentCoApplicantFromList();
 
-    this.isSummaryEditMode =!isNewCoappFlow &&
-     ( params['fromSummary'] === true ||
-      params['fromSummary'] === 'true' ||
-      this.loanform.isSummaryEditFlow())
 
-    
-this.viewOnly = this.isSummaryEditMode && (params['mode'] === 'view' || params['mode'] === undefined);
+    const coappStatus = (currentCoapp?.status || currentCoapp?.uiStatus || '').toUpperCase();
+
+    const isDraftCoapp =
+      this.isCoApplicant &&
+      !isNewCoappFlow &&
+      (
+        coappStatus === 'DRAFT' ||
+        coappStatus === 'IN_PROGRESS' ||
+        !coappStatus
+      );
+
+    if (isDraftCoapp) {
+      this.loanform.clearSummaryEditFlow();
+      this.loanform.clearSummaryEducationEditFlow?.();
+
+      this.isFromSummary = false;
+      this.isSummaryEditMode = false;
+      this.viewOnly = false;
+      this.isViewMode = false;
+      this.isEditMode = false;
+    }
+    this.isSummaryEditMode = !isNewCoappFlow && !isDraftCoapp &&
+      (params['fromSummary'] === true ||
+        params['fromSummary'] === 'true' ||
+        this.loanform.isSummaryEditFlow())
+
+
+    this.viewOnly = this.isSummaryEditMode && !isDraftCoapp && (params['mode'] === 'view' || params['mode'] === undefined);
 
 
     this.registerForm = this.fb.group({
@@ -207,18 +230,18 @@ this.viewOnly = this.isSummaryEditMode && (params['mode'] === 'view' || params['
     });
 
 
-this.isFromSummary = !isNewCoappFlow && this.loanform.isSummaryEditFlow();
+    this.isFromSummary = !isNewCoappFlow && !isDraftCoapp &&  this.loanform.isSummaryEditFlow();
 
-if (this.isFromSummary) {
-  this.isViewMode = true;
-  this.registerForm.disable({ emitEvent: false });
-} else {
-  this.isViewMode = false;
-  this.isEditMode = false;
-  this.registerForm.enable({ emitEvent: false });
-}
+    if (this.isFromSummary) {
+      this.isViewMode = true;
+      this.registerForm.disable({ emitEvent: false });
+    } else {
+      this.isViewMode = false;
+      this.isEditMode = false;
+      this.registerForm.enable({ emitEvent: false });
+    }
 
-    const currentCoapp = this.getCurrentCoApplicantFromList();
+
 
     const existingCoApplicantId =
       currentCoapp?.applicantId ||
@@ -281,10 +304,10 @@ if (this.isFromSummary) {
     }
 
 
-  
+
   }
   get f() {
-    return this.registerForm.controls  || {};
+    return this.registerForm.controls || {};
   }
 
 
@@ -971,18 +994,25 @@ if (this.isFromSummary) {
     // this.patchCoApplicantInfo(parsed); // or patchGeneralInfo / patchAdditionalInfo
   }
   back() {
-    this.loanform.coappStep = 1;
-    this.router.navigate(['../coapplicantinfo']);
-  }
+  this.loanform.coappStep = 1;
+
+  this.router.navigate(
+    ['/loanform', 'co-applicantdetails', 'coapplicantinfo'],
+    {
+      queryParams: {},
+      replaceUrl: true
+    }
+  );
+}
   next() {
-     console.log('FNAME =>', this.registerForm.get('fname')?.value);
-    
-  if (this.registerForm.invalid) {
-    this.registerForm.markAllAsTouched();
-    return;
-  }
-  let formdata = this.registerForm.getRawValue();
-  
+    console.log('FNAME =>', this.registerForm.get('fname')?.value);
+
+    if (this.registerForm.invalid) {
+      this.registerForm.markAllAsTouched();
+      return;
+    }
+    let formdata = this.registerForm.getRawValue();
+
 
     const input = this.buildBasicPayload(formdata);
     const hasChanged = this.isPayloadChanged(input, this.lastSavedPayload);
@@ -1186,15 +1216,15 @@ if (this.isFromSummary) {
             this.isCoApplicant,
             input
           );
-         
-            this.loanform.co_basicInfoData = input;
-          
+
+          this.loanform.co_basicInfoData = input;
+
 
           this.lastSavedPayload = { ...input };
 
-        
-            this.editSuccess = true;
-         
+
+          this.editSuccess = true;
+
 
         }
       },
@@ -1204,7 +1234,7 @@ if (this.isFromSummary) {
     });
   }
 
-    // edit sucess popup
+  // edit sucess popup
   onCancel() {
     this.editSuccess = false;
   }
@@ -1214,7 +1244,7 @@ if (this.isFromSummary) {
       this.editSuccess = false;
       this.isViewMode = true;
       this.isEditMode = false;
-       this.registerForm.disable({ emitEvent: false });
+      this.registerForm.disable({ emitEvent: false });
     }
   }
 }

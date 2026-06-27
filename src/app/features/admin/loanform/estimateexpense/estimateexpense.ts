@@ -332,7 +332,7 @@ export class Estimateexpense {
         .toLowerCase();
 
       return (
-        item.expenseItemMasterId ||
+         item.expenseItemMasterId ||
         item.livingExpenseItemMasterId ||
         item.categoryId ||
         item.id ||

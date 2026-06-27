@@ -43,7 +43,7 @@ interface TransformedUserData {
   applicationStatus?: string,
   currentApplicationStatus?: string,
   nextStage?: string,
-  applicantId?:string 
+  applicantId?: string
 }
 @Component({
   selector: 'app-los-operation',
@@ -283,13 +283,13 @@ export class LosOperation {
   //search from table
   onSearchChange(value: string): void {
     this.searchText = value.toLowerCase();
- var type;
+    var type;
 
     if (this.searchText.length === 0) {
       this.nodata = false;
       this.hidepagination = false;
       this.currentPage = 1;
-
+      this.filteredData = [];
       this.loadallusers();      // reload paginated list
       this.cdr.detectChanges();
       return;
@@ -305,30 +305,37 @@ export class LosOperation {
         return; // stop if invalid email
       }
 
-    } else {
+    } else if (this.searchText.startsWith('nc')) {
+      type = 'NCID'
+    }
+    else if (this.searchText.startsWith('cust')) {
+      type = 'CUST_ID'
+    }
+    else if (/^\d+$/.test(this.searchText)) {
       type = 'MOBILE'
+      const mobile = this.searchText.trim();
+      const mobileRegex = /^[0-9]{10}$/;
 
-      
- const mobileRegex = /^[0-9]{10}$/;
+      if (!mobileRegex.test(mobile)) {
+        return;
+      }
 
-  if (!mobileRegex.test(this.searchText)) {
-    return; 
-  }
-
+    } else {
+      type = "NAME"
     }
 
     let input = {
       identifier: this.searchText,
       type: type,
-      isSearch :true,
-        "applicantType": "PRIMARY", //// PRIMARY / CO_APPLICANT
+      isSearch: true,
+      "applicantType": "PRIMARY", //// PRIMARY / CO_APPLICANT
       "coApplicantIndex": 0,
 
     }
     this.addcustomerservice.customersearch(input).subscribe({
       next: (res) => {
         console.log(res);
- let respdata= res.data[0];
+        let respdata = res.data[0];
 
 
         const row: TransformedUserData = {
@@ -440,7 +447,7 @@ export class LosOperation {
 
   //disable edit btn from row
   disableEditCondition = (row: any) => {
-//  console.log("edit-----",row)
+    //  console.log("edit-----",row)
     return false;
 
 

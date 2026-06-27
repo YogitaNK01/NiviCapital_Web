@@ -19,7 +19,8 @@
       placeholder="DD/MM/YYYY"
       [min]="minDate"
       [max]="maxDate"
-      
+      maxlength="10"
+      (keypress)="allowOnlyDate($event)"
     />
 
     <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>

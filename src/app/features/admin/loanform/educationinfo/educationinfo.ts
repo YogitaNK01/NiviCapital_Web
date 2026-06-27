@@ -70,9 +70,9 @@ export class Educationinfo implements OnInit {
   files: any = {};
 
   basicConfig: UploadConfig = {
-    accept: '.svg, .png, .jpg, .jpeg, .pdf, .tiff, .heic',
+    accept: '.svg, .png, .jpg, .jpeg, .pdf',
     maxSize: 10,
-    helperText: 'JPG, JPEG, PDF, PNG, TIFF, SVG, HEIC (max. 10 MB)'
+    helperText: 'JPG, JPEG, PDF, PNG,  SVG (max. 10 MB)'
   };
   qualification: string = 'Last Qualification';
   seleactqualification: OptionItem[] = []
@@ -541,13 +541,15 @@ export class Educationinfo implements OnInit {
 
       const valueStr = value.toString();
 
-      //  4.0–10.0
+      //  4.0–9.0
       const isValid =
         num >= 4.0 &&
-        num <= 10.0 &&
+        num <= 9.0 &&
         /^\d+(\.\d{1})?$/.test(valueStr);
 
       return isValid ? null : { invalidIeltsScore: true };
+
+
     };
   }
 

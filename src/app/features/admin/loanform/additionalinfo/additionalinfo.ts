@@ -210,14 +210,25 @@ export class Additionalinfo implements OnInit {
     });
     this.stepperService.rebuildSteps();
 
-    if (this.viewOnly) {
-      this.additionalinfoForm.disable({ emitEvent: false });
+    const coappMode = this.formSvc.getCoApplicantMode();
+    if (this.isCoApplicant && coappMode.isDraft) {
+      this.formSvc.clearSummaryEditFlow();
+      this.formSvc.clearSummaryEducationEditFlow?.();
+      this.isFromSummary = false;
+      this.isSummaryEditMode = false;
+      this.viewOnly = false;
+      this.isViewMode = false;
+      this.isEditMode = false;
+      this.additionalinfoForm.enable({ emitEvent: false });
     }
-   this.isFromSummary = this.formSvc.isSummaryEditFlow();
-
-    if (this.isFromSummary) {
-      this.isViewMode = true;
-      this.additionalinfoForm.disable();
+    else {
+      this.isFromSummary = this.formSvc.isSummaryEditFlow();
+      if (this.isFromSummary) {
+        this.isViewMode = true;
+        this.isEditMode = false;
+        this.additionalinfoForm.disable({ emitEvent: false });
+      }
+      if (this.viewOnly) { this.additionalinfoForm.disable({ emitEvent: false }); }
     }
 
     this.additionalinfoForm.get('maritalstatus')?.valueChanges.subscribe(value => {
@@ -230,7 +241,7 @@ export class Additionalinfo implements OnInit {
 
     await this.loadAdditionalInfoForBothFlows();
 
- 
+
 
   }
 
@@ -1200,9 +1211,9 @@ export class Additionalinfo implements OnInit {
 
           this.lastSavedPayload = { ...input };
 
-        
-            this.editSuccess = true;
-         
+
+          this.editSuccess = true;
+
 
         }
       },
@@ -1222,7 +1233,7 @@ export class Additionalinfo implements OnInit {
       this.editSuccess = false;
       this.isViewMode = true;
       this.isEditMode = false;
-       this.additionalinfoForm.disable({ emitEvent: false });
+      this.additionalinfoForm.disable({ emitEvent: false });
     }
   }
 

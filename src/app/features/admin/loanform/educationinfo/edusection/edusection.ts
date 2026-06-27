@@ -71,9 +71,9 @@ export class Edusection {
   files: any = {};
 
   basicConfig: UploadConfig = {
-    accept: '.svg, .png, .jpg, .jpeg, .pdf, .tiff, .heic',
+    accept: '.svg, .png, .jpg, .jpeg, .pdf',
     maxSize: 10,
-    helperText: 'JPG, JPEG, PDF, PNG, TIFF, SVG, HEIC (max. 10 MB)'
+    helperText: 'JPG, JPEG, PDF, PNG, SVG (max. 10 MB)'
   };
 
 

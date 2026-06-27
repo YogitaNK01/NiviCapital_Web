@@ -32,7 +32,7 @@ export class Datepickernew implements OnInit, ControlValueAccessor {
   @Input() required: boolean = false;
 
   @Input() disablePastDates: boolean = false;
-   @Input() disablefutureDates: boolean = false;
+  @Input() disablefutureDates: boolean = false;
   @Input() minDate: Date | null = null;
   @Input() minyear: number = 1960;
 
@@ -49,10 +49,10 @@ export class Datepickernew implements OnInit, ControlValueAccessor {
     minYearDate.setHours(0, 0, 0, 0);
 
 
-    
-const yesterday = new Date();
-  yesterday.setDate(yesterday.getDate() - 1);
-  yesterday.setHours(23, 59, 59, 999);
+
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+    yesterday.setHours(23, 59, 59, 999);
 
 
     if (this.disablePastDates) {
@@ -60,12 +60,12 @@ const yesterday = new Date();
       today.setHours(0, 0, 0, 0);
 
       this.minDate = today > minYearDate ? today : minYearDate;
-    } else  if (this.disablefutureDates) {
+    } else if (this.disablefutureDates) {
       this.maxDate = yesterday;
     }
     else {
       this.minDate = minYearDate;
-      
+
     }
 
 
@@ -88,7 +88,22 @@ const yesterday = new Date();
     this.disabled = isDisabled;
   }
 
+  allowOnlyDate(event: KeyboardEvent) {
+  const allowedKeys = /[0-9\/]/;
+
+  if (!allowedKeys.test(event.key)) {
+    event.preventDefault();
+  }
+}
+
   onDateChange(val: Date | null) {
+    if (!val) {
+      this.selectedDate = null;
+      this.onChange(null);
+      return;
+    }
+    const stringVal = val.toString();
+    if (stringVal.length > 10) { return; }
     this.selectedDate = val;
     this.onChange(val);
     this.onTouched();

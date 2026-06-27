@@ -43,12 +43,12 @@ export class Coappdashboard implements OnInit {
   //toretrive data
   removedCoApplicants: any[] = [];
 
-    //edit from summary
+  //edit from summary
   isFromSummary = false;
   isViewMode = false;
   isEditMode = false;
   originalFormValue: any = null;
-  
+
   editSuccess: any = false;
   description1 = `Great ! Your Additional Info Details\n Uploaded Successfully.`;
 
@@ -106,7 +106,7 @@ export class Coappdashboard implements OnInit {
 
     this.loadRemovedCoApplicants();
 
-    
+
   }
   add() {
 
@@ -117,7 +117,7 @@ export class Coappdashboard implements OnInit {
       return;
     }
 
-   
+
 
     const nextIndex = this.getNextAvailableCoApplicantIndex();
     sessionStorage.removeItem('coAppIds');
@@ -141,14 +141,14 @@ export class Coappdashboard implements OnInit {
       mode: 'new'
     }));
 
-// if(this.isFromSummary){
-//       this.loanfornservice.clearSummaryEditFlow();
-//       this.isFromSummary = false;
-//     }
+    // if(this.isFromSummary){
+    //       this.loanfornservice.clearSummaryEditFlow();
+    //       this.isFromSummary = false;
+    //     }
 
- this.loanfornservice.clearSummaryEditFlow();
-  this.loanfornservice.clearSummaryEducationEditFlow?.();
-  this.isFromSummary = false;
+    this.loanfornservice.clearSummaryEditFlow();
+    this.loanfornservice.clearSummaryEducationEditFlow?.();
+    this.isFromSummary = false;
 
     this.router.navigate(
       ['coapplicantinfo'],
@@ -179,7 +179,7 @@ export class Coappdashboard implements OnInit {
 
 
   //get all applicants
- 
+
   getAllcoapplicants() {
     this.loanfornservice.getAllCoapp(this.applicationId).subscribe({
       next: (res: any) => {
@@ -207,7 +207,9 @@ export class Coappdashboard implements OnInit {
             name: item.name || item.fullName || localMatch?.name || '',
             phone: item.phone || item.mobileNumber || localMatch?.phone || '',
             userInitiateId: item.userInitiateId || localMatch?.userInitiateId || '',
-            status: item.status || localMatch?.status || 'IN_PROGRESS'
+            status: item.status || localMatch?.status || '',
+            currentStage: item.currentStage,
+            nextStage: item.nextStage
           };
 
           return {
@@ -298,6 +300,16 @@ export class Coappdashboard implements OnInit {
     this.stepperService.setStepperType('CO_APPLICANT');
     this.stepperService.setCurrentCoApplicantIndex(current.index);
 
+    const isDraftCoapp = current.status === 'DRAFT' || current.status === 'IN_PROGRESS';
+
+    if (isDraftCoapp) {
+      this.loanfornservice.clearSummaryEditFlow();
+      this.loanfornservice.clearSummaryEducationEditFlow?.();
+      this.isFromSummary = false;
+      this.isViewMode = false;
+      this.isEditMode = false;
+    }
+
     sessionStorage.setItem('coAppIds', JSON.stringify({
       applicantId: current.applicantId,
       applicationId: current.applicationId || this.applicationId,
@@ -343,7 +355,8 @@ export class Coappdashboard implements OnInit {
         relativeTo: this.route,
         queryParams: {
           coApplicantIndex: current.index,
-          mode: 'existing'
+          mode: 'existing',
+          fromSummary: isSubmittedCoapp ? true : null
         }
       }
     );
@@ -440,7 +453,7 @@ export class Coappdashboard implements OnInit {
   }
 
   // coapplicant status
-  private getCoApplicantStatus(coapp: any): 'COMPLETED' | 'IN_PROGRESS' {
+  private getCoApplicantStatus(coapp: any): 'COMPLETED' | 'DRAFT' {
     const apiStatus = (coapp.status || '').toUpperCase();
 
     if (apiStatus === 'COMPLETED' || apiStatus === 'SUBMITTED') {
@@ -467,7 +480,7 @@ export class Coappdashboard implements OnInit {
       completedSteps.includes(route)
     );
 
-    return isComplete ? 'COMPLETED' : 'IN_PROGRESS';
+    return isComplete ? 'COMPLETED' : 'DRAFT';
   }
   private getCoApplicantCompletedSteps(index: number, applicantId?: string): string[] {
     const mainApplicantId = this.applicantId;
@@ -478,20 +491,20 @@ export class Coappdashboard implements OnInit {
       `coapp_completedSteps_${mainApplicantId}_temp_${index}`
     ];
 
+
+    const merged = new Set<string>();
     for (const key of possibleKeys) {
       const saved = localStorage.getItem(key);
-
-      if (saved) {
-        try {
-          const parsed = JSON.parse(saved);
-          return Array.isArray(parsed) ? parsed : [];
-        } catch {
-          return [];
+      if (!saved) continue;
+      try {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed)) {
+          parsed.forEach(step => merged.add(step));
         }
+      } catch {
       }
     }
-
-    return [];
+    return Array.from(merged);
   }
 
   // mark as completed
@@ -511,10 +524,10 @@ export class Coappdashboard implements OnInit {
     this.isChildRouteActive = false;
     this.loadCoApplicants();
   }
- get hasAtLeastOneCoApplicant(): boolean {
-  return this.coApplicants.length > 0 &&
-         this.coApplicants.every(item => this.getCoApplicantStatus(item) === 'COMPLETED');
-}
+  get hasAtLeastOneCoApplicant(): boolean {
+    return this.coApplicants.length > 0 &&
+      this.coApplicants.every(item => this.getCoApplicantStatus(item) === 'COMPLETED');
+  }
 
   //delete
   deleteCoApplicant(index: number, event?: Event) {
@@ -541,22 +554,22 @@ export class Coappdashboard implements OnInit {
               x => Number(x.index) !== Number(index)
             );
 
-           
-          // add to removed list if not already present
-          const alreadyRemoved = this.removedCoApplicants.some(
-            x => Number(x.index) === Number(index)
-          );
 
-          if (!alreadyRemoved) {
-            this.removedCoApplicants.push({
-              ...current,
-              archivedAt: new Date().toISOString()
-            });
-
-            this.removedCoApplicants = this.removedCoApplicants.sort(
-              (a: any, b: any) => Number(a.index) - Number(b.index)
+            // add to removed list if not already present
+            const alreadyRemoved = this.removedCoApplicants.some(
+              x => Number(x.index) === Number(index)
             );
-          }
+
+            if (!alreadyRemoved) {
+              this.removedCoApplicants.push({
+                ...current,
+                archivedAt: new Date().toISOString()
+              });
+
+              this.removedCoApplicants = this.removedCoApplicants.sort(
+                (a: any, b: any) => Number(a.index) - Number(b.index)
+              );
+            }
 
 
 
@@ -565,14 +578,14 @@ export class Coappdashboard implements OnInit {
               JSON.stringify(this.coApplicants)
             );
 
-          this.saveRemovedCoApplicants();
+            this.saveRemovedCoApplicants();
 
 
-            
+
             // this.clearCoApplicantLocalData(index, current.applicantId); not clearing data as want to retrive
 
             this.loadCoApplicants();
-          this.loadRemovedCoApplicants();
+            this.loadRemovedCoApplicants();
             this.updateCoApplicantStepStatus();
             this.cd.detectChanges();
           },
@@ -605,64 +618,64 @@ export class Coappdashboard implements OnInit {
       JSON.stringify(this.removedCoApplicants)
     );
   }
-restoreCoApplicant(index: number, event?: Event) {
-  event?.stopPropagation();
-  event?.preventDefault();
+  restoreCoApplicant(index: number, event?: Event) {
+    event?.stopPropagation();
+    event?.preventDefault();
 
-  const current = this.removedCoApplicants.find(
-    x => Number(x.index) === Number(index)
-  );
+    const current = this.removedCoApplicants.find(
+      x => Number(x.index) === Number(index)
+    );
 
-  if (!current) return;
+    if (!current) return;
 
-  this.msgBox.open({
-    title: 'Are you sure want to Retrieve',
-    message: `${current.name || 'Co-Applicant'} (Co-Applicant ${index})`,
-    showCancel: true,
-    onOk: () => {
-      this.loanfornservice.retriveCoapp(this.applicationId, current.applicantId).subscribe({
-        next: (res) => {
-          // remove from removed list
-          this.removedCoApplicants = this.removedCoApplicants.filter(
-            x => Number(x.index) !== Number(index)
-          );
-
-          // add back to active list
-          const existsInActive = this.coApplicants.some(
-            x => Number(x.index) === Number(index)
-          );
-
-          if (!existsInActive) {
-            this.coApplicants.push({
-              ...current,
-              status: current.status || 'IN_PROGRESS'
-            });
-
-            this.coApplicants = this.coApplicants.sort(
-              (a: any, b: any) => Number(a.index) - Number(b.index)
+    this.msgBox.open({
+      title: 'Are you sure want to Retrieve',
+      message: `${current.name || 'Co-Applicant'} (Co-Applicant ${index})`,
+      showCancel: true,
+      onOk: () => {
+        this.loanfornservice.retriveCoapp(this.applicationId, current.applicantId).subscribe({
+          next: (res) => {
+            // remove from removed list
+            this.removedCoApplicants = this.removedCoApplicants.filter(
+              x => Number(x.index) !== Number(index)
             );
+
+            // add back to active list
+            const existsInActive = this.coApplicants.some(
+              x => Number(x.index) === Number(index)
+            );
+
+            if (!existsInActive) {
+              this.coApplicants.push({
+                ...current,
+                status: current.status || 'DRAFT'
+              });
+
+              this.coApplicants = this.coApplicants.sort(
+                (a: any, b: any) => Number(a.index) - Number(b.index)
+              );
+            }
+
+            localStorage.setItem(
+              this.getCoappListKey(),
+              JSON.stringify(this.coApplicants)
+            );
+
+            this.saveRemovedCoApplicants();
+
+            this.loadCoApplicants();
+            this.getAllcoapplicants();
+            this.loadRemovedCoApplicants();
+            this.updateCoApplicantStepStatus();
+            this.cd.detectChanges();
+          },
+          error: (err) => {
+            console.error('Retrieve co-applicant failed', err);
           }
-
-          localStorage.setItem(
-            this.getCoappListKey(),
-            JSON.stringify(this.coApplicants)
-          );
-
-          this.saveRemovedCoApplicants();
-
-          this.loadCoApplicants();
-          this.getAllcoapplicants();
-          this.loadRemovedCoApplicants();
-          this.updateCoApplicantStepStatus();
-          this.cd.detectChanges();
-        },
-        error: (err) => {
-          console.error('Retrieve co-applicant failed', err);
-        }
-      });
-    }
-  });
-}
+        });
+      }
+    });
+  }
 
   get totalCoApplicantSlotsUsed(): number {
     return (this.coApplicants?.length || 0) + (this.removedCoApplicants?.length || 0);

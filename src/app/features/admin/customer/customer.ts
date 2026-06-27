@@ -293,7 +293,7 @@ export class Customer implements OnInit, OnDestroy {
       this.nodata = false;
       this.hidepagination = false;
       this.currentPage = 1;
-
+this.filteredData = [];
       this.loadallusers();      // reload paginated list
       this.cdr.detectChanges();
       return;
@@ -305,21 +305,28 @@ export class Customer implements OnInit, OnDestroy {
       type = 'EMAIL'
 
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
       if (!emailRegex.test(this.searchText)) {
         return; // stop if invalid email
       }
 
-    } else {
+    }
+    else if (this.searchText.startsWith('nc')) {
+      type = 'NCID'
+    }
+    else if (this.searchText.startsWith('cust')) {
+      type = 'CUST_ID'
+    }
+    else if (/^\d+$/.test(this.searchText)) {
       type = 'MOBILE'
+       const mobile = this.searchText.trim();
+      const mobileRegex = /^[0-9]{10}$/;
 
-      
- const mobileRegex = /^[0-9]{10}$/;
+      if (!mobileRegex.test(mobile)) {
+        return;
+      }
 
-  if (!mobileRegex.test(this.searchText)) {
-    return; 
-  }
-
+    } else {
+      type = "NAME"
     }
 
 

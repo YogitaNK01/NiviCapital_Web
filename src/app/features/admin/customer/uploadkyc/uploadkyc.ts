@@ -29,11 +29,11 @@ interface OptionItem {
   templateUrl: './uploadkyc.html',
   styleUrl: './uploadkyc.scss'
 })
-export class Uploadkyc implements OnDestroy,AfterViewInit {
+export class Uploadkyc implements OnDestroy, AfterViewInit {
   basicConfig: UploadConfig = {
-    accept: '.svg, .png, .jpg, .jpeg, .pdf, .tiff, .heic',
+    accept: '.svg, .png, .jpg, .jpeg, .pdf, ',
     maxSize: 10,
-    helperText: 'JPG, JPEG, PDF, PNG, TIFF, SVG, HEIC (max. 10 MB)'
+    helperText: 'JPG, JPEG, PDF, PNG, SVG,  (max. 10 MB)'
   };
   selectedOption: any;
   addressType: 'same' | 'different' = 'same';
@@ -398,122 +398,8 @@ export class Uploadkyc implements OnDestroy,AfterViewInit {
 
 
   }
-  kycupload1(form: any) {
-    console.log(form.value);
 
-
-    if (!form.valid) {
-      console.log("form invalid");
-      return;
-    }
-    const firstName = this.editMode ? this.editUserData.fname : this.isCoApplicant ? this.co_userid.fullName : this.userdata.fname;
-
-    const lastName = this.editMode ? this.editUserData.lname : this.isCoApplicant ? this.co_userid.fullName : this.userdata.lname;
-
-    const custid = this.editMode ? this.editUserData.custId : this.isCoApplicant ? this.co_userid.cifId : this.userid.cifId;
-
-    const permanentAddress = {
-      addressType: 'PERMANENT',
-      addressLine: form.value.addressline1,
-      addressLine1: form.value.addressline2,
-      addressLine2: form.value.addressline3,
-      city: this.perselectedCityLabel,
-      state: this.perselectedStateLabel,
-      isPreferredAddress: this.isDifferentAddress == false ? 1 : 0,
-      isMailingAddress: this.isDifferentAddress == false ? 1 : 0,
-      zipCode: form.value.perpincode,
-      country: 'India'
-    };
-
-    const currentAddress = {
-      addressType: 'CURRENT',
-      addressLine: form.value.addressline1,
-      addressLine1: form.value.addressline2,
-      addressLine2: form.value.addressline3,
-      city: this.perselectedCityLabel,
-      state: this.perselectedStateLabel,
-      isPreferredAddress: this.isDifferentAddress == false ? 1 : 0,
-      isMailingAddress: this.isDifferentAddress == false ? 1 : 0,
-      zipCode: form.value.perpincode,
-      country: 'India'
-    };
-    const otherAddress = {
-      addressType: 'OTHER',
-      addressLine: form.value.currentaddressline1,
-      addressLine1: form.value.currentaddressline2,
-      addressLine2: form.value.currentaddressline3,
-      city: this.currselectedCityLabel,
-      state: this.currselectedStateLabel,
-      isPreferredAddress: this.isDifferentAddress == true ? 1 : 0,
-      isMailingAddress: this.isDifferentAddress == true ? 1 : 0,
-      zipCode: form.value.currpincode,
-      country: 'India'
-    };
-
-
-    const kycPayload = {
-      firstName: firstName,
-      lastName: lastName,
-      dob: form.value.dob ? form.value.dob.format('YYYY-MM-DD') : null,
-      aadhaarNumber: form.value.aadharnum,
-      panNumber: (form.value.pan).toUpperCase(),
-      passportNo: form.value.Passport,
-      addresses: this.isDifferentAddress
-        ? [permanentAddress, currentAddress, otherAddress]
-        : [permanentAddress, currentAddress]
-
-
-    };
-    console.log("fd-------", kycPayload)
-    sessionStorage.setItem(
-      'userdetails',
-      JSON.stringify({
-        ...kycPayload,
-        dob: kycPayload.dob
-      })
-    );
-
-    console.log("this.files----", this.files);
-
-    const fd = new FormData();
-
-    // text fields
-    fd.append('kycData', JSON.stringify(kycPayload));
-    if (this.files.pan) fd.append('panFile', this.files.pan);
-    if (this.files.aadharfront) fd.append('aadharFrontFile', this.files.aadharfront);
-    if (this.files.aadharback) fd.append('aadharBackFile', this.files.aadharback);
-    if (this.files.passport) fd.append('passportFile', this.files.passport);
-    fd.append('custId', custid);
-    if (this.files.secaddress) {
-      fd.append('utilityBillFile', this.files.secaddress);
-    }
-
-
-
-    this.addcustomerservice.uploadkycdocuments(fd).subscribe({
-      next: res => {
-        console.log("KYC uploaded", res);
-        this.ncid.emit(res.ncId);
-        this.kycid.emit(res.kycId);
-        this.loanservice.setKycId(res.kycId);
-        this.lastSavedPayload = this.normalizeKycPayload(kycPayload);
-        // this.nextStep.emit();
-        if (this.isCoApplicant) {
-          this.stepperService.markStepCompleted('co-kyc');
-          this.stepperService.setStepData('co-kyc', fd);
-          this.stepperService.next();
-        } else {
-          this.nextStep.emit();
-        }
-      },
-      error: err => {
-        console.error(err);
-      }
-    });
-
-    this.editMode = false;
-  }
-  kycupload(form: any) {
+  async kycupload(form: any) {
     console.log(form.value);
 
     if (this.isPassportRequired() && !form.value.Passport) {
@@ -564,13 +450,24 @@ export class Uploadkyc implements OnDestroy,AfterViewInit {
 
 
     }));
-    if (this.files.pan) fd.append('panFile', this.files.pan);
-    if (this.files.aadharfront) fd.append('aadharFrontFile', this.files.aadharfront);
-    if (this.files.aadharback) fd.append('aadharBackFile', this.files.aadharback);
-    if (this.files.passport) fd.append('passportFile', this.files.passport);
+    // if (this.files.pan) fd.append('panFile', this.files.pan);
+    // if (this.files.aadharfront) fd.append('aadharFrontFile', this.files.aadharfront);
+    // if (this.files.aadharback) fd.append('aadharBackFile', this.files.aadharback);
+    // if (this.files.passport) fd.append('passportFile', this.files.passport);
+    
     fd.append('custId', kycPayload.custId);
+
+    // Append new files OR summary URL converted files
+    await this.appendKycFile(fd, 'pan', 'panFile', 'application/pdf');
+    await this.appendKycFile(fd, 'aadharfront', 'aadharFrontFile', 'application/pdf');
+    await this.appendKycFile(fd, 'aadharback', 'aadharBackFile', 'application/pdf');
+    await this.appendKycFile(fd, 'passport', 'passportFile', 'application/pdf');
+    
+    fd.forEach((value, key) => { console.log('FD:', key, value); });
     if (this.files.secaddress) {
-      fd.append('utilityBillFile', this.files.secaddress);
+      // fd.append('utilityBillFile', this.files.secaddress);
+      await this.appendKycFile(fd, 'secaddress', 'utilityBillFile', 'application/pdf');
+
     }
 
 
@@ -602,17 +499,6 @@ export class Uploadkyc implements OnDestroy,AfterViewInit {
     this.editMode = false;
   }
 
-  onFileChange1(result: UploadResult, key: string) {
-
-    if (!result.file) {
-      this.uploadedFiles[key] = null;
-      return;
-    }
-
-    this.files[key] = result.file;
-    this.uploadedFiles[key] = result.file;
-
-  }
 
   onFileChange(result: UploadResult, key: string) {
     if (!result.file) {
@@ -836,7 +722,7 @@ export class Uploadkyc implements OnDestroy,AfterViewInit {
   }
 
   getLocalFileUrl(key: string): string {
-    return this.uploadedPreviewUrls[key] || this.uploadedFileMeta[key]?.fileUrl || '';
+    return this.uploadedFileMeta[key]?.fileUrl || this.uploadedPreviewUrls[key] || '';
   }
 
   viewLocalFile(key: string): void {
@@ -848,7 +734,7 @@ export class Uploadkyc implements OnDestroy,AfterViewInit {
   }
 
   downloadLocalFile(key: string): void {
-    const file = this.uploadedFiles[key];
+    const file = this.uploadedFiles[key] || this.uploadedFileMeta[key];
     const meta = this.uploadedFileMeta[key];
     if (!file) return;
 
@@ -886,6 +772,56 @@ export class Uploadkyc implements OnDestroy,AfterViewInit {
 
   back() {
     this.stepperService.previous();
+  }
+  //------------convert viewurl to binary file
+  async urlToFile(
+    url: string,
+    filename: string,
+    fallbackType: string = 'application/octet-stream'
+  ): Promise<File> {
+    const res = await fetch(url);
+
+    if (!res.ok) {
+      throw new Error(`Failed to fetch file from URL: ${url}`);
+    }
+
+    const blob = await res.blob();
+
+    return new File([blob], filename || 'document', {
+      type: blob.type || fallbackType
+    });
+  }
+
+  private async appendKycFile(
+    fd: FormData,
+    key: string,
+    formDataKey: string,
+    fallbackType: string = 'application/octet-stream'
+  ): Promise<void> {
+    // Case 1: user newly selected file
+    if (this.files?.[key]) {
+      fd.append(formDataKey, this.files[key]);
+      return;
+    }
+
+    // Case 2: file came from summary patch as URL/meta
+    const meta = this.uploadedFileMeta?.[key];
+
+    const fileUrl =
+      meta?.viewUrl ||
+      meta?.fileUrl ||
+      meta?.url ||
+      this.uploadedPreviewUrls?.[key];
+
+    if (fileUrl && meta?.fileName) {
+      const fileFromUrl = await this.urlToFile(
+        fileUrl,
+        meta.fileName,
+        meta.type || fallbackType
+      );
+
+      fd.append(formDataKey, fileFromUrl, fileFromUrl.name);
+    }
   }
   next() {
 
@@ -1406,18 +1342,6 @@ export class Uploadkyc implements OnDestroy,AfterViewInit {
   patchKycInfo(data: any) {
     if (!data || !this.kycForm) return;
 
-    // const permanentAddress = data.addresses?.find(
-    //   (a: any) => a.addressType === 'PERMANENT'
-    // );
-
-    // const otherAddress = data.addresses?.find(
-    //   (a: any) => a.addressType === 'OTHER'
-    // );
-
-    // const otherAddress =
-    //   data.addresses?.find((a: any) => a.addressType === 'OTHER') ||
-    //   data.addresses?.find((a: any) => a.addressType === 'CURRENT');
-
     const permanentAddress = data.addresses?.find((a: any) => a.addressType === 'PERMANENT');
     const currentAddress = data.addresses?.find((a: any) => a.addressType === 'CURRENT');
     const otherAddress = data.addresses?.find((a: any) => a.addressType === 'OTHER');
@@ -1428,8 +1352,8 @@ export class Uploadkyc implements OnDestroy,AfterViewInit {
 
     // this.addressType = data.addressType || 'same';
 
-  this.addressType =
-    data.addressType || (data.isDifferentAddress ? 'different' : 'same');
+    this.addressType =
+      data.addressType || (data.isDifferentAddress ? 'different' : 'same');
 
     this.isDifferentAddress = !!data.isDifferentAddress;
 
@@ -1471,17 +1395,13 @@ export class Uploadkyc implements OnDestroy,AfterViewInit {
       addressline3: permanentAddress?.addressLine2 || '',
       perpincode: permanentAddress?.zipCode || '',
 
-      
- currentaddressline1: currentFormAddress?.addressLine || '',
-    currentaddressline2: currentFormAddress?.addressLine1 || '',
-    currentaddressline3: currentFormAddress?.addressLine2 || '',
-    currpincode: currentFormAddress?.zipCode || ''
+
+      currentaddressline1: currentFormAddress?.addressLine || '',
+      currentaddressline2: currentFormAddress?.addressLine1 || '',
+      currentaddressline3: currentFormAddress?.addressLine2 || '',
+      currpincode: currentFormAddress?.zipCode || ''
 
 
-      // currentaddressline1: this.addressType == "different" ? otherAddress?.addressLine || '' : permanentAddress?.addressLine || '',
-      // currentaddressline2: this.addressType == "different" ? otherAddress?.addressLine1 || '' : permanentAddress?.addressLine1 || '',
-      // currentaddressline3: this.addressType == "different" ? otherAddress?.addressLine2 || '' : permanentAddress?.addressLine2 || '',
-      // currpincode: this.addressType == "different" ? otherAddress?.zipCode || '' : permanentAddress?.zipCode || '',
     });
 
     if (this.perselectedStateId) {
@@ -1692,23 +1612,23 @@ export class Uploadkyc implements OnDestroy,AfterViewInit {
 
       fileMeta: {
         aadharfront: {
-          fileName: identity.aadhaarFrontUrl || '',
-          fileUrl: identity.aadhaarFrontUrl || '',
+          fileName: identity.aadhaarFrontUrl || identity.aadhaarFrontDocument.fileName || '',
+          fileUrl: identity.aadhaarFrontDocument.viewUrl || identity.aadhaarFrontUrl || '',
           uploaded: !!identity.aadhaarFrontUrl
         },
         aadharback: {
-          fileName: identity.aadhaarBackUrl || '',
-          fileUrl: identity.aadhaarBackUrl || '',
+          fileName: identity.aadhaarBackUrl || identity.aadhaarBackDocument.fileName || '',
+          fileUrl: identity.aadhaarBackDocument.viewUrl || identity.aadhaarBackUrl || '',
           uploaded: !!identity.aadhaarBackUrl
         },
         pan: {
-          fileName: identity.panCardUrl || '',
-          fileUrl: identity.panCardUrl || '',
+          fileName: identity.panCardUrl || identity.panDocument.fileName || '',
+          fileUrl: identity.panDocument.viewUrl || identity.panCardUrl || '',
           uploaded: !!identity.panCardUrl
         },
         passport: {
-          fileName: identity.passportUrl || '',
-          fileUrl: identity.passportUrl || '',
+          fileName: identity.passportUrl || identity.passportDocument.fileName || '',
+          fileUrl: identity.passportDocument.viewUrl || identity.passportUrl || '',
           uploaded: !!identity.passportUrl
         },
         secaddress: {

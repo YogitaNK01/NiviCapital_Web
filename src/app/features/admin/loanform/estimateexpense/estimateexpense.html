@@ -336,8 +336,8 @@
                 <!-- Description only for Other Expense -->
                 @if(getCategoryLabel(expense.get('category')?.value) === 'Other Expense') {
                 <div class="col-12 mt-20">
-                  <app-inputfield type="text" label="Expense Name" [required]="true" placeholder="Enter Here"
-                    formControlName="description" name="description">
+                  <app-inputfield type="text" label="Expense Name" [required]="true" placeholder="Enter Here" 
+                    formControlName="description" name="description"  [disabled]="isViewMode">
                   </app-inputfield>
 
                   <div class="text-danger"
@@ -464,8 +464,8 @@
                 <!-- Description only for Other Expense -->
                 @if(getmisCategoryLabel(expense.get('category')?.value) === 'Other Expenses') {
                 <div class="col-12 mt-20">
-                  <app-inputfield type="text" label="Expense Name" [required]="true" placeholder="Enter Here"
-                    formControlName="descriptionmisc" name="descriptionmisc">
+                  <app-inputfield type="text" label="Expense Name" [required]="true" placeholder="Enter Here" [ngClass]="{'disabled-div': isViewMode}"
+                    formControlName="descriptionmisc" name="descriptionmisc"  [disabled]="isViewMode">
                   </app-inputfield>
                   <div class="text-danger"
                     *ngIf="expense.get('descriptionmisc')?.touched && expense.get('descriptionmisc')?.invalid">

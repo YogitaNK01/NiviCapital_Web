@@ -165,12 +165,6 @@ export class Assetsinfo implements OnInit {
 
     const queryParams = this.route.snapshot.queryParams;
 
-    this.isSummaryEditMode =
-      queryParams['fromSummary'] === true ||
-      queryParams['fromSummary'] === 'true' ||
-      this.formSvc.isSummaryEditFlow();
-
-    this.viewOnly = this.isSummaryEditMode && (queryParams['mode'] === 'view' || queryParams['mode'] === undefined);
 
     if (
       this.isCoApplicant &&
@@ -227,16 +221,8 @@ export class Assetsinfo implements OnInit {
 
       otherassets: this.fb.array([]),
     });
-    this.isFromSummary = this.formSvc.isSummaryEditFlow();
-
-    if (this.isFromSummary) {
-      this.isViewMode = true;
-      this.assetsForm.disable();
-    }
-    // this.allAssetCatagory();
-    if (this.viewOnly) {
-      this.assetsForm.disable({ emitEvent: false });
-    }
+    
+  this.applyCoApplicantViewMode(queryParams)
 
     this.assetsForm.valueChanges.subscribe(() => {
       this.calculateGrandTotal();
@@ -253,9 +239,46 @@ export class Assetsinfo implements OnInit {
 
 
   }
+private applyCoApplicantViewMode(queryParams: any) {
+  const coappMode = this.formSvc.getCoApplicantMode();
 
+  this.isSummaryEditMode =
+    !(this.isCoApplicant && coappMode.isDraft) &&
+    (
+      queryParams['fromSummary'] === true ||
+      queryParams['fromSummary'] === 'true' ||
+      this.formSvc.isSummaryEditFlow()
+    );
 
+  this.viewOnly =
+    this.isSummaryEditMode &&
+    (
+      queryParams['mode'] === 'view' ||
+      queryParams['mode'] === undefined
+    );
 
+  if (this.isCoApplicant && coappMode.isDraft) {
+    this.formSvc.clearSummaryEditFlow();
+    this.formSvc.clearSummaryEducationEditFlow?.();
+
+    this.isFromSummary = false;
+    this.isSummaryEditMode = false;
+    this.viewOnly = false;
+    this.isViewMode = false;
+    this.isEditMode = false;
+
+    this.assetsForm.enable({ emitEvent: false });
+    return;
+  }
+
+  this.isFromSummary = this.formSvc.isSummaryEditFlow();
+
+  if (this.isFromSummary || this.viewOnly) {
+    this.isViewMode = true;
+    this.isEditMode = false;
+    this.assetsForm.disable({ emitEvent: false });
+  }
+}
   getStorageKey() {
     const main_ApplicantId = this.stepperService.getLoanId()?.[0];
     const co_ApplicantId = this.stepperService.getCo_appId()?.[0];

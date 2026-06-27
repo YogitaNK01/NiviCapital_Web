@@ -84,7 +84,7 @@ export class Tables implements OnChanges {
 
     SAVE_REFERENCES: 'referenceinfo',
 
-    SAVE_CO_APPLICANT: 'co-applicantdetails',
+    COAPPLICANT: 'co-applicantdetails',
 
     SUMMARY: 'summaryinfo'
   };

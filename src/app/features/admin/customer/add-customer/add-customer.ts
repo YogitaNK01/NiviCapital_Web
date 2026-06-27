@@ -21,7 +21,7 @@ import { Loanformservice } from '../../../../core/service/loanformservice';
 @Component({
   selector: 'app-add-customer',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, FormsModule, Inputfield, Checkbox, Otpsection, Uploadkyc, Buttons, Successbox,DecimalPipe],
+  imports: [CommonModule, ReactiveFormsModule, FormsModule, Inputfield, Checkbox, Otpsection, Uploadkyc, Buttons, Successbox, DecimalPipe],
   templateUrl: './add-customer.html',
   styleUrl: './add-customer.scss'
 })
@@ -58,7 +58,7 @@ export class AddCustomer implements OnInit {
   isCounting = false;
   timerId: any;
 
-showMiddleNameError = false;
+  showMiddleNameError = false;
 
   steps = [
     {
@@ -84,27 +84,31 @@ showMiddleNameError = false;
   description2 = `The customer's KYC details have been submitted and  \nthe profile is now active.`;
 
   resetCounter = 0;
-  
-  constructor(private fb: FormBuilder, public main: Main, private route: ActivatedRoute, private addcustomerservice: Addcustomerservice, private loanform:Loanformservice,
-    private cd: ChangeDetectorRef, private router: Router,private msgBox:Msgboxservice) { }
+  maxResendAttempts = 5;
+  resendLocked = false;
+  isResendLoading = false;
+
+
+  constructor(private fb: FormBuilder, public main: Main, private route: ActivatedRoute, private addcustomerservice: Addcustomerservice, private loanform: Loanformservice,
+    private cd: ChangeDetectorRef, private router: Router, private msgBox: Msgboxservice) { }
 
   ngOnInit() {
     this.route.queryParams.subscribe(params => {
       if (params['phone']) {
         this.prefillPhone = params['phone'];
         this.sendotpId = params['id'];
-        this.currentStep=0;
-        this.maxAllowedStep=0;
+        this.currentStep = 0;
+        this.maxAllowedStep = 0;
       }
       if (params['step'] == 2) {
         this.currentStep = +params['step'];
         console.log("currentstep", this.currentStep);
         sessionStorage.removeItem('editUser');
         if (params['edit'] === 'true') {
-        this.maxAllowedStep = this.currentStep;
-      }
+          this.maxAllowedStep = this.currentStep;
+        }
         if (params['custId'] && params['edit'] == 'true') {
-           this.custname = params['fname'] + ' ' + params['lname'];
+          this.custname = params['fname'] + ' ' + params['lname'];
           sessionStorage.setItem('editUser', JSON.stringify({
             custId: params['custId'],
             fname: params['fname'],
@@ -113,12 +117,12 @@ showMiddleNameError = false;
 
         }
       }
-       if (params['step'] == 0) {
+      if (params['step'] == 0) {
         this.currentStep = +params['step'];
         console.log("currentstep", this.currentStep);
-       this.prefillPhone = params['phone'];
-       this.maxAllowedStep = this.currentStep;
-       
+        this.prefillPhone = params['phone'];
+        this.maxAllowedStep = this.currentStep;
+
       }
 
 
@@ -135,17 +139,17 @@ showMiddleNameError = false;
 
   createcustId(data: NgForm) {
 
-        
-const isMiddleNameEmpty = !data.value.mname;
-  const isCheckboxUnchecked = !this.ismiddlename;
 
-  if (isMiddleNameEmpty && isCheckboxUnchecked) {
-    this.showMiddleNameError = true;
-    return;
-  }
+    const isMiddleNameEmpty = !data.value.mname;
+    const isCheckboxUnchecked = !this.ismiddlename;
 
-  this.showMiddleNameError = false;
-  
+    if (isMiddleNameEmpty && isCheckboxUnchecked) {
+      this.showMiddleNameError = true;
+      return;
+    }
+
+    this.showMiddleNameError = false;
+
     if (data.invalid) {
       data.control.markAllAsTouched();
       return;
@@ -209,6 +213,8 @@ const isMiddleNameEmpty = !data.value.mname;
 
   sendOtp() {
     console.log("send otp");
+    this.resetCounter = 0;
+    this.resendLocked = false;
     this.loanform.setMobileNumber(this.prefillPhone);
     this.otpsent = true;
     const input = {
@@ -244,6 +250,8 @@ const isMiddleNameEmpty = !data.value.mname;
     this.resendSeconds = 60;
     this.isCounting = true;
 
+    // if (isLockTimer) { this.resendLocked = true;  }
+
     this.timerSub = interval(1000).subscribe(() => {
       this.resendSeconds--;
       this.cd.detectChanges();
@@ -252,6 +260,10 @@ const isMiddleNameEmpty = !data.value.mname;
 
       if (this.resendSeconds <= 0) {
         this.isCounting = false;
+        if (this.resendLocked) {
+          this.resendLocked = false;
+          this.resetCounter = 0;
+        }
         this.timerSub?.unsubscribe();
         this.timerSub = undefined;
         this.cd.detectChanges();
@@ -260,12 +272,12 @@ const isMiddleNameEmpty = !data.value.mname;
   }
 
   formatTime(seconds: number): string {
-  const mins = Math.floor(seconds / 60);
-  const secs = seconds % 60;
-  return `${mins.toString().padStart(2, '0')}:${secs
-    .toString()
-    .padStart(2, '0')}`;
-}
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins.toString().padStart(2, '0')}:${secs
+      .toString()
+      .padStart(2, '0')}`;
+  }
   onOtpSubmit(otp: string) {
 
     console.log('OTP submitted:', otp);
@@ -313,14 +325,14 @@ const isMiddleNameEmpty = !data.value.mname;
     // this.otpVerifiedOk = val;
 
     if (val.status === "success") {
-    this.otpVerifiedOk = true;
-    this.otpState = "success";
-  } else {
-    this.otpVerifiedOk = false;
-    this.otpState = "error";
-  }
+      this.otpVerifiedOk = true;
+      this.otpState = "success";
+    } else {
+      this.otpVerifiedOk = false;
+      this.otpState = "error";
+    }
 
-  this.otpmsg = val.message;
+    this.otpmsg = val.message;
 
 
     setTimeout(() => {
@@ -331,7 +343,7 @@ const isMiddleNameEmpty = !data.value.mname;
 
 
   goToStep(step: number) {
-      this.currentStep = step;
+    this.currentStep = step;
     this.maxAllowedStep = Math.max(this.maxAllowedStep, step);
   }
 
@@ -349,21 +361,27 @@ const isMiddleNameEmpty = !data.value.mname;
     }
 
     if (action === 'ToDashboard') {
-       this.msgBox.open({
-      title: 'Are you sure want to go to Dashboard?',
-      message: ``,
-      showCancel: true,
-      onOk: () => {
-       this.router.navigate(['/admin/customer']);
-      }
-    });
+      this.msgBox.open({
+        title: 'Are you sure want to go to Dashboard?',
+        message: ``,
+        showCancel: true,
+        onOk: () => {
+          this.router.navigate(['/admin/customer']);
+        }
+      });
 
-      
+
     }
   }
 
   resendOtp() {
-    this.resetCounter++;
+    if (!this.canResendOtp) { return; }
+    if (this.resetCounter >= this.maxResendAttempts) {
+      // this.startTimer(true); return;
+    }
+    this.isResendLoading = true;
+
+    // this.resetCounter++;
     console.log("Resend OTP API call here");
 
     const input = {
@@ -377,7 +395,10 @@ const isMiddleNameEmpty = !data.value.mname;
     this.startTimer();
     this.addcustomerservice.ResendOTP(input).subscribe({
       next: (res) => {
-
+        this.isResendLoading = false;
+        this.resetCounter++;
+        const reachedMaxAttempts = this.resetCounter >= this.maxResendAttempts;
+        // this.startTimer(reachedMaxAttempts);
       },
       error: (err) => {
         console.error("error msg", err);
@@ -385,10 +406,18 @@ const isMiddleNameEmpty = !data.value.mname;
     })
 
   }
-
+  get canResendOtp(): boolean {
+    return (
+      this.otpsent &&
+      !this.otpVerifiedOk &&
+      !this.isCounting &&
+      !this.resendLocked &&
+      !this.isResendLoading
+    );
+  }
   goTocontact() {
     this.router.navigate(['/admin/customer/checkcontact'],
-      {queryParams:{ phone: this.prefillPhone }})
-    
+      { queryParams: { phone: this.prefillPhone } })
+
   }
 }

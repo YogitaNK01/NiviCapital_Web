@@ -283,21 +283,34 @@ export class GeneralInfo implements OnInit {
       co_checkedasset: [null, Validators.required],
     });
 
-    this.isFromSummary = this.formSvc.isSummaryEditFlow();
+    const coappMode = this.formSvc.getCoApplicantMode();
 
-    if (this.isFromSummary) {
-      this.isViewMode = true;
-      this.activeForm.disable();
-      //   if (this.isCoApplicant) {
-      //   this.coapp_registerForm.disable();
-      // } else {
-      //   this.registerForm.disable();
-      // }
+if (this.isCoApplicant && coappMode.isDraft) {
+  this.formSvc.clearSummaryEditFlow();
+  this.formSvc.clearSummaryEducationEditFlow?.();
 
-    }
-    if (this.viewOnly) {
-      this.activeForm.disable({ emitEvent: false });
-    }
+  this.isFromSummary = false;
+  this.isSummaryEditMode = false;
+  this.viewOnly = false;
+  this.isViewMode = false;
+  this.isEditMode = false;
+
+  this.activeForm.enable({ emitEvent: false });
+} else {
+  this.isFromSummary = this.formSvc.isSummaryEditFlow();
+
+  if (this.isFromSummary) {
+    this.isViewMode = true;
+    this.isEditMode = false;
+    this.activeForm.disable({ emitEvent: false });
+  }
+
+  if (this.viewOnly) {
+    this.activeForm.disable({ emitEvent: false });
+  }
+}
+
+   
 
     // Reset localStorage if applicant changed
 
@@ -409,6 +422,9 @@ export class GeneralInfo implements OnInit {
       this.lastSavedPayload = this.buildCoApplicantPayload(
         this.coapp_registerForm.getRawValue()
       );
+       if (this.coapp_registerForm.valid) {
+            this.stepperService.markStepCompleted('co-generalinfo');  }
+
     } else {
       this.patchGeneralInfo(finalData);
 
@@ -508,7 +524,7 @@ export class GeneralInfo implements OnInit {
         const start = new Date(startDate);
         start.setHours(0, 0, 0, 0);
         this.calculatedEndDate = start;
-
+ this.form.get('courseenddate')?.updateValueAndValidity();
         // const endCtrl = this.registerForm.get('courseenddate');
         // endCtrl?.reset();
         // endCtrl?.updateValueAndValidity();
@@ -1474,9 +1490,10 @@ export class GeneralInfo implements OnInit {
   saveCoApplicant(formdata: any) {
     const payload = this.buildCoApplicantPayload(formdata);
 
+     const coApplicantId =    this.stepperService.getCo_appId()?.[0] || this.applicantId;
     const input = {
       applicationId: this.applicationId,
-      applicantId: this.stepperService.getCo_appId()?.[0],
+      applicantId: coApplicantId,
       occupationId: payload.occupation,
       annualIncome: payload.annualIncome,
       relationWithApplicantId: payload.relationWithApplicantId,
@@ -1494,10 +1511,7 @@ export class GeneralInfo implements OnInit {
         this.lastSavedPayload = { ...payload };
 
         this.formSvc.co_generalInfoData = { ...localPayload };
-        // localStorage.setItem(
-        //   this.getStorageKey(),
-        //   JSON.stringify(this.formSvc.co_generalInfoData)
-        // );
+      
         this.storageservice.saveSectionData(
           'generalInfo',
           this.applicationId,
@@ -1559,12 +1573,20 @@ export class GeneralInfo implements OnInit {
 
     const hasChanged = this.isPayloadChanged(currentPayload, this.lastSavedPayload);
 
-    if (!hasChanged) {
-      console.log('No changes detected, skipping API call');
-      this.stepperService.next();
-      return;
-    }
+  if (!hasChanged) {
+  console.log('No changes detected, skipping API call');
 
+  if (this.isCoApplicant) {
+    this.stepperService.markStepCompleted('co-generalinfo');
+    this.stepperService.setStepData('co-generalinfo', form.value);
+  } else {
+    this.stepperService.markStepCompleted('genralinfo');
+    this.stepperService.setStepData('genralinfo', form.value);
+  }
+
+  this.stepperService.next();
+  return;
+}
 
     if (this.isCoApplicant) {
       this.saveCoApplicant(form.value);

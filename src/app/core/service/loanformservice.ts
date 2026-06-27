@@ -786,6 +786,38 @@ isSummaryEditFlow(): boolean {
     this.summaryLoaded = false;
     sessionStorage.removeItem(this.SUMMARY_STORAGE_KEY);
   }
+  getCoApplicantMode() {
+  let sessionCoApp: any = {};
+
+  try {
+    sessionCoApp = JSON.parse(sessionStorage.getItem('coAppIds') || '{}');
+  } catch {
+    sessionCoApp = {};
+  }
+
+  const status = (
+    sessionCoApp?.status ||
+    sessionCoApp?.uiStatus ||
+    ''
+  ).toUpperCase();
+
+  const isCompleted =
+    status === 'COMPLETED' ||
+    status === 'SUBMITTED';
+
+  const isDraft =
+    status === 'DRAFT' ||
+    status === 'IN_PROGRESS' ||
+    !status;
+
+  return {
+    status,
+    isCompleted,
+    isDraft,
+    raw: sessionCoApp
+  };
+}
+
 // ***********************education edit*******************
 
 private summaryEducationEditFlow = false;

@@ -164,12 +164,14 @@
               <div class="text-label-data otp-inline d-flex align-items-center">
                 <span class="text-label-data">Resend code in</span>
                 <span class="text-label-data resend-timer mx-2"> {{ formatTime(resendSeconds) }}</span>
-                <span class="resend-link text-dp-3-regular" (click)="resendOtp()" [class.disabled]=" isCounting">
+                <span class="resend-link text-dp-3-regular" (click)="resendOtp()" [class.disabled]=" !canResendOtp">
                   Resend OTP
                 </span>
+                <small class="text-danger ms-2" *ngIf="resendLocked">  Maximum attempts reached. Try again after {{ formatTime(resendSeconds) }}</small>
               </div>
             </div>
-          </div>}
+          </div>
+        }
 
 
 

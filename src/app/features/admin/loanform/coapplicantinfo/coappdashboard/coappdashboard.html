@@ -5,7 +5,7 @@
         <div class="header w-100">
 
             <div class="text-datepicker blue-text d-flex flex-column gap-data ">Co-Applicant
-                <div class="text-label-data fw-normal fst-italic">
+                <div class="text-label-data fw-normal fst-italic" *ngIf="this.coApplicants.length === 0">
 
                     You currently have no co-applicants. Minimum 1 co-applicant is mandatory to complete your
                     application. You can add more as well. Co-applicants ensures your financial capability to repay the
@@ -29,14 +29,7 @@
                                 </div>
 
                                 <div class="coapp-icons d-flex gap-3 align-items-center ms-auto">
-                                    <!-- <div class="div"> -->
-
-                                    <!-- <div class="text-body-2" [ngClass]="{
-                                                        'text-success': coapp.uiStatus === 'COMPLETED',
-                                                         'text-warning': coapp.uiStatus === 'IN_PROGRESS'
-                                                                 }">
-                                        {{ coapp.uiStatus === 'COMPLETED' ? 'Completed' : 'Pending' }}
-                                    </div> -->
+                                    
 
                                     <span *ngIf="coapp.uiStatus === 'COMPLETED'">
                                         <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32"
@@ -46,7 +39,7 @@
                                                 fill="#3B8439" />
                                         </svg>
                                     </span>
-                                    <span *ngIf="coapp.uiStatus === 'IN_PROGRESS'" class="status-pending">
+                                    <span *ngIf="coapp.uiStatus === 'DRAFT'" class="status-pending">
                                         <span class="text-body-2 warning-color">In progress
 
                                         </span>

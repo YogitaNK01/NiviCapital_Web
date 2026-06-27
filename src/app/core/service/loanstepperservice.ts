@@ -98,8 +98,8 @@ export class Loanstepperservice {
     SAVE_LIABILITIES: 'liabilitiesinfo',
     SAVE_MONTHLY_EXPENSES: 'monthlyexpinfo',
     SAVE_REFERENCES: 'referenceinfo',
-    SAVE_CO_APPLICANT: 'co-applicantdetails',
-    SUMMARY: 'summaryinfo'
+    COAPPLICANT: 'co-applicantdetails',
+    FETCH_SUMMARY: 'summaryinfo'
   };
 
   getRouteFromStage(stage: string | null | undefined): string {

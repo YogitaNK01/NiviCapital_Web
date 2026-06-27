@@ -36,9 +36,9 @@ export interface UploadResult {
 })
 export class Uploadbtn implements OnInit, ControlValueAccessor, OnChanges {
   @Input() config: UploadConfig = {
-    accept: '.svg, .png, .jpg, .jpeg, .pdf, .tiff, .heic',
+    accept: '.svg, .png, .jpg, .jpeg, .pdf',
     maxSize: 10,
-    helperText: 'JPG, JPEG, PDF, PNG, TIFF, SVG, HEIC (max. 10 MB)'
+    helperText: 'JPG, JPEG, PDF, PNG, SVG(max. 10 MB)'
   };
 
   @Input() disabled: boolean = false;

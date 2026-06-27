@@ -247,25 +247,51 @@ export class Liabilitiesinfo {
     }
     await this.loadliabilityForBothFlows()
 
+this.applyCoApplicantViewMode(queryParams);
+
+
+  }
+
+private applyCoApplicantViewMode(queryParams: any) {
+  const coappMode = this.formSvc.getCoApplicantMode();
+
+  this.isSummaryEditMode =
+    !(this.isCoApplicant && coappMode.isDraft) &&
+    (
+      queryParams['fromSummary'] === true ||
+      queryParams['fromSummary'] === 'true' ||
+      this.formSvc.isSummaryEditFlow()
+    );
+
+  this.viewOnly =
+    this.isSummaryEditMode &&
+    (
+      queryParams['mode'] === 'view' ||
+      queryParams['mode'] === undefined
+    );
+
+  if (this.isCoApplicant && coappMode.isDraft) {
+    this.formSvc.clearSummaryEditFlow();
+    this.formSvc.clearSummaryEducationEditFlow?.();
+
+    this.isFromSummary = false;
+    this.isSummaryEditMode = false;
+    this.viewOnly = false;
+    this.isViewMode = false;
+    this.isEditMode = false;
+
+    this.liabilityForm.enable({ emitEvent: false });
+    return;
+  }
+
   this.isFromSummary = this.formSvc.isSummaryEditFlow();
 
-    if(this.isFromSummary){
-      this.isViewMode = true;
-      this.liabilityForm.disable();
-    }
-
-
-
+  if (this.isFromSummary || this.viewOnly) {
+    this.isViewMode = true;
+    this.isEditMode = false;
+    this.liabilityForm.disable({ emitEvent: false });
   }
-
-  getStorageKey1() {
-    const index = this.stepperService.getCurrentCoApplicantIndex();
-    const coApplicantId = this.stepperService.getCo_appId()?.[0];
-
-return this.isCoApplicant
-      ? `liabilitiesinfoData_coapp_${this.applicationId}_${index}`
-      : `liabilitiesinfoData_main_${this.applicationId}_${this.stepperService.getLoanId()?.[0]}`;
-  }
+}
 
     getStorageKey() {
     const main_ApplicantId = this.stepperService.getLoanId()?.[0];
@@ -413,11 +439,7 @@ return this.isCoApplicant
     const normalizedDraft = this.normalizeLiabilities(draftData);
     const normalizedLocal = this.normalizeLiabilities(parsedLocal);
 
-    //    after FINAL submit, summary must win
-    // const finalData =
-    //   normalizedSummary ||
-    //   normalizedDraft ||
-    //   normalizedLocal;
+   
 
     const finalData = this.mergeLiabilityData(
       normalizedSummary,
