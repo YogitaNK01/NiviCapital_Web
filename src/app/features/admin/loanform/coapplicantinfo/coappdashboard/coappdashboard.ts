@@ -287,80 +287,70 @@ export class Coappdashboard implements OnInit {
 
   //open 
 
-  openCoApplicant(index: number) {
-    const current = this.coApplicants.find(
-      x => Number(x.index) === Number(index)
-    );
+ 
+openCoApplicant(index: number) {
+  const current = this.coApplicants.find(
+    x => Number(x.index) === Number(index)
+  );
 
-    if (!current) return;
+  if (!current) return;
 
-    //    remove pending new co-app flow context
-    sessionStorage.removeItem('pendingCoAppContext');
+  sessionStorage.removeItem('pendingCoAppContext');
 
-    this.stepperService.setStepperType('CO_APPLICANT');
-    this.stepperService.setCurrentCoApplicantIndex(current.index);
+  this.stepperService.setStepperType('CO_APPLICANT');
+  this.stepperService.setCurrentCoApplicantIndex(current.index);
 
-    const isDraftCoapp = current.status === 'DRAFT' || current.status === 'IN_PROGRESS';
+  const status = (
+    current.status ||
+    current.uiStatus ||
+    ''
+  ).toUpperCase();
 
-    if (isDraftCoapp) {
-      this.loanfornservice.clearSummaryEditFlow();
-      this.loanfornservice.clearSummaryEducationEditFlow?.();
-      this.isFromSummary = false;
-      this.isViewMode = false;
-      this.isEditMode = false;
-    }
+  const isCompletedCoapp =
+    status === 'COMPLETED' ||
+    status === 'SUBMITTED';
 
-    sessionStorage.setItem('coAppIds', JSON.stringify({
-      applicantId: current.applicantId,
-      applicationId: current.applicationId || this.applicationId,
-      fullName: current.name || '',
-      coApplicantIndex: current.index,
-      status: current.status || '',
-      phone: current.phone || '',
-      userInitiateId: current.userInitiateId || '',
-      mode: 'existing'
-    }));
-
-
-    this.stepperService.setCo_appId(
-      current.applicantId,
-      current.applicationId || this.applicationId,
-      current.name || '',
-      undefined,
-      current.index
-    );
-
-    const isSubmittedCoapp =
-      ['COMPLETED', 'SUBMITTED'].includes(
-        (current.status || '').toUpperCase()
-      );
-
-    if (isSubmittedCoapp) {
-      this.coApplicantStepRoutes.forEach(route =>
-        this.stepperService.markStepCompleted(route)
-      );
-    } else {
-      this.stepperService.restoreCompletedSteps();
-    }
-
-    this.stepperService.rebuildSteps();
-
-    const resumeRoute = isSubmittedCoapp
-      ? 'co-summaryinfo'
-      : this.getResumeRouteForCoApplicant(current);
-
-    this.router.navigate(
-      ['coapplicantinfo', resumeRoute],
-      {
-        relativeTo: this.route,
-        queryParams: {
-          coApplicantIndex: current.index,
-          mode: 'existing',
-          fromSummary: isSubmittedCoapp ? true : null
-        }
-      }
-    );
+  if (!isCompletedCoapp) {
+    this.loanfornservice.clearSummaryEditFlow();
+    this.loanfornservice.clearSummaryEducationEditFlow?.();
   }
+
+  sessionStorage.setItem('coAppIds', JSON.stringify({
+    applicantId: current.applicantId,
+    applicationId: current.applicationId || this.applicationId,
+    fullName: current.name || '',
+    coApplicantIndex: current.index,
+    status: current.status || current.uiStatus || '',
+    phone: current.phone || '',
+    userInitiateId: current.userInitiateId || '',
+    mode: isCompletedCoapp ? 'view' : 'existing'
+  }));
+
+  this.stepperService.setCo_appId(
+    current.applicantId,
+    current.applicationId || this.applicationId,
+    current.name || '',
+    undefined,
+    current.index
+  );
+
+  const resumeRoute = isCompletedCoapp
+    ? 'co-summaryinfo'
+    : this.getResumeRouteForCoApplicant(current);
+
+  this.router.navigate(
+    ['coapplicantinfo', resumeRoute],
+    {
+      relativeTo: this.route,
+      queryParams: {
+        coApplicantIndex: current.index,
+        mode: isCompletedCoapp ? 'view' : 'existing',
+        fromSummary: isCompletedCoapp ? true : null
+      }
+    }
+  );
+}
+
   private getResumeRouteForCoApplicant(coapp: any): string {
     const completedSteps = this.getCoApplicantCompletedSteps(
       coapp.index,

@@ -333,6 +333,7 @@ export class Summaryinfo {
 
 
           this.coApplicantSummaries = coApplicants
+           .filter((coapp: any) => this.isCompletedCoApplicant(coapp))
             .map((coapp: any, index: number) => {
               try {
                 coapp.showAccordion = false;
@@ -358,7 +359,19 @@ export class Summaryinfo {
       }
     );
   }
+private isCompletedCoApplicant(coapp: any): boolean {
+  const status = (
+    coapp?.status ||
+    coapp?.uiStatus ||
+    coapp?.applicationStatus ||
+    ''
+  )
+    .toString()
+    .trim()
+    .toUpperCase();
 
+  return status === 'COMPLETED' || status === 'SUBMITTED';
+}
   private getCoApplicantIndex(applicant: any, fallbackIndex: number): number {
     const type = this.getApplicantType(applicant);
 
@@ -600,7 +613,9 @@ export class Summaryinfo {
       applicantId: coapp.applicantId,
       applicationId: coapp.applicationId || this.applicationId,
       fullName: coapp.applicantName,
-      coApplicantIndex: coapp.index
+      coApplicantIndex: coapp.index,
+      status:coapp.status || 'COMPLETED',
+       mode:  'existing' ,
     }));
 
     this.stepperService.setCo_appId(

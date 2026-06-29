@@ -18,7 +18,7 @@
 
         <div class="accordion-collapse collapse" [class.show]="openIndex.includes(i)">
 
-          <div class="accordion-body mobiledetails" *ngIf="openIndex.includes(i)">
+          <div class="accordion-body mobiledetails" >
 
             <ng-container *ngIf="i === 0">
               <ng-container *ngTemplateOutlet="identityTemplate; context:{index:i}">

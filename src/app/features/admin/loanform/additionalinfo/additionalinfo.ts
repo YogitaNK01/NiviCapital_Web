@@ -147,12 +147,6 @@ export class Additionalinfo implements OnInit {
 
     const queryParams = this.route.snapshot.queryParams;
 
-    this.isSummaryEditMode =
-      queryParams['fromSummary'] === true ||
-      queryParams['fromSummary'] === 'true' ||
-      this.formSvc.isSummaryEditFlow();
-
-    this.viewOnly = this.isSummaryEditMode && (queryParams['mode'] === 'view' || queryParams['mode'] === undefined);
 
     if (this.isCoApplicant && (!AllCoapp_ids || !AllCoapp_ids[0] || !AllCoapp_ids[1])) {
 
@@ -209,27 +203,8 @@ export class Additionalinfo implements OnInit {
 
     });
     this.stepperService.rebuildSteps();
-
-    const coappMode = this.formSvc.getCoApplicantMode();
-    if (this.isCoApplicant && coappMode.isDraft) {
-      this.formSvc.clearSummaryEditFlow();
-      this.formSvc.clearSummaryEducationEditFlow?.();
-      this.isFromSummary = false;
-      this.isSummaryEditMode = false;
-      this.viewOnly = false;
-      this.isViewMode = false;
-      this.isEditMode = false;
-      this.additionalinfoForm.enable({ emitEvent: false });
-    }
-    else {
-      this.isFromSummary = this.formSvc.isSummaryEditFlow();
-      if (this.isFromSummary) {
-        this.isViewMode = true;
-        this.isEditMode = false;
-        this.additionalinfoForm.disable({ emitEvent: false });
-      }
-      if (this.viewOnly) { this.additionalinfoForm.disable({ emitEvent: false }); }
-    }
+    
+    this.applyApplicantViewMode(queryParams)
 
     this.additionalinfoForm.get('maritalstatus')?.valueChanges.subscribe(value => {
 
@@ -241,20 +216,126 @@ export class Additionalinfo implements OnInit {
 
     await this.loadAdditionalInfoForBothFlows();
 
-
-
-  }
-
-  getStorageKey1() {
-    const coApplicantId = this.stepperService.getCo_appId()?.[0];
-    const index = this.stepperService.getCurrentCoApplicantIndex();
-
-    return this.isCoApplicant
-      ? `additionalinfo_coapp_${this.applicationId}_${index}`
-      : `additionalinfo_main_${this.applicationId}_${this.stepperService.getLoanId()?.[0]}`;
-
+    if (this.viewOnly) {
+      this.additionalinfoForm.disable({ emitEvent: false });
+    }
 
   }
+
+
+  applyApplicantViewMode(queryParams: any) {
+  const isFromSummaryRoute =
+    queryParams['fromSummary'] === true ||
+    queryParams['fromSummary'] === 'true';
+
+  const cameFromSummary =
+    isFromSummaryRoute ||
+    this.formSvc.isSummaryEditFlow();
+
+  // ✅ MAIN APPLICANT LOGIC
+  if (!this.isCoApplicant) {
+    this.isSummaryEditMode = cameFromSummary;
+    this.isFromSummary = this.isSummaryEditMode;
+
+    this.viewOnly =
+      this.isSummaryEditMode &&
+      queryParams['mode'] !== 'edit';
+
+    if (this.isSummaryEditMode) {
+      if (this.viewOnly) {
+        this.isViewMode = true;
+        this.isEditMode = false;
+        this.additionalinfoForm.disable({ emitEvent: false });
+      } else {
+        this.isViewMode = false;
+        this.isEditMode = true;
+        this.additionalinfoForm.enable({ emitEvent: false });
+      }
+    } else {
+      this.isFromSummary = false;
+      this.isSummaryEditMode = false;
+      this.viewOnly = false;
+      this.isViewMode = false;
+      this.isEditMode = false;
+      this.additionalinfoForm.enable({ emitEvent: false });
+    }
+
+    return;
+  }
+
+  // ✅ CO-APPLICANT LOGIC
+  let storedCoAppData: any = {};
+
+  try {
+    storedCoAppData = JSON.parse(sessionStorage.getItem('coAppIds') || '{}');
+  } catch {
+    storedCoAppData = {};
+  }
+
+  const coappStatus = (
+    storedCoAppData?.status ||
+    (isFromSummaryRoute ? 'COMPLETED' : '')
+  ).toUpperCase();
+
+  const isCompletedCoapp =
+    coappStatus === 'COMPLETED' ||
+    coappStatus === 'SUBMITTED';
+
+  const isNewCoappFlow =
+    storedCoAppData?.mode === 'new';
+
+  const isDraftCoapp =
+    !isNewCoappFlow &&
+    !isCompletedCoapp;
+
+  const coappCameFromSummary =
+    isFromSummaryRoute ||
+    storedCoAppData?.mode === 'view' ||
+    storedCoAppData?.mode === 'edit' ||
+    this.formSvc.isSummaryEditFlow();
+
+  this.isSummaryEditMode =
+    !isNewCoappFlow &&
+    isCompletedCoapp &&
+    coappCameFromSummary;
+
+  this.isFromSummary = this.isSummaryEditMode;
+
+  this.viewOnly =
+    this.isSummaryEditMode &&
+    queryParams['mode'] !== 'edit';
+
+  if (isDraftCoapp || isNewCoappFlow) {
+    this.formSvc.clearSummaryEditFlow();
+    this.formSvc.clearSummaryEducationEditFlow?.();
+
+    this.isFromSummary = false;
+    this.isSummaryEditMode = false;
+    this.viewOnly = false;
+    this.isViewMode = false;
+    this.isEditMode = false;
+
+    this.additionalinfoForm.enable({ emitEvent: false });
+  } else if (this.isSummaryEditMode) {
+    if (this.viewOnly) {
+      this.isViewMode = true;
+      this.isEditMode = false;
+      this.additionalinfoForm.disable({ emitEvent: false });
+    } else {
+      this.isViewMode = false;
+      this.isEditMode = true;
+      this.additionalinfoForm.enable({ emitEvent: false });
+    }
+  } else {
+    this.isFromSummary = false;
+    this.isSummaryEditMode = false;
+    this.viewOnly = false;
+    this.isViewMode = false;
+    this.isEditMode = false;
+
+    this.additionalinfoForm.enable({ emitEvent: false });
+  }
+}
 
   getStorageKey() {
     const main_ApplicantId = this.stepperService.getLoanId()?.[0];
@@ -378,9 +459,25 @@ export class Additionalinfo implements OnInit {
     );
 
     // Blue tick only if fully completed
-    if (this.isAdditionalInfoComplete(finalData)) {
-      this.stepperService.markStepCompleted(this.getStepRoute());
-    }
+  const isFromSummaryRoute =
+  this.route.snapshot.queryParams['fromSummary'] === true ||
+  this.route.snapshot.queryParams['fromSummary'] === 'true';
+
+const storedCoAppData = JSON.parse(sessionStorage.getItem('coAppIds') || '{}');
+  const coappStatus = (
+      storedCoAppData?.status || (isFromSummaryRoute ? 'COMPLETED' : '')
+
+    ).toUpperCase();
+
+    const isCompletedCoapp =
+      coappStatus === 'COMPLETED' ||
+      coappStatus === 'SUBMITTED';
+if (
+  this.isAdditionalInfoComplete(finalData) ||
+  (this.isCoApplicant && isFromSummaryRoute && isCompletedCoapp)
+) {
+  this.stepperService.markStepCompleted(this.getStepRoute());
+}
 
 
     this.additionalinfoForm.markAsPristine();

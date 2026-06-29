@@ -89,26 +89,6 @@ export class Loanstepper implements OnInit {
   }
 
 
-  get currentIndex1(): number {
-    try {
-      const rawUrl = this.router.url;
-      const pathOnly = rawUrl.split('?')[0];
-      const segments = pathOnly.split('/').filter(seg => seg.length > 0);
-      const currentRoute = segments[segments.length - 1];
-
-      // console.log('Cleaned route:', currentRoute);
-
-      const idx = this.steps?.findIndex((s: any) =>
-        s.route === currentRoute ||
-        s.route?.toLowerCase().includes(currentRoute.toLowerCase()) ||
-        currentRoute.includes(s.route)
-      ) ?? -1;
-
-      return Math.max(idx, 0);
-    } catch (e) {
-      return 0;
-    }
-  }
   get currentIndex(): number {
     const cleanUrl = this.router.url.split('?')[0];
     const lastSegment = cleanUrl.split('/').pop();
@@ -192,28 +172,10 @@ if (cleanUrl.includes('co-applicantdetails')) {
 
   this.router.navigate(['/loanform', route], {
     queryParams: cleanedParams,
-    queryParamsHandling: 'merge'
+    // queryParamsHandling: 'merge'
   });
 }
-goToStep1(route: string, index: number) {
-  if (!this.canNavigateTo(index)) {
-    console.log(`Blocked navigation to index ${index}`);
-    return;
-  }
 
-  this.stepperService.switchToMainApplicantFlow();
-
-  if (route === 'educationDetails') {
-    this.router.navigate(['/loanform', 'educationDetails'], {
-      queryParamsHandling: 'merge'
-    });
-    return;
-  }
-
-  this.router.navigate(['/loanform', route], {
-    queryParamsHandling: 'merge'
-  });
-}
   isNextStep(index: number): boolean {
     return index === this.currentIndex + 1;
   }

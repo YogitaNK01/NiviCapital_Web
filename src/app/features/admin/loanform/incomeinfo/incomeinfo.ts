@@ -301,12 +301,7 @@ export class Incomeinfo {
 
     const queryParams = this.route.snapshot.queryParams;
 
-    this.isSummaryEditMode =
-      queryParams['fromSummary'] === true ||
-      queryParams['fromSummary'] === 'true' ||
-      this.loanformservice.isSummaryEditFlow();
-
-    this.viewOnly = this.isSummaryEditMode && (queryParams['mode'] === 'view' || queryParams['mode'] === undefined);
+  
 
     if (
       this.isCoApplicant &&
@@ -354,37 +349,99 @@ export class Incomeinfo {
 
 
     });
+    this.applyCoApplicantViewMode(queryParams);
+
     this.requiredDocs.forEach(k => this.uploadedFiles[k] = null);
     this.optionalDocs.forEach(k => this.uploadedFiles[k] = null);
     this.requiredBusinessDocs.forEach(k => this.uploadedFiles[k] = null);
+
+    await this.loadIncomeForBothFlows();
 
     if (this.viewOnly) {
       this.incomeForm.disable({ emitEvent: false });
     }
 
-    await this.loadIncomeForBothFlows();
+  }
 
-    const key = this.getStorageKey();
+applyCoApplicantViewMode(queryParams: any) {
+  let storedCoAppData: any = {};
 
-    this.isFromSummary = this.loanformservice.isSummaryEditFlow();
-    console.log(this.isFromSummary);
+  try {
+    storedCoAppData = JSON.parse(sessionStorage.getItem('coAppIds') || '{}');
+  } catch {
+    storedCoAppData = {};
+  }
 
-    if (this.isFromSummary) {
+  const isFromSummaryRoute =
+    queryParams['fromSummary'] === true ||
+    queryParams['fromSummary'] === 'true';
+
+  const coappStatus = (
+    storedCoAppData?.status ||
+    (isFromSummaryRoute ? 'COMPLETED' : '')
+  ).toUpperCase();
+
+  const isCompletedCoapp =
+    coappStatus === 'COMPLETED' ||
+    coappStatus === 'SUBMITTED';
+
+  const isNewCoappFlow =
+    this.isCoApplicant &&
+    storedCoAppData?.mode === 'new';
+
+  const isDraftCoapp =
+    this.isCoApplicant &&
+    !isNewCoappFlow &&
+    !isCompletedCoapp;
+
+  const cameFromSummary =
+    isFromSummaryRoute ||
+    storedCoAppData?.mode === 'view' ||
+    storedCoAppData?.mode === 'edit' ||
+    this.loanformservice.isSummaryEditFlow();
+
+  this.isSummaryEditMode =
+    !isNewCoappFlow &&
+    isCompletedCoapp &&
+    cameFromSummary;
+
+  this.isFromSummary = this.isSummaryEditMode;
+
+  this.viewOnly =
+    this.isSummaryEditMode &&
+    queryParams['mode'] !== 'edit';
+
+  if (isDraftCoapp || isNewCoappFlow) {
+    this.loanformservice.clearSummaryEditFlow();
+    this.loanformservice.clearSummaryEducationEditFlow?.();
+
+    this.isFromSummary = false;
+    this.isSummaryEditMode = false;
+    this.viewOnly = false;
+    this.isViewMode = false;
+    this.isEditMode = false;
+
+    this.incomeForm.enable({ emitEvent: false });
+  } else if (this.isSummaryEditMode) {
+    if (this.viewOnly) {
       this.isViewMode = true;
-      this.incomeForm.disable();
+      this.isEditMode = false;
+      this.incomeForm.disable({ emitEvent: false });
+    } else {
+      this.isViewMode = false;
+      this.isEditMode = true;
+      this.incomeForm.enable({ emitEvent: false });
     }
+  } else {
+    this.isFromSummary = false;
+    this.isSummaryEditMode = false;
+    this.viewOnly = false;
+    this.isViewMode = false;
+    this.isEditMode = false;
 
-
-
+    this.incomeForm.enable({ emitEvent: false });
   }
-
-  getStorageKey1() {
-    const index = this.stepperService.getCurrentCoApplicantIndex();
-    const coApplicantId = this.stepperService.getCo_appId()?.[0];
-    return this.isCoApplicant
-      ? `IncomeInfoData_coapp_${this.applicationId}_${index}`
-      : `IncomeInfoData_main_${this.applicationId}_${this.stepperService.getLoanId()?.[0]}`;
-  }
+}
   getStorageKey() {
     const main_ApplicantId = this.stepperService.getLoanId()?.[0];
     const co_ApplicantId = this.stepperService.getCo_appId()?.[0];
@@ -401,12 +458,8 @@ export class Incomeinfo {
     );
   }
   private async loadIncomeForBothFlows() {
-    const key = this.getStorageKey();
 
-    // 1. Restore stepper cache/local first only for quick UI
     const stepData = this.stepperService.getStepData(this.getStepRoute());
-    // const localData = localStorage.getItem(key);
-    // const parsedLocal = localData ? JSON.parse(localData) : null;
 
     const parsedLocal = this.storageservice.getStoredSectionData(
       'IncomeInfoData',
@@ -450,36 +503,52 @@ export class Incomeinfo {
     // 1) Final submitted docs should always win
     if (hasCompleteSummary) {
       this.patchFromSummaryData(summaryIncome, summaryBusiness);
+       this.markIncomeStepCompletedIfValid()
       return;
     }
 
     // 2) Otherwise use saved draft
     if (hasDraftData) {
       this.restoreIncomeDraftData(savedDraftData);
+       this.markIncomeStepCompletedIfValid()
       return;
     }
 
     // 3) If draft not available, but summary has partial docs, still patch them
     if (this.hasAnySummaryIncome(summaryIncome, summaryBusiness)) {
       this.patchFromSummaryData(summaryIncome, summaryBusiness);
+       this.markIncomeStepCompletedIfValid()
       return;
     }
 
 
-    // // const savedDraftData = await this.getSavedIncomeData(applicantId);
-
-    // const hasApiData = this.hasIncomeDraftData(savedDraftData);
-
-    // if (hasApiData) {
-    //   this.restoreIncomeDraftData(savedDraftData);
-    //   return;
-    // }
-
-    // // 3. Fallback to summary only if draft API has no documents
-    // if (this.isSummaryEditMode) {
-    //   await this.patchFromSummary();
-    // }
+ 
   }
+  private markIncomeStepCompletedIfValid() {
+  const isFromSummaryRoute =
+    this.route.snapshot.queryParams['fromSummary'] === true ||
+    this.route.snapshot.queryParams['fromSummary'] === 'true';
+
+  let storedCoAppData: any = {};
+
+  try {
+    storedCoAppData = JSON.parse(sessionStorage.getItem('coAppIds') || '{}');
+  } catch {
+    storedCoAppData = {};
+  }
+
+  const isCompletedCoapp =
+    ['COMPLETED', 'SUBMITTED'].includes(
+      (storedCoAppData?.status || '').toUpperCase()
+    );
+
+  if (
+    this.allRequiredFilesUploaded ||
+    (this.isCoApplicant && isFromSummaryRoute && isCompletedCoapp)
+  ) {
+    this.stepperService.markStepCompleted(this.getStepRoute());
+  }
+}
   private async getSummarySection(sectionKey: string): Promise<any> {
     if (!this.applicationId) return null;
 
@@ -1401,6 +1470,7 @@ export class Incomeinfo {
 
     const stepData = {
       uploadedFiles: [], // summary docs are already in allDocuments
+        allDocuments: this.allDocuments,
       otherIncomeSlots: this.otherIncomeSlots,
       otherBusinessSlots: this.otherBusinessSlots
     };
@@ -1414,6 +1484,8 @@ export class Incomeinfo {
       stepData
     );
     this.stepperService.setStepData(this.getStepRoute(), stepData);
+    this.markIncomeStepCompletedIfValid();
+
 
     if (this.isCoApplicant) {
       this.loanformservice.co_incomeInfoData = stepData;

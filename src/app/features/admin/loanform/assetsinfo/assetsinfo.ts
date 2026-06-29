@@ -221,8 +221,8 @@ export class Assetsinfo implements OnInit {
 
       otherassets: this.fb.array([]),
     });
-    
-  this.applyCoApplicantViewMode(queryParams)
+
+    this.applyApplicantViewMode(queryParams)
 
     this.assetsForm.valueChanges.subscribe(() => {
       this.calculateGrandTotal();
@@ -236,28 +236,94 @@ export class Assetsinfo implements OnInit {
     await this.loadPropertyMaster();
 
     await this.loadAssetsForBothFlows()
-
+    if (this.viewOnly) {
+      this.assetsForm.disable({ emitEvent: false });
+    }
 
   }
-private applyCoApplicantViewMode(queryParams: any) {
-  const coappMode = this.formSvc.getCoApplicantMode();
+  applyApplicantViewMode(queryParams: any) {
+  const isFromSummaryRoute =
+    queryParams['fromSummary'] === true ||
+    queryParams['fromSummary'] === 'true';
+
+  const cameFromSummary =
+    isFromSummaryRoute ||
+    this.formSvc.isSummaryEditFlow();
+
+  // ✅ MAIN APPLICANT LOGIC
+  if (!this.isCoApplicant) {
+    this.isSummaryEditMode = cameFromSummary;
+    this.isFromSummary = this.isSummaryEditMode;
+
+    this.viewOnly =
+      this.isSummaryEditMode &&
+      queryParams['mode'] !== 'edit';
+
+    if (this.isSummaryEditMode) {
+      if (this.viewOnly) {
+        this.isViewMode = true;
+        this.isEditMode = false;
+        this.assetsForm.disable({ emitEvent: false });
+      } else {
+        this.isViewMode = false;
+        this.isEditMode = true;
+        this.assetsForm.enable({ emitEvent: false });
+      }
+    } else {
+      this.isFromSummary = false;
+      this.isSummaryEditMode = false;
+      this.viewOnly = false;
+      this.isViewMode = false;
+      this.isEditMode = false;
+      this.assetsForm.enable({ emitEvent: false });
+    }
+
+    return;
+  }
+
+  // ✅ CO-APPLICANT LOGIC
+  let storedCoAppData: any = {};
+
+  try {
+    storedCoAppData = JSON.parse(sessionStorage.getItem('coAppIds') || '{}');
+  } catch {
+    storedCoAppData = {};
+  }
+
+  const coappStatus = (
+    storedCoAppData?.status ||
+    (isFromSummaryRoute ? 'COMPLETED' : '')
+  ).toUpperCase();
+
+  const isCompletedCoapp =
+    coappStatus === 'COMPLETED' ||
+    coappStatus === 'SUBMITTED';
+
+  const isNewCoappFlow =
+    storedCoAppData?.mode === 'new';
+
+  const isDraftCoapp =
+    !isNewCoappFlow &&
+    !isCompletedCoapp;
+
+  const coappCameFromSummary =
+    isFromSummaryRoute ||
+    storedCoAppData?.mode === 'view' ||
+    storedCoAppData?.mode === 'edit' ||
+    this.formSvc.isSummaryEditFlow();
 
   this.isSummaryEditMode =
-    !(this.isCoApplicant && coappMode.isDraft) &&
-    (
-      queryParams['fromSummary'] === true ||
-      queryParams['fromSummary'] === 'true' ||
-      this.formSvc.isSummaryEditFlow()
-    );
+    !isNewCoappFlow &&
+    isCompletedCoapp &&
+    coappCameFromSummary;
+
+  this.isFromSummary = this.isSummaryEditMode;
 
   this.viewOnly =
     this.isSummaryEditMode &&
-    (
-      queryParams['mode'] === 'view' ||
-      queryParams['mode'] === undefined
-    );
+    queryParams['mode'] !== 'edit';
 
-  if (this.isCoApplicant && coappMode.isDraft) {
+  if (isDraftCoapp || isNewCoappFlow) {
     this.formSvc.clearSummaryEditFlow();
     this.formSvc.clearSummaryEducationEditFlow?.();
 
@@ -268,15 +334,24 @@ private applyCoApplicantViewMode(queryParams: any) {
     this.isEditMode = false;
 
     this.assetsForm.enable({ emitEvent: false });
-    return;
-  }
-
-  this.isFromSummary = this.formSvc.isSummaryEditFlow();
-
-  if (this.isFromSummary || this.viewOnly) {
-    this.isViewMode = true;
+  } else if (this.isSummaryEditMode) {
+    if (this.viewOnly) {
+      this.isViewMode = true;
+      this.isEditMode = false;
+      this.assetsForm.disable({ emitEvent: false });
+    } else {
+      this.isViewMode = false;
+      this.isEditMode = true;
+      this.assetsForm.enable({ emitEvent: false });
+    }
+  } else {
+    this.isFromSummary = false;
+    this.isSummaryEditMode = false;
+    this.viewOnly = false;
+    this.isViewMode = false;
     this.isEditMode = false;
-    this.assetsForm.disable({ emitEvent: false });
+
+    this.assetsForm.enable({ emitEvent: false });
   }
 }
   getStorageKey() {
@@ -670,7 +745,7 @@ private applyCoApplicantViewMode(queryParams: any) {
 
 
 
-  toggle(index: number) {
+  toggle1(index: number) {
     if (this.openIndex.includes(index)) {
       this.openIndex = this.openIndex.filter(i => i !== index);
     } else {
@@ -678,14 +753,53 @@ private applyCoApplicantViewMode(queryParams: any) {
     }
     // this.cd.detectChanges();
   }
+toggle(index: number) {
+  const acc = this.accordions[index];
 
+  if (acc?.key) {
+    this.ensureAssetSectionInitialized(acc.key);
+  }
 
+  if (this.openIndex.includes(index)) {
+    this.openIndex = this.openIndex.filter(i => i !== index);
+  } else {
+    this.openIndex = [...this.openIndex, index];
+  }
 
+  this.cd.detectChanges();
+}
+
+private ensureAssetSectionInitialized(key: string): void {
+  const config = this.assetFieldMap[key];
+  if (!config) return;
+
+  const control = this.assetsForm.get(config.form);
+
+  if (control instanceof FormArray && control.length === 0) {
+    if (key === 'Property/ Land Assets') {
+      control.push(this.createProperty());
+    }
+
+    if (key === 'Fixed Deposit') {
+      control.push(this.createFD());
+    }
+
+    if (key === 'Investments') {
+      // don't auto push because investments depend on dropdown selection
+    }
+
+    if (key === 'Other') {
+      control.push(this.createOther());
+    }
+  }
+}
   removeAccordion(key: string, index: number, event: Event) {
+      event.stopPropagation();
+       event.preventDefault();
     console.log(key);
     let accArr: any = [];
 
-    if(this.summaryFieldMap?.[key]){
+    if (this.summaryFieldMap?.[key]) {
       this.summarySection[this.summaryFieldMap[key].keyName].forEach((item: any) => {
         accArr.push(item.id);
       });
@@ -1072,11 +1186,7 @@ private applyCoApplicantViewMode(queryParams: any) {
       x => x !== this.NO_ASSETS_CODE
     );
 
-    /**
-     * SELECT ALL CASE:
-     * If all real assets are selected, keep only real assets
-     * and force-remove "I don't have Assets".
-     */
+ 
     const allRealAssetsSelected = this.REAL_ASSETS_CODES.every(asset =>
       realAssets.includes(asset)
     );
@@ -1109,10 +1219,6 @@ private applyCoApplicantViewMode(queryParams: any) {
       return;
     }
 
-    /**
-     * If "I don't have Assets" is selected,
-     * it must override everything else.
-     */
     if (hasNoAssets) {
       this.selectedAssets = [this.NO_ASSETS_CODE];
       this.clearAllAssetSelections();
@@ -1121,9 +1227,7 @@ private applyCoApplicantViewMode(queryParams: any) {
       return;
     }
 
-    /**
-     * Otherwise keep only real assets
-     */
+  
     this.selectedAssets = realAssets;
 
     const deselected = previousSelected.filter(k => !realAssets.includes(k));
@@ -1157,19 +1261,24 @@ private applyCoApplicantViewMode(queryParams: any) {
       }
     });
 
+    
+    // newlySelected.forEach(key => {
+    //   const config = this.assetFieldMap[key];
+    //   if (!config) return;
+
+    //   const control = this.assetsForm.get(config.form);
+
+    //   if (control instanceof FormArray && control.length === 0) {
+    //     if (key === 'Property/ Land Assets') control.push(this.createProperty());
+    //     if (key === 'Fixed Deposit') control.push(this.createFD());
+    //     if (key === 'Other') control.push(this.createOther());
+    //   }
+    // });
+
     // initialize newly selected arrays
     newlySelected.forEach(key => {
-      const config = this.assetFieldMap[key];
-      if (!config) return;
-
-      const control = this.assetsForm.get(config.form);
-
-      if (control instanceof FormArray && control.length === 0) {
-        if (key === 'Property/ Land Assets') control.push(this.createProperty());
-        if (key === 'Fixed Deposit') control.push(this.createFD());
-        if (key === 'Other') control.push(this.createOther());
-      }
-    });
+  this.ensureAssetSectionInitialized(key);
+});
 
     // open only selected accordions
     this.openIndex = this.selectedAssets
@@ -1508,13 +1617,13 @@ private applyCoApplicantViewMode(queryParams: any) {
   }
   removeitem(index: number, type: 'property' | 'fd' | 'other') {
     let item: any = {};
-    if(this.summarySection?.properties && type === 'property'){
+    if (this.summarySection?.properties && type === 'property') {
       item = this.summarySection.properties[index];
     }
-    if(this.summarySection?.fixedDeposits && type === 'fd'){
+    if (this.summarySection?.fixedDeposits && type === 'fd') {
       item = this.summarySection.fixedDeposits[index];
     }
-    if(this.summarySection?.otherAssets && type === 'other'){
+    if (this.summarySection?.otherAssets && type === 'other') {
       item = this.summarySection.otherAssets[index];
     }
 
@@ -1536,14 +1645,14 @@ private applyCoApplicantViewMode(queryParams: any) {
         }
         this.handleEmptyAccordion(type);
         this.calculateGrandTotal();  // Recalc total
-        if(item){
+        if (item) {
           this.deleteItemArr([item.id]);
         }
       }
     });
   }
 
-  deleteItemArr(idArr: any){
+  deleteItemArr(idArr: any) {
     this.formSvc.deleteAssets({
       applicationId: this.applicationId,
       applicantId: this.applicantId,

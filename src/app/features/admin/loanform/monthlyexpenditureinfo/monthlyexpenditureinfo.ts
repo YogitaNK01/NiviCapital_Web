@@ -16,7 +16,7 @@ import { Successbox } from '../../customer/successbox/successbox';
 import { Messagebox } from "../../../systemdesign/messagebox/messagebox";
 @Component({
   selector: 'app-monthlyexpenditureinfo',
-  imports: [CommonModule, ReactiveFormsModule, Buttons, Dropdown, Inputfield,Successbox,Messagebox],
+  imports: [CommonModule, ReactiveFormsModule, Buttons, Dropdown, Inputfield, Successbox, Messagebox],
   standalone: true,
   templateUrl: './monthlyexpenditureinfo.html',
   styleUrl: './monthlyexpenditureinfo.scss'
@@ -112,21 +112,21 @@ export class Monthlyexpenditureinfo {
 
   isCoApplicant: boolean = false;
   lastSavedPayload: any = null;
-    isSummaryEditMode = false;
+  isSummaryEditMode = false;
   viewOnly = false;
 
-    //edit from summary
-     //edit from summary
+  //edit from summary
+  //edit from summary
   isFromSummary = false;
   isViewMode = false;
   isEditMode = false;
   originalFormValue: any = null;
-  
+
   editSuccess: any = false;
   description1 = `Great ! Your Monthly Expenditure Info Details\n Uploaded Successfully.`;
-  summarySection : any = {};
+  summarySection: any = {};
 
-  constructor(private fb: FormBuilder, public main: Main, private route: ActivatedRoute, private msgBox: Msgboxservice, private router: Router,private storageservice:Storage,
+  constructor(private fb: FormBuilder, public main: Main, private route: ActivatedRoute, private msgBox: Msgboxservice, private router: Router, private storageservice: Storage,
     private stepperService: Loanstepperservice, private formSvc: Loanformservice, private cd: ChangeDetectorRef) { }
 
 
@@ -136,11 +136,11 @@ export class Monthlyexpenditureinfo {
       this.isCoApplicant ? 'CO_APPLICANT' : 'MAIN'
     );
     if (this.isCoApplicant) {
-  this.stepperService.restoreCoAppIdFromSession();
-}
+      this.stepperService.restoreCoAppIdFromSession();
+    }
 
-this.stepperService.restoreLoanEditContext();
-this.stepperService.restoreLoanIdFromSession();
+    this.stepperService.restoreLoanEditContext();
+    this.stepperService.restoreLoanIdFromSession();
 
     let Allids = this.stepperService.getLoanId();
 
@@ -151,14 +151,8 @@ this.stepperService.restoreLoanIdFromSession();
 
     let AllCoapp_ids = this.stepperService.getCo_appId();
 
-const queryParams = this.route.snapshot.queryParams;
+    const queryParams = this.route.snapshot.queryParams;
 
-    this.isSummaryEditMode =
-      queryParams['fromSummary'] === true ||
-      queryParams['fromSummary'] === 'true' ||
-      this.formSvc.isSummaryEditFlow();
-
-    this.viewOnly = this.isSummaryEditMode && (queryParams['mode'] === 'view' || queryParams['mode'] === undefined);
 
     if (
       this.isCoApplicant &&
@@ -181,7 +175,7 @@ const queryParams = this.route.snapshot.queryParams;
           parsed.applicantId,
           parsed.applicationId,
           parsed.fullName,
-        undefined,parsed.coApplicantIndex || 1);
+          undefined, parsed.coApplicantIndex || 1);
       }
     }
     if (this.isCoApplicant) {
@@ -219,7 +213,7 @@ const queryParams = this.route.snapshot.queryParams;
     });
 
 
-this.applyCoApplicantViewMode(queryParams);
+    this.applyApplicantViewMode(queryParams);
 
     this.monthlyExpenditureForm.valueChanges
       .pipe(debounceTime(200))
@@ -228,32 +222,98 @@ this.applyCoApplicantViewMode(queryParams);
       });
 
 
-await this.loadMonthlyExpenditureForBothFlows();
+    await this.loadMonthlyExpenditureForBothFlows();
 
- 
+    if (this.viewOnly) {
+      this.monthlyExpenditureForm.disable({ emitEvent: false });
+    }
 
 
   }
 
-private applyCoApplicantViewMode(queryParams: any) {
-  const coappMode = this.formSvc.getCoApplicantMode();
+   applyApplicantViewMode(queryParams: any) {
+  const isFromSummaryRoute =
+    queryParams['fromSummary'] === true ||
+    queryParams['fromSummary'] === 'true';
+
+  const cameFromSummary =
+    isFromSummaryRoute ||
+    this.formSvc.isSummaryEditFlow();
+
+  // ✅ MAIN APPLICANT LOGIC
+  if (!this.isCoApplicant) {
+    this.isSummaryEditMode = cameFromSummary;
+    this.isFromSummary = this.isSummaryEditMode;
+
+    this.viewOnly =
+      this.isSummaryEditMode &&
+      queryParams['mode'] !== 'edit';
+
+    if (this.isSummaryEditMode) {
+      if (this.viewOnly) {
+        this.isViewMode = true;
+        this.isEditMode = false;
+        this.monthlyExpenditureForm.disable({ emitEvent: false });
+      } else {
+        this.isViewMode = false;
+        this.isEditMode = true;
+        this.monthlyExpenditureForm.enable({ emitEvent: false });
+      }
+    } else {
+      this.isFromSummary = false;
+      this.isSummaryEditMode = false;
+      this.viewOnly = false;
+      this.isViewMode = false;
+      this.isEditMode = false;
+      this.monthlyExpenditureForm.enable({ emitEvent: false });
+    }
+
+    return;
+  }
+
+  // ✅ CO-APPLICANT LOGIC
+  let storedCoAppData: any = {};
+
+  try {
+    storedCoAppData = JSON.parse(sessionStorage.getItem('coAppIds') || '{}');
+  } catch {
+    storedCoAppData = {};
+  }
+
+  const coappStatus = (
+    storedCoAppData?.status ||
+    (isFromSummaryRoute ? 'COMPLETED' : '')
+  ).toUpperCase();
+
+  const isCompletedCoapp =
+    coappStatus === 'COMPLETED' ||
+    coappStatus === 'SUBMITTED';
+
+  const isNewCoappFlow =
+    storedCoAppData?.mode === 'new';
+
+  const isDraftCoapp =
+    !isNewCoappFlow &&
+    !isCompletedCoapp;
+
+  const coappCameFromSummary =
+    isFromSummaryRoute ||
+    storedCoAppData?.mode === 'view' ||
+    storedCoAppData?.mode === 'edit' ||
+    this.formSvc.isSummaryEditFlow();
 
   this.isSummaryEditMode =
-    !(this.isCoApplicant && coappMode.isDraft) &&
-    (
-      queryParams['fromSummary'] === true ||
-      queryParams['fromSummary'] === 'true' ||
-      this.formSvc.isSummaryEditFlow()
-    );
+    !isNewCoappFlow &&
+    isCompletedCoapp &&
+    coappCameFromSummary;
+
+  this.isFromSummary = this.isSummaryEditMode;
 
   this.viewOnly =
     this.isSummaryEditMode &&
-    (
-      queryParams['mode'] === 'view' ||
-      queryParams['mode'] === undefined
-    );
+    queryParams['mode'] !== 'edit';
 
-  if (this.isCoApplicant && coappMode.isDraft) {
+  if (isDraftCoapp || isNewCoappFlow) {
     this.formSvc.clearSummaryEditFlow();
     this.formSvc.clearSummaryEducationEditFlow?.();
 
@@ -264,18 +324,27 @@ private applyCoApplicantViewMode(queryParams: any) {
     this.isEditMode = false;
 
     this.monthlyExpenditureForm.enable({ emitEvent: false });
-    return;
-  }
-
-  this.isFromSummary = this.formSvc.isSummaryEditFlow();
-
-  if (this.isFromSummary || this.viewOnly) {
-    this.isViewMode = true;
+  } else if (this.isSummaryEditMode) {
+    if (this.viewOnly) {
+      this.isViewMode = true;
+      this.isEditMode = false;
+      this.monthlyExpenditureForm.disable({ emitEvent: false });
+    } else {
+      this.isViewMode = false;
+      this.isEditMode = true;
+      this.monthlyExpenditureForm.enable({ emitEvent: false });
+    }
+  } else {
+    this.isFromSummary = false;
+    this.isSummaryEditMode = false;
+    this.viewOnly = false;
+    this.isViewMode = false;
     this.isEditMode = false;
-    this.monthlyExpenditureForm.disable({ emitEvent: false });
+
+    this.monthlyExpenditureForm.enable({ emitEvent: false });
   }
 }
-    getStorageKey() {
+  getStorageKey() {
     const main_ApplicantId = this.stepperService.getLoanId()?.[0];
     const co_ApplicantId = this.stepperService.getCo_appId()?.[0];
     const index = this.stepperService.getCurrentCoApplicantIndex();
@@ -285,11 +354,11 @@ private applyCoApplicantViewMode(queryParams: any) {
       this.applicationId,
       this.applicantId,
       this.isCoApplicant,
-    
+
     );
   }
 
-    getCurrentCoApplicantFromList() {
+  getCurrentCoApplicantFromList() {
     const mainApplicantId = this.stepperService.getLoanId()?.[0];
     const index = this.stepperService.getCurrentCoApplicantIndex();
 
@@ -306,246 +375,246 @@ private applyCoApplicantViewMode(queryParams: any) {
 
     return this.stepperService.getCo_appId()?.[0] || null;
   }
-private async getSummarySection(sectionKey: string): Promise<any> {
-  if (!this.applicationId) return null;
+  private async getSummarySection(sectionKey: string): Promise<any> {
+    if (!this.applicationId) return null;
 
-  try {
-    const res: any = await firstValueFrom(
-      this.formSvc.getSummary(this.applicationId)
-    );
+    try {
+      const res: any = await firstValueFrom(
+        this.formSvc.getSummary(this.applicationId)
+      );
 
-    if (!res || res.status !== 'success') return null;
+      if (!res || res.status !== 'success') return null;
 
-    return this.formSvc.getApplicantSectionFromSummary(
-      res,
-      sectionKey,
-      {
-        isCoApplicant: this.isCoApplicant,
-        coApplicantId: this.stepperService.getCo_appId()?.[0],
-        coApplicantIndex: this.stepperService.getCurrentCoApplicantIndex()
-      }
-    );
-  } catch (error) {
-    console.error(`Failed to get summary section: ${sectionKey}`, error);
-    return null;
+      return this.formSvc.getApplicantSectionFromSummary(
+        res,
+        sectionKey,
+        {
+          isCoApplicant: this.isCoApplicant,
+          coApplicantId: this.stepperService.getCo_appId()?.[0],
+          coApplicantIndex: this.stepperService.getCurrentCoApplicantIndex()
+        }
+      );
+    } catch (error) {
+      console.error(`Failed to get summary section: ${sectionKey}`, error);
+      return null;
+    }
   }
-}
 
-private async loadMonthlyExpenditureForBothFlows() {
-  const key = this.getStorageKey();
+  private async loadMonthlyExpenditureForBothFlows() {
+    const key = this.getStorageKey();
 
-  // const localData = localStorage.getItem(key);
-  // const parsedLocal = localData ? JSON.parse(localData) : null;
+    // const localData = localStorage.getItem(key);
+    // const parsedLocal = localData ? JSON.parse(localData) : null;
 
-   const parsedLocal = this.storageservice.getStoredSectionData(
+    const parsedLocal = this.storageservice.getStoredSectionData(
       'monthlyExpenditureData',
       this.applicationId,
       this.applicantId,
       this.isCoApplicant
     );
 
-  const applicantId = this.getApiApplicantId();
+    const applicantId = this.getApiApplicantId();
 
-  const draftData = applicantId
-    ? await this.getSavedMonthlyExp(applicantId)
-    : null;
+    const draftData = applicantId
+      ? await this.getSavedMonthlyExp(applicantId)
+      : null;
 
-  const summarySection = await this.getSummarySection('monthlyExpenditure');
-  this.summarySection = summarySection;
-  
-const normalizedSummary = this.normalizeMonthlyExpenditure(summarySection);
-  const normalizedDraft = this.normalizeMonthlyExpenditure(draftData);
-  const normalizedLocal = this.normalizeMonthlyExpenditure(parsedLocal);
+    const summarySection = await this.getSummarySection('monthlyExpenditure');
+    this.summarySection = summarySection;
 
-  let finalData: any = null;
+    const normalizedSummary = this.normalizeMonthlyExpenditure(summarySection);
+    const normalizedDraft = this.normalizeMonthlyExpenditure(draftData);
+    const normalizedLocal = this.normalizeMonthlyExpenditure(parsedLocal);
 
-  const summaryComplete =
-    normalizedSummary &&
-    this.isMonthlyExpPayloadComplete(normalizedSummary);
+    let finalData: any = null;
 
-  if (summaryComplete) {
-    finalData = normalizedSummary;
-  } else if (normalizedDraft?.items?.length) {
-    finalData = normalizedDraft;
-  } else if (normalizedLocal?.items?.length) {
-    finalData = normalizedLocal;
-  } else if (normalizedSummary?.items?.length) {
-    finalData = normalizedSummary;
-  }
+    const summaryComplete =
+      normalizedSummary &&
+      this.isMonthlyExpPayloadComplete(normalizedSummary);
 
-  if (!finalData) {
-    this.lastSavedPayload = null;
-    this.selectedexpenditure = [];
-    this.openIndex = [];
+    if (summaryComplete) {
+      finalData = normalizedSummary;
+    } else if (normalizedDraft?.items?.length) {
+      finalData = normalizedDraft;
+    } else if (normalizedLocal?.items?.length) {
+      finalData = normalizedLocal;
+    } else if (normalizedSummary?.items?.length) {
+      finalData = normalizedSummary;
+    }
 
-    this.monthlyExpenditureForm.reset({
-      rent: { rentvalue: '' },
-      grocery: { groceryvalue: '' },
-      utilities: { utilityvalue1: '', utilityvalue2: '' },
-      transportation: { transportationvalue: '' },
-      SchoolFees: { SchoolFeesvalue: '' },
-      MedicalMedicines: { MedicalMedicinesvalue: '' }
-    }, { emitEvent: false });
+    if (!finalData) {
+      this.lastSavedPayload = null;
+      this.selectedexpenditure = [];
+      this.openIndex = [];
 
-    this.monthlyExpenditureForm.setControl('other', this.fb.array([this.createOther()]));
-    this.calculateGrandTotal();
-    this.cd.detectChanges();
-    return;
-  }
+      this.monthlyExpenditureForm.reset({
+        rent: { rentvalue: '' },
+        grocery: { groceryvalue: '' },
+        utilities: { utilityvalue1: '', utilityvalue2: '' },
+        transportation: { transportationvalue: '' },
+        SchoolFees: { SchoolFeesvalue: '' },
+        MedicalMedicines: { MedicalMedicinesvalue: '' }
+      }, { emitEvent: false });
+
+      this.monthlyExpenditureForm.setControl('other', this.fb.array([this.createOther()]));
+      this.calculateGrandTotal();
+      this.cd.detectChanges();
+      return;
+    }
 
 
-  if (this.isCoApplicant) {
-    this.formSvc.co_monthlyExpenditureData = finalData;
-  } else {
-    this.formSvc.monthlyExpenditureData = finalData;
-  }
+    if (this.isCoApplicant) {
+      this.formSvc.co_monthlyExpenditureData = finalData;
+    } else {
+      this.formSvc.monthlyExpenditureData = finalData;
+    }
 
-  this.patchMonthlyExpenditure();
+    this.patchMonthlyExpenditure();
 
-  const snapshot = this.buildMonthlyExpPayloadWithApplicantId();
+    const snapshot = this.buildMonthlyExpPayloadWithApplicantId();
 
-  this.lastSavedPayload = snapshot.invalid
-    ? null
-    : {
+    this.lastSavedPayload = snapshot.invalid
+      ? null
+      : {
         applicantId: snapshot.applicantId,
         items: snapshot.items
       };
 
-  // localStorage.setItem(key, JSON.stringify(finalData));
+    // localStorage.setItem(key, JSON.stringify(finalData));
     this.storageservice.saveSectionData(
-            'monthlyExpenditureData',
-            this.applicationId,
-            this.applicantId,
-            this.isCoApplicant,
-            JSON.stringify(finalData)
-          );
+      'monthlyExpenditureData',
+      this.applicationId,
+      this.applicantId,
+      this.isCoApplicant,
+      JSON.stringify(finalData)
+    );
 
-  this.calculateGrandTotal();
-  this.stepperService.markStepCompleted(this.getStepRoute());
-  this.cd.detectChanges();
-}
-private isMonthlyExpPayloadComplete(data: any): boolean {
-  if (!data || !Array.isArray(data.items) || data.items.length === 0) {
-    return false;
+    this.calculateGrandTotal();
+    this.stepperService.markStepCompleted(this.getStepRoute());
+    this.cd.detectChanges();
+  }
+  private isMonthlyExpPayloadComplete(data: any): boolean {
+    if (!data || !Array.isArray(data.items) || data.items.length === 0) {
+      return false;
+    }
+
+    const groupedTypes = data.items.map((x: any) => x.expenseType);
+
+    // If a category exists in data, required fields for that category must be present
+    for (const item of data.items) {
+      if (!item.expenseType) return false;
+
+      if (
+        item.expenseType === 'RENT_HOME_MAINTENANCE' ||
+        item.expenseType === 'GROCERIES_HOUSEHOLD' ||
+        item.expenseType === 'TRANSPORTATION' ||
+        item.expenseType === 'SCHOOL_EDUCATION_FEES' ||
+        item.expenseType === 'MEDICAL_MEDICINES'
+      ) {
+        if (!item.amountInr) return false;
+      }
+
+      if (item.expenseType === 'TELEPHONE' || item.expenseType === 'UTILITIES') {
+        if (!item.amountInr) return false;
+      }
+
+      if (item.expenseType === 'OTHER_RECURRING') {
+        if (!item.amountInr || !item.expenseTypeText) return false;
+      }
+    }
+
+    return true;
   }
 
-  const groupedTypes = data.items.map((x: any) => x.expenseType);
+  private normalizeMonthlyExpenditure(data: any): any {
+    if (!data) return null;
 
-  // If a category exists in data, required fields for that category must be present
-  for (const item of data.items) {
-    if (!item.expenseType) return false;
-
-    if (
-      item.expenseType === 'RENT_HOME_MAINTENANCE' ||
-      item.expenseType === 'GROCERIES_HOUSEHOLD' ||
-      item.expenseType === 'TRANSPORTATION' ||
-      item.expenseType === 'SCHOOL_EDUCATION_FEES' ||
-      item.expenseType === 'MEDICAL_MEDICINES'
-    ) {
-      if (!item.amountInr) return false;
+    // Already draft/local payload
+    if (Array.isArray(data.items)) {
+      return {
+        applicantId: data.applicantId || this.getApiApplicantId(),
+        items: data.items
+      };
     }
 
-    if (item.expenseType === 'TELEPHONE' || item.expenseType === 'UTILITIES') {
-      if (!item.amountInr) return false;
-    }
+    const items: any[] = [];
 
-    if (item.expenseType === 'OTHER_RECURRING') {
-      if (!item.amountInr || !item.expenseTypeText) return false;
-    }
-  }
+    const addItem = (
+      expenseType: string,
+      amount: any,
+      extra: any = {}
+    ) => {
+      if (amount === null || amount === undefined || amount === '') return;
 
-  return true;
-}
+      items.push({
+        expenseType,
+        amountInr: Number(amount || 0),
+        ...extra
+      });
+    };
 
-private normalizeMonthlyExpenditure(data: any): any {
-  if (!data) return null;
+    addItem(
+      'RENT_HOME_MAINTENANCE',
+      data.rentHomeMaintenance?.amountInr
+    );
 
-  // Already draft/local payload
-  if (Array.isArray(data.items)) {
+    addItem(
+      'GROCERIES_HOUSEHOLD',
+      data.groceriesHousehold?.amountInr
+    );
+    addItem(
+      'TELEPHONE',
+      data.telephoneInternetBills?.amountInr
+    );
+    (data.utilitiesElectricityWaterGas || []).forEach((item: any) => {
+      const name = item.name || '';
+
+      const isTelephone =
+        name.toLowerCase().includes('telephone') ||
+        name.toLowerCase().includes('internet');
+
+      addItem(
+        isTelephone ? 'TELEPHONE' : 'UTILITIES',
+        item.amountInr,
+        {
+          expenseTypeText: name
+        }
+      );
+    });
+
+    addItem(
+      'TRANSPORTATION',
+      data.transportation?.amountInr
+    );
+
+    addItem(
+      'SCHOOL_EDUCATION_FEES',
+      data.schoolEducationFees?.amountInr
+    );
+
+    addItem(
+      'MEDICAL_MEDICINES',
+      data.medicalMedicines?.amountInr
+    );
+
+    (data.otherRecurringExpenses || []).forEach((item: any) => {
+      addItem(
+        'OTHER_RECURRING',
+        item.amountInr,
+        {
+          expenseTypeText: item.name || item.expenseTypeText || ''
+        }
+      );
+    });
+
+    if (!items.length) return null;
+
     return {
-      applicantId: data.applicantId || this.getApiApplicantId(),
-      items: data.items
+      applicantId: this.getApiApplicantId(),
+      totalMonthlyInr: data.totalMonthlyInr || 0,
+      items
     };
   }
-
-  const items: any[] = [];
-
-  const addItem = (
-    expenseType: string,
-    amount: any,
-    extra: any = {}
-  ) => {
-    if (amount === null || amount === undefined || amount === '') return;
-
-    items.push({
-      expenseType,
-      amountInr: Number(amount || 0),
-      ...extra
-    });
-  };
-
-  addItem(
-    'RENT_HOME_MAINTENANCE',
-    data.rentHomeMaintenance?.amountInr
-  );
-
-  addItem(
-    'GROCERIES_HOUSEHOLD',
-    data.groceriesHousehold?.amountInr
-  );
-  addItem(
-    'TELEPHONE',
-    data.telephoneInternetBills?.amountInr
-  );
-  (data.utilitiesElectricityWaterGas || []).forEach((item: any) => {
-    const name = item.name || '';
-
-    const isTelephone =
-      name.toLowerCase().includes('telephone') ||
-      name.toLowerCase().includes('internet');
-
-    addItem(
-      isTelephone ? 'TELEPHONE' : 'UTILITIES',
-      item.amountInr,
-      {
-        expenseTypeText: name
-      }
-    );
-  });
-
-  addItem(
-    'TRANSPORTATION',
-    data.transportation?.amountInr
-  );
-
-  addItem(
-    'SCHOOL_EDUCATION_FEES',
-    data.schoolEducationFees?.amountInr
-  );
-
-  addItem(
-    'MEDICAL_MEDICINES',
-    data.medicalMedicines?.amountInr
-  );
-
-  (data.otherRecurringExpenses || []).forEach((item: any) => {
-    addItem(
-      'OTHER_RECURRING',
-      item.amountInr,
-      {
-        expenseTypeText: item.name || item.expenseTypeText || ''
-      }
-    );
-  });
-
-  if (!items.length) return null;
-
-  return {
-    applicantId: this.getApiApplicantId(),
-    totalMonthlyInr: data.totalMonthlyInr || 0,
-    items
-  };
-}
 
   get other(): FormArray {
     return this.monthlyExpenditureForm.get('other') as FormArray;
@@ -686,8 +755,8 @@ private normalizeMonthlyExpenditure(data: any): any {
 
   removeAccordion(key: string, index: number, event: Event) {
     let accArr: any = [];
-    if(this.summaryFieldMap?.[key]){
-      if(Array.isArray(this.summarySection[this.summaryFieldMap[key].keyName])){
+    if (this.summaryFieldMap?.[key]) {
+      if (Array.isArray(this.summarySection[this.summaryFieldMap[key].keyName])) {
         this.summarySection[this.summaryFieldMap[key].keyName].forEach((item: any) => {
           accArr.push(item.id);
         });
@@ -741,7 +810,7 @@ private normalizeMonthlyExpenditure(data: any): any {
           }
         }
 
-        if(accArr){
+        if (accArr) {
           this.deleteItemArr(accArr);
         }
 
@@ -750,7 +819,7 @@ private normalizeMonthlyExpenditure(data: any): any {
     });
   }
 
-  deleteItemArr(idArr: any){
+  deleteItemArr(idArr: any) {
     this.formSvc.deleteMonthlyExpenditure({
       applicationId: this.applicationId,
       applicantId: this.applicantId,
@@ -925,34 +994,34 @@ private normalizeMonthlyExpenditure(data: any): any {
     }
   }
 
- // edit flow = patch from summary
-async patchFromSummary() {
-  const section = await this.getSummarySection('monthlyExpenditure');
-  const data = this.normalizeMonthlyExpenditure(section);
+  // edit flow = patch from summary
+  async patchFromSummary() {
+    const section = await this.getSummarySection('monthlyExpenditure');
+    const data = this.normalizeMonthlyExpenditure(section);
 
-  if (!data) return;
+    if (!data) return;
 
-  if (this.isCoApplicant) {
-    this.formSvc.co_monthlyExpenditureData = data;
-  } else {
-    this.formSvc.monthlyExpenditureData = data;
-  }
+    if (this.isCoApplicant) {
+      this.formSvc.co_monthlyExpenditureData = data;
+    } else {
+      this.formSvc.monthlyExpenditureData = data;
+    }
 
-  this.patchMonthlyExpenditure();
+    this.patchMonthlyExpenditure();
 
-  const snapshot = this.buildMonthlyExpPayloadWithApplicantId();
+    const snapshot = this.buildMonthlyExpPayloadWithApplicantId();
 
-  this.lastSavedPayload = snapshot.invalid
-    ? null
-    : {
+    this.lastSavedPayload = snapshot.invalid
+      ? null
+      : {
         applicantId: snapshot.applicantId,
         items: snapshot.items
       };
 
-  this.calculateGrandTotal();
-  this.cd.detectChanges();
-}
-  
+    this.calculateGrandTotal();
+    this.cd.detectChanges();
+  }
+
   patchMonthlyExpenditure() {
     const data = this.isCoApplicant
       ? this.formSvc.co_monthlyExpenditureData
@@ -1064,19 +1133,19 @@ async patchFromSummary() {
     this.calculateGrandTotal();
     this.cd.detectChanges();
   }
-private finishAfterSaveOrNoChange() {
-  if (this.isSummaryEditMode) {
-    this.formSvc.clearSummaryEditFlow();
+  private finishAfterSaveOrNoChange() {
+    if (this.isSummaryEditMode) {
+      this.formSvc.clearSummaryEditFlow();
 
-    this.router.navigate(['/loanform', 'summaryinfo'], {
-      queryParamsHandling: 'merge'
-    });
+      this.router.navigate(['/loanform', 'summaryinfo'], {
+        queryParamsHandling: 'merge'
+      });
 
-    return;
+      return;
+    }
+
+    this.stepperService.next();
   }
-
-  this.stepperService.next();
-}
   getOtherType(val: string): string {
     const predefined = this.otherExpenses.map(o => o.value);
 
@@ -1266,89 +1335,89 @@ private finishAfterSaveOrNoChange() {
       items
     };
   }
-//draft payload for save exit
+  //draft payload for save exit
 
-buildDraftMonthlyExpPayloadWithApplicantId(): {
-  invalid: boolean;
-  applicantId?: any;
-  items: any[];
-} {
-  const form = this.monthlyExpenditureForm.getRawValue();
-  const items: any[] = [];
+  buildDraftMonthlyExpPayloadWithApplicantId(): {
+    invalid: boolean;
+    applicantId?: any;
+    items: any[];
+  } {
+    const form = this.monthlyExpenditureForm.getRawValue();
+    const items: any[] = [];
 
-  const cleanAmount = (val: any) =>
-    val ? Number(val.toString().replace(/,/g, '')) : 0;
+    const cleanAmount = (val: any) =>
+      val ? Number(val.toString().replace(/,/g, '')) : 0;
 
-  const addItem = (code: string, value: any, extra: any = {}) => {
-    if (!this.hasValue(value)) return;
+    const addItem = (code: string, value: any, extra: any = {}) => {
+      if (!this.hasValue(value)) return;
 
-    items.push({
-      expenseType: code,
-      amountInr: cleanAmount(value),
-      ...extra
-    });
-  };
+      items.push({
+        expenseType: code,
+        amountInr: cleanAmount(value),
+        ...extra
+      });
+    };
 
-  // RENT
-  if (this.selectedexpenditure.includes('RentHomeMaintenance')) {
-    addItem('RENT_HOME_MAINTENANCE', form.rent?.rentvalue);
-  }
+    // RENT
+    if (this.selectedexpenditure.includes('RentHomeMaintenance')) {
+      addItem('RENT_HOME_MAINTENANCE', form.rent?.rentvalue);
+    }
 
-  // GROCERY
-  if (this.selectedexpenditure.includes('GroceriesandHousehold')) {
-    addItem('GROCERIES_HOUSEHOLD', form.grocery?.groceryvalue);
-  }
+    // GROCERY
+    if (this.selectedexpenditure.includes('GroceriesandHousehold')) {
+      addItem('GROCERIES_HOUSEHOLD', form.grocery?.groceryvalue);
+    }
 
-  // UTILITIES
-  if (this.selectedexpenditure.includes('Utilities')) {
-    addItem('TELEPHONE', form.utilities?.utilityvalue1, {
-      expenseTypeText: 'Telephone and Internet bills'
-    });
+    // UTILITIES
+    if (this.selectedexpenditure.includes('Utilities')) {
+      addItem('TELEPHONE', form.utilities?.utilityvalue1, {
+        expenseTypeText: 'Telephone and Internet bills'
+      });
 
-    addItem('UTILITIES', form.utilities?.utilityvalue2, {
-      expenseTypeText: 'Utilities (Electricity, Water, Gas)'
-    });
-  }
+      addItem('UTILITIES', form.utilities?.utilityvalue2, {
+        expenseTypeText: 'Utilities (Electricity, Water, Gas)'
+      });
+    }
 
-  // TRANSPORTATION
-  if (this.selectedexpenditure.includes('Transportation')) {
-    addItem('TRANSPORTATION', form.transportation?.transportationvalue);
-  }
+    // TRANSPORTATION
+    if (this.selectedexpenditure.includes('Transportation')) {
+      addItem('TRANSPORTATION', form.transportation?.transportationvalue);
+    }
 
-  // SCHOOL
-  if (this.selectedexpenditure.includes('SchoolEducationFees')) {
-    addItem('SCHOOL_EDUCATION_FEES', form.SchoolFees?.SchoolFeesvalue);
-  }
+    // SCHOOL
+    if (this.selectedexpenditure.includes('SchoolEducationFees')) {
+      addItem('SCHOOL_EDUCATION_FEES', form.SchoolFees?.SchoolFeesvalue);
+    }
 
-  // MEDICAL
-  if (this.selectedexpenditure.includes('Medical')) {
-    addItem('MEDICAL_MEDICINES', form.MedicalMedicines?.MedicalMedicinesvalue);
-  }
+    // MEDICAL
+    if (this.selectedexpenditure.includes('Medical')) {
+      addItem('MEDICAL_MEDICINES', form.MedicalMedicines?.MedicalMedicinesvalue);
+    }
 
-  // OTHER
-  if (this.selectedexpenditure.includes('Others') && Array.isArray(form.other)) {
-    form.other.forEach((item: any) => {
-      const type = item.type === 'Other' ? item.customType : item.type;
+    // OTHER
+    if (this.selectedexpenditure.includes('Others') && Array.isArray(form.other)) {
+      form.other.forEach((item: any) => {
+        const type = item.type === 'Other' ? item.customType : item.type;
 
-      if (this.hasValue(type) || this.hasValue(item.amount)) {
-        if (this.hasValue(type) && this.hasValue(item.amount)) {
-          addItem('OTHER_RECURRING', item.amount, {
-            expenseTypeText: type
-          });
+        if (this.hasValue(type) || this.hasValue(item.amount)) {
+          if (this.hasValue(type) && this.hasValue(item.amount)) {
+            addItem('OTHER_RECURRING', item.amount, {
+              expenseTypeText: type
+            });
+          }
         }
-      }
-    });
-  }
+      });
+    }
 
-  return {
-    invalid: false,
-    applicantId: this.getApiApplicantId(),
-    items
-  };
-}
-private hasValue(val: any): boolean {
-  return val !== null && val !== undefined && val !== '';
-}
+    return {
+      invalid: false,
+      applicantId: this.getApiApplicantId(),
+      items
+    };
+  }
+  private hasValue(val: any): boolean {
+    return val !== null && val !== undefined && val !== '';
+  }
 
   buildMonthlyExpPayloadWithApplicantId(): {
     invalid: boolean;
@@ -1356,9 +1425,9 @@ private hasValue(val: any): boolean {
     items: any[];
   } {
     const result = this.buildMonthlyExpPayload();
- const applicantId = this.getApiApplicantId();
+    const applicantId = this.getApiApplicantId();
 
-    
+
     if (result.invalid) {
       return {
         invalid: true,
@@ -1383,18 +1452,18 @@ private hasValue(val: any): boolean {
         next: (res) => {
           if (res.status === 'success') {
             // resolve(res.data.data);
-            
-let data = res.data.data;
 
-          if (typeof data === 'string') {
-            try {
-              data = JSON.parse(data);
-            } catch {
-              data = null;
+            let data = res.data.data;
+
+            if (typeof data === 'string') {
+              try {
+                data = JSON.parse(data);
+              } catch {
+                data = null;
+              }
             }
-          }
 
-          resolve(data);
+            resolve(data);
 
           } else {
             resolve(null);
@@ -1406,59 +1475,59 @@ let data = res.data.data;
   }
 
   saveExit() {
-  this.msgBox.open({
+    this.msgBox.open({
       title: 'Are you sure you want to exit?',
       message: ``,
       showCancel: true,
       onOk: () => {
-    // const result = this.buildMonthlyExpPayloadWithApplicantId();
+        // const result = this.buildMonthlyExpPayloadWithApplicantId();
 
-  const result = this.buildDraftMonthlyExpPayloadWithApplicantId();
+        const result = this.buildDraftMonthlyExpPayloadWithApplicantId();
 
-    if (result.invalid) {
-      console.log('Invalid form - not saving');
-      return;
-    }
+        if (result.invalid) {
+          console.log('Invalid form - not saving');
+          return;
+        }
 
-    const input = { items: result.items, applicantId: result.applicantId };
- const applicantId = this.getApiApplicantId();
+        const input = { items: result.items, applicantId: result.applicantId };
+        const applicantId = this.getApiApplicantId();
 
-    if (!applicantId) {
-      console.error('ApplicantId not found for photo upload');
-      return;
-    }
+        if (!applicantId) {
+          console.error('ApplicantId not found for photo upload');
+          return;
+        }
 
-    const key = this.getStorageKey();
-    // localStorage.setItem(key, JSON.stringify(input));
- this.storageservice.saveSectionData(
-            'monthlyExpenditureData',
-            this.applicationId,
-            this.applicantId,
-            this.isCoApplicant,
-            JSON.stringify(input)
-          );
+        const key = this.getStorageKey();
+        // localStorage.setItem(key, JSON.stringify(input));
+        this.storageservice.saveSectionData(
+          'monthlyExpenditureData',
+          this.applicationId,
+          this.applicantId,
+          this.isCoApplicant,
+          JSON.stringify(input)
+        );
 
-    if (this.isCoApplicant) {
-      this.formSvc.co_monthlyExpenditureData = input;
-    } else {
-      this.formSvc.monthlyExpenditureData = input;
-    }
+        if (this.isCoApplicant) {
+          this.formSvc.co_monthlyExpenditureData = input;
+        } else {
+          this.formSvc.monthlyExpenditureData = input;
+        }
 
-    const inputdata = {
-      action: "auto-save",
-      sectionKey: "SAVE_MONTHLY_EXPENSES",
-      applicationId: this.applicationId,
-      applicantId: applicantId,
-      jsonData: input
-    };
+        const inputdata = {
+          action: "auto-save",
+          sectionKey: "SAVE_MONTHLY_EXPENSES",
+          applicationId: this.applicationId,
+          applicantId: applicantId,
+          jsonData: input
+        };
 
-    this.formSvc.saveandExit(inputdata).subscribe({
-      next: () => {
-        this.lastSavedPayload = { ...input };
+        this.formSvc.saveandExit(inputdata).subscribe({
+          next: () => {
+            this.lastSavedPayload = { ...input };
+          }
+        });
+        this.router.navigate(['/admin/losoperation']);
       }
-    });
-     this.router.navigate(['/admin/losoperation']);
-     }
     });
   }
   getStepRoute() {
@@ -1504,7 +1573,7 @@ let data = res.data.data;
           }
 
           // localStorage.setItem(this.getStorageKey(), JSON.stringify(payload));
-           this.storageservice.saveSectionData(
+          this.storageservice.saveSectionData(
             'monthlyExpenditureData',
             this.applicationId,
             this.applicantId,
@@ -1655,7 +1724,7 @@ let data = res.data.data;
 
   //edit from summary enable and disbale
 
-   enableForm(){
+  enableForm() {
     this.isViewMode = false;
     this.isEditMode = true;
     this.monthlyExpenditureForm.enable();
@@ -1697,8 +1766,8 @@ let data = res.data.data;
           this.lastSavedPayload = { ...input };
 
           console.log(res);
-this.editSuccess = true;
-          
+          this.editSuccess = true;
+
         }
       },
       error: (err) => {
@@ -1707,13 +1776,13 @@ this.editSuccess = true;
     });
   }
 
-   // edit sucess popup
-   onCancel() {
+  // edit sucess popup
+  onCancel() {
     this.editSuccess = false;
   }
 
-  handleSuccessAction(action: string){
-    if(action === "OK"){
+  handleSuccessAction(action: string) {
+    if (action === "OK") {
       this.editSuccess = false;
       this.isViewMode = true;
       this.isEditMode = false;

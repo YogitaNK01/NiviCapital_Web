@@ -225,7 +225,7 @@ export class AddCustomer implements OnInit {
       "deviceId": "",
       "userId": this.sendotpId
     }
-    this.startTimer()
+    this.startTimer(false)
     this.addcustomerservice.SendOTP(input).subscribe({
       next: (res) => {
         console.log(res);
@@ -239,7 +239,7 @@ export class AddCustomer implements OnInit {
 
   }
 
-  startTimer() {
+  startTimer(reachedMaxAttempts:boolean) {
 
     // stop any existing timer first
     if (this.timerSub) {
@@ -248,15 +248,18 @@ export class AddCustomer implements OnInit {
     }
 
     this.resendSeconds = 60;
+    if(reachedMaxAttempts){
+      this.resendSeconds = 180;
+      this.resetCounter = 0;
+    }
     this.isCounting = true;
 
-    // if (isLockTimer) { this.resendLocked = true;  }
+
 
     this.timerSub = interval(1000).subscribe(() => {
       this.resendSeconds--;
       this.cd.detectChanges();
 
-      // console.log(this.resendSeconds);
 
       if (this.resendSeconds <= 0) {
         this.isCounting = false;
@@ -392,12 +395,13 @@ export class AddCustomer implements OnInit {
       "deviceId": "",
       "userId": this.sendotpId
     }
-    this.startTimer();
+    this.startTimer(false);
     this.addcustomerservice.ResendOTP(input).subscribe({
       next: (res) => {
         this.isResendLoading = false;
         this.resetCounter++;
         const reachedMaxAttempts = this.resetCounter >= this.maxResendAttempts;
+        if(reachedMaxAttempts) this.startTimer(reachedMaxAttempts);
         // this.startTimer(reachedMaxAttempts);
       },
       error: (err) => {

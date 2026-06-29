@@ -139,21 +139,6 @@ export class Coapplicantinfo implements OnInit {
     'co-summaryinfo'
   ];
   //on refresh page redirecting to number page so storing here 
-  restoreCoApplicantState1() {
-    const cleanUrl = this.router.url.split('?')[0];
-
-    const isStepperRoute = this.coApplicantChildRoutes.some(route =>
-      cleanUrl.includes(route)
-    );
-
-    if (isStepperRoute) {
-      this.mobileSubmitted = true;
-      return;
-    }
-
-    const saved = localStorage.getItem(`coapp_mobile_submitted_${this.applicantId}_${this.coApplicantIndex}`);
-    // this.mobileSubmitted = saved === 'true';
-  }
   restoreCoApplicantState() {
     const cleanUrl = this.router.url.split('?')[0];
 
@@ -327,6 +312,7 @@ export class Coapplicantinfo implements OnInit {
         console.error("error msg", err);
         this.searchLoading = false;
         this.norecordfound = true;
+        this.showmsg = true;
       }
     });
   }

@@ -252,13 +252,7 @@ export class Uploadkyc implements OnDestroy, AfterViewInit {
     }
   }
 
-  // getStorageKey() {
-  //    const coApplicantId = this.stepperService.getCo_appId()?.[0];
-  //   const index = this.stepperService.getCurrentCoApplicantIndex();
-  //   // return `kycinfo_coapp_${this.applicantId}_${index}`;
-  //    return `kycinfo_coapp_${this.applicationId}_${index}` 
 
-  // }
   getStorageKey() {
     if (!this.isCoApplicant) {
       return `kycinfo_main_${this.applicationId}_${this.stepperService.getLoanId()?.[0]}`;

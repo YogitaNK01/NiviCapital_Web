@@ -846,6 +846,55 @@ areEducationSubstepsUnlocked(): boolean {
   return this.educationSubstepsUnlocked;
 }
 
+getCoApplicantPageMode(routeParams: any) {
+  let storedCoAppData: any = {};
+
+  try {
+    storedCoAppData = JSON.parse(sessionStorage.getItem('coAppIds') || '{}');
+  } catch {
+    storedCoAppData = {};
+  }
+
+  const status = (
+    storedCoAppData?.status ||
+    ''
+  ).toUpperCase();
+
+  const isCompleted =
+    status === 'COMPLETED' ||
+    status === 'SUBMITTED';
+
+  const isNew =
+    storedCoAppData?.mode === 'new';
+
+  const isDraft =
+    !isNew &&
+    !isCompleted;
+
+  const cameFromSummary =
+    routeParams['fromSummary'] === true ||
+    routeParams['fromSummary'] === 'true' ||
+    storedCoAppData?.mode === 'view' ||
+    this.isSummaryEditFlow();
+
+  const isSummaryEditMode =
+    !isNew &&
+    isCompleted &&
+    cameFromSummary;
+
+  const viewOnly =
+    isSummaryEditMode &&
+    routeParams['mode'] !== 'edit';
+
+  return {
+    isCompleted,
+    isDraft,
+    isNew,
+    isSummaryEditMode,
+    viewOnly
+  };
+}
+
   // *************************Edit flow from table*********************************
 
 

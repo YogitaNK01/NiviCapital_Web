@@ -23,14 +23,14 @@
                 [(ngModel)]="prefillPhone" [showPhonePrefix]="true" [showPhonePrefixnumber]="true"
                 [state]="getPhoneFieldState(phone)"></app-inputfield>
 
- <div class="text-danger" *ngIf="showmsg">
+              <div class="text-danger mt-2" *ngIf="showmsg">
 
-                        <div >
-                            This Customer is already added as coapplicant
-                        </div>
-                        </div>
+                <div>
+                 Main Applicant and Co-Applicant mobile numbers cannot be the same. Please enter a different mobile number for the Co-Applicant.
+                </div>
+              </div>
             </div>
-            
+
 
           </div>
 
@@ -38,7 +38,7 @@
         </div>
 
         <!-- STEP 2  co-applicant steppers-->
-         
+
         <div *ngIf="mobileSubmitted">
           <app-coappstepper></app-coappstepper>
 

@@ -305,25 +305,6 @@ export class Loanstepperservice {
     this.rebuildSteps();
   }
 
-  markStepCompleted1(route: string) {
-    if (!this.completedSteps.has(route)) {
-      this.completedSteps.add(route);
-    }
-
-
-    const key =
-      this.stepperType === 'CO_APPLICANT'
-        ? this.getCoApplicantCompletedKey()
-        : this.getMainCompletedKey();
-
-    localStorage.setItem(
-      key,
-      JSON.stringify([...this.completedSteps])
-    );
-
-
-    this.rebuildSteps();
-  }
 
   restoreCompletedSteps1() {
     if (!this.applicantId) return;
@@ -1039,7 +1020,7 @@ this.router.navigate([...basePath, prevRoute], {
   }
 
   // clear queryparam of education
-  getCleanQueryParamsForRoute(route: string, currentParams: any = {}) {
+  getCleanQueryParamsForRoute1(route: string, currentParams: any = {}) {
     const isEducationRoute =
       route === 'educationDetails' ||
       route === 'educationinfo';
@@ -1059,4 +1040,42 @@ this.router.navigate([...basePath, prevRoute], {
       mode: null
     };
   }
+  getCleanQueryParamsForRoute(route: string, currentParams: any = {}) {
+  const isEducationRoute =
+    route === 'educationDetails' ||
+    route === 'educationinfo';
+
+  const cleanParams: any = {};
+
+  // ✅ Keep summary edit params only if user came from summary
+  const isFromSummary =
+    currentParams['fromSummary'] === true ||
+    currentParams['fromSummary'] === 'true';
+
+  if (isFromSummary) {
+    cleanParams.fromSummary = true;
+
+    if (currentParams['mode']) {
+      cleanParams.mode = currentParams['mode'];
+    }
+  }
+
+  // ✅ Keep education params only for education pages
+  if (isEducationRoute) {
+    if (currentParams['qualificationlabel']) {
+      cleanParams.qualificationlabel = currentParams['qualificationlabel'];
+    }
+
+    if (currentParams['qualificationId']) {
+      cleanParams.qualificationId = currentParams['qualificationId'];
+    }
+
+    if (currentParams['section']) {
+      cleanParams.section = currentParams['section'];
+    }
+  }
+
+
+  return cleanParams;
+}
 }

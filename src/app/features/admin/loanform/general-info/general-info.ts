@@ -198,13 +198,6 @@ export class GeneralInfo implements OnInit {
 
     const queryParams = this.route.snapshot.queryParams;
 
-    this.isSummaryEditMode =
-      queryParams['fromSummary'] === true ||
-      queryParams['fromSummary'] === 'true' ||
-      this.formSvc.isSummaryEditFlow();
-
-    this.viewOnly = this.isSummaryEditMode && (queryParams['mode'] === 'view' || queryParams['mode'] === undefined);
-
     if (
       this.isCoApplicant &&
       (!AllCoapp_ids || !AllCoapp_ids[0] || !AllCoapp_ids[1])
@@ -283,35 +276,8 @@ export class GeneralInfo implements OnInit {
       co_checkedasset: [null, Validators.required],
     });
 
-    const coappMode = this.formSvc.getCoApplicantMode();
 
-if (this.isCoApplicant && coappMode.isDraft) {
-  this.formSvc.clearSummaryEditFlow();
-  this.formSvc.clearSummaryEducationEditFlow?.();
-
-  this.isFromSummary = false;
-  this.isSummaryEditMode = false;
-  this.viewOnly = false;
-  this.isViewMode = false;
-  this.isEditMode = false;
-
-  this.activeForm.enable({ emitEvent: false });
-} else {
-  this.isFromSummary = this.formSvc.isSummaryEditFlow();
-
-  if (this.isFromSummary) {
-    this.isViewMode = true;
-    this.isEditMode = false;
-    this.activeForm.disable({ emitEvent: false });
-  }
-
-  if (this.viewOnly) {
-    this.activeForm.disable({ emitEvent: false });
-  }
-}
-
-   
-
+    this.applyApplicantViewMode(queryParams)
     // Reset localStorage if applicant changed
 
     const currentUserKey = this.isCoApplicant
@@ -342,17 +308,129 @@ if (this.isCoApplicant && coappMode.isDraft) {
     this.listenToChanges();
     await this.loadGeneralInfoForBothFlows()
 
-
+    if (this.viewOnly) {
+      this.activeForm.disable({ emitEvent: false });
+    }
 
 
   }
-  getStorageKey1() {
-    const coApplicantId = this.stepperService.getCo_appId()?.[0];
-    const index = this.stepperService.getCurrentCoApplicantIndex();
+  applyApplicantViewMode(queryParams: any) {
+    const isFromSummaryRoute =
+      queryParams['fromSummary'] === true ||
+      queryParams['fromSummary'] === 'true';
 
-    return this.isCoApplicant
-      ? `generalInfo_coapp_${this.applicationId}_${index}`
-      : `generalInfo_main_${this.applicationId}_${this.stepperService.getLoanId()?.[0]}`;
+    const cameFromSummary =
+      isFromSummaryRoute ||
+      this.formSvc.isSummaryEditFlow();
+
+    // =========================
+    // MAIN APPLICANT LOGIC
+    // =========================
+    if (!this.isCoApplicant) {
+      this.isSummaryEditMode = cameFromSummary;
+      this.isFromSummary = this.isSummaryEditMode;
+
+      this.viewOnly =
+        this.isSummaryEditMode &&
+        queryParams['mode'] !== 'edit';
+
+      if (this.isSummaryEditMode) {
+        if (this.viewOnly) {
+          this.isViewMode = true;
+          this.isEditMode = false;
+          this.activeForm.disable({ emitEvent: false });
+        } else {
+          this.isViewMode = false;
+          this.isEditMode = true;
+          this.activeForm.enable({ emitEvent: false });
+        }
+      } else {
+        this.isFromSummary = false;
+        this.isSummaryEditMode = false;
+        this.viewOnly = false;
+        this.isViewMode = false;
+        this.isEditMode = false;
+
+        this.activeForm.enable({ emitEvent: false });
+      }
+
+      return;
+    }
+
+    // =========================
+    // CO-APPLICANT LOGIC
+    // =========================
+    let storedCoAppData: any = {};
+
+    try {
+      storedCoAppData = JSON.parse(sessionStorage.getItem('coAppIds') || '{}');
+    } catch {
+      storedCoAppData = {};
+    }
+
+    const coappStatus = (
+      storedCoAppData?.status ||
+      (isFromSummaryRoute ? 'COMPLETED' : '')
+    ).toUpperCase();
+
+    const isCompletedCoapp =
+      coappStatus === 'COMPLETED' ||
+      coappStatus === 'SUBMITTED';
+
+    const isNewCoappFlow =
+      storedCoAppData?.mode === 'new';
+
+    const isDraftCoapp =
+      !isNewCoappFlow &&
+      !isCompletedCoapp;
+
+    const coappCameFromSummary =
+      isFromSummaryRoute ||
+      storedCoAppData?.mode === 'view' ||
+      storedCoAppData?.mode === 'edit' ||
+      this.formSvc.isSummaryEditFlow();
+
+    this.isSummaryEditMode =
+      !isNewCoappFlow &&
+      isCompletedCoapp &&
+      coappCameFromSummary;
+
+    this.isFromSummary = this.isSummaryEditMode;
+
+    this.viewOnly =
+      this.isSummaryEditMode &&
+      queryParams['mode'] !== 'edit';
+
+    if (isDraftCoapp || isNewCoappFlow) {
+      this.formSvc.clearSummaryEditFlow();
+      this.formSvc.clearSummaryEducationEditFlow?.();
+
+      this.isFromSummary = false;
+      this.isSummaryEditMode = false;
+      this.viewOnly = false;
+      this.isViewMode = false;
+      this.isEditMode = false;
+
+      this.activeForm.enable({ emitEvent: false });
+    } else if (this.isSummaryEditMode) {
+      if (this.viewOnly) {
+        this.isViewMode = true;
+        this.isEditMode = false;
+        this.activeForm.disable({ emitEvent: false });
+      } else {
+        this.isViewMode = false;
+        this.isEditMode = true;
+        this.activeForm.enable({ emitEvent: false });
+      }
+    } else {
+      this.isFromSummary = false;
+      this.isSummaryEditMode = false;
+      this.viewOnly = false;
+      this.isViewMode = false;
+      this.isEditMode = false;
+
+      this.activeForm.enable({ emitEvent: false });
+    }
   }
 
   getStorageKey() {
@@ -365,9 +443,7 @@ if (this.isCoApplicant && coappMode.isDraft) {
       this.applicationId,
       this.applicantId,
       this.isCoApplicant,
-      // main_ApplicantId ?? undefined,
-      // co_ApplicantId ?? undefined,
-      // index
+
     );
   }
 
@@ -422,8 +498,9 @@ if (this.isCoApplicant && coappMode.isDraft) {
       this.lastSavedPayload = this.buildCoApplicantPayload(
         this.coapp_registerForm.getRawValue()
       );
-       if (this.coapp_registerForm.valid) {
-            this.stepperService.markStepCompleted('co-generalinfo');  }
+      if (this.coapp_registerForm.valid) {
+        this.stepperService.markStepCompleted('co-generalinfo');
+      }
 
     } else {
       this.patchGeneralInfo(finalData);
@@ -524,7 +601,7 @@ if (this.isCoApplicant && coappMode.isDraft) {
         const start = new Date(startDate);
         start.setHours(0, 0, 0, 0);
         this.calculatedEndDate = start;
- this.form.get('courseenddate')?.updateValueAndValidity();
+        this.form.get('courseenddate')?.updateValueAndValidity();
         // const endCtrl = this.registerForm.get('courseenddate');
         // endCtrl?.reset();
         // endCtrl?.updateValueAndValidity();
@@ -1490,7 +1567,7 @@ if (this.isCoApplicant && coappMode.isDraft) {
   saveCoApplicant(formdata: any) {
     const payload = this.buildCoApplicantPayload(formdata);
 
-     const coApplicantId =    this.stepperService.getCo_appId()?.[0] || this.applicantId;
+    const coApplicantId = this.stepperService.getCo_appId()?.[0] || this.applicantId;
     const input = {
       applicationId: this.applicationId,
       applicantId: coApplicantId,
@@ -1511,7 +1588,7 @@ if (this.isCoApplicant && coappMode.isDraft) {
         this.lastSavedPayload = { ...payload };
 
         this.formSvc.co_generalInfoData = { ...localPayload };
-      
+
         this.storageservice.saveSectionData(
           'generalInfo',
           this.applicationId,
@@ -1573,20 +1650,20 @@ if (this.isCoApplicant && coappMode.isDraft) {
 
     const hasChanged = this.isPayloadChanged(currentPayload, this.lastSavedPayload);
 
-  if (!hasChanged) {
-  console.log('No changes detected, skipping API call');
+    if (!hasChanged) {
+      console.log('No changes detected, skipping API call');
 
-  if (this.isCoApplicant) {
-    this.stepperService.markStepCompleted('co-generalinfo');
-    this.stepperService.setStepData('co-generalinfo', form.value);
-  } else {
-    this.stepperService.markStepCompleted('genralinfo');
-    this.stepperService.setStepData('genralinfo', form.value);
-  }
+      if (this.isCoApplicant) {
+        this.stepperService.markStepCompleted('co-generalinfo');
+        this.stepperService.setStepData('co-generalinfo', form.value);
+      } else {
+        this.stepperService.markStepCompleted('genralinfo');
+        this.stepperService.setStepData('genralinfo', form.value);
+      }
 
-  this.stepperService.next();
-  return;
-}
+      this.stepperService.next();
+      return;
+    }
 
     if (this.isCoApplicant) {
       this.saveCoApplicant(form.value);
@@ -1671,47 +1748,64 @@ if (this.isCoApplicant && coappMode.isDraft) {
   enableForm() {
     this.isViewMode = false;
     this.isEditMode = true;
+    this.viewOnly = false;
     this.activeForm.enable();
   }
 
   cancelSummaryEdit() {
     if (this.isEditMode && this.originalFormValue) {
-      this.registerForm.patchValue(this.originalFormValue);
+      this.activeForm.patchValue(this.originalFormValue);
     }
 
     this.isViewMode = true;
     this.isEditMode = false;
-     this.activeForm.disable();
+    this.viewOnly = true;
+    this.activeForm.disable();
   }
   saveSummaryEdit() {
     const formdata = this.activeForm.getRawValue();
-    const input = this.buildMainPayload(formdata);
 
-    this.formSvc.submitGenralInfo(input, this.applicationId, true).subscribe({
-      next: (res: any) => {
-        if (res.status === 'success') {
-          const key = this.getStorageKey();
-          localStorage.setItem(key, JSON.stringify(input));
+    const input = this.isCoApplicant
+      ? this.buildCoApplicantPayload(formdata)
+      : this.buildMainPayload(formdata);
 
-          if (this.isCoApplicant) {
+    if (this.isCoApplicant) {
+      const apiInput = {
+        applicationId: this.applicationId,
+        applicantId: this.applicantId,
+        occupationId: formdata.occupation,
+        annualIncome: formdata.annualIncome,
+        relationWithApplicantId: formdata.relationWithApplicantId,
+        hasAssets: formdata.hasAssets
+      };
+
+      this.formSvc.submit_Coapp_GenralInfo(apiInput, this.applicationId, true).subscribe({
+        next: (res: any) => {
+          if (res.status === 'success') {
             this.formSvc.co_generalInfoData = input;
-          } else {
-            this.formSvc.generalInfoData = input;
+            this.lastSavedPayload = { ...input };
+            this.editSuccess = true;
           }
-
-          this.lastSavedPayload = { ...input };
-
-          console.log(res);
-
-
-          this.editSuccess = true;
-
+        },
+        error: (err) => {
+          console.error('General info update failed', err);
         }
-      },
-      error: (err) => {
-        console.error('Additional info update failed', err);
-      }
-    });
+      });
+
+    } else {
+      this.formSvc.submitGenralInfo(input, this.applicationId, true).subscribe({
+        next: (res: any) => {
+          if (res.status === 'success') {
+            this.formSvc.generalInfoData = input;
+            this.lastSavedPayload = { ...input };
+            this.editSuccess = true;
+          }
+        },
+        error: (err) => {
+          console.error('General info update failed', err);
+        }
+      });
+    }
   }
 
   // edit sucess popup

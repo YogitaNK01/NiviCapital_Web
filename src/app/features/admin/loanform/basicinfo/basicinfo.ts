@@ -55,7 +55,6 @@ export class Basicinfo {
   resendSeconds = 60;
   isCounting = false;
   timerId: any;
-  resetCounter = 0;
 
   ismiddlename = false;
   showMiddleNameError = false;
@@ -79,7 +78,10 @@ export class Basicinfo {
   editSuccess: any = false;
   description1 = `Great ! Your Additional Info Details\n Uploaded Successfully.`;
 
-
+  resetCounter = 0;
+  maxResendAttempts = 5;
+  resendLocked = false;
+  isResendLoading = false;
   constructor(private fb: FormBuilder, public main: Main, private addcustomerservice: Addcustomerservice, private cd: ChangeDetectorRef, private msgBox: Msgboxservice,
     private router: Router, private loanform: Loanformservice, private stepperService: Loanstepperservice, private route: ActivatedRoute, private storageservice: Storage) { }
 
@@ -163,19 +165,37 @@ export class Basicinfo {
       ? pendingContext?.phone || ''
       : params['phone'] || ''
 
+    // const currentCoapp = this.getCurrentCoApplicantFromList();
+
+
+    // const coappStatus = (currentCoapp?.status || currentCoapp?.uiStatus || '').toUpperCase();
+
+    // const isDraftCoapp =
+    //   this.isCoApplicant &&
+    //   !isNewCoappFlow &&
+    //   (
+    //     coappStatus === 'DRAFT' ||
+    //     coappStatus === 'IN_PROGRESS' ||
+    //     !coappStatus
+    //   );
+
     const currentCoapp = this.getCurrentCoApplicantFromList();
 
+    const coappStatus = (
+      sessionCoApp?.status ||
+      currentCoapp?.status ||
+      currentCoapp?.uiStatus ||
+      ''
+    ).toUpperCase();
 
-    const coappStatus = (currentCoapp?.status || currentCoapp?.uiStatus || '').toUpperCase();
+    const isCompletedCoapp =
+      coappStatus === 'COMPLETED' ||
+      coappStatus === 'SUBMITTED';
 
     const isDraftCoapp =
       this.isCoApplicant &&
       !isNewCoappFlow &&
-      (
-        coappStatus === 'DRAFT' ||
-        coappStatus === 'IN_PROGRESS' ||
-        !coappStatus
-      );
+      !isCompletedCoapp;
 
     if (isDraftCoapp) {
       this.loanform.clearSummaryEditFlow();
@@ -230,18 +250,34 @@ export class Basicinfo {
     });
 
 
-    this.isFromSummary = !isNewCoappFlow && !isDraftCoapp &&  this.loanform.isSummaryEditFlow();
+    const cameFromSummary =
+      params['fromSummary'] === true ||
+      params['fromSummary'] === 'true' ||
+      sessionCoApp?.mode === 'view' ||
+      this.loanform.isSummaryEditFlow();
 
-    if (this.isFromSummary) {
+    this.isSummaryEditMode =
+      !isNewCoappFlow &&
+      isCompletedCoapp &&
+      cameFromSummary;
+
+    this.isFromSummary = this.isSummaryEditMode;
+
+    this.viewOnly =
+      this.isSummaryEditMode &&
+      params['mode'] !== 'edit';
+
+    if (this.isSummaryEditMode) {
       this.isViewMode = true;
+      this.isEditMode = false;
       this.registerForm.disable({ emitEvent: false });
     } else {
+      this.isFromSummary = false;
       this.isViewMode = false;
       this.isEditMode = false;
+      this.viewOnly = false;
       this.registerForm.enable({ emitEvent: false });
     }
-
-
 
     const existingCoApplicantId =
       currentCoapp?.applicantId ||
@@ -406,9 +442,21 @@ export class Basicinfo {
       this.stepperService.markStepCompleted('co-basicinfo');
     }
   }
+   get canResendOtp(): boolean {
+    return (
+      this.otpsent &&
+      !this.otpVerifiedOk &&
+      !this.isCounting &&
+      !this.resendLocked &&
+      !this.isResendLoading
+    );
+  }
   resendOtp() {
-    if (this.hasExistingCif) return;
-    this.resetCounter++;
+    if (!this.canResendOtp) { return; }
+    if (this.resetCounter >= this.maxResendAttempts) {
+      // this.startTimer(true); return;
+    }
+    this.isResendLoading = true;
     console.log("Resend OTP API call here");
 
     const input = {
@@ -419,10 +467,13 @@ export class Basicinfo {
       "deviceId": "",
       "userId": this.sendotpId
     }
-    this.startTimer();
+    this.startTimer(false);
     this.addcustomerservice.ResendOTP(input).subscribe({
       next: (res) => {
-
+  this.isResendLoading = false;
+        this.resetCounter++;
+        const reachedMaxAttempts = this.resetCounter >= this.maxResendAttempts;
+        if(reachedMaxAttempts) this.startTimer(reachedMaxAttempts);
       },
       error: (err) => {
         console.error("error msg", err);
@@ -433,7 +484,10 @@ export class Basicinfo {
 
   sendOtp() {
     console.log("send otp");
+
     if (this.hasExistingCif) return;
+    this.resetCounter = 0;
+      this.resendLocked = false;
     this.loanform.setMobileNumber(this.prefillPhone);
     this.otpsent = true;
     const input = {
@@ -444,7 +498,7 @@ export class Basicinfo {
       "deviceId": "",
       "userId": this.sendotpId
     }
-    this.startTimer()
+    this.startTimer(false)
     this.addcustomerservice.SendOTP(input).subscribe({
       next: (res) => {
         console.log(res);
@@ -458,7 +512,7 @@ export class Basicinfo {
 
   }
 
-  startTimer() {
+  startTimer(reachedMaxAttempts:boolean) {
 
     // stop any existing timer first
     if (this.timerSub) {
@@ -467,16 +521,25 @@ export class Basicinfo {
     }
 
     this.resendSeconds = 60;
+    if(reachedMaxAttempts){
+      this.resendSeconds = 180;
+      this.resetCounter = 0;
+    }
     this.isCounting = true;
+
+
 
     this.timerSub = interval(1000).subscribe(() => {
       this.resendSeconds--;
       this.cd.detectChanges();
 
-      // console.log(this.resendSeconds);
 
       if (this.resendSeconds <= 0) {
         this.isCounting = false;
+        if (this.resendLocked) {
+          this.resendLocked = false;
+          this.resetCounter = 0;
+        }
         this.timerSub?.unsubscribe();
         this.timerSub = undefined;
         this.cd.detectChanges();
@@ -588,12 +651,22 @@ export class Basicinfo {
 
     const currentCoapp = this.getCurrentCoApplicantFromList();
 
+    // const isSubmittedCoapp =
+    //   ['COMPLETED', 'SUBMITTED'].includes(
+    //     (currentCoapp?.status || '').toUpperCase()
+    //   );
+
+    const sessionCoApp = JSON.parse(sessionStorage.getItem('coAppIds') || '{}');
+
     const isSubmittedCoapp =
       ['COMPLETED', 'SUBMITTED'].includes(
-        (currentCoapp?.status || '').toUpperCase()
+        (
+          sessionCoApp?.status ||
+          currentCoapp?.status ||
+          currentCoapp?.uiStatus ||
+          ''
+        ).toUpperCase()
       );
-
-
     const coApplicantApplicantId = this.getCoApplicantApplicantId();
 
     const draftData = coApplicantApplicantId
@@ -994,16 +1067,16 @@ export class Basicinfo {
     // this.patchCoApplicantInfo(parsed); // or patchGeneralInfo / patchAdditionalInfo
   }
   back() {
-  this.loanform.coappStep = 1;
+    this.loanform.coappStep = 1;
 
-  this.router.navigate(
-    ['/loanform', 'co-applicantdetails', 'coapplicantinfo'],
-    {
-      queryParams: {},
-      replaceUrl: true
-    }
-  );
-}
+    this.router.navigate(
+      ['/loanform', 'co-applicantdetails', 'coapplicantinfo'],
+      {
+        queryParams: {},
+        replaceUrl: true
+      }
+    );
+  }
   next() {
     console.log('FNAME =>', this.registerForm.get('fname')?.value);
 
@@ -1086,7 +1159,9 @@ export class Basicinfo {
           applicantId: this.co_applicantId,
           applicationId: this.co_applicationId,
           fullName: this.co_applicantName,
-          coApplicantIndex: this.stepperService.getCurrentCoApplicantIndex()
+          coApplicantIndex: this.stepperService.getCurrentCoApplicantIndex(),
+          status: 'DRAFT',
+          mode: ''
         };
         sessionStorage.setItem('coAppIds', JSON.stringify(coAppData));
         sessionStorage.removeItem('pendingCoAppContext');

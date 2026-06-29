@@ -27,7 +27,7 @@ interface LiabilityOption {
 
 @Component({
   selector: 'app-liabilitiesinfo',
-  imports: [CommonModule, ReactiveFormsModule, Buttons, Dropdown, Inputfield,Successbox,Messagebox],
+  imports: [CommonModule, ReactiveFormsModule, Buttons, Dropdown, Inputfield, Successbox, Messagebox],
   standalone: true,
   templateUrl: './liabilitiesinfo.html',
   styleUrl: './liabilitiesinfo.scss'
@@ -124,18 +124,18 @@ export class Liabilitiesinfo {
   viewOnly = false;
   private isPatching = false;
 
-    //edit from summary
-   //edit from summary
+  //edit from summary
+  //edit from summary
   isFromSummary = false;
   isViewMode = false;
   isEditMode = false;
   originalFormValue: any = null;
-  
+
   editSuccess: any = false;
   description1 = `Great ! Your Liabilities Info Details\n Uploaded Successfully.`;
   summarySection: any = [];
 
-  constructor(private fb: FormBuilder, public main: Main, private route: ActivatedRoute, private msgBox: Msgboxservice, private router: Router,private storageservice:Storage,
+  constructor(private fb: FormBuilder, public main: Main, private route: ActivatedRoute, private msgBox: Msgboxservice, private router: Router, private storageservice: Storage,
     private stepperService: Loanstepperservice, private formSvc: Loanformservice, private cd: ChangeDetectorRef) { }
 
 
@@ -163,13 +163,6 @@ export class Liabilitiesinfo {
 
     const queryParams = this.route.snapshot.queryParams;
 
-    this.isSummaryEditMode =
-      queryParams['fromSummary'] === true ||
-      queryParams['fromSummary'] === 'true' ||
-      this.formSvc.isSummaryEditFlow();
-
-    this.viewOnly = this.isSummaryEditMode && (queryParams['mode'] === 'view' || queryParams['mode'] === undefined);
-
     if (
       this.isCoApplicant &&
       (!AllCoapp_ids || !AllCoapp_ids[0] || !AllCoapp_ids[1])
@@ -191,7 +184,7 @@ export class Liabilitiesinfo {
           parsed.applicantId,
           parsed.applicationId,
           parsed.fullName,
-          undefined,parsed.coApplicantIndex || 1
+          undefined, parsed.coApplicantIndex || 1
         );
       }
     }
@@ -220,7 +213,7 @@ export class Liabilitiesinfo {
       other: this.fb.array([]),
 
     });
-
+    this.applyApplicantViewMode(queryParams);
 
     this.liabilityForm.get('loans')?.valueChanges.subscribe(() => {
       this.calculateGrandTotal();
@@ -238,62 +231,130 @@ export class Liabilitiesinfo {
       this.calculateGrandTotal();
     });
 
-
-
-
     await this.loadMasters();
+    await this.loadliabilityForBothFlows()
     if (this.viewOnly) {
       this.liabilityForm.disable({ emitEvent: false });
     }
-    await this.loadliabilityForBothFlows()
-
-this.applyCoApplicantViewMode(queryParams);
 
 
   }
 
-private applyCoApplicantViewMode(queryParams: any) {
-  const coappMode = this.formSvc.getCoApplicantMode();
-
-  this.isSummaryEditMode =
-    !(this.isCoApplicant && coappMode.isDraft) &&
-    (
+  applyApplicantViewMode(queryParams: any) {
+    const isFromSummaryRoute =
       queryParams['fromSummary'] === true ||
-      queryParams['fromSummary'] === 'true' ||
-      this.formSvc.isSummaryEditFlow()
-    );
+      queryParams['fromSummary'] === 'true';
 
-  this.viewOnly =
-    this.isSummaryEditMode &&
-    (
-      queryParams['mode'] === 'view' ||
-      queryParams['mode'] === undefined
-    );
+    const cameFromSummary =
+      isFromSummaryRoute ||
+      this.formSvc.isSummaryEditFlow();
 
-  if (this.isCoApplicant && coappMode.isDraft) {
-    this.formSvc.clearSummaryEditFlow();
-    this.formSvc.clearSummaryEducationEditFlow?.();
+    // ✅ MAIN APPLICANT LOGIC
+    if (!this.isCoApplicant) {
+      this.isSummaryEditMode = cameFromSummary;
+      this.isFromSummary = this.isSummaryEditMode;
 
-    this.isFromSummary = false;
-    this.isSummaryEditMode = false;
-    this.viewOnly = false;
-    this.isViewMode = false;
-    this.isEditMode = false;
+      this.viewOnly =
+        this.isSummaryEditMode &&
+        queryParams['mode'] !== 'edit';
 
-    this.liabilityForm.enable({ emitEvent: false });
-    return;
+      if (this.isSummaryEditMode) {
+        if (this.viewOnly) {
+          this.isViewMode = true;
+          this.isEditMode = false;
+          this.liabilityForm.disable({ emitEvent: false });
+        } else {
+          this.isViewMode = false;
+          this.isEditMode = true;
+          this.liabilityForm.enable({ emitEvent: false });
+        }
+      } else {
+        this.isFromSummary = false;
+        this.isSummaryEditMode = false;
+        this.viewOnly = false;
+        this.isViewMode = false;
+        this.isEditMode = false;
+        this.liabilityForm.enable({ emitEvent: false });
+      }
+
+      return;
+    }
+
+    // ✅ CO-APPLICANT LOGIC
+    let storedCoAppData: any = {};
+
+    try {
+      storedCoAppData = JSON.parse(sessionStorage.getItem('coAppIds') || '{}');
+    } catch {
+      storedCoAppData = {};
+    }
+
+    const coappStatus = (
+      storedCoAppData?.status ||
+      (isFromSummaryRoute ? 'COMPLETED' : '')
+    ).toUpperCase();
+
+    const isCompletedCoapp =
+      coappStatus === 'COMPLETED' ||
+      coappStatus === 'SUBMITTED';
+
+    const isNewCoappFlow =
+      storedCoAppData?.mode === 'new';
+
+    const isDraftCoapp =
+      !isNewCoappFlow &&
+      !isCompletedCoapp;
+
+    const coappCameFromSummary =
+      isFromSummaryRoute ||
+      storedCoAppData?.mode === 'view' ||
+      storedCoAppData?.mode === 'edit' ||
+      this.formSvc.isSummaryEditFlow();
+
+    this.isSummaryEditMode =
+      !isNewCoappFlow &&
+      isCompletedCoapp &&
+      coappCameFromSummary;
+
+    this.isFromSummary = this.isSummaryEditMode;
+
+    this.viewOnly =
+      this.isSummaryEditMode &&
+      queryParams['mode'] !== 'edit';
+
+    if (isDraftCoapp || isNewCoappFlow) {
+      this.formSvc.clearSummaryEditFlow();
+      this.formSvc.clearSummaryEducationEditFlow?.();
+
+      this.isFromSummary = false;
+      this.isSummaryEditMode = false;
+      this.viewOnly = false;
+      this.isViewMode = false;
+      this.isEditMode = false;
+
+      this.liabilityForm.enable({ emitEvent: false });
+    } else if (this.isSummaryEditMode) {
+      if (this.viewOnly) {
+        this.isViewMode = true;
+        this.isEditMode = false;
+        this.liabilityForm.disable({ emitEvent: false });
+      } else {
+        this.isViewMode = false;
+        this.isEditMode = true;
+        this.liabilityForm.enable({ emitEvent: false });
+      }
+    } else {
+      this.isFromSummary = false;
+      this.isSummaryEditMode = false;
+      this.viewOnly = false;
+      this.isViewMode = false;
+      this.isEditMode = false;
+
+      this.liabilityForm.enable({ emitEvent: false });
+    }
   }
 
-  this.isFromSummary = this.formSvc.isSummaryEditFlow();
-
-  if (this.isFromSummary || this.viewOnly) {
-    this.isViewMode = true;
-    this.isEditMode = false;
-    this.liabilityForm.disable({ emitEvent: false });
-  }
-}
-
-    getStorageKey() {
+  getStorageKey() {
     const main_ApplicantId = this.stepperService.getLoanId()?.[0];
     const co_ApplicantId = this.stepperService.getCo_appId()?.[0];
     const index = this.stepperService.getCurrentCoApplicantIndex();
@@ -303,7 +364,7 @@ private applyCoApplicantViewMode(queryParams: any) {
       this.applicationId,
       this.applicantId,
       this.isCoApplicant,
-    
+
     );
   }
   getCurrentCoApplicantFromList() {
@@ -418,7 +479,7 @@ private applyCoApplicantViewMode(queryParams: any) {
     // const localData = localStorage.getItem(key);
     // const parsedLocal = localData ? JSON.parse(localData) : null;
 
-     const parsedLocal = this.storageservice.getStoredSectionData(
+    const parsedLocal = this.storageservice.getStoredSectionData(
       'liabilitiesinfoData',
       this.applicationId,
       this.applicantId,
@@ -427,7 +488,7 @@ private applyCoApplicantViewMode(queryParams: any) {
 
     const apiApplicantId = this.getApiApplicantId();
 
-  
+
 
     const [draftData, summarySection] = await Promise.all([
       apiApplicantId ? this.getSavedLiability(apiApplicantId) : Promise.resolve(null),
@@ -439,7 +500,7 @@ private applyCoApplicantViewMode(queryParams: any) {
     const normalizedDraft = this.normalizeLiabilities(draftData);
     const normalizedLocal = this.normalizeLiabilities(parsedLocal);
 
-   
+
 
     const finalData = this.mergeLiabilityData(
       normalizedSummary,
@@ -491,13 +552,13 @@ private applyCoApplicantViewMode(queryParams: any) {
       });
 
     // localStorage.setItem(key, JSON.stringify(finalData));
-      this.storageservice.saveSectionData(
-            'liabilitiesinfoData',
-            this.applicationId,
-            this.applicantId,
-            this.isCoApplicant,
-             JSON.stringify(finalData)
-          );
+    this.storageservice.saveSectionData(
+      'liabilitiesinfoData',
+      this.applicationId,
+      this.applicantId,
+      this.isCoApplicant,
+      JSON.stringify(finalData)
+    );
 
     this.liabilityForm.markAsPristine();
     this.calculateGrandTotal();
@@ -1683,7 +1744,7 @@ private applyCoApplicantViewMode(queryParams: any) {
 
     let accArr: any = [];
 
-    if(this.summaryFieldMap?.[acc?.key]){
+    if (this.summaryFieldMap?.[acc?.key]) {
       this.summarySection[this.summaryFieldMap[acc.key].keyName].forEach((item: any) => {
         accArr.push(item.id);
       });
@@ -1725,7 +1786,7 @@ private applyCoApplicantViewMode(queryParams: any) {
 
         this.calculateGrandTotal();
 
-        if(accArr){
+        if (accArr) {
           this.deleteItemArr(accArr);
         }
 
@@ -1738,17 +1799,17 @@ private applyCoApplicantViewMode(queryParams: any) {
 
   // 2. removeitem - FULL LOAN RESET
   removeitem(index: number, type: 'loantype' | 'creditcard' | 'bnpl' | 'other') {
-    let item : any = {};
-    if(this.summarySection?.existingLoans && type === 'loantype'){
+    let item: any = {};
+    if (this.summarySection?.existingLoans && type === 'loantype') {
       item = this.summarySection.existingLoans[index];
     }
-    if(this.summarySection?.creditCardOutstanding && type === 'creditcard'){
+    if (this.summarySection?.creditCardOutstanding && type === 'creditcard') {
       item = this.summarySection.creditCardOutstanding[index];
     }
-    if(this.summarySection?.bnpl && type === 'bnpl'){
+    if (this.summarySection?.bnpl && type === 'bnpl') {
       item = this.summarySection.bnpl[index];
     }
-    if(this.summarySection?.otherLiabilities && type === 'other'){
+    if (this.summarySection?.otherLiabilities && type === 'other') {
       item = this.summarySection.otherLiabilities[index];
     }
 
@@ -1777,7 +1838,7 @@ private applyCoApplicantViewMode(queryParams: any) {
         this.checkAndDeselectEmptyArray(type);
         this.calculateGrandTotal();
 
-        if(item){
+        if (item) {
           this.deleteItemArr([item.id]);
         }
 
@@ -1786,7 +1847,7 @@ private applyCoApplicantViewMode(queryParams: any) {
     });
   }
 
-  deleteItemArr(idArr: any){
+  deleteItemArr(idArr: any) {
     this.formSvc.deleteLiability({
       applicationId: this.applicationId,
       applicantId: this.applicantId,
@@ -2007,104 +2068,104 @@ private applyCoApplicantViewMode(queryParams: any) {
   }
 
   saveExit() {
-  this.msgBox.open({
+    this.msgBox.open({
       title: 'Are you sure you want to exit?',
       message: ``,
       showCancel: true,
       onOk: () => {
-    
 
-  if (this.hasNoLiabilitiesSelected) {
-    const input = {
-      applicantId: this.getApiApplicantId(),
-      items: []
-    };
 
-    // localStorage.setItem(this.getStorageKey(), JSON.stringify(input));
-      this.storageservice.saveSectionData(
+        if (this.hasNoLiabilitiesSelected) {
+          const input = {
+            applicantId: this.getApiApplicantId(),
+            items: []
+          };
+
+          // localStorage.setItem(this.getStorageKey(), JSON.stringify(input));
+          this.storageservice.saveSectionData(
             'liabilitiesinfoData',
             this.applicationId,
             this.applicantId,
             this.isCoApplicant,
-             JSON.stringify(input)
+            JSON.stringify(input)
           );
 
-    if (this.isCoApplicant) {
-      this.formSvc.co_liabilitiesInfoData = input;
-    } else {
-      this.formSvc.liabilitiesInfoData = input;
-    }
+          if (this.isCoApplicant) {
+            this.formSvc.co_liabilitiesInfoData = input;
+          } else {
+            this.formSvc.liabilitiesInfoData = input;
+          }
 
-    const inputdata = {
-      action: 'auto-save',
-      sectionKey: 'SAVE_LIABILITIES',
-      applicationId: this.applicationId,
-      applicantId: this.getApiApplicantId(),
-      jsonData: input
-    };
+          const inputdata = {
+            action: 'auto-save',
+            sectionKey: 'SAVE_LIABILITIES',
+            applicationId: this.applicationId,
+            applicantId: this.getApiApplicantId(),
+            jsonData: input
+          };
 
-    this.formSvc.saveandExit(inputdata).subscribe({
-      next: () => {
-        this.lastSavedPayload = { ...input };
-      },
-      error: (err) => {
-        console.error('Liabilities saveExit error:', err);
+          this.formSvc.saveandExit(inputdata).subscribe({
+            next: () => {
+              this.lastSavedPayload = { ...input };
+            },
+            error: (err) => {
+              console.error('Liabilities saveExit error:', err);
+            }
+          });
+
+          return;
+        }
+
+        // const result = this.buildLiabilityPayloadWithApplicantId();
+        const result = this.buildDraftLiabilityPayloadWithApplicantId();
+        if (result.invalid) return;
+
+        const input = { items: result.items, applicantId: result.applicantId, };
+
+
+        const key = this.getStorageKey();
+        // localStorage.setItem(key, JSON.stringify(input));
+        this.storageservice.saveSectionData(
+          'liabilitiesinfoData',
+          this.applicationId,
+          this.applicantId,
+          this.isCoApplicant,
+          JSON.stringify(input)
+        );
+
+        if (this.isCoApplicant) {
+          this.formSvc.co_liabilitiesInfoData = input;
+        } else {
+          this.formSvc.liabilitiesInfoData = input;
+        }
+
+        const applicantId = this.getApiApplicantId();
+
+        if (!applicantId) {
+          console.error('ApplicantId not found for photo upload');
+          return;
+        }
+
+        const inputdata = {
+          action: "auto-save",
+          sectionKey: "SAVE_LIABILITIES",
+          applicationId: this.applicationId,
+          applicantId: applicantId,
+          jsonData: input
+        };
+
+        this.formSvc.saveandExit(inputdata).subscribe({
+          next: () => {
+            this.lastSavedPayload = { ...input };
+          },
+
+          error: (err) => {
+            console.error('Liabilities saveExit error:', err);
+          }
+
+        });
+        this.router.navigate(['/admin/losoperation']);
       }
-    });
-
-    return;
-  }
-
-    // const result = this.buildLiabilityPayloadWithApplicantId();
-    const result = this.buildDraftLiabilityPayloadWithApplicantId();
-    if (result.invalid) return;
-
-    const input = { items: result.items, applicantId: result.applicantId, };
-
-
-    const key = this.getStorageKey();
-    // localStorage.setItem(key, JSON.stringify(input));
-  this.storageservice.saveSectionData(
-            'liabilitiesinfoData',
-            this.applicationId,
-            this.applicantId,
-            this.isCoApplicant,
-             JSON.stringify(input)
-          );
-
-    if (this.isCoApplicant) {
-      this.formSvc.co_liabilitiesInfoData = input;
-    } else {
-      this.formSvc.liabilitiesInfoData = input;
-    }
-
-    const applicantId = this.getApiApplicantId();
-
-    if (!applicantId) {
-      console.error('ApplicantId not found for photo upload');
-      return;
-    }
-
-    const inputdata = {
-      action: "auto-save",
-      sectionKey: "SAVE_LIABILITIES",
-      applicationId: this.applicationId,
-      applicantId: applicantId,
-      jsonData: input
-    };
-
-    this.formSvc.saveandExit(inputdata).subscribe({
-      next: () => {
-        this.lastSavedPayload = { ...input };
-      },
-
-      error: (err) => {
-        console.error('Liabilities saveExit error:', err);
-      }
-
-    });
-     this.router.navigate(['/admin/losoperation']);
-     }
     });
   }
   buildLiabilityPayload(): {
@@ -2161,7 +2222,7 @@ private applyCoApplicantViewMode(queryParams: any) {
             emiAmountInr: cleanAmount(loan.value.emiamount),
             remainingTenureMonths: loan.value.remtenure,
             liabilityTypeText: loan.value.type,
-              liabilityId: this.liabilityCodeMap["EXISTING_LOAN"],
+            liabilityId: this.liabilityCodeMap["EXISTING_LOAN"],
           });
         }
       });
@@ -2184,7 +2245,7 @@ private applyCoApplicantViewMode(queryParams: any) {
             outstandingBalanceInr: cleanAmount(card.value.ccoutstandingBalance),
             creditLimitInr: cleanAmount(card.value.cccreditLimit),
             liabilityTypeText: `CREDIT_CARD_OUTSTANDING ${index + 1}`,
-             liabilityId: this.liabilityCodeMap["CREDIT_CARD_OUTSTANDING"],
+            liabilityId: this.liabilityCodeMap["CREDIT_CARD_OUTSTANDING"],
           });
         }
       });
@@ -2207,7 +2268,7 @@ private applyCoApplicantViewMode(queryParams: any) {
             creditLimitInr: cleanAmount(bnpl.value.creditLimit),
             monthlyEmiInr: cleanAmount(bnpl.value.monthlyEMI),
             ...(this.isOtherSelectedbnpl(bnpl) && { title: bnpl.value.title }),
-               liabilityTypeText: `BNPL ${index + 1}`,
+            liabilityTypeText: `BNPL ${index + 1}`,
             liabilityId: this.liabilityCodeMap["BNPL"],
           });
         }
@@ -2228,7 +2289,7 @@ private applyCoApplicantViewMode(queryParams: any) {
             liabilityTypeText: other.value.LiabilityType,
             amountInr: cleanAmount(other.value.libamount),
             monthlyRepaymentInr: cleanAmount(other.value.MonthlyRepaymentLimit),
-              liabilityId: this.liabilityCodeMap["OTHER_LIABILITY"],
+            liabilityId: this.liabilityCodeMap["OTHER_LIABILITY"],
 
           });
         }
@@ -2405,13 +2466,13 @@ private applyCoApplicantViewMode(queryParams: any) {
       }
 
       // localStorage.setItem(this.getStorageKey(), JSON.stringify(payload));
-        this.storageservice.saveSectionData(
-            'liabilitiesinfoData',
-            this.applicationId,
-            this.applicantId,
-            this.isCoApplicant,
-             JSON.stringify(payload)
-          );
+      this.storageservice.saveSectionData(
+        'liabilitiesinfoData',
+        this.applicationId,
+        this.applicantId,
+        this.isCoApplicant,
+        JSON.stringify(payload)
+      );
 
       const stepRoute = this.getStepRoute();
       this.stepperService.markStepCompleted(stepRoute);
@@ -2446,7 +2507,7 @@ private applyCoApplicantViewMode(queryParams: any) {
       return;
     }
 
-    this.formSvc.submitliability(payload, this.applicationId,false).pipe().subscribe({
+    this.formSvc.submitliability(payload, this.applicationId, false).pipe().subscribe({
       next: (res) => {
         console.log("resp---", res);
         if (res.status == "success") {
@@ -2463,12 +2524,12 @@ private applyCoApplicantViewMode(queryParams: any) {
 
           // const key = this.getStorageKey();
           // localStorage.setItem(key, JSON.stringify(payload));
-            this.storageservice.saveSectionData(
+          this.storageservice.saveSectionData(
             'liabilitiesinfoData',
             this.applicationId,
             this.applicantId,
             this.isCoApplicant,
-             JSON.stringify(payload)
+            JSON.stringify(payload)
           );
           this.stepperService.markStepCompleted(stepRoute);
           this.stepperService.setStepData(stepRoute, this.liabilityForm.getRawValue());
@@ -2616,7 +2677,7 @@ private applyCoApplicantViewMode(queryParams: any) {
 
 
 
-    this.formSvc.submitliability(payload, this.applicationId,false).pipe().subscribe({
+    this.formSvc.submitliability(payload, this.applicationId, false).pipe().subscribe({
       next: (res) => {
         console.log("resp---", res);
         if (res.status == "success") {
@@ -2624,12 +2685,12 @@ private applyCoApplicantViewMode(queryParams: any) {
           // const key = `liabilitiesinfoData_main_${this.applicantId}`;
           // localStorage.setItem(key, JSON.stringify(payload));
 
-            this.storageservice.saveSectionData(
+          this.storageservice.saveSectionData(
             'liabilitiesinfoData',
             this.applicationId,
             this.applicantId,
             this.isCoApplicant,
-             JSON.stringify(payload)
+            JSON.stringify(payload)
           );
           this.stepperService.markStepCompleted('liabilitiesinfo');
           this.stepperService.setStepData('liabilitiesinfo', this.liabilityForm.getRawValue());
@@ -2645,7 +2706,7 @@ private applyCoApplicantViewMode(queryParams: any) {
 
   //edit from summary enable and disbale
 
-  enableForm(){
+  enableForm() {
     this.isViewMode = false;
     this.isEditMode = true;
     this.liabilityForm.enable();
@@ -2697,13 +2758,13 @@ private applyCoApplicantViewMode(queryParams: any) {
     });
   }
 
-   // edit sucess popup
-   onCancel() {
+  // edit sucess popup
+  onCancel() {
     this.editSuccess = false;
   }
 
-  handleSuccessAction(action: string){
-    if(action === "OK"){
+  handleSuccessAction(action: string) {
+    if (action === "OK") {
       this.editSuccess = false;
       this.isViewMode = true;
       this.isEditMode = false;
