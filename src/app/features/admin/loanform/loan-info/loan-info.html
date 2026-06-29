@@ -1,5 +1,5 @@
 <div class="page-card">
-
+  @if(!issuccess){
   <div class=" form-area row g-4">
     <!-- Left Form -->
     <div class="col-lg-5">
@@ -54,16 +54,18 @@
         <div class="">
           <div class="d-flex justify-content-between align-items-center">
             <label class="text-dp-3-regular fw-bold">Loan Tenure</label>
-             <div class="input-with-prefix">
-              
-            <input type="text" class="value-box text-dp-1-medium value-box-input" [(ngModel)]="tenure" min="1" max="7" [required]="true"
-              step="1" name="tenureInput" (input)="limitTenureAmount($event ,rangeSlider1)" [maxlength]="1">
-              <span class="suffix text-dp-1-medium">yr</span></div>
+            <div class="input-with-prefix">
+
+              <input type="text" class="value-box text-dp-1-medium value-box-input" [(ngModel)]="tenure" min="1" max="7"
+                [required]="true" step="1" name="tenureInput" (input)="limitTenureAmount($event ,rangeSlider1)"
+                [maxlength]="1">
+              <span class="suffix text-dp-1-medium">yr</span>
+            </div>
           </div>
           <input type="range" class="custom-range mt-20" min="1" max="7" step="1" [(ngModel)]="tenure"
             name="tenureInput" (input)="updateSliderBackground($event)" #rangeSlider1>
 
-            <div class="text-danger">
+          <div class="text-danger">
 
             <div *ngIf="tenure < 1">
               {{ errormsg.minTenure }}
@@ -84,8 +86,8 @@
           </app-dropdown>
         </div>
 
-        <app-buttons label="Apply loan" class="btn btncustomClass w-100" type="submit"
-          [disabled]="isFormInvalid" color="primary"></app-buttons>
+        <app-buttons label="Apply loan" class="btn btncustomClass w-100" type="submit" [disabled]="isFormInvalid"
+          color="primary"></app-buttons>
       </form>
     </div>
 
@@ -114,7 +116,7 @@
           <div class="text-label-data fw-normal">TOTAL EMI AMOUNT</div>
           <div class="text-dp-3-bold text-nowrap">₹ {{ totalEmiAmount | number }}</div>
         </div>
-        <div class="text-center mt-3" >
+        <div class="text-center mt-3">
           <a href="#" class="see-amortization text-dp-3-regular d-flex gap-2 disabled-link"><span><img
                 src="../assets/images/icons/arrow-square-down.svg"></span>See Amortization</a>
         </div>
@@ -127,19 +129,19 @@
 
   </div>
 
+  }
+  @else {
+  <div class="submitMainDiv">
+    <div class="successDiv">
+      <div class="success mobiledetails d-flex flex-column center-page">
 
-  <!-- <div class="col-lg-12 mt-4 d-flex justify-content-between">
-
-    <div class="col-lg-4 mt-4">
-      <img src="../assets/images/icons/save.svg">
-      <span class="text-dp-3-regular mx-2 blue-text"> Save and Exit</span>
+        <app-successbox title="A new loan application has been initiated." [description]="`Please note your ARN`"
+          [id]="custARN" [buttons]="[
+    { label: 'Let’s Get Started', action: 'letsstart', outline: false, color: 'primary',class: 'btncustomClass'  }
+  ]" (actionClick)="handleSuccessAction($event)" [copy]="true" ]>
+        </app-successbox>
+      </div>
     </div>
-    <div class="col-lg-4 mt-4 d-flex justify-content-end">
-      <app-buttons type="button" label="Back" class="btn btncustomClass" [outline]="true" (click)="back()">
-      </app-buttons>
-      <app-buttons type="button" label="Next" class="btn btncustomClass" color="primary" (click)="next()">
-      </app-buttons>
-
-    </div>
-  </div> -->
+  </div>
+  }
 </div>

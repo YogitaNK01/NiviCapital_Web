@@ -121,7 +121,8 @@ export class Selectproduct implements OnInit {
         this.arnid = res?.data?.arn ?? '';
         this.applicationId = res?.data?.applicationId ?? '';
         this.applicantId = res?.data?.applicantId ?? '';
-        this.issuccess = true;
+        // this.issuccess = true;
+        this.handleSuccessAction('letsstart')
         this.cd.detectChanges();
       },
       error: (err) => {

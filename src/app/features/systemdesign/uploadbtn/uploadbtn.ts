@@ -202,7 +202,7 @@ ngOnChanges() {
           } else {
             this.state = 'error';
             this.showHelperMessage = true;
-           this.hideHelperMessageAfterDelay();
+          //  this.hideHelperMessageAfterDelay();
           }
 
         
@@ -243,7 +243,7 @@ ngOnChanges() {
       file: null,
       error: message
     });
-    this.hideHelperMessageAfterDelay();
+    // this.hideHelperMessageAfterDelay();
   }
 
   public setSuccess(file: File) {
@@ -265,7 +265,7 @@ ngOnChanges() {
       file: null,
       error: this.errorMessage
     });
-    this.hideHelperMessageAfterDelay();
+    // this.hideHelperMessageAfterDelay();
   }
   removeFile() {
     this.msgBox.open({

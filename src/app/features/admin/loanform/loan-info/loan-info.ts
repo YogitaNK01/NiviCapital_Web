@@ -8,11 +8,12 @@ import { FormsModule, NgForm } from '@angular/forms';
 import { Charts } from "../../../systemdesign/charts/charts";
 import { Loanformservice } from '../../../../core/service/loanformservice';
 import { loanErrors } from './loanerror';
+import { Successbox } from '../../customer/successbox/successbox';
 
 
 @Component({
   selector: 'app-loan-info',
-  imports: [CommonModule, Buttons, Dropdown, FormsModule, Charts],
+  imports: [CommonModule, Buttons, Dropdown, FormsModule, Charts,Successbox],
   standalone: true,
   templateUrl: './loan-info.html',
   styleUrl: './loan-info.scss'
@@ -88,6 +89,7 @@ export class LoanInfo implements OnInit {
   currenterror = ''
   loanError: string = '';
   tenureError: string = '';
+   issuccess: boolean = false;
   constructor(private router: Router, private stepperService: Loanstepperservice, private route: ActivatedRoute, private loanformservice: Loanformservice) { }
 
 
@@ -234,9 +236,9 @@ export class LoanInfo implements OnInit {
           this.loanformservice.loanInfoData = input;
           const key = `loanInfoData${this.applicantId}`;
           localStorage.setItem(key, JSON.stringify(input));
-
-          this.stepperService.markStepCompleted('loaninfo');
-          this.stepperService.next();
+          this.issuccess = true;
+          // this.stepperService.markStepCompleted('loaninfo');
+          // this.stepperService.next();
         }
 
       },
@@ -272,5 +274,26 @@ export class LoanInfo implements OnInit {
     event.target.style.background = `linear-gradient(to right, #1e3a5f ${percent}%, #e5e7eb ${percent}%)`;
   }
 
+ handleSuccessAction(action: string) {
+    if (action === 'letsstart') {
 
+      
+ const payload = {
+      applicantId: this.applicantId,
+      applicationId: this.applicationId,
+      custName: this.custName,
+      custARN: this.custARN
+    };
+
+    sessionStorage.setItem('loanContextData', JSON.stringify(payload));
+ this.stepperService.markStepCompleted('loaninfo');
+          this.stepperService.next();
+
+
+       
+
+
+    
+    }
+  }
 }

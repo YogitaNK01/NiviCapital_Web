@@ -270,3 +270,16 @@ color: $secondary-700;
   opacity: 0.5;          
   cursor: not-allowed;
 }
+
+.submitMainDiv{
+  height: 89vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow-y: hidden;
+}
+
+.successDiv{
+  gap: var(--spacing-spacing_14, 30px);
+  padding: var(--spacing-spacing_18, 40px);
+}

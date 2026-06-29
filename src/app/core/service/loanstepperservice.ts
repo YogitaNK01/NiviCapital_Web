@@ -505,22 +505,7 @@ export class Loanstepperservice {
 
     this.buildSteps();
   }
-  restoreLoanEditContext1() {
-    const stored = sessionStorage.getItem('loanContextData');
 
-    if (!stored) return null;
-
-    const parsed = JSON.parse(stored);
-
-    this.setLoanId(
-      parsed.applicantId,
-      parsed.applicationId,
-      parsed.custName,
-      parsed.custARN
-    );
-
-    return parsed;
-  }
   restoreLoanEditContext() {
     const stored =
       sessionStorage.getItem('loanContextData') ||

@@ -4,7 +4,7 @@
 
 .upload-label {
   color: $neutral-text-primary;
-  font-size: $font-size-body_md;
+  font-size: $font-size-body_lg;
   font-style: $font-weight-regular;
   font-weight: $font-weight-regular;
   line-height: $spacing_10;
@@ -12,6 +12,11 @@
   margin-bottom: 8px;
   text-align: start;
 
+  &.upload-error {
+
+    color: $error-text;
+
+  }
 }
 
 .upload-wrapper {
@@ -244,7 +249,7 @@
 
     border-color: $error-text;
     border-style: solid;
-    background: #fef2f2;
+    // background: #fef2f2;
 
   }
 
@@ -255,6 +260,7 @@
 
   }
 }
+
 
 .helper-text {
     color: $neutral-text-secondary;

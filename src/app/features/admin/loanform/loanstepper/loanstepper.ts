@@ -342,4 +342,9 @@ if (cleanUrl.includes('co-applicantdetails')) {
   get completedEducationSections() {
     return this.stepservice.getCompletedEducationSections();
   }
+//active coapplocant only
+  isCoApplicantActive(): boolean {
+  return this.router.url.includes('/co-applicantdetails');
+}
+
 }

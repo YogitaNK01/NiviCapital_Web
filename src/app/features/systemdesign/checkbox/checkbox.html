@@ -6,7 +6,8 @@
     [checked]="checked"
     [disabled]="disabled"
     (change)="toggleCheckbox($event)"
-    [id]="checkboxId">
+    [id]="checkboxId"
+    [ngClass]="{'disabled-bg': disabled}">
   <label class="form-check-label text-body-1" [for]="checkboxId">
     {{ label }}
   </label>

@@ -24,7 +24,12 @@
       (input)="onManualInput($event)"
     />
 
-    <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+    <!-- <mat-datepicker-toggle matSuffix [for]="picker">
+    
+    </mat-datepicker-toggle> -->
+<mat-datepicker-toggle matSuffix [for]="picker">
+  <img matDatepickerToggleIcon src="assets/images/icons/calendar2.svg" alt="calendar">
+</mat-datepicker-toggle>
 
     <mat-datepicker #picker (opened)="onPickerOpen()">
        

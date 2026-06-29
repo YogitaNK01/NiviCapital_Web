@@ -39,7 +39,9 @@ height: 54px;
 ::ng-deep .btn{
   padding: 0;
 }
-
+.table-head{
+  color:$secondary-text;
+}
 .pan-row {
   --bs-gutter-x: 20px;
   margin-bottom: 20px;
@@ -78,9 +80,8 @@ height: 54px;
 
 .addcust-img-box {
   position: relative;
-  background: #d9e3ea;
   border-radius: 30px;
-  padding: 12px 50px 12px 20px;
+  padding: 12px 12x 12px 20px;
   /* space for icons */
   display: flex;
   align-items: center;
