@@ -44,6 +44,7 @@ registerOnValidatorChange(fn: () => void): void {
 
   @Input() disablePastDates: boolean = false;
   @Input() disablefutureDates: boolean = false;
+  @Input() disableMinYears: boolean = false;
   @Input() minDate: Date | null = null;
   @Input() minyear: number = 1960;
 
@@ -58,26 +59,24 @@ registerOnValidatorChange(fn: () => void): void {
   ngOnInit() {
 
     const minYearDate = new Date(this.minyear, 0, 1); // 01-01-1960
-    minYearDate.setHours(0, 0, 0, 0);
-
+    // minYearDate.setHours(0, 0, 0, 0);
 
 
     const yesterday = new Date();
     yesterday.setDate(yesterday.getDate() - 1);
-    yesterday.setHours(23, 59, 59, 999);
+    // yesterday.setHours(23, 59, 59, 999);
 
 
     if (this.disablePastDates) {
       const today = new Date();
       today.setHours(0, 0, 0, 0);
-
       this.minDate = today > minYearDate ? today : minYearDate;
-    } else if (this.disablefutureDates) {
+    } 
+    if (this.disablefutureDates) {
       this.maxDate = yesterday;
-    }
-    else {
+    } 
+    if(this.disableMinYears){
       this.minDate = minYearDate;
-
     }
 
 
@@ -156,43 +155,67 @@ writeValue(value: any): void {
   return null;
 }
 onManualInput(event: any) {
-  let value = event.target.value;
+  
+  
+const input = event.target as HTMLInputElement;
+let value = input.value;  
 
-  // allow only numbers and slash
-  value = value.replace(/[^0-9/]/g, '');
+const isDelete =
+  event.inputType === 'deleteContentBackward' ||
+  event.inputType === 'deleteContentForward';
 
-  // max DD/MM/YYYY length
-  if (value.length > 10) {
-    value = value.substring(0, 10);
-  }
 
-  event.target.value = value;
-  this.rawDateValue = value;
+  // // allow only numbers and slash
+  // value = value.replace(/[^0-9/]/g, '');
 
-  if (!value) {
-    this.selectedDate = null;
-    this.onChange(null);
+  // // max DD/MM/YYYY length
+  // if (value.length > 10) {
+  //   value = value.substring(0, 10);
+  // }
+  
+  // Remove everything except digits
+
+  if (!isDelete) {
+    value = value.replace(/\D/g, '').substring(0, 9);
+
+    // Add slashes automatically
+    if (value.length > 2) {
+      value = value.substring(0, 2) + '/' + value.substring(2);
+    }
+
+    if (value.length > 5) {
+      value = value.substring(0, 5) + '/' + value.substring(5, 9);
+    }
+
+
+    event.target.value = value;
+    this.rawDateValue = value;
+
+    if (!value) {
+      this.selectedDate = null;
+      this.onChange(null);
+      this.validatorChange();
+      return;
+    }
+
+    const parsed = moment(value, 'DD/MM/YYYY', true);
+
+    if (parsed.isValid()) {
+      const date = parsed.toDate();
+
+      this.selectedDate = date;
+
+      // ✅ this is important
+      // sends typed date to parent ngModel
+      this.onChange(date);
+    } else {
+      this.selectedDate = null;
+      this.onChange(null);
+    }
+
+    this.onTouched();
     this.validatorChange();
-    return;
   }
-
-  const parsed = moment(value, 'DD/MM/YYYY', true);
-
-  if (parsed.isValid()) {
-    const date = parsed.toDate();
-
-    this.selectedDate = date;
-
-    // ✅ this is important
-    // sends typed date to parent ngModel
-    this.onChange(date);
-  } else {
-    this.selectedDate = null;
-    this.onChange(null);
-  }
-
-  this.onTouched();
-  this.validatorChange();
 }
 
   onDateChange1(val: Date | null) {

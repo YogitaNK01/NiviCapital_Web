@@ -649,8 +649,8 @@ export class GeneralInfo implements OnInit {
       applicantId: this.applicantId,
       occupation: formdata.occupation,
       annualIncome: formdata.annualincome,
-      relationWithApplicantId: formdata.relationship[0],
-      relationship: formdata.relationship[0],
+      relationWithApplicantId: formdata.relationship,
+      relationship: formdata.relationship,
       hasAssets: formdata.co_checkedasset === 'Yes'
     };
   }
@@ -1126,7 +1126,7 @@ export class GeneralInfo implements OnInit {
     )
 
     const control = this.coapp_registerForm.get('relationship');
-    control?.setValue(ids);
+    control?.setValue(ids[0]);
     control?.markAsTouched();
     control?.updateValueAndValidity();
 
@@ -1774,9 +1774,10 @@ export class GeneralInfo implements OnInit {
         applicationId: this.applicationId,
         applicantId: this.applicantId,
         occupationId: formdata.occupation,
-        annualIncome: formdata.annualIncome,
-        relationWithApplicantId: formdata.relationWithApplicantId,
-        hasAssets: formdata.hasAssets
+        annualIncome: formdata.annualincome,
+        relationWithApplicantId: formdata.relationship,
+        relationship: formdata.relationship,
+        hasAssets: formdata.co_checkedasset === 'Yes'
       };
 
       this.formSvc.submit_Coapp_GenralInfo(apiInput, this.applicationId, true).subscribe({

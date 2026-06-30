@@ -250,7 +250,7 @@
 
         <div class="col-lg-6 loan-mt-4 col-sm-12">
           <app-datepickernew name="dob" label="Date of Birth" ngModel [required]="true" #dob="ngModel"
-            [disablefutureDates]="true" (ngModelChange)="checkDob($event)"
+            [disablefutureDates]="true" [disableMinYears]="true" (ngModelChange)="checkDob($event)"
             (click)="dobTouched = true"></app-datepickernew>
         </div>
 

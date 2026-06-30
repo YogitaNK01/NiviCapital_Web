@@ -177,6 +177,14 @@ export class Edusection {
 
   ngOnInit(): void {
 
+    this.group.reset({
+      institutename: '',
+      institutetitle: '',
+      passingyear: 'Year of Passing',
+      per_cgpa: 'Percentage / CGPA ',
+      location: '',
+      otherLocation: ''
+    });
 
 
     let Allids = this.stepperService.getLoanId();

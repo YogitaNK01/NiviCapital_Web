@@ -1231,7 +1231,7 @@ private ensureAssetSectionInitialized(key: string): void {
     this.selectedAssets = realAssets;
 
     const deselected = previousSelected.filter(k => !realAssets.includes(k));
-    const newlySelected = realAssets.filter(k => !previousSelected.includes(k));
+    const newlySelected = this.selectedAssets.filter(k => !previousSelected.includes(k));
 
     // reset deselected controls
     deselected.forEach(key => {
@@ -1276,7 +1276,7 @@ private ensureAssetSectionInitialized(key: string): void {
     // });
 
     // initialize newly selected arrays
-    newlySelected.forEach(key => {
+    this.selectedAssets.forEach(key => {
   this.ensureAssetSectionInitialized(key);
 });
 
