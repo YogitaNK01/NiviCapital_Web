@@ -818,6 +818,7 @@ if (
       onOk: () => {
         this.uploadedFiles[key] = null;
         delete this.files[key];
+        delete this.localFiles[key];
 
         if (this.uploadedPreviewUrls[key]) {
           URL.revokeObjectURL(this.uploadedPreviewUrls[key]);
@@ -1098,7 +1099,7 @@ if (
       ? this.formSvc.co_additionalInfoData
       : this.formSvc.additionalInfoData;
     const existingData = this.lastSavedPayload || {};
-
+    console.log(this.gendercheckvalue);
     return {
       applicantId: this.getApiApplicantId(),
       profilePhotoUrl: this.profilePhotoUrl || formdata.uploadphoto || existingData?.profilePhotoUrl || '',

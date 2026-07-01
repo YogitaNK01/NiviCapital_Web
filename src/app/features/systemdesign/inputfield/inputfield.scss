@@ -13,7 +13,7 @@
   text-align: start;
 
   color: $neutral-text-primary;
-  font-size: $font-size-body_md;
+  font-size: $font-size-body_lg;
   font-style: $font-weight-regular;
   font-weight: $font-weight-regular;
   line-height: $spacing_10;
@@ -81,7 +81,7 @@
   outline: none;
   border-radius: $border_radius_s;
   border: $border_2 solid $input-default;
-  font-size: $spacing_7;
+  // font-size: $spacing_7;
   box-sizing: border-box;
 
   &:focus {

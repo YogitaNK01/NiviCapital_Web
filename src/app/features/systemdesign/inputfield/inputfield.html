@@ -125,7 +125,7 @@
 
     <input [attr.maxlength]="maxlength" [attr.type]="currentType" [placeholder]="placeholder" [value]=" value"
       (input)="onInputChange($any($event.target).value)" (blur)="onBlur()" [disabled]="disabled" 
-      class="input-field percent-input " [readonly]="readonly" [attr.min]="min" [attr.max]="max" [attr.step]="step"
+      class="input-field percent-input text-label" [readonly]="readonly" [attr.min]="min" [attr.max]="max" [attr.step]="step"
       [ngClass]="{
         'has-left-icon': showSearch,
         'has-right-icon': showPasswordToggle || showStateIcon || showInfo || showSearch,

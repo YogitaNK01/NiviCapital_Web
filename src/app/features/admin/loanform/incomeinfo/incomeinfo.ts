@@ -995,14 +995,14 @@ applyCoApplicantViewMode(queryParams: any) {
 
     const missing = required.filter(key => !this.getDocumentByKey(key));
 
-    console.log('Required docs:', required);
-    console.log('Available docs:', this.allDocuments.map(d => ({
-      slotKey: d.slotKey,
-      title: d.title,
-      fileName: d.fileName,
-      type: d.type
-    })));
-    console.log('Missing docs:', missing);
+    // console.log('Required docs:', required);
+    // console.log('Available docs:', this.allDocuments.map(d => ({
+    //   slotKey: d.slotKey,
+    //   title: d.title,
+    //   fileName: d.fileName,
+    //   type: d.type
+    // })));
+    // console.log('Missing docs:', missing);
 
     return missing.length === 0;
   }

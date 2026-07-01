@@ -38,7 +38,7 @@
   width: 2px;
   height: 100%;
   //  height: calc(100% + 24px + 8px);
-  border-left: 2px dashed $secondary-700;
+  // border-left: 2px dashed $secondary-700;
   z-index: 0;
   background: transparent;
 }
@@ -169,6 +169,18 @@
   display: flex;
   flex-direction: column;
   gap: 13px;
+  
+ &::before {
+    content: '';
+    position: absolute;
+    left: -29px;
+    top: 9px;
+    bottom: 9px;
+    width: 2px;
+    background-color: $secondary-700;
+    z-index: 1;
+  }
+
 }
 
 

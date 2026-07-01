@@ -1765,6 +1765,30 @@ export class GeneralInfo implements OnInit {
   saveSummaryEdit() {
     const formdata = this.activeForm.getRawValue();
 
+    if (!formdata.valid) {
+      console.log("form invalid");
+      return;
+    }
+
+    if (formdata.value.occupation && this.isCoApplicant) {
+      const occupationType: any = this.selectoccupation.filter((item: any) => item.value === formdata.value.occupation);
+      console.log(occupationType, this.checkboxasset);
+      if ((occupationType?.[0]?.label === "Housewife / Homemaker" || occupationType?.[0]?.label === "Unemployed") && this.checkboxasset === "No") {
+        this.msgBox.open({
+          title: 'You are not eligible as a co-applicant. Please ask the main applicant to add another co-applicant.',
+          message: ``,
+          showCancel: false,
+          okText: '+ Add Co-applicant',
+          // onOk: () => {
+          //   this.router.navigate(['/loanform/co-applicantdetails/coapplicantinfo/co-generalinfo']);
+          // }
+        });
+        return;
+      }
+
+
+    }
+
     const input = this.isCoApplicant
       ? this.buildCoApplicantPayload(formdata)
       : this.buildMainPayload(formdata);
