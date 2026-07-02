@@ -718,23 +718,38 @@ applyCoApplicantViewMode(queryParams: any) {
   }
 
   removeOtherDocument(type: 'other' | 'otherbusiness', id: number): void {
-    this.msgBox.open({
-      title: 'Are you sure want to Remove',
-      message: ``,
-      showCancel: true,
-      onOk: () => {
+    // this.msgBox.open({
+    //   title: 'Are you sure want to Remove',
+    //   message: ``,
+    //   showCancel: true,
+    //   onOk: () => {
+    //     let deleteDoc : any;
 
+    //     if (type === 'other') {
+    //       deleteDoc = this.otherIncomeSlots.filter(slot => slot.id === id);
+    //       this.otherIncomeSlots = this.otherIncomeSlots.filter(slot => slot.id !== id);
+    //     } else {
+    //       deleteDoc = this.otherBusinessSlots.filter(slot => slot.id === id);
+    //       this.otherBusinessSlots = this.otherBusinessSlots.filter(slot => slot.id !== id);
+    //     }
 
-        if (type === 'other') {
-          this.otherIncomeSlots = this.otherIncomeSlots.filter(slot => slot.id !== id);
-        } else {
-          this.otherBusinessSlots = this.otherBusinessSlots.filter(slot => slot.id !== id);
-        }
+    //     if(deleteDoc?.[0]?.title){
+    //       this.deleteImage(deleteDoc[0].title);
+    //     }
+    //   }
+    // });
 
-      }
-    });
+    let deleteDoc : any;
 
+    if (type === 'other') {
+      deleteDoc = this.otherIncomeSlots.filter(slot => slot.id === id);
+    } else {
+      deleteDoc = this.otherBusinessSlots.filter(slot => slot.id === id);
+    }
 
+    if(deleteDoc?.[0]?.title){
+      this.deleteImage(deleteDoc[0].title, type, id);
+    }
   }
 
   onFileChange(result: UploadResult, key: string,
@@ -1132,7 +1147,7 @@ applyCoApplicantViewMode(queryParams: any) {
       });
   }
 
-  deleteImage(key: string): void {
+  deleteImage(key: string, otherDocType: string = '', id: number = 0): void {
     this.msgBox.open({
       title: 'Are you sure want to Remove',
       message: ``,
@@ -1189,10 +1204,16 @@ applyCoApplicantViewMode(queryParams: any) {
 
         // localStorage.setItem(keyLocal, JSON.stringify(this.uploadedrespfiles));
 
+        if (otherDocType === 'other') {
+          this.otherIncomeSlots = this.otherIncomeSlots.filter(slot => slot.id !== id);
+        } else {
+          this.otherBusinessSlots = this.otherBusinessSlots.filter(slot => slot.id !== id);
+        }
+
         this.cd.detectChanges();
 
 
-
+        return true;
       }
     });
   }

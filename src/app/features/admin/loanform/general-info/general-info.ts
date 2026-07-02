@@ -1411,7 +1411,7 @@ export class GeneralInfo implements OnInit {
       '';
 
     const relationship =
-      data.relationship ||
+      data.relationship || data.relationWithApplicantId ||
       this.formatRelation(data.relationWithApplicant) ||
       '';
 
@@ -1763,15 +1763,15 @@ export class GeneralInfo implements OnInit {
     this.activeForm.disable();
   }
   saveSummaryEdit() {
-    const formdata = this.activeForm.getRawValue();
+    const form = this.activeForm;
 
-    if (!formdata.valid) {
+    if (!form.valid) {
       console.log("form invalid");
       return;
     }
 
-    if (formdata.value.occupation && this.isCoApplicant) {
-      const occupationType: any = this.selectoccupation.filter((item: any) => item.value === formdata.value.occupation);
+    if (form.value.occupation && this.isCoApplicant) {
+      const occupationType: any = this.selectoccupation.filter((item: any) => item.value === form.value.occupation);
       console.log(occupationType, this.checkboxasset);
       if ((occupationType?.[0]?.label === "Housewife / Homemaker" || occupationType?.[0]?.label === "Unemployed") && this.checkboxasset === "No") {
         this.msgBox.open({
@@ -1790,18 +1790,20 @@ export class GeneralInfo implements OnInit {
     }
 
     const input = this.isCoApplicant
-      ? this.buildCoApplicantPayload(formdata)
-      : this.buildMainPayload(formdata);
+      ? this.buildCoApplicantPayload(form.value)
+      : this.buildMainPayload(form.value);
+
+    const relationObject: any = this.selectrelationship.find((item: any) => item.label === form.value.relationship || item.value === form.value.relationship);
 
     if (this.isCoApplicant) {
       const apiInput = {
         applicationId: this.applicationId,
         applicantId: this.applicantId,
-        occupationId: formdata.occupation,
-        annualIncome: formdata.annualincome,
-        relationWithApplicantId: formdata.relationship,
-        relationship: formdata.relationship,
-        hasAssets: formdata.co_checkedasset === 'Yes'
+        occupationId: form.value.occupation,
+        annualIncome: form.value.annualincome,
+        relationWithApplicantId: relationObject.value,
+        relationship: form.value.relationship,
+        hasAssets: form.value.co_checkedasset === 'Yes'
       };
 
       this.formSvc.submit_Coapp_GenralInfo(apiInput, this.applicationId, true).subscribe({

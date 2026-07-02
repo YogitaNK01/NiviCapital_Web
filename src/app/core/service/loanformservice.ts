@@ -351,16 +351,11 @@ submitAdditionalInfo(
 
   uploadIncome(payload: any, id: string,edit:boolean): Observable<ApiResponse<any>> {
 
-    // return this.http.post<ApiResponse<any>>(
-    //   `${this.baseUrl}/v1/los/applications/${id}/documents/batch`,
-    //   payload
-    // );
+    const url = `${this.baseUrl}/v1/los/applications/${id}/documents/batch`;
 
-      const url = `${this.baseUrl}/v1/los/applications/${id}/documents/batch`;
+    return this.http.post<ApiResponse<any>>(url, payload);
 
-  return edit
-    ? this.http.put<ApiResponse<any>>(url, payload)
-    : this.http.post<ApiResponse<any>>(url, payload);
+  
 
   
   }

@@ -22,7 +22,7 @@
                 <app-buttons *ngIf="isFromSummary && !isEditMode" type="button" label="Edit"
                     class="btn btn-icon edit btncustomClass editBtnClass" color="primary" (click)="enableForm()"
                     [disabled]="!isViewMode" [ngClass]="{'disabled-div' : !isViewMode}">
-                    <img src="/assets/images/icons/edit-white.svg" alt="edit">
+                    <img src="assets/images/icons/edit-white.svg" alt="edit">
                 </app-buttons>
             </div>
         </div>
@@ -371,7 +371,7 @@
 
                                     <app-inputfield label="Title" [required]="true" placeholder="Enter text here"
                                         [(ngModel)]="slot.title" [ngModelOptions]="{ standalone: true }"
-                                        (input)="main.restrictInput($event, 'text')" [maxlength]="25">
+                                        (input)="main.restrictInput($event, 'text')" [maxlength]="25" [ngClass]="{'disabled-div': isViewMode}">
                                     </app-inputfield>
 
                                     <div class="text-danger" *ngIf="f['assettitle'].touched && f['assettitle'].invalid">
@@ -423,7 +423,7 @@
                                 </div>
                                 <div class="col-lg-4 d-flex justify-content-end align-items-end mt-5">
                                     <span class="delete d-none d-lg-block"
-                                        (click)="removeOtherDocument('other',slot.id)">
+                                        (click)="removeOtherDocument('other',slot.id)" [ngClass]="{'disabled-div': isViewMode}">
                                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
                                             viewBox="0 0 24 24" fill="none">
                                             <path

@@ -113,9 +113,8 @@ if (cleanUrl.includes('co-applicantdetails')) {
   }
 
 
-
-  isActive(route: string) {
-    return this.router.url.includes(route);
+  isActive(index: number) {
+    return index === this.currentIndex;
   }
 
 

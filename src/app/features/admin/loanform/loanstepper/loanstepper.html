@@ -5,7 +5,7 @@
   </div>
   <div class="stepcls">
     <div *ngFor="let s of steps  ; let i = index;" class="step" [class.active]="isCoApplicantActive()" [ngClass]="{
-      active: isActive(s.route),
+      active: isActive(i),
       completed: isCompleted(i),
       upcoming: isUpcoming(i)
     }" (click)=" canNavigateTo(i) && goToStep(s.route, i)">

@@ -101,6 +101,9 @@ export class Uploadkyc implements OnDestroy, AfterViewInit {
   co_userid: any;
   NCId: any;
   custName: any;
+  custId: any;
+  firstName: any;
+  lastName: any;
 
   editMode = false;
   editUserData: any = {};
@@ -213,6 +216,10 @@ export class Uploadkyc implements OnDestroy, AfterViewInit {
       this.getSavedKycInfo(apiApplicantId),
       this.getSummarySection('kyc')
     ]);
+
+    this.custId = summarySection?.identityAndResidency?.customerId;
+    this.firstName =summarySection?.identityAndResidency?.firstName;
+    this.lastName =summarySection?.identityAndResidency?.lastName;
 
     const normalizedSummary = this.normalizeSummaryKyc(summarySection);
 
@@ -948,10 +955,10 @@ export class Uploadkyc implements OnDestroy, AfterViewInit {
     return {
       applicationId: this.applicationId,
       applicantId: this.applicantId,
-      custId: custId,
+      custId: custId || this.custId,
 
-      firstName: firstName || '',
-      lastName: lastName || '',
+      firstName: firstName || this.firstName,
+      lastName: lastName || this.lastName,
 
       dob: formValue.dob
         ? moment.isMoment(formValue.dob)
