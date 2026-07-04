@@ -1170,6 +1170,10 @@ private ensureAssetSectionInitialized(key: string): void {
   onAssetChange(values: string | string[]): void {
     const rawSelected = Array.isArray(values) ? values : [values];
 
+    this.assetsCatagories.forEach((item: any) => {
+      item.disabled = false;
+    });
+    
     let normalizedSelected = rawSelected
       .map(v => this.normalizeToAccordionKey(v))
       .filter(Boolean);
@@ -1180,6 +1184,28 @@ private ensureAssetSectionInitialized(key: string): void {
     const previousSelected = [...this.selectedAssets];
 
     const hasNoAssets = normalizedSelected.includes(this.NO_ASSETS_CODE);
+
+        if(rawSelected.length > 0){
+      if(hasNoAssets && rawSelected.length > 1){
+        this.assetsCatagories.forEach((item: any) => {
+          if(item.value === this.NO_ASSETS_CODE){
+            item.disabled = true;
+          }
+        });
+      } else if(hasNoAssets && rawSelected.length === 1){
+        this.assetsCatagories.forEach((item: any) => {
+          if(item.value !== this.NO_ASSETS_CODE){
+            item.disabled = true;
+          }
+        });
+      }
+    } else if(rawSelected.length === 0){
+      this.assetsCatagories.forEach((item: any) => {
+        if(item.value === this.NO_ASSETS_CODE){
+          item.disabled = false;
+        }
+      });
+    }
 
     // remove "I don't have Assets" from real asset list
     let realAssets = normalizedSelected.filter(
@@ -1349,7 +1375,8 @@ private ensureAssetSectionInitialized(key: string): void {
         this.assetsCatagories = sortedGroups.map((group: any) => ({
           value: group,
           label: this.formatTitle(group),
-          code: group
+          code: group,
+          disabled: false
         }));
 
         this.accordions = sortedGroups.map((group: any) => ({

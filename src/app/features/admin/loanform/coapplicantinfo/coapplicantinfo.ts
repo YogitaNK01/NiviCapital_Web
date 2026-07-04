@@ -38,6 +38,7 @@ export class Coapplicantinfo implements OnInit {
   mobileSubmitted: boolean = false;
   coApplicantIndex: number = 1;
   showmsg: boolean = false;
+  showmsgtext = '';
   constructor(public service: Main, private router: Router, private addcustomerservice: Addcustomerservice,
     private route: ActivatedRoute, private cd: ChangeDetectorRef, private loanform: Loanformservice, private loanStepper: Loanstepperservice) { }
 
@@ -242,6 +243,7 @@ export class Coapplicantinfo implements OnInit {
     this.searchLoading = true;
     this.norecordfound = false;
     this.showmsg = false;
+    this.showmsgtext = ''
 
     const input = {
       identifier: this.prefillPhone,
@@ -304,6 +306,7 @@ export class Coapplicantinfo implements OnInit {
         }
         else {
           this.showmsg = true;
+          this.showmsgtext = ' Main Applicant and Co-Applicant mobile numbers cannot be the same. Please enter a different mobile number for the Co-Applicant.'
           this.searchLoading = false;
         }
 
@@ -313,6 +316,7 @@ export class Coapplicantinfo implements OnInit {
         this.searchLoading = false;
         this.norecordfound = true;
         this.showmsg = true;
+        this.showmsgtext = err.error.message == "Mobile number already used in this application" ? "Main Applicant and Co-Applicant mobile numbers cannot be the same. Please enter a different mobile number for the Co-Applicant." : err.error.message;
       }
     });
   }

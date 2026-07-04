@@ -114,7 +114,8 @@
     [pageSize]="6" 
     [totalPages]="totalPages"
   (pageChange)="onPageChange($event)"
-  [disableEditFn]="disableEditCondition">
+  [disableEditFn]="disableEditCondition"
+  [hidepagination]="this.searchText.length > 0">
     </app-tables>
     } @else {
   <div class="text-label text-center mt-4">

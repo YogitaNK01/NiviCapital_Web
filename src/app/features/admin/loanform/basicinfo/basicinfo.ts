@@ -133,7 +133,19 @@ export class Basicinfo {
 
     this.stepperService.setCurrentCoApplicantIndex(currentIndex);
 
-    const isNewCoappFlow = this.isCoApplicant && mode === 'new';
+    const currentCoapp = this.getCurrentCoApplicantFromList();
+
+    const existingCoAppApplicantId =
+      sessionCoApp?.applicantId ||
+      currentCoapp?.applicantId ||
+      this.stepperService.getCo_appId()?.[0] ||
+      null;
+
+    const isNewCoappFlow =
+      this.isCoApplicant &&
+      mode === 'new' &&
+      !existingCoAppApplicantId;
+
     if (isNewCoappFlow) {
       this.loanform.clearSummaryEditFlow();
       this.isFromSummary = false;
@@ -144,13 +156,15 @@ export class Basicinfo {
     }
 
     //    restore old co-app only for EXISTING flow
-    if (this.isCoApplicant && !isNewCoappFlow) {
-      this.stepperService.restoreCoAppIdFromSession();
-    } else if (isNewCoappFlow) {
-      this.stepperService.clearCoAppId?.();
-      sessionStorage.removeItem('coAppIds');
-      sessionStorage.removeItem('coapp_cifdetails');
-    }
+   if (this.isCoApplicant && !isNewCoappFlow) {
+  this.stepperService.restoreCoAppIdFromSession();
+} else if (isNewCoappFlow) {
+  this.stepperService.clearCoAppId?.();
+
+  // clear only pending/new context, not stable CIF data
+  sessionStorage.removeItem('coapp_cifdetails');
+}
+
 
 
     const pendingContextRaw = sessionStorage.getItem('pendingCoAppContext');
@@ -165,21 +179,8 @@ export class Basicinfo {
       ? pendingContext?.phone || ''
       : params['phone'] || ''
 
-    // const currentCoapp = this.getCurrentCoApplicantFromList();
 
 
-    // const coappStatus = (currentCoapp?.status || currentCoapp?.uiStatus || '').toUpperCase();
-
-    // const isDraftCoapp =
-    //   this.isCoApplicant &&
-    //   !isNewCoappFlow &&
-    //   (
-    //     coappStatus === 'DRAFT' ||
-    //     coappStatus === 'IN_PROGRESS' ||
-    //     !coappStatus
-    //   );
-
-    const currentCoapp = this.getCurrentCoApplicantFromList();
 
     const coappStatus = (
       sessionCoApp?.status ||
@@ -442,7 +443,7 @@ export class Basicinfo {
       this.stepperService.markStepCompleted('co-basicinfo');
     }
   }
-   get canResendOtp(): boolean {
+  get canResendOtp(): boolean {
     return (
       this.otpsent &&
       !this.otpVerifiedOk &&
@@ -470,10 +471,10 @@ export class Basicinfo {
     this.startTimer(false);
     this.addcustomerservice.ResendOTP(input).subscribe({
       next: (res) => {
-  this.isResendLoading = false;
+        this.isResendLoading = false;
         this.resetCounter++;
         const reachedMaxAttempts = this.resetCounter >= this.maxResendAttempts;
-        if(reachedMaxAttempts) this.startTimer(reachedMaxAttempts);
+        if (reachedMaxAttempts) this.startTimer(reachedMaxAttempts);
       },
       error: (err) => {
         console.error("error msg", err);
@@ -487,7 +488,7 @@ export class Basicinfo {
 
     if (this.hasExistingCif) return;
     this.resetCounter = 0;
-      this.resendLocked = false;
+    this.resendLocked = false;
     this.loanform.setMobileNumber(this.prefillPhone);
     this.otpsent = true;
     const input = {
@@ -512,7 +513,7 @@ export class Basicinfo {
 
   }
 
-  startTimer(reachedMaxAttempts:boolean) {
+  startTimer(reachedMaxAttempts: boolean) {
 
     // stop any existing timer first
     if (this.timerSub) {
@@ -521,7 +522,7 @@ export class Basicinfo {
     }
 
     this.resendSeconds = 60;
-    if(reachedMaxAttempts){
+    if (reachedMaxAttempts) {
       this.resendSeconds = 180;
       this.resetCounter = 0;
     }
@@ -1068,11 +1069,11 @@ export class Basicinfo {
   }
   back() {
     this.loanform.coappStep = 1;
-
+  const currentIndex = this.stepperService.getCurrentCoApplicantIndex();5
     this.router.navigate(
       ['/loanform', 'co-applicantdetails', 'coapplicantinfo'],
       {
-        queryParams: {},
+        queryParams: {  coApplicantIndex: currentIndex,       mode: 'new'},
         replaceUrl: true
       }
     );
@@ -1216,9 +1217,9 @@ export class Basicinfo {
           },
           queryParamsHandling: 'merge',
           replaceUrl: true
-        });
+        }).then(() => { this.stepperService.next();});;
 
-        this.stepperService.next();
+        // this.stepperService.next();
         // this.finishAfterSaveOrNoChange()
       },
       error: (err) => {

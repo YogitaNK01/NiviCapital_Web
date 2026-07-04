@@ -165,7 +165,7 @@ export class GeneralInfo implements OnInit {
 
     if (this.isCoApplicant) {
       this.stepperService.restoreCoAppIdFromSession();
-      this.getRealtionShipwith()
+      // this.getRealtionShipwith()
     }
     this.stepperService.restoreLoanEditContext();
     this.stepperService.restoreLoanIdFromSession();
@@ -299,12 +299,14 @@ export class GeneralInfo implements OnInit {
     localStorage.setItem(currentUserKey, this.applicantId);
     this.stepperService.rebuildSteps();
 
-    this.getOccupationdetails();
-    if (!this.isCoApplicant) {
-      this.states();
-      this.getEducationdetails();
-      this.getlendingpartnersdetails();
-    }
+    // this.getOccupationdetails();
+    await this.getOccupationdetailsAsync();
+    if (this.isCoApplicant) {
+       await this.getRealtionShipwithAsync();} 
+    else {
+        this.states();
+        this.getEducationdetails();
+        this.getlendingpartnersdetails();}
     this.listenToChanges();
     await this.loadGeneralInfoForBothFlows()
 
@@ -884,7 +886,46 @@ export class GeneralInfo implements OnInit {
 
 
   }
+  getOccupationdetailsAsync(): Promise<void> {
+  return new Promise((resolve) => {
+    this.formSvc.getOccupations().subscribe({
+      next: (res: any) => {
+        const list = res.data ?? res;
 
+        this.selectoccupation = list.map((s: any) => ({
+          value: s.occupationId,
+          label: s.occupationName,
+        }));
+
+        resolve();
+      },
+      error: () => {
+        this.selectoccupation = [];
+        resolve();
+      }
+    });
+  });
+}
+getRealtionShipwithAsync(): Promise<void> {
+  return new Promise((resolve) => {
+    this.formSvc.getRelationShip().subscribe({
+      next: (res: any) => {
+        const list = res.data ?? res;
+
+        this.selectrelationship = list.map((s: any) => ({
+          value: s.id,
+          label: s.relationWithApplicant,
+        }));
+
+        resolve();
+      },
+      error: () => {
+        this.selectrelationship = [];
+        resolve();
+      }
+    });
+  });
+}
   getEducationdetails() {
     this.formSvc.getEducation().subscribe((res: any) => {
       const list = res.data ?? res;
@@ -912,10 +953,10 @@ export class GeneralInfo implements OnInit {
   restoreDropdownLabels(data: any) {
 
     const occ = this.selectoccupation.find(o => o.value == data.occupation);
-    this.occupationlabel = occ?.label || 'Current Occupation';
+    this.occupationlabel =  'Current Occupation';
 
     const qual = this.seleactqualification.find(q => q.value == data.qualification);
-    this.qualification = qual?.label || 'Last Qualification';
+    this.qualification =  'Last Qualification';
 
     const state = this.Australianstate.find(s => s.value == data.state);
     this.selectedStateLabel = state?.label || '';
@@ -1253,7 +1294,7 @@ export class GeneralInfo implements OnInit {
   }
   mapLocalToApiFormat(local: any) {
     return {
-      currentOccupationId: local.currentOccupationId || local.occupation,
+      currentOccupationId: local.currentOccupationId ||  local.occupationId || local.occupation,
 
       occupationId:
         local.occupationId ||
@@ -1429,6 +1470,22 @@ export class GeneralInfo implements OnInit {
     }, { emitEvent: false });
 
     this.checkboxasset = data.hasAssets ? 'Yes' : 'No';
+
+    
+  // important for custom dropdown display
+  const selectedOccupation = this.selectoccupation.find(
+    x => x.value === occupation
+  );
+
+  this.occupationlabel =
+    'Current Occupation';
+
+  const selectedRelation = this.selectrelationship.find(
+    x => x.value === relationship || x.label === relationship
+  );
+
+  this.isOtherRelationship =
+    selectedRelation?.label?.trim().toLowerCase() === 'other';
   }
 
   formatRelation(value: any): string {
@@ -1582,6 +1639,8 @@ export class GeneralInfo implements OnInit {
 
         const localPayload = {
           ...input,
+          // occupation: payload.occupation,
+            //  occupationId: payload.occupation,
           relationship: payload.relationship
         };
 

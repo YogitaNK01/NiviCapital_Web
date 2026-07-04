@@ -100,7 +100,7 @@
 
     @if (!nodata ) {
     <app-tables [columns]="columns" [data]="filteredData" [pageSize]="6" [isLoading]="isLoading"
-      [totalPages]="totalPages" (pageChange)="onPageChange($event)" >
+      [totalPages]="totalPages" (pageChange)="onPageChange($event)" [hidepagination]="this.searchText.length > 0">
     </app-tables>
     } @else {
     <div class="text-label text-center mt-4">

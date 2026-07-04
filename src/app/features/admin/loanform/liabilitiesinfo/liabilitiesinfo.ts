@@ -199,13 +199,7 @@ export class Liabilitiesinfo {
     }
     this.stepperService.rebuildSteps();
 
-    // this.liabilityForm = this.fb.group({
-    //   loans: this.fb.array([]),
-    //   creditcard: this.fb.array([this.createCreditcard()]),
-    //   bnpl: this.fb.array([this.createBNPL()]),
-    //   other: this.fb.array([this.createOther()]),
 
-    // });
     this.liabilityForm = this.fb.group({
       loans: this.fb.array([]),
       creditcard: this.fb.array([]),
@@ -444,7 +438,8 @@ export class Liabilitiesinfo {
     this.accordions = liabilitiesList.map((group: any) => ({
       title: this.accordianTitle(group.code),
       alwaysOpen: true,
-      key: group.code
+      key: group.code,
+      disabled: false
     }));
 
     this.liabilityCodeMap = liabilitiesList.reduce((acc: any, item: any) => {
@@ -1880,51 +1875,37 @@ export class Liabilitiesinfo {
 
   // 4. onChange - Handle Existing Loans properly
 
-  onChange1(values: string | string[]): void {
-    if (this.isPatching) return;
-    const selectedCodes = Array.isArray(values) ? values : [values];
-
-    const mapping: any = {
-      'EXISTING_LOAN': { array: this.loans, createFn: () => this.createLoan('') },
-      'CREDIT_CARD_OUTSTANDING': { array: this.creditcard, createFn: () => this.createCreditcard() },
-      'BNPL': { array: this.bnpl, createFn: () => this.createBNPL() },
-      'OTHER_LIABILITY': { array: this.other, createFn: () => this.createOther() }
-    };
-
-    // For each type: if newly selected and empty, add a default row
-    // If deselected, clear it
-    Object.keys(mapping).forEach(code => {
-      const { array, createFn } = mapping[code];
-      const isSelected = selectedCodes.includes(code);
-
-      if (isSelected) {
-        // Only add a default row if array is empty (preserve existing data)
-        if (array.length === 0) {
-          // For EXISTING_LOAN don't push empty row - wait for loan type selection
-          if (code !== 'EXISTING_LOAN') {
-            array.push(createFn());
-          }
-        }
-      } else {
-        // Deselected - clear data
-        array.clear();
-        if (code === 'EXISTING_LOAN') {
-          this.selectedloantype = [];
-        }
-      }
-    });
-
-    this.selectedliabilities = selectedCodes;
-    this.openIndex = selectedCodes.map(code =>
-      this.accordions.findIndex(acc => acc.key === code)
-    ).filter(i => i !== -1);
-
-    this.calculateGrandTotal();
-    this.cd.detectChanges();
-  }
 
   onChange(values: string | string[]): void {
     let selectedCodes = Array.isArray(values) ? [...values] : [values];
+
+      this.liabilitiesCatagories.forEach((item: any) => {
+      item.disabled = false;
+    });
+
+    const hasNoLiabilities = selectedCodes.find((item: any) => item === this.NO_LIABILITY_CODE);
+ 
+    if(selectedCodes.length > 0){
+      if(hasNoLiabilities && selectedCodes.length > 1){
+        this.liabilitiesCatagories.forEach((item: any) => {
+          if(item.value === this.NO_LIABILITY_CODE){
+            item.disabled = true;
+          }
+        });
+      } else if(hasNoLiabilities && selectedCodes.length === 1){
+        this.liabilitiesCatagories.forEach((item: any) => {
+          if(item.value !== this.NO_LIABILITY_CODE){
+            item.disabled = true;
+          }
+        });
+      }
+    } else if(selectedCodes.length === 0){
+      this.liabilitiesCatagories.forEach((item: any) => {
+        if(item.value === this.NO_LIABILITY_CODE){
+          item.disabled = false;
+        }
+      });
+    }
 
     // If "No liabilities" is selected together with any real liability,
     // remove "No liabilities".

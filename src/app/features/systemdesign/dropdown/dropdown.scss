@@ -321,8 +321,6 @@ letter-spacing: 0.16px;
 }
 
 .dropdown-item.disabled {
-  color: #b0b0b0!important;
-  background-color: #f4f4f7;
   pointer-events: none;
   cursor:none;
 }
@@ -337,10 +335,6 @@ letter-spacing: 0.16px;
   cursor: pointer;
 }
 
-.dropdown-item input[type="checkbox"] {
-  width: $spacing_8;
-    height: $spacing_8;
-}
 
 .hrclass{
     background: $neutral-300;

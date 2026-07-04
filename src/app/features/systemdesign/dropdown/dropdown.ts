@@ -148,9 +148,7 @@ ngOnChanges(changes: SimpleChanges) {
 
 
   get filteredOptions1(): DropdownOption[] {
-    // if (!this.searchable || !this.searchTerm) return this.options;
-    // const lower = this.searchTerm.toLowerCase();
-    // return this.options.filter(o => o.label.toLowerCase().includes(lower));
+  
      return this.options;
   }
 

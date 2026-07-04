@@ -199,10 +199,10 @@ export class Uploadkyc implements OnDestroy, AfterViewInit {
   }
 
   private async loadKycForBothFlows() {
-    const key = this.isCoApplicant
+    const key1 = this.isCoApplicant
       ? this.getStorageKey()
       : `kycinfo_main_${this.stepperService.getLoanId()?.[0]}`;
-
+    const key = this.getStorageKey();
     const localData = localStorage.getItem(key);
     const parsedLocal = localData ? JSON.parse(localData) : null;
 
@@ -218,8 +218,8 @@ export class Uploadkyc implements OnDestroy, AfterViewInit {
     ]);
 
     this.custId = summarySection?.identityAndResidency?.customerId;
-    this.firstName =summarySection?.identityAndResidency?.firstName;
-    this.lastName =summarySection?.identityAndResidency?.lastName;
+    this.firstName = summarySection?.identityAndResidency?.firstName;
+    this.lastName = summarySection?.identityAndResidency?.lastName;
 
     const normalizedSummary = this.normalizeSummaryKyc(summarySection);
 
@@ -370,6 +370,10 @@ export class Uploadkyc implements OnDestroy, AfterViewInit {
     this.selectedSecondaryProof = null;
     this.isCurrentMailingChecked = false;
     this.isPermanentMailingChecked = true;
+    if (this.kycForm) {
+      const input = this.buildKycPayload(this.kycForm.value);
+      localStorage.setItem(this.getStorageKey(), JSON.stringify(input));
+    }
   }
 
   selectDifferentAddress(checked: boolean) {
@@ -383,13 +387,18 @@ export class Uploadkyc implements OnDestroy, AfterViewInit {
     this.isCurrentMailingChecked = true;
     this.isPermanentMailingChecked = false;
     this.states();
+    if (this.kycForm) {
+      const input = this.buildKycPayload(this.kycForm.value);
+      localStorage.setItem(this.getStorageKey(), JSON.stringify(input));
+    }
   }
 
   checkDob(value: any) {
     this.dobTouched = true;
-     if (!value) {  
-        this.dobValid = true;
-           return;  }
+    if (!value) {
+      this.dobValid = true;
+      return;
+    }
 
     this.dobValid = this.isAdult(value);
   }
@@ -459,7 +468,7 @@ export class Uploadkyc implements OnDestroy, AfterViewInit {
     // if (this.files.aadharfront) fd.append('aadharFrontFile', this.files.aadharfront);
     // if (this.files.aadharback) fd.append('aadharBackFile', this.files.aadharback);
     // if (this.files.passport) fd.append('passportFile', this.files.passport);
-    
+
     fd.append('custId', kycPayload.custId);
 
     // Append new files OR summary URL converted files
@@ -467,7 +476,7 @@ export class Uploadkyc implements OnDestroy, AfterViewInit {
     await this.appendKycFile(fd, 'aadharfront', 'aadharFrontFile', 'application/pdf');
     await this.appendKycFile(fd, 'aadharback', 'aadharBackFile', 'application/pdf');
     await this.appendKycFile(fd, 'passport', 'passportFile', 'application/pdf');
-    
+
     fd.forEach((value, key) => { console.log('FD:', key, value); });
     if (this.files.secaddress) {
       // fd.append('utilityBillFile', this.files.secaddress);
@@ -910,9 +919,9 @@ export class Uploadkyc implements OnDestroy, AfterViewInit {
       addressLine1: formValue.addressline2 || '',
       addressLine2: formValue.addressline3 || '',
       city: this.perselectedCityLabel || '',
-      // cityId: this.perselectedCityId || this.perCitySelectedOption || '',
+      cityId: this.perselectedCityId || this.perCitySelectedOption || '',
       state: this.perselectedStateLabel || '',
-      // stateId: this.perselectedStateId || this.perStateSelectedOption || '',
+      stateId: this.perselectedStateId || this.perStateSelectedOption || '',
       isPreferredAddress: this.isDifferentAddress === false ? 1 : 0,
       isMailingAddress: this.isDifferentAddress ? 1 : 0,
       zipCode: formValue.perpincode || '',
@@ -926,9 +935,9 @@ export class Uploadkyc implements OnDestroy, AfterViewInit {
       addressLine1: formValue.addressline2 || '',
       addressLine2: formValue.addressline3 || '',
       city: this.perselectedCityLabel || '',
-      // cityId: this.perselectedCityId || this.perCitySelectedOption || '',
+      cityId: this.perselectedCityId || this.perCitySelectedOption || '',
       state: this.perselectedStateLabel || '',
-      // stateId: this.perselectedStateId || this.perStateSelectedOption || '',
+      stateId: this.perselectedStateId || this.perStateSelectedOption || '',
       isPreferredAddress: this.isDifferentAddress == false ? 1 : 0,
       isMailingAddress: this.isDifferentAddress == false ? 1 : 0,
       zipCode: formValue.perpincode || '',
@@ -942,9 +951,9 @@ export class Uploadkyc implements OnDestroy, AfterViewInit {
       addressLine1: formValue.currentaddressline2 || '',
       addressLine2: formValue.currentaddressline3 || '',
       city: this.currselectedCityLabel,
-      // cityId: this.currselectedCityId || this.currCitySelectedOption || '',
+      cityId: this.currselectedCityId || this.currCitySelectedOption || '',
       state: this.currselectedStateLabel,
-      // stateId: this.currselectedStateId || this.currStateSelectedOption || '',
+      stateId: this.currselectedStateId || this.currStateSelectedOption || '',
       isPreferredAddress: this.isDifferentAddress == true ? 1 : 0,
       isMailingAddress: this.isDifferentAddress == true ? 1 : 0,
       zipCode: formValue.currpincode || '',
@@ -981,13 +990,7 @@ export class Uploadkyc implements OnDestroy, AfterViewInit {
         ? [permanentAddress, currentAddress, otherAddress]
         : [permanentAddress, currentAddress],
 
-      // fileMeta: {
-      //   pan: this.uploadedFiles['pan']?.name || '',
-      //   aadharfront: this.uploadedFiles['aadharfront']?.name || '',
-      //   aadharback: this.uploadedFiles['aadharback']?.name || '',
-      //   passport: this.uploadedFiles['passport']?.name || '',
-      //   secaddress: this.uploadedFiles['secaddress']?.name || ''
-      // }
+
 
       fileMeta: {
         pan: this.uploadedFileMeta['pan'] || {
@@ -1148,201 +1151,6 @@ export class Uploadkyc implements OnDestroy, AfterViewInit {
   }
 
   // edit flow = patch from summary
-  patchFromSummary() {
-    if (!this.isCoApplicant) return;
-    if (!this.loanservice.isEditFlow()) return;
-
-    const data = this.loanservice.getSummarySection('kyc');
-    console.log('patch kyc', data);
-
-    if (!data || !this.kycForm) return;
-
-    const identity = data.identityAndResidency || {};
-    const permanent = data.permanentAddress || {};
-    const current = data.currentAddress || {};
-    const other = data.otherAddress || null;
-
-    const findStateId = (stateName: string) =>
-      this.stateOptions.find(s =>
-        s.label?.toLowerCase() === stateName?.toLowerCase()
-      )?.value || '';
-
-    const permanentStateId = findStateId(permanent.state);
-    const currentStateId = findStateId(other?.state || current.state);
-
-    const isDifferent = !!other;
-
-    const mappedData = {
-      applicationId: this.applicationId,
-      applicantId: this.applicantId,
-      custId: this.isCoApplicant
-        ? this.co_userid?.cifId
-        : this.userid?.cifId,
-
-      firstName: this.isCoApplicant
-        ? this.co_userid?.fullName
-        : this.userdata?.fname,
-
-      lastName: this.isCoApplicant
-        ? this.co_userid?.fullName
-        : this.userdata?.lname,
-
-      dob: identity.dob
-        ? moment(identity.dob, 'DD/MM/YYYY').format('YYYY-MM-DD')
-        : null,
-
-      aadhaarNumber: identity.aadhaarNumber || '',
-      panNumber: identity.panNumber || '',
-      passportNo: identity.passportNumber || '',
-
-      addressType: isDifferent ? 'different' : 'same',
-      isDifferentAddress: isDifferent,
-
-      isPermanentMailingChecked:
-        permanent.isMailingAddress === 1 || !isDifferent,
-
-      isCurrentMailingChecked:
-        isDifferent
-          ? other?.isMailingAddress === 1
-          : current.isMailingAddress === 1,
-
-      selectedSecondaryProof: null,
-
-      addresses: [
-        {
-          addressType: 'PERMANENT',
-          addressLine: permanent.addressLine || '',
-          addressLine1: permanent.addressLine1 || '',
-          addressLine2: permanent.addressLine2 || '',
-          city: permanent.city || '',
-          cityId: '',
-          state: permanent.state || '',
-          stateId: permanentStateId,
-          isPreferredAddress: permanent.isPreferredAddress ?? 1,
-          isMailingAddress: permanent.isMailingAddress ?? 1,
-          zipCode: permanent.pincode || '',
-          country: permanent.country || 'India'
-        },
-        {
-          addressType: 'CURRENT',
-          addressLine: current.addressLine || '',
-          addressLine1: current.addressLine1 || '',
-          addressLine2: current.addressLine2 || '',
-          city: current.city || '',
-          cityId: '',
-          state: current.state || '',
-          stateId: findStateId(current.state),
-          isPreferredAddress: current.isPreferredAddress ?? 0,
-          isMailingAddress: current.isMailingAddress ?? 0,
-          zipCode: current.pincode || '',
-          country: current.country || 'India'
-        },
-
-        ...(isDifferent ? [{
-          addressType: 'OTHER',
-          addressLine: other.addressLine || '',
-          addressLine1: other.addressLine1 || '',
-          addressLine2: other.addressLine2 || '',
-          city: other.city || '',
-          cityId: '',
-          state: other.state || '',
-          stateId: currentStateId,
-          isPreferredAddress: other.isPreferredAddress ?? 1,
-          isMailingAddress: other.isMailingAddress ?? 1,
-          zipCode: other.pincode || '',
-          country: other.country || 'India'
-        }] : [])
-      ],
-
-      fileMeta: {
-        aadharfront: {
-          fileName: identity.aadhaarFrontUrl || '',
-          fileUrl: identity.aadhaarFrontUrl || '',
-          uploaded: !!identity.aadhaarFrontUrl
-        },
-        aadharback: {
-          fileName: identity.aadhaarBackUrl || '',
-          fileUrl: identity.aadhaarBackUrl || '',
-          uploaded: !!identity.aadhaarBackUrl
-        },
-        pan: {
-          fileName: identity.panCardUrl || '',
-          fileUrl: identity.panCardUrl || '',
-          uploaded: !!identity.panCardUrl
-        },
-        passport: {
-          fileName: identity.passportUrl || '',
-          fileUrl: identity.passportUrl || '',
-          uploaded: !!identity.passportUrl
-        },
-        secaddress: {
-          fileName:
-            other?.supportingDocumentUrl ||
-            current?.supportingDocumentUrl ||
-            permanent?.supportingDocumentUrl ||
-            '',
-          fileUrl:
-            other?.supportingDocumentUrl ||
-            current?.supportingDocumentUrl ||
-            permanent?.supportingDocumentUrl ||
-            '',
-          uploaded: !!(
-            other?.supportingDocumentUrl ||
-            current?.supportingDocumentUrl ||
-            permanent?.supportingDocumentUrl
-          )
-        }
-      }
-    };
-
-    this.patchKycInfo(mappedData);
-
-    // set city id after state-wise city API loads
-    if (permanentStateId && permanent.city) {
-      this.main.getIndianstatescities(permanentStateId).subscribe((res: any) => {
-        const list = res.data ?? res;
-
-        this.cityOptions = list.map((c: any) => ({
-          value: c.id,
-          label: c.name
-        }));
-
-        const cityId =
-          this.cityOptions.find(c =>
-            c.label?.toLowerCase() === permanent.city?.toLowerCase()
-          )?.value || '';
-
-        this.perCitySelectedOption = cityId;
-        this.perselectedCityId = cityId;
-        this.perselectedCityLabel = permanent.city;
-      });
-    }
-
-    if (isDifferent && currentStateId && other?.city) {
-      this.main.getIndianstatescities(currentStateId).subscribe((res: any) => {
-        const list = res.data ?? res;
-
-        this.currcityOptions = list.map((c: any) => ({
-          value: c.id,
-          label: c.name
-        }));
-
-        const cityId =
-          this.currcityOptions.find(c =>
-            c.label?.toLowerCase() === other.city?.toLowerCase()
-          )?.value || '';
-
-        this.currCitySelectedOption = cityId;
-        this.currselectedCityId = cityId;
-        this.currselectedCityLabel = other.city;
-      });
-    }
-
-    this.lastSavedPayload = this.normalizeKycPayload(mappedData);
-
-    const stepRoute = this.isCoApplicant ? 'co-kyc' : 'kycinfo';
-    this.stepperService.markStepCompleted(stepRoute);
-  }
 
   patchKycInfo(data: any) {
     if (!data || !this.kycForm) return;
@@ -1351,16 +1159,19 @@ export class Uploadkyc implements OnDestroy, AfterViewInit {
     const currentAddress = data.addresses?.find((a: any) => a.addressType === 'CURRENT');
     const otherAddress = data.addresses?.find((a: any) => a.addressType === 'OTHER');
 
-    const currentFormAddress = data.isDifferentAddress
-      ? otherAddress
+
+    const isDifferent =
+      data.isDifferentAddress === true ||
+      data.addressType === 'different' ||
+      !!otherAddress;
+
+    const currentFormAddress = isDifferent
+      ? otherAddress || currentAddress || permanentAddress
       : currentAddress || permanentAddress;
 
-    // this.addressType = data.addressType || 'same';
 
-    this.addressType =
-      data.addressType || (data.isDifferentAddress ? 'different' : 'same');
-
-    this.isDifferentAddress = !!data.isDifferentAddress;
+    this.addressType = isDifferent ? 'different' : 'same';
+    this.isDifferentAddress = isDifferent;
 
     this.isPermanentMailingChecked =
       data.isPermanentMailingChecked ?? !this.isDifferentAddress;
@@ -1375,19 +1186,19 @@ export class Uploadkyc implements OnDestroy, AfterViewInit {
     this.perselectedStateId = permanentAddress?.stateId || '';
     this.perselectedStateLabel = permanentAddress?.state || '';
 
-    this.currStateSelectedOption = otherAddress?.stateId || '';
-    this.currselectedStateId = otherAddress?.stateId || '';
-    this.currselectedStateLabel = otherAddress?.state || '';
+    this.currStateSelectedOption = currentFormAddress?.stateId || '';
+    this.currselectedStateId = currentFormAddress?.stateId || '';
+    this.currselectedStateLabel = currentFormAddress?.state || '';
 
 
     this.perCitySelectedOption = permanentAddress?.cityId || '';
     this.perselectedCityId = permanentAddress?.cityId || '';
     this.perselectedCityLabel = permanentAddress?.city || '';
 
-    this.currCitySelectedOption = otherAddress?.cityId || '';
+    this.currCitySelectedOption = currentFormAddress?.cityId || '';
 
-    this.currselectedCityId = otherAddress?.cityId || '';
-    this.currselectedCityLabel = otherAddress?.city || '';
+    this.currselectedCityId = currentFormAddress?.cityId || '';
+    this.currselectedCityLabel = currentFormAddress?.city || '';
 
     this.kycForm.form.patchValue({
       dob: data.dob ? moment(data.dob, 'YYYY-MM-DD') : null,
@@ -1401,23 +1212,31 @@ export class Uploadkyc implements OnDestroy, AfterViewInit {
       perpincode: permanentAddress?.zipCode || '',
 
 
-      currentaddressline1: currentFormAddress?.addressLine || '',
-      currentaddressline2: currentFormAddress?.addressLine1 || '',
-      currentaddressline3: currentFormAddress?.addressLine2 || '',
-      currpincode: currentFormAddress?.zipCode || ''
-
 
     });
-    if (data.dob) { 
+    if (isDifferent) {
+      setTimeout(() => {
+        this.kycForm.form.patchValue({
+          currentaddressline1: currentFormAddress?.addressLine || '',
+          currentaddressline2: currentFormAddress?.addressLine1 || '',
+          currentaddressline3: currentFormAddress?.addressLine2 || '',
+          currpincode: currentFormAddress?.zipCode || ''
+
+        });
+      }, 0);
+    }
+
+    if (data.dob) {
       this.dobValid = this.isAdult(moment(data.dob, 'YYYY-MM-DD'));
-        this.dobTouched = false;}
+      this.dobTouched = false;
+    }
 
     if (this.perselectedStateId) {
       this.loadPerCities(this.perselectedStateId, permanentAddress?.city || '');
     }
 
     if (this.currselectedStateId) {
-      this.loadCurrCities(this.currselectedStateId, otherAddress?.city || '');
+      this.loadCurrCities(this.currselectedStateId, currentFormAddress?.city || '');
     }
     if (data.fileMeta) {
       this.uploadedFileMeta = data.fileMeta;

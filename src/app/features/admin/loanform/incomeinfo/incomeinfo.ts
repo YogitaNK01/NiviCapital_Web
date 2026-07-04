@@ -349,7 +349,7 @@ export class Incomeinfo {
 
 
     });
-    this.applyCoApplicantViewMode(queryParams);
+    this.applyApplicantViewMode(queryParams);
 
     this.requiredDocs.forEach(k => this.uploadedFiles[k] = null);
     this.optionalDocs.forEach(k => this.uploadedFiles[k] = null);
@@ -363,85 +363,119 @@ export class Incomeinfo {
 
   }
 
-applyCoApplicantViewMode(queryParams: any) {
-  let storedCoAppData: any = {};
-
-  try {
-    storedCoAppData = JSON.parse(sessionStorage.getItem('coAppIds') || '{}');
-  } catch {
-    storedCoAppData = {};
-  }
-
-  const isFromSummaryRoute =
-    queryParams['fromSummary'] === true ||
-    queryParams['fromSummary'] === 'true';
-
-  const coappStatus = (
-    storedCoAppData?.status ||
-    (isFromSummaryRoute ? 'COMPLETED' : '')
-  ).toUpperCase();
-
-  const isCompletedCoapp =
-    coappStatus === 'COMPLETED' ||
-    coappStatus === 'SUBMITTED';
-
-  const isNewCoappFlow =
-    this.isCoApplicant &&
-    storedCoAppData?.mode === 'new';
-
-  const isDraftCoapp =
-    this.isCoApplicant &&
-    !isNewCoappFlow &&
-    !isCompletedCoapp;
-
-  const cameFromSummary =
-    isFromSummaryRoute ||
-    storedCoAppData?.mode === 'view' ||
-    storedCoAppData?.mode === 'edit' ||
-    this.loanformservice.isSummaryEditFlow();
-
-  this.isSummaryEditMode =
-    !isNewCoappFlow &&
-    isCompletedCoapp &&
-    cameFromSummary;
-
-  this.isFromSummary = this.isSummaryEditMode;
-
-  this.viewOnly =
-    this.isSummaryEditMode &&
-    queryParams['mode'] !== 'edit';
-
-  if (isDraftCoapp || isNewCoappFlow) {
-    this.loanformservice.clearSummaryEditFlow();
-    this.loanformservice.clearSummaryEducationEditFlow?.();
-
-    this.isFromSummary = false;
-    this.isSummaryEditMode = false;
-    this.viewOnly = false;
-    this.isViewMode = false;
-    this.isEditMode = false;
-
-    this.incomeForm.enable({ emitEvent: false });
-  } else if (this.isSummaryEditMode) {
-    if (this.viewOnly) {
-      this.isViewMode = true;
-      this.isEditMode = false;
-      this.incomeForm.disable({ emitEvent: false });
-    } else {
+applyApplicantViewMode(queryParams: any) {
+    const isFromSummaryRoute =
+      queryParams['fromSummary'] === true ||
+      queryParams['fromSummary'] === 'true';
+ 
+    const cameFromSummary =
+      isFromSummaryRoute ||
+      this.loanformservice.isSummaryEditFlow();
+ 
+    // ✅ MAIN APPLICANT LOGIC
+    if (!this.isCoApplicant) {
+      this.isSummaryEditMode = cameFromSummary;
+      this.isFromSummary = this.isSummaryEditMode;
+ 
+      this.viewOnly =
+        this.isSummaryEditMode &&
+        queryParams['mode'] !== 'edit';
+ 
+      if (this.isSummaryEditMode) {
+        if (this.viewOnly) {
+          this.isViewMode = true;
+          this.isEditMode = false;
+          this.incomeForm.disable({ emitEvent: false });
+        } else {
+          this.isViewMode = false;
+          this.isEditMode = true;
+          this.incomeForm.enable({ emitEvent: false });
+        }
+      } else {
+        this.isFromSummary = false;
+        this.isSummaryEditMode = false;
+        this.viewOnly = false;
+        this.isViewMode = false;
+        this.isEditMode = false;
+        this.incomeForm.enable({ emitEvent: false });
+      }
+ 
+      return;
+    }
+ 
+    // ✅ CO-APPLICANT LOGIC
+    let storedCoAppData: any = {};
+ 
+    try {
+      storedCoAppData = JSON.parse(sessionStorage.getItem('coAppIds') || '{}');
+    } catch {
+      storedCoAppData = {};
+    }
+ 
+    const coappStatus = (
+      storedCoAppData?.status ||
+      (isFromSummaryRoute ? 'COMPLETED' : '')
+    ).toUpperCase();
+ 
+    const isCompletedCoapp =
+      coappStatus === 'COMPLETED' ||
+      coappStatus === 'SUBMITTED';
+ 
+    const isNewCoappFlow =
+      storedCoAppData?.mode === 'new';
+ 
+    const isDraftCoapp =
+      !isNewCoappFlow &&
+      !isCompletedCoapp;
+ 
+    const coappCameFromSummary =
+      isFromSummaryRoute ||
+      storedCoAppData?.mode === 'view' ||
+      storedCoAppData?.mode === 'edit' ||
+      this.loanformservice.isSummaryEditFlow();
+ 
+    this.isSummaryEditMode =
+      !isNewCoappFlow &&
+      isCompletedCoapp &&
+      coappCameFromSummary;
+ 
+    this.isFromSummary = this.isSummaryEditMode;
+ 
+    this.viewOnly =
+      this.isSummaryEditMode &&
+      queryParams['mode'] !== 'edit';
+ 
+    if (isDraftCoapp || isNewCoappFlow) {
+      this.loanformservice.clearSummaryEditFlow();
+      this.loanformservice.clearSummaryEducationEditFlow?.();
+ 
+      this.isFromSummary = false;
+      this.isSummaryEditMode = false;
+      this.viewOnly = false;
       this.isViewMode = false;
-      this.isEditMode = true;
+      this.isEditMode = false;
+ 
+      this.incomeForm.enable({ emitEvent: false });
+    } else if (this.isSummaryEditMode) {
+      if (this.viewOnly) {
+        this.isViewMode = true;
+        this.isEditMode = false;
+        this.incomeForm.disable({ emitEvent: false });
+      } else {
+        this.isViewMode = false;
+        this.isEditMode = true;
+        this.incomeForm.enable({ emitEvent: false });
+      }
+    } else {
+      this.isFromSummary = false;
+      this.isSummaryEditMode = false;
+      this.viewOnly = false;
+      this.isViewMode = false;
+      this.isEditMode = false;
+ 
       this.incomeForm.enable({ emitEvent: false });
     }
-  } else {
-    this.isFromSummary = false;
-    this.isSummaryEditMode = false;
-    this.viewOnly = false;
-    this.isViewMode = false;
-    this.isEditMode = false;
-
-    this.incomeForm.enable({ emitEvent: false });
   }
-}
   getStorageKey() {
     const main_ApplicantId = this.stepperService.getLoanId()?.[0];
     const co_ApplicantId = this.stepperService.getCo_appId()?.[0];
@@ -452,9 +486,7 @@ applyCoApplicantViewMode(queryParams: any) {
       this.applicationId,
       this.applicantId,
       this.isCoApplicant,
-      // main_ApplicantId ?? undefined,
-      // co_ApplicantId ?? undefined,
-      // index
+     
     );
   }
   private async loadIncomeForBothFlows() {
@@ -822,12 +854,12 @@ applyCoApplicantViewMode(queryParams: any) {
       fd.append(`items[0].file.file`, result.file);
       fd.append(`items[0].documentId`, doc.documentId);
     } else {
-      fd.append(`files[${index}].title`, othertitle || key);
-      fd.append(`files[${index}].type`, type);
-      fd.append(`files[${index}].file`, result.file);
+    fd.append(`files[${index}].title`, othertitle || key);
+    fd.append(`files[${index}].type`, type);
+    fd.append(`files[${index}].file`, result.file);
     }
   const isDeletedFiles = !doc ? false : true;
- 
+
     this.loanformservice.uploadIncome(fd, this.applicationId, isDeletedFiles).subscribe({
     // this.loanformservice.uploadIncome(fd, this.applicationId, this.isEditMode).subscribe({
       next: (res) => {

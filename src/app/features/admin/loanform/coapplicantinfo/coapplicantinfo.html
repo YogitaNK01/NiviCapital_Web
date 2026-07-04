@@ -23,11 +23,11 @@
                 [(ngModel)]="prefillPhone" [showPhonePrefix]="true" [showPhonePrefixnumber]="true"
                 [state]="getPhoneFieldState(phone)"></app-inputfield>
 
-              <div class="text-danger mt-2" *ngIf="showmsg">
+              <div class="text-danger mt-2" *ngIf="showmsg"> {{showmsgtext}}
 
-                <div>
+                <!-- <div>
                  Main Applicant and Co-Applicant mobile numbers cannot be the same. Please enter a different mobile number for the Co-Applicant.
-                </div>
+                </div> -->
               </div>
             </div>
 
