@@ -310,7 +310,7 @@ export class Educationinfo implements OnInit {
 
         this.educationFormState[stepKey] = {
           ...stepState,
-          institutename: this.resolveInstituteId(stepState.institutename),
+          institutename: (stepState.institutename),
           location: this.resolveLocationId(stepState.location),
         };
       });
@@ -399,17 +399,30 @@ export class Educationinfo implements OnInit {
 
           this.hasUnsavedChanges = true;
 
+          // this.educationFormState[step] = {
+          //   ...raw,
+
+          //   institutename: (raw.institutename),
+          //   institutetitle: raw.institutetitle || '',
+          //   location: this.resolveLocationId(raw.location),
+          //   otherLocation: raw.otherLocation || '',
+
+          //   passingyear: this.normalizeDropdownValue(raw.passingyear),
+          // };
+
           this.educationFormState[step] = {
             ...raw,
 
-            institutename: this.resolveInstituteId(raw.institutename),
+            instituteId: raw.instituteId || this.educationFormState[step]?.instituteId || '',
+            instituteName: raw.instituteName || this.educationFormState[step]?.instituteName || raw.institutename || '',
+            institutename: raw.institutename || this.educationFormState[step]?.instituteName || '',
+
             institutetitle: raw.institutetitle || '',
             location: this.resolveLocationId(raw.location),
             otherLocation: raw.otherLocation || '',
 
             passingyear: this.normalizeDropdownValue(raw.passingyear),
           };
-
           this.stepperService.setEducationStepData(
             step,
             this.educationFormState[step]
@@ -476,7 +489,7 @@ export class Educationinfo implements OnInit {
   createForm(): FormGroup {
     return this.fb.group({
 
-
+      instituteId: [''], instituteName: [''],
       institutename: ['', Validators.required],
       institutetitle: ['', [Validators.minLength(2), Validators.maxLength(100)]],
       passingyear: ['', Validators.required],
@@ -485,7 +498,7 @@ export class Educationinfo implements OnInit {
       otherLocation: ['', [Validators.minLength(2), Validators.maxLength(100)]],
       marksheet: [null],
       lc: [null],
-     
+
       // score: ['', [ this.ieltsScoreValidator()]],
     });
   }
@@ -751,13 +764,14 @@ export class Educationinfo implements OnInit {
   restoreFormState(step: StepKey) {
     const form = this.educationForms[step];
     const saved = this.educationFormState[step] || this.stepperService.getEducationStepData(step);;
-
+    console.log("restoreFormState---saved----", saved)
     if (!form || !saved) return;
 
 
     form.patchValue({
       ...saved,
-      institutename: this.getOptionValue(this.instituteOptions, saved?.institutename),
+      instituteId: (saved?.instituteId),
+      institutename: saved?.instituteName || saved?.institutename,
       institutetitle: saved?.institutetitle || saved?.otherInstituteName || saved?.title || '',
       location: this.getOptionValue(this.cityOptions, saved?.location),
       otherLocation: saved?.otherLocation || saved?.otherLocationName || '',
@@ -775,8 +789,30 @@ export class Educationinfo implements OnInit {
     form.updateValueAndValidity({ emitEvent: false });
 
   }
+  //on institute value changes
+  onInstituteChanged(event: { id: string; name: string }) {
+    const step = this.activeEducation as StepKey;
+    const form = this.educationForms[step] as FormGroup;
 
+    if (!form) return;
 
+    form.patchValue({
+      instituteId: event.id || '',
+      instituteName: event.name || '',
+      institutename: event.name || ''
+    }, { emitEvent: false });
+
+    this.educationFormState[step] = {
+      ...(this.educationFormState[step] || {}),
+      ...form.getRawValue(),
+      instituteId: event.id || '',
+      instituteName: event.name || '',
+      institutename: event.name || ''
+    };
+
+    this.stepperService.setEducationStepData(step, this.educationFormState[step]);
+    this.saveEducationStateToLocalStorage();
+  }
 
 
   getEducationGroup(key: string): FormGroup {
@@ -1066,8 +1102,9 @@ export class Educationinfo implements OnInit {
 
     const normalized = {
       ...raw,
-
-      institutename: this.resolveInstituteId(raw.institutename),
+      instituteId: raw.instituteId || this.educationFormState[step]?.instituteId || '',
+      instituteName: raw.instituteName || this.educationFormState[step]?.instituteName || raw.institutename || '',
+      institutename: raw.institutename || this.educationFormState[step]?.instituteName || '',
       institutetitle: raw.institutetitle || '',
       location: this.resolveLocationId(raw.location),
       otherLocation: raw.otherLocation || '',
@@ -1275,8 +1312,9 @@ export class Educationinfo implements OnInit {
         forms[activeStep] = {
           ...forms[activeStep],
           ...raw,
-
-          institutename: this.resolveInstituteId(raw.institutename),
+          instituteId: raw.instituteId || this.educationFormState[activeStep]?.instituteId || '',
+          instituteName: raw.instituteName || this.educationFormState[activeStep]?.instituteName || raw.institutename || '',
+          institutename: raw.institutename || this.educationFormState[activeStep]?.instituteName || '',
           institutetitle: raw.institutetitle || '',
           location: this.resolveLocationId(raw.location),
           otherLocation: raw.otherLocation || '',
@@ -1385,7 +1423,8 @@ export class Educationinfo implements OnInit {
 
       form.patchValue({
         ...savedValue,
-        institutename: this.getOptionValue(this.instituteOptions, savedValue?.institutename),
+        instituteId: savedValue?.instituteId || '',
+        institutename: savedValue?.institutename || savedValue?.instituteName || '',
         institutetitle: savedValue?.institutetitle || savedValue?.otherInstituteName || savedValue?.title || '',
         location: this.getOptionValue(this.cityOptions, savedValue?.location),
         otherLocation: savedValue?.otherLocation || savedValue?.otherLocationName || '',
@@ -1466,7 +1505,20 @@ export class Educationinfo implements OnInit {
     if (!form) return;
 
     const data = savedData?.jsonData || savedData;
+    const prev = this.educationFormState[step] || {};
 
+    const instituteId =
+      data.instituteId ||
+      data.institutionId ||
+      prev.instituteId ||
+      '';
+
+    const instituteName =
+      data.instituteName ||
+      data.institutename ||
+      prev.instituteName ||
+      prev.institutename ||
+      '';
     if (!data) return;
 
     if (step === 'ielts') {
@@ -1476,12 +1528,13 @@ export class Educationinfo implements OnInit {
     } else if (step === 'offerletter') {
       // no normal form fields except file display
     } else {
-      form.patchValue({
 
-        institutename: this.getOptionValue(
-          this.instituteOptions,
-          data.instituteId || data.institutename || data.instituteName || ''
-        ),
+
+      form.patchValue({
+        instituteId,
+        instituteName,
+        institutename: instituteName,
+
 
         institutetitle: data.title || data.otherInstituteName || data.institutetitle || '',
         passingyear: this.normalizeDropdownValue(data.passingyear || data.yearOfPassing),
@@ -1495,7 +1548,13 @@ export class Educationinfo implements OnInit {
       }, { emitEvent: false });
     }
 
-    this.educationFormState[step] = form.getRawValue();
+    // this.educationFormState[step] = form.getRawValue();
+    this.educationFormState[step] = {
+      ...form.getRawValue(),
+      instituteId,
+      instituteName,
+      institutename: instituteName
+    };
 
     if (data.otherDocMap) {
       this.otherDocMap = {
@@ -1690,7 +1749,7 @@ export class Educationinfo implements OnInit {
       step,
       category: 'EDUCATION',
       subcategory: this.stepToSubcategory[step],
-      institutename: this.resolveInstituteId(raw.institutename),
+      institutename: (raw.institutename),
       location: this.resolveLocationId(raw.location),
       passingyear: this.normalizeDropdownValue(raw.passingyear),
       files: filesMeta,
@@ -2242,11 +2301,17 @@ export class Educationinfo implements OnInit {
           this.markStepPersisted(step);
         }
       } else {
+
+        //  this.formSvc.instituteCache.push({
+        //   label: first.instituteName,
+        //   value: first.instituteId
+        // });
+
+        // this.instituteOptions = this.formSvc.instituteCache;
+
         form.patchValue({
-          institutename: this.getOptionValue(
-            this.instituteOptions,
-            first.instituteId || first.instituteName || ''
-          ),
+          instituteId: first.instituteId,
+          institutename: first.instituteName,
           institutetitle: first.otherInstituteName || '',
           passingyear: this.normalizeDropdownValue(
             first.yearOfPassing || ''
@@ -2270,7 +2335,13 @@ export class Educationinfo implements OnInit {
         }
       }
 
-      this.educationFormState[step] = form.getRawValue();
+      // this.educationFormState[step] = form.getRawValue();
+      this.educationFormState[step] = {
+        ...form.getRawValue(),
+        instituteId: first.instituteId || '',
+        instituteName: first.instituteName || ''
+      };
+
       this.stepperService.setEducationStepData(step, this.educationFormState[step]);
 
       // -----------------------------
@@ -2371,7 +2442,26 @@ export class Educationinfo implements OnInit {
     this.cd.detectChanges();
   }
 
+  private getOptionLabel(
+    list: { label: string; value: string }[],
+    rawValue: any,
+    fallbackLabel: string = ''
+  ): string {
+    const value = this.normalizeDropdownValue(rawValue);
+    if (!value && !fallbackLabel) return '';
 
+    const matchByValue = list.find(x => x.value === value);
+    if (matchByValue) return matchByValue.label;
+
+    const matchByLabel = list.find(
+      x =>
+        x.label?.toString().trim().toLowerCase() ===
+        value?.toString().trim().toLowerCase()
+    );
+    if (matchByLabel) return matchByLabel.label;
+
+    return fallbackLabel || value || '';
+  }
   private clearOtherDocsForStep(step: StepKey): void {
     const prefix = `${step}_`;
 
@@ -2516,7 +2606,14 @@ export class Educationinfo implements OnInit {
       return fd;
     }
 
-    fd.append('instituteId', this.resolveInstituteId(form.get('institutename')?.value || ''));
+    const raw = form.getRawValue();
+
+    const instituteId =
+      raw.instituteId ||
+      this.educationFormState[step]?.instituteId ||
+      '';
+
+    fd.append('instituteId', instituteId);
 
     fd.append('otherInstituteName', form.get('institutetitle')?.value);
     fd.append('yearOfPassing', form.get('passingyear')?.value || '');
@@ -2568,6 +2665,7 @@ export class Educationinfo implements OnInit {
 
     const step = this.activeEducation as StepKey;
     const form = this.educationForms[step];
+    console.log("form---", form);
 
 
     if (step === 'pg' && !this.hasPgData(form, step)) {
@@ -2597,14 +2695,26 @@ export class Educationinfo implements OnInit {
     if (!this.shouldCallNextApi(step)) {
       this.saveCurrentFormState();
       this.persistEducationState();
+      const rawStep = this.educationForms[step].getRawValue();
 
       this.stepperService.setEducationStepData(step, {
-        ...this.educationForms[step].getRawValue(),
-        institutename: this.resolveInstituteId(this.educationForms[step].get('institutename')?.value),
-        location: this.resolveLocationId(this.educationForms[step].get('location')?.value),
-        institutetitle: this.educationForms[step].get('institutetitle')?.value || '',
-        otherLocation: this.educationForms[step].get('otherLocation')?.value || ''
+        ...rawStep,
+        institutename: rawStep.institutename,
+        instituteId: rawStep.instituteId || this.educationFormState[step]?.instituteId || '',
+        instituteName: rawStep.instituteName || this.educationFormState[step]?.instituteName || rawStep.institutename || '',
+
+        location: this.resolveLocationId(rawStep.location),
+        institutetitle: rawStep.institutetitle || '',
+        otherLocation: rawStep.otherLocation || ''
       });
+
+      // this.stepperService.setEducationStepData(step, {
+      //   ...this.educationForms[step].getRawValue(),
+      //   institutename: (this.educationForms[step].get('institutename')?.value),
+      //   location: this.resolveLocationId(this.educationForms[step].get('location')?.value),
+      //   institutetitle: this.educationForms[step].get('institutetitle')?.value || '',
+      //   otherLocation: this.educationForms[step].get('otherLocation')?.value || ''
+      // });
 
       this.stepperService.markEducationSectionComplete(step);
 
@@ -2627,7 +2737,7 @@ export class Educationinfo implements OnInit {
 
       {
         ...this.educationForms[step].getRawValue(),
-        institutename: this.resolveInstituteId(this.educationForms[step].get('institutename')?.value),
+        institutename: (this.educationForms[step].get('institutename')?.value),
         location: this.resolveLocationId(this.educationForms[step].get('location')?.value),
         institutetitle: this.educationForms[step].get('institutetitle')?.value || '',
         otherLocation: this.educationForms[step].get('otherLocation')?.value || ''
@@ -2642,9 +2752,6 @@ export class Educationinfo implements OnInit {
       const prevStep = this.educationOrder[i];
       this.stepperService.markEducationSectionComplete(prevStep);
     }
-
-
-
 
     const fd = new FormData();
     const subcategory = this.stepToSubcategory[step];
@@ -2732,7 +2839,6 @@ export class Educationinfo implements OnInit {
       const reqDocs = this.requiredDocs(step);
       console.log('reqdoc-', reqDocs);
 
-
       if (step !== 'pg') {
         const missingFiles = reqDocs.filter(r => !this.getFile(step, r.doc, r.index));
         if (missingFiles.length > 0) {
@@ -2740,7 +2846,6 @@ export class Educationinfo implements OnInit {
           return;
         }
       }
-
 
 
       let fileIndex = 0;
@@ -2778,8 +2883,6 @@ export class Educationinfo implements OnInit {
 
 
       //  ADD EXTRA MARKSHEETS (after required ones)
-
-
       const requiredMarksheetIndexes = new Set(
         this.requiredDocs(step)
           .filter(d => d.doc === 'marksheet')
@@ -2865,9 +2968,16 @@ export class Educationinfo implements OnInit {
 
         fileIndex++;
       }
-
-      const instituteId = this.resolveInstituteId(form.get('institutename')?.value);
+      const instituteId1 = this.resolveInstituteId(form.get('institutename')?.value);
       const locationId = this.resolveLocationId(form.get('location')?.value);
+
+      const raw = form.getRawValue();
+
+      const instituteId =
+        raw.instituteId ||
+        this.educationFormState[step]?.instituteId ||
+        '';
+
 
 
       // fd.append('instituteId', form.get('institutename')?.value);
@@ -3070,8 +3180,6 @@ export class Educationinfo implements OnInit {
 
     this.cd.detectChanges();
   }
-
-
 
   private disableAllEducationForms(): void {
     Object.keys(this.educationForms).forEach((key) => {
@@ -3303,11 +3411,19 @@ export class Educationinfo implements OnInit {
         this.normalizeDropdownValue(form.get('passingyear')?.value) || ''
       );
 
+      // fd.append(
+      //   `items[${itemIndex}].instituteId`,
+      //   (form.get('institutename')?.value) || ''
+      // );
+
+      const raw = form.getRawValue();
+
       fd.append(
         `items[${itemIndex}].instituteId`,
-        this.resolveInstituteId(form.get('institutename')?.value) || ''
+        raw.instituteId ||
+        this.educationFormState[this.getCurrentStep()]?.instituteId ||
+        ''
       );
-
       fd.append(
         `items[${itemIndex}].locationId`,
         this.resolveLocationId(form.get('location')?.value) || ''

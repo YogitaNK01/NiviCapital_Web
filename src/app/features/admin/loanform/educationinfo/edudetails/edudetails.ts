@@ -368,16 +368,18 @@ export class Edudetails {
     this.selectedInstituteLabel = selected.map(s => s.label).join(', ');
     this.selectedInstituteID = selected.map(s => s.value).join(', ');
 
-    // this.isOtherEducation = this.selectedInstituteLabel.toLowerCase().includes('other');
+    this.basicform.patchValue({
+      institute: this.selectedInstituteLabel
+    }, { emitEvent: false });
 
-    // this.isOtherEducation = selected.some(
-    //   s => s.label.trim().toLowerCase() === 'other'
-    // )
-    if (this.selectedInstituteLabel.toLowerCase() === 'other') {
-      this.isOtherEducation = true;
-    } else {
-      this.isOtherEducation = false;
-    }
+    this.isOtherEducation = selected.some(
+      s => s.label.trim().toLowerCase() === 'other');
+
+    // if (this.selectedInstituteLabel.toLowerCase() === 'other') {
+    //   this.isOtherEducation = true;
+    // } else {
+    //   this.isOtherEducation = false;
+    // }
 
     this.saveEducationBasic();
 
@@ -404,19 +406,25 @@ export class Edudetails {
       return;
     }
 
-    if (value === 'other') {
-      const otherItem = this.seleactInstitute.find(
-        item => item.label.toLowerCase() === 'other'
-      );
-
-      this.filteredInstitutes = otherItem ? [otherItem] : [];
-      return;
+    if (value.length >= 3) {
+      this.formSvc.getInstitutesBySearch(searchText).subscribe((res: any) => {
+        this.filteredInstitutes = [...res];
+        this.seleactInstitute = [...res];
+      });
     }
+    // if (value === 'other') {
+    //   const otherItem = this.seleactInstitute.find(
+    //     item => item.label.toLowerCase() === 'other'
+    //   );
 
-    //  Normal search
-    this.filteredInstitutes = this.seleactInstitute.filter(item =>
-      item.label.toLowerCase().includes(value)
-    );
+    //   this.filteredInstitutes = otherItem ? [otherItem] : [];
+    //   return;
+    // }
+
+    // //  Normal search
+    // this.filteredInstitutes = this.seleactInstitute.filter(item =>
+    //   item.label.toLowerCase().includes(value)
+    // );
   }
 
 
@@ -642,21 +650,7 @@ export class Edudetails {
     });
   }
 
-  //eduction is removed (pg-ug)
 
-  private isRemovingQualification1(
-    currentLabel: string,
-    newLabel: string
-  ): boolean {
-    const curr = currentLabel.toLowerCase();
-    const next = newLabel.toLowerCase();
-
-    if (curr.includes('postgraduate') && next.includes('undergraduate')) return true;
-    if (curr.includes('postgraduate') && next.includes('diploma')) return true;
-    if (curr.includes('undergraduate') && next.includes('diploma')) return true;
-
-    return false;
-  }
   private normalizeFlowLabel(label: string): string {
     return (label || '')
       .toLowerCase()
@@ -944,96 +938,43 @@ export class Edudetails {
     );
   }
 
-  private restoreEducationBasic() {
-    if (!this.applicantId || !this.basicform) return;
-
-    const saved = localStorage.getItem(this.getEducationBasicKey());
-    if (!saved) return;
-
-    const parsed = JSON.parse(saved);
-
-    this.basicform.patchValue(parsed.form || {}, {
-      emitEvent: false
-    });
-
-    this.selectedQualificationLabel = parsed.selectedQualificationLabel || '';
-    this.selectedInstituteLabel = parsed.selectedInstituteLabel || '';
-    this.isOtherQualification = !!parsed.isOtherQualification;
-    this.isOtherEducation = !!parsed.isOtherEducation;
-    this.previousEducationId = parsed.previousEducationId || null;
-    this.hasProceededOnce = !!parsed.hasProceededOnce;
-
-    this.cd.detectChanges();
-  }
-
-  private restoreSavedEducationPayload() {
-    const key = `educationdetailsData_${this.applicantId}`;
-    const saved = localStorage.getItem(key);
-
-    if (!saved) return;
-
-    const data = JSON.parse(saved);
-
-    this.basicform.patchValue({
-      qualification: data.lastQualificationId,
-      qualificationtitle: data.otherQualification || '',
-      institute: data.lastInstitutionId,
-      institutetitle: data.otherInstitutionName || ''
-    }, { emitEvent: false });
-
-    //    restore flags
-    this.isOtherQualification = !!data.otherQualification;
-    this.isOtherEducation = !!data.otherInstitutionName;
-    this.previousEducationId = data.lastQualificationId;
-    this.hasProceededOnce = true;
-
-    //    restore labels
-    const qual = this.seleactqualification.find(q => q.value === data.lastQualificationId);
-    this.selectedQualificationLabel = qual?.label || '';
-
-    const inst = this.seleactInstitute.find(i => i.value === data.lastInstitutionId);
-    this.selectedInstituteLabel = inst?.label || '';
-
-    //    restore education flow
-    if (this.previousEducationId) {
-      this.formSvc.getselectedEducation(this.previousEducationId).subscribe(res => {
-        this.educationdetails = res.data ?? res;
-      });
-    }
-
-    this.cd.detectChanges();
-  }
 
   //edit flow =patch from summary
-  async patchFromSummary() {
-    const summaryData = await this.getEducationBasicFromSummary();
-    const data = this.normalizeEducationBasic(summaryData);
-
-    if (!data) return;
-
-    this.formSvc.educationdetailsData = data;
-
-    this.patchSavedEducation(data);
-
-    this.lastSavedPayload = this.buildEduDetailsPayload();
-
-    localStorage.setItem(
-      this.getEducationDetailsStorageKey(),
-      JSON.stringify(data)
-    );
-
-    this.saveEducationBasic();
-
-    this.cd.detectChanges();
-  }
-
   patchSavedEducation(data: any) {
     if (!data) return;
+
+    // this.basicform.patchValue({
+    //   qualification: data.lastQualificationId || '',
+    //   qualificationtitle: data.otherQualification || '',
+    //   institute: data.lastInstitutionId || '',
+    //   institutetitle: data.otherInstitutionName || ''
+    // }, { emitEvent: false });
+
+    // ensure searched institute exists in dropdown options
+    if (data.lastInstitutionId && data.lastInstitutionName) {
+      const exists = this.seleactInstitute.some(x => x.value === data.lastInstitutionId);
+
+      if (!exists) {
+        this.seleactInstitute = [
+          ...this.seleactInstitute,
+          {
+            value: data.lastInstitutionId,
+            label: data.lastInstitutionName
+          }
+        ];
+
+        this.filteredInstitutes = [...this.seleactInstitute];
+      }
+    }
 
     this.basicform.patchValue({
       qualification: data.lastQualificationId || '',
       qualificationtitle: data.otherQualification || '',
-      institute: data.lastInstitutionId || '',
+
+
+      institute:  
+        data.lastInstitutionName
+      ,
       institutetitle: data.otherInstitutionName || ''
     }, { emitEvent: false });
 
@@ -1045,8 +986,8 @@ export class Edudetails {
     const qual = this.seleactqualification.find(q => q.value === data.lastQualificationId);
     this.selectedQualificationLabel = qual?.label || '';
 
-    const inst = this.seleactInstitute.find(i => i.value === data.lastInstitutionId);
-    this.selectedInstituteLabel = inst?.label || '';
+    // const inst = this.seleactInstitute.find(i => i.value === data.lastInstitutionId);
+    // this.selectedInstituteLabel = inst?.label || '';
 
     if (this.previousEducationId) {
       this.formSvc.getselectedEducation(this.previousEducationId).subscribe(res => {
@@ -1058,19 +999,79 @@ export class Edudetails {
     this.cd.detectChanges();
   }
 
-  buildEduDetailsPayload() {
-    this.previousEducationId = this.basicform.value.qualification;
+  private getLabelByValue(
+    list: { label: string; value: string }[],
+    value: any,
+    fallbackLabel: string = ''
+  ): string {
+    if (!value && !fallbackLabel) return '';
 
+    const found = list.find(x => x.value === value);
+    if (found) return found.label;
+
+    return fallbackLabel || value || '';
+  }
+
+  private resolveOptionValue(
+    list: { label: string; value: string }[],
+    rawValue: any
+  ): string {
+    if (!rawValue) return '';
+
+    // already id
+    const byValue = list.find(x => x.value === rawValue);
+    if (byValue) return byValue.value;
+
+    // label to id
+    const byLabel = list.find(x =>
+      x.label?.toString().trim().toLowerCase() ===
+      rawValue.toString().trim().toLowerCase()
+    );
+
+    return byLabel?.value || rawValue;
+  }
+
+  private resolveInstituteId(rawValue: any): string {
+    return this.resolveOptionValue(this.seleactInstitute, rawValue);
+  }
+
+  private resolveQualificationId(rawValue: any): string {
+    return this.resolveOptionValue(this.seleactqualification, rawValue);
+  }
+
+  buildEduDetailsPayload() {
+    // this.previousEducationId = this.basicform.value.qualification;
+
+
+    // return {
+    //   applicantId: this.applicantId,
+    //   lastQualificationId: this.basicform.value.qualification,
+    //   otherQualification: this.isOtherQualification
+    //     ? this.basicform.value.qualificationtitle
+    //     : '',
+    //   lastInstitutionId: this.basicform.value.institute,
+    //   otherInstitutionName: this.isOtherEducation
+    //     ? this.basicform.value.institutetitle
+    //     : ''
+    // };
+    const raw = this.basicform.getRawValue();
+
+    const qualificationId = this.resolveQualificationId(raw.qualification);
+    const instituteId = this.resolveInstituteId(raw.institute);
+
+    const instituteLabel = this.selectedInstituteLabel || this.getLabelByValue(this.seleactInstitute, instituteId, raw.institute);
+
+    this.previousEducationId = qualificationId;
 
     return {
       applicantId: this.applicantId,
-      lastQualificationId: this.basicform.value.qualification,
+      lastQualificationId: qualificationId,
       otherQualification: this.isOtherQualification
-        ? this.basicform.value.qualificationtitle
+        ? raw.qualificationtitle
         : '',
-      lastInstitutionId: this.basicform.value.institute,
+      lastInstitutionId: instituteId,
       otherInstitutionName: this.isOtherEducation
-        ? this.basicform.value.institutetitle
+        ? raw.institutetitle
         : ''
     };
 
@@ -1173,8 +1174,8 @@ export class Edudetails {
       data.lastQualificationName ||
       '';
 
-    const instituteName = 
-    data.lastInstitution ||
+    const instituteName =
+      data.lastInstitution ||
       data.lastInstitutionName ||
       data.institutionName ||
       data.instituteName ||
@@ -1189,17 +1190,18 @@ export class Edudetails {
     const instituteId =
       data.lastInstitutionId ||
       data.instituteId ||
-      data.institutionId ||
-      this.getValueByLabel(this.seleactInstitute, instituteName);
+      data.institutionId ;
 
     const normalized = {
       applicantId: this.applicantId,
       lastQualificationId: qualificationId || '',
+      lastQualificationName: qualificationName || '',
       otherQualification:
         data.otherQualification ||
         data.otherQualificationName ||
         '',
       lastInstitutionId: instituteId || '',
+      lastInstitutionName: instituteName || '',
       otherInstitutionName:
         data.otherInstitutionName ||
         data.otherInstituteName ||
@@ -1256,56 +1258,40 @@ export class Edudetails {
       }
     });
   }
-  private finishAfterSaveOrNoChange(qualificationId: string) {
-    if (this.isSummaryEditMode) {
-      this.formSvc.clearSummaryEditFlow();
 
-      this.router.navigate(['/loanform', 'summaryinfo'], {
-        queryParamsHandling: 'merge'
-      });
 
-      return;
-    }
 
-    this.router.navigate(['educationinfo'], {
-      relativeTo: this.route,
-      queryParams: {
-        qualificationId,
-        qualificationlabel: '10th'
-      },
-      queryParamsHandling: 'merge'
-    });
-  }
-
-  private getSummaryEducationQueryParams(extra: any = {}) {
-    if (!this.isFromSummary && !this.formSvc.isSummaryEditFlow()) {
-      return extra;
-    }
-
-    return {
-      fromSummary: true,
-      mode: 'edit',
-      section: 'education',
-      ...extra
-    };
-  }
   next() {
     if (this.basicform.invalid) return;
 
     this.hasProceededOnce = true;
     this.previousEducationId = this.basicform.value.qualification;
 
-    const qualificationId = this.basicform.value.qualification;
+    // const qualificationId = this.basicform.value.qualification;
 
-    let input =
+    // let input =
 
-    {
-      "applicantId": this.applicantId,
-      "lastQualificationId": this.basicform.value.qualification,
-      'otherQualification': this.isOtherQualification ? this.basicform.value.qualificationtitle : '',
-      "lastInstitutionId": this.basicform.value.institute,
-      "otherInstitutionName": this.isOtherEducation ? this.basicform.value.institutetitle : ''
-    }
+    // {
+    //   "applicantId": this.applicantId,
+    //   "lastQualificationId": this.basicform.value.qualification,
+    //   'otherQualification': this.isOtherQualification ? this.basicform.value.qualificationtitle : '',
+    //   "lastInstitutionId": this.basicform.value.institute,
+    //   "otherInstitutionName": this.isOtherEducation ? this.basicform.value.institutetitle : ''
+    // }
+    const raw = this.basicform.getRawValue();
+
+    const qualificationId = this.resolveQualificationId(raw.qualification);
+    const instituteId = this.resolveInstituteId(raw.institute);
+
+    const instituteLabel = this.selectedInstituteLabel || this.getLabelByValue(this.seleactInstitute, instituteId, raw.institute);
+
+    let input = {
+      applicantId: this.applicantId,
+      lastQualificationId: qualificationId,
+      otherQualification: this.isOtherQualification ? raw.qualificationtitle : '',
+      lastInstitutionId: instituteId,
+      otherInstitutionName: this.isOtherEducation ? raw.institutetitle : ''
+    };
 
     this.formSvc.selectedqualification(input, this.applicationId).subscribe({
       next: (res) => {
@@ -1322,7 +1308,6 @@ export class Edudetails {
           );
           this.lastSavedPayload = { ...input };
           this.saveEducationBasic();
-          // this.finishAfterSaveOrNoChange(qualificationId);
           if (this.isFromSummary || this.stepperService.isSummaryEducationEditFlow()) {
 
             this.router.navigate(['educationinfo'], {
@@ -1488,23 +1473,23 @@ export class Edudetails {
     this.editSuccess = false;
   }
 
-handleSuccessAction(action: string) {
-  if (action === 'OK') {
-    this.editSuccess = false;
-    this.isViewMode = true;
-    this.isEditMode = false;
+  handleSuccessAction(action: string) {
+    if (action === 'OK') {
+      this.editSuccess = false;
+      this.isViewMode = true;
+      this.isEditMode = false;
 
-    this.basicform.disable({ emitEvent: false });
+      this.basicform.disable({ emitEvent: false });
 
-    this.router.navigate([], {
-      relativeTo: this.route,
-      queryParams: {
-        fromSummary: true,
-        mode: 'view',
-        section: 'education'
-      },
-      queryParamsHandling: 'merge'
-    });
+      this.router.navigate([], {
+        relativeTo: this.route,
+        queryParams: {
+          fromSummary: true,
+          mode: 'view',
+          section: 'education'
+        },
+        queryParamsHandling: 'merge'
+      });
+    }
   }
-}
 }

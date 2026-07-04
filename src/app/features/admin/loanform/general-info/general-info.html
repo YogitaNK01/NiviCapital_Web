@@ -307,7 +307,7 @@
                     <div [ngClass]="{'col-3': isOtherRelationship, 'col-4': !isOtherRelationship  }">
                         <!-- <div class="col-lg-4 col-sm-12 mt-20"> -->
                         <app-dropdown [options]="selectoccupation" [placeholder]="'Select Current Occupation'"
-                            [required]="true" [disabled]="isViewMode"
+                            [required]="true" [disabled]="isViewMode" [selectedValue]="coapp_registerForm.get('occupation')?.value"
                             (selectedValueChange)="coapp_registerForm.get('occupation')?.setValue($event);handleCoApplicantOccupationChange($event)"
                             [avatarUrl]="avatarUrl" formControlName="occupation" [hasAvatar]="hasAvatar"
                             [label]="occupationlabel">

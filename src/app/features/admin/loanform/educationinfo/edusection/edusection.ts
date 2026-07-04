@@ -167,7 +167,7 @@ export class Edusection {
 @Input() isViewModeon = false;
 @Input() isEditMode = false;
 @Output() editClick = new EventEmitter<void>();
-
+@Output() instituteChanged = new EventEmitter<{ id: string; name: string }>();
 
   editSuccess: any = false;
   description1 = `Great ! Your Additional Info Details\n Uploaded Successfully.`;
@@ -177,14 +177,18 @@ export class Edusection {
 
   ngOnInit(): void {
 
-    this.group.reset({
-      institutename: '',
-      institutetitle: '',
-      passingyear: 'Year of Passing',
-      per_cgpa: 'Percentage / CGPA ',
-      location: '',
-      otherLocation: ''
-    });
+    // this.group.reset({
+    //   institutename: '',
+    //   institutetitle: '',
+    //   passingyear: 'Year of Passing',
+    //   per_cgpa: 'Percentage / CGPA ',
+    //   location: '',
+    //   otherLocation: ''
+    // });
+this.group.patchValue({
+  passingyear: this.group.get('passingyear')?.value || 'Year of Passing',
+  per_cgpa: this.group.get('per_cgpa')?.value || 'Percentage / CGPA '
+}, { emitEvent: false });
 
 
     let Allids = this.stepperService.getLoanId();
@@ -317,7 +321,7 @@ export class Edusection {
 
 
 
-  SelectedInstitute(values: string | string[]) {
+  SelectedInstitute1(values: string | string[]) {
     const ids = Array.isArray(values) ? values : [values];
 
     const selected = this.seleactInstitute.filter(s =>
@@ -342,7 +346,35 @@ export class Edusection {
 
 
   }
+SelectedInstitute(values: string | string[]) {
+  const ids = Array.isArray(values) ? values : [values];
+  const selectedId = ids[0] || '';
 
+  const selected = this.seleactInstitute.find(s => s.value === selectedId);
+
+  const instituteId = selected?.value || selectedId || '';
+  const instituteName = selected?.label || '';
+
+  this.selectedInstituteID = instituteId;
+  this.selectedInstituteLabel = instituteName;
+
+  this.isOtherEducation =
+    instituteName.trim().toLowerCase() === 'other';
+
+  this.group.patchValue({
+    instituteId: instituteId,
+    instituteName: instituteName,
+    institutename: instituteName
+  }, { emitEvent: true });
+
+  this.group.markAsDirty();
+  this.group.markAsTouched();
+
+  this.instituteChanged.emit({
+    id: instituteId,
+    name: instituteName
+  });
+}
   filterInstitutes(searchText: any) {
     const value = searchText.trim().toLowerCase();
 
@@ -352,21 +384,28 @@ export class Edusection {
       return;
     }
 
-    //  Special case: user searching "other"
-    if (value === 'other') {
-      const otherItem = this.seleactInstitute.find(
-        item => item.label.toLowerCase() === 'other'
-      );
-
-      // Put "Other" at the top
-      this.filteredInstitutes = otherItem ? [otherItem] : [];
-      return;
+       if(value.length >= 3){
+      this.loanformservice.getInstitutesBySearch(searchText).subscribe((res: any) => {
+        this.filteredInstitutes = [...res];
+        this.seleactInstitute = [...res];
+      });
     }
+    
+    //  Special case: user searching "other"
+    // if (value === 'other') {
+    //   const otherItem = this.seleactInstitute.find(
+    //     item => item.label.toLowerCase() === 'other'
+    //   );
 
-    //  Normal search
-    this.filteredInstitutes = this.seleactInstitute.filter(item =>
-      item.label.toLowerCase().includes(value)
-    );
+    //   // Put "Other" at the top
+    //   this.filteredInstitutes = otherItem ? [otherItem] : [];
+    //   return;
+    // }
+
+    // //  Normal search
+    // this.filteredInstitutes = this.seleactInstitute.filter(item =>
+    //   item.label.toLowerCase().includes(value)
+    // );
   }
 
   cityNames() {

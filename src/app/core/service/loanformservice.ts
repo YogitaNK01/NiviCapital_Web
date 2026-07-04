@@ -91,7 +91,8 @@ export class Loanformservice {
   coapppmobile: any;
   coappStep: number = 1
 
-  private instituteCache: OptionItem[] | null = null;
+  private instituteCache1: OptionItem[] | null = null;
+    public instituteCache: OptionItem[] = [];
   private instituteRequest$!: Observable<OptionItem[]>;
 
   mobileNumber = signal<string | null>(null);
@@ -492,14 +493,14 @@ submitAdditionalInfo(
   getInstitutesCached(): Observable<OptionItem[]> {
 
     //  1. Return cached data if already loaded
-    if (this.instituteCache) {
-      return of(this.instituteCache);
-    }
+    // if (this.instituteCache) {
+    //   return of(this.instituteCache);
+    // }
 
-    //  2. If API call already in progress, reuse it
-    if (this.instituteRequest$) {
-      return this.instituteRequest$;
-    }
+    // //  2. If API call already in progress, reuse it
+    // if (this.instituteRequest$) {
+    //   return this.instituteRequest$;
+    // }
 
     //  3. Make API call ONCE
     this.instituteRequest$ = this.http.get<any>(`${this.baseUrl}/v1/masters/institute-names`)
@@ -518,9 +519,28 @@ submitAdditionalInfo(
       );
 
     return this.instituteRequest$;
+
+   
   }
 
-
+  getInstitutesBySearch(searchText: string){
+    this.instituteRequest$ = this.http.get<any>(`${this.baseUrl}/v1/masters/institute-names/search?keyword=${searchText}`)
+      .pipe(
+        map(res =>
+          (res.data ?? res).map((s: any) => ({
+            value: s.id,
+            //  value: s.instituteName,
+            label: s.instituteName
+          }))
+        ),
+        tap(data => {
+          this.instituteCache = [...this.instituteCache, ...data];
+        }),
+        shareReplay(1)
+      );
+ 
+    return this.instituteRequest$;
+  }
   getEducation(): Observable<ApiResponse<any>> {
     return this.http.get<ApiResponse<any>>(
       `${this.baseUrl}/v1/masters/qualifications`,

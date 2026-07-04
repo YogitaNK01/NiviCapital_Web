@@ -1877,39 +1877,6 @@ export class Liabilitiesinfo {
   // 4. onChange - Handle Existing Loans properly
 
 
-  onChange(values: string | string[]): void {
-    let selectedCodes = Array.isArray(values) ? [...values] : [values];
-
-      this.liabilitiesCatagories.forEach((item: any) => {
-      item.disabled = false;
-    });
-
-    const hasNoLiabilities = selectedCodes.find((item: any) => item === this.NO_LIABILITY_CODE);
- 
-    if(selectedCodes.length > 0){
-      if(hasNoLiabilities && selectedCodes.length > 1){
-        this.liabilitiesCatagories.forEach((item: any) => {
-          if(item.value === this.NO_LIABILITY_CODE){
-            item.disabled = true;
-          }
-        }
-      } else {
-        // Deselected - clear data
-        array.clear();
-        if (code === 'EXISTING_LOAN') {
-          this.selectedloantype = [];
-        }
-      }
-    });
-
-    this.selectedliabilities = selectedCodes;
-    this.openIndex = selectedCodes.map(code =>
-      this.accordions.findIndex(acc => acc.key === code)
-    ).filter(i => i !== -1);
-
-    this.calculateGrandTotal();
-    this.cd.detectChanges();
-  }
 
   onChange(values: string | string[]): void {
     let selectedCodes = Array.isArray(values) ? [...values] : [values];
