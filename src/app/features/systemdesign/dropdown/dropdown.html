@@ -78,7 +78,7 @@
 
       <!-- Checkbox -->
       @if (multiSelect) {
-      <input type="checkbox" [checked]="selectedValues.includes(option.value)" (click)="toggleSelection(option, $event)" class="text-common mx-2" />
+      <input type="checkbox" [checked]="selectedValues.includes(option.value)" (click)="toggleSelection(option, $event)" class="text-common mx-2" [disabled]="option.disabled" />
       }
 
       <span class="text-body-1">{{ option.label }}</span>

@@ -1,4 +1,4 @@
-import { Component, Input, OnInit, forwardRef } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output, forwardRef } from '@angular/core';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatDatepickerModule } from '@angular/material/datepicker';
@@ -51,6 +51,8 @@ registerOnValidatorChange(fn: () => void): void {
   @Input() maxDate: Date | null = null;
   rawDateValue: string = '';
 
+  
+  @Output() dateChanged = new EventEmitter<any>();
 
   onChange = (_: any) => { };
   onTouched = () => { };
@@ -256,6 +258,11 @@ onDateChange(val: any) {
         overlay.setAttribute('data-selected', formatted);
       }
     });
+  }
+
+  onValueChange(value: any) {
+    this.rawDateValue = value;
+    this.dateChanged.emit(value); // send changed value to parent
   }
 
 }

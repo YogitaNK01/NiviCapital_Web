@@ -1184,6 +1184,23 @@ private ensureAssetSectionInitialized(key: string): void {
     const previousSelected = [...this.selectedAssets];
 
     const hasNoAssets = normalizedSelected.includes(this.NO_ASSETS_CODE);
+        
+    const totalAssets = this.assetsCatagories.length;
+
+    this.assetsCatagories.forEach((item: any) => {
+      if (
+        (!hasNoAssets && rawSelected.length === totalAssets - 1) ||
+        (hasNoAssets && rawSelected.length === totalAssets)
+      ) {
+        item.disabled = item.value === this.NO_ASSETS_CODE;
+
+      } else if (hasNoAssets) {
+        item.disabled = item.value !== this.NO_ASSETS_CODE;
+
+      } else {
+        item.disabled = false;
+      }
+    });
 
         if(rawSelected.length > 0){
       if(hasNoAssets && rawSelected.length > 1){

@@ -432,7 +432,8 @@ export class Liabilitiesinfo {
     this.liabilitiesCatagories = liabilitiesList.map((a: any) => ({
       value: a.code,
       label: this.accordianTitle(a.code),
-      code: a.code
+      code: a.code,
+      disabled: false
     }));
 
     this.accordions = liabilitiesList.map((group: any) => ({
@@ -1891,21 +1892,50 @@ export class Liabilitiesinfo {
           if(item.value === this.NO_LIABILITY_CODE){
             item.disabled = true;
           }
-        });
-      } else if(hasNoLiabilities && selectedCodes.length === 1){
-        this.liabilitiesCatagories.forEach((item: any) => {
-          if(item.value !== this.NO_LIABILITY_CODE){
-            item.disabled = true;
-          }
-        });
-      }
-    } else if(selectedCodes.length === 0){
-      this.liabilitiesCatagories.forEach((item: any) => {
-        if(item.value === this.NO_LIABILITY_CODE){
-          item.disabled = false;
         }
-      });
-    }
+      } else {
+        // Deselected - clear data
+        array.clear();
+        if (code === 'EXISTING_LOAN') {
+          this.selectedloantype = [];
+        }
+      }
+    });
+
+    this.selectedliabilities = selectedCodes;
+    this.openIndex = selectedCodes.map(code =>
+      this.accordions.findIndex(acc => acc.key === code)
+    ).filter(i => i !== -1);
+
+    this.calculateGrandTotal();
+    this.cd.detectChanges();
+  }
+
+  onChange(values: string | string[]): void {
+    let selectedCodes = Array.isArray(values) ? [...values] : [values];
+
+    this.liabilitiesCatagories.forEach((item: any) => {
+      item.disabled = false;
+    });
+
+    const hasNoLiabilities = selectedCodes.find((item: any) => item === this.NO_LIABILITY_CODE);
+
+    const totalLiability = this.liabilitiesCatagories.length;
+
+    this.liabilitiesCatagories.forEach((item: any) => {
+      if (
+        (!hasNoLiabilities && selectedCodes.length === totalLiability - 1) ||
+        (hasNoLiabilities && selectedCodes.length === totalLiability)
+      ) {
+        item.disabled = item.value === this.NO_LIABILITY_CODE;
+
+      } else if (hasNoLiabilities) {
+        item.disabled = item.value !== this.NO_LIABILITY_CODE;
+
+      } else {
+        item.disabled = false;
+      }
+    });
 
     // If "No liabilities" is selected together with any real liability,
     // remove "No liabilities".

@@ -295,6 +295,10 @@ letter-spacing: 0.16px;
   * {
     color: #ffffff !important;
   }
+
+  input[type="checkbox"] {
+   accent-color: $neutral-50;
+  }
 }
 
 
@@ -321,6 +325,9 @@ letter-spacing: 0.16px;
 }
 
 .dropdown-item.disabled {
+  color: #C2C4CE !important;
+  // color: #b0b0b0!important;
+  // background-color: #f4f4f7;
   pointer-events: none;
   cursor:none;
 }
@@ -350,7 +357,6 @@ letter-spacing: 0.16px;
   width: $spacing_8;
   height: $spacing_8;
   accent-color: $secondary-900;
-
 }
 
 .select-all input[type='checkbox'] {

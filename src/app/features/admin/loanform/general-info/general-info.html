@@ -242,7 +242,7 @@
                     <!-- Course Start Date* -->
                     <div class="col-lg-6 col-sm-12 mt-20">
                         <app-datepickernew formControlName="coursestartdate" label="Course Start Date"
-                            placeholder="DD/MM/YYYY" [disablePastDates]="true"  [ngClass]="{'disabled-div' : isViewMode}">
+                            placeholder="DD/MM/YYYY" [disablePastDates]="true"  [ngClass]="{'disabled-div' : isViewMode}" (dateChanged)="onDateChanged($event)">
                         </app-datepickernew>
                         <div class="text-danger"
                             *ngIf="f['coursestartdate'].touched && f['coursestartdate'].errors?.['minDateError']">

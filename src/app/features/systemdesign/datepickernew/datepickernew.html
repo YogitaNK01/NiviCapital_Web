@@ -21,7 +21,7 @@
       [max]="maxDate"
       maxlength="10"
       (keypress)="allowOnlyDate($event)"
-      (input)="onManualInput($event)"
+      (input)="onManualInput($event); onValueChange($event)"
     />
 
     <!-- <mat-datepicker-toggle matSuffix [for]="picker">
