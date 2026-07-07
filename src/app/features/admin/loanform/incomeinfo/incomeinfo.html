@@ -402,7 +402,7 @@
                                                 <img src="/assets/images/icons/import-red.svg">
                                             </span>
 
-                                            <span class="delete" (click)="deleteImage(slot.title)">
+                                            <span class="delete" (click)="deleteImage(slot.title, 'other', slot.id)">
                                                 <img src="/assets/images/icons/close.svg">
                                             </span>
                                         </div>
@@ -794,7 +794,7 @@
                                                 (click)="downloadImage(getDocumentUrl(slot.title),getDocumentName(slot.title))">
                                                 <img src="/assets/images/icons/import-red.svg">
                                             </span>
-                                            <span class="delete" (click)="deleteImage(slot.title)">
+                                            <span class="delete" (click)="deleteImage(slot.title, 'otherbusiness', slot.id)">
                                                 <img src="/assets/images/icons/close.svg">
                                             </span>
                                         </div>

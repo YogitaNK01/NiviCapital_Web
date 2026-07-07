@@ -49,6 +49,8 @@ export class Coappdashboard implements OnInit {
   isEditMode = false;
   originalFormValue: any = null;
 
+  coappSummaryData: any = {};
+
   editSuccess: any = false;
   description1 = `Great ! Your Additional Info Details\n Uploaded Successfully.`;
 
@@ -334,6 +336,17 @@ openCoApplicant(index: number) {
     current.index
   );
 
+  this.loanfornservice.getCoappSummary(this.applicationId, current.applicantId).subscribe({
+    next: (res: any) => {
+      if(res.status === "success"){
+        this.coappSummaryData = res.data;
+      }
+    },
+    error: (err: any) => {
+      console.log(err);
+    }
+  })
+
   const resumeRoute = isCompletedCoapp
     ? 'co-summaryinfo'
     : this.getResumeRouteForCoApplicant(current);
@@ -357,7 +370,16 @@ openCoApplicant(index: number) {
       coapp.applicantId
     );
 
-    const firstIncomplete = this.coApplicantStepRoutes.find(
+    let coappSteps = this.coApplicantStepRoutes;
+
+    if(this.coappSummaryData){
+      const occupation = this.coappSummaryData?.generalInfo?.occupationInfo?.occupation;
+      if(occupation === "Unemployed" || occupation === "Housewife / Homemaker"){
+        coappSteps = coappSteps.filter((item: any) => item !== "co-incomeinfo");
+      }
+    }
+
+    const firstIncomplete = coappSteps.find(
       route => !completedSteps.includes(route)
     );
 

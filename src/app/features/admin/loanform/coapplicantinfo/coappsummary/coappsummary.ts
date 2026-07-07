@@ -383,8 +383,13 @@ export class Coappsummary {
 
           this.isSummarySubmitted = true;
           this.isSubmittingSummary = false;
-          this.formSvc.getAllCoapp(this.applicationId).subscribe()
-          this.router.navigate(['/loanform/co-applicantdetails']);
+          this.formSvc.getAllCoapp(this.applicationId).subscribe({
+ 
+            next: (res: any) => {
+              this.router.navigate(['/loanform/co-applicantdetails']);
+            }, error: (err) => { }
+          });
+          // this.router.navigate(['/loanform/co-applicantdetails']);
         }
       },
 

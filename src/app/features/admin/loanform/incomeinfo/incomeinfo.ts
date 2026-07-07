@@ -826,73 +826,59 @@ applyApplicantViewMode(queryParams: any) {
     subcategory: 'LAST_3_MONTHS' | 'FORM_16' | 'BANK_STATEMENT_1_YEAR' | 'ITR_LAST_3_YEARS' | 'OTHER_INCOME' | 'BUSINESS_BANK_STATEMENT_1_YEAR' | 'BUSINESS_ITR_3_YEARS' | 'BUSINESS_GST_1_YEAR' | 'BUSINESS_FINANCE_3_YEARS' | 'OTHER_BUSSINESS_INCOME',
     type: 'SALARY_SLIP' | 'FORM_16' | 'BANK_STATEMENT' | 'ITR' | 'OTHER' | 'BUSINESS_BANK_STATEMENT' | 'BUSINESS_ITR' | 'BUSINESS_GST' | 'BUSINESS_FINANCE',
     othertitle?: any, index: number = 0) {
-
+ 
     if (!result.file) return;
-
+ 
     const apiApplicantId = this.getApiApplicantId();
-
+ 
     if (!apiApplicantId) {
       console.error('ApplicantId not found for income upload');
       return;
     }
     this.uploadedFiles[key] = result.file;
-
+ 
     const fd = new FormData();
     fd.append('category', category);
     fd.append('subcategory', subcategory);
     fd.append('applicantId', apiApplicantId);
-
-    // fd.append(`files[${index}].title`, othertitle || key);
-    // fd.append(`files[${index}].type`, type);
-    // fd.append(`files[${index}].file`, result.file);
-
-    let doc: any = this.deletedDocs.find((item: any) => item.category === category && item.type === type);
-
-    if (this.isEditMode && doc) {
-      fd.append(`items[0].title`, othertitle || key);
-      fd.append(`items[0].file.type`, type);
-      fd.append(`items[0].file.file`, result.file);
-      fd.append(`items[0].documentId`, doc.documentId);
-    } else {
+ 
+    if(subcategory === "OTHER_INCOME" || subcategory === "OTHER_BUSSINESS_INCOME"){
+      if(this.otherIncomeSlots.length > 0){
+        index = this.otherIncomeSlots.length - 1;
+      } else if(this.otherBusinessSlots.length > 0){
+        index = this.otherBusinessSlots.length - 1;
+      }
+    }
+ 
     fd.append(`files[${index}].title`, othertitle || key);
     fd.append(`files[${index}].type`, type);
     fd.append(`files[${index}].file`, result.file);
-    }
-  const isDeletedFiles = !doc ? false : true;
-
-    this.loanformservice.uploadIncome(fd, this.applicationId, isDeletedFiles).subscribe({
-    // this.loanformservice.uploadIncome(fd, this.applicationId, this.isEditMode).subscribe({
+    // const isDeletedFiles = !doc ? false : true;
+ 
+    // this.loanformservice.uploadIncome(fd, this.applicationId, isDeletedFiles).subscribe({
+    this.loanformservice.uploadIncome(fd, this.applicationId, this.isEditMode).subscribe({
       next: (res) => {
-
-
+ 
+ 
         this.fileresponse.emit(res)
         this.handleresponse = res
         // this.uploadedrespfiles.push(res.data)
-
+ 
         const uploadedData = this.normalizeUploadResponse(res.data, key, category, subcategory, type, othertitle);
-
+ 
         this.uploadedrespfiles.push(uploadedData);
-
-
-        // append new docs instead of rebuilding from uploadedrespfiles
-        // const Docs = [...uploadedData?.uploadedDocuments, ...uploadedData?.updatedDocuments];
-        // const newDocs = Docs.filter((item: any) => item.documentId === doc.documentId) || [];
-        let newDocs = [];
-        if (doc) {
-          newDocs = uploadedData?.updatedDocuments.filter((item: any) => item.documentId === doc.documentId) || [];
-        } else {
-          newDocs = uploadedData?.uploadedDocuments;
-        }
-
+ 
+        const newDocs = uploadedData?.uploadedDocuments;
+ 
         this.allDocuments = [...this.allDocuments, ...newDocs];
-
+ 
         this.rebuildDocumentMap();
         this.restoreSlotsFromDocuments();
         this.cd.detectChanges();
-
+ 
         this.uploadedFiles = { ...  this.uploadedFiles }
-
-
+ 
+ 
         const key1 = this.getStorageKey()
         // localStorage.setItem(key1, JSON.stringify(this.uploadedrespfiles));
         const stepData = {
@@ -901,7 +887,7 @@ applyApplicantViewMode(queryParams: any) {
           otherIncomeSlots: this.otherIncomeSlots,
           otherBusinessSlots: this.otherBusinessSlots
         };
-
+ 
         // localStorage.setItem(this.getStorageKey(), JSON.stringify(stepData));
         this.storageservice.saveSectionData(
           'IncomeInfoData',
@@ -911,12 +897,12 @@ applyApplicantViewMode(queryParams: any) {
           stepData
         );
         this.stepperService.setStepData(this.getStepRoute(), stepData);
-
+ 
         // this.getAllDocuments();
         // this.cd.detectChanges();
       },
       error: (err) => {
-
+ 
         const errorMsg = err.error?.message || 'Failed to upload file';
         this.uploadComponent.setErrorFromApi(errorMsg);
       }
@@ -1238,7 +1224,7 @@ applyApplicantViewMode(queryParams: any) {
 
         if (otherDocType === 'other') {
           this.otherIncomeSlots = this.otherIncomeSlots.filter(slot => slot.id !== id);
-        } else {
+        } else if(otherDocType === 'otherbusiness') {
           this.otherBusinessSlots = this.otherBusinessSlots.filter(slot => slot.id !== id);
         }
 

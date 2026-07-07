@@ -1314,6 +1314,7 @@ getRealtionShipwithAsync(): Promise<void> {
       lendingPartnerId: local.lendingPartnerId || local.lendingpartner,
       annualIncome: local.annualIncome || local.annualincome,
       relationship: local.relationship || this.formatRelation(local.relationWithApplicant),
+      relationshipWithId: local?.relationshipWithId,
       hasAssets:
         local.hasAssets === true ||
         local.hasAssets === 'true' ||
@@ -1354,6 +1355,7 @@ getRealtionShipwithAsync(): Promise<void> {
         annualIncome: generalInfo?.annualIncome || '',
         relationship: this.formatRelation(generalInfo?.relationWithApplicant),
         relationWithApplicant: this.formatRelation(generalInfo?.relationWithApplicant),
+        relationWithApplicantId: generalInfo?.relationWithApplicantId,
         hasAssets: generalInfo?.hasAssets === true
       };
     }
@@ -1452,7 +1454,7 @@ getRealtionShipwithAsync(): Promise<void> {
       '';
 
     const relationship =
-      data.relationship || data.relationWithApplicantId ||
+      data.relationWithApplicantId || data.relationship ||
       this.formatRelation(data.relationWithApplicant) ||
       '';
 
