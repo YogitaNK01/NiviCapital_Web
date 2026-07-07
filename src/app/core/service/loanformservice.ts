@@ -467,6 +467,12 @@ submitAdditionalInfo(
     );
   }
 
+  noLiabilitiesSelected(payload: any, id1: any, id2: any) : Observable<ApiResponse<any>>{
+    return this.http.patch<ApiResponse<any>>(
+      `${this.baseUrl}/v1/los/applications/${id1}/applicants/${id2}/has-liabilities`, payload
+    );
+  }
+
   // ************************* Monthly Expenditure   *************************
   MonthlyExpenditure(data: any, id: string): Observable<ApiResponse<any>> {
 

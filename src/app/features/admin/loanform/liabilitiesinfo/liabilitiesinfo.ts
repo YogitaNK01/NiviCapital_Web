@@ -1906,19 +1906,53 @@ export class Liabilitiesinfo {
 
     // If "No liabilities" is selected together with any real liability,
     // remove "No liabilities".
-    const hasRealLiability = selectedCodes.some(code =>
-      this.REAL_LIABILITY_CODES.includes(code)
+
+    // const hasRealLiability = selectedCodes.some(code =>
+    //   this.REAL_LIABILITY_CODES.includes(code)
+    // );
+
+    // if (selectedCodes.includes(this.NO_LIABILITY_CODE) && hasRealLiability) {
+    //   selectedCodes = selectedCodes.filter(code => code !== this.NO_LIABILITY_CODE);
+    // }
+
+    let realLiab = selectedCodes.filter(
+      x => x !== this.NO_LIABILITY_CODE
     );
 
-    if (selectedCodes.includes(this.NO_LIABILITY_CODE) && hasRealLiability) {
-      selectedCodes = selectedCodes.filter(code => code !== this.NO_LIABILITY_CODE);
+
+    const allRealLiabSelected = this.REAL_LIABILITY_CODES.every(asset =>
+      realLiab.includes(asset)
+    );
+
+    if (allRealLiabSelected) {
+      realLiab = [...this.REAL_LIABILITY_CODES];
+      this.selectedliabilities = realLiab;
+
+      // initialize accordions/forms for all real assets
+      this.selectedliabilities.forEach(key => {
+        const config = this.fieldMap[key];
+        if (!config) return;
+
+        const control = this.liabilityForm.get(config.form);
+
+        if (control instanceof FormArray && control.length === 0) {
+          if (key === 'CREDIT_CARD_OUTSTANDING') control.push(this.createCreditcard());
+          if (key === 'BNPL') control.push(this.createBNPL());
+          if (key === 'OTHER_LIABILITY') control.push(this.createOther());
+        }
+      });
+
+      this.openIndex = this.selectedliabilities
+        .map(val => this.accordions.findIndex(a => a.key === val))
+        .filter(i => i !== -1);
+
+      this.calculateGrandTotal();
+      this.cd.detectChanges();
+      return;
     }
 
     // If only "No liabilities" is selected
-    if (
-      selectedCodes.length === 1 &&
-      selectedCodes.includes(this.NO_LIABILITY_CODE)
-    ) {
+    if (hasNoLiabilities) {
       this.selectedliabilities = [this.NO_LIABILITY_CODE];
       this.selectedloantype = [];
       this.openIndex = [];
@@ -2435,27 +2469,50 @@ export class Liabilitiesinfo {
         items: []
       };
 
-      this.lastSavedPayload = this.normalizeLiabilityPayload(payload);
+      this.msgBox.open({
+        title: 'Update Liabilities Information?',
+        message: `You previously declared that you have assets in the\n General Information section. \nBy selecting 'I don't have liabilities', your earlier information\n will be updated. \n
+        Are you sure you want to continue?`,
+        showCancel: true,
+        okText: 'Yes, Update',
+        onOk: () => {
+          this.formSvc.noLiabilitiesSelected({"hasLiabilities": false}, this.applicationId, this.applicantId).subscribe({
+            next: (res) => {
+              if(res.status == "success"){
+                console.log(res);
 
-      if (this.isCoApplicant) {
-        this.formSvc.co_liabilitiesInfoData = payload;
-      } else {
-        this.formSvc.liabilitiesInfoData = payload;
-      }
+                this.lastSavedPayload = this.normalizeLiabilityPayload(payload);
 
-      // localStorage.setItem(this.getStorageKey(), JSON.stringify(payload));
-      this.storageservice.saveSectionData(
-        'liabilitiesinfoData',
-        this.applicationId,
-        this.applicantId,
-        this.isCoApplicant,
-        JSON.stringify(payload)
-      );
+                if (this.isCoApplicant) {
+                  this.formSvc.co_liabilitiesInfoData = payload;
+                } else {
+                  this.formSvc.liabilitiesInfoData = payload;
+                }
 
-      const stepRoute = this.getStepRoute();
-      this.stepperService.markStepCompleted(stepRoute);
-      this.stepperService.setStepData(stepRoute, this.liabilityForm.getRawValue());
-      this.stepperService.next();
+                // localStorage.setItem(this.getStorageKey(), JSON.stringify(payload));
+                this.storageservice.saveSectionData(
+                  'liabilitiesinfoData',
+                  this.applicationId,
+                  this.applicantId,
+                  this.isCoApplicant,
+                  JSON.stringify(payload)
+                );
+
+                const stepRoute = this.getStepRoute();
+                this.stepperService.markStepCompleted(stepRoute);
+                this.stepperService.setStepData(stepRoute, this.liabilityForm.getRawValue());
+                this.stepperService.next();
+              }
+            },
+            error: (err) => {
+              console.log(err);
+            }
+          });    
+        },
+        onCancel: () => {
+          return;
+        }
+      });
       return;
     }
 
@@ -2710,6 +2767,43 @@ export class Liabilitiesinfo {
 
 
     const input = { applicantId: result.applicantId, items: result.items };
+
+
+    if(this.hasNoLiabilitiesSelected){
+      this.msgBox.open({
+        title: 'Update Liabilities Information?',
+        message: `You previously declared that you have assets in the\n General Information section. \nBy selecting 'I don't have liabilities', your earlier information\n will be updated. \n
+        Are you sure you want to continue?`,
+        showCancel: true,
+        okText: 'Yes, Update',
+        onOk: () => {
+          this.formSvc.noLiabilitiesSelected({"hasLiabilities": false}, this.applicationId, this.applicantId).subscribe({
+            next: (res) => {
+              if(res.status == "success"){
+                console.log(res);
+                const key = this.getStorageKey();
+                localStorage.setItem(key, JSON.stringify(input));
+
+                if (this.isCoApplicant) {
+                  this.formSvc.liabilitiesInfoData = input;
+                } else {
+                  this.formSvc.co_liabilitiesInfoData = input;
+                }
+
+                this.lastSavedPayload = { ...input };
+
+                this.editSuccess = true;
+              }
+            }
+          })
+        },
+        onCancel: () => {
+          return;
+        }
+      })
+
+      return;
+    }
 
     this.formSvc.submitliability(input, this.applicationId, false).subscribe({
       next: (res: any) => {

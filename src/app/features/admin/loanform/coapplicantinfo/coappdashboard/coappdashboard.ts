@@ -216,7 +216,7 @@ export class Coappdashboard implements OnInit {
 
           return {
             ...coapp,
-            uiStatus: this.getCoApplicantStatus(coapp)
+            // status: this.getCoApplicantStatus(coapp)
           };
         });
 
@@ -247,7 +247,7 @@ export class Coappdashboard implements OnInit {
       .sort((a: any, b: any) => Number(a.index) - Number(b.index))
       .map((coapp: any) => ({
         ...coapp,
-        uiStatus: this.getCoApplicantStatus(coapp)
+        // status: this.getCoApplicantStatus(coapp)
       }));
 
     this.updateCoApplicantStepStatus();

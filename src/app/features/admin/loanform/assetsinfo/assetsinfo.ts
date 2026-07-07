@@ -1205,28 +1205,6 @@ export class Assetsinfo implements OnInit {
       }
     });
 
-    if (rawSelected.length > 0) {
-      if (hasNoAssets && rawSelected.length > 1) {
-        this.assetsCatagories.forEach((item: any) => {
-          if (item.value === this.NO_ASSETS_CODE) {
-            item.disabled = true;
-          }
-        });
-      } else if (hasNoAssets && rawSelected.length === 1) {
-        this.assetsCatagories.forEach((item: any) => {
-          if (item.value !== this.NO_ASSETS_CODE) {
-            item.disabled = true;
-          }
-        });
-      }
-    } else if (rawSelected.length === 0) {
-      this.assetsCatagories.forEach((item: any) => {
-        if (item.value === this.NO_ASSETS_CODE) {
-          item.disabled = false;
-        }
-      });
-    }
-
     // remove "I don't have Assets" from real asset list
     let realAssets = normalizedSelected.filter(
       x => x !== this.NO_ASSETS_CODE
@@ -2661,47 +2639,71 @@ export class Assetsinfo implements OnInit {
 
 
     // this.formSvc.getAssets(payload, this.applicationId, false).pipe().subscribe({
-    let request = this.formSvc.getAssets(payload, this.applicationId, false);
+    // let request = this.formSvc.getAssets(payload, this.applicationId, false);
 
     if (this.hasNoassetsSelected) {
-      request = this.formSvc.noAssetsSelected({ "hasAssets": false }, this.applicationId, this.applicantId);
-    }
-    request.subscribe({
-      next: (res) => {
-        console.log("resp---", res);
-        if (res.status == "success") {
-          this.lastSavedPayload = { ...payload };
-
-
-          if (this.isCoApplicant) {
-            this.formSvc.co_aseetsInfoData = payload;
-          } else {
-            this.formSvc.aseetsInfoData = payload;
-          }
-
-
-          // localStorage.setItem(this.getStorageKey(), JSON.stringify(payload));
-          this.storageservice.saveSectionData(
-            'assetsinfoData',
-            this.applicationId,
-            this.applicantId,
-            this.isCoApplicant,
-            JSON.stringify(payload)
-          );
-          this.stepperService.markStepCompleted(stepRoute);
-          this.stepperService.setStepData(stepRoute, this.assetsForm.getRawValue());
-
-          this.stepperService.next();
+      this.msgBox.open({
+        title: 'Update Asset Information?',
+        message: `You previously declared that you have assets in the\n General Information section. \nBy selecting 'I don't have assets', your earlier information\n will be updated. \n
+        Are you sure you want to continue?`,
+        showCancel: true,
+        okText: 'Yes, Update',
+        onOk: () => {
+          this.formSvc.noAssetsSelected({ "hasAssets": false }, this.applicationId, this.applicantId).subscribe({
+            next: (res) => {
+              if(res.status == "success"){
+                this.nextResponseFunction(res, payload, stepRoute);
+              }
+            },
+            error: (err) => {
+              console.log(err);
+            }
+          });    
+        },
+        onCancel: () => {
+          return;
         }
-      },
-
-      error: (err) => {
-        console.error("Assets submit error:", err);
-      }
-
-    });
-
+      });
+    } else {
+      this.formSvc.getAssets(payload, this.applicationId, false).subscribe({
+        next: (res) => {
+          if(res.status == "success"){
+            this.nextResponseFunction(res, payload, stepRoute);
+          }
+        },
+        error: (err) => {
+          console.log(err);
+        }
+      });  
+    }
   }
+
+  nextResponseFunction(res: any, payload: any, stepRoute: any){
+    this.lastSavedPayload = { ...payload };
+
+
+    if (this.isCoApplicant) {
+      this.formSvc.co_aseetsInfoData = payload;
+    } else {
+      this.formSvc.aseetsInfoData = payload;
+    }
+
+
+    // localStorage.setItem(this.getStorageKey(), JSON.stringify(payload));
+    this.storageservice.saveSectionData(
+      'assetsinfoData',
+      this.applicationId,
+      this.applicantId,
+      this.isCoApplicant,
+      JSON.stringify(payload)
+    );
+    this.stepperService.markStepCompleted(stepRoute);
+    this.stepperService.setStepData(stepRoute, this.assetsForm.getRawValue());
+
+    this.stepperService.next();
+  }
+
+
 
 
   //edit from summary
@@ -2733,33 +2735,60 @@ export class Assetsinfo implements OnInit {
     }
 
     // this.formSvc.getAssets(input, this.applicationId, false).subscribe({
-    let request = this.formSvc.getAssets(input, this.applicationId, false);
+    // let request = this.formSvc.getAssets(input, this.applicationId, false);
+
     if (this.hasNoassetsSelected) {
-      request = this.formSvc.noAssetsSelected({ "hasAssets": false }, this.applicationId, this.applicantId);
-    }
-    request.subscribe({
-      next: (res: any) => {
-        if (res.status === 'success') {
-          const key = this.getStorageKey();
-          localStorage.setItem(key, JSON.stringify(input));
-
-          if (this.isCoApplicant) {
-            this.formSvc.co_aseetsInfoData = input;
-          } else {
-            this.formSvc.aseetsInfoData = input;
-          }
-
-          this.lastSavedPayload = { ...input };
-
-          console.log(res);
-
-          this.editSuccess = true;
+      this.msgBox.open({
+        title: 'Update Asset Information?',
+        message: `You previously declared that you have assets in the\n General Information section. \nBy selecting 'I don't have assets', your earlier information\n will be updated. \n
+        Are you sure you want to continue?`,
+        showCancel: true,
+        okText: 'Yes, Update',
+        onOk: () => {
+          this.formSvc.noAssetsSelected({ "hasAssets": false }, this.applicationId, this.applicantId).subscribe({
+            next: (res) => {
+              if (res.status === 'success') {
+                this.saveResponseFunction(res, input);
+              }
+            },
+            error: (err) => {
+              console.log(err);
+            }
+          });    
+        },
+        onCancel: () => {
+          return;
         }
-      },
-      error: (err) => {
-        console.error('Additional info update failed', err);
-      }
-    });
+      });
+    } else {
+      this.formSvc.getAssets(input, this.applicationId, false).subscribe({
+        next: (res) => {
+          if (res.status === 'success') {
+            this.saveResponseFunction(res, input);
+          }
+        },
+        error: (err) => {
+          console.log(err);
+        }
+      });  
+    }
+  }
+
+  saveResponseFunction(res: any, input: any){
+    const key = this.getStorageKey();
+    localStorage.setItem(key, JSON.stringify(input));
+
+    if (this.isCoApplicant) {
+      this.formSvc.co_aseetsInfoData = input;
+    } else {
+      this.formSvc.aseetsInfoData = input;
+    }
+
+    this.lastSavedPayload = { ...input };
+
+    console.log(res);
+
+    this.editSuccess = true;
   }
 
 

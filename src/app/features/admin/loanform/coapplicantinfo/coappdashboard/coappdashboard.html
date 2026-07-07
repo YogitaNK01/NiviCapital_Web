@@ -31,7 +31,7 @@
                                 <div class="coapp-icons d-flex gap-3 align-items-center ms-auto">
                                     
 
-                                    <span *ngIf="coapp.uiStatus === 'COMPLETED'">
+                                    <span *ngIf="coapp.status === 'COMPLETED'">
                                         <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32"
                                             viewBox="0 0 32 32" fill="none">
                                             <path
@@ -39,7 +39,7 @@
                                                 fill="#3B8439" />
                                         </svg>
                                     </span>
-                                    <span *ngIf="coapp.uiStatus === 'DRAFT'" class="status-pending">
+                                    <span *ngIf="coapp.status === 'DRAFT'" class="status-pending">
                                         <span class="text-body-2 warning-color">In progress
 
                                         </span>
