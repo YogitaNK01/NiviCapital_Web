@@ -750,6 +750,11 @@ SelectedInstitute(values: string | string[]) {
         // this.uploadedFiles[key] = null;
         // this.uploadedFiles = { ...this.uploadedFiles };
 
+        const deleteDoc = this.getStoredFile(doc, index);
+
+        if(deleteDoc?.documentId){
+          this.deleteItemArr([deleteDoc?.documentId]);
+        }
 
         const control =
           doc === 'marksheet'
@@ -937,6 +942,10 @@ SelectedInstitute(values: string | string[]) {
           doc.documentId !== docToDelete.documentId
         );
 
+        if(docToDelete?.documentId){
+          this.deleteItemArr([docToDelete.documentId]);
+        }
+
 
         this.rebuildDocumentMap();
 
@@ -1023,6 +1032,13 @@ SelectedInstitute(values: string | string[]) {
 
         // const key = `others_${doc.id}`;
         const key = `${this.stepKey}_other_${doc.id}`;
+
+        const deleteDoc: any = this.uploadedFiles[key];
+
+        if(deleteDoc?.documentId){
+          this.deleteItemArr([deleteDoc?.documentId]);
+        }
+
         this.uploadedFiles[key] = null;
         this.uploadedFiles = { ...this.uploadedFiles };
 
@@ -1105,6 +1121,12 @@ SelectedInstitute(values: string | string[]) {
         // delete this.uploadedFiles[key];
         // this.uploadedFiles = { ...this.uploadedFiles };
 
+        const deleteDoc: any = this.otherDocuments.filter(d => d.id === doc.id);
+
+        if(deleteDoc?.[0]?.file?.documentId){
+          this.deleteItemArr([deleteDoc?.[0]?.file?.documentId]);
+        }
+
         this.otherDocuments = this.otherDocuments.filter(d => d.id !== doc.id);
 
         this.group.markAsDirty();
@@ -1121,6 +1143,21 @@ SelectedInstitute(values: string | string[]) {
       }
     });
   }
+  deleteItemArr(idArr: any){
+    this.loanformservice.deleteEducationDoc({
+      applicationId: this.applicationId,
+      applicantId: this.applicantId,
+      documentIds: idArr
+    }).subscribe({
+      next: (res) => {
+        console.log(res);
+      },
+      error: (error) => {
+        console.log(error);
+      }
+    });
+  }
+
   onOtherTitleChange(slot: any, event: Event) {
     const value = (event.target as HTMLInputElement).value;
     slot.title = value;

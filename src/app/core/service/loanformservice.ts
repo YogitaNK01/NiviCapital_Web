@@ -577,6 +577,17 @@ submitAdditionalInfo(
       data
     );
   }
+
+  deleteEducationDoc(payload: any): Observable<ApiResponse<any>> {
+    const httpOptions = {
+      headers: new HttpHeaders({ 'Content-Type': 'application/json' }),
+      body: payload
+    };
+
+    return this.http.delete<ApiResponse<any>>(
+      `${this.baseUrl}/v1/los/applications/documents/delete-income-document`, httpOptions
+    );
+  } 
   // *************************Reference *************************
 
   saveReference(payload: any, id: string, edit: boolean): Observable<ApiResponse<any>> {
