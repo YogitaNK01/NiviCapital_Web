@@ -350,7 +350,7 @@ submitAdditionalInfo(
 
   // ************************* Income   *************************
 
-  uploadIncome(payload: any, id: string,edit:boolean): Observable<ApiResponse<any>> {
+  uploadIncome(payload: any, id: string,edit?:boolean): Observable<ApiResponse<any>> {
 
     const url = `${this.baseUrl}/v1/los/applications/${id}/documents/batch`;
 

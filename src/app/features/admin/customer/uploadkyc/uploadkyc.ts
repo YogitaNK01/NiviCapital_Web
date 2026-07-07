@@ -1211,6 +1211,10 @@ export class Uploadkyc implements OnDestroy, AfterViewInit {
       addressline3: permanentAddress?.addressLine2 || '',
       perpincode: permanentAddress?.zipCode || '',
 
+      currentaddressline1: currentFormAddress?.addressLine || '',
+      currentaddressline2: currentFormAddress?.addressLine1 || '',
+      currentaddressline3: currentFormAddress?.addressLine2 || '',
+      currpincode: currentFormAddress?.zipCode || ''
 
 
     });

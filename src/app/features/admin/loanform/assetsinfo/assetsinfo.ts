@@ -123,7 +123,7 @@ export class Assetsinfo implements OnInit {
     "Other"
   ];
 
-
+  checkoccupation: boolean = false;
   isCoApplicant: boolean = false;
   lastSavedPayload: any = null;
   isSummaryEditMode = false;
@@ -242,24 +242,99 @@ export class Assetsinfo implements OnInit {
 
   }
   applyApplicantViewMode(queryParams: any) {
-  const isFromSummaryRoute =
-    queryParams['fromSummary'] === true ||
-    queryParams['fromSummary'] === 'true';
+    const isFromSummaryRoute =
+      queryParams['fromSummary'] === true ||
+      queryParams['fromSummary'] === 'true';
 
-  const cameFromSummary =
-    isFromSummaryRoute ||
-    this.formSvc.isSummaryEditFlow();
+    const cameFromSummary =
+      isFromSummaryRoute ||
+      this.formSvc.isSummaryEditFlow();
 
-  // ✅ MAIN APPLICANT LOGIC
-  if (!this.isCoApplicant) {
-    this.isSummaryEditMode = cameFromSummary;
+    // ✅ MAIN APPLICANT LOGIC
+    if (!this.isCoApplicant) {
+      this.isSummaryEditMode = cameFromSummary;
+      this.isFromSummary = this.isSummaryEditMode;
+
+      this.viewOnly =
+        this.isSummaryEditMode &&
+        queryParams['mode'] !== 'edit';
+
+      if (this.isSummaryEditMode) {
+        if (this.viewOnly) {
+          this.isViewMode = true;
+          this.isEditMode = false;
+          this.assetsForm.disable({ emitEvent: false });
+        } else {
+          this.isViewMode = false;
+          this.isEditMode = true;
+          this.assetsForm.enable({ emitEvent: false });
+        }
+      } else {
+        this.isFromSummary = false;
+        this.isSummaryEditMode = false;
+        this.viewOnly = false;
+        this.isViewMode = false;
+        this.isEditMode = false;
+        this.assetsForm.enable({ emitEvent: false });
+      }
+
+      return;
+    }
+
+    // ✅ CO-APPLICANT LOGIC
+    let storedCoAppData: any = {};
+
+    try {
+      storedCoAppData = JSON.parse(sessionStorage.getItem('coAppIds') || '{}');
+    } catch {
+      storedCoAppData = {};
+    }
+
+    const coappStatus = (
+      storedCoAppData?.status ||
+      (isFromSummaryRoute ? 'COMPLETED' : '')
+    ).toUpperCase();
+
+    const isCompletedCoapp =
+      coappStatus === 'COMPLETED' ||
+      coappStatus === 'SUBMITTED';
+
+    const isNewCoappFlow =
+      storedCoAppData?.mode === 'new';
+
+    const isDraftCoapp =
+      !isNewCoappFlow &&
+      !isCompletedCoapp;
+
+    const coappCameFromSummary =
+      isFromSummaryRoute ||
+      storedCoAppData?.mode === 'view' ||
+      storedCoAppData?.mode === 'edit' ||
+      this.formSvc.isSummaryEditFlow();
+
+    this.isSummaryEditMode =
+      !isNewCoappFlow &&
+      isCompletedCoapp &&
+      coappCameFromSummary;
+
     this.isFromSummary = this.isSummaryEditMode;
 
     this.viewOnly =
       this.isSummaryEditMode &&
       queryParams['mode'] !== 'edit';
 
-    if (this.isSummaryEditMode) {
+    if (isDraftCoapp || isNewCoappFlow) {
+      this.formSvc.clearSummaryEditFlow();
+      this.formSvc.clearSummaryEducationEditFlow?.();
+
+      this.isFromSummary = false;
+      this.isSummaryEditMode = false;
+      this.viewOnly = false;
+      this.isViewMode = false;
+      this.isEditMode = false;
+
+      this.assetsForm.enable({ emitEvent: false });
+    } else if (this.isSummaryEditMode) {
       if (this.viewOnly) {
         this.isViewMode = true;
         this.isEditMode = false;
@@ -275,85 +350,10 @@ export class Assetsinfo implements OnInit {
       this.viewOnly = false;
       this.isViewMode = false;
       this.isEditMode = false;
+
       this.assetsForm.enable({ emitEvent: false });
     }
-
-    return;
   }
-
-  // ✅ CO-APPLICANT LOGIC
-  let storedCoAppData: any = {};
-
-  try {
-    storedCoAppData = JSON.parse(sessionStorage.getItem('coAppIds') || '{}');
-  } catch {
-    storedCoAppData = {};
-  }
-
-  const coappStatus = (
-    storedCoAppData?.status ||
-    (isFromSummaryRoute ? 'COMPLETED' : '')
-  ).toUpperCase();
-
-  const isCompletedCoapp =
-    coappStatus === 'COMPLETED' ||
-    coappStatus === 'SUBMITTED';
-
-  const isNewCoappFlow =
-    storedCoAppData?.mode === 'new';
-
-  const isDraftCoapp =
-    !isNewCoappFlow &&
-    !isCompletedCoapp;
-
-  const coappCameFromSummary =
-    isFromSummaryRoute ||
-    storedCoAppData?.mode === 'view' ||
-    storedCoAppData?.mode === 'edit' ||
-    this.formSvc.isSummaryEditFlow();
-
-  this.isSummaryEditMode =
-    !isNewCoappFlow &&
-    isCompletedCoapp &&
-    coappCameFromSummary;
-
-  this.isFromSummary = this.isSummaryEditMode;
-
-  this.viewOnly =
-    this.isSummaryEditMode &&
-    queryParams['mode'] !== 'edit';
-
-  if (isDraftCoapp || isNewCoappFlow) {
-    this.formSvc.clearSummaryEditFlow();
-    this.formSvc.clearSummaryEducationEditFlow?.();
-
-    this.isFromSummary = false;
-    this.isSummaryEditMode = false;
-    this.viewOnly = false;
-    this.isViewMode = false;
-    this.isEditMode = false;
-
-    this.assetsForm.enable({ emitEvent: false });
-  } else if (this.isSummaryEditMode) {
-    if (this.viewOnly) {
-      this.isViewMode = true;
-      this.isEditMode = false;
-      this.assetsForm.disable({ emitEvent: false });
-    } else {
-      this.isViewMode = false;
-      this.isEditMode = true;
-      this.assetsForm.enable({ emitEvent: false });
-    }
-  } else {
-    this.isFromSummary = false;
-    this.isSummaryEditMode = false;
-    this.viewOnly = false;
-    this.isViewMode = false;
-    this.isEditMode = false;
-
-    this.assetsForm.enable({ emitEvent: false });
-  }
-}
   getStorageKey() {
     const main_ApplicantId = this.stepperService.getLoanId()?.[0];
     const co_ApplicantId = this.stepperService.getCo_appId()?.[0];
@@ -408,6 +408,9 @@ export class Assetsinfo implements OnInit {
     if (generalInfoData && !generalInfoData?.hasAssets) {
       summarySection = [];
     }
+    if (generalInfoData.occupationInfo.occupation == "Employed" || generalInfoData.occupationInfo.occupation == "Employed") {
+      this.checkoccupation = true;
+    } else { this.checkoccupation = false }
 
     this.summarySection = summarySection;
 
@@ -753,49 +756,49 @@ export class Assetsinfo implements OnInit {
     }
     // this.cd.detectChanges();
   }
-toggle(index: number) {
-  const acc = this.accordions[index];
+  toggle(index: number) {
+    const acc = this.accordions[index];
 
-  if (acc?.key) {
-    this.ensureAssetSectionInitialized(acc.key);
+    if (acc?.key) {
+      this.ensureAssetSectionInitialized(acc.key);
+    }
+
+    if (this.openIndex.includes(index)) {
+      this.openIndex = this.openIndex.filter(i => i !== index);
+    } else {
+      this.openIndex = [...this.openIndex, index];
+    }
+
+    this.cd.detectChanges();
   }
 
-  if (this.openIndex.includes(index)) {
-    this.openIndex = this.openIndex.filter(i => i !== index);
-  } else {
-    this.openIndex = [...this.openIndex, index];
-  }
+  private ensureAssetSectionInitialized(key: string): void {
+    const config = this.assetFieldMap[key];
+    if (!config) return;
 
-  this.cd.detectChanges();
-}
+    const control = this.assetsForm.get(config.form);
 
-private ensureAssetSectionInitialized(key: string): void {
-  const config = this.assetFieldMap[key];
-  if (!config) return;
+    if (control instanceof FormArray && control.length === 0) {
+      if (key === 'Property/ Land Assets') {
+        control.push(this.createProperty());
+      }
 
-  const control = this.assetsForm.get(config.form);
+      if (key === 'Fixed Deposit') {
+        control.push(this.createFD());
+      }
 
-  if (control instanceof FormArray && control.length === 0) {
-    if (key === 'Property/ Land Assets') {
-      control.push(this.createProperty());
-    }
+      if (key === 'Investments') {
+        // don't auto push because investments depend on dropdown selection
+      }
 
-    if (key === 'Fixed Deposit') {
-      control.push(this.createFD());
-    }
-
-    if (key === 'Investments') {
-      // don't auto push because investments depend on dropdown selection
-    }
-
-    if (key === 'Other') {
-      control.push(this.createOther());
+      if (key === 'Other') {
+        control.push(this.createOther());
+      }
     }
   }
-}
   removeAccordion(key: string, index: number, event: Event) {
-      event.stopPropagation();
-       event.preventDefault();
+    event.stopPropagation();
+    event.preventDefault();
     console.log(key);
     let accArr: any = [];
 
@@ -850,7 +853,7 @@ private ensureAssetSectionInitialized(key: string): void {
             break;
         }
 
-        if(accArr){
+        if (accArr) {
           this.deleteItemArr(accArr);
         }
 
@@ -1173,7 +1176,7 @@ private ensureAssetSectionInitialized(key: string): void {
     this.assetsCatagories.forEach((item: any) => {
       item.disabled = false;
     });
-    
+
     let normalizedSelected = rawSelected
       .map(v => this.normalizeToAccordionKey(v))
       .filter(Boolean);
@@ -1184,7 +1187,7 @@ private ensureAssetSectionInitialized(key: string): void {
     const previousSelected = [...this.selectedAssets];
 
     const hasNoAssets = normalizedSelected.includes(this.NO_ASSETS_CODE);
-        
+
     const totalAssets = this.assetsCatagories.length;
 
     this.assetsCatagories.forEach((item: any) => {
@@ -1202,23 +1205,23 @@ private ensureAssetSectionInitialized(key: string): void {
       }
     });
 
-        if(rawSelected.length > 0){
-      if(hasNoAssets && rawSelected.length > 1){
+    if (rawSelected.length > 0) {
+      if (hasNoAssets && rawSelected.length > 1) {
         this.assetsCatagories.forEach((item: any) => {
-          if(item.value === this.NO_ASSETS_CODE){
+          if (item.value === this.NO_ASSETS_CODE) {
             item.disabled = true;
           }
         });
-      } else if(hasNoAssets && rawSelected.length === 1){
+      } else if (hasNoAssets && rawSelected.length === 1) {
         this.assetsCatagories.forEach((item: any) => {
-          if(item.value !== this.NO_ASSETS_CODE){
+          if (item.value !== this.NO_ASSETS_CODE) {
             item.disabled = true;
           }
         });
       }
-    } else if(rawSelected.length === 0){
+    } else if (rawSelected.length === 0) {
       this.assetsCatagories.forEach((item: any) => {
-        if(item.value === this.NO_ASSETS_CODE){
+        if (item.value === this.NO_ASSETS_CODE) {
           item.disabled = false;
         }
       });
@@ -1229,7 +1232,7 @@ private ensureAssetSectionInitialized(key: string): void {
       x => x !== this.NO_ASSETS_CODE
     );
 
- 
+
     const allRealAssetsSelected = this.REAL_ASSETS_CODES.every(asset =>
       realAssets.includes(asset)
     );
@@ -1270,7 +1273,7 @@ private ensureAssetSectionInitialized(key: string): void {
       return;
     }
 
-  
+
     this.selectedAssets = realAssets;
 
     const deselected = previousSelected.filter(k => !realAssets.includes(k));
@@ -1304,7 +1307,7 @@ private ensureAssetSectionInitialized(key: string): void {
       }
     });
 
-    
+
     // newlySelected.forEach(key => {
     //   const config = this.assetFieldMap[key];
     //   if (!config) return;
@@ -1320,8 +1323,8 @@ private ensureAssetSectionInitialized(key: string): void {
 
     // initialize newly selected arrays
     this.selectedAssets.forEach(key => {
-  this.ensureAssetSectionInitialized(key);
-});
+      this.ensureAssetSectionInitialized(key);
+    });
 
     // open only selected accordions
     this.openIndex = this.selectedAssets
@@ -2627,6 +2630,19 @@ private ensureAssetSectionInitialized(key: string): void {
       this.assetsForm.markAllAsTouched();
       return;
 
+    }
+
+     if ( this.isCoApplicant && !this.checkoccupation) {
+      // if ((occupationType?.[0]?.label === "Housewife / Homemaker" || occupationType?.[0]?.label === "Unemployed") && this.checkboxasset === "No") {
+        this.msgBox.open({
+          title: 'You are not eligible as a co-applicant. Please ask the main applicant to add another co-applicant.',
+          message: ``,
+          showCancel: false,
+          okText: '+ Add Co-applicant',
+
+        });
+        return;
+      // }
     }
 
     const hasChanged = !this.lastSavedPayload ||

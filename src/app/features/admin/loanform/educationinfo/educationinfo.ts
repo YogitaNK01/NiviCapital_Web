@@ -141,15 +141,19 @@ export class Educationinfo implements OnInit {
     othersdiploma: 'OTHER_AFTER_DIPLOMA'
   };
 
-  educationOrder: Array<'10th' | '12th' | 'diploma10' | 'diploma12' | 'ug' | 'pg' | 'ielts' | 'offerletter' | 'others' | 'others12' | 'othersdiploma'> = ['10th', '12th', 'diploma10', 'diploma12', 'ug', 'pg', 'ielts', 'offerletter', 'others', 'others12', 'othersdiploma'];
+  educationOrder1: Array<'10th' | '12th' | 'diploma10' | 'diploma12' | 'ug' | 'pg' | 'ielts' | 'offerletter' | 'others' | 'others12' | 'othersdiploma'> = ['10th', '12th', 'diploma10', 'diploma12', 'ug', 'pg', 'ielts', 'offerletter', 'others', 'others12', 'othersdiploma'];
 
-
+  educationOrder: Array<
+    '10th' | '12th' | 'diploma10' | 'diploma12' | 'ug' | 'pg' |
+    'ielts' | 'offerletter' | 'others' | 'others12' | 'othersdiploma'
+  > = [];
 
   educationForms: any = {};
   basicform!: FormGroup;
 
   private isEducationFlowInitialized = false;
-  uploadedFiles: Record<string, File | null> = {}; // central store
+  uploadedFiles: Record<string, File | null> = {};
+uploadedFiles1: Record<string, File | Record<string, any> | null> = {};
   private educationFormState: Record<string, any> = {};
 
   uploadeddata: any;
@@ -1133,6 +1137,7 @@ export class Educationinfo implements OnInit {
       this.router.navigate([], {
         relativeTo: this.route,
         queryParams: {
+          qualificationId: this.flowQualificationId,
           qualificationlabel: prevEducation
         },
         queryParamsHandling: 'merge'
@@ -1358,7 +1363,7 @@ export class Educationinfo implements OnInit {
       educationOrder: this.educationOrder?.length
         ? this.educationOrder
         : oldParsed.educationOrder,
-      flowQualificationId: this.flowQualificationId,
+      flowQualificationId: this.flowQualificationId || oldParsed.flowQualificationId || null,
 
       persistedEducationSteps: {
         ...(oldParsed.persistedEducationSteps || {}),
@@ -1397,6 +1402,8 @@ export class Educationinfo implements OnInit {
     // this.educationFormState = parsed.educationFormState || {};
     // this.otherDocMap = parsed.otherDocMap || {};
 
+    this.flowQualificationId = this.flowQualificationId || parsed.flowQualificationId || null;
+
     this.educationFormState = {
       ...(this.educationFormState || {}),
       ...(parsed.educationFormState || {})
@@ -1411,7 +1418,7 @@ export class Educationinfo implements OnInit {
       ...(this.persistedEducationSteps || {})
     };
     if (!this.educationOrder || !this.educationOrder.length) {
-      this.educationOrder = parsed.educationOrder || this.educationOrder;
+      this.educationOrder = parsed.educationOrder || [];
     }    // this.activeEducation = parsed.activeEducation || this.activeEducation;
     this.activeEducation = this.activeEducation || parsed.activeEducation;
 
@@ -2651,144 +2658,144 @@ export class Educationinfo implements OnInit {
     return fd;
   }
   private async buildEducationSaveExitFormData(sectionKey: string): Promise<FormData> {
-  const step = this.activeEducation as StepKey;
-  const form = this.educationForms[step] as FormGroup;
-  const fd = new FormData();
+    const step = this.activeEducation as StepKey;
+    const form = this.educationForms[step] as FormGroup;
+    const fd = new FormData();
 
-  const subcategory = this.stepToSubcategory[step];
+    const subcategory = this.stepToSubcategory[step];
 
-  fd.append('sectionKey', sectionKey);
-  fd.append('applicationId', this.applicationId);
-  fd.append('applicantId', this.applicantId);
-  fd.append('category', 'EDUCATION');
-  fd.append('subcategory', subcategory);
+    fd.append('sectionKey', sectionKey);
+    fd.append('applicationId', this.applicationId);
+    fd.append('applicantId', this.applicantId);
+    fd.append('category', 'EDUCATION');
+    fd.append('subcategory', subcategory);
 
-  let fileIndex = 0;
+    let fileIndex = 0;
 
-  // IELTS
-  if (step === 'ielts') {
-    fd.append('score', form.get('score')?.value || '');
+    // IELTS
+    if (step === 'ielts') {
+      fd.append('score', form.get('score')?.value || '');
 
-    fileIndex = await this.appendEducationFileForSaveExit(
-      fd,
-      fileIndex,
-      step,
-      'ielts',
-      'UPLOAD_CERTIFICATE'
+      fileIndex = await this.appendEducationFileForSaveExit(
+        fd,
+        fileIndex,
+        step,
+        'ielts',
+        'UPLOAD_CERTIFICATE'
+      );
+
+      return fd;
+    }
+
+    // Offer Letter
+    if (step === 'offerletter') {
+      fileIndex = await this.appendEducationFileForSaveExit(
+        fd,
+        fileIndex,
+        step,
+        'offerletter',
+        'UPLOAD_CERTIFICATE'
+      );
+
+      return fd;
+    }
+
+    const raw = form.getRawValue();
+
+    const instituteId =
+      raw.instituteId ||
+      this.educationFormState[step]?.instituteId ||
+      '';
+
+    fd.append('instituteId', instituteId);
+    fd.append('otherInstituteName', form.get('institutetitle')?.value || '');
+    fd.append('yearOfPassing', form.get('passingyear')?.value || '');
+    fd.append('percentageCgpa', form.get('per_cgpa')?.value || '');
+    fd.append('locationId', this.resolveLocationId(form.get('location')?.value) || '');
+    fd.append('otherLocationName', form.get('otherLocation')?.value || '');
+
+    // ✅ Required docs: Marksheet + LC
+    const reqDocs = this.requiredDocs(step);
+
+    for (const r of reqDocs) {
+      fileIndex = await this.appendEducationFileForSaveExit(
+        fd,
+        fileIndex,
+        step,
+        r.doc,
+        r.apiType,
+        r.index
+      );
+    }
+
+    // ✅ Extra marksheets from savedFileMeta/uploadedFiles
+    const requiredMarksheetIndexes = new Set(
+      this.requiredDocs(step)
+        .filter(d => d.doc === 'marksheet')
+        .map(d => d.index ?? -1)
     );
 
-    return fd;
-  }
+    const maxAllowedMarksheetCount = this.getMarksheetCount(step);
 
-  // Offer Letter
-  if (step === 'offerletter') {
-    fileIndex = await this.appendEducationFileForSaveExit(
-      fd,
-      fileIndex,
-      step,
-      'offerletter',
-      'UPLOAD_CERTIFICATE'
-    );
-
-    return fd;
-  }
-
-  const raw = form.getRawValue();
-
-  const instituteId =
-    raw.instituteId ||
-    this.educationFormState[step]?.instituteId ||
-    '';
-
-  fd.append('instituteId', instituteId);
-  fd.append('otherInstituteName', form.get('institutetitle')?.value || '');
-  fd.append('yearOfPassing', form.get('passingyear')?.value || '');
-  fd.append('percentageCgpa', form.get('per_cgpa')?.value || '');
-  fd.append('locationId', this.resolveLocationId(form.get('location')?.value) || '');
-  fd.append('otherLocationName', form.get('otherLocation')?.value || '');
-
-  // ✅ Required docs: Marksheet + LC
-  const reqDocs = this.requiredDocs(step);
-
-  for (const r of reqDocs) {
-    fileIndex = await this.appendEducationFileForSaveExit(
-      fd,
-      fileIndex,
-      step,
-      r.doc,
-      r.apiType,
-      r.index
-    );
-  }
-
-  // ✅ Extra marksheets from savedFileMeta/uploadedFiles
-  const requiredMarksheetIndexes = new Set(
-    this.requiredDocs(step)
-      .filter(d => d.doc === 'marksheet')
-      .map(d => d.index ?? -1)
-  );
-
-  const maxAllowedMarksheetCount = this.getMarksheetCount(step);
-
-  const extraMarksheetKeys = Array.from(
-    new Set([
-      ...Object.keys(this.savedFileMeta || {}),
-      ...Object.keys(this.uploadedFiles || {})
-    ])
-  )
-    .filter(key => key.startsWith(`${step}_marksheet_`))
-    .map(key => {
-      const match = key.match(/marksheet_(\d+)/);
-      const index = match ? Number(match[1]) : -1;
-      return { key, index };
-    })
-    .filter(({ index }) =>
-      index >= 0 &&
-      index < maxAllowedMarksheetCount &&
-      !requiredMarksheetIndexes.has(index)
+    const extraMarksheetKeys = Array.from(
+      new Set([
+        ...Object.keys(this.savedFileMeta || {}),
+        ...Object.keys(this.uploadedFiles || {})
+      ])
     )
-    .sort((a, b) => a.index - b.index);
+      .filter(key => key.startsWith(`${step}_marksheet_`))
+      .map(key => {
+        const match = key.match(/marksheet_(\d+)/);
+        const index = match ? Number(match[1]) : -1;
+        return { key, index };
+      })
+      .filter(({ index }) =>
+        index >= 0 &&
+        index < maxAllowedMarksheetCount &&
+        !requiredMarksheetIndexes.has(index)
+      )
+      .sort((a, b) => a.index - b.index);
 
-  for (const { index } of extraMarksheetKeys) {
-    fileIndex = await this.appendEducationFileForSaveExit(
-      fd,
-      fileIndex,
-      step,
-      'marksheet',
-      'MARKSHEET',
-      index
-    );
+    for (const { index } of extraMarksheetKeys) {
+      fileIndex = await this.appendEducationFileForSaveExit(
+        fd,
+        fileIndex,
+        step,
+        'marksheet',
+        'MARKSHEET',
+        index
+      );
+    }
+
+    // ✅ Other docs
+    for (const key of Object.keys({
+      ...this.uploadedFiles,
+      ...this.savedFileMeta
+    }).filter(k => k.startsWith(`${step}_other_`))) {
+
+      const match = key.match(/_other_(\d+)$/);
+      const index = match ? Number(match[1]) : undefined;
+
+      const title =
+        this.otherDocMap[key]?.title ||
+        (this.savedFileMeta[key] as any)?.title ||
+        (this.uploadedFiles[key] as any)?.title ||
+        'Other Document';
+
+      fileIndex = await this.appendEducationFileForSaveExit(
+        fd,
+        fileIndex,
+        step,
+        'other',
+        'OTHER',
+        index,
+        title
+      );
+    }
+
+    return fd;
   }
-
-  // ✅ Other docs
-  for (const key of Object.keys({
-    ...this.uploadedFiles,
-    ...this.savedFileMeta
-  }).filter(k => k.startsWith(`${step}_other_`))) {
-
-    const match = key.match(/_other_(\d+)$/);
-    const index = match ? Number(match[1]) : undefined;
-
-    const title =
-      this.otherDocMap[key]?.title ||
-      (this.savedFileMeta[key] as any)?.title ||
-      (this.uploadedFiles[key] as any)?.title ||
-      'Other Document';
-
-    fileIndex = await this.appendEducationFileForSaveExit(
-      fd,
-      fileIndex,
-      step,
-      'other',
-      'OTHER',
-      index,
-      title
-    );
-  }
-
-  return fd;
-}
-   private async appendEducationFileForSaveExit(
+  private async appendEducationFileForSaveExit(
     fd: FormData,
     fileIndex: number,
     step: StepKey,
@@ -2861,6 +2868,7 @@ export class Educationinfo implements OnInit {
       this.router.navigate([], {
         relativeTo: this.route,
         queryParams: {
+          qualificationId: this.flowQualificationId,
           qualificationlabel: nextEducation
         },
         queryParamsHandling: 'merge'
@@ -3218,6 +3226,7 @@ export class Educationinfo implements OnInit {
             relativeTo: this.route,
 
             queryParams: {
+              qualificationId: this.flowQualificationId,
               qualificationlabel: nextEducation,
 
             },
@@ -3254,6 +3263,7 @@ export class Educationinfo implements OnInit {
       this.router.navigate([], {
         relativeTo: this.route,
         queryParams: {
+          qualificationId: this.flowQualificationId,
           qualificationlabel: nextEducation,
         },
         queryParamsHandling: 'merge'
@@ -3549,7 +3559,7 @@ export class Educationinfo implements OnInit {
 
     return null;
   }
-  private appendUpdateItem(
+  private async appendUpdateItem(
     fd: FormData,
     itemIndex: number,
     key: string,
@@ -3558,7 +3568,7 @@ export class Educationinfo implements OnInit {
     form?: FormGroup,
     title?: string,
     existingMeta?: any
-  ) {
+  ): Promise<void> {
 
 
     // const meta = this.getMetaForUpdate(key, apiType, fileOrMeta, title);
@@ -3627,13 +3637,43 @@ export class Educationinfo implements OnInit {
       fd.append(`items[${itemIndex}].title`, title);
     }
 
-    // only send file if user changed/re-uploaded
+    // Case 1: user selected new file
     if (fileOrMeta instanceof File) {
       fd.append(`items[${itemIndex}].file.file`, fileOrMeta, fileOrMeta.name);
+      return;
+    }
+
+    // Case 2: file came from summary/API as metadata with viewUrl
+    const viewUrl =
+      meta.viewUrl ||
+      meta.fileUrl ||
+      meta.publicUrl ||
+      fileOrMeta?.viewUrl ||
+      fileOrMeta?.fileUrl ||
+      fileOrMeta?.publicUrl ||
+      '';
+
+    if (viewUrl) {
+      try {
+        const fileFromUrl = await this.urlToFile(
+          viewUrl,
+          meta.fileName || meta.name || fileOrMeta?.fileName || fileOrMeta?.name || 'document'
+        );
+
+        fd.append(
+          `items[${itemIndex}].file.file`,
+          fileFromUrl,
+          fileFromUrl.name
+        );
+      } catch (error) {
+        console.error('Failed to convert viewUrl to File for:', key, error);
+      }
+    } else {
+      console.warn('No viewUrl found for existing file:', key, meta);
     }
   }
 
-  private buildEducationUpdateFormData(): FormData {
+  private async buildEducationUpdateFormData(): Promise<FormData> {
     const step = this.getCurrentStep();
     const form = this.getCurrentForm();
     const fd = new FormData();
@@ -3710,29 +3750,46 @@ export class Educationinfo implements OnInit {
     }
 
     // ✅ Required docs (MARKSHEET / LC)
-    this.requiredDocs(step).forEach(r => {
-      const key = this.buildKey(step, r.doc as DocType, r.index);
+    // this.requiredDocs(step).forEach(r => {
+    //   const key = this.buildKey(step, r.doc as DocType, r.index);
 
-      const fileOrMeta =
-        this.uploadedFiles[key] instanceof File
-          ? this.uploadedFiles[key]
-          : this.savedFileMeta[key];
+    //   const fileOrMeta =
+    //     this.uploadedFiles[key] instanceof File
+    //       ? this.uploadedFiles[key]
+    //       : this.savedFileMeta[key];
 
-      if (!fileOrMeta) return;
+    //   if (!fileOrMeta) return;
 
-      this.appendUpdateItem(
-        fd,
-        itemIndex++,
-        key,
-        r.apiType,
-        fileOrMeta,
-        form
-      );
-    });
+    //   this.appendUpdateItem(
+    //     fd,
+    //     itemIndex++,
+    //     key,
+    //     r.apiType,
+    //     fileOrMeta,
+    //     form
+    //   );
+    // });
+    for (const r of this.requiredDocs(step)) {
+  const key = this.buildKey(step, r.doc as DocType, r.index);
+
+  const fileOrMeta =
+    this.uploadedFiles[key] instanceof File
+      ? this.uploadedFiles[key]
+      : this.savedFileMeta[key] || this.uploadedFiles[key];
+
+  if (!fileOrMeta) continue;
+
+  await this.appendUpdateItem(
+    fd,
+    itemIndex++,
+    key,
+    r.apiType,
+    fileOrMeta,
+    form
+  );
+}
 
     // ✅ Extra marksheets
-
-
     const requiredMarksheetIndexes = new Set(
       this.requiredDocs(step)
         .filter(d => d.doc === 'marksheet')
@@ -3760,50 +3817,92 @@ export class Educationinfo implements OnInit {
       )
       .sort((a, b) => a.index - b.index);
 
-    extraMarksheetKeys.forEach(({ key }) => {
-      const fileOrMeta =
-        this.uploadedFiles[key] instanceof File
-          ? this.uploadedFiles[key]
-          : this.savedFileMeta[key];
+    // extraMarksheetKeys.forEach(({ key }) => {
+    //   const fileOrMeta =
+    //     this.uploadedFiles[key] instanceof File
+    //       ? this.uploadedFiles[key]
+    //       : this.savedFileMeta[key];
 
-      if (!fileOrMeta) return;
+    //   if (!fileOrMeta) return;
 
-      this.appendUpdateItem(
-        fd,
-        itemIndex++,
-        key,
-        'MARKSHEET',
-        fileOrMeta,
-        form
-      );
-    });
+    //   this.appendUpdateItem(
+    //     fd,
+    //     itemIndex++,
+    //     key,
+    //     'MARKSHEET',
+    //     fileOrMeta,
+    //     form
+    //   );
+    // });
+for (const { key } of extraMarksheetKeys) {
+  const fileOrMeta =
+    this.uploadedFiles[key] instanceof File
+      ? this.uploadedFiles[key]
+      : this.savedFileMeta[key] || this.uploadedFiles[key];
 
+  if (!fileOrMeta) continue;
+
+  await this.appendUpdateItem(
+    fd,
+    itemIndex++,
+    key,
+    'MARKSHEET',
+    fileOrMeta,
+    form
+  );
+}
 
     // ✅ Other docs
-    Object.keys({
-      ...this.savedFileMeta,
-      ...this.uploadedFiles
-    })
-      .filter(key => key.startsWith(`${step}_other_`))
-      .sort()
-      .forEach(key => {
+    // Object.keys({
+    //   ...this.savedFileMeta,
+    //   ...this.uploadedFiles
+    // })
+    //   .filter(key => key.startsWith(`${step}_other_`))
+    //   .sort()
+    //   .forEach(key => {
 
-        const fileOrMeta =
-          this.uploadedFiles[key] instanceof File
-            ? this.uploadedFiles[key]
-            : (this.savedFileMeta[key] || this.uploadedFiles[key]);
-        if (!fileOrMeta) return;
+    //     const fileOrMeta =
+    //       this.uploadedFiles[key] instanceof File
+    //         ? this.uploadedFiles[key]
+    //         : (this.savedFileMeta[key] || this.uploadedFiles[key]);
+    //     if (!fileOrMeta) return;
 
-        this.appendUpdateItem(
-          fd,
-          itemIndex++,
-          key,
-          'OTHER',
-          fileOrMeta,
-          form,
-          this.otherDocMap[key]?.title || fileOrMeta?.title || 'Other Document'
-        );
-      });
+    //     this.appendUpdateItem(
+    //       fd,
+    //       itemIndex++,
+    //       key,
+    //       'OTHER',
+    //       fileOrMeta,
+    //       form,
+    //       this.otherDocMap[key]?.title || fileOrMeta?.title || 'Other Document'
+    //     );
+    //   });
+
+    const otherKeys = Object.keys({
+  ...this.savedFileMeta,
+  ...this.uploadedFiles
+})
+  .filter(key => key.startsWith(`${step}_other_`))
+  .sort();
+
+for (const key of otherKeys) {
+  const fileOrMeta =
+    this.uploadedFiles[key] instanceof File
+      ? this.uploadedFiles[key]
+      : this.savedFileMeta[key] || this.uploadedFiles[key];
+
+  if (!fileOrMeta) continue;
+
+  await this.appendUpdateItem(
+    fd,
+    itemIndex++,
+    key,
+    'OTHER',
+    fileOrMeta,
+    form,
+    this.otherDocMap[key]?.title || fileOrMeta?.title || 'Other Document'
+  );
+}
 
     return fd;
   }
@@ -3828,7 +3927,7 @@ export class Educationinfo implements OnInit {
       }
     });
   }
-  saveSummaryEdit() {
+  async saveSummaryEdit() {
 
     const step = this.getCurrentStep();
     const form = this.getCurrentForm();
@@ -3838,7 +3937,7 @@ export class Educationinfo implements OnInit {
       return;
     }
 
-    const fd = this.buildEducationUpdateFormData();
+    const fd = await this.buildEducationUpdateFormData();
 
     this.formSvc.uploadIncome(fd, this.applicationId, true).subscribe({
       next: async (res: any) => {
