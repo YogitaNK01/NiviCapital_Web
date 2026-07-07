@@ -365,9 +365,9 @@ export class Coappsummary {
 
   submitsummary() {
 
-    if (this.isSubmitDisabled) {
-      return;
-    }
+    // if (this.isSubmitDisabled) {
+    //   return;
+    // }
 
     this.isSubmittingSummary = true;
 
@@ -380,7 +380,7 @@ export class Coappsummary {
         console.log(res)
         if (res.status === "success") {
           this.saveCoApplicantOnDashboard();
-
+  this.updateSubmittedCoApplicantInLocalStorage();
           this.isSummarySubmitted = true;
           this.isSubmittingSummary = false;
           this.formSvc.getAllCoapp(this.applicationId).subscribe({
@@ -399,6 +399,44 @@ export class Coappsummary {
 
     )
   }
+  private updateSubmittedCoApplicantInLocalStorage(): void {
+  const listKey = `coApplicants_${this.applicationId}`;
+
+  const saved = localStorage.getItem(listKey);
+  let list = saved ? JSON.parse(saved) : [];
+
+  const currentIndex = this.stepperService.getCurrentCoApplicantIndex();
+
+  list = list.map((item: any) => {
+    const isSameCoapp =
+      Number(item.index) === Number(currentIndex) ||
+      item.applicantId === this.applicantId;
+
+    if (!isSameCoapp) {
+      return item;
+    }
+
+    return {
+      ...item,
+      applicantId: this.applicantId,
+      applicationId: this.applicationId,
+      status: 'COMPLETED',
+      uiStatus: 'COMPLETED',
+      mode: 'view'
+    };
+  });
+
+  localStorage.setItem(listKey, JSON.stringify(list));
+
+  sessionStorage.setItem('coAppIds', JSON.stringify({
+    applicantId: this.applicantId,
+    applicationId: this.applicationId,
+    fullName: list.find((x: any) => Number(x.index) === Number(currentIndex))?.name || '',
+    coApplicantIndex: currentIndex,
+    status: 'COMPLETED',
+    mode: 'view'
+  }));
+}
   saveCoApplicantOnDashboard() {
     const loanIds = this.stepperService.getLoanId();
     const mainApplicantId = loanIds?.[0];

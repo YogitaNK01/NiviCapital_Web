@@ -440,7 +440,9 @@ export class Coapplicantinfo implements OnInit {
         this.searchLoading = false;
         this.norecordfound = true;
         this.showmsg = true;
-        this.showmsgtext = err.error.message == "Mobile number already used in this application" ? "Main Applicant and Co-Applicant mobile numbers cannot be the same. Please enter a different mobile number for the Co-Applicant." : err.error.message;
+       this.showmsgtext = err.error.message ;
+
+        // this.showmsgtext = err.error.message == "Mobile number already used in this application" ? "Main Applicant and Co-Applicant mobile numbers cannot be the same. Please enter a different mobile number for the Co-Applicant." : err.error.message;
       }
     });
   }
