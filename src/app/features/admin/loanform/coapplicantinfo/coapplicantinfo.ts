@@ -4,13 +4,15 @@ import { Loanstepper } from '../loanstepper/loanstepper';
 import { Buttons } from '../../../systemdesign/buttons/buttons';
 import { Inputfield } from '../../../systemdesign/inputfield/inputfield';
 import { FormsModule, NgForm, ReactiveFormsModule } from '@angular/forms';
-import { Router, ActivatedRoute, RouterOutlet } from '@angular/router';
+import { Router, ActivatedRoute, RouterOutlet ,NavigationEnd } from '@angular/router';
 import { Addcustomerservice } from '../../../../core/service/addcustomerservice';
 import { Main } from '../../../../core/service/main';
 import { Coappstepper } from "./coappstepper/coappstepper";
 import { LoanformModule } from '../loanform-module';
 import { Loanformservice } from '../../../../core/service/loanformservice';
 import { Loanstepperservice } from '../../../../core/service/loanstepperservice';
+import { filter } from 'rxjs/operators';
+
 
 @Component({
   selector: 'app-coapplicantinfo',
@@ -51,7 +53,15 @@ export class Coapplicantinfo implements OnInit {
     this.applicationId = Allids[1];
     this.custName = Allids[2];
     this.custARN = Allids[3];
+// Run once on component load
+  this.handleCoApplicantRoute();
 
+  // Run again after every navigation is completed
+  this.router.events
+    .pipe(filter(event => event instanceof NavigationEnd))
+    .subscribe(() => {
+      this.handleCoApplicantRoute();
+    });
 
     this.route.queryParams.subscribe(params => {
 
@@ -140,7 +150,7 @@ export class Coapplicantinfo implements OnInit {
     'co-summaryinfo'
   ];
   //on refresh page redirecting to number page so storing here 
-  restoreCoApplicantState() {
+  restoreCoApplicantState1() {
     const cleanUrl = this.router.url.split('?')[0];
 
     const isStepperRoute = this.coApplicantChildRoutes.some(route =>
@@ -191,6 +201,45 @@ export class Coapplicantinfo implements OnInit {
       this.prefillPhone = current.phone;
     }
   }
+  restoreCoApplicantState() {
+  const listKey = this.getCoApplicantListKey();
+  const savedList = localStorage.getItem(listKey);
+  const coApplicants = savedList ? JSON.parse(savedList) : [];
+
+  const current = coApplicants.find(
+    (x: any) => Number(x.index) === Number(this.coApplicantIndex)
+  );
+
+  const pendingContextRaw = sessionStorage.getItem('pendingCoAppContext');
+  const pendingContext = pendingContextRaw ? JSON.parse(pendingContextRaw) : null;
+
+  if (
+    pendingContext &&
+    Number(pendingContext.coApplicantIndex) === Number(this.coApplicantIndex)
+  ) {
+    this.prefillPhone = pendingContext.phone || '';
+    this.loanform.coapppmobile = pendingContext.phone || '';
+  } else if (current?.phone) {
+    this.prefillPhone = current.phone;
+    this.loanform.coapppmobile = current.phone;
+  }
+
+  const saved = localStorage.getItem(
+    `coapp_mobile_submitted_${this.applicantId}_${this.coApplicantIndex}`
+  );
+
+  this.mobileSubmitted = saved === 'true';
+
+  if (!this.mobileSubmitted) {
+    this.prefillPhone = '';
+    this.loanform.coapppmobile = '';
+    this.loanform.coappStep = 1;
+  }
+
+  if (current?.phone && !this.prefillPhone) {
+    this.prefillPhone = current.phone;
+  }
+}
   getPhoneFieldState(phone: any): 'default' | 'error' | 'success' {
     if (phone.touched && phone.invalid) {
       return 'error';
@@ -201,6 +250,81 @@ export class Coapplicantinfo implements OnInit {
 
     return 'default';
   }
+  private handleCoApplicantRoute(): void {
+  const params = this.route.snapshot.queryParams;
+
+  const sessionCoApp = JSON.parse(sessionStorage.getItem('coAppIds') || '{}');
+
+  this.coApplicantIndex = Number(
+    params['coApplicantIndex'] ||
+    sessionCoApp?.coApplicantIndex ||
+    1
+  );
+
+  this.loanStepper.setCurrentCoApplicantIndex(this.coApplicantIndex);
+
+  if (sessionCoApp?.applicantId) {
+    this.loanStepper.setCo_appId(
+      sessionCoApp.applicantId,
+      sessionCoApp.applicationId,
+      sessionCoApp.fullName || '',
+      sessionCoApp.custARN,
+      this.coApplicantIndex
+    );
+  }
+
+  const mode = params['mode'] || '';
+
+  const cleanUrl = this.router.url.split('?')[0];
+
+  const isChildStepperRoute = this.coApplicantChildRoutes.some(route =>
+    cleanUrl.includes(route)
+  );
+
+  console.log('Coapp route check:', {
+    cleanUrl,
+    mode,
+    isChildStepperRoute
+  });
+
+  /**
+   * Parent page + mode=new means show mobile number page
+   */
+  if (mode === 'new' && !isChildStepperRoute) {
+    this.loanStepper.clearCoAppId?.();
+
+    sessionStorage.removeItem('coAppIds');
+    sessionStorage.removeItem('coapp_cifdetails');
+
+    this.mobileSubmitted = false;
+    this.prefillPhone = '';
+    this.loanform.coapppmobile = '';
+
+    // Your code uses 1 for mobile screen, 2 for stepper screen
+    this.loanform.coappStep = 1;
+
+    this.cd.detectChanges();
+    return;
+  }
+
+  /**
+   * Child route means show co-applicant stepper
+   */
+  if (isChildStepperRoute) {
+    this.mobileSubmitted = true;
+    this.cd.detectChanges();
+    return;
+  }
+
+  /**
+   * Otherwise restore saved state
+   */
+  this.mobileSubmitted = false;
+  this.prefillPhone = '';
+
+  this.restoreCoApplicantState();
+  this.cd.detectChanges();
+}
   back() { }
 
   saveCoApplicantToList(userid: any) {

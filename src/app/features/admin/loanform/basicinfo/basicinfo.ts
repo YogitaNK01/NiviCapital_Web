@@ -8,7 +8,7 @@ import { Checkbox } from '../../../systemdesign/checkbox/checkbox';
 import { interval, Subscription } from 'rxjs';
 import { Addcustomerservice } from '../../../../core/service/addcustomerservice';
 import { Otpsection } from '../../customer/otpsection/otpsection';
-import { ActivatedRoute, Route, Router } from '@angular/router';
+import { ActivatedRoute, Route, Router,NavigationEnd  } from '@angular/router';
 import { Loanformservice } from '../../../../core/service/loanformservice';
 import { Loanstepper } from '../loanstepper/loanstepper';
 import { Loanstepperservice } from '../../../../core/service/loanstepperservice';
@@ -17,6 +17,8 @@ import { Messagebox } from '../../../systemdesign/messagebox/messagebox';
 import { Msgboxservice } from '../../../../core/service/msgboxservice';
 import { Storage } from '../../../../core/service/storage';
 import { Successbox } from '../../customer/successbox/successbox';
+import { filter } from 'rxjs/operators';
+
 
 @Component({
   selector: 'app-basicinfo',
@@ -155,15 +157,21 @@ export class Basicinfo {
       this.isEditMode = false;
     }
 
-    //    restore old co-app only for EXISTING flow
-   if (this.isCoApplicant && !isNewCoappFlow) {
-  this.stepperService.restoreCoAppIdFromSession();
-} else if (isNewCoappFlow) {
-  this.stepperService.clearCoAppId?.();
 
-  // clear only pending/new context, not stable CIF data
-  sessionStorage.removeItem('coapp_cifdetails');
-}
+
+  
+
+
+
+    //    restore old co-app only for EXISTING flow
+    if (this.isCoApplicant && !isNewCoappFlow) {
+      this.stepperService.restoreCoAppIdFromSession();
+    } else if (isNewCoappFlow) {
+      this.stepperService.clearCoAppId?.();
+
+      // clear only pending/new context, not stable CIF data
+      sessionStorage.removeItem('coapp_cifdetails');
+    }
 
 
 
@@ -1067,17 +1075,37 @@ export class Basicinfo {
 
     // this.patchCoApplicantInfo(parsed); // or patchGeneralInfo / patchAdditionalInfo
   }
-  back() {
+  
+  back1() {
     this.loanform.coappStep = 1;
-  const currentIndex = this.stepperService.getCurrentCoApplicantIndex();5
+    const currentIndex = this.stepperService.getCurrentCoApplicantIndex();
     this.router.navigate(
       ['/loanform', 'co-applicantdetails', 'coapplicantinfo'],
       {
-        queryParams: {  coApplicantIndex: currentIndex,       mode: 'new'},
+        queryParams: { coApplicantIndex: currentIndex, mode: 'new' },
         replaceUrl: true
       }
     );
   }
+  back() {
+  const currentIndex =
+    this.stepperService.getCurrentCoApplicantIndex() ||
+    Number(this.route.snapshot.queryParams['coApplicantIndex']) ||
+    1;
+
+  this.loanform.coappStep = 1;
+
+  this.router.navigate(
+    ['/loanform/co-applicantdetails/coapplicantinfo'],
+    {
+      queryParams: {
+        coApplicantIndex: currentIndex,
+        mode: 'new'
+      },
+      replaceUrl: true
+    }
+  );
+}
   next() {
     console.log('FNAME =>', this.registerForm.get('fname')?.value);
 

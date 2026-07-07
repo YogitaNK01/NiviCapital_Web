@@ -775,7 +775,8 @@ export class Educationinfo implements OnInit {
     form.patchValue({
       ...saved,
       instituteId: (saved?.instituteId),
-      institutename: saved?.instituteName || saved?.institutename,
+      institutename: saved?.instituteName || saved?.institutename || '',
+        instituteName: saved?.instituteName || saved?.institutename || '',
       institutetitle: saved?.institutetitle || saved?.otherInstituteName || saved?.title || '',
       location: this.getOptionValue(this.cityOptions, saved?.location),
       otherLocation: saved?.otherLocation || saved?.otherLocationName || '',
@@ -819,6 +820,23 @@ export class Educationinfo implements OnInit {
   }
 
 
+isOtherInstituteSelected(step: StepKey): boolean {
+  const form = this.educationForms[step] as FormGroup;
+  if (!form) return false;
+
+  const instituteName = form.get('instituteName')?.value;
+  const institutename = form.get('institutename')?.value;
+
+  const selectedOption = this.instituteOptions.find(
+    x => x.value === institutename || x.label === institutename
+  );
+
+  return (
+    instituteName?.toString().trim().toLowerCase() === 'other' ||
+    institutename?.toString().trim().toLowerCase() === 'other' ||
+    selectedOption?.label?.toString().trim().toLowerCase() === 'other'
+  );
+}
   getEducationGroup(key: string): FormGroup {
     return this.educationForm.get(key) as FormGroup;
   }
@@ -2318,7 +2336,8 @@ export class Educationinfo implements OnInit {
 
         form.patchValue({
           instituteId: first.instituteId,
-          institutename: first.instituteName,
+          institutename: first.instituteName || '',
+           instituteName: first.instituteName || '',
           institutetitle: first.otherInstituteName || '',
           passingyear: this.normalizeDropdownValue(
             first.yearOfPassing || ''
@@ -2346,7 +2365,9 @@ export class Educationinfo implements OnInit {
       this.educationFormState[step] = {
         ...form.getRawValue(),
         instituteId: first.instituteId || '',
-        instituteName: first.instituteName || ''
+        instituteName: first.instituteName || '',
+         institutename: first.instituteName || '',
+           institutetitle: first.otherInstituteName || ''
       };
 
       this.stepperService.setEducationStepData(step, this.educationFormState[step]);

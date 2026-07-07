@@ -1693,11 +1693,13 @@ getRealtionShipwithAsync(): Promise<void> {
         this.msgBox.open({
           title: 'You are not eligible as a co-applicant. Please ask the main applicant to add another co-applicant.',
           message: ``,
-          showCancel: false,
+         
           okText: '+ Add Co-applicant',
-          // onOk: () => {
-          //   this.router.navigate(['/loanform/co-applicantdetails/coapplicantinfo/co-generalinfo']);
-          // }
+      cancelText: 'No',
+      showCancel: false,
+          onOk: () => {
+            this.router.navigate(['/loanform/co-applicantdetails']);
+          }
         });
         return;
       }
@@ -1840,9 +1842,9 @@ getRealtionShipwithAsync(): Promise<void> {
           message: ``,
           showCancel: false,
           okText: '+ Add Co-applicant',
-          // onOk: () => {
-          //   this.router.navigate(['/loanform/co-applicantdetails/coapplicantinfo/co-generalinfo']);
-          // }
+          onOk: () => {
+            this.router.navigate(['/loanform/co-applicantdetails']);
+          }
         });
         return;
       }

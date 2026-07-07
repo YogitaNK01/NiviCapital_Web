@@ -472,7 +472,7 @@ SelectedInstitute(values: string | string[]) {
     );
   }
 
-  restoreDropdownValues() {
+  restoreDropdownValues1() {
 
     const step = this.stepKey;
     const saved = this.group.value;
@@ -489,6 +489,7 @@ SelectedInstitute(values: string | string[]) {
         this.selectedInstituteLabel = found.label;
         this.isOtherEducation = (found?.label ?? '').trim().toLowerCase() === 'other';
         this.group.get('institutename')?.setValue(found.value, { emitEvent: false });
+         this.group.get('institutetitle')?.setValue(saved.institutetitle, { emitEvent: false });
       }
     }
 
@@ -506,8 +507,77 @@ SelectedInstitute(values: string | string[]) {
         this.group.get('location')?.setValue(foundLoc.value, { emitEvent: false });
       }
     }
+  }restoreDropdownValues() {
+  const saved = this.group.getRawValue();
+
+  if (!saved) return;
+
+  // Institute restore
+  const instituteRaw =
+    saved.instituteId ||
+    saved.institutename ||
+    saved.instituteName ||
+    '';
+
+  if (instituteRaw) {
+    const found = this.seleactInstitute.find(i =>
+      i.value === instituteRaw ||
+      i.label?.trim().toLowerCase() === instituteRaw.toString().trim().toLowerCase()
+    );
+
+    if (found) {
+      this.selectedInstituteID = found.value;
+      this.selectedInstituteLabel = found.label;
+
+      this.isOtherEducation =
+        found.label?.trim().toLowerCase() === 'other';
+
+      this.group.patchValue({
+        instituteId: found.value,
+        instituteName: found.label,
+        institutename: found.label,
+        institutetitle:
+          saved.institutetitle ||
+          saved.otherInstituteName ||
+          ''
+      }, { emitEvent: false });
+    } else {
+      // fallback if dropdown option not found but saved value is Other
+      this.selectedInstituteLabel = saved.instituteName || saved.institutename || '';
+
+      this.isOtherEducation =
+        this.selectedInstituteLabel?.trim().toLowerCase() === 'other';
+
+      this.group.patchValue({
+        institutetitle:
+          saved.institutetitle ||
+          saved.otherInstituteName ||
+          ''
+      }, { emitEvent: false });
+    }
   }
 
+  // Location restore
+  const locationRaw = saved.location || '';
+
+  if (locationRaw) {
+    const foundLoc = this.selectlocation.find(l =>
+      l.value === locationRaw ||
+      l.label?.trim().toLowerCase() === locationRaw.toString().trim().toLowerCase()
+    );
+
+    if (foundLoc) {
+      this.selectedLocationLabel = foundLoc.label;
+
+      this.isOtherLocation =
+        foundLoc.label?.trim().toLowerCase() === 'other';
+
+      this.group.get('location')?.setValue(foundLoc.value, { emitEvent: false });
+    }
+  }
+
+  this.cd.detectChanges();
+}
   getLevelFromTitle(title: string): EducationType {
     const t = (title || '').toLowerCase();
 

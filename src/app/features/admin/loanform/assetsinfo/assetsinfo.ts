@@ -2610,16 +2610,18 @@ export class Assetsinfo implements OnInit {
 
     }
 
-     if ( this.isCoApplicant && !this.checkoccupation && this.hasNoassetsSelected) {
+    if (this.isCoApplicant && !this.checkoccupation && this.hasNoassetsSelected) {
       // if ((occupationType?.[0]?.label === "Housewife / Homemaker" || occupationType?.[0]?.label === "Unemployed") && this.checkboxasset === "No") {
-        this.msgBox.open({
-          title: 'You are not eligible as a co-applicant. Please ask the main applicant to add another co-applicant.',
-          message: ``,
-          showCancel: false,
-          okText: '+ Add Co-applicant',
-
-        });
-        return;
+      this.msgBox.open({
+        title: 'You are not eligible as a co-applicant. Please ask the main applicant to add another co-applicant.',
+        message: ``,
+        showCancel: false,
+        okText: '+ Add Co-applicant',
+        onOk: () => {
+          this.router.navigate(['/loanform/co-applicantdetails']);
+        }
+      });
+      return;
       // }
     }
 

@@ -763,7 +763,7 @@
                                 <div class="col-lg-4 col-sm-12">
 
                                     <app-inputfield label="Title" [required]="true" placeholder="Enter text here"
-                                        [(ngModel)]="slot.title" [ngModelOptions]="{ standalone: true }"
+                                        [(ngModel)]="slot.title" [ngModelOptions]="{ standalone: true }" [ngClass]="{'disabled-div': isViewMode}"
                                         (input)="main.restrictInput($event, 'text')" [maxlength]="25">
                                     </app-inputfield>
 
@@ -807,7 +807,7 @@
                                     <app-uploadbtn label="Other Documents" [config]="basicConfig" [required]="true"
                                         [disabled]="!slot.title && slot.title.trim().length === 0" [uploadViaApi]="true"
                                         [fileuploadresponse]="handleresponse" [disabled]="isViewMode"
-                                        (uploadStarted)="onUploadStarted($event, slot.title,'BUSINESS', 'OTHER_BUSSINESS_INCOME', 'OTHER', slot.key)">
+                                        (uploadStarted)="onUploadStarted($event, slot.title,'BUSINESS', 'OTHER_BUSSINESS_INCOME', 'OTHER')">
                                     </app-uploadbtn>
 
                                     }
@@ -817,7 +817,7 @@
 
                                 <div class="col-lg-4 d-flex justify-content-end align-items-end mt-5">
                                     <span class="delete d-none d-lg-block"
-                                        (click)="removeOtherDocument('otherbusiness',slot.id)">
+                                        (click)="removeOtherDocument('otherbusiness',slot.id)" [ngClass]="{'disabled-div': isViewMode}">
                                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
                                             viewBox="0 0 24 24" fill="none">
                                             <path
@@ -848,7 +848,7 @@
                         <!-- Add button -->
                         <div class="col-lg-4 col-sm-12 mt-20">
                             <app-buttons label="Add Other Document" class="btn btn-icon Add btncustomClass"
-                                [ngClass]="{'disabled-div' : isViewMode}" [outline]="true"
+                                [ngClass]="{'disabled-div' : isViewMode}" [outline]="true" 
                                 (click)="addOtherBusinessDocument()" [disabled]="isViewMode">
 
                             </app-buttons>
