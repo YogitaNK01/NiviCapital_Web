@@ -153,7 +153,7 @@ export class Educationinfo implements OnInit {
 
   private isEducationFlowInitialized = false;
   uploadedFiles: Record<string, File | null> = {};
-uploadedFiles1: Record<string, File | Record<string, any> | null> = {};
+  uploadedFiles1: Record<string, File | Record<string, any> | null> = {};
   private educationFormState: Record<string, any> = {};
 
   uploadeddata: any;
@@ -3559,7 +3559,7 @@ uploadedFiles1: Record<string, File | Record<string, any> | null> = {};
 
     return null;
   }
-  private async appendUpdateItem(
+  private async appendUpdateItem1(
     fd: FormData,
     itemIndex: number,
     key: string,
@@ -3571,8 +3571,6 @@ uploadedFiles1: Record<string, File | Record<string, any> | null> = {};
   ): Promise<void> {
 
 
-    // const meta = this.getMetaForUpdate(key, apiType, fileOrMeta, title);
-    // const documentId = meta?.documentId || '';
 
 
     const meta =
@@ -3596,11 +3594,6 @@ uploadedFiles1: Record<string, File | Record<string, any> | null> = {};
         `items[${itemIndex}].yearOfPassing`,
         this.normalizeDropdownValue(form.get('passingyear')?.value) || ''
       );
-
-      // fd.append(
-      //   `items[${itemIndex}].instituteId`,
-      //   (form.get('institutename')?.value) || ''
-      // );
 
       const raw = form.getRawValue();
 
@@ -3672,124 +3665,149 @@ uploadedFiles1: Record<string, File | Record<string, any> | null> = {};
       console.warn('No viewUrl found for existing file:', key, meta);
     }
   }
+  private async appendUpdateItem(
+    fd: FormData,
+    fileIndex: number,
+    step: StepKey,
+    doc: DocType,
+    apiType: string,
+    index?: number,
+    title?: string
+  ): Promise<number> {
+    const key = this.buildKey(step, doc, index);
 
+    const fileOrMeta: any =
+      this.uploadedFiles[key] ||
+      this.savedFileMeta[key];
+
+    if (!fileOrMeta) {
+      console.warn('No file/meta found for key:', key);
+      return fileIndex;
+    }
+
+    fd.append(`files[${fileIndex}].type`, apiType);
+
+    if (title) {
+      fd.append(`files[${fileIndex}].title`, title);
+    }
+
+    // Optional: if your update API needs documentId, keep this.
+    // If backend does not need it in files[], remove this block.
+    const documentId =
+      fileOrMeta.documentId ||
+      this.savedFileMeta[key]?.documentId ||
+      '';
+
+    if (documentId) {
+      fd.append(`files[${fileIndex}].documentId`, documentId);
+    }
+
+    // Case 1: user uploaded new file
+    if (fileOrMeta instanceof File) {
+      fd.append(`files[${fileIndex}].file`, fileOrMeta, fileOrMeta.name);
+      return fileIndex + 1;
+    }
+
+    // Case 2: file came from summary/API as metadata
+    const viewUrl =
+      fileOrMeta.viewUrl ||
+      fileOrMeta.fileUrl ||
+      fileOrMeta.publicUrl ||
+      '';
+
+    if (!viewUrl) {
+      console.warn('No viewUrl found for existing file:', key, fileOrMeta);
+      return fileIndex;
+    }
+
+    try {
+      const fileFromUrl = await this.urlToFile(
+        viewUrl,
+        fileOrMeta.fileName || fileOrMeta.name || 'document',
+        fileOrMeta.mimeType || fileOrMeta.contentType || 'application/octet-stream'
+      );
+
+      fd.append(`files[${fileIndex}].file`, fileFromUrl, fileFromUrl.name);
+
+      return fileIndex + 1;
+    } catch (error) {
+      console.error('Failed to convert viewUrl to File:', key, error);
+      return fileIndex;
+    }
+  }
+ 
   private async buildEducationUpdateFormData(): Promise<FormData> {
     const step = this.getCurrentStep();
     const form = this.getCurrentForm();
     const fd = new FormData();
 
+    const subcategory = this.stepToSubcategory[step];
+
     fd.append('category', 'EDUCATION');
-    fd.append('subcategory', this.stepToSubcategory[step]);
+    fd.append('subcategory', subcategory);
     fd.append('applicantId', this.applicantId);
 
-    let itemIndex = 0;
+    let fileIndex = 0;
 
-    // ✅ IELTS
+    // IELTS
     if (step === 'ielts') {
-      // fd.append('score', form.get('score')?.value || '');
-      fd.append(`items[${itemIndex}].score`, form.get('score')?.value || '');
-      const key = this.buildKey(step, 'ielts');
+      fd.append('score', form.get('score')?.value || '');
 
-      const newFile = this.uploadedFiles[key] instanceof File ? this.uploadedFiles[key] : null;
-      const existingMeta = this.getExistingSingleDocMeta(step, 'ielts');
-
-
-      const fileOrMeta =
-        this.savedFileMeta[key] ||
-        this.uploadedFiles[key] ||
-        this.getStoredFileMeta(step, 'ielts');
-
-
-      if (newFile || existingMeta) {
-        this.appendUpdateItem(
-          fd,
-          itemIndex++,
-          key,
-          'UPLOAD_CERTIFICATE',
-          fileOrMeta
-        );
-      }
+      fileIndex = await this.appendUpdateItem(
+        fd,
+        fileIndex,
+        step,
+        'ielts',
+        'UPLOAD_CERTIFICATE'
+      );
 
       return fd;
     }
 
-    // ✅ Offer Letter
+    // Offer Letter
     if (step === 'offerletter') {
-      const key = this.buildKey(step, 'offerletter');
-
-      const newFile = this.uploadedFiles[key] instanceof File ? this.uploadedFiles[key] : null;
-      const existingMeta = this.getExistingSingleDocMeta(step, 'offerletter');
-
-
-      console.log('offerletter key', key);
-      console.log('offerletter savedFileMeta', this.savedFileMeta[key]);
-      console.log('offerletter uploadedFiles', this.uploadedFiles[key]);
-
-      // const fileOrMeta =
-      //   this.uploadedFiles[key] instanceof File
-      //     ? this.uploadedFiles[key]
-      //     : this.savedFileMeta[key];
-
-      const fileOrMeta =
-        this.savedFileMeta[key] ||
-        this.uploadedFiles[key] ||
-        this.getStoredFileMeta(step, 'offerletter');
-
-
-      if (newFile || existingMeta) {
-        this.appendUpdateItem(
-          fd,
-          itemIndex++,
-          key,
-          'UPLOAD_CERTIFICATE',
-          fileOrMeta
-        );
-      }
+      fileIndex = await this.appendUpdateItem(
+        fd,
+        fileIndex,
+        step,
+        'offerletter',
+        'UPLOAD_CERTIFICATE'
+      );
 
       return fd;
     }
 
-    // ✅ Required docs (MARKSHEET / LC)
-    // this.requiredDocs(step).forEach(r => {
-    //   const key = this.buildKey(step, r.doc as DocType, r.index);
+    const raw = form.getRawValue();
 
-    //   const fileOrMeta =
-    //     this.uploadedFiles[key] instanceof File
-    //       ? this.uploadedFiles[key]
-    //       : this.savedFileMeta[key];
+    const instituteId =
+      raw.instituteId ||
+      this.educationFormState[step]?.instituteId ||
+      '';
 
-    //   if (!fileOrMeta) return;
+    const locationId = this.resolveLocationId(form.get('location')?.value);
 
-    //   this.appendUpdateItem(
-    //     fd,
-    //     itemIndex++,
-    //     key,
-    //     r.apiType,
-    //     fileOrMeta,
-    //     form
-    //   );
-    // });
-    for (const r of this.requiredDocs(step)) {
-  const key = this.buildKey(step, r.doc as DocType, r.index);
+    fd.append('instituteId', instituteId || '');
+    fd.append('otherInstituteName', form.get('institutetitle')?.value || '');
+    fd.append('yearOfPassing', form.get('passingyear')?.value || '');
+    fd.append('percentageCgpa', form.get('per_cgpa')?.value || '');
+    fd.append('locationId', locationId || '');
+    fd.append('otherLocationName', form.get('otherLocation')?.value || '');
 
-  const fileOrMeta =
-    this.uploadedFiles[key] instanceof File
-      ? this.uploadedFiles[key]
-      : this.savedFileMeta[key] || this.uploadedFiles[key];
+    // Required docs: marksheet + LC
+    const reqDocs = this.requiredDocs(step);
 
-  if (!fileOrMeta) continue;
+    for (const r of reqDocs) {
+      fileIndex = await this.appendUpdateItem(
+        fd,
+        fileIndex,
+        step,
+        r.doc,
+        r.apiType,
+        r.index
+      );
+    }
 
-  await this.appendUpdateItem(
-    fd,
-    itemIndex++,
-    key,
-    r.apiType,
-    fileOrMeta,
-    form
-  );
-}
-
-    // ✅ Extra marksheets
+    // Extra marksheets
     const requiredMarksheetIndexes = new Set(
       this.requiredDocs(step)
         .filter(d => d.doc === 'marksheet')
@@ -3817,92 +3835,48 @@ uploadedFiles1: Record<string, File | Record<string, any> | null> = {};
       )
       .sort((a, b) => a.index - b.index);
 
-    // extraMarksheetKeys.forEach(({ key }) => {
-    //   const fileOrMeta =
-    //     this.uploadedFiles[key] instanceof File
-    //       ? this.uploadedFiles[key]
-    //       : this.savedFileMeta[key];
+    for (const { index } of extraMarksheetKeys) {
+      fileIndex = await this.appendUpdateItem(
+        fd,
+        fileIndex,
+        step,
+        'marksheet',
+        'MARKSHEET',
+        index
+      );
+    }
 
-    //   if (!fileOrMeta) return;
-
-    //   this.appendUpdateItem(
-    //     fd,
-    //     itemIndex++,
-    //     key,
-    //     'MARKSHEET',
-    //     fileOrMeta,
-    //     form
-    //   );
-    // });
-for (const { key } of extraMarksheetKeys) {
-  const fileOrMeta =
-    this.uploadedFiles[key] instanceof File
-      ? this.uploadedFiles[key]
-      : this.savedFileMeta[key] || this.uploadedFiles[key];
-
-  if (!fileOrMeta) continue;
-
-  await this.appendUpdateItem(
-    fd,
-    itemIndex++,
-    key,
-    'MARKSHEET',
-    fileOrMeta,
-    form
-  );
-}
-
-    // ✅ Other docs
-    // Object.keys({
-    //   ...this.savedFileMeta,
-    //   ...this.uploadedFiles
-    // })
-    //   .filter(key => key.startsWith(`${step}_other_`))
-    //   .sort()
-    //   .forEach(key => {
-
-    //     const fileOrMeta =
-    //       this.uploadedFiles[key] instanceof File
-    //         ? this.uploadedFiles[key]
-    //         : (this.savedFileMeta[key] || this.uploadedFiles[key]);
-    //     if (!fileOrMeta) return;
-
-    //     this.appendUpdateItem(
-    //       fd,
-    //       itemIndex++,
-    //       key,
-    //       'OTHER',
-    //       fileOrMeta,
-    //       form,
-    //       this.otherDocMap[key]?.title || fileOrMeta?.title || 'Other Document'
-    //     );
-    //   });
-
+    // Other documents
     const otherKeys = Object.keys({
-  ...this.savedFileMeta,
-  ...this.uploadedFiles
-})
-  .filter(key => key.startsWith(`${step}_other_`))
-  .sort();
+      ...this.uploadedFiles,
+      ...this.savedFileMeta
+    })
+      .filter(key => key.startsWith(`${step}_other_`))
+      .sort();
 
-for (const key of otherKeys) {
-  const fileOrMeta =
-    this.uploadedFiles[key] instanceof File
-      ? this.uploadedFiles[key]
-      : this.savedFileMeta[key] || this.uploadedFiles[key];
+    for (const key of otherKeys) {
+      const match = key.match(/_other_(\d+)$/);
+      const index = match ? Number(match[1]) : undefined;
 
-  if (!fileOrMeta) continue;
+      const fileOrMeta =
+        this.uploadedFiles[key] ||
+        this.savedFileMeta[key];
 
-  await this.appendUpdateItem(
-    fd,
-    itemIndex++,
-    key,
-    'OTHER',
-    fileOrMeta,
-    form,
-    this.otherDocMap[key]?.title || fileOrMeta?.title || 'Other Document'
-  );
-}
+      const title =
+        this.otherDocMap[key]?.title ||
+        fileOrMeta?.title ||
+        'Other Document';
+
+      fileIndex = await this.appendUpdateItem(
+        fd,
+        fileIndex,
+        step,
+        'other',
+        'OTHER',
+        index,
+        title
+      );
+    }
 
     return fd;
   }
@@ -3938,6 +3912,19 @@ for (const key of otherKeys) {
     }
 
     const fd = await this.buildEducationUpdateFormData();
+
+    // debug payload
+    for (const [key, value] of fd.entries()) {
+      if (value instanceof File) {
+        console.log(key, 'FILE =>', {
+          name: value.name,
+          type: value.type,
+          size: value.size
+        });
+      } else {
+        console.log(key, '=>', value);
+      }
+    }
 
     this.formSvc.uploadIncome(fd, this.applicationId, true).subscribe({
       next: async (res: any) => {

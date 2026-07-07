@@ -85,14 +85,14 @@ export class Loanstepperservice {
 
   private stageRouteMap: Record<string, string> = {
     LOAN_INFO: 'loaninfo',
-    PERSONAL_INFO: 'genralinfo',
-    SAVE_GENERAL_INFO: 'genralinfo',
-    SAVE_ESTIMATED_EXPENSES: 'expense',
+    GENERAL_INFO: 'genralinfo',
+    ESTIMATED_EXPENSE: 'expense',
     SAVE_EXPENSE: 'expense',
-    SAVE_ADDITIONAL_INFO: 'additionalinfo',
+    PERSONAL_INFO: 'additionalinfo',
     FETCH_KYC: 'kycinfo',
     SAVE_KYC: 'kycinfo',
     SAVE_LAST_QUALIFICATION: 'educationDetails',
+    EDUCATIONAL_DETAILS:'educationDetails',
     INCOME: 'incomeinfo',
     SAVE_ASSETS: 'assetsinfo',
     SAVE_LIABILITIES: 'liabilitiesinfo',

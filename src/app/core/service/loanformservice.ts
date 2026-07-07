@@ -714,7 +714,7 @@ submitAdditionalInfo(
 
   // *************************get saved data for income and education*************************
   getUploadedData(id1: string, id2: string, sectionkey: string, category: string, subcategory: string, documentType: string): Observable<ApiResponse<any>> {
-    console.log(id1, id2, sectionkey, category, subcategory, documentType)
+    // console.log(id1, id2, sectionkey, category, subcategory, documentType)
     return this.http.get<ApiResponse<any>>(
       `${this.baseUrl}/v1/los/draft/get?applicationId=${id1}&applicantId=${id2}&sectionKey=${sectionkey}&category=${category}&subcategory=${subcategory}&documentType=${documentType}`,
 
