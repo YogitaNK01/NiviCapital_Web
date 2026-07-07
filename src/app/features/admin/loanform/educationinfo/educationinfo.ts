@@ -2509,7 +2509,7 @@ export class Educationinfo implements OnInit {
       title: 'Are you sure you want to exit?',
       message: ``,
       showCancel: true,
-      onOk: () => {
+      onOk: async () => {
 
         const step = this.activeEducation as StepKey;
         const form = this.educationForms[step] as FormGroup;
@@ -2525,7 +2525,7 @@ export class Educationinfo implements OnInit {
         const localKey = `educationInfoData_${this.applicantId}_${sectionKey}`;
         localStorage.setItem(localKey, JSON.stringify(payload));
 
-        const fd = this.buildEducationSaveExitFormData(sectionKey);
+        const fd = await this.buildEducationSaveExitFormData(sectionKey);
         // fd.append('sectionKey', sectionKey);
 
         this.formSvc.saveandExit(fd).subscribe({
@@ -2568,7 +2568,7 @@ export class Educationinfo implements OnInit {
     });
   }
 
-  private buildEducationSaveExitFormData(sectionKey: string): FormData {
+  private buildEducationSaveExitFormData1(sectionKey: string): FormData {
     const step = this.activeEducation as StepKey;
     const form = this.educationForms[step] as FormGroup;
     const fd = new FormData();
@@ -2650,6 +2650,189 @@ export class Educationinfo implements OnInit {
 
     return fd;
   }
+  private async buildEducationSaveExitFormData(sectionKey: string): Promise<FormData> {
+  const step = this.activeEducation as StepKey;
+  const form = this.educationForms[step] as FormGroup;
+  const fd = new FormData();
+
+  const subcategory = this.stepToSubcategory[step];
+
+  fd.append('sectionKey', sectionKey);
+  fd.append('applicationId', this.applicationId);
+  fd.append('applicantId', this.applicantId);
+  fd.append('category', 'EDUCATION');
+  fd.append('subcategory', subcategory);
+
+  let fileIndex = 0;
+
+  // IELTS
+  if (step === 'ielts') {
+    fd.append('score', form.get('score')?.value || '');
+
+    fileIndex = await this.appendEducationFileForSaveExit(
+      fd,
+      fileIndex,
+      step,
+      'ielts',
+      'UPLOAD_CERTIFICATE'
+    );
+
+    return fd;
+  }
+
+  // Offer Letter
+  if (step === 'offerletter') {
+    fileIndex = await this.appendEducationFileForSaveExit(
+      fd,
+      fileIndex,
+      step,
+      'offerletter',
+      'UPLOAD_CERTIFICATE'
+    );
+
+    return fd;
+  }
+
+  const raw = form.getRawValue();
+
+  const instituteId =
+    raw.instituteId ||
+    this.educationFormState[step]?.instituteId ||
+    '';
+
+  fd.append('instituteId', instituteId);
+  fd.append('otherInstituteName', form.get('institutetitle')?.value || '');
+  fd.append('yearOfPassing', form.get('passingyear')?.value || '');
+  fd.append('percentageCgpa', form.get('per_cgpa')?.value || '');
+  fd.append('locationId', this.resolveLocationId(form.get('location')?.value) || '');
+  fd.append('otherLocationName', form.get('otherLocation')?.value || '');
+
+  // ✅ Required docs: Marksheet + LC
+  const reqDocs = this.requiredDocs(step);
+
+  for (const r of reqDocs) {
+    fileIndex = await this.appendEducationFileForSaveExit(
+      fd,
+      fileIndex,
+      step,
+      r.doc,
+      r.apiType,
+      r.index
+    );
+  }
+
+  // ✅ Extra marksheets from savedFileMeta/uploadedFiles
+  const requiredMarksheetIndexes = new Set(
+    this.requiredDocs(step)
+      .filter(d => d.doc === 'marksheet')
+      .map(d => d.index ?? -1)
+  );
+
+  const maxAllowedMarksheetCount = this.getMarksheetCount(step);
+
+  const extraMarksheetKeys = Array.from(
+    new Set([
+      ...Object.keys(this.savedFileMeta || {}),
+      ...Object.keys(this.uploadedFiles || {})
+    ])
+  )
+    .filter(key => key.startsWith(`${step}_marksheet_`))
+    .map(key => {
+      const match = key.match(/marksheet_(\d+)/);
+      const index = match ? Number(match[1]) : -1;
+      return { key, index };
+    })
+    .filter(({ index }) =>
+      index >= 0 &&
+      index < maxAllowedMarksheetCount &&
+      !requiredMarksheetIndexes.has(index)
+    )
+    .sort((a, b) => a.index - b.index);
+
+  for (const { index } of extraMarksheetKeys) {
+    fileIndex = await this.appendEducationFileForSaveExit(
+      fd,
+      fileIndex,
+      step,
+      'marksheet',
+      'MARKSHEET',
+      index
+    );
+  }
+
+  // ✅ Other docs
+  for (const key of Object.keys({
+    ...this.uploadedFiles,
+    ...this.savedFileMeta
+  }).filter(k => k.startsWith(`${step}_other_`))) {
+
+    const match = key.match(/_other_(\d+)$/);
+    const index = match ? Number(match[1]) : undefined;
+
+    const title =
+      this.otherDocMap[key]?.title ||
+      (this.savedFileMeta[key] as any)?.title ||
+      (this.uploadedFiles[key] as any)?.title ||
+      'Other Document';
+
+    fileIndex = await this.appendEducationFileForSaveExit(
+      fd,
+      fileIndex,
+      step,
+      'other',
+      'OTHER',
+      index,
+      title
+    );
+  }
+
+  return fd;
+}
+   private async appendEducationFileForSaveExit(
+    fd: FormData,
+    fileIndex: number,
+    step: StepKey,
+    doc: DocType,
+    apiType: string,
+    index?: number,
+    title?: string
+  ): Promise<number> {
+    const key = this.buildKey(step, doc, index);
+    const fileOrMeta: any =
+      this.uploadedFiles[key] ||
+      this.savedFileMeta[key];
+
+    if (!fileOrMeta) return fileIndex;
+
+    fd.append(`files[${fileIndex}].type`, apiType);
+
+    if (title) {
+      fd.append(`files[${fileIndex}].title`, title);
+    }
+
+    if (fileOrMeta instanceof File) {
+      fd.append(`files[${fileIndex}].file`, fileOrMeta, fileOrMeta.name);
+      return fileIndex + 1;
+    }
+
+    const viewUrl =
+      fileOrMeta.viewUrl ||
+      fileOrMeta.fileUrl ||
+      fileOrMeta.publicUrl ||
+      '';
+
+    if (viewUrl) {
+      const fileFromUrl = await this.urlToFile(
+        viewUrl,
+        fileOrMeta.fileName || fileOrMeta.name || 'document'
+      );
+
+      fd.append(`files[${fileIndex}].file`, fileFromUrl, fileFromUrl.name);
+      return fileIndex + 1;
+    }
+
+    return fileIndex;
+  }
   //------------convert viewurl to binary file
   async urlToFile(url: string, filename: string, fallbackType: string = 'application/octet-stream') {
     const res = await fetch(url);
@@ -2708,13 +2891,6 @@ export class Educationinfo implements OnInit {
         otherLocation: rawStep.otherLocation || ''
       });
 
-      // this.stepperService.setEducationStepData(step, {
-      //   ...this.educationForms[step].getRawValue(),
-      //   institutename: (this.educationForms[step].get('institutename')?.value),
-      //   location: this.resolveLocationId(this.educationForms[step].get('location')?.value),
-      //   institutetitle: this.educationForms[step].get('institutetitle')?.value || '',
-      //   otherLocation: this.educationForms[step].get('otherLocation')?.value || ''
-      // });
 
       this.stepperService.markEducationSectionComplete(step);
 
