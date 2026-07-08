@@ -190,8 +190,10 @@ export class Coappdashboard implements OnInit {
         const data = Array.isArray(res?.data) ? res.data : [];
 
         const localSaved = localStorage.getItem(this.getCoappListKey());
-        const localList = localSaved ? JSON.parse(localSaved) : [];
-
+        const localList1 = localSaved ? JSON.parse(localSaved) : [];
+        const localList = localSaved
+          ? JSON.parse(localSaved).filter((x: any) => x.applicantId || x.name)
+          : [];
         this.coApplicants = data.map((item: any, i: number) => {
           const apiIndex = Number(item.index || i + 1);
 
@@ -217,7 +219,7 @@ export class Coappdashboard implements OnInit {
             name: item.name || item.fullName || localMatch?.name || '',
             phone: item.phone || item.mobileNumber || localMatch?.phone || '',
             userInitiateId: item.userInitiateId || localMatch?.userInitiateId || '',
-            status: finalStatus  || '',
+            status: finalStatus || '',
             currentStage: item.currentStage,
             nextStage: item.nextStage
           };
@@ -247,7 +249,7 @@ export class Coappdashboard implements OnInit {
       }
     });
   }
-  loadCoApplicants() {
+  loadCoApplicants1() {
     const saved = localStorage.getItem(this.getCoappListKey());
     this.coApplicants = saved ? JSON.parse(saved) : [];
 
@@ -257,6 +259,28 @@ export class Coappdashboard implements OnInit {
         ...coapp,
         // status: this.getCoApplicantStatus(coapp)
       }));
+
+    this.updateCoApplicantStepStatus();
+  }
+  loadCoApplicants() {
+    const saved = localStorage.getItem(this.getCoappListKey());
+    this.coApplicants = saved ? JSON.parse(saved) : [];
+
+    // Do not show temporary number-only co-applicants
+    this.coApplicants = this.coApplicants.filter((x: any) =>
+      x.applicantId || x.name
+    );
+
+    this.coApplicants = this.coApplicants
+      .sort((a: any, b: any) => Number(a.index) - Number(b.index))
+      .map((coapp: any) => ({
+        ...coapp
+      }));
+
+    localStorage.setItem(
+      this.getCoappListKey(),
+      JSON.stringify(this.coApplicants)
+    );
 
     this.updateCoApplicantStepStatus();
   }
