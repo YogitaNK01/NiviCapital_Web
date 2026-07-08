@@ -505,8 +505,12 @@ export class Liabilitiesinfo {
     );
 
 
-    if (!finalData || !finalData.items?.length) {
-      this.lastSavedPayload = null;
+    if (finalData?.noLiabilities === true || finalData?.items?.length === 0) {
+  this.lastSavedPayload = this.normalizeLiabilityPayload({
+    applicantId: this.getApiApplicantId(),
+    items: []
+  });
+
 
       this.selectedliabilities = [this.NO_LIABILITY_CODE];
       this.selectedloantype = [];
@@ -553,7 +557,7 @@ export class Liabilitiesinfo {
       this.applicationId,
       this.applicantId,
       this.isCoApplicant,
-      JSON.stringify(finalData)
+      (finalData)
     );
 
     this.liabilityForm.markAsPristine();
@@ -569,6 +573,22 @@ export class Liabilitiesinfo {
   private mergeLiabilityData(...sources: any[]): any {
     const validSources = sources.filter(Boolean);
     if (!validSources.length) return null;
+    // Important:
+    // If any latest/local source says user has no liabilities,
+    // do not merge old draft data.
+    const explicitNoLiabilities = validSources.find(source =>
+      source?.noLiabilities === true ||
+      (Array.isArray(source?.items) && source.items.length === 0)
+    );
+
+    if (explicitNoLiabilities) {
+      return {
+        applicantId: explicitNoLiabilities.applicantId || this.getApiApplicantId(),
+        items: [],
+        noLiabilities: true,
+        totalLiabilities: 0
+      };
+    }
 
     const mergedItems: any[] = [];
 
@@ -645,10 +665,10 @@ export class Liabilitiesinfo {
     // Already in saved/draft/local payload format
     // Example: { applicantId: '...', items: [...] }
     if (Array.isArray(data.items)) {
-      if (data.items.length === 0) return null;
       return {
         applicantId: data.applicantId || this.getApiApplicantId(),
-        items: data.items || []
+        items: data.items || [],
+        noLiabilities: data.noLiabilities === true || data.items.length === 0
       };
     }
 
@@ -2099,7 +2119,7 @@ export class Liabilitiesinfo {
             this.applicationId,
             this.applicantId,
             this.isCoApplicant,
-            JSON.stringify(input)
+            (input)
           );
 
           if (this.isCoApplicant) {
@@ -2142,7 +2162,7 @@ export class Liabilitiesinfo {
           this.applicationId,
           this.applicantId,
           this.isCoApplicant,
-          JSON.stringify(input)
+          (input)
         );
 
         if (this.isCoApplicant) {
@@ -2466,19 +2486,19 @@ export class Liabilitiesinfo {
     if (this.hasNoLiabilitiesSelected) {
       const payload = {
         applicantId: this.getApiApplicantId(),
-        items: []
+        items: [],
+        noLiabilities: true
       };
 
       this.msgBox.open({
-        title: 'Update Liabilities Information?',
-        message: `You previously declared that you have assets in the\n General Information section. \nBy selecting 'I don't have liabilities', your earlier information\n will be updated. \n
-        Are you sure you want to continue?`,
+        title: 'Are your sure you don’t  want to add any Liabilities?',
+        message: ``,
         showCancel: true,
         okText: 'Yes, Update',
         onOk: () => {
-          this.formSvc.noLiabilitiesSelected({"hasLiabilities": true}, this.applicationId, this.applicantId).subscribe({
+          this.formSvc.noLiabilitiesSelected({ "hasLiabilities": true }, this.applicationId, this.applicantId).subscribe({
             next: (res) => {
-              if(res.status == "success"){
+              if (res.status == "success") {
                 console.log(res);
 
                 this.lastSavedPayload = this.normalizeLiabilityPayload(payload);
@@ -2495,9 +2515,27 @@ export class Liabilitiesinfo {
                   this.applicationId,
                   this.applicantId,
                   this.isCoApplicant,
-                  JSON.stringify(payload)
+                  (payload)
                 );
+                const draftPayload = {
+                  action: 'auto-save',
+                  sectionKey: 'SAVE_LIABILITIES',
+                  applicationId: this.applicationId,
+                  applicantId: this.getApiApplicantId(),
+                  jsonData: payload
+                };
 
+                this.formSvc.saveandExit(draftPayload).subscribe({
+                  next: () => {
+                    const stepRoute = this.getStepRoute();
+                    this.stepperService.markStepCompleted(stepRoute);
+                    this.stepperService.setStepData(stepRoute, this.liabilityForm.getRawValue());
+                    this.stepperService.next();
+                  },
+                  error: err => {
+                    console.error('Failed to clear liability draft:', err);
+                  }
+                });
                 const stepRoute = this.getStepRoute();
                 this.stepperService.markStepCompleted(stepRoute);
                 this.stepperService.setStepData(stepRoute, this.liabilityForm.getRawValue());
@@ -2507,7 +2545,7 @@ export class Liabilitiesinfo {
             error: (err) => {
               console.log(err);
             }
-          });    
+          });
         },
         onCancel: () => {
           return;
@@ -2564,7 +2602,7 @@ export class Liabilitiesinfo {
             this.applicationId,
             this.applicantId,
             this.isCoApplicant,
-            JSON.stringify(payload)
+            (payload)
           );
           this.stepperService.markStepCompleted(stepRoute);
           this.stepperService.setStepData(stepRoute, this.liabilityForm.getRawValue());
@@ -2725,7 +2763,7 @@ export class Liabilitiesinfo {
             this.applicationId,
             this.applicantId,
             this.isCoApplicant,
-            JSON.stringify(payload)
+           (payload)
           );
           this.stepperService.markStepCompleted('liabilitiesinfo');
           this.stepperService.setStepData('liabilitiesinfo', this.liabilityForm.getRawValue());
@@ -2769,17 +2807,16 @@ export class Liabilitiesinfo {
     const input = { applicantId: result.applicantId, items: result.items };
 
 
-    if(this.hasNoLiabilitiesSelected){
+    if (this.hasNoLiabilitiesSelected) {
       this.msgBox.open({
-        title: 'Update Liabilities Information?',
-        message: `You previously declared that you have assets in the\n General Information section. \nBy selecting 'I don't have liabilities', your earlier information\n will be updated. \n
-        Are you sure you want to continue?`,
+        title: 'Are your sure you don’t  want to add any Liabilities?',
+        message: ``,
         showCancel: true,
         okText: 'Yes, Update',
         onOk: () => {
-          this.formSvc.noLiabilitiesSelected({"hasLiabilities": true}, this.applicationId, this.applicantId).subscribe({
+          this.formSvc.noLiabilitiesSelected({ "hasLiabilities": true }, this.applicationId, this.applicantId).subscribe({
             next: (res) => {
-              if(res.status == "success"){
+              if (res.status == "success") {
                 console.log(res);
                 const key = this.getStorageKey();
                 localStorage.setItem(key, JSON.stringify(input));

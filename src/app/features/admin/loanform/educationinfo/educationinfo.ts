@@ -298,10 +298,15 @@ export class Educationinfo implements OnInit {
       this.instituteOptions = inst || [];
 
       const list = citiesRes.data ?? citiesRes;
+      // this.cityOptions = list.map((c: any) => ({
+      //   value: c.id,
+      //   label: c.name
+      // }));
+
       this.cityOptions = list.map((c: any) => ({
-        value: c.id,
-        label: c.name
-      }));
+  value: c.id || c.cityId || c.locationId || c.value,
+  label: c.name || c.cityName || c.locationName || c.label
+})).filter((x: any) => x.value && x.label);
 
       // optional, if you still use these elsewhere
       this.selectlocation = [...this.cityOptions];
@@ -422,7 +427,7 @@ export class Educationinfo implements OnInit {
             institutename: raw.institutename || this.educationFormState[step]?.instituteName || '',
 
             institutetitle: raw.institutetitle || '',
-            location: this.resolveLocationId(raw.location),
+           location:this.resolveLocationId(raw.location) || raw.location || this.educationFormState[step]?.location || '',
             otherLocation: raw.otherLocation || '',
 
             passingyear: this.normalizeDropdownValue(raw.passingyear),
@@ -1128,7 +1133,8 @@ isOtherInstituteSelected(step: StepKey): boolean {
       instituteName: raw.instituteName || this.educationFormState[step]?.instituteName || raw.institutename || '',
       institutename: raw.institutename || this.educationFormState[step]?.instituteName || '',
       institutetitle: raw.institutetitle || '',
-      location: this.resolveLocationId(raw.location),
+      // location: this.resolveLocationId(raw.location),
+      location:this.resolveLocationId(raw.location) || raw.location || this.educationFormState[step]?.location || '',
       otherLocation: raw.otherLocation || '',
 
 
@@ -1339,7 +1345,7 @@ isOtherInstituteSelected(step: StepKey): boolean {
           instituteName: raw.instituteName || this.educationFormState[activeStep]?.instituteName || raw.institutename || '',
           institutename: raw.institutename || this.educationFormState[activeStep]?.instituteName || '',
           institutetitle: raw.institutetitle || '',
-          location: this.resolveLocationId(raw.location),
+           location: this.resolveLocationId(raw.location) ||  raw.location ||  forms[activeStep]?.location || this.educationFormState[activeStep]?.location || '',
           otherLocation: raw.otherLocation || '',
 
 
@@ -1544,6 +1550,8 @@ isOtherInstituteSelected(step: StepKey): boolean {
       prev.instituteName ||
       prev.institutename ||
       '';
+      const apiLocation =  data.locationId ||  data.location ||  data.locationName ||  prev.location ||  '';
+
     if (!data) return;
 
     if (step === 'ielts') {
@@ -1567,7 +1575,7 @@ isOtherInstituteSelected(step: StepKey): boolean {
 
         location: this.getOptionValue(
           this.cityOptions,
-          data.locationId || data.location || data.locationName || ''
+         apiLocation
         ),
         otherLocation: data.otherLocation || data.otherLocationName || ''
       }, { emitEvent: false });
@@ -1578,7 +1586,21 @@ isOtherInstituteSelected(step: StepKey): boolean {
       ...form.getRawValue(),
       instituteId,
       instituteName,
-      institutename: instituteName
+      institutename: instituteName,
+
+       location:
+    form.get('location')?.value ||
+    apiLocation ||
+    prev.location ||
+    '',
+
+  otherLocation:
+    form.get('otherLocation')?.value ||
+    data.otherLocationName ||
+    data.otherLocation ||
+    prev.otherLocation ||
+    ''
+    
     };
 
     if (data.otherDocMap) {
@@ -3305,7 +3327,7 @@ isOtherInstituteSelected(step: StepKey): boolean {
     return this.resolveOptionValue(this.cityOptions, rawValue);
   }
 
-  private resolveOptionValue(list: any[], rawValue: any): string {
+  private resolveOptionValue1(list: any[], rawValue: any): string {
     const normalized = this.normalizeDropdownValue(rawValue);
 
     if (!normalized) return '';
@@ -3315,6 +3337,26 @@ isOtherInstituteSelected(step: StepKey): boolean {
 
     return this.getValueByLabel(list, normalized);
   }
+  private resolveOptionValue(list: any[], rawValue: any): string {
+  const normalized = this.normalizeDropdownValue(rawValue);
+
+  if (!normalized) return '';
+
+  // Important for SIT/server slow API case
+  if (!list || !list.length) {
+    return normalized;
+  }
+
+  // already ID
+  const existsAsValue = list.some((x: any) => x.value === normalized);
+  if (existsAsValue) return normalized;
+
+  // label to ID
+  const valueByLabel = this.getValueByLabel(list, normalized);
+
+  // Important: do not return blank if label not found
+  return valueByLabel || normalized;
+}
   private getValueByLabel(list: any[], label: string) {
     if (!label || !list?.length) return '';
 
