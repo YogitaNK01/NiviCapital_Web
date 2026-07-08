@@ -8,7 +8,7 @@ import { Checkbox } from '../../../systemdesign/checkbox/checkbox';
 import { interval, Subscription } from 'rxjs';
 import { Addcustomerservice } from '../../../../core/service/addcustomerservice';
 import { Otpsection } from '../../customer/otpsection/otpsection';
-import { ActivatedRoute, Route, Router,NavigationEnd  } from '@angular/router';
+import { ActivatedRoute, Route, Router, NavigationEnd } from '@angular/router';
 import { Loanformservice } from '../../../../core/service/loanformservice';
 import { Loanstepper } from '../loanstepper/loanstepper';
 import { Loanstepperservice } from '../../../../core/service/loanstepperservice';
@@ -159,7 +159,7 @@ export class Basicinfo {
 
 
 
-  
+
 
 
 
@@ -842,7 +842,7 @@ export class Basicinfo {
       name:
         this.co_applicantName ||
         `${formValue.fname || ''} ${formValue.lname || ''}`.trim(),
-      status: 'IN_PROGRESS'
+      status: 'DRAFT'
     };
 
     if (existingIndex > -1) {
@@ -978,13 +978,22 @@ export class Basicinfo {
           return;
         }
 
+        const jsonData = {
 
+          emailId: input.emailId,
+          firstName: input.firstName,
+          lastName: input.lastName,
+          middleName: input.middleName,
+
+        }
         const inputdata = {
           action: "auto-save",
           sectionKey: "BASIC_INFO",
           applicationId: this.applicationId,
           applicantId: coApplicantApplicantId,
-          jsonData: input
+          phoneNumber: input.phoneNumber,
+          source: input.source,
+          jsonData: jsonData
         };
 
         this.loanform.saveandExitBasicinfo(inputdata).subscribe({
@@ -999,7 +1008,7 @@ export class Basicinfo {
   getSavedbasicInfo(coApplicantApplicantId: any): Promise<any> {
     let sectionkey = "BASIC_INFO"
     return new Promise((resolve) => {
-      this.loanform.getSavedBasicInfo(this.applicationId, coApplicantApplicantId, sectionkey).pipe()
+      this.loanform.getSavedBasicInfo(this.applicationId, coApplicantApplicantId, sectionkey, this.prefillPhone).pipe()
 
         .subscribe({
           next: (res) => {
@@ -1075,7 +1084,7 @@ export class Basicinfo {
 
     // this.patchCoApplicantInfo(parsed); // or patchGeneralInfo / patchAdditionalInfo
   }
-  
+
   back1() {
     this.loanform.coappStep = 1;
     const currentIndex = this.stepperService.getCurrentCoApplicantIndex();
@@ -1088,24 +1097,24 @@ export class Basicinfo {
     );
   }
   back() {
-  const currentIndex =
-    this.stepperService.getCurrentCoApplicantIndex() ||
-    Number(this.route.snapshot.queryParams['coApplicantIndex']) ||
-    1;
+    const currentIndex =
+      this.stepperService.getCurrentCoApplicantIndex() ||
+      Number(this.route.snapshot.queryParams['coApplicantIndex']) ||
+      1;
 
-  this.loanform.coappStep = 1;
+    this.loanform.coappStep = 1;
 
-  this.router.navigate(
-    ['/loanform/co-applicantdetails/coapplicantinfo'],
-    {
-      queryParams: {
-        coApplicantIndex: currentIndex,
-        mode: 'new'
-      },
-      replaceUrl: true
-    }
-  );
-}
+    this.router.navigate(
+      ['/loanform/co-applicantdetails/coapplicantinfo'],
+      {
+        queryParams: {
+          coApplicantIndex: currentIndex,
+          mode: 'new'
+        },
+        replaceUrl: true
+      }
+    );
+  }
   next() {
     console.log('FNAME =>', this.registerForm.get('fname')?.value);
 
@@ -1193,7 +1202,6 @@ export class Basicinfo {
           mode: ''
         };
         sessionStorage.setItem('coAppIds', JSON.stringify(coAppData));
-        sessionStorage.removeItem('pendingCoAppContext');
 
         const payload = {
           applicantId: this.co_applicantId,
@@ -1225,6 +1233,7 @@ export class Basicinfo {
           }
         );
         this.updateCoApplicantListAfterCif();
+        sessionStorage.removeItem('pendingCoAppContext');
 
         localStorage.removeItem(tempKey);
 
@@ -1245,7 +1254,7 @@ export class Basicinfo {
           },
           queryParamsHandling: 'merge',
           replaceUrl: true
-        }).then(() => { this.stepperService.next();});;
+        }).then(() => { this.stepperService.next(); });;
 
         // this.stepperService.next();
         // this.finishAfterSaveOrNoChange()

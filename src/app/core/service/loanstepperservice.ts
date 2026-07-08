@@ -106,42 +106,6 @@ export class Loanstepperservice {
     if (!stage) return 'loaninfo';
     return this.stageRouteMap[stage] || 'loaninfo';
   }
-  private buildSteps1() {
-
-    const baseSteps: Step[] = [
-      { label: 'Loan Info', route: 'loaninfo' },
-      { label: 'General Info', route: 'genralinfo' },
-      { label: 'Estimated Expense', route: 'expense' },
-      { label: 'Additional Info', route: 'additionalinfo' },
-      { label: 'KYC', route: 'kycinfo' },
-
-      {
-        label: 'Education Details',
-        route: 'educationDetails',
-        children: this.educationSubSteps
-      },
-    ];
-    const conditionalSteps: { label: string; route: string }[] = [];
-    if (this.formSvc.isincome) {
-      conditionalSteps.push({ label: 'Income Details', route: 'incomeinfo' });
-    }
-    if (this.formSvc.isasset) {
-      conditionalSteps.push({ label: 'Assets', route: 'assetsinfo' });
-    }
-
-    const finalSteps: Step[] = [
-      ...baseSteps,
-      ...conditionalSteps,
-      { label: 'Liabilities', route: 'liabilitiesinfo' },
-      { label: 'Monthly Expenditure', route: 'monthlyexpinfo' },
-      { label: 'Reference', route: 'referenceinfo' },
-      { label: 'Co-Applicant', route: 'co-applicantdetails' },
-      { label: 'Summary', route: 'summaryinfo' }
-    ];
-
-    this.stepsSubject.next(finalSteps);
-
-  }
 
   private buildSteps() {
     this.restoreApplicantStatesFromStorage(); // asset values stores

@@ -1424,7 +1424,7 @@ export class Estimateexpense {
       miscellaneousExpenseItemMasterId: item.category,
       frequency: item.securityfrequency?.toUpperCase(),
       amountInr: Number(item.amountINR.replace(/,/g, '')),
-      description: item.description || ''
+      description: item.descriptionmisc || ''
     }));
 
 

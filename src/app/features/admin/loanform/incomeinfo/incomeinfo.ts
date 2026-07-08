@@ -750,37 +750,18 @@ export class Incomeinfo {
   }
 
   removeOtherDocument(type: 'other' | 'otherbusiness', id: number): void {
-    // this.msgBox.open({
-    //   title: 'Are you sure want to Remove',
-    //   message: ``,
-    //   showCancel: true,
-    //   onOk: () => {
-    //     let deleteDoc : any;
 
-    //     if (type === 'other') {
-    //       deleteDoc = this.otherIncomeSlots.filter(slot => slot.id === id);
-    //       this.otherIncomeSlots = this.otherIncomeSlots.filter(slot => slot.id !== id);
-    //     } else {
-    //       deleteDoc = this.otherBusinessSlots.filter(slot => slot.id === id);
-    //       this.otherBusinessSlots = this.otherBusinessSlots.filter(slot => slot.id !== id);
-    //     }
-
-    //     if(deleteDoc?.[0]?.title){
-    //       this.deleteImage(deleteDoc[0].title);
-    //     }
-    //   }
-    // });
 
     let deleteDoc: any;
 
     if (type === 'other') {
-      deleteDoc = this.otherIncomeSlots.filter(slot => slot.id === id);
-    } else {
-      deleteDoc = this.otherBusinessSlots.filter(slot => slot.id === id);
+      deleteDoc = this.otherIncomeSlots.find(slot => slot.id === id);
+    } else if(type === 'otherbusiness') {
+      deleteDoc = this.otherBusinessSlots.find(slot => slot.id === id);
     }
 
-    if (deleteDoc?.[0]?.title) {
-      this.deleteImage(deleteDoc[0].title, type, id);
+    if (deleteDoc?.key) {
+      this.deleteImage(deleteDoc.key, type, id);
     }
   }
 
@@ -842,31 +823,24 @@ export class Incomeinfo {
     fd.append('subcategory', subcategory);
     fd.append('applicantId', apiApplicantId);
 
-    // if(subcategory === "OTHER_INCOME" || subcategory === "OTHER_BUSSINESS_INCOME"){
-    //   if(this.otherIncomeSlots.length > 0){
-    //     index = this.otherIncomeSlots.length - 1;
-    //   } else if(this.otherBusinessSlots.length > 0){
-    //     index = this.otherBusinessSlots.length - 1;
-    //   }
-    // }
-    const uploadIndex = 0;
+    if(subcategory === "OTHER_INCOME" || subcategory === "OTHER_BUSSINESS_INCOME"){
+      if(this.otherIncomeSlots.length > 0){
+        index = this.otherIncomeSlots.length - 1;
+      } else if(this.otherBusinessSlots.length > 0){
+        index = this.otherBusinessSlots.length - 1;
+      }
+    }
 
     const finalTitle =
       (othertitle && othertitle.toString().trim())
         ? othertitle.toString().trim()
         : key;
 
-    fd.append(`files[${uploadIndex}].title`, finalTitle);
-    fd.append(`files[${uploadIndex}].type`, type);
-    fd.append(`files[${uploadIndex}].file`, result.file);
 
+    fd.append(`files[${index}].title`,  finalTitle);
+    fd.append(`files[${index}].type`, type);
+    fd.append(`files[${index}].file`, result.file);
 
-    // fd.append(`files[${index}].title`,  key);
-    // fd.append(`files[${index}].type`, type);
-    // fd.append(`files[${index}].file`, result.file);
-    // const isDeletedFiles = !doc ? false : true;
-
-    // this.loanformservice.uploadIncome(fd, this.applicationId, isDeletedFiles).subscribe({
     this.loanformservice.uploadIncome(fd, this.applicationId, this.isEditMode).subscribe({
       next: (res) => {
 
@@ -1180,7 +1154,7 @@ export class Incomeinfo {
 
   deleteImage(key: string, otherDocType: string = '', id: number = 0): void {
     this.msgBox.open({
-      title: 'Are you sure want to Remove',
+      title: 'Are you sure want to Remove?',
       message: ``,
       showCancel: true,
       onOk: () => {
@@ -1293,7 +1267,7 @@ export class Incomeinfo {
 
         this.otherIncomeSlots.push({
           id: incomeCounter,
-          key: `other_income_${incomeCounter}`,
+          key: doc.title || `other_income_${incomeCounter}`,
           title: doc.title || ''
         });
       }
