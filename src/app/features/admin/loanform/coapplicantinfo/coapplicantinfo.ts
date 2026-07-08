@@ -325,7 +325,11 @@ export class Coapplicantinfo implements OnInit {
   this.restoreCoApplicantState();
   this.cd.detectChanges();
 }
-  back() { }
+  back() {
+
+  
+ this.router.navigate(['/loanform/co-applicantdetails']);
+   }
 
   saveCoApplicantToList(userid: any) {
     const key = this.getCoApplicantListKey();
