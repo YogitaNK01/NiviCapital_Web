@@ -508,7 +508,7 @@ export class Liabilitiesinfo {
     if (!finalData || !finalData.items?.length) {
       this.lastSavedPayload = null;
 
-      this.selectedliabilities = [];
+      this.selectedliabilities = [this.NO_LIABILITY_CODE];
       this.selectedloantype = [];
       this.openIndex = [];
 
@@ -2476,7 +2476,7 @@ export class Liabilitiesinfo {
         showCancel: true,
         okText: 'Yes, Update',
         onOk: () => {
-          this.formSvc.noLiabilitiesSelected({"hasLiabilities": false}, this.applicationId, this.applicantId).subscribe({
+          this.formSvc.noLiabilitiesSelected({"hasLiabilities": true}, this.applicationId, this.applicantId).subscribe({
             next: (res) => {
               if(res.status == "success"){
                 console.log(res);
@@ -2777,7 +2777,7 @@ export class Liabilitiesinfo {
         showCancel: true,
         okText: 'Yes, Update',
         onOk: () => {
-          this.formSvc.noLiabilitiesSelected({"hasLiabilities": false}, this.applicationId, this.applicantId).subscribe({
+          this.formSvc.noLiabilitiesSelected({"hasLiabilities": true}, this.applicationId, this.applicantId).subscribe({
             next: (res) => {
               if(res.status == "success"){
                 console.log(res);

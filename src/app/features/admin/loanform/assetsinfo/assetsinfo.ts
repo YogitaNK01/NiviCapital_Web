@@ -407,6 +407,10 @@ export class Assetsinfo implements OnInit {
     ]);
     if (generalInfoData && !generalInfoData?.hasAssets) {
       summarySection = [];
+      this.selectedAssets = [this.NO_ASSETS_CODE];
+      this.clearAllAssetSelections();
+      this.syncNoAssetsToGeneral();
+      this.cd.detectChanges();
     }
     if (generalInfoData.occupationInfo.occupation == "Employed" || generalInfoData.occupationInfo.occupation == "Self-employed") {
       this.checkoccupation = true;
