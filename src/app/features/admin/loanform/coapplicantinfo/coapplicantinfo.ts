@@ -65,10 +65,6 @@ export class Coapplicantinfo implements OnInit {
 
     this.route.queryParams.subscribe(params => {
 
-
-
-      // this.coApplicantIndex = Number(params['coApplicantIndex']) || 1;
-      // this.loanStepper.setCurrentCoApplicantIndex(this.coApplicantIndex);
       const sessionCoApp = JSON.parse(sessionStorage.getItem('coAppIds') || '{}');
 
       this.coApplicantIndex = Number(
@@ -97,7 +93,7 @@ export class Coapplicantinfo implements OnInit {
         cleanUrl.includes(route)
       );
 
-
+// New coapp parent screen only
       if (mode === 'new' && !isChildStepperRoute) {
         this.loanStepper.clearCoAppId?.();
         sessionStorage.removeItem('coAppIds');
@@ -112,11 +108,17 @@ export class Coapplicantinfo implements OnInit {
         return;
       }
 
+        //  Existing coapp child route should always show stepper
+  if (isChildStepperRoute) {
+    this.mobileSubmitted = true;
+    this.loanform.coappStep = 2;
+    this.restoreCoApplicantState();
+    this.cd.detectChanges();
+    return;
+  }
       // reset first, then restore per index
-      this.mobileSubmitted = false;
-      this.prefillPhone = '';
-
-
+      // this.mobileSubmitted = false;
+      // this.prefillPhone = '';
       this.restoreCoApplicantState();
       this.cd.detectChanges();
     });
@@ -150,58 +152,14 @@ export class Coapplicantinfo implements OnInit {
     'co-summaryinfo'
   ];
   //on refresh page redirecting to number page so storing here 
-  restoreCoApplicantState1() {
-    const cleanUrl = this.router.url.split('?')[0];
 
-    const isStepperRoute = this.coApplicantChildRoutes.some(route =>
-      cleanUrl.includes(route)
-    );
+restoreCoApplicantState() {
+  const cleanUrl = this.router.url.split('?')[0];
 
-    const listKey = this.getCoApplicantListKey();
-    const savedList = localStorage.getItem(listKey);
-    const coApplicants = savedList ? JSON.parse(savedList) : [];
+  const isChildStepperRoute = this.coApplicantChildRoutes.some(route =>
+    cleanUrl.includes(route)
+  );
 
-    const current = coApplicants.find(
-      (x: any) => Number(x.index) === Number(this.coApplicantIndex)
-    );
-
-    const pendingContextRaw = sessionStorage.getItem('pendingCoAppContext');
-    const pendingContext = pendingContextRaw ? JSON.parse(pendingContextRaw) : null;
-
-    //    prefer pending context for freshly added coapplicant
-    if (
-      pendingContext &&
-      Number(pendingContext.coApplicantIndex) === Number(this.coApplicantIndex)
-    ) {
-      this.prefillPhone = pendingContext.phone || '';
-      this.loanform.coapppmobile = pendingContext.phone || '';
-    } else if (current?.phone) {
-      this.prefillPhone = current.phone;
-      this.loanform.coapppmobile = current.phone;
-    }
-
-    if (isStepperRoute) {
-      this.mobileSubmitted = true;
-      return;
-    }
-
-    const saved = localStorage.getItem(
-      `coapp_mobile_submitted_${this.applicantId}_${this.coApplicantIndex}`
-    );
-
-    this.mobileSubmitted = saved === 'true';
-
-    if (!this.mobileSubmitted) {
-      this.prefillPhone = '';
-      this.loanform.coapppmobile = '';
-      this.loanform.coappStep = 1;
-    }
-
-    if (current?.phone && !this.prefillPhone) {
-      this.prefillPhone = current.phone;
-    }
-  }
-  restoreCoApplicantState() {
   const listKey = this.getCoApplicantListKey();
   const savedList = localStorage.getItem(listKey);
   const coApplicants = savedList ? JSON.parse(savedList) : [];
@@ -224,6 +182,26 @@ export class Coapplicantinfo implements OnInit {
     this.loanform.coapppmobile = current.phone;
   }
 
+  // ✅ Important fix:
+  // If URL is already inside co-basicinfo / co-kyc / etc.,
+  // never show mobile number screen.
+  if (isChildStepperRoute) {
+    this.mobileSubmitted = true;
+    this.loanform.coappStep = 2;
+
+    if (current?.applicantId) {
+      this.loanStepper.setCo_appId(
+        current.applicantId,
+        current.applicationId || this.applicationId,
+        current.fullName || current.name || '',
+        current.custARN,
+        this.coApplicantIndex
+      );
+    }
+
+    return;
+  }
+
   const saved = localStorage.getItem(
     `coapp_mobile_submitted_${this.applicantId}_${this.coApplicantIndex}`
   );
@@ -234,6 +212,8 @@ export class Coapplicantinfo implements OnInit {
     this.prefillPhone = '';
     this.loanform.coapppmobile = '';
     this.loanform.coappStep = 1;
+  } else {
+    this.loanform.coappStep = 2;
   }
 
   if (current?.phone && !this.prefillPhone) {

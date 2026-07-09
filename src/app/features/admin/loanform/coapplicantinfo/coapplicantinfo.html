@@ -1,17 +1,12 @@
 <div class="vh-container">
-
   <div class="base-layout base-height">
-
     <div class="header w-100">
-
       <div class="text-datepicker blue-text d-flex flex-column gap-data ">Co-Applicant
         <div class="text-label-data fw-normal fst-italic">
 
           Minimum 1 co-applicant is mandatory to complete your application. You can
           add more as well.
         </div>
-
-
         <!-- STEP 1 Mobile number  -->
         <div *ngIf="!mobileSubmitted">
 
@@ -24,26 +19,16 @@
                 [state]="getPhoneFieldState(phone)"></app-inputfield>
 
               <div class="text-danger mt-2" *ngIf="showmsg"> {{showmsgtext}}
-
-                <!-- <div>
-                 Main Applicant and Co-Applicant mobile numbers cannot be the same. Please enter a different mobile number for the Co-Applicant.
-                </div> -->
               </div>
             </div>
-
-
           </div>
-
-
         </div>
 
         <!-- STEP 2  co-applicant steppers-->
 
         <div *ngIf="mobileSubmitted">
           <app-coappstepper></app-coappstepper>
-
         </div>
-
       </div>
 
     </div>

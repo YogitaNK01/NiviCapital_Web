@@ -210,6 +210,9 @@ export class Summaryinfo {
   summaryApplicants: any[] = [];
   submitDescription: any = "";
 
+  isSummaryLoading = false;
+summaryLoadError = '';
+
   constructor(private fb: FormBuilder, private formSvc: Loanformservice, private stepperService: Loanstepperservice, private cd: ChangeDetectorRef, private loanformservice: Loanformservice,
     private router: Router, private route: ActivatedRoute, public main: Main, private apiservice: Addcustomerservice, private sanitizer: DomSanitizer) { }
 
@@ -251,9 +254,9 @@ export class Summaryinfo {
       }
     }
 
-  //  this.formSvc.startSummaryEditFlow(this.summaryData, 'MAIN');
+  this.buildForm();
     this.getSummarydetails()
-    this.buildForm();
+   
   }
 
 
@@ -302,8 +305,13 @@ export class Summaryinfo {
 
 
   getSummarydetails() {
+      this.isSummaryLoading = true;
+        this.summaryLoaded = false;
+         this.summaryLoadError = '';
+
     this.formSvc.getSummary(this.applicationId).subscribe(
       (res: any) => {
+        try {
         if (res && res.status === 'success' && res.data) {
 
           const rootData = res.data;
@@ -350,12 +358,27 @@ export class Summaryinfo {
             .filter(Boolean);
 
           console.log('CO APPLICANT SUMMARIES:', this.coApplicantSummaries);
-
+this.summaryLoaded = true;
           this.cd.detectChanges();
+        } 
+      else {
+          this.summaryLoadError = 'Unable to load summary details.';
         }
+      }catch (err) {
+        console.error('Summary binding failed:', err);
+        this.summaryLoadError = 'Something went wrong while preparing summary.';
+      } finally {
+        this.isSummaryLoading = false;
+        this.cd.detectChanges();
+      }
       },
       (error) => {
         console.error('Error fetching summary details:', error);
+        this.summaryLoadError = 'Failed to load summary details.';
+      this.isSummaryLoading = false;
+      this.summaryLoaded = false;
+
+      this.cd.detectChanges();
       }
     );
   }

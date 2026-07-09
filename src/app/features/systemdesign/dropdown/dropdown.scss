@@ -17,11 +17,12 @@
   border: 1px solid $input-default;
   align-items: flex-start;
 }
-.dropdown-content{
-   width: 100%;
+
+.dropdown-content {
+  width: 100%;
   height: 42px;
   padding: $spacing_7;
- 
+
 }
 
 .dropdown-input {
@@ -44,9 +45,10 @@
   margin-bottom: 0.5rem;
 }
 
-.dropdown-label1{
+.dropdown-label1 {
   margin-bottom: 0.5rem;
 }
+
 ::ng-deep app-dropdown .dropdown-list {
   background-color: $bg !important;
   border: 1px solid #eaeaed;
@@ -240,26 +242,28 @@
   font-weight: $font-weight-regular;
   line-height: $spacing_10;
   color: $neutral-text-secondary;
-font-size: $font-size-body_lg;
-font-style: normal;
-letter-spacing: 0.16px;
+  font-size: $font-size-body_lg;
+  font-style: normal;
+  letter-spacing: 0.16px;
 
 }
-.profilelabel{
+
+.profilelabel {
   color: $neutral_text-primary;
-font-size: $font-size-h3;
-font-style: normal;
-font-weight: 500;
-line-height: $spacing_12; 
-letter-spacing: 0.2px;
+  font-size: $font-size-h3;
+  font-style: normal;
+  font-weight: 500;
+  line-height: $spacing_12;
+  letter-spacing: 0.2px;
 }
-.subtext{
- color: $neutral_text-secondary;
-font-size: $font-size-body_md;
-font-style: normal;
-font-weight: 400;
-line-height: $spacing_10; 
-letter-spacing: 0.16px;
+
+.subtext {
+  color: $neutral_text-secondary;
+  font-size: $font-size-body_md;
+  font-style: normal;
+  font-weight: 400;
+  line-height: $spacing_10;
+  letter-spacing: 0.16px;
 }
 
 .arrow {
@@ -273,8 +277,8 @@ letter-spacing: 0.16px;
 .dropdown-item {
   display: flex;
   align-items: center;
-  padding: 6px; 
-  gap: 10px; 
+  padding: 6px;
+  gap: 10px;
   cursor: pointer;
   color: #404040;
   font-size: $font-size-body_sm;
@@ -283,24 +287,24 @@ letter-spacing: 0.16px;
   line-height: $spacing_9;
   letter-spacing: 0.14px;
 
-   &:not(:has(.item-icon)) {
+  &:not(:has(.item-icon)) {
     gap: 0;
   }
 }
 
 
 .dropdown-item:hover {
-  
-  background-color:$secondary-500 !important;
 
-    color: #ffffff !important;
+  background-color: $secondary-500 !important;
+
+  color: #ffffff !important;
 
   * {
     color: #ffffff !important;
   }
 
   input[type="checkbox"] {
-   accent-color: $neutral-50;
+    accent-color: $neutral-50;
   }
 }
 
@@ -332,7 +336,7 @@ letter-spacing: 0.16px;
   // color: #b0b0b0!important;
   // background-color: #f4f4f7;
   pointer-events: none;
-  cursor:none;
+  cursor: none;
 }
 
 .select-all {
@@ -346,14 +350,22 @@ letter-spacing: 0.16px;
 }
 
 
-.hrclass{
-    background: $neutral-300;
-    margin: 10px 0
+.hrclass {
+  background: $neutral-300;
+  margin: 10px 0
 }
-.disabled-div{
-.dropdown-input{
-      background: #F5F5F5;
+
+.disabled-div {
+  .dropdown-input {
+    background: #F5F5F5 !important;
+  }
 }
+
+.dropdown-container {
+
+  &.disabled-div {
+    background: #F5F5F5 !important;
+  }
 }
 
 .dropdown-item input[type="checkbox"] {

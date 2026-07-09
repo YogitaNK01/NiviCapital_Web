@@ -62,24 +62,17 @@ export class Kycinfo {
   kycId: any;
 
   passportmissing: boolean = false;
-  passportuploadfailure:boolean = false;
-selectedPassportFile: File | null = null;
+  passportuploadfailure: boolean = false;
+  selectedPassportFile: File | null = null;
 
+  isSummaryLoading = false;
+  summaryLoaded = false;
   constructor(private fb: FormBuilder, private stepperService: Loanstepperservice, private cd: ChangeDetectorRef, private loanformservice: Loanformservice, private route: ActivatedRoute) { }
 
   ngOnInit(): void {
-this.stepperService.rebuildSteps();
-    // this.route.queryParams.subscribe(params => {
+    this.stepperService.rebuildSteps();
 
-    //   const applicantId = params['applicantId'];
-    //   const applicationId = params['applicationId'];
-
-    //   // Store in variables if needed
-    //   this.applicantId = applicantId;
-    //   this.applicationId = applicationId;
-
-    // });
-     let Allids = this.stepperService.getLoanId();
+    let Allids = this.stepperService.getLoanId();
 
     this.applicantId = Allids[0];
     this.applicationId = Allids[1];
@@ -158,26 +151,26 @@ this.stepperService.rebuildSteps();
   viewImage(url: string): void {
     window.open(url, '_blank');
   }
-  
+
   downloadImage(url: string, filename: string): void {
-  fetch(url)
-    .then(res => res.blob())
-    .then(blob => {
+    fetch(url)
+      .then(res => res.blob())
+      .then(blob => {
 
-      const blobUrl = window.URL.createObjectURL(blob);
+        const blobUrl = window.URL.createObjectURL(blob);
 
-      const link = document.createElement('a');
-      link.href = blobUrl;
-      link.download = filename;
-      link.click();
+        const link = document.createElement('a');
+        link.href = blobUrl;
+        link.download = filename;
+        link.click();
 
-      window.URL.revokeObjectURL(blobUrl);
+        window.URL.revokeObjectURL(blobUrl);
 
-    });
+      });
 
-}
+  }
 
-   getKycId(event: any) {
+  getKycId(event: any) {
     console.log(event);
 
   }
@@ -205,22 +198,22 @@ this.stepperService.rebuildSteps();
     this.stepperService.previous();
   }
   next() {
-   
-      if (!this.selectedPassportFile && !this.passportUrl) {
-    this.passportmissing = true;
-    return;
 
-  } 
-   this.passportmissing = false;
-     
+    if (!this.selectedPassportFile && !this.passportUrl) {
+      this.passportmissing = true;
+      return;
+
+    }
+    this.passportmissing = false;
+
     if (this.passportUrl) {
       this.stepperService.markStepCompleted('kycinfo');
-     
-    this.stepperService.next();
-    return;
-  }
 
-  const fd = new FormData();
+      this.stepperService.next();
+      return;
+    }
+
+    const fd = new FormData();
 
     // text fields
     fd.append('docType', 'PASSPORT');
@@ -230,11 +223,11 @@ this.stepperService.rebuildSteps();
       next: (data) => {
         console.log(data);
         this.stepperService.markStepCompleted('kycinfo');
-         this.stepperService.next();
+        this.stepperService.next();
       },
       error: (error) => {
         console.log(error);
-        this.passportuploadfailure= true
+        this.passportuploadfailure = true
       }
     });
 
@@ -243,83 +236,96 @@ this.stepperService.rebuildSteps();
 
   onFileChange(result: UploadResult, key: string) {
     console.log(!result.file);
- if (!result.file){
-  this.passportmissing = false;
-  return
- } ; 
+    if (!result.file) {
+      this.passportmissing = false;
+      return
+    };
 
-  
- this.selectedPassportFile = result.file;
- if(this.selectedPassportFile) {
-  this.passportmissing = false;
- }
+
+    this.selectedPassportFile = result.file;
+    if (this.selectedPassportFile) {
+      this.passportmissing = false;
+    }
   }
   getKycData(id: any) {
+    this.isSummaryLoading = true;
+    this.summaryLoaded = false;
 
     this.loanformservice.getKycDetails(id).subscribe({
       next: (res) => {
-        let formdata = res.data;
-        this.kycId = res.data.kycId;
-        const documents = formdata.documents;
+        try {
+          let formdata = res.data;
+          this.kycId = res.data.kycId;
+          const documents = formdata.documents;
 
-        const aadhaarFront = documents.find((d: { docType: string; }) => d.docType === 'AADHAAR_FRONT');
-        const aadhaarBack = documents.find((d: { docType: string; }) => d.docType === 'AADHAAR_BACK');
-        const panDoc = documents.find((d: { docType: string; }) => d.docType === 'PAN');
-        const passportDoc = documents.find((d: { docType: string; }) => d.docType === 'PASSPORT');
-        const otherDoc = documents.find((d: { docType: string; }) => d.docType === 'UTILITY_BILL');
+          const aadhaarFront = documents.find((d: { docType: string; }) => d.docType === 'AADHAAR_FRONT');
+          const aadhaarBack = documents.find((d: { docType: string; }) => d.docType === 'AADHAAR_BACK');
+          const panDoc = documents.find((d: { docType: string; }) => d.docType === 'PAN');
+          const passportDoc = documents.find((d: { docType: string; }) => d.docType === 'PASSPORT');
+          const otherDoc = documents.find((d: { docType: string; }) => d.docType === 'UTILITY_BILL');
 
 
-        this.aadhaarFrontUrl = aadhaarFront?.url || '';
-        this.aadhaarFrontFileName = aadhaarFront?.fileName || '';
-        this.aadhaarBackUrl = aadhaarBack?.url || '';
-        this.aadhaarBackFileName = aadhaarBack?.fileName || '';
-        this.panUrl = panDoc?.url || '';
-        this.panFileName = panDoc?.fileName || '';
+          this.aadhaarFrontUrl = aadhaarFront?.url || '';
+          this.aadhaarFrontFileName = aadhaarFront?.fileName || '';
+          this.aadhaarBackUrl = aadhaarBack?.url || '';
+          this.aadhaarBackFileName = aadhaarBack?.fileName || '';
+          this.panUrl = panDoc?.url || '';
+          this.panFileName = panDoc?.fileName || '';
 
-        this.passportUrl = passportDoc?.url || '';
-        this.passportFileName = passportDoc?.fileName || '';
-        this.ispassport = !!passportDoc; 
-        if(this.passportUrl !== '' && this.passportUrl !== null){
-          this.passportmissing = false;
+          this.passportUrl = passportDoc?.url || '';
+          this.passportFileName = passportDoc?.fileName || '';
+          this.ispassport = !!passportDoc;
+          if (this.passportUrl !== '' && this.passportUrl !== null) {
+            this.passportmissing = false;
+          }
+
+          this.otherDocumentUrl = otherDoc?.url || '';
+          this.otherDocumentFileName = otherDoc?.fileName || '';
+
+          this.kycdocumentsForm.patchValue({
+            adhaarnumber: formdata.aadhaarNumber,
+            adhaarfront: aadhaarFront?.fileName,
+            adhaarback: aadhaarBack?.fileName,
+            pannumber: formdata.panNumber,
+            panimg: panDoc?.fileName,
+            passportnumber: formdata.passportNumber,
+            dob: formdata.dateOfBirth,
+
+            sameAsPermanent: formdata.sameAsPermanent,
+            peraddressline1: formdata.permanentAddress.addressLine,
+            peraddressline2: formdata.permanentAddress.addressLine1,
+            peraddressline3: formdata.permanentAddress.addressLine2,
+            percountry: formdata.permanentAddress.country,
+            perstate: formdata.permanentAddress.state,
+            percity: formdata.permanentAddress.city,
+            perpincode: formdata.permanentAddress.zipCode,
+            isperMailingAddress: formdata.permanentAddress.isMailingAddress == 0 ? false : true,
+
+            curraddressline1: formdata.otherAddress == null ? formdata.currentAddress.addressLine : formdata.otherAddress.addressLine,
+            curraddressline2: formdata.otherAddress == null ? formdata.currentAddress.addressLine1 : formdata.otherAddress.addressLine1,
+            curraddressline3: formdata.otherAddress == null ? formdata.currentAddress.addressLine2 : formdata.otherAddress.addressLine2,
+            currcountry: formdata.otherAddress == null ? formdata.currentAddress.country : formdata.otherAddress.country,
+            currstate: formdata.otherAddress == null ? formdata.currentAddress.state : formdata.otherAddress.state,
+            currcity: formdata.otherAddress == null ? formdata.currentAddress.city : formdata.otherAddress.city,
+            currpincode: formdata.otherAddress == null ? formdata.currentAddress.zipCode : formdata.otherAddress.zipCode,
+            iscurrMailingAddress: formdata.sameAsPermanent == 0 ? true : false,
+          });
+          this.kycdocumentsForm.disable({ emitEvent: false });
+          console.log(this.kycdocumentsForm.get('dob')?.disabled);
+          this.stepperService.setStepData('kycinfo', formdata);
+          this.summaryLoaded = true;
+        } catch (error) {
+          console.error('KYC data binding error:', error);
+          this.summaryLoaded = false;
+        } finally {
+          this.isSummaryLoading = false;
+          this.cd.detectChanges();
         }
-        
-        this.otherDocumentUrl = otherDoc?.url || '';
-        this.otherDocumentFileName = otherDoc?.fileName || '';
-
-        this.kycdocumentsForm.patchValue({
-          adhaarnumber: formdata.aadhaarNumber,
-          adhaarfront: aadhaarFront?.fileName,
-          adhaarback: aadhaarBack?.fileName,
-          pannumber: formdata.panNumber,
-          panimg: panDoc?.fileName,
-          passportnumber: formdata.passportNumber,
-          dob: formdata.dateOfBirth,
-
-          sameAsPermanent: formdata.sameAsPermanent,
-          peraddressline1: formdata.permanentAddress.addressLine,
-          peraddressline2: formdata.permanentAddress.addressLine1,
-          peraddressline3: formdata.permanentAddress.addressLine2 ,
-          percountry: formdata.permanentAddress.country,
-          perstate: formdata.permanentAddress.state,
-          percity: formdata.permanentAddress.city,
-          perpincode: formdata.permanentAddress.zipCode,
-          isperMailingAddress: formdata.permanentAddress.isMailingAddress == 0 ? false : true,
-
-          curraddressline1: formdata.otherAddress == null ? formdata.currentAddress.addressLine :formdata.otherAddress.addressLine,
-          curraddressline2:formdata.otherAddress == null ? formdata.currentAddress.addressLine1 :formdata.otherAddress.addressLine1,
-          curraddressline3:formdata.otherAddress == null ? formdata.currentAddress.addressLine2 :formdata.otherAddress.addressLine2,
-          currcountry:formdata.otherAddress == null ? formdata.currentAddress.country:formdata.otherAddress.country,
-          currstate:formdata.otherAddress == null ? formdata.currentAddress.state:formdata.otherAddress.state,
-          currcity:formdata.otherAddress == null ? formdata.currentAddress.city:formdata.otherAddress.city,
-          currpincode:formdata.otherAddress == null ? formdata.currentAddress.zipCode:formdata.otherAddress.zipCode,
-          iscurrMailingAddress:formdata.sameAsPermanent == 0 ?  true  : false,
-        });
-        this.kycdocumentsForm.disable();
-        console.log(this.kycdocumentsForm.get('dob')?.disabled);
-         this.stepperService.setStepData('kycinfo', formdata);
-         
       },
       error: (err) => {
+        this.summaryLoaded = false;
+        this.isSummaryLoading = false;
+        this.cd.detectChanges();
         console.error("error msg", err);
       }
 

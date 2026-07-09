@@ -110,6 +110,7 @@ export class Coappdashboard implements OnInit {
 
 
   }
+  //add new coapp
   add() {
 
     this.loadCoApplicants();
@@ -151,6 +152,12 @@ export class Coappdashboard implements OnInit {
     this.loanfornservice.clearSummaryEditFlow();
     this.loanfornservice.clearSummaryEducationEditFlow?.();
     this.isFromSummary = false;
+
+    this.loanfornservice.coappStep = 1;
+
+localStorage.removeItem(
+  `coapp_mobile_submitted_${this.applicantId}_${nextIndex}`
+);
 
     this.router.navigate(
       ['coapplicantinfo'],
@@ -328,6 +335,14 @@ export class Coappdashboard implements OnInit {
     );
 
     if (!current) return;
+
+     // ✅ Existing coapp should open stepper, not mobile screen
+  this.loanfornservice.coappStep = 2;
+
+  localStorage.setItem(
+    `coapp_mobile_submitted_${this.applicantId}_${current.index}`,
+    'true'
+  );
 
     sessionStorage.removeItem('pendingCoAppContext');
 

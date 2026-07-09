@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { AfterViewInit, Component, EventEmitter, OnDestroy, Output, ViewChild } from '@angular/core';
+import { AfterViewInit, ChangeDetectorRef, Component, EventEmitter, OnDestroy, Output, ViewChild } from '@angular/core';
 import { ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { Main } from '../../../../core/service/main';
 import { Inputfield } from '../../../systemdesign/inputfield/inputfield';
@@ -39,7 +39,7 @@ export class Uploadkyc implements OnDestroy, AfterViewInit {
   addressType: 'same' | 'different' = 'same';
   ismailingaddress: 'same' | 'different' = 'same';
   isDifferentAddress: boolean = false;
-  selectedSecondaryProof: string | null = null;
+  selectedSecondaryProof: any;
   permanentMailingFlag = 0;
   currentMailingFlag = 0;
   isPermanentMailingChecked = true;
@@ -117,7 +117,15 @@ export class Uploadkyc implements OnDestroy, AfterViewInit {
   isCoApplicant: boolean = false;
   uploadedFileMeta: Record<string, any> = {};
   issuccess: boolean = false;
-  constructor(public main: Main, private addcustomerservice: Addcustomerservice, private route: ActivatedRoute, private stepperService: Loanstepperservice, private loanservice: Loanformservice, private msgBox: Msgboxservice, private router: Router) { }
+
+
+
+  //edit from summary
+  isViewMode = false;
+  isEditMode = false;
+  isSummaryEditMode = false;
+  viewOnly = false;
+  constructor(public main: Main, private addcustomerservice: Addcustomerservice, private cd: ChangeDetectorRef,private route: ActivatedRoute, private stepperService: Loanstepperservice, private loanservice: Loanformservice, private msgBox: Msgboxservice, private router: Router) { }
 
   async ngOnInit(): Promise<void> {
     this.isCoApplicant = this.router.url.includes('co-applicant');
@@ -187,7 +195,26 @@ export class Uploadkyc implements OnDestroy, AfterViewInit {
     this.requiredDocs.forEach(k => this.uploadedFiles[k] = null);
     this.optionalDocs.forEach(k => this.uploadedFiles[k] = null);
 
+    const params = this.route.snapshot.queryParams;
 
+    const cameFromSummary =
+      params['fromSummary'] === true ||
+      params['fromSummary'] === 'true' ||
+      this.loanservice.isSummaryEditFlow();
+
+    this.isSummaryEditMode = cameFromSummary;
+
+
+    this.viewOnly =
+      this.isSummaryEditMode &&
+      params['mode'] !== 'edit';
+
+    if (this.isSummaryEditMode) {
+      this.isViewMode = true;
+      this.isEditMode = false;
+      // this.kycForm.form.disable({ emitEvent: false });
+       setTimeout(() => {this.applyKycViewMode();  });
+    }
 
   }
 
@@ -364,7 +391,7 @@ export class Uploadkyc implements OnDestroy, AfterViewInit {
 
   selectSameAddress(checked: boolean) {
 
-
+if (this.isViewMode) return;
     this.addressType = 'same';
     this.isDifferentAddress = false;
     this.selectedSecondaryProof = null;
@@ -377,7 +404,7 @@ export class Uploadkyc implements OnDestroy, AfterViewInit {
   }
 
   selectDifferentAddress(checked: boolean) {
-
+if (this.isViewMode) return;
 
     this.addressType = 'different';
     this.currstateOptions = [];
@@ -427,6 +454,15 @@ export class Uploadkyc implements OnDestroy, AfterViewInit {
 
 
     const kycPayload = this.buildKycPayload(form.value);
+
+    if (!kycPayload.custId) {
+      console.error('custId missing. Basic Info CIF is not generated for this co-applicant.');
+
+
+
+      return;
+    }
+
     let key = this.getStorageKey();
     localStorage.setItem(key, JSON.stringify(kycPayload));
     this.lastSavedPayload = { ...kycPayload };
@@ -455,19 +491,12 @@ export class Uploadkyc implements OnDestroy, AfterViewInit {
       aadhaarNumber: kycPayload.aadhaarNumber,
       panNumber: kycPayload.panNumber,
       passportNo: kycPayload.passportNo,
-      addresses: kycPayload.addresses
-
-      // addresses: this.isDifferentAddress
-      //   ? [permanentAddress, currentAddress, otherAddress]
-      //   : [permanentAddress, currentAddress]
-
-
+      addresses: kycPayload.addresses,
+      secondaryAddressProof: kycPayload.selectedSecondaryProof ,
+     
 
     }));
-    // if (this.files.pan) fd.append('panFile', this.files.pan);
-    // if (this.files.aadharfront) fd.append('aadharFrontFile', this.files.aadharfront);
-    // if (this.files.aadharback) fd.append('aadharBackFile', this.files.aadharback);
-    // if (this.files.passport) fd.append('passportFile', this.files.passport);
+    
 
     fd.append('custId', kycPayload.custId);
 
@@ -515,6 +544,7 @@ export class Uploadkyc implements OnDestroy, AfterViewInit {
 
 
   onFileChange(result: UploadResult, key: string) {
+    if (this.viewOnly) return;
     if (!result.file) {
       this.uploadedFiles[key] = null;
 
@@ -599,9 +629,15 @@ export class Uploadkyc implements OnDestroy, AfterViewInit {
     { value: 'voterID', label: 'Voter ID' }
   ];
 
-  onSelectionChange(value: any) {
-    console.log('Selected:1', value);
-  }
+ onSelectionChange(value: any) {
+  console.log('Selected secondary address proof:', value);
+
+  this.selectedSecondaryProof =
+    typeof value === 'object'
+      ? value?.value || ''
+      : value || '';
+}
+
 
 
 
@@ -761,6 +797,7 @@ export class Uploadkyc implements OnDestroy, AfterViewInit {
   }
 
   deleteLocalFile(key: string): void {
+
     this.msgBox.open({
       title: 'Are you sure want to Remove',
       message: ``,
@@ -837,6 +874,27 @@ export class Uploadkyc implements OnDestroy, AfterViewInit {
       fd.append(formDataKey, fileFromUrl, fileFromUrl.name);
     }
   }
+  private getCurrentCoApplicantStoredData(): any {
+    const index =
+      this.stepperService.getCurrentCoApplicantIndex() ||
+      Number(this.route.snapshot.queryParams['coApplicantIndex']) ||
+      1;
+
+    const key = `coApplicants_${this.applicationId}`;
+    const saved = localStorage.getItem(key);
+
+    let list: any[] = [];
+
+    try {
+      const parsed = saved ? JSON.parse(saved) : [];
+      list = Array.isArray(parsed) ? parsed : [];
+    } catch {
+      list = [];
+    }
+
+    return list.find((x: any) => Number(x.index) === Number(index)) || null;
+  }
+
   next() {
 
     if (!this.kycForm) {
@@ -895,6 +953,31 @@ export class Uploadkyc implements OnDestroy, AfterViewInit {
     this.issuccess = false;
   }
   buildKycPayload(formValue: any) {
+    const storedCoApp = this.isCoApplicant
+      ? this.getCurrentCoApplicantStoredData()
+      : null;
+
+    const custId = this.editMode
+      ? this.editUserData.custId
+      : this.isCoApplicant
+        ? (
+          this.co_userid?.custId ||
+          this.co_userid?.cifId ||
+          this.co_userid?.customerId ||
+          storedCoApp?.custId ||
+          storedCoApp?.cifId ||
+          storedCoApp?.customerId ||
+          this.custId ||
+          ''
+        )
+        : (
+          this.userid?.custId ||
+          this.userid?.cifId ||
+          this.userid?.customerId ||
+          this.custId ||
+          ''
+        );
+
     const firstName = this.editMode
       ? this.editUserData.fname
       : this.isCoApplicant
@@ -907,7 +990,7 @@ export class Uploadkyc implements OnDestroy, AfterViewInit {
         ? this.co_userid?.fullName
         : this.userdata?.lname;
 
-    const custId = this.editMode
+    const custId1 = this.editMode
       ? this.editUserData.custId
       : this.isCoApplicant
         ? this.co_userid?.cifId
@@ -978,13 +1061,13 @@ export class Uploadkyc implements OnDestroy, AfterViewInit {
       aadhaarNumber: formValue.aadharnum || '',
       panNumber: formValue.pan ? formValue.pan.toUpperCase() : '',
       passportNo: formValue.Passport || '',
-
+     
       addressType: this.addressType,
       isDifferentAddress: this.isDifferentAddress,
       isPermanentMailingChecked: this.isPermanentMailingChecked,
       isCurrentMailingChecked: this.isCurrentMailingChecked,
 
-      selectedSecondaryProof: this.selectedSecondaryProof,
+      selectedSecondaryProof: this.selectedSecondaryProof || '',
 
       addresses: this.isDifferentAddress
         ? [permanentAddress, currentAddress, otherAddress]
@@ -1218,18 +1301,33 @@ export class Uploadkyc implements OnDestroy, AfterViewInit {
 
 
     });
-    if (isDifferent) {
-      setTimeout(() => {
-        this.kycForm.form.patchValue({
-          currentaddressline1: currentFormAddress?.addressLine || '',
-          currentaddressline2: currentFormAddress?.addressLine1 || '',
-          currentaddressline3: currentFormAddress?.addressLine2 || '',
-          currpincode: currentFormAddress?.zipCode || ''
+    // if (isDifferent) {
+    //   setTimeout(() => {
+    //     this.kycForm.form.patchValue({
+    //       currentaddressline1: currentFormAddress?.addressLine || '',
+    //       currentaddressline2: currentFormAddress?.addressLine1 || '',
+    //       currentaddressline3: currentFormAddress?.addressLine2 || '',
+    //       currpincode: currentFormAddress?.zipCode || ''
 
-        });
-      }, 0);
-    }
+    //     });
+    //   }, 0);
+    // }
+if (isDifferent) {
+  setTimeout(() => {
+    this.kycForm.form.patchValue({
+      currentaddressline1: currentFormAddress?.addressLine || '',
+      currentaddressline2: currentFormAddress?.addressLine1 || '',
+      currentaddressline3: currentFormAddress?.addressLine2 || '',
+      currpincode: currentFormAddress?.zipCode || ''
+    }, { emitEvent: false });
 
+    this.applyKycViewMode();
+  }, 0);
+} else {
+  setTimeout(() => {
+    this.applyKycViewMode();
+  }, 0);
+}
     if (data.dob) {
       this.dobValid = this.isAdult(moment(data.dob, 'YYYY-MM-DD'));
       this.dobTouched = false;
@@ -1533,6 +1631,21 @@ export class Uploadkyc implements OnDestroy, AfterViewInit {
 
     return hasBase && passportOk && permanentOk && otherOk;
   }
+
+  // disable mode when came from summary
+  private applyKycViewMode(): void {
+  if (!this.kycForm?.form) return;
+
+  if (this.viewOnly || (this.isSummaryEditMode && !this.isEditMode)) {
+    this.kycForm.form.disable({ emitEvent: false });
+
+    Object.keys(this.kycForm.form.controls).forEach(key => {
+      this.kycForm.form.get(key)?.disable({ emitEvent: false });
+    });
+  }
+
+  this.cd.detectChanges();
+}
   ngOnDestroy(): void {
     sessionStorage.removeItem('kycs');
 

@@ -1147,7 +1147,7 @@ p {
 .disabled-div {
   pointer-events: none;
   opacity: 0.6;
-  background: #F5F5F5;
+  // background: #F5F5F5;
 }
 
 // edit from summary success popup
@@ -1215,5 +1215,39 @@ p {
   @media (max-width:780px) {
     width: 25px;
     height: 25px;
+  }
+}
+
+ 
+//loading spiner
+
+.summary-loader-wrapper {
+  height:100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.summary-loader-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+ 
+}
+
+.spinner {
+  width: 60px;
+  height: 60px;
+  border: 6px solid #e5eefb;
+  border-top-color: #1f4e79;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
   }
 }
