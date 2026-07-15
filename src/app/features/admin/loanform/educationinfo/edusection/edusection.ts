@@ -597,14 +597,12 @@ SelectedInstitute(values: string | string[]) {
   }
 
 
-  getLocalName1(doc: 'marksheet' | 'lc' | 'other', index?: number): string {
-    return this.uploadedFiles?.[this.buildKey(doc, index)]?.name ?? '';
-  }
+ 
   hasLocal(doc: 'marksheet' | 'lc' | 'other', index?: number): boolean {
     return !!this.getStoredFile(doc, index);
   }
 
-  getLocalName(doc: 'marksheet' | 'lc' | 'other', index?: number): string {
+  getLocalName1(doc: 'marksheet' | 'lc' | 'other', index?: number): string {
     const file = this.getStoredFile(doc, index);
 
     if (!file) return '';
@@ -615,6 +613,23 @@ SelectedInstitute(values: string | string[]) {
 
     return file.fileName || file.name || '';
   }
+  getLocalName(
+  doc: 'marksheet' | 'lc' | 'other',
+  index?: number,truncate = true
+): string {
+  const file = this.getStoredFile(doc, index);
+
+  if (!file) return '';
+
+  const fileName =
+    file instanceof File
+      ? file.name
+      : file.fileName || file.name || '';
+
+    if (!truncate || fileName.length <= 30) {
+          return fileName; }
+            return `${fileName.substring(0, 30)}...`;
+}
 
   buildKey(doc: DocType, index?: number): string {
     // return index
@@ -744,46 +759,7 @@ SelectedInstitute(values: string | string[]) {
     }
   }
 
-  downloadLocalFile1(doc: DocType, index?: number): void {
-    const key = this.buildKey(doc, index);
-
-    const file: any =
-      this.uploadedFiles[key] ||
-      this.savedFileMeta?.[key];
-
-    if (!file) return;
-
-    // Case 1: newly selected browser file
-    if (file instanceof File) {
-      const url = URL.createObjectURL(file);
-
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = file.name || 'document';
-      a.click();
-
-      URL.revokeObjectURL(url);
-      return;
-    }
-
-    // Case 2: restored file metadata from API/localStorage
-    const savedUrl =
-      file.viewUrl ||
-      file.fileUrl ||
-      file.publicUrl ||
-      '';
-
-    if (!savedUrl) {
-      console.warn('No downloadable URL found for file:', file);
-      return;
-    }
-
-    const a = document.createElement('a');
-    a.href = savedUrl;
-    a.target = '_blank';
-    a.download = file.fileName || file.name || 'document';
-    a.click();
-  }
+ 
   downloadLocalFile(doc: DocType, index?: number): void {
     const file = this.getStoredFile(doc, index);
     if (!file) return;
@@ -1125,10 +1101,27 @@ SelectedInstitute(values: string | string[]) {
       },
     })
   }
+ 
 
-  viewOther1(doc: any) {
-    window.open(URL.createObjectURL(doc.file), '_blank');
+
+getOtherFileName(slot: any, truncate = true): string {
+  const file = slot?.file;
+
+  if (!file) {
+    return '';
   }
+
+  const fileName =
+    file instanceof File
+      ? file.name
+      : file.fileName || file.name || '';
+
+  if (!truncate || fileName.length <= 35) {
+    return fileName;
+  }
+
+  return `${fileName.substring(0, 35)}...`;
+}
   viewOther(slot: any): void {
     const file = slot.file;
     if (!file) return;

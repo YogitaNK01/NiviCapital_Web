@@ -406,6 +406,9 @@ export class Referenceinfo implements OnInit {
     }
   }
   searchMobile(mobile: string) {
+    const searchedMobile = String(mobile || '').trim();
+     if (!/^[6-9][0-9]{9}$/.test(searchedMobile)) {    return;  }
+
     this.mobileNumber = mobile;
     let input = {
       identifier: mobile,
@@ -416,6 +419,7 @@ export class Referenceinfo implements OnInit {
     }
 
     this.apiservice.customersearch(input).subscribe(res => {
+ if (this.mobileNumber !== searchedMobile) {     return;   }
 
       const isExisting = res.message?.includes('Existing customer found');
 
@@ -439,10 +443,41 @@ export class Referenceinfo implements OnInit {
 
   }
 
-  goNext() {
-    this.popupStep = 2;
+  goNext(): void {
+  if (
+    !this.isMobileValid ||
+    !this.isSearchDone ||
+    this.referenceForm.hasError('samePhone')
+  ) {
+    this.phone?.control?.markAsTouched();
+    this.phone?.control?.updateValueAndValidity();
+    return;
   }
 
+  this.popupStep = 2;
+}
+
+handleMobileAction(): void {
+  if (!this.isMobileValid) {
+    this.phone?.control?.markAsTouched();
+    this.phone?.control?.updateValueAndValidity();
+
+    this.isSearchDone = false;
+    this.isdata = false;
+    return;
+  }
+
+  if (this.referenceForm.hasError('samePhone')) {
+    return;
+  }
+
+  if (!this.isSearchDone) {
+    this.searchReference();
+    return;
+  }
+
+  this.goNext();
+}
   createReferenceGroup(): FormGroup {
     return this.fb.group({
       fname: ['', [Validators.required, Validators.pattern('^[A-Za-z ]+$'), Validators.minLength(2), Validators.maxLength(25)]],
@@ -669,8 +704,16 @@ export class Referenceinfo implements OnInit {
     this.referenceForm.updateValueAndValidity({ emitEvent: true });
 
   }
+  get isMobileValid(): boolean {
+  return /^[6-9][0-9]{9}$/.test(
+    String(this.mobileNumber || '').trim()
+  );
+}
   onMobileChange(value: string) {
-    this.mobileNumber = value;
+    this.mobileNumber = String(value || '').trim();
+    this.isSearchDone = false;
+      this.isdata = false;
+
     if (this.currentRefIndex === 1) {
       this.reference2Touched = true;
 
@@ -703,38 +746,7 @@ export class Referenceinfo implements OnInit {
     this.referenceForm.updateValueAndValidity({ emitEvent: true });
   }
 
-  referenceUniquenessValidator1: ValidatorFn = (
-    control: AbstractControl
-  ): ValidationErrors | null => {
 
-    const ref1 = control.get('reference1') as FormArray;
-    const ref2 = control.get('reference2') as FormArray;
-
-    if (!ref1?.length || !ref2?.length) return null;
-
-    const r1 = ref1.at(0);
-    const r2 = ref2.at(0);
-
-    const phone1 = r1.get('phone')?.value;
-    const phone2 = r2.get('phone')?.value;
-    const email1 = r1.get('email')?.value;
-    const email2 = r2.get('email')?.value;
-
-    const errors: any = {};
-
-    if (phone1 && phone2 && phone1 === phone2) {
-      errors.samePhone = true;
-    }
-
-    if (
-      email1 && email2 &&
-      email1.trim().toLowerCase() === email2.trim().toLowerCase()
-    ) {
-      errors.sameEmail = true;
-    }
-
-    return Object.keys(errors).length ? errors : null;
-  };
 
   referenceUniquenessValidator: ValidatorFn = (control: AbstractControl): ValidationErrors | null => {
     const ref1 = control.get('reference1') as FormArray;
@@ -863,12 +875,21 @@ export class Referenceinfo implements OnInit {
   }
 
   // ==================== SEARCH BUTTON ====================
-  searchReference() {
-    if (this.mobileNumber.length !== 10) {
-      return;
-    }
-    this.searchMobile(this.mobileNumber);
+ searchReference(): void {
+  if (
+    !this.isMobileValid ||
+    this.referenceForm.hasError('samePhone')
+  ) {
+    this.phone?.control?.markAsTouched();
+    this.phone?.control?.updateValueAndValidity();
+
+    this.isSearchDone = false;
+    this.isdata = false;
+    return;
   }
+
+  this.searchMobile(this.mobileNumber);
+}
 
   // ==================== BACK TO MOBILE STEP ====================
   backToMobileStep() {

@@ -64,6 +64,7 @@ height: 54px;
 //file upload preview
 
 .addcust-img-box {
+  height:52px;
   display: flex;
   padding: $spacing_7;
   justify-content: space-between;
@@ -90,7 +91,15 @@ height: 54px;
   width: 100%;
 }
 
+.file-name {
+  flex: 1 1 auto;
+  min-width: 0;
+  margin: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
 
+}
 
 /* Icons container */
 .addcust-img-box .icons {

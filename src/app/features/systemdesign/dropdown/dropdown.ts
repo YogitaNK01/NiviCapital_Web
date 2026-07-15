@@ -74,6 +74,8 @@ private isCvaWrite = false;
  private onChange = (value: any) => {};
   private onTouched = () => { };
 
+  @Input() dropdownPosition: 'top' | 'bottom' = 'bottom';
+  
   constructor(private eRef: ElementRef) {}
 
   ngOnChanges1(changes: SimpleChanges) {

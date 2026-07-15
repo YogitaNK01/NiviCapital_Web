@@ -173,7 +173,7 @@
                         @if (hasLocal('marksheet' ,i)) {
                         <label class="text-label">Marksheet <span class="text-danger">*</span></label>
                         <div class="addcust-img-box mt-2" [ngClass]="{'disabled-div' : isViewModeon}">
-                            <p class="text-label">{{ getLocalName('marksheet', i) }}</p>
+                            <p class="text-label file-name" [title]="getLocalName('marksheet', i, false)">{{ getLocalName('marksheet', i) }}</p>
                             <div class="icons">
 
                                 <span class="view" (click)="viewLocalFile('marksheet', i)">
@@ -193,8 +193,9 @@
 
                         }
                         @else{
-                        <app-uploadbtn [config]="basicConfig" [uploadViaApi]="false" [required]="true" [disabled]="isViewModeon"
-                            label="Marksheet " (fileChange)="onFileChange($event, educationType, 'marksheet')">
+                        <app-uploadbtn [config]="basicConfig" [uploadViaApi]="false" [required]="true"
+                            [disabled]="isViewModeon" label="Marksheet "
+                            (fileChange)="onFileChange($event, educationType, 'marksheet')">
                         </app-uploadbtn>
                         }
 
@@ -208,7 +209,7 @@
                         <label class="text-label">Passing / Leaving Certificate <span
                                 class="text-danger">*</span></label>
                         <div class="addcust-img-box mt-2" [ngClass]="{'disabled-div' : isViewModeon}">
-                            <p class="text-label">{{ getLocalName('lc') }}</p>
+                            <p class="text-label file-name" [title]="getLocalName('lc', undefined, false)">{{ getLocalName('lc') }}</p>
                             <div class="icons">
 
                                 <span class="view" (click)="viewLocalFile('lc')">
@@ -253,7 +254,7 @@
                             </label>
 
                             <div class="addcust-img-box mt-2" [ngClass]="{'disabled-div' : isViewModeon}">
-                                <p class="text-label">{{ getLocalName('marksheet', i) }}</p>
+                                <p class="text-label file-name" [title]="getLocalName('marksheet', i, false)">{{ getLocalName('marksheet', i) }}</p>
                                 <div class="icons">
 
                                     <span class="view" (click)="viewLocalFile('marksheet', i)">
@@ -293,7 +294,7 @@
                         </label>
 
                         <div class="addcust-img-box mt-2" [ngClass]="{'disabled-div' : isViewModeon}">
-                            <p class="text-label">{{ getLocalName('lc') }}</p>
+                            <p class="text-label file-name" [title]="getLocalName('lc', undefined, false)">{{ getLocalName('lc') }}</p>
                             <div class="icons">
 
                                 <span class="view" (click)="viewLocalFile('lc')">
@@ -344,11 +345,7 @@
 
                             <div class="other-doc-title">
 
-                                <!-- <app-inputfield label="Title" [required]="educationType !== 'POSTGRADUATE'" [disabled]="isViewModeon"
-                                    placeholder="Enter text here"
-                                    (input)="main.restrictInput($event, 'text');slot.title = $any($event.target).value"
-                                    [maxlength]="100">
-                                </app-inputfield> -->
+
                                 <app-inputfield label="Title" [required]="educationType !== 'POSTGRADUATE'"
                                     [disabled]="isViewModeon" placeholder="Enter text here" [valueslot]="slot.title"
                                     (input)="onOtherTitleInput(slot, $event)" [maxlength]="100">
@@ -361,12 +358,18 @@
                                 </div> -->
                             </div>
 
-                            <div class=" other-doc-upload" [ngClass]="slot.file ? 'mt-1' : 'mt-0'">
+                            <div class=" other-doc-upload" [ngClass]="slot.file ? 'mt-0' : 'mt-0'">
 
                                 @if (slot.file) {
-                                <div class="addcust-img-box mt-4" [ngClass]="{'disabled-div' : isViewModeon}">
-                                    <p class="text-label">{{ slot.file.name }}</p>
+                                <label class="text-label">
+                                    Upload Document <span class="text-danger">*</span>
+                                </label>
 
+                                <div class="addcust-img-box mt-2" [ngClass]="{'disabled-div' : isViewModeon}">
+                                    <!-- <p class="text-label">{{getOtherFileName(slot.file.name)  }}</p> -->
+                                    <p class="text-label " [title]="getOtherFileName(slot, false)">
+                                        {{ getOtherFileName(slot,true) }}
+                                    </p>
                                     <div class="icons">
                                         <span class="view" (click)="viewOther(slot)">
                                             <img src="/assets/images/icons/eyered.svg">
@@ -382,8 +385,9 @@
                                     </div>
                                 </div>
                                 } @else {
-                                <app-uploadbtn [config]="basicConfig" [required]="educationType !== 'POSTGRADUATE'" [disabled]="isViewModeon"
-                                    label="Upload Document" (fileChange)="onOtherFileChange($event, slot)">
+                                <app-uploadbtn [config]="basicConfig" [required]="educationType !== 'POSTGRADUATE'"
+                                    [disabled]="isViewModeon" label="Upload Document"
+                                    (fileChange)="onOtherFileChange($event, slot)">
                                 </app-uploadbtn>
                                 }
                             </div>

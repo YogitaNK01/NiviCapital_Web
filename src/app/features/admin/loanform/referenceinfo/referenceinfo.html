@@ -138,7 +138,7 @@
                                     </div>
 
 
-                                    @if(isdata && !(referenceForm.hasError('samePhone'))) {
+                                    @if(isdata  && isSearchDone &&  isMobileValid && !(referenceForm.hasError('samePhone'))) {
                                     <div class=" mt-1 text-start">
                                         <small class="text-body-2 fst-italic text-danger">This is new
                                             customer</small>
@@ -148,8 +148,8 @@
 
 
                                 <app-buttons type="button" [label]=" isSearchDone ? 'Next' : 'Search'"
-                                    (click)="!isSearchDone ? searchReference() : goNext()"
-                                    [disabled]="phone.invalid || !mobileNumber || referenceForm.hasError('samePhone')"
+                                    (click)="handleMobileAction()"
+                                    [disabled]="!isMobileValid  || referenceForm.hasError('samePhone')"
                                     class="btn btncustomClass searchbtn" color="primary">
                                 </app-buttons>
                             </div>
@@ -420,7 +420,7 @@
 
                                     <div class="col-lg-6 col-sm-12 mt-20">
 
-                                        <app-dropdown [options]="cityOptions" [placeholder]="'Select City'"
+                                        <app-dropdown [options]="cityOptions" [placeholder]="'Select City'" dropdownPosition="top"
                                             [selectedValue]="selectedCityId[currentRefIndex]" [searchable]="true"
                                             (selectedValueChange)="selectPerCity($event)" label="City" name="city">
                                         </app-dropdown>
@@ -701,7 +701,7 @@
 
                                     <div class="col-lg-6 col-sm-12 mt-20">
 
-                                        <app-dropdown [options]="cityOptions" [placeholder]="'Select City'"
+                                        <app-dropdown [options]="cityOptions" [placeholder]="'Select City'" dropdownPosition="top"
                                             [selectedValue]="selectedCityId[currentRefIndex]" [searchable]="true"
                                             (selectedValueChange)="selectPerCity($event)" label="City" name="city">
                                         </app-dropdown>

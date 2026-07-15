@@ -278,7 +278,7 @@
                     <div class="w-100 gap-3">
                         <div formArrayName="creditcard">
                             @for(item of getFormArray('creditcard').controls; track $index; let i = $index){
-                            <div class="row common-details-box d-flex flex-row gap-0" [formGroupName]="i">
+                            <div class="row common-details-box d-flex flex-row gap-0 pb-3" [formGroupName]="i">
 
 
 
@@ -437,7 +437,7 @@
                     <div class="w-100 gap-3">
                         <div formArrayName="bnpl">
                             @for(item of getFormArray('bnpl').controls; track $index; let i = $index){
-                            <div class="row common-details-box d-flex flex-row gap-0" [formGroupName]="i">
+                            <div class="row common-details-box d-flex flex-row gap-0 pb-3" [formGroupName]="i">
 
 
                                 <div class="text-dp-3-regular d-flex align-items-center justify-content-between">
@@ -577,7 +577,7 @@
                     <div class="w-100 gap-3">
                         <div formArrayName="other">
                             @for(item of other.controls; track item; let i = $index){
-                            <div class="row common-details-box d-flex flex-row gap-0" [formGroupName]="i">
+                            <div class="row common-details-box d-flex flex-row gap-0 pb-3" [formGroupName]="i">
 
 
                                 <div class="text-dp-3-regular d-flex align-items-center justify-content-between">

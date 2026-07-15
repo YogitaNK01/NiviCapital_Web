@@ -975,11 +975,28 @@ export class Incomeinfo {
     this.rebuildDocumentMap();
   }
 
-  getDocumentName(key: any): any {
+  getDocumentName1(key: any): any {
     const doc = this.getDocumentByKey(key);
     return doc?.fileName || doc?.title || 'No file uploaded';  // Use fileName!
   }
 
+getDocumentName(
+  key: any,truncate=true
+): any {
+  const file = this.getDocumentByKey(key);
+
+  if (!file) return '';
+
+  const fileName =
+    file instanceof File
+      ? file.name
+      : file.fileName || file.name || '';
+
+  
+    if (!truncate || fileName.length <= 30) {
+          return fileName; }
+            return `${fileName.substring(0, 30)}...`;
+}
 
   getDocumentUrl(key: string): string {
     const doc = this.getDocumentByKey(key);

@@ -131,7 +131,7 @@
                 @if (hasLocalFile(activeEducation,'ielts')) {
                 <label class="text-label">Passing / Leaving Certificate <span class="text-danger">*</span></label>
                 <div class="addcust-img-box mt-2" [ngClass]="{'disabled-div' : isViewMode}">
-                    <p class="text-label">{{ getLocalFileName(activeEducation,'ielts') }}</p>
+                    <p class="text-label file-name" [title]="getLocalFileName(activeEducation,'ielts',undefined,false)">{{ getLocalFileName(activeEducation,'ielts') }}</p>
                     <div class="icons">
                         <span class="view" (click)="viewLocal(activeEducation,'ielts')">
                             <img src="/assets/images/icons/eyered.svg" alt="view">
@@ -186,7 +186,7 @@
                 @if (hasLocalFile(activeEducation,'offerletter')) {
                 <label class="text-label">Offer Letter <span class="text-danger">*</span></label>
                 <div class="addcust-img-box mt-2" [ngClass]="{'disabled-div' : isViewMode}">
-                    <p class="text-label">{{ getLocalFileName(activeEducation,'offerletter') }}</p>
+                    <p class="text-label file-name" [title]="getLocalFileName(activeEducation,'offerletter',undefined,false)">{{ getLocalFileName(activeEducation,'offerletter') }}</p>
                     <div class="icons">
                         <span class="view" (click)="viewLocal(activeEducation,'offerletter')">
                             <img src="/assets/images/icons/eyered.svg" alt="view">

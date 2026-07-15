@@ -39,7 +39,8 @@
 
   <!-- Dropdown List -->
   @if (isOpen) {
-  <div class="dropdown-list dropdown-listdata">
+  <div class="dropdown-list dropdown-listdata"
+  [class.open-top]="dropdownPosition === 'top'"  [class.open-bottom]="dropdownPosition === 'bottom'">
 
     <!-- Search -->
     @if (searchable) {

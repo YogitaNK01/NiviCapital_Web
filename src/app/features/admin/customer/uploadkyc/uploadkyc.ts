@@ -767,9 +767,25 @@ if (this.isViewMode) return;
     return !!this.uploadedFiles[key] || !!this.uploadedFileMeta[key]?.fileName;;
   }
 
-  getLocalFileName(key: string): string {
+  getLocalFileName1(key: string): string {
     return this.uploadedFiles[key]?.name || this.uploadedFileMeta[key]?.fileName || 'No file uploaded';
   }
+
+  getLocalFileName(
+  key: any,truncate=true
+): any {
+  // const file = this.getDocumentByKey(key);
+
+  // if (!file) return '';
+
+  const fileName =
+    this.uploadedFiles[key]?.name || this.uploadedFileMeta[key]?.fileName|| '';
+
+  
+    if (!truncate || fileName.length <= 30) {
+          return fileName; }
+            return `${fileName.substring(0, 30)}...`;
+}
 
   getLocalFileUrl(key: string): string {
     return this.uploadedFileMeta[key]?.fileUrl || this.uploadedPreviewUrls[key] || '';

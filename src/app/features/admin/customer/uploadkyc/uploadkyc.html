@@ -73,12 +73,12 @@
         <div class="col-lg-6 col-sm-12 loan-mt-4">
 
           @if (hasLocalFile('aadharfront')) {
-          <label class="text-label">
+          
+  <div class=" text-label">
             Aadhaar Card Front<span class="text-danger">*</span>
-          </label>
-
+          </div>
           <div class="addcust-img-box mt-2" [ngClass]="{'disabled-div' : isViewMode}">
-            <p class="text-label">{{ getLocalFileName('aadharfront') }}</p>
+            <p class="text-label file-name" [title]="getLocalFileName('aadharfront', false)">{{ getLocalFileName('aadharfront') }}</p>
 
             <div class="icons">
               <span class="view" (click)="viewLocalFile('aadharfront')">
@@ -107,12 +107,12 @@
 
         <div class="col-lg-6 col-sm-12 loan-mt-4">
           @if (hasLocalFile('aadharback')) {
-          <label class="text-label">
+         
+  <div class=" text-label">
             Aadhaar Card Back<span class="text-danger">*</span>
-          </label>
-
+          </div>
           <div class="addcust-img-box mt-2" [ngClass]="{'disabled-div' : isViewMode}">
-            <p class="text-label">{{ getLocalFileName('aadharback') }}</p>
+            <p class="text-label file-name" [title]="getLocalFileName('aadharback', false)">{{ getLocalFileName('aadharback') }}</p>
 
             <div class="icons">
               <span class="view" (click)="viewLocalFile('aadharback')">
@@ -160,12 +160,13 @@
         <div class="col-lg-6 loan-mt-4 col-sm-12">
 
           @if (hasLocalFile('pan')) {
-          <label class="text-label">
+            <div class=" text-label">
             PAN Card<span class="text-danger">*</span>
-          </label>
+          </div>
+        
 
           <div class="addcust-img-box mt-2" [ngClass]="{'disabled-div' : isViewMode}">
-            <p class="text-label">{{ getLocalFileName('pan') }}</p>
+            <p class="text-label file-name" [title]="getLocalFileName('pan', false)">{{ getLocalFileName('pan') }}</p>
 
             <div class="icons">
               <span class="view" (click)="viewLocalFile('pan')">
@@ -216,12 +217,13 @@
         <div class="col-lg-6 loan-mt-4 col-sm-12">
 
           @if (hasLocalFile('passport')) {
-          <label class="text-label">
+         
+            <div class=" text-label">
             Passport<span class="text-danger">*</span>
-          </label>
+          </div>
 
           <div class="addcust-img-box mt-2" [ngClass]="{'disabled-div' : isViewMode}">
-            <p class="text-label">{{ getLocalFileName('passport') }}</p>
+            <p class="text-label file-name" [title]="getLocalFileName('passport', false)">{{ getLocalFileName('passport') }}</p>
 
             <div class="icons">
               <span class="view" (click)="viewLocalFile('passport')">
@@ -405,12 +407,14 @@
         </div>
         <div class="col-lg-6  col-sm-12 ">
           @if (hasLocalFile('secaddress')) {
-          <label class="text-label">
+         
+
+            <div class=" text-label">
             Secondary Address Proof Name<span class="text-danger">*</span>
-          </label>
+          </div>
 
           <div class="addcust-img-box mt-2" [ngClass]="{'disabled-div' : isViewMode}">
-            <p class="text-label">{{ getLocalFileName('secaddress') }}</p>
+            <p class="text-label file-name" [title]="getLocalFileName('secaddress', false)">{{ getLocalFileName('secaddress') }}</p>
 
             <div class="icons">
               <span class="view" (click)="viewLocalFile('secaddress')">

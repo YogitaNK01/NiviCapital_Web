@@ -1007,7 +1007,7 @@ isOtherInstituteSelected(step: StepKey): boolean {
       file?.name ||
       '';
   }
-  getLocalFileName(level: any, docType: DocType, index?: number): string {
+  getLocalFileName(level: any, docType: DocType, index?: number,truncate=true): string {
     const file: any = this.getStoredFileMeta(
       level as StepKey,
       docType,
@@ -1016,11 +1016,19 @@ isOtherInstituteSelected(step: StepKey): boolean {
 
     if (!file) return '';
 
-    if (file instanceof File) {
-      return file.name;
-    }
+   
+     const fileName =
+    file instanceof File
+      ? file.name
+      : file.fileName || file.name || '';
 
-    return file.fileName || file.name || '';
+
+     if (!truncate || fileName.length <= 30) {
+    return fileName;
+  }
+
+  return `${fileName.substring(0, 30)}...`;
+
   }
   private getStoredFileMeta(step: StepKey, docType: DocType, index?: number): any {
     const normalizedDoc = this.normalizeDocType(docType);
