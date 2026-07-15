@@ -8,6 +8,7 @@ import { MatMenuModule } from '@angular/material/menu';
 import { MatButtonModule } from '@angular/material/button';
 import { Router } from '@angular/router';
 import { Loanstepperservice } from '../../../core/service/loanstepperservice';
+import { Main } from '../../../core/service/main';
 
 
 export interface TableColumn {
@@ -30,7 +31,7 @@ export interface TableColumn {
   styleUrl: './tables.scss'
 })
 export class Tables implements OnChanges {
- 
+
   //  @Input() apiUrl!: string;               
   @Input() columns: TableColumn[] = [];
   @Input() data: any[] = [];
@@ -56,7 +57,7 @@ export class Tables implements OnChanges {
   @Output() pageChange = new EventEmitter<number>();
   @Input() disableEditFn?: (row: any) => boolean;
 
- 
+
 
 
 
@@ -73,8 +74,8 @@ export class Tables implements OnChanges {
 
     FETCH_KYC: 'kycinfo',
     SAVE_KYC: 'kycinfo',
-  SAVE_LAST_QUALIFICATION: 'educationDetails',
-  EDUCATIONAL_DETAILS:'educationDetails',
+    SAVE_LAST_QUALIFICATION: 'educationDetails',
+    EDUCATIONAL_DETAILS: 'educationDetails',
     INCOME: 'incomeinfo',
 
     SAVE_ASSETS: 'assetsinfo',
@@ -89,7 +90,7 @@ export class Tables implements OnChanges {
 
     SUMMARY: 'summaryinfo'
   };
-  constructor(private http: HttpClient, private router: Router, private stepperservice: Loanstepperservice) { }
+  constructor(private http: HttpClient, private router: Router, private stepperservice: Loanstepperservice,private main:Main) { }
 
   ngOnInit() {
     this.displayedColumnKeys = ['select', ...this.columns.map(c => c.key), 'actions'];
@@ -230,6 +231,12 @@ export class Tables implements OnChanges {
   }
   onEdit(row: any) {
     console.log("Edit", row);
+    this.main.setState({
+      phone: row.mobile,
+      userId: row.userId,
+      currentStep: 0
+    });
+
     if (row.custId == "-" || row.custId == null) {
       this.router.navigate(
         ['/admin/customer/addcustomer'],

@@ -818,6 +818,7 @@ export class Assetsinfo implements OnInit {
       title: 'Are you sure want to Remove',
       message: ``,
       showCancel: true,
+       okText:'OK',
       onOk: () => {
         event.stopPropagation();
 
@@ -1660,6 +1661,7 @@ export class Assetsinfo implements OnInit {
       title: 'Are you sure want to Remove',
       message: ``,
       showCancel: true,
+       okText:'OK',
       onOk: () => {
         switch (type) {
           case 'property':

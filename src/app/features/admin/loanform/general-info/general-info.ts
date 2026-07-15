@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, Input } from '@angular/core';
 import { Loanformservice } from '../../../../core/service/loanformservice';
-import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, ValidatorFn, AbstractControl, ValidationErrors } from '@angular/forms';
 import { Inputfield } from '../../../systemdesign/inputfield/inputfield';
 import { Buttons } from '../../../systemdesign/buttons/buttons';
 import { Radiobuttons } from '../../../systemdesign/radiobuttons/radiobuttons';
@@ -140,7 +140,7 @@ export class GeneralInfo implements OnInit {
 
 
   ]
-
+  formSubmitted = false;
   lastSavedPayload: any = null;
   isSummaryEditMode = false;
   viewOnly = false;
@@ -258,8 +258,8 @@ export class GeneralInfo implements OnInit {
       coursename: ['', Validators.required],
       othercoursenametitle: [''],
       // courseduration: [''],
-      coursestartdate: ['', [Validators.required, this.dateMinValidator(() => new Date())]],
-      courseenddate: ['', [Validators.required, this.endDateValidator()]],
+      coursestartdate: ['', [Validators.required, this.validDateValidator(), this.dateMinValidator(() => new Date())]],
+      courseenddate: ['', [Validators.required, this.validDateValidator(), this.endDateValidator()]],
       checkedasset: [null, Validators.required],
       lendingpartner: ['', Validators.required],
 
@@ -302,11 +302,13 @@ export class GeneralInfo implements OnInit {
     // this.getOccupationdetails();
     await this.getOccupationdetailsAsync();
     if (this.isCoApplicant) {
-       await this.getRealtionShipwithAsync();} 
+      await this.getRealtionShipwithAsync();
+    }
     else {
-        this.states();
-        this.getEducationdetails();
-        this.getlendingpartnersdetails();}
+      this.states();
+      this.getEducationdetails();
+      this.getlendingpartnersdetails();
+    }
     this.listenToChanges();
     await this.loadGeneralInfoForBothFlows()
 
@@ -597,17 +599,17 @@ export class GeneralInfo implements OnInit {
         this.handleOccupationChange(value);
       });
 
-      this.registerForm.get('coursestartdate')?.valueChanges.subscribe((startDate) => {
-        if (!startDate) return;
+      this.registerForm
+        .get('coursestartdate')
+        ?.valueChanges
+        .subscribe(() => {
+          const endDateControl =
+            this.registerForm.get('courseenddate');
 
-        const start = new Date(startDate);
-        start.setHours(0, 0, 0, 0);
-        this.calculatedEndDate = start;
-        this.form.get('courseenddate')?.updateValueAndValidity();
-        // const endCtrl = this.registerForm.get('courseenddate');
-        // endCtrl?.reset();
-        // endCtrl?.updateValueAndValidity();
-      });
+          endDateControl?.updateValueAndValidity({
+            emitEvent: false
+          });
+        });
     }
   }
   listenToChanges1() {
@@ -887,45 +889,45 @@ export class GeneralInfo implements OnInit {
 
   }
   getOccupationdetailsAsync(): Promise<void> {
-  return new Promise((resolve) => {
-    this.formSvc.getOccupations().subscribe({
-      next: (res: any) => {
-        const list = res.data ?? res;
+    return new Promise((resolve) => {
+      this.formSvc.getOccupations().subscribe({
+        next: (res: any) => {
+          const list = res.data ?? res;
 
-        this.selectoccupation = list.map((s: any) => ({
-          value: s.occupationId,
-          label: s.occupationName,
-        }));
+          this.selectoccupation = list.map((s: any) => ({
+            value: s.occupationId,
+            label: s.occupationName,
+          }));
 
-        resolve();
-      },
-      error: () => {
-        this.selectoccupation = [];
-        resolve();
-      }
+          resolve();
+        },
+        error: () => {
+          this.selectoccupation = [];
+          resolve();
+        }
+      });
     });
-  });
-}
-getRealtionShipwithAsync(): Promise<void> {
-  return new Promise((resolve) => {
-    this.formSvc.getRelationShip().subscribe({
-      next: (res: any) => {
-        const list = res.data ?? res;
+  }
+  getRealtionShipwithAsync(): Promise<void> {
+    return new Promise((resolve) => {
+      this.formSvc.getRelationShip().subscribe({
+        next: (res: any) => {
+          const list = res.data ?? res;
 
-        this.selectrelationship = list.map((s: any) => ({
-          value: s.id,
-          label: s.relationWithApplicant,
-        }));
+          this.selectrelationship = list.map((s: any) => ({
+            value: s.id,
+            label: s.relationWithApplicant,
+          }));
 
-        resolve();
-      },
-      error: () => {
-        this.selectrelationship = [];
-        resolve();
-      }
+          resolve();
+        },
+        error: () => {
+          this.selectrelationship = [];
+          resolve();
+        }
+      });
     });
-  });
-}
+  }
   getEducationdetails() {
     this.formSvc.getEducation().subscribe((res: any) => {
       const list = res.data ?? res;
@@ -953,10 +955,10 @@ getRealtionShipwithAsync(): Promise<void> {
   restoreDropdownLabels(data: any) {
 
     const occ = this.selectoccupation.find(o => o.value == data.occupation);
-    this.occupationlabel =  'Current Occupation';
+    this.occupationlabel = 'Current Occupation';
 
     const qual = this.seleactqualification.find(q => q.value == data.qualification);
-    this.qualification =  'Last Qualification';
+    this.qualification = 'Last Qualification';
 
     const state = this.Australianstate.find(s => s.value == data.state);
     this.selectedStateLabel = state?.label || '';
@@ -1205,7 +1207,7 @@ getRealtionShipwithAsync(): Promise<void> {
 
   }
 
-  dateMinValidator = (getMinDate: () => Date) => {
+  dateMinValidator1 = (getMinDate: () => Date) => {
     return (control: any) => {
       const value = control.value;
       const minDate = getMinDate();
@@ -1228,7 +1230,7 @@ getRealtionShipwithAsync(): Promise<void> {
     };
   };
 
-  endDateValidator = () => {
+  endDateValidator1 = () => {
     return (control: any) => {
       const endDate = control.value;
       const minDate = this.calculatedEndDate;
@@ -1245,7 +1247,191 @@ getRealtionShipwithAsync(): Promise<void> {
 
     };
   };
+  private dateMinValidator(getMinDate: () => Date): ValidatorFn {
+    return (control: AbstractControl): ValidationErrors | null => {
+      const value = control.value;
 
+      if (value === null || value === undefined || value === '') {
+        return null;
+      }
+
+      const selectedDate = this.parseStrictDate(value);
+
+      // Invalid date will be handled by validDateValidator.
+      if (!selectedDate) {
+        return null;
+      }
+
+      const minimumDate = getMinDate();
+
+      if (
+        !(minimumDate instanceof Date) ||
+        Number.isNaN(minimumDate.getTime())
+      ) {
+        return null;
+      }
+
+      const normalizedMinimumDate = new Date(
+        minimumDate.getFullYear(),
+        minimumDate.getMonth(),
+        minimumDate.getDate()
+      );
+
+      normalizedMinimumDate.setHours(0, 0, 0, 0);
+
+      return selectedDate < normalizedMinimumDate
+        ? { minDateError: true }
+        : null;
+    };
+  }
+  private endDateValidator(): ValidatorFn {
+    return (control: AbstractControl): ValidationErrors | null => {
+      const endValue = control.value;
+
+      if (
+        endValue === null ||
+        endValue === undefined ||
+        endValue === ''
+      ) {
+        return null;
+      }
+
+      const startValue =
+        control.parent?.get('coursestartdate')?.value;
+
+      if (
+        startValue === null ||
+        startValue === undefined ||
+        startValue === ''
+      ) {
+        return null;
+      }
+
+      const startDate = this.parseStrictDate(startValue);
+      const endDate = this.parseStrictDate(endValue);
+
+      // invalidDate is handled by validDateValidator.
+      if (!startDate || !endDate) {
+        return null;
+      }
+
+      return endDate <= startDate
+        ? { invalidEndDate: true }
+        : null;
+    };
+  }
+  private parseStrictDate(value: unknown): Date | null {
+    if (!value) {
+      return null;
+    }
+
+    // JavaScript Date
+    if (value instanceof Date) {
+      if (Number.isNaN(value.getTime())) {
+        return null;
+      }
+
+      const result = new Date(
+        value.getFullYear(),
+        value.getMonth(),
+        value.getDate()
+      );
+
+      result.setHours(0, 0, 0, 0);
+      return result;
+    }
+
+    // Moment-like object
+    if (
+      typeof value === 'object' &&
+      value !== null &&
+      '_isAMomentObject' in value
+    ) {
+      const momentValue = value as any;
+      const convertedDate = momentValue.toDate();
+
+      if (
+        !(convertedDate instanceof Date) ||
+        Number.isNaN(convertedDate.getTime())
+      ) {
+        return null;
+      }
+
+      convertedDate.setHours(0, 0, 0, 0);
+      return convertedDate;
+    }
+
+    if (typeof value !== 'string') {
+      return null;
+    }
+
+    const text = value.trim();
+
+    let day: number;
+    let month: number;
+    let year: number;
+
+    // DD/MM/YYYY
+    const displayFormatMatch = text.match(
+      /^(\d{2})\/(\d{2})\/(\d{4})$/
+    );
+
+    // YYYY-MM-DD
+    const isoFormatMatch = text.match(
+      /^(\d{4})-(\d{2})-(\d{2})$/
+    );
+
+    if (displayFormatMatch) {
+      day = Number(displayFormatMatch[1]);
+      month = Number(displayFormatMatch[2]);
+      year = Number(displayFormatMatch[3]);
+    } else if (isoFormatMatch) {
+      year = Number(isoFormatMatch[1]);
+      month = Number(isoFormatMatch[2]);
+      day = Number(isoFormatMatch[3]);
+    } else {
+      return null;
+    }
+
+    if (
+      year < 1000 ||
+      month < 1 ||
+      month > 12 ||
+      day < 1 ||
+      day > 31
+    ) {
+      return null;
+    }
+
+    const parsedDate = new Date(year, month - 1, day);
+
+    // Prevent rollover:
+    // 31/02/2026 must not become a valid date in March.
+    if (
+      parsedDate.getFullYear() !== year ||
+      parsedDate.getMonth() !== month - 1 ||
+      parsedDate.getDate() !== day
+    ) {
+      return null;
+    }
+
+    parsedDate.setHours(0, 0, 0, 0);
+    return parsedDate;
+  }
+  private validDateValidator(): ValidatorFn {
+    return (control: AbstractControl): ValidationErrors | null => {
+      const value = control.value;
+
+      // Let Validators.required handle empty values.
+      if (value === null || value === undefined || value === '') {
+        return null;
+      }
+
+      return this.parseStrictDate(value)
+        ? null
+        : { invalidDate: true };
+    };
+  }
   formatDate1(date: any): string | null {
     if (!date) return null;
 
@@ -1294,7 +1480,7 @@ getRealtionShipwithAsync(): Promise<void> {
   }
   mapLocalToApiFormat(local: any) {
     return {
-      currentOccupationId: local.currentOccupationId ||  local.occupationId || local.occupation,
+      currentOccupationId: local.currentOccupationId || local.occupationId || local.occupation,
 
       occupationId:
         local.occupationId ||
@@ -1473,21 +1659,21 @@ getRealtionShipwithAsync(): Promise<void> {
 
     this.checkboxasset = data.hasAssets ? 'Yes' : 'No';
 
-    
-  // important for custom dropdown display
-  const selectedOccupation = this.selectoccupation.find(
-    x => x.value === occupation
-  );
 
-  this.occupationlabel =
-    'Current Occupation';
+    // important for custom dropdown display
+    const selectedOccupation = this.selectoccupation.find(
+      x => x.value === occupation
+    );
 
-  const selectedRelation = this.selectrelationship.find(
-    x => x.value === relationship || x.label === relationship
-  );
+    this.occupationlabel =
+      'Current Occupation';
 
-  this.isOtherRelationship =
-    selectedRelation?.label?.trim().toLowerCase() === 'other';
+    const selectedRelation = this.selectrelationship.find(
+      x => x.value === relationship || x.label === relationship
+    );
+
+    this.isOtherRelationship =
+      selectedRelation?.label?.trim().toLowerCase() === 'other';
   }
 
   formatRelation(value: any): string {
@@ -1642,7 +1828,7 @@ getRealtionShipwithAsync(): Promise<void> {
         const localPayload = {
           ...input,
           // occupation: payload.occupation,
-            //  occupationId: payload.occupation,
+          //  occupationId: payload.occupation,
           relationship: payload.relationship
         };
 
@@ -1679,7 +1865,24 @@ getRealtionShipwithAsync(): Promise<void> {
 
 
   next() {
+      this.formSubmitted = true;
     const form = this.activeForm;
+
+      form.updateValueAndValidity();
+
+  if (!this.isCoApplicant) {
+    this.registerForm
+     .get('coursestartdate')
+      ?.updateValueAndValidity({
+        emitEvent: false
+      });
+
+    this.registerForm
+      .get('courseenddate')
+      ?.updateValueAndValidity({
+        emitEvent: false
+     });
+  }
 
     if (!form.valid) {
       console.log("form invalid");
@@ -1693,10 +1896,10 @@ getRealtionShipwithAsync(): Promise<void> {
         this.msgBox.open({
           title: 'You are not eligible as a co-applicant. Please ask the main applicant to add another co-applicant.',
           message: ``,
-         
+
           okText: '+ Add Co-applicant',
-      cancelText: 'No',
-      showCancel: false,
+          cancelText: 'No',
+          showCancel: false,
           onOk: () => {
             this.router.navigate(['/loanform/co-applicantdetails']);
           }
@@ -1827,7 +2030,7 @@ getRealtionShipwithAsync(): Promise<void> {
   }
   saveSummaryEdit() {
     const form = this.activeForm;
-
+ form.updateValueAndValidity();
     if (!form.valid) {
       console.log("form invalid");
       return;
@@ -1912,9 +2115,28 @@ getRealtionShipwithAsync(): Promise<void> {
     }
   }
 
-  onDateChanged($event: any){
+  onDateChanged1($event: any) {
     this.registerForm.patchValue({
       courseenddate: ''
-    }, {emitEvent: false});
+    }, { emitEvent: false });
   }
+  onDateChanged(event: unknown): void {
+  const startDateControl =
+    this.registerForm.get('coursestartdate');
+
+  const endDateControl =
+    this.registerForm.get('courseenddate');
+
+  startDateControl?.updateValueAndValidity({
+    emitEvent: false
+  });
+
+  endDateControl?.reset('', {
+    emitEvent: false
+  });
+
+  endDateControl?.updateValueAndValidity({
+    emitEvent: false
+  });
+}
 }

@@ -802,6 +802,8 @@ if (this.isViewMode) return;
       title: 'Are you sure want to Remove',
       message: ``,
       showCancel: true,
+      okText:'OK',
+
       onOk: () => {
         this.uploadedFiles[key] = null;
         delete this.files[key];

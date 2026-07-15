@@ -35,6 +35,10 @@ export interface UserData {
   createdAt: number[];
 }
 
+interface CustomerFlowState {  phone: string;
+   userId: string;  currentStep: number;
+  }
+
 @Injectable({
   providedIn: 'root'
 })
@@ -54,6 +58,7 @@ export class Main {
   private _lastLogin = signal<string | null>(null);
   lastLogin = computed(() => this._lastLogin());
   
+    private readonly storageKey = 'customerFlowState';
   constructor(private http: HttpClient) { }
 
   getLogin(payload: LoginPayload): Observable<any> {
@@ -74,6 +79,46 @@ export class Main {
     }
   }
  
+
+  setState(state: CustomerFlowState): void {
+    sessionStorage.setItem(
+      this.storageKey,
+      JSON.stringify(state)
+    );
+  }
+
+  getState(): CustomerFlowState | null {
+    const storedState = sessionStorage.getItem(this.storageKey);
+
+    if (!storedState) {
+      return null;
+    }
+
+    try {
+      return JSON.parse(storedState) as CustomerFlowState;
+    } catch {
+      this.clearState();
+      return null;
+    }
+  }
+
+  updateStep(currentStep: number): void {
+    const state = this.getState();
+
+    if (!state) {
+      return;
+    }
+
+    this.setState({
+      ...state,
+      currentStep
+    });
+  }
+
+  clearState(): void {
+    sessionStorage.removeItem(this.storageKey);
+  }
+
   getAllUsers(page:number,size:number): Observable<ApiResponse<PageResponse<UserData>>> {
   return this.http.get<ApiResponse<PageResponse<UserData>>>(
     `${this.baseUrl}/v1/customers/my-customers?page=${page}&size=${size}`,

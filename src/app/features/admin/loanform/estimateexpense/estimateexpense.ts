@@ -1033,7 +1033,7 @@ export class Estimateexpense {
     this.msgBox.open({
       title: 'Are you sure want to Remove',
       message: ``,
-      showCancel: true,
+      showCancel: true, okText:'OK',
       onOk: () => {
 
 

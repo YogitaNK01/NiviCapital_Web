@@ -1769,7 +1769,7 @@ export class Liabilitiesinfo {
     this.msgBox.open({
       title: 'Are you sure want to Remove',
       message: ``,
-      showCancel: true,
+      showCancel: true, okText:'OK',
       onOk: () => {
         const key = acc.key;
         const title = acc.title;
@@ -1832,7 +1832,7 @@ export class Liabilitiesinfo {
     this.msgBox.open({
       title: 'Are you sure want to Remove',
       message: ``,
-      showCancel: true,
+      showCancel: true, okText:'OK',
       onOk: () => {
         switch (type) {
           case 'loantype':

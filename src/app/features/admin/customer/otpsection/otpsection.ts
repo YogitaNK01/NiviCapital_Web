@@ -26,7 +26,7 @@ export class Otpsection implements OnInit {
   @Output() timer = new EventEmitter<number>();
   @Output() resendbtn = new EventEmitter<number>();
 
-@Input() resetTrigger: number = 0;
+  @Input() resetTrigger: number = 0;
   otp: string[] = [];
   phonenumber: any;
   sendotpId: any;
@@ -38,8 +38,9 @@ export class Otpsection implements OnInit {
   resendSeconds = 60;
   isCounting = false;
   timerId: any;
+  otpStatus: 'default' | 'success' | 'error' = 'default';
 
-  constructor(public mainservice: Main, public addcustomerservice: Addcustomerservice, private route: ActivatedRoute, private cdr: ChangeDetectorRef,private loanform:Loanformservice) { }
+  constructor(public mainservice: Main, public addcustomerservice: Addcustomerservice, private route: ActivatedRoute, private cdr: ChangeDetectorRef, private loanform: Loanformservice) { }
   ngOnInit(): void {
     this.otp = Array(this.length).fill('');
     this.route.queryParams.subscribe(params => {
@@ -62,6 +63,9 @@ export class Otpsection implements OnInit {
       const copy = [...this.otp];
       copy[index] = key;
       this.otp = copy;
+
+      this.otpStatus = 'default';
+      this.otpVerified = false;
 
       this.isOtpComplete = this.otp.every(d => d !== '');
 
@@ -89,6 +93,8 @@ export class Otpsection implements OnInit {
       }
 
       this.otp = copy;
+      this.otpStatus = 'default';
+      this.otpVerified = false;
       this.isOtpComplete = this.otp.every(d => d !== '');
 
       return;
@@ -122,14 +128,16 @@ export class Otpsection implements OnInit {
     }
     this.addcustomerservice.verifyOTP(input).subscribe({
       next: (res) => {
-        console.log("verifyotp---",res);
+        console.log("verifyotp---", res);
         // this.otpSubmit.emit(res.status);
         this.otp_Verified.emit(res);
 
         if (res.status === "success") {
           this.otpVerified = true;
+          this.otpStatus = 'success';
         } else {
           this.otpVerified = false;
+          this.otpStatus = 'error';
         }
 
         this.otpVerifiedSuccess.emit(res);
@@ -179,18 +187,22 @@ export class Otpsection implements OnInit {
     return 'Resend OTP';
   }
 
-resetOtp() {
-  this.otp = new Array(this.length).fill('');
+  resetOtp() {
+    this.otp = new Array(this.length).fill('');
+    this.isOtpComplete = false;
+    this.otpVerified = false;
+    this.otpStatus = 'default';
+    this.hasStarted = false;
 
-  setTimeout(() => {
-    const first = document.getElementById('otp-0') as HTMLInputElement;
-    first?.focus();
-  });
-}
+    setTimeout(() => {
+      const first = document.getElementById('otp-0') as HTMLInputElement;
+      first?.focus();
+    });
+  }
 
-ngOnChanges() {
-  this.resetOtp();
-}
+  ngOnChanges() {
+    this.resetOtp();
+  }
 
   ngOnDestroy() {
     this.timerSub?.unsubscribe();

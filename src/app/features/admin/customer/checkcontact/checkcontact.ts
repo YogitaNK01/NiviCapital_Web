@@ -94,12 +94,22 @@ export class Checkcontact implements OnInit {
   constructor(public service: Main, private tableDataService: TableData, private router: Router, private addcustomerservice: Addcustomerservice,
     private route: ActivatedRoute, private cd: ChangeDetectorRef) { }
   ngOnInit(): void {
-    this.route.queryParams.subscribe(params => {
-      if (params['phone']) {
-        this.prefillPhone = params['phone'];
+    // this.route.queryParams.subscribe(params => {
+    //   if (params['phone']) {
+    //     this.prefillPhone = params['phone'];
 
-      }
-    });
+    //   }
+    // });
+
+     const flowState = this.service.getState();
+   
+
+  if (!flowState) {
+    return;
+  }
+
+  // this.prefillPhone = flowState.phone;
+
   }
 
   searchnumber(data: NgForm) {
@@ -169,10 +179,20 @@ export class Checkcontact implements OnInit {
 
   return 'default';
 }
-  addcustomer() {
+  addcustomer1() {
     this.router.navigate(['/admin/customer/addcustomer'], { queryParams: { phone: this.mobilenumber, id: this.number_id } });
 
   }
+  addcustomer(): void {
+  this.service.setState({
+    phone: this.mobilenumber,
+    userId: this.number_id,
+    currentStep: 0
+  });
+
+  this.router.navigate(['/admin/customer/addcustomer']);
+}
+
   getStatusClass(status: string) {
     return this.tableDataService.getStatus_Class(status);
   }

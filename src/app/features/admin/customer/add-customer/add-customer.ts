@@ -93,13 +93,39 @@ export class AddCustomer implements OnInit {
     private cd: ChangeDetectorRef, private router: Router, private msgBox: Msgboxservice) { }
 
   ngOnInit() {
+     const flowState = this.main.getState();
+   
+
+  if (!flowState) {
+ 
+    return;
+  }
+
+  this.prefillPhone = flowState.phone;
+  this.sendotpId = flowState.userId;
+
+  const restoredStep = Number(flowState.currentStep);
+
+  if (
+    Number.isInteger(restoredStep) &&
+    restoredStep >= 0 &&
+    restoredStep < this.steps.length
+  ) {
+    this.currentStep = restoredStep;
+    this.maxAllowedStep = restoredStep;
+  } else {
+    this.currentStep = 0;
+    this.maxAllowedStep = 0;
+  }
+ this.restoreCustomerDetails();
+
     this.route.queryParams.subscribe(params => {
-      if (params['phone']) {
-        this.prefillPhone = params['phone'];
-        this.sendotpId = params['id'];
-        this.currentStep = 0;
-        this.maxAllowedStep = 0;
-      }
+      // if (params['phone']) {
+      //   this.prefillPhone = params['phone'];
+      //   this.sendotpId = params['id'];
+      //   this.currentStep = 0;
+      //   this.maxAllowedStep = 0;
+      // }
       if (params['step'] == 2) {
         this.currentStep = +params['step'];
         console.log("currentstep", this.currentStep);
@@ -120,7 +146,7 @@ export class AddCustomer implements OnInit {
       if (params['step'] == 0) {
         this.currentStep = +params['step'];
         console.log("currentstep", this.currentStep);
-        this.prefillPhone = params['phone'];
+        this.prefillPhone = flowState.phone;
         this.maxAllowedStep = this.currentStep;
 
       }
@@ -136,6 +162,22 @@ export class AddCustomer implements OnInit {
     this.router.navigate(['/admin/customer']);
   }
 
+private restoreCustomerDetails(): void {
+  const cifDetails = sessionStorage.getItem('cifdetails');
+
+  if (!cifDetails) {
+    return;
+  }
+
+  try {
+    const parsedCifDetails = JSON.parse(cifDetails);
+
+    this.custid = parsedCifDetails.cifId;
+    this.custname = parsedCifDetails.fullName;
+  } catch {
+    sessionStorage.removeItem('cifdetails');
+  }
+}
 
   createcustId(data: NgForm) {
 
@@ -189,10 +231,10 @@ export class AddCustomer implements OnInit {
         this.custname = res.data.fullName;
         //  this.cd.detectChanges();
 
-        setTimeout(() => {
+        // setTimeout(() => {
           this.goToStep(1);
           this.cd.detectChanges();
-        });
+        // });
       },
       error: (err) => {
         console.error("error msg", err);
@@ -345,22 +387,41 @@ export class AddCustomer implements OnInit {
 
 
 
-  goToStep(step: number) {
+  goToStep1(step: number) {
     this.currentStep = step;
     this.maxAllowedStep = Math.max(this.maxAllowedStep, step);
   }
 
+goToStep(step: number): void {
+  if (step < 0 || step >= this.steps.length) {
+    return;
+  }
 
-  prevStep() {
+  this.currentStep = step;
+  this.maxAllowedStep = Math.max(this.maxAllowedStep, step);
+
+  const existingState = this.main.getState();
+
+  this.main.setState({
+    phone: existingState?.phone || this.prefillPhone,
+    userId: existingState?.userId || this.sendotpId,
+    currentStep: step
+  });
+}
+  prevStep1() {
     if (this.currentStep > 0) {
       this.currentStep--;
     }
   }
-
+prevStep(): void {
+  if (this.currentStep > 0) {
+    this.goToStep(this.currentStep - 1);
+  }
+}
   handleSuccessAction(action: string) {
     if (action === 'proceedToKYC') {
 
-      this.goToStep(2);
+      this.goToStep(2);return;
     }
 
     if (action === 'ToDashboard') {
@@ -369,6 +430,7 @@ export class AddCustomer implements OnInit {
         message: ``,
         showCancel: true,
         onOk: () => {
+          this.clearCustomerFlow();
           this.router.navigate(['/admin/customer']);
         }
       });
@@ -420,8 +482,21 @@ export class AddCustomer implements OnInit {
     );
   }
   goTocontact() {
+      this.main.setState({
+    phone: this.prefillPhone,
+    userId: '',
+    currentStep: 0
+  });
+
     this.router.navigate(['/admin/customer/checkcontact'],
-      { queryParams: { phone: this.prefillPhone } })
+      // { queryParams: { phone: this.prefillPhone } }
+    )
 
   }
+  private clearCustomerFlow(): void {
+  this.main.clearState();
+  sessionStorage.removeItem('cifdetails');
+  sessionStorage.removeItem('userdetails');
+  sessionStorage.removeItem('editUser');
+}
 }

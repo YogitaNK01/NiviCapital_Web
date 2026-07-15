@@ -951,6 +951,7 @@ isOtherInstituteSelected(step: StepKey): boolean {
       title: 'Are you sure want to Remove',
       message: ``,
       showCancel: true,
+       okText:'OK',
       onOk: () => {
         const key = this.buildKey(level as StepKey, this.normalizeDocType(docType), index);
 
