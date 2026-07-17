@@ -67,6 +67,11 @@ export class Kycinfo {
 
   isSummaryLoading = false;
   summaryLoaded = false;
+  aadhaarFrontDisplayName: string='';
+  aadhaarBackDisplayName: string='';
+  panDisplayName: string='';
+  passportDisplayName: string='';
+  otherDocumentDisplayName: string='';
   constructor(private fb: FormBuilder, private stepperService: Loanstepperservice, private cd: ChangeDetectorRef, private loanformservice: Loanformservice, private route: ActivatedRoute) { }
 
   ngOnInit(): void {
@@ -247,6 +252,14 @@ export class Kycinfo {
       this.passportmissing = false;
     }
   }
+
+   getFileName(filename:any,maxLength: number = 22): string {
+  const fileName = filename || '';
+    if (fileName.length <= maxLength) {
+          return fileName; 
+        }
+            return `${fileName.substring(0, maxLength)}...`;
+}
   getKycData(id: any) {
     this.isSummaryLoading = true;
     this.summaryLoaded = false;
@@ -267,13 +280,21 @@ export class Kycinfo {
 
           this.aadhaarFrontUrl = aadhaarFront?.url || '';
           this.aadhaarFrontFileName = aadhaarFront?.fileName || '';
+          this.aadhaarFrontDisplayName =
+  this.getFileName(this.aadhaarFrontFileName, 21);
           this.aadhaarBackUrl = aadhaarBack?.url || '';
           this.aadhaarBackFileName = aadhaarBack?.fileName || '';
+          this.aadhaarBackDisplayName =
+  this.getFileName(this.aadhaarBackFileName, 21);
           this.panUrl = panDoc?.url || '';
           this.panFileName = panDoc?.fileName || '';
+          this.panDisplayName =
+  this.getFileName(this.panFileName, 30);
 
           this.passportUrl = passportDoc?.url || '';
           this.passportFileName = passportDoc?.fileName || '';
+          this.passportDisplayName =
+  this.getFileName(this.passportFileName, 30);
           this.ispassport = !!passportDoc;
           if (this.passportUrl !== '' && this.passportUrl !== null) {
             this.passportmissing = false;
@@ -281,6 +302,8 @@ export class Kycinfo {
 
           this.otherDocumentUrl = otherDoc?.url || '';
           this.otherDocumentFileName = otherDoc?.fileName || '';
+          this.otherDocumentDisplayName =
+  this.getFileName(this.otherDocumentFileName, 30);
 
           this.kycdocumentsForm.patchValue({
             adhaarnumber: formdata.aadhaarNumber,

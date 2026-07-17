@@ -84,7 +84,7 @@
 
             <div class="text-label">Aadhaar_Card_front<span class="text-danger">*</span></div>
             <div class="addcust-img-box mt-2" name="adhaarfront">
-              <p class="text-label">{{aadhaarFrontFileName}}</p>
+              <p class="text-label file-name" [title]="aadhaarFrontFileName">{{aadhaarFrontDisplayName}}</p>
               <div class="icons">
                 <span (click)="viewImage(aadhaarFrontUrl)"><img src="/assets/images/icons/eyered.svg" alt="view"></span>
                 <span (click)="downloadImage(aadhaarFrontUrl,aadhaarFrontFileName)"><img
@@ -97,7 +97,7 @@
 
             <div class="text-label">Aadhaar_Card_Back<span class="text-danger">*</span></div>
             <div class="addcust-img-box mt-2" name="adhaarback">
-              <p class="text-label">{{aadhaarBackFileName}}</p>
+              <p class="text-label file-name" [title]="aadhaarBackFileName">{{aadhaarBackDisplayName}}</p>
               <div class="icons">
                 <span (click)="viewImage(aadhaarBackUrl)"><img src="/assets/images/icons/eyered.svg" alt="view"></span>
                 <span (click)="downloadImage(aadhaarBackUrl,aadhaarBackFileName)"><img
@@ -117,7 +117,9 @@
           <div class="col-lg-6 col-sm-12">
             <div class="text-label">PAN Card<span class="text-danger">*</span></div>
             <div class="addcust-img-box mt-2" name="panimg">
-              <p class="text-label">{{panFileName}}</p>
+             <p class="text-label file-name" [title]="panFileName">{{panDisplayName}}</p>
+
+              <!-- <p class="text-label">{{panFileName}}</p> -->
               <div class="icons">
                 <span (click)="viewImage(panUrl)"><img src="/assets/images/icons/eyered.svg" alt="view"></span>
                 <span (click)="downloadImage(panUrl,panFileName)"><img src="/assets/images/icons/import-red.svg"
@@ -139,7 +141,9 @@
             @if(ispassport){
             <div class="text-label">Passport<span class="text-danger">*</span></div>
             <div class="addcust-img-box mt-2">
-              <p class="text-label">{{passportFileName}}</p>
+           
+                            <p class="text-label file-name" [title]="passportFileName">{{passportDisplayName}}</p>
+
               <div class="icons">
                 <span (click)="viewImage(passportUrl)"><img src="/assets/images/icons/eyered.svg" alt="view"></span>
                 <span (click)="downloadImage(passportUrl,passportFileName)"><img
@@ -241,7 +245,9 @@
           <div class="col-lg-6 col-sm-12 ">
             <div class="text-label">Supporting Document<span class="text-danger">*</span></div>
             <div class="addcust-img-box mt-2">
-              <p class="text-label">{{otherDocumentFileName}}</p>
+              <!-- <p class="text-label">{{otherDocumentFileName}}</p> -->
+                             <p class="text-label file-name" [title]="otherDocumentFileName">{{otherDocumentDisplayName}}</p>
+
               <div class="icons">
                 <span (click)="viewImage(otherDocumentUrl)"><img src="/assets/images/icons/eyered.svg"
                     alt="view"></span>

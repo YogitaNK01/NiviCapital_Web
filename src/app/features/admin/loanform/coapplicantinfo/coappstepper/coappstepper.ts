@@ -27,6 +27,8 @@ export class Coappstepper implements OnInit, OnDestroy {
   ];
   currentIndex = 0;
   coApplicantIndex: any;
+  allStepsUnlocked = false;
+
   constructor(private router: Router, private route: ActivatedRoute, private stepperService: Loanstepperservice, private cdr: ChangeDetectorRef) {
 
     this.stepperService.coSteps$.subscribe(steps => {
@@ -53,6 +55,7 @@ export class Coappstepper implements OnInit, OnDestroy {
     this.steps = this.stepperService.coSteps; // get co-applicant steps from service
 
     this.updateCurrentIndex();
+    this.updateAllStepsUnlocked();
     this.cdr.detectChanges();
 
 
@@ -71,14 +74,11 @@ export class Coappstepper implements OnInit, OnDestroy {
         }
 
         this.updateCurrentIndex();
+        this.updateAllStepsUnlocked();
         this.cdr.detectChanges();
       });
 
   }
-
-
-
-
 
   updateCurrentIndex() {
     const cleanUrl = this.router.url.split('?')[0];
@@ -102,9 +102,6 @@ export class Coappstepper implements OnInit, OnDestroy {
     return index === this.currentIndex;
   }
 
-  isCompleted1(index: number) {
-    return index < this.currentIndex;
-  }
 
   isCompleted(index: number): boolean {
     const step = this.steps[index];
@@ -113,6 +110,15 @@ export class Coappstepper implements OnInit, OnDestroy {
       return false;
     }
 
+     // Summary is active/current, not shown as completed.
+  if (step.route === 'co-summaryinfo') {
+    return false;
+  }
+
+  // Completed co-applicant: all visible steps before Summary are complete.
+  if (this.allStepsUnlocked) {
+    return true;
+  }
     return this.stepperService.isCoApplicantStepCompleted(step.route);
   }
 
@@ -134,36 +140,13 @@ export class Coappstepper implements OnInit, OnDestroy {
     return !this.canNavigate(index);
   }
 
-
-  canNavigate1(index: number): boolean {
-    const step = this.steps[index];
-
-    if (!step) {
-      return false;
-    }
-    if (index === 0) {
-      return true;
-    }
-
-    if (this.stepperService.isCoApplicantStepCompleted(step.route)) {
-      return true;
-    }
-
-    if (index === this.currentIndex) {
-      return true;
-    }
-
-    const prevStep = this.steps[index - 1];
-
-    if (prevStep && this.stepperService.isCoApplicantStepCompleted(prevStep.route)) {
-      return true;
-    }
-
-    return false;
-  }
   canNavigate(index: number): boolean {
     const step = this.steps[index];
     if (!step) return false;
+    // If Summary has been reached or the co-applicant is completed
+    if (this.allStepsUnlocked) {
+      return true;
+    }
 
     // first step always allowed
     if (index === 0) return true;
@@ -198,6 +181,34 @@ export class Coappstepper implements OnInit, OnDestroy {
     );
   }
 
+
+  private updateAllStepsUnlocked(): void {
+    const cleanUrl = this.router.url.split('?')[0];
+    const currentRoute =
+      cleanUrl.split('/').filter(Boolean).at(-1) || '';
+
+    let storedCoApp: any = {};
+
+    try {
+      storedCoApp = JSON.parse(
+        sessionStorage.getItem('coAppIds') || '{}'
+      );
+    } catch {
+      storedCoApp = {};
+    }
+
+    const status = String(storedCoApp?.status || '').toUpperCase();
+    const mode = String(storedCoApp?.mode || '').toLowerCase();
+
+    this.allStepsUnlocked =
+      currentRoute === 'co-summaryinfo' ||
+      status === 'COMPLETED' ||
+      status === 'SUBMITTED' ||
+      mode === 'view' ||
+      this.stepperService.isCoApplicantStepCompleted('co-summaryinfo');
+
+     
+  }
   ngOnDestroy() {
     // Important when leaving co-applicant flow
     this.stepperService.setStepperType('MAIN');

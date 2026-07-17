@@ -128,7 +128,7 @@ export class Uploadkyc implements OnDestroy, AfterViewInit {
   constructor(public main: Main, private addcustomerservice: Addcustomerservice, private cd: ChangeDetectorRef,private route: ActivatedRoute, private stepperService: Loanstepperservice, private loanservice: Loanformservice, private msgBox: Msgboxservice, private router: Router) { }
 
   async ngOnInit(): Promise<void> {
-    this.isCoApplicant = this.router.url.includes('co-applicant');
+    this.isCoApplicant = this.router.url.includes('coapplicantinfo');
     this.stepperService.setStepperType(
       this.isCoApplicant ? 'CO_APPLICANT' : 'MAIN'
     );

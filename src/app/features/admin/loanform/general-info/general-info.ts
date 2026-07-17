@@ -144,6 +144,7 @@ export class GeneralInfo implements OnInit {
   lastSavedPayload: any = null;
   isSummaryEditMode = false;
   viewOnly = false;
+minEndCourseDate: any = null;
 
   //edit from summary
   isFromSummary = false;
@@ -258,8 +259,8 @@ export class GeneralInfo implements OnInit {
       coursename: ['', Validators.required],
       othercoursenametitle: [''],
       // courseduration: [''],
-      coursestartdate: ['', [Validators.required, this.validDateValidator(), this.dateMinValidator(() => new Date())]],
-      courseenddate: ['', [Validators.required, this.validDateValidator(), this.endDateValidator()]],
+      coursestartdate: ['', [Validators.required,  this.dateMinValidator(() => new Date())]],
+      courseenddate: ['', [Validators.required,  this.endDateValidator()]],
       checkedasset: [null, Validators.required],
       lendingpartner: ['', Validators.required],
 
@@ -451,6 +452,10 @@ export class GeneralInfo implements OnInit {
     );
   }
 
+  getStepRoute() {
+    return this.isCoApplicant ? 'co-generalInfo' : 'generalInfo';
+  }
+
   //store data in form
   private async loadGeneralInfoForBothFlows() {
     const key = this.getStorageKey();
@@ -503,7 +508,7 @@ export class GeneralInfo implements OnInit {
         this.coapp_registerForm.getRawValue()
       );
       if (this.coapp_registerForm.valid) {
-        this.stepperService.markStepCompleted('co-generalinfo');
+        this.stepperService.markStepCompleted(this.getStepRoute());
       }
 
     } else {
@@ -1207,7 +1212,7 @@ export class GeneralInfo implements OnInit {
 
   }
 
-  dateMinValidator1 = (getMinDate: () => Date) => {
+  dateMinValidator= (getMinDate: () => Date) => {
     return (control: any) => {
       const value = control.value;
       const minDate = getMinDate();
@@ -1218,6 +1223,7 @@ export class GeneralInfo implements OnInit {
 
       const selected = new Date(value);
       const min = new Date(getMinDate());
+      this.minEndCourseDate = selected;
 
 
       selected.setHours(0, 0, 0, 0);
@@ -1232,10 +1238,11 @@ export class GeneralInfo implements OnInit {
     };
   };
 
-  endDateValidator1 = () => {
+  endDateValidator = () => {
     return (control: any) => {
       const endDate = control.value;
-      const minDate = this.calculatedEndDate;
+      const minDate = this.minEndCourseDate;
+
 
       if (!endDate || !minDate) {
         return { zeroDateError: true };
@@ -1251,7 +1258,7 @@ export class GeneralInfo implements OnInit {
 
     };
   };
-  private dateMinValidator(getMinDate: () => Date): ValidatorFn {
+  private dateMinValidator11(getMinDate: () => Date): ValidatorFn {
     return (control: AbstractControl): ValidationErrors | null => {
       const value = control.value;
 
@@ -1288,7 +1295,7 @@ export class GeneralInfo implements OnInit {
         : null;
     };
   }
-  private endDateValidator(): ValidatorFn {
+  private endDateValidator11(): ValidatorFn {
     return (control: AbstractControl): ValidationErrors | null => {
       const endValue = control.value;
 
@@ -1805,8 +1812,8 @@ export class GeneralInfo implements OnInit {
           input
         );
 
-        this.stepperService.markStepCompleted('genralinfo');
-        this.stepperService.setStepData('genralinfo', formdata);
+        this.stepperService.markStepCompleted(this.getStepRoute());
+        this.stepperService.setStepData(this.getStepRoute(), formdata);
 
       }
     });
@@ -1848,8 +1855,8 @@ export class GeneralInfo implements OnInit {
           localPayload
         );
 
-        this.stepperService.markStepCompleted('co-generalinfo');
-        this.stepperService.setStepData('co-generalinfo', formdata);
+        this.stepperService.markStepCompleted(this.getStepRoute());
+        this.stepperService.setStepData(this.getStepRoute(), formdata);
         this.stepperService.next();
 
 
@@ -1924,11 +1931,11 @@ export class GeneralInfo implements OnInit {
       console.log('No changes detected, skipping API call');
 
       if (this.isCoApplicant) {
-        this.stepperService.markStepCompleted('co-generalinfo');
-        this.stepperService.setStepData('co-generalinfo', form.value);
+        this.stepperService.markStepCompleted(this.getStepRoute());
+        this.stepperService.setStepData(this.getStepRoute(), form.value);
       } else {
-        this.stepperService.markStepCompleted('genralinfo');
-        this.stepperService.setStepData('genralinfo', form.value);
+        this.stepperService.markStepCompleted(this.getStepRoute());
+        this.stepperService.setStepData(this.getStepRoute(), form.value);
       }
 
       this.stepperService.next();
