@@ -768,7 +768,7 @@ if (
     };
   }
 
-  getLocalFileName(key: string): string {
+  getLocalFileName1(key: string): string {
     if (this.uploadedFiles[key]) {
       return this.uploadedFiles[key].name;
     }
@@ -777,6 +777,25 @@ if (
     }
     return 'No file uploaded';
   }
+
+  getLocalFileName(
+  key: any,truncate=true
+): any {
+  let filename ='';
+ if (this.uploadedFiles[key]) {
+      filename = this.uploadedFiles[key].name;
+    }
+    if (this.localFiles[key]) {
+      filename = this.localFiles[key].name;
+    }
+
+  const fileName =filename;
+
+  
+    if (!truncate || fileName.length <= 30) {
+          return fileName; }
+            return `${fileName.substring(0, 30)}...`;
+}
 
   getLocalFileUrl(key: string): string {
     if (this.uploadedPreviewUrls[key]) {

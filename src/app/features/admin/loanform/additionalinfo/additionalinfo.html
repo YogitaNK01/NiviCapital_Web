@@ -100,12 +100,12 @@
                 </div>
                 <div class="col-lg-4 col-sm-12 ">
                     @if (hasLocalFile('applicantphoto')) {
-                    <label class="text-label">
+                    <div class="text-label">
                         Upload Applicant Photo<span class="text-danger">*</span>
-                    </label>
+                    </div>
 
-                    <div class="addcust-img-box mt-2" [ngClass]="{'disabled-div' : isViewMode}">
-                        <p class="text-label">{{ getLocalFileName('applicantphoto') }}</p>
+                    <div class="addcust-img-box mt-1" [ngClass]="{'disabled-div' : isViewMode}">
+                        <p class="text-label file-name" [title]="getLocalFileName('applicantphoto',false)">{{ getLocalFileName('applicantphoto') }}</p>
 
                         <div class="icons">
                             <span class="view" (click)="viewLocalFile('applicantphoto')">

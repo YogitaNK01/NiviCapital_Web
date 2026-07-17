@@ -1243,7 +1243,7 @@ export class Assetsinfo implements OnInit {
         .filter(i => i !== -1);
 
       this.calculateGrandTotal();
-      this.syncNoAssetsToGeneral();
+      // this.syncNoAssetsToGeneral();
       this.cd.detectChanges();
       return;
     }
@@ -1251,7 +1251,7 @@ export class Assetsinfo implements OnInit {
     if (hasNoAssets) {
       this.selectedAssets = [this.NO_ASSETS_CODE];
       this.clearAllAssetSelections();
-      this.syncNoAssetsToGeneral();
+      // this.syncNoAssetsToGeneral();
       this.cd.detectChanges();
       return;
     }
@@ -1315,7 +1315,7 @@ export class Assetsinfo implements OnInit {
       .filter(i => i !== -1);
 
     this.calculateGrandTotal();
-    this.syncNoAssetsToGeneral();
+    // this.syncNoAssetsToGeneral();
     this.cd.detectChanges();
   }
 
@@ -2645,10 +2645,6 @@ export class Assetsinfo implements OnInit {
       return;
     }
 
-
-    // this.formSvc.getAssets(payload, this.applicationId, false).pipe().subscribe({
-    // let request = this.formSvc.getAssets(payload, this.applicationId, false);
-
     if (this.hasNoassetsSelected) {
       this.msgBox.open({
         title: 'Update Asset Information?',
@@ -2741,9 +2737,6 @@ export class Assetsinfo implements OnInit {
       return;
 
     }
-
-    // this.formSvc.getAssets(input, this.applicationId, false).subscribe({
-    // let request = this.formSvc.getAssets(input, this.applicationId, false);
 
     if (this.hasNoassetsSelected) {
       this.msgBox.open({

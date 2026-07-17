@@ -171,7 +171,7 @@
                     <div class=" col-sm-12 mt-20" *ngFor="let m of [].constructor(marksheetCount); let i = index">
 
                         @if (hasLocal('marksheet' ,i)) {
-                        <label class="text-label">Marksheet <span class="text-danger">*</span></label>
+                        <div class="text-label">Marksheet <span class="text-danger">*</span></div>
                         <div class="addcust-img-box mt-2" [ngClass]="{'disabled-div' : isViewModeon}">
                             <p class="text-label file-name" [title]="getLocalName('marksheet', i, false)">{{ getLocalName('marksheet', i) }}</p>
                             <div class="icons">
@@ -206,8 +206,8 @@
                     <div class="text-label fw-bold mt-20">Passing / Leaving Certificate</div>
                     <div class=" col-sm-12 mt-20">
                         @if (hasLocal('lc')) {
-                        <label class="text-label">Passing / Leaving Certificate <span
-                                class="text-danger">*</span></label>
+                        <div class="text-label">Passing / Leaving Certificate <span
+                                class="text-danger">*</span></div>
                         <div class="addcust-img-box mt-2" [ngClass]="{'disabled-div' : isViewModeon}">
                             <p class="text-label file-name" [title]="getLocalName('lc', undefined, false)">{{ getLocalName('lc') }}</p>
                             <div class="icons">
@@ -249,9 +249,9 @@
                             *ngFor="let _ of [].constructor(marksheetCount); let i = index">
                             <!-- Dynamic document key -->
                             @if (hasLocal('marksheet' ,i)) {
-                            <label class="text-label">
+                            <div class="text-label">
                                 Marksheet Year {{ i + 1 }} <span class="text-danger">*</span>
-                            </label>
+                            </div>
 
                             <div class="addcust-img-box mt-2" [ngClass]="{'disabled-div' : isViewModeon}">
                                 <p class="text-label file-name" [title]="getLocalName('marksheet', i, false)">{{ getLocalName('marksheet', i) }}</p>
@@ -289,9 +289,9 @@
                     <div class=" col-sm-12 mt-20">
                         @if (hasLocal('lc' )) {
 
-                        <label class="text-label">
+                        <div class="text-label">
                             Passing / Leaving Certificate <span class="text-danger">*</span>
-                        </label>
+                        </div>
 
                         <div class="addcust-img-box mt-2" [ngClass]="{'disabled-div' : isViewModeon}">
                             <p class="text-label file-name" [title]="getLocalName('lc', undefined, false)">{{ getLocalName('lc') }}</p>
@@ -361,9 +361,9 @@
                             <div class=" other-doc-upload" [ngClass]="slot.file ? 'mt-0' : 'mt-0'">
 
                                 @if (slot.file) {
-                                <label class="text-label">
+                                <div class="text-label">
                                     Upload Document <span class="text-danger">*</span>
-                                </label>
+                                </div>
 
                                 <div class="addcust-img-box mt-2" [ngClass]="{'disabled-div' : isViewModeon}">
                                     <!-- <p class="text-label">{{getOtherFileName(slot.file.name)  }}</p> -->

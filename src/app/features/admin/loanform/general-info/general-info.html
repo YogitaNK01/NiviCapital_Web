@@ -264,7 +264,10 @@
                             *ngIf="f['courseenddate'].touched && f['courseenddate'].errors?.['invalidEndDate']"> End
                             date must be after start date
                         </div>
-
+                        <div class="text-danger"
+                            *ngIf="f['courseenddate'].touched && f['courseenddate'].errors?.['zeroDateError']">
+                            Please enter valid date.
+                        </div>
                     </div>
 
                     <!-- Do you have Assets? -->

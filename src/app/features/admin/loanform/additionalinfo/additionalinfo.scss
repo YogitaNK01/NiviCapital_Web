@@ -65,7 +65,15 @@
   width: 100%;
 }
 
+.file-name {
+  flex: 1 1 auto;
+  min-width: 0;
+  margin: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
 
+}
 
 /* Icons container */
 .addcust-img-box .icons {

@@ -1212,7 +1212,9 @@ export class GeneralInfo implements OnInit {
       const value = control.value;
       const minDate = getMinDate();
 
-      if (!value || !minDate) return null;
+      if (!value || !minDate) {
+        return { zeroDateError: true };
+      }
 
       const selected = new Date(value);
       const min = new Date(getMinDate());
@@ -1221,7 +1223,7 @@ export class GeneralInfo implements OnInit {
       selected.setHours(0, 0, 0, 0);
       min.setHours(0, 0, 0, 0);
 
-      return selected < min ? { minDateError: true } : null;
+      return selected < min ? { minDateError: true, zeroDateError: false } : null;
       // if (selected < min) {
       //   return { minDateError: true };
       // }
@@ -1235,7 +1237,9 @@ export class GeneralInfo implements OnInit {
       const endDate = control.value;
       const minDate = this.calculatedEndDate;
 
-      if (!endDate || !minDate) return null;
+      if (!endDate || !minDate) {
+        return { zeroDateError: true };
+      };
 
       const end = new Date(endDate);
       const min = new Date(minDate);
@@ -1243,7 +1247,7 @@ export class GeneralInfo implements OnInit {
 
       end.setHours(0, 0, 0, 0);
       min.setHours(0, 0, 0, 0);
-      return end <= min ? { invalidEndDate: true } : null;
+      return end <= min ? { invalidEndDate: true, zeroDateError: false } : null;
 
     };
   };
@@ -1937,77 +1941,6 @@ export class GeneralInfo implements OnInit {
       this.saveMainApplicant(form.value);
     }
   }
-
-  next1() {
-    if (!this.registerForm.valid) {
-      console.log("form invalid");
-      return;
-    }
-
-    let formdata = this.registerForm.value;
-    console.log("formdata------", formdata);
-    let input = {
-      "applicationId": this.applicationId,
-      "applicantId": this.applicantId,
-
-      "currentOccupationId": formdata.occupation,
-      // "lastQualificationId": formdata.qualification,
-      // "lastInstitutionName": formdata.institutionName,
-
-      "stateId": formdata.state,
-      "otherStateName": formdata.otherstatetitle,
-      "universityId": formdata.university,
-      "otherUniversityName": formdata.otherunititle,
-      "courseId": formdata.coursename,
-      "otherCourseName": formdata.othercoursenametitle,
-      // "courseDuration": formdata.courseduration,
-      "courseStartDate": this.formatDate(formdata.coursestartdate),
-
-      "courseEndDate": this.formatDate(formdata.courseenddate),
-
-      "hasAssets": this.checkboxasset == "Yes" ? true : false,
-      "lendingPartnerId": formdata.lendingpartner,
-    }
-
-    console.log(input);
-    this.formSvc.submitGenralInfo(input, this.applicationId, false).pipe().subscribe({
-      next: (res) => {
-
-        if (res.status == "success") {
-
-          this.stepperService.next();
-          // this.formSvc.generalInfoData = input;
-          this.formSvc.generalInfoData = { ...input, coursetype: formdata.coursetype };
-          const key = `generalInfoData_${this.applicantId}`;
-          // localStorage.setItem(
-          //   key,
-          //   JSON.stringify(this.formSvc.generalInfoData)
-          // );
-          this.storageservice.saveSectionData(
-            'generalInfo',
-            this.applicationId,
-            this.applicantId,
-            this.isCoApplicant,
-            input
-          );
-
-          this.stepperService.markStepCompleted('genralinfo');
-          this.stepperService.setStepData('genralinfo', formdata);
-
-
-        }
-
-      },
-      error: (err) => {
-        console.error("error msg", err);
-      }
-
-    });
-
-
-
-  }
-
 
   //edit from summary enable and disbale
 
