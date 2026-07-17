@@ -749,7 +749,7 @@ export class Incomeinfo {
     return this.incomeForm.controls;
   }
 
-  removeOtherDocument(type: 'other' | 'otherbusiness', id: number): void {
+  removeOtherDocument1(type: 'other' | 'otherbusiness', id: number): void {
 
 
     let deleteDoc: any;
@@ -765,6 +765,37 @@ export class Incomeinfo {
     }
   }
 
+  removeOtherDocument(type: 'other' | 'otherbusiness', id: number): void {
+  
+    let deleteDoc: any;
+
+    if (type === 'other') {
+      deleteDoc = this.otherIncomeSlots.find(slot => slot.id === id);
+    } else if(type === 'otherbusiness') {
+      deleteDoc = this.otherBusinessSlots.find(slot => slot.id === id);
+    }
+
+
+  if (!deleteDoc) return;
+
+  const doc = this.getDocumentByKey(deleteDoc.key);
+
+  if (deleteDoc) {
+    // uploaded document -> call delete API
+    this.deleteImage(deleteDoc.key, type, id);
+  } else {
+    // only title exists -> just remove UI section
+    if (type === 'other') {
+      this.otherIncomeSlots =
+        this.otherIncomeSlots.filter(x => x.id !== id);
+    } else  if (type === 'otherbusiness')  {
+      this.otherBusinessSlots =
+        this.otherBusinessSlots.filter(x => x.id !== id);
+    }
+
+    this.cd.detectChanges();
+  }
+}
   onFileChange(result: UploadResult, key: string,
     subcategory: 'LAST_3_MONTHS' | 'FORM_16' | 'BANK_STATEMENT_1_YEAR' | 'ITR_LAST_3_YEARS' | 'OTHER_INCOME',
     type: 'SALARY_SLIP' | 'FORM_16' | 'BANK_STATEMENT' | 'ITR' | 'OTHER') {

@@ -784,4 +784,12 @@ export class SummaryHelper {
       .trim();
   }
 
+
+       getFileName(filename:any,maxLength: number = 30): string {
+  const fileName = filename || '';
+    if (fileName.length <= maxLength) {
+          return fileName; 
+        }
+            return `${fileName.substring(0, maxLength)}...`;
+}
 }

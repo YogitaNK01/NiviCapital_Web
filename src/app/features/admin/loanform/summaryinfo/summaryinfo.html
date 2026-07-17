@@ -590,7 +590,7 @@
 
                                                                 <div class="text-label-data fw-bold">
                                                                     <a>
-                                                                        {{ file.split('/').pop() }}
+                                                                        {{ getFileName(file.split('/').pop()) }}
                                                                     </a>
                                                                 </div>
 
@@ -605,7 +605,7 @@
 
                                                                 <div class="text-label-data fw-bold">
                                                                     <a>
-                                                                        {{ f.value.split('/').pop() }}
+                                                                        {{ getFileName(f.value.split('/').pop()) }}
                                                                     </a>
                                                                 </div>
                                                             </div>
@@ -637,8 +637,9 @@
                                         class="info-item d-flex flex-column">
                                         <label class="text-label">{{ field.label }}</label>
 
-                                        <div class="text-label-data fw-bold">{{field.value}}</div>
-
+                                        <!-- <div class="text-label-data fw-bold">{{(field.value)}}</div> -->
+                                        <div class="text-label-data fw-bold">{{ field.label == 'Certificate' ?
+                                            getFileName(field.value) : field.value}}</div>
                                     </div>
                                 </div>
                             </div>
@@ -650,7 +651,7 @@
                                         class="info-item d-flex flex-column">
                                         <label class="text-label">{{ field.label }}</label>
 
-                                        <div class="text-label-data fw-bold">{{field.value}}</div>
+                                        <div class="text-label-data fw-bold">{{getFileName(field.value)}}</div>
 
                                     </div>
                                 </div>
@@ -683,7 +684,7 @@
                                                         </div>
                                                         <div class="info-item d-flex flex-column">
                                                             <label class="text-label">Other Document</label>
-                                                            <div class="text-label-data fw-bold">{{ doc.url || '-' }}
+                                                            <div class="text-label-data fw-bold">{{ getFileName(doc.url) || '-' }}
                                                             </div>
                                                         </div>
                                                     </ng-container>
@@ -696,7 +697,7 @@
                                                                 'itrs' ?
                                                                 (i + 1) : '' }}
                                                             </label>
-                                                            <div class="text-label-data fw-bold">{{ doc.url || '-' }}
+                                                            <div class="text-label-data fw-bold">{{ getFileName(doc.url) || '-' }}
                                                             </div>
                                                         </div>
                                                     </ng-template>
@@ -722,7 +723,7 @@
                                                         </div>
                                                         <div class="info-item d-flex flex-column">
                                                             <label class="text-label">Other Document</label>
-                                                            <div class="text-label-data fw-bold">{{ doc.url || '-' }}
+                                                            <div class="text-label-data fw-bold">{{ getFileName(doc.url) || '-' }}
                                                             </div>
                                                         </div>
                                                     </ng-container>
@@ -735,7 +736,7 @@
                                                                 ===
                                                                 'business_finance_3_years' ? (i + 1) : '' }}
                                                             </label>
-                                                            <div class="text-label-data fw-bold">{{ doc.url || '-' }}
+                                                            <div class="text-label-data fw-bold">{{ getFileName(doc.url) || '-' }}
                                                             </div>
                                                         </div>
                                                     </ng-template>
@@ -1163,7 +1164,7 @@
                                                 class="info-item d-flex flex-column">
                                                 <label class="text-label">{{ field.label }}</label>
 
-                                                <div class="text-label-data fw-bold">{{field.value}}</div>
+                                                <div class="text-label-data fw-bold">{{getFileName(field.value)}}</div>
                                             </div>
                                         </div>
                                     </div>
@@ -1244,7 +1245,8 @@
                                                                     'itrs' ?
                                                                     (i + 1) : '' }}
                                                                 </label>
-                                                                <div class="text-label-data fw-bold">{{ doc.url
+                                                                <div class="text-label-data fw-bold">{{
+                                                                    getFileName(doc.url)
                                                                     || '-'
                                                                     }}</div>
                                                             </div>
