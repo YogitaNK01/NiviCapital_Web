@@ -770,7 +770,7 @@ export class Monthlyexpenditureinfo {
     this.msgBox.open({
       title: 'Are you sure want to Remove',
       message: ``,
-      showCancel: true, okText:'OK',
+      showCancel: true, okText:'Yes',
       onOk: () => {
         event.stopPropagation();
 

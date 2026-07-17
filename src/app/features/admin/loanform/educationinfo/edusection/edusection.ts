@@ -789,7 +789,7 @@ SelectedInstitute(values: string | string[]) {
       title: 'Are you sure want to Remove',
       message: ``,
       showCancel: true,
-       okText:'OK',
+       okText:'Yes',
       onOk: () => {
 
         // const key = this.buildKey(doc, index);
@@ -980,7 +980,7 @@ SelectedInstitute(values: string | string[]) {
       title: 'Are you sure want to Remove',
       message: ``,
       showCancel: true,
-       okText:'OK',
+       okText:'Yes',
       onOk: () => {
         const docToDelete = this.getDocumentByKey(key);
         if (!docToDelete) return;
@@ -1073,7 +1073,7 @@ SelectedInstitute(values: string | string[]) {
       title: 'Are you sure want to Remove',
       message: ``,
       showCancel: true,
- okText:'OK',
+ okText:'Yes',
 
       onOk: () => {
 
@@ -1179,7 +1179,7 @@ getOtherFileName(slot: any, truncate = true): string {
       title: 'Are you sure want to Remove',
       message: ``,
       showCancel: true,
- okText:'OK',
+ okText:'Yes',
 
       onOk: () => {
         // const key = `${this.stepKey}_other_${doc.id}`;

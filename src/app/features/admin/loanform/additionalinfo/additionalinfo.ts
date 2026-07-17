@@ -834,7 +834,7 @@ if (
       title: 'Are you sure want to Remove',
       message: ``,
       showCancel: true,
-       okText:'OK',
+       okText:'Yes',
       onOk: () => {
         this.uploadedFiles[key] = null;
         delete this.files[key];
