@@ -453,7 +453,7 @@ minEndCourseDate: any = null;
   }
 
   getStepRoute() {
-    return this.isCoApplicant ? 'co-generalInfo' : 'generalInfo';
+    return this.isCoApplicant ? 'co-generalinfo' : 'generalinfo';
   }
 
   //store data in form
@@ -1838,8 +1838,6 @@ minEndCourseDate: any = null;
 
         const localPayload = {
           ...input,
-          // occupation: payload.occupation,
-          //  occupationId: payload.occupation,
           relationship: payload.relationship
         };
 

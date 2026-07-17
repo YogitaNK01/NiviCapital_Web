@@ -125,7 +125,7 @@ export class Uploadkyc implements OnDestroy, AfterViewInit {
   isEditMode = false;
   isSummaryEditMode = false;
   viewOnly = false;
-  constructor(public main: Main, private addcustomerservice: Addcustomerservice, private cd: ChangeDetectorRef,private route: ActivatedRoute, private stepperService: Loanstepperservice, private loanservice: Loanformservice, private msgBox: Msgboxservice, private router: Router) { }
+  constructor(public main: Main, private addcustomerservice: Addcustomerservice, private cd: ChangeDetectorRef, private route: ActivatedRoute, private stepperService: Loanstepperservice, private loanservice: Loanformservice, private msgBox: Msgboxservice, private router: Router) { }
 
   async ngOnInit(): Promise<void> {
     this.isCoApplicant = this.router.url.includes('coapplicantinfo');
@@ -173,9 +173,8 @@ export class Uploadkyc implements OnDestroy, AfterViewInit {
     }
 
 
-    // this.states();
     await this.states();
-    // await this.loadKycForBothFlows();
+
 
     const cifDetails = sessionStorage.getItem('cifdetails');
     this.userid = this.safeParse(cifDetails);
@@ -213,7 +212,7 @@ export class Uploadkyc implements OnDestroy, AfterViewInit {
       this.isViewMode = true;
       this.isEditMode = false;
       // this.kycForm.form.disable({ emitEvent: false });
-       setTimeout(() => {this.applyKycViewMode();  });
+      setTimeout(() => { this.applyKycViewMode(); });
     }
 
   }
@@ -239,14 +238,35 @@ export class Uploadkyc implements OnDestroy, AfterViewInit {
       return;
     }
 
-    const [draftData, summarySection] = await Promise.all([
+    // const [draftData, summarySection] = await Promise.all([
+    //   this.getSavedKycInfo(apiApplicantId),
+    //   this.getSummarySection('kyc')
+    // ]);
+
+    const [draftData, summaryApplicant] = await Promise.all([
       this.getSavedKycInfo(apiApplicantId),
-      this.getSummarySection('kyc')
+      this.getCurrentApplicantFromSummary()
     ]);
 
-    this.custId = summarySection?.identityAndResidency?.customerId;
-    this.firstName = summarySection?.identityAndResidency?.firstName;
-    this.lastName = summarySection?.identityAndResidency?.lastName;
+    this.custId =
+      summaryApplicant?.customerId ||
+      summaryApplicant?.custId ||
+      summaryApplicant?.cifId ||
+      this.custId ||
+      '';
+
+       this.firstName = summaryApplicant?.firstName ||
+      '';
+    this.lastName = summaryApplicant?.lastName ||
+      '';
+
+    const summarySection =
+      summaryApplicant?.kyc ||
+      summaryApplicant?.kycInfo ||
+      null;
+
+    // this.firstName = summarySection?.identityAndResidency?.firstName;
+    // this.lastName = summarySection?.identityAndResidency?.lastName;
 
     const normalizedSummary = this.normalizeSummaryKyc(summarySection);
 
@@ -391,7 +411,7 @@ export class Uploadkyc implements OnDestroy, AfterViewInit {
 
   selectSameAddress(checked: boolean) {
 
-if (this.isViewMode) return;
+    if (this.isViewMode) return;
     this.addressType = 'same';
     this.isDifferentAddress = false;
     this.selectedSecondaryProof = null;
@@ -404,7 +424,7 @@ if (this.isViewMode) return;
   }
 
   selectDifferentAddress(checked: boolean) {
-if (this.isViewMode) return;
+    if (this.isViewMode) return;
 
     this.addressType = 'different';
     this.currstateOptions = [];
@@ -493,10 +513,10 @@ if (this.isViewMode) return;
       passportNo: kycPayload.passportNo,
       addresses: kycPayload.addresses,
       secondaryAddressProof: kycPayload.selectedSecondaryProof ,
-     
+
 
     }));
-    
+
 
     fd.append('custId', kycPayload.custId);
 
@@ -629,14 +649,14 @@ if (this.isViewMode) return;
     { value: 'voterID', label: 'Voter ID' }
   ];
 
- onSelectionChange(value: any) {
-  console.log('Selected secondary address proof:', value);
+  onSelectionChange(value: any) {
+    console.log('Selected secondary address proof:', value);
 
-  this.selectedSecondaryProof =
-    typeof value === 'object'
-      ? value?.value || ''
-      : value || '';
-}
+    this.selectedSecondaryProof =
+      typeof value === 'object'
+        ? value?.value || ''
+        : value || '';
+  }
 
 
 
@@ -773,19 +793,19 @@ if (this.isViewMode) return;
 
   getLocalFileName(
   key: any,truncate=true
-): any {
-  // const file = this.getDocumentByKey(key);
+  ): any {
+    // const file = this.getDocumentByKey(key);
 
-  // if (!file) return '';
+    // if (!file) return '';
 
-  const fileName =
+    const fileName =
     this.uploadedFiles[key]?.name || this.uploadedFileMeta[key]?.fileName|| '';
 
-  
+
     if (!truncate || fileName.length <= 30) {
           return fileName; }
-            return `${fileName.substring(0, 30)}...`;
-}
+    return `${fileName.substring(0, 30)}...`;
+  }
 
   getLocalFileUrl(key: string): string {
     return this.uploadedFileMeta[key]?.fileUrl || this.uploadedPreviewUrls[key] || '';
@@ -1079,7 +1099,7 @@ if (this.isViewMode) return;
       aadhaarNumber: formValue.aadharnum || '',
       panNumber: formValue.pan ? formValue.pan.toUpperCase() : '',
       passportNo: formValue.Passport || '',
-     
+
       addressType: this.addressType,
       isDifferentAddress: this.isDifferentAddress,
       isPermanentMailingChecked: this.isPermanentMailingChecked,
@@ -1330,22 +1350,22 @@ if (this.isViewMode) return;
     //     });
     //   }, 0);
     // }
-if (isDifferent) {
-  setTimeout(() => {
-    this.kycForm.form.patchValue({
-      currentaddressline1: currentFormAddress?.addressLine || '',
-      currentaddressline2: currentFormAddress?.addressLine1 || '',
-      currentaddressline3: currentFormAddress?.addressLine2 || '',
-      currpincode: currentFormAddress?.zipCode || ''
-    }, { emitEvent: false });
+    if (isDifferent) {
+      setTimeout(() => {
+        this.kycForm.form.patchValue({
+          currentaddressline1: currentFormAddress?.addressLine || '',
+          currentaddressline2: currentFormAddress?.addressLine1 || '',
+          currentaddressline3: currentFormAddress?.addressLine2 || '',
+          currpincode: currentFormAddress?.zipCode || ''
+        }, { emitEvent: false });
 
-    this.applyKycViewMode();
-  }, 0);
-} else {
-  setTimeout(() => {
-    this.applyKycViewMode();
-  }, 0);
-}
+        this.applyKycViewMode();
+      }, 0);
+    } else {
+      setTimeout(() => {
+        this.applyKycViewMode();
+      }, 0);
+    }
     if (data.dob) {
       this.dobValid = this.isAdult(moment(data.dob, 'YYYY-MM-DD'));
       this.dobTouched = false;
@@ -1425,7 +1445,102 @@ if (isDifferent) {
   private hasNewKycFiles(): boolean {
     return Object.values(this.files || {}).some(file => !!file);
   }
+  //to get cif from summary
+  private async getCurrentApplicantFromSummary(): Promise<any | null> {
+    if (!this.applicationId) {
+      return null;
+    }
 
+    try {
+      const res: any = await firstValueFrom(
+        this.loanservice.getSummary(this.applicationId)
+      );
+
+      if (res?.status !== 'success' || !res?.data) {
+        return null;
+      }
+
+      /*
+       * Support both common response structures:
+       * 1. res.data.applicants
+       * 2. res.data directly being an array
+       */
+      const applicants = Array.isArray(res.data?.applicants)
+        ? res.data.applicants
+        : Array.isArray(res.data)
+          ? res.data
+          : [];
+
+      if (!applicants.length) {
+        return null;
+      }
+
+      if (!this.isCoApplicant) {
+        const mainApplicantId =
+          this.stepperService.getLoanId()?.[0] ||
+          this.applicantId;
+
+        return (
+          applicants.find(
+            (applicant: any) =>
+              String(applicant?.applicantId) ===
+              String(mainApplicantId)
+          ) ||
+          applicants.find(
+            (applicant: any) =>
+              String(applicant?.applicantType || '')
+                .toUpperCase() === 'PRIMARY'
+          ) ||
+          null
+        );
+      }
+
+      const coApplicantId =
+        this.stepperService.getCo_appId()?.[0] ||
+        this.applicantId;
+
+      const coApplicantIndex =
+        this.stepperService.getCurrentCoApplicantIndex() ||
+        Number(
+          this.route.snapshot.queryParams['coApplicantIndex']
+        );
+
+      return (
+        // Best match: applicant ID
+        applicants.find(
+          (applicant: any) =>
+            coApplicantId &&
+            String(applicant?.applicantId) ===
+            String(coApplicantId)
+        ) ||
+
+        // Fallback: co-applicant index
+        applicants.find((applicant: any) => {
+          const applicantType =
+            String(applicant?.applicantType || '').toUpperCase();
+
+          const indexFromType = Number(
+            applicantType.match(/\d+/)?.[0]
+          );
+
+          return (
+            applicantType.startsWith('CO_APPLICANT') &&
+            indexFromType === Number(coApplicantIndex)
+          );
+        }) ||
+
+        null
+      );
+
+    } catch (error) {
+      console.error(
+        'Failed to get applicant from summary:',
+        error
+      );
+
+      return null;
+    }
+  }
   private async getSummarySection(sectionKey: string): Promise<any> {
     if (!this.applicationId) return null;
 
@@ -1477,17 +1592,29 @@ if (isDifferent) {
     return {
       applicationId: this.applicationId,
       applicantId: this.applicantId,
-      custId: this.isCoApplicant
-        ? this.co_userid?.cifId
-        : this.userid?.cifId,
+     custId: this.isCoApplicant
+  ? (
+      this.co_userid?.custId ||
+      this.co_userid?.cifId ||
+      this.co_userid?.customerId ||
+      this.custId ||
+      ''
+    )
+  : (
+      this.userid?.custId ||
+      this.userid?.cifId ||
+      this.userid?.customerId ||
+      this.custId ||
+      ''
+    ),
 
       firstName: this.isCoApplicant
-        ? this.co_userid?.fullName
-        : this.userdata?.fname,
+        ? this.co_userid?.fullName || this.firstName
+        : this.userdata?.fname || this.firstName,
 
       lastName: this.isCoApplicant
-        ? this.co_userid?.fullName
-        : this.userdata?.lname,
+        ? this.co_userid?.fullName || this.lastName
+        : this.userdata?.lname || this.lastName,
 
       dob: identity.dob
         ? moment(identity.dob, 'DD/MM/YYYY').format('YYYY-MM-DD')
@@ -1652,18 +1779,18 @@ if (isDifferent) {
 
   // disable mode when came from summary
   private applyKycViewMode(): void {
-  if (!this.kycForm?.form) return;
+    if (!this.kycForm?.form) return;
 
-  if (this.viewOnly || (this.isSummaryEditMode && !this.isEditMode)) {
-    this.kycForm.form.disable({ emitEvent: false });
+    if (this.viewOnly || (this.isSummaryEditMode && !this.isEditMode)) {
+      this.kycForm.form.disable({ emitEvent: false });
 
-    Object.keys(this.kycForm.form.controls).forEach(key => {
-      this.kycForm.form.get(key)?.disable({ emitEvent: false });
-    });
+      Object.keys(this.kycForm.form.controls).forEach(key => {
+        this.kycForm.form.get(key)?.disable({ emitEvent: false });
+      });
+    }
+
+    this.cd.detectChanges();
   }
-
-  this.cd.detectChanges();
-}
   ngOnDestroy(): void {
     sessionStorage.removeItem('kycs');
 

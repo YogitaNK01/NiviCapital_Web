@@ -257,27 +257,22 @@
         </div>
 
 
-        <!-- <div class="text-danger error" *ngIf="(dob.invalid && dob.touched) || (!dobValid && dob.value)">
-          <small *ngIf="dob.errors?.['required']">DOB is required</small>
-          <small *ngIf=" !dobValid && dob.value">
-            Age must be 18 years or above
-          </small>
-          <small *ngIf="dob.errors?.['invalidDate']"> Please enter valid date </small>
-        </div> -->
-        <div class="text-danger error" *ngIf="dob.touched || dobTouched">
+       
+        <div class="text-danger error" *ngIf="dob.invalid && dob.touched">
 
-          <small *ngIf="dob.errors?.['required']">
+          <small *ngIf="dob.errors?.['required'] && !dob.errors?.['invalidDate']">
             DOB is required
           </small>
 
-          <small *ngIf="!dob.errors?.['required'] && dob.errors?.['invalidDate']">
+          <small *ngIf=" dob.errors?.['invalidDate']">
             Please enter valid date
           </small>
 
+        </div>
+        <div class="text-danger error" *ngIf="!dob.invalid && dob.touched">
           <small *ngIf="!dob.errors && !dobValid && dob.value">
             Age must be 18 years or above
           </small>
-
         </div>
       </div>
 
