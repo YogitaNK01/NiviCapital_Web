@@ -228,26 +228,38 @@ export class Uploadkyc implements OnDestroy, AfterViewInit {
     const key1 = this.isCoApplicant
       ? this.getStorageKey()
       : `kycinfo_main_${this.stepperService.getLoanId()?.[0]}`;
+
     const key = this.getStorageKey();
-    const localData = localStorage.getItem(key);
-    const parsedLocal = localData ? JSON.parse(localData) : null;
+    // const localData = localStorage.getItem(key);
+    // const parsedLocal = localData ? JSON.parse(localData) : null;
+    let parsedLocal: any = null;
+    try {
+      const localData = localStorage.getItem(key);
+      parsedLocal = localData ? JSON.parse(localData) : null;
+    }
+    catch { parsedLocal = null; }
 
     const apiApplicantId = this.getApiApplicantId();
+    if (!apiApplicantId) { console.error('Applicant ID is missing'); return; }
+
+    const custid_data =
+      parsedLocal?.custId ||
+      this.co_userid?.custId ||
+      this.userid?.custId ||
+      this.custId ||
+      '';
 
     if (!apiApplicantId) {
       return;
     }
 
-    // const [draftData, summarySection] = await Promise.all([
-    //   this.getSavedKycInfo(apiApplicantId),
-    //   this.getSummarySection('kyc')
+
+
+    // const [draftData, summaryApplicant] = await Promise.all([
+    //   this.getSavedKycInfo(apiApplicantId, custid_data),
+    //   this.getCurrentApplicantFromSummary()
     // ]);
-
-    const [draftData, summaryApplicant] = await Promise.all([
-      this.getSavedKycInfo(apiApplicantId),
-      this.getCurrentApplicantFromSummary()
-    ]);
-
+    const summaryApplicant = await this.getCurrentApplicantFromSummary();
     this.custId =
       summaryApplicant?.customerId ||
       summaryApplicant?.custId ||
@@ -255,39 +267,41 @@ export class Uploadkyc implements OnDestroy, AfterViewInit {
       this.custId ||
       '';
 
-       this.firstName = summaryApplicant?.firstName ||
+    this.firstName = summaryApplicant?.firstName ||
       '';
     this.lastName = summaryApplicant?.lastName ||
       '';
+
+    const draftData = await this.getSavedKycInfo(apiApplicantId, this.custId);
 
     const summarySection =
       summaryApplicant?.kyc ||
       summaryApplicant?.kycInfo ||
       null;
 
-    // this.firstName = summarySection?.identityAndResidency?.firstName;
-    // this.lastName = summarySection?.identityAndResidency?.lastName;
 
     const normalizedSummary = this.normalizeSummaryKyc(summarySection);
 
     let finalData: any = null;
 
-    // 1) Full submitted summary should always win
-    if (this.isKycComplete(normalizedSummary)) {
-      finalData = normalizedSummary;
-    }
-    // 2) Else draft data (partial save-exit)
-    else if (this.hasAnyKycData(draftData)) {
-      finalData = draftData;
-    }
-    // 3) Else local fallback
-    else if (this.hasAnyKycData(parsedLocal)) {
-      finalData = parsedLocal;
-    }
-    // 4) Else partial summary fallback
-    else if (this.hasAnyKycData(normalizedSummary)) {
-      finalData = normalizedSummary;
-    }
+      finalData = this.mergeKycData(  normalizedSummary, draftData,parsedLocal  );
+
+    // // 1) Full submitted summary should always win
+    // if (this.isKycComplete(normalizedSummary)) {
+    //   finalData = normalizedSummary;
+    // }
+    // // 2) Else draft data (partial save-exit)
+    // else if (this.hasAnyKycData(draftData)) {
+    //   finalData = draftData;
+    // }
+    // // 3) Else local fallback
+    // else if (this.hasAnyKycData(parsedLocal)) {
+    //   finalData = parsedLocal;
+    // }
+    // // 4) Else partial summary fallback
+    // else if (this.hasAnyKycData(normalizedSummary)) {
+    //   finalData = normalizedSummary;
+    // }
 
     if (!finalData) {
       this.lastSavedPayload = null;
@@ -297,8 +311,10 @@ export class Uploadkyc implements OnDestroy, AfterViewInit {
     this.patchKycInfo(finalData);
     this.lastSavedPayload = this.normalizeKycPayload(finalData);
 
-    localStorage.setItem(key, JSON.stringify(finalData));
-
+    // localStorage.setItem(key, JSON.stringify(finalData));
+    if (draftData) {
+      localStorage.setItem(key, JSON.stringify(draftData));
+    }
     const stepRoute = this.isCoApplicant ? 'co-kyc' : 'kycinfo';
 
     if (this.isKycComplete(finalData)) {
@@ -306,7 +322,38 @@ export class Uploadkyc implements OnDestroy, AfterViewInit {
     }
   }
 
+private mergeKycData(
+  summaryData: any,
+  draftData: any,
+  localData: any
+): any {
+  const baseData = {
+    ...(localData || {}),
+    ...(summaryData || {}),
+    ...(draftData || {})
+  };
 
+  const fileMeta = this.mergeFileMeta(
+    this.mergeFileMeta(
+      localData?.fileMeta,
+      summaryData?.fileMeta
+    ),
+    draftData?.fileMeta
+  );
+
+  return {
+    ...baseData,
+
+    addresses:
+      draftData?.addresses?.length
+        ? draftData.addresses
+        : summaryData?.addresses?.length
+          ? summaryData.addresses
+          : localData?.addresses || [],
+
+    fileMeta
+  };
+}
   getStorageKey() {
     if (!this.isCoApplicant) {
       return `kycinfo_main_${this.applicationId}_${this.stepperService.getLoanId()?.[0]}`;
@@ -592,11 +639,11 @@ export class Uploadkyc implements OnDestroy, AfterViewInit {
 
     this.uploadedFileMeta[key] = {
       fileName: result.file.name,
-      fileUrl: previewUrl,
+      // fileUrl: previewUrl,
       uploaded: true,
       localOnly: true
     };
-
+    this.uploadedPreviewUrls[key] = previewUrl;
     if (this.kycForm) {
       const input = this.buildKycPayload(this.kycForm.value);
       localStorage.setItem(this.getStorageKey(), JSON.stringify(input));
@@ -799,18 +846,28 @@ export class Uploadkyc implements OnDestroy, AfterViewInit {
     // if (!file) return '';
 
     const fileName =
-    this.uploadedFiles[key]?.name || this.uploadedFileMeta[key]?.fileName|| '';
+      this.uploadedFiles[key]?.name || this.uploadedFileMeta[key]?.fileName || '';
 
 
     if (!truncate || fileName.length <= 30) {
-          return fileName; }
+      return fileName;
+    }
     return `${fileName.substring(0, 30)}...`;
   }
 
+ 
   getLocalFileUrl(key: string): string {
-    return this.uploadedFileMeta[key]?.fileUrl || this.uploadedPreviewUrls[key] || '';
-  }
 
+    if (this.uploadedPreviewUrls[key]) {
+      return this.uploadedPreviewUrls[key];
+    }
+
+    return (
+      this.uploadedFileMeta[key]?.viewUrl ||
+      this.uploadedFileMeta[key]?.fileUrl ||
+      ''
+    );
+  }
   viewLocalFile(key: string): void {
     const url = this.getLocalFileUrl(key);
 
@@ -838,7 +895,7 @@ export class Uploadkyc implements OnDestroy, AfterViewInit {
       title: 'Are you sure want to Remove',
       message: ``,
       showCancel: true,
-      okText:'Yes',
+      okText: 'Yes',
 
       onOk: () => {
         this.uploadedFiles[key] = null;
@@ -870,6 +927,12 @@ export class Uploadkyc implements OnDestroy, AfterViewInit {
   ): Promise<File> {
     const res = await fetch(url);
 
+    if (!url) { throw new Error('Document URL is missing'); }
+
+    if (url.startsWith('blob:')) {
+      throw new Error('Invalid persisted blob URL');
+    }
+
     if (!res.ok) {
       throw new Error(`Failed to fetch file from URL: ${url}`);
     }
@@ -880,6 +943,44 @@ export class Uploadkyc implements OnDestroy, AfterViewInit {
       type: blob.type || fallbackType
     });
   }
+  private async urlToFile1(
+    url: string,
+    filename: string,
+    fallbackType = 'application/octet-stream'
+  ): Promise<File> {
+    if (!url) {
+      throw new Error('Document URL is missing');
+    }
+
+    if (
+      url.startsWith('blob:') ||
+      url.startsWith('data:')
+    ) {
+      throw new Error(
+        `Temporary document URL cannot be restored: ${url}`
+      );
+    }
+
+    const response = await fetch(url);
+
+    if (!response.ok) {
+      throw new Error(
+        `Failed to fetch document. HTTP ${response.status}: ${url}`
+      );
+    }
+
+    const blob = await response.blob();
+
+    return new File(
+      [blob],
+      filename || 'document',
+      {
+        type:
+          blob.type ||
+          fallbackType
+      }
+    );
+  }
 
   private async appendKycFile(
     fd: FormData,
@@ -888,7 +989,8 @@ export class Uploadkyc implements OnDestroy, AfterViewInit {
     fallbackType: string = 'application/octet-stream'
   ): Promise<void> {
     // Case 1: user newly selected file
-    if (this.files?.[key]) {
+    const file = this.files?.[key];
+    if (file instanceof File) {
       fd.append(formDataKey, this.files[key]);
       return;
     }
@@ -1147,90 +1249,563 @@ export class Uploadkyc implements OnDestroy, AfterViewInit {
 
     };
   }
+private createKycLocalCache(input: any): any {
+  if (!input) {
+    return null;
+  }
+
+  const cleanFileMeta: Record<string, any> = {};
+
+  Object.entries(
+    input.fileMeta || {}
+  ).forEach(([key, rawMeta]) => {
+    const meta: any = rawMeta;
+
+    const url =
+      meta?.viewUrl ||
+      meta?.fileUrl ||
+      meta?.url ||
+      '';
+
+    const isTemporary =
+      url.startsWith('blob:') ||
+      url.startsWith('data:');
+
+    cleanFileMeta[key] = {
+      fileName: meta?.fileName || '',
+      viewUrl: isTemporary ? '' : url,
+      fileUrl: isTemporary ? '' : url,
+      documentId: meta?.documentId || '',
+      objectKey: meta?.objectKey || '',
+      uploaded:
+        !isTemporary &&
+        !!meta?.fileName,
+      localOnly: isTemporary
+    };
+  });
+
+  return {
+    applicationId: input.applicationId || '',
+    applicantId: input.applicantId || '',
+    custId: input.custId || '',
+
+    ...this.buildKycApiData_saveexit(input),
+
+    fileMeta: cleanFileMeta
+  };
+}
 
 
-  saveExit() {
+
+  saveExit(): void {
+    const storedCoApp = this.isCoApplicant
+      ? this.getCurrentCoApplicantStoredData()
+      : null;
+
+    const custId = this.editMode
+      ? this.editUserData?.custId
+      : this.isCoApplicant
+        ? (
+          this.co_userid?.custId ||
+          this.co_userid?.cifId ||
+          this.co_userid?.customerId ||
+          storedCoApp?.custId ||
+          storedCoApp?.cifId ||
+          storedCoApp?.customerId ||
+          this.custId ||
+          ''
+        )
+        : (
+          this.userid?.custId ||
+          this.userid?.cifId ||
+          this.userid?.customerId ||
+          this.custId ||
+          ''
+        );
+
     this.msgBox.open({
       title: 'Are you sure you want to exit?',
-      message: ``,
+      message: '',
       showCancel: true,
-      onOk: () => {
+      okText: 'Yes',
+
+      // Required because appendKycFile() is asynchronous
+      onOk: async () => {
         if (!this.kycForm) {
           console.error('KYC form not found');
           return;
         }
 
-        const formValue = this.kycForm.value;
-
-        const input = this.buildKycPayload(formValue);
-
-        const key = this.getStorageKey();
-        localStorage.setItem(key, JSON.stringify(input));
-
-
-        const hasChanged = this.isKycPayloadChanged(input, this.lastSavedPayload);
-        const hasNewFiles = this.hasNewKycFiles();
         const apiApplicantId = this.getApiApplicantId();
 
         if (!apiApplicantId) {
-          this.lastSavedPayload = { ...input };
+          console.error('Applicant ID is missing');
           return;
         }
-        //    If no changes, don't call save API
+
+        if (!custId) {
+          console.error('Customer ID is missing');
+          return;
+        }
+
+        const formValue = this.kycForm.value;
+        const input = this.buildKycPayload(formValue);
+
+        const hasChanged = this.isKycPayloadChanged(
+          input,
+          this.lastSavedPayload
+        );
+
+        const hasNewFiles = this.hasNewKycFiles();
+
+        const localCache = this.createKycLocalCache(input);
+
+        localStorage.setItem(
+          this.getStorageKey(),
+          JSON.stringify(localCache)
+        );
+
+        // No changes: API call is unnecessary, but exit should continue.
         if (!hasChanged && !hasNewFiles) {
-          console.log('No KYC changes detected, skipping save-exit API');
+          console.log(
+            'No KYC changes detected, skipping save-exit API'
+          );
+
+          this.router.navigate(['/admin/losoperation']);
           return;
         }
 
-        const inputdata = {
-          action: "auto-save",
-          sectionKey: "KYC",
-          applicationId: this.applicationId,
-          applicantId: apiApplicantId,
-          jsonData: input
-        };
+        try {
+          const formData = new FormData();
 
-        this.loanservice.saveandExit(inputdata).subscribe({
-          next: () => {
-            this.lastSavedPayload = { ...input };
-          },
-          error: (err) => {
-            console.error('KYC save and exit failed', err);
-          }
 
-        });
-        this.router.navigate(['/admin/losoperation']);
+          formData.append('applicationId', this.applicationId);
+          formData.append('applicantId', apiApplicantId);
+          formData.append('custId', String(custId));
+          formData.append('sectionKey', 'KYC');
+
+
+          const kycData = this.buildKycApiData_saveexit(input);
+
+          formData.append(
+            'kycData',
+            JSON.stringify(kycData)
+          );
+
+
+          await Promise.all([
+            this.appendNewOrExistingKycFile(
+              formData,
+              'pan',
+              'panFile'
+            ),
+
+            this.appendNewOrExistingKycFile(
+              formData,
+              'aadharfront',
+              'aadharFrontFile'
+            ),
+
+            this.appendNewOrExistingKycFile(
+              formData,
+              'aadharback',
+              'aadharBackFile'
+            ),
+
+            this.appendNewOrExistingKycFile(
+              formData,
+              'passport',
+              'passportFile'
+            ),
+
+            this.appendNewOrExistingKycFile(
+              formData,
+              'secaddress',
+              'utilityBillFile'
+            )
+          ]);
+
+          // Debug multipart payload.
+          formData.forEach((value, key) => {
+            if (value instanceof File) {
+              console.log(
+                `FormData file: ${key}`,
+                value.name,
+                value.type,
+                value.size
+              );
+            } else {
+              console.log(`FormData text: ${key}`, value);
+            }
+          });
+
+          this.loanservice.saveandExitKYCData(formData).subscribe({
+            next: (response: any) => {
+              console.log(
+                'KYC save and exit successful',
+                response
+              );
+
+              this.lastSavedPayload =
+                this.normalizeKycPayload(input);
+
+              this.router.navigate(['/admin/losoperation']);
+            },
+
+            error: (error: any) => {
+              console.error(
+                'KYC save and exit failed',
+                error
+              );
+            }
+          });
+        } catch (error) {
+          console.error(
+            'Failed to prepare KYC save-exit payload',
+            error
+          );
+        }
       }
     });
   }
-  getSavedKycInfo(applicantId: any): Promise<any> {
-    let sectionkey = "KYC"
-    return new Promise((resolve) => {
-      this.loanservice.getSavedData(this.applicationId, applicantId, sectionkey).pipe()
 
+  private buildKycApiData_saveexit(input: any): any {
+    return {
+      firstName: input?.firstName || '',
+      lastName: input?.lastName || '',
+      dob: input?.dob || null,
+      panNumber: input?.panNumber || '',
+      aadhaarNumber: input?.aadhaarNumber || '',
+      passportNo: input?.passportNo || '',
+      custId: input?.custId || '',
+      addresses: Array.isArray(input?.addresses)
+        ? input.addresses.map((address: any) => ({
+          addressType: address?.addressType || '',
+          addressLine: address?.addressLine || '',
+          addressLine1: address?.addressLine1 || '',
+          addressLine2: address?.addressLine2 || '',
+          city: address?.city || '',
+          cityId: address?.cityId || '',
+          state: address?.state || '',
+          stateId: address?.stateId || '',
+          isPreferredAddress: Number(
+            address?.isPreferredAddress || 0
+          ),
+          isMailingAddress: Number(
+            address?.isMailingAddress || 0
+          ),
+          zipCode: address?.zipCode || '',
+          country: address?.country || 'India'
+        }))
+        : []
+    };
+  }
+  private async appendNewOrExistingKycFile(
+    formData: FormData,
+    localKey: string,
+    apiFieldName: string
+  ): Promise<void> {
+    /*
+     * Priority 1:
+     * The user selected a new file during the current session.
+     */
+    const newFile = this.files?.[localKey];
+
+    if (newFile instanceof File) {
+      formData.append(
+        apiFieldName,
+        newFile,
+        newFile.name
+      );
+
+      return;
+    }
+
+    /*
+     * Priority 2:
+     * The file was previously saved and restored from getSavedKycInfo().
+     */
+    const meta = this.uploadedFileMeta?.[localKey];
+
+    if (!meta?.fileName) {
+      console.log(
+        `No new or existing file available for ${localKey}`
+      );
+
+      return;
+    }
+
+    const backendUrl =
+      meta?.viewUrl ||
+      meta?.fileUrl ||
+      meta?.url ||
+      '';
+
+    if (!backendUrl) {
+      console.warn(
+        `Existing ${localKey} has a file name but no backend URL`,
+        meta
+      );
+
+      return;
+    }
+
+    /*
+     * Never attempt to restore expired local browser URLs.
+     */
+    if (
+      backendUrl.startsWith('blob:') ||
+      backendUrl.startsWith('data:')
+    ) {
+      console.warn(
+        `Ignoring temporary URL for ${localKey}`,
+        backendUrl
+      );
+
+      return;
+    }
+
+    try {
+      const existingFile = await this.urlToFile(
+        backendUrl,
+        meta.fileName,
+        meta.type || 'application/octet-stream'
+      );
+
+      formData.append(
+        apiFieldName,
+        existingFile,
+        existingFile.name
+      );
+    } catch (error) {
+      console.error(
+        `Could not restore existing ${localKey} file`,
+        {
+          fileName: meta.fileName,
+          backendUrl,
+          error
+        }
+      );
+      throw error;
+    }
+  }
+
+ getSavedKycInfo(
+    applicantId: any,
+    custId: any
+  ): Promise<any> {
+    const sectionKey = 'KYC';
+
+    return new Promise(resolve => {
+      this.loanservice
+        .getSavedkYCData(custId, sectionKey)
         .subscribe({
-          next: (res) => {
+          next: (res: any) => {
+            if (
+              res?.status !== 'success' ||
+              !res?.data?.data
+            ) {
+              resolve(null);
+              return;
+            }
 
-            console.log(res)
-            if (res.status === "success" && res.data?.data) {
-              let data = res.data.data;
+            const responseData = res.data.data;
 
-              if (typeof data === 'string') {
-                try {
-                  data = JSON.parse(data);
-                } catch {
-                  data = null;
-                }
+            let data: any = {};
+
+            try {
+              const rawKycData =
+                responseData.kycData ??
+                responseData.kycdata ??
+                {};
+
+              data =
+                typeof rawKycData === 'string'
+                  ? JSON.parse(rawKycData)
+                  : rawKycData || {};
+            } catch (error) {
+              console.error(
+                'Invalid KYC data returned by API',
+                error
+              );
+
+              data = {};
+            }
+
+            const documents = Array.isArray(
+              responseData.uploadedDocuments
+            )
+              ? responseData.uploadedDocuments
+              : [];
+
+            const getDocument = (
+              ...acceptedTypes: string[]
+            ) => {
+              const normalizedTypes =
+                acceptedTypes.map(type =>
+                  this.normalizeDocumentType(type)
+                );
+
+              return documents.find((document: any) => {
+                const documentType =
+                  this.normalizeDocumentType(
+                    document?.docType ||
+                    document?.documentType ||
+                    document?.type
+                  );
+
+                return normalizedTypes.includes(
+                  documentType
+                );
+              });
+            };
+
+            const toMeta = (document: any) => {
+              if (!document) {
+                return {
+                  fileName: '',
+                  fileUrl: '',
+                  viewUrl: '',
+                  documentId: '',
+                  objectKey: '',
+                  uploaded: false,
+                  localOnly: false
+                };
               }
 
-              resolve(data);
-            }
-            else {
-              resolve(null);
-            }
-          }, error: () => resolve(null)
+              const permanentUrl =
+                document?.viewUrl ||
+                document?.fileUrl ||
+                document?.downloadUrl ||
+                document?.url ||
+                '';
+
+              return {
+                fileName:
+                  document?.fileName ||
+                  document?.originalFileName ||
+                  document?.name ||
+                  '',
+
+                fileUrl: permanentUrl,
+                viewUrl: permanentUrl,
+
+                documentId:
+                  document?.documentId ||
+                  document?.id ||
+                  '',
+
+                objectKey:
+                  document?.objectKey ||
+                  '',
+
+                type:
+                  document?.contentType ||
+                  document?.mimeType ||
+                  '',
+
+                uploaded: true,
+                localOnly: false
+              };
+            };
+
+            data = {
+              ...data,
+
+              applicationId:
+                data.applicationId ||
+                this.applicationId,
+
+              applicantId:
+                data.applicantId ||
+                applicantId,
+
+              custId:
+                data.custId ||
+                custId,
+
+              fileMeta: {
+                pan: toMeta(
+                  getDocument('PAN', 'PAN_CARD')
+                ),
+
+                aadharfront: toMeta(
+                  getDocument(
+                    'AADHAAR_FRONT',
+                    'AADHAR_FRONT'
+                  )
+                ),
+
+                aadharback: toMeta(
+                  getDocument(
+                    'AADHAAR_BACK',
+                    'AADHAR_BACK'
+                  )
+                ),
+
+                passport: toMeta(
+                  getDocument('PASSPORT')
+                ),
+
+                secaddress: toMeta(
+                  getDocument(
+                    'UTILITY_BILL',
+                    'SECONDARY_ADDRESS_PROOF'
+                  )
+                )
+              }
+            };
+
+            resolve(data);
+          },
+
+          error: (error: any) => {
+            console.error(
+              'Unable to retrieve saved KYC data',
+              error
+            );
+
+            resolve(null);
+          }
         });
     });
+  }
+  private normalizeDocumentType(value: any): string {
+    return String(value || '')
+      .trim()
+      .toUpperCase()
+      .replace(/[\s-]+/g, '_');
+  }
+  private mergeFileMeta(
+    existingMeta: Record<string, any> = {},
+    incomingMeta: Record<string, any> = {}
+  ): Record<string, any> {
+    const keys = [
+      'pan',
+      'aadharfront',
+      'aadharback',
+      'passport',
+      'secaddress'
+    ];
+
+    const result: Record<string, any> = {};
+
+    keys.forEach(key => {
+      const incoming = incomingMeta?.[key];
+      const existing = existingMeta?.[key];
+
+      result[key] =
+        incoming?.fileName
+          ? incoming
+          : existing || {
+            fileName: '',
+            fileUrl: '',
+            viewUrl: '',
+            uploaded: false
+          };
+    });
+
+    return result;
   }
   async restoreKycData() {
     const key = this.getStorageKey();
@@ -1238,7 +1813,7 @@ export class Uploadkyc implements OnDestroy, AfterViewInit {
     const localData = localStorage.getItem(key);
     const parsedLocal = localData ? JSON.parse(localData) : null;
     const apiApplicantId = this.getApiApplicantId();
-    const apiData = await this.getSavedKycInfo(apiApplicantId);
+    const apiData = await this.getSavedKycInfo(apiApplicantId, parsedLocal.custid);
 
     if (!apiApplicantId) {
 
@@ -1276,9 +1851,35 @@ export class Uploadkyc implements OnDestroy, AfterViewInit {
   patchKycInfo(data: any) {
     if (!data || !this.kycForm) return;
 
-    const permanentAddress = data.addresses?.find((a: any) => a.addressType === 'PERMANENT');
-    const currentAddress = data.addresses?.find((a: any) => a.addressType === 'CURRENT');
-    const otherAddress = data.addresses?.find((a: any) => a.addressType === 'OTHER');
+    const permanentAddress1 = data.addresses?.find((a: any) => a.addressType === 'PERMANENT');
+    const currentAddress1 = data.addresses?.find((a: any) => a.addressType === 'CURRENT');
+    const otherAddress1 = data.addresses?.find((a: any) => a.addressType === 'OTHER');
+
+    const addresses = Array.isArray(data.addresses)
+      ? data.addresses
+      : [];
+
+    const permanentAddress = addresses.find(
+      (a: any) => a.addressType === 'PERMANENT'
+    );
+
+    const currentAddress = addresses.find(
+      (a: any) => a.addressType === 'CURRENT'
+    );
+
+    const otherAddress = addresses.find(
+      (a: any) => a.addressType === 'OTHER'
+    );
+
+
+    const permanentStateId =
+      permanentAddress?.stateId ||
+      this.stateOptions.find(
+        state =>
+          state.label?.trim().toLowerCase() ===
+          permanentAddress?.state?.trim().toLowerCase()
+      )?.value ||
+      '';
 
 
     const isDifferent =
@@ -1295,19 +1896,19 @@ export class Uploadkyc implements OnDestroy, AfterViewInit {
     this.isDifferentAddress = isDifferent;
 
     this.isPermanentMailingChecked =
-      data.isPermanentMailingChecked ?? !this.isDifferentAddress;
+      data.isPermanentMailingChecked ?? permanentAddress?.isMailingAddress === 1;
 
     this.isCurrentMailingChecked =
-      data.isCurrentMailingChecked ?? this.isDifferentAddress;
+      data.isCurrentMailingChecked ?? currentFormAddress?.isMailingAddress === 1;
 
     this.selectedSecondaryProof = data.selectedSecondaryProof || null;
 
     // State values
-    this.perStateSelectedOption = permanentAddress?.stateId || '';
-    this.perselectedStateId = permanentAddress?.stateId || '';
+    this.perStateSelectedOption = permanentStateId || permanentAddress?.stateId || '';
+    this.perselectedStateId = permanentStateId || permanentAddress?.stateId || '';
     this.perselectedStateLabel = permanentAddress?.state || '';
 
-    this.currStateSelectedOption = currentFormAddress?.stateId || '';
+    this.currStateSelectedOption =  currentFormAddress?.stateId || '';
     this.currselectedStateId = currentFormAddress?.stateId || '';
     this.currselectedStateLabel = currentFormAddress?.state || '';
 
@@ -1339,17 +1940,7 @@ export class Uploadkyc implements OnDestroy, AfterViewInit {
 
 
     });
-    // if (isDifferent) {
-    //   setTimeout(() => {
-    //     this.kycForm.form.patchValue({
-    //       currentaddressline1: currentFormAddress?.addressLine || '',
-    //       currentaddressline2: currentFormAddress?.addressLine1 || '',
-    //       currentaddressline3: currentFormAddress?.addressLine2 || '',
-    //       currpincode: currentFormAddress?.zipCode || ''
 
-    //     });
-    //   }, 0);
-    // }
     if (isDifferent) {
       setTimeout(() => {
         this.kycForm.form.patchValue({
@@ -1385,8 +1976,19 @@ export class Uploadkyc implements OnDestroy, AfterViewInit {
         const file = data.fileMeta[key];
 
         if (file?.fileName) {
+          const url =
+            file.viewUrl ||
+            file.fileUrl ||
+            file.url ||
+            '';
+
           this.uploadedFiles[key] = null;
-          this.uploadedPreviewUrls[key] = file.fileUrl || '';
+
+          this.uploadedFileMeta[key] = {
+            ...file,
+            fileUrl: url,
+            viewUrl: url
+          };
         }
       });
     }
@@ -1443,7 +2045,7 @@ export class Uploadkyc implements OnDestroy, AfterViewInit {
   }
 
   private hasNewKycFiles(): boolean {
-    return Object.values(this.files || {}).some(file => !!file);
+    return Object.values(this.files || {}).some(value => value instanceof File);
   }
   //to get cif from summary
   private async getCurrentApplicantFromSummary(): Promise<any | null> {
@@ -1592,21 +2194,21 @@ export class Uploadkyc implements OnDestroy, AfterViewInit {
     return {
       applicationId: this.applicationId,
       applicantId: this.applicantId,
-     custId: this.isCoApplicant
-  ? (
-      this.co_userid?.custId ||
-      this.co_userid?.cifId ||
-      this.co_userid?.customerId ||
-      this.custId ||
-      ''
-    )
-  : (
-      this.userid?.custId ||
-      this.userid?.cifId ||
-      this.userid?.customerId ||
-      this.custId ||
-      ''
-    ),
+      custId: this.isCoApplicant
+        ? (
+          this.co_userid?.custId ||
+          this.co_userid?.cifId ||
+          this.co_userid?.customerId ||
+          this.custId ||
+          ''
+        )
+        : (
+          this.userid?.custId ||
+          this.userid?.cifId ||
+          this.userid?.customerId ||
+          this.custId ||
+          ''
+        ),
 
       firstName: this.isCoApplicant
         ? this.co_userid?.fullName || this.firstName

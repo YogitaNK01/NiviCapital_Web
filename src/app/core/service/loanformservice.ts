@@ -698,6 +698,23 @@ submitAdditionalInfo(
     );
   }
 
+    // *************************get saved KYC data *************************
+
+     saveandExitKYCData(data: any): Observable<ApiResponse<any>> {
+
+    return this.http.post<ApiResponse<any>>(
+      `${this.baseUrl}/v1/los/draft/saveKYC`,
+      data
+    );
+  }
+
+  getSavedkYCData(custId: string, sectionkey: string): Observable<ApiResponse<any>> {
+    return this.http.get<ApiResponse<any>>(
+      `${this.baseUrl}/v1/los/draft/getKYC?custId=${custId}&sectionKey=${sectionkey}`,
+
+    );
+  }
+
   // ************************* Save and Exit basic info from coapplicant data *************************
 
   saveandExitBasicinfo(data: any): Observable<ApiResponse<any>> {
@@ -733,12 +750,13 @@ submitAdditionalInfo(
     data: any,
     applicantType: 'MAIN' | 'CO_APPLICANT' = 'MAIN'
   ) {
-    const context = {
+    const context1 = {
       edit: true,
       fromSummary: true,
       applicantType
     };
-
+const existing =JSON.parse(sessionStorage.getItem(this.SUMMARY_EDIT_CONTEXT_KEY) || '{}'   );
+ const context = { ...existing,  edit: true, fromSummary: true,   applicantType  };
     sessionStorage.setItem(this.SUMMARY_EDIT_CONTEXT_KEY, JSON.stringify(context));
     this.setSummary(data);
   }

@@ -6,15 +6,17 @@
   display: flex;
   border-radius: 12px;
   border: 1px solid $neutral-300;
-  // box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.05);
+   overflow: hidden;
 }
-
+/* First step */
 .stepper .step:first-child {
   border-bottom-left-radius: 12px;
+  border-top-left-radius: 12px;
 }
 
 /* LAST STEP */
 .stepper .step:last-child {
+  border-bottom-right-radius: 12px;
   border-bottom-right-radius: 12px;
 }
 
@@ -71,7 +73,10 @@
     border-radius: 0 12px 12px 0;
   }
 }
-
+.step:last-child.active ,.step:last-child.active.completed {
+  background: $secondary-50 !important;
+  border-bottom: 3px solid $secondary-700;
+}
 
 .step.upcoming,
 .step.disabled {

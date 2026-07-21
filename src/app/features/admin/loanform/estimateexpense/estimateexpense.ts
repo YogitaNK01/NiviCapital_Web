@@ -1290,7 +1290,7 @@ export class Estimateexpense {
     this.msgBox.open({
       title: 'Are you sure you want to exit?',
       message: ``,
-      showCancel: true,
+      showCancel: true, okText:'Yes',
       onOk: () => {
         let formdata = this.expenseForm.value
         console.log("form data Expenses:", formdata);

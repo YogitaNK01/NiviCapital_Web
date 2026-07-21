@@ -408,7 +408,7 @@
                                     </div>
 
                                     <div class="col-lg-6 col-sm-12 ">
-                                        <app-dropdown [options]="stateOptions" [placeholder]="'Select State'"
+                                        <app-dropdown [options]="stateOptions" [placeholder]="'Select State'"  dropdownPosition="top"
                                             (selectedValueChange)="selectPerState($event)" [searchable]="true"
                                             [selectedValue]="selectedStateId[currentRefIndex]" label="State"
                                             name="state">
@@ -689,7 +689,7 @@
                                     </div>
 
                                     <div class="col-lg-6 col-sm-12 ">
-                                        <app-dropdown [options]="stateOptions" [placeholder]="'Select State'"
+                                        <app-dropdown [options]="stateOptions" [placeholder]="'Select State'"  dropdownPosition="top"
                                             [searchable]="true" (selectedValueChange)="selectPerState($event)"
                                             [selectedValue]="selectedStateId[currentRefIndex]" label="State"
                                             name="state">

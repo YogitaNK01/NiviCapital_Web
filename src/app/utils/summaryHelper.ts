@@ -243,12 +243,12 @@ export class SummaryHelper {
 
     return [
       { label: 'Aadhaar Number', value: identity.aadhaarNumber },
-      { label: 'Aadhaar Card Front', value: identity.aadhaarFrontUrl },
-      { label: 'Aadhaar Card Back', value: identity.aadhaarBackUrl },
+      { label: 'Aadhaar Card Front', value: this.getFileName(identity.aadhaarFrontUrl,30) },
+      { label: 'Aadhaar Card Back', value:  this.getFileName(identity.aadhaarBackUrl ,30)},
       { label: 'PAN Number', value: identity.panNumber },
-      { label: 'PAN Card', value: identity.panCardUrl },
+      { label: 'PAN Card', value: this.getFileName( identity.panCardUrl,30) },
       { label: 'Passport', value: identity.passportNumber },
-      { label: 'Passport ', value: identity.passportUrl },
+      { label: 'Passport ', value:  this.getFileName(identity.passportUrl,30) },
       { label: 'Date Of Birth', value: identity.dob }
     ];
   }
@@ -785,7 +785,7 @@ export class SummaryHelper {
   }
 
 
-       getFileName(filename:any,maxLength: number = 30): string {
+      static getFileName(filename:any,maxLength: number = 5): string {
   const fileName = filename || '';
     if (fileName.length <= maxLength) {
           return fileName; 

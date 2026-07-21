@@ -1033,7 +1033,7 @@ if (
     this.msgBox.open({
       title: 'Are you sure you want to exit?',
       message: ``,
-      showCancel: true,
+      showCancel: true, okText:'Yes',
       onOk: () => {
         let formdata = this.additionalinfoForm.getRawValue();
         const input = this.buildAdditionalPayload(formdata);

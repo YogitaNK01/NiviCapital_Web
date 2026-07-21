@@ -1195,7 +1195,7 @@ handleMobileAction(): void {
     this.msgBox.open({
       title: 'Are you sure you want to exit?',
       message: ``,
-      showCancel: true,
+      showCancel: true, okText:'Yes',
       onOk: () => {
         const input = this.buildReferencePayload();
 

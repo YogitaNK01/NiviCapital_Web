@@ -307,6 +307,156 @@ export class Loanstepperservice {
       this.completedSteps = new Set<string>();
     }
   }
+//restore from summary if localdate empty
+  restoreCompletedStepsFromRoutes(
+  routes: string[],
+  options?: { replace?: boolean }
+): void {
+  const shouldReplace = options?.replace ?? true;
+
+  if (shouldReplace) {
+    this.completedSteps = new Set<string>();
+  }
+
+  routes
+    .filter((route): route is string => !!route)
+    .forEach(route => this.completedSteps.add(route));
+
+  // Cache the backend-derived state.
+  localStorage.setItem(
+    this.getCompletedStepsKey(),
+    JSON.stringify([...this.completedSteps])
+  );
+
+  this.buildSteps();
+}
+getCompletedRoutesFromStage(stage: string | null | undefined): string[] {
+  if (!stage) {
+    return [];
+  }
+
+  const lastCompletedRoute = this.getRouteFromStage(stage);
+  const steps = this.getActiveNavigationSteps();
+
+  const index = steps.findIndex(step => step.route === lastCompletedRoute);
+
+  if (index < 0) {
+    return [];
+  }
+
+  return steps.slice(0, index + 1).map(step => step.route);
+}
+hydrateMainProgressFromSummary(summary: any): void {
+  const routes = new Set<string>();
+
+  const applicants = Array.isArray(summary?.applicants)
+    ? summary.applicants
+    : [];
+
+  const primaryApplicant = applicants.find(
+    (applicant: any) =>
+      this.formSvc.getApplicantType(applicant) === 'PRIMARY'
+  );
+
+  if (!primaryApplicant) {
+    this.restoreCompletedStepsFromRoutes([]);
+    return;
+  }
+
+  // Adjust these property names to match the real summary API.
+  if (summary?.loanInfo || primaryApplicant?.loanInfo) {
+    routes.add('loaninfo');
+  }
+
+  if (primaryApplicant?.generalInfo) {
+    routes.add('genralinfo');
+  }
+
+  if (
+    primaryApplicant?.estimatedExpense ||
+    primaryApplicant?.expenseInfo ||
+    summary?.estimatedExpense
+  ) {
+    routes.add('expense');
+  }
+
+  if (
+    primaryApplicant?.additionalInfo ||
+    primaryApplicant?.personalInfo
+  ) {
+    routes.add('additionalinfo');
+  }
+
+  if (
+    primaryApplicant?.kycInfo ||
+    primaryApplicant?.kyc
+  ) {
+    routes.add('kycinfo');
+  }
+
+  if (
+    primaryApplicant?.educationDetails ||
+    primaryApplicant?.educationInfo
+  ) {
+    routes.add('educationDetails');
+  }
+
+  if (
+    primaryApplicant?.incomeInfo ||
+    primaryApplicant?.incomeDetails
+  ) {
+    routes.add('incomeinfo');
+  }
+
+  if (
+    primaryApplicant?.assetsInfo ||
+    primaryApplicant?.assets
+  ) {
+    routes.add('assetsinfo');
+  }
+
+  if (
+    primaryApplicant?.liabilitiesInfo ||
+    primaryApplicant?.liabilities
+  ) {
+    routes.add('liabilitiesinfo');
+  }
+
+  if (
+    primaryApplicant?.monthlyExpenditure ||
+    primaryApplicant?.monthlyExpenseInfo
+  ) {
+    routes.add('monthlyexpinfo');
+  }
+
+  if (
+    primaryApplicant?.referenceInfo ||
+    primaryApplicant?.references
+  ) {
+    routes.add('referenceinfo');
+  }
+
+  if (
+    summary?.coApplicants?.length ||
+    applicants.some(
+      (applicant: any) =>
+        this.formSvc
+          .getApplicantType(applicant)
+          .startsWith('CO_APPLICANT')
+    )
+  ) {
+    routes.add('co-applicantdetails');
+  }
+
+  if (
+    summary?.status === 'COMPLETED' ||
+    summary?.isCompleted === true
+  ) {
+    routes.add('summaryinfo');
+  }
+
+  this.restoreCompletedStepsFromRoutes([...routes]);
+}
   // ========================================================
   get steps(): Step[] {
     return this.stepsSubject.getValue();

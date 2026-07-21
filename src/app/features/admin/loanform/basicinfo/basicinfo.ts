@@ -1070,7 +1070,7 @@ export class Basicinfo {
     this.msgBox.open({
       title: 'Are you sure you want to exit?',
       message: ``,
-      showCancel: true,
+      showCancel: true, okText:'Yes',
       onOk: () => {
         let formdata = this.registerForm.getRawValue();
         const input = this.buildBasicPayload(formdata);

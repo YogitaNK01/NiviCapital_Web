@@ -401,7 +401,7 @@ private isCompletedCoApplicant(coapp: any): boolean {
     const match = type.match(/^CO_APPLICANT(\d+)$/);
 
     if (match) {
-      return Number(match[1]) + 1;
+      return Number(match[1]) ;
     }
 
     return fallbackIndex + 1;
@@ -629,6 +629,8 @@ private isCompletedCoApplicant(coapp: any): boolean {
     }
   }
   editCoApplicant(coapp: any,section: string) {
+     this.formSvc.startSummaryEditFlow( coapp, 'CO_APPLICANT'  );
+
     this.stepperService.setStepperType('CO_APPLICANT');
     this.stepperService.setCurrentCoApplicantIndex(coapp.index);
 
@@ -813,6 +815,10 @@ private isCompletedCoApplicant(coapp: any): boolean {
     this.formSvc.submitMainApplicationSummary(this.applicationId, {}).subscribe((res: any) => {
       console.log(res);
       if (res.status === "success") {
+         this.formSvc.clearSummaryEditFlow();
+           this.formSvc.clearSummaryEducationEditFlow();
+             sessionStorage.removeItem('coAppIds');
+
         this.submitDescription = `Application Reference Number : ${res.application.referenceNumber}`;
         return;
       }

@@ -85,7 +85,8 @@
                             @if( hasDocument('salary1')){
                             <div class="text-label">Salary Slip 1<span class="text-danger">*</span></div>
                             <div class="addcust-img-box mt-2" [ngClass]="{'disabled-div' : isViewMode}">
-                                <p class="text-label file-name" [title]="getDocumentName('salary1',false)" >{{ getDocumentName('salary1') }}</p>
+                                <p class="text-label file-name" [title]="getDocumentName('salary1',false)">{{
+                                    getDocumentName('salary1') }}</p>
                                 <div class="icons">
                                     <span class="view" (click)="viewImage(getDocumentUrl('salary1'))"><img
                                             src="/assets/images/icons/eyered.svg" alt="view"></span>
@@ -110,7 +111,8 @@
                             @if( hasDocument('salary2')){
                             <div class="text-label">Salary Slip 2<span class="text-danger">*</span></div>
                             <div class="addcust-img-box mt-2" [ngClass]="{'disabled-div' : isViewMode}">
-                                <p class="text-label file-name" [title]="getDocumentName('salary2',false)">{{ getDocumentName('salary2') }}</p>
+                                <p class="text-label file-name" [title]="getDocumentName('salary2',false)">{{
+                                    getDocumentName('salary2') }}</p>
                                 <div class="icons">
                                     <span class="view" (click)="viewImage(getDocumentUrl('salary2'))"><img
                                             src="/assets/images/icons/eyered.svg" alt="view"></span>
@@ -134,7 +136,8 @@
                             @if( hasDocument('salary3')){
                             <div class="text-label">Salary Slip 3<span class="text-danger">*</span></div>
                             <div class="addcust-img-box mt-2" [ngClass]="{'disabled-div' : isViewMode}">
-                                <p class="text-label file-name" [title]="getDocumentName('salary3',false)">{{ getDocumentName('salary3') }}</p>
+                                <p class="text-label file-name" [title]="getDocumentName('salary3',false)">{{
+                                    getDocumentName('salary3') }}</p>
                                 <div class="icons">
                                     <span class="view" (click)="viewImage(getDocumentUrl('salary3'))"><img
                                             src="/assets/images/icons/eyered.svg" alt="view"></span>
@@ -181,7 +184,8 @@
                             @if( hasDocument('Form16')){
                             <div class="text-label">Form 16<span class="text-danger">*</span></div>
                             <div class="addcust-img-box mt-2" [ngClass]="{'disabled-div' : isViewMode}">
-                                <p class="text-label file-name" [title]="getDocumentName('Form16',false)">{{ getDocumentName('Form16') }}</p>
+                                <p class="text-label file-name" [title]="getDocumentName('Form16',false)">{{
+                                    getDocumentName('Form16') }}</p>
                                 <div class="icons">
                                     <span class="view" (click)="viewImage(getDocumentUrl('Form16'))"><img
                                             src="/assets/images/icons/eyered.svg" alt="view"></span>
@@ -226,7 +230,8 @@
                             @if( hasDocument('oneyearbankstatement')){
                             <div class="text-label">1 Year bank statement<span class="text-danger">*</span></div>
                             <div class="addcust-img-box mt-2" [ngClass]="{'disabled-div' : isViewMode}">
-                                <p class="text-label file-name" [title]="getDocumentName('oneyearbankstatement',false)">{{ getDocumentName('oneyearbankstatement') }}</p>
+                                <p class="text-label file-name" [title]="getDocumentName('oneyearbankstatement',false)">
+                                    {{ getDocumentName('oneyearbankstatement') }}</p>
                                 <div class="icons">
                                     <span class="view" (click)="viewImage(getDocumentUrl('oneyearbankstatement'))"><img
                                             src="/assets/images/icons/eyered.svg" alt="view"></span>
@@ -272,7 +277,8 @@
                             @if( hasDocument('ay1')){
                             <div class="text-label">Year 1<span class="text-danger">*</span></div>
                             <div class="addcust-img-box mt-2" [ngClass]="{'disabled-div' : isViewMode}">
-                                <p class="text-label file-name" [title]="getDocumentName('ay1',false)">{{ getDocumentName('ay1') }}</p>
+                                <p class="text-label file-name" [title]="getDocumentName('ay1',false)">{{
+                                    getDocumentName('ay1') }}</p>
                                 <div class="icons">
                                     <span class="view" (click)="viewImage(getDocumentUrl('ay1'))"><img
                                             src="/assets/images/icons/eyered.svg" alt="view"></span>
@@ -296,7 +302,8 @@
                             @if( hasDocument('ay2')){
                             <div class="text-label">Year 2<span class="text-danger">*</span></div>
                             <div class="addcust-img-box mt-2" [ngClass]="{'disabled-div' : isViewMode}">
-                                <p class="text-label file-name" [title]="getDocumentName('ay2',false)">{{ getDocumentName('ay2') }}</p>
+                                <p class="text-label file-name" [title]="getDocumentName('ay2',false)">{{
+                                    getDocumentName('ay2') }}</p>
                                 <div class="icons">
                                     <span class="view" (click)="viewImage(getDocumentUrl('ay2'))"><img
                                             src="/assets/images/icons/eyered.svg" alt="view"></span>
@@ -320,7 +327,8 @@
                             @if( hasDocument('ay3')){
                             <div class="text-label">Year 3<span class="text-danger">*</span></div>
                             <div class="addcust-img-box mt-2" [ngClass]="{'disabled-div' : isViewMode}">
-                                <p class="text-label file-name" [title]="getDocumentName('ay3',false)">{{ getDocumentName('ay3') }}</p>
+                                <p class="text-label file-name" [title]="getDocumentName('ay3',false)">{{
+                                    getDocumentName('ay3') }}</p>
                                 <div class="icons">
                                     <span class="view" (click)="viewImage(getDocumentUrl('ay3'))"><img
                                             src="/assets/images/icons/eyered.svg" alt="view"></span>
@@ -371,7 +379,8 @@
 
                                     <app-inputfield label="Title" [required]="true" placeholder="Enter text here"
                                         [(ngModel)]="slot.title" [ngModelOptions]="{ standalone: true }"
-                                        (input)="main.restrictInput($event, 'text')" [maxlength]="25" [ngClass]="{'disabled-div': isViewMode}">
+                                        (input)="main.restrictInput($event, 'text')" [maxlength]="25"
+                                        [ngClass]="{'disabled-div': isViewMode}">
                                     </app-inputfield>
 
                                     <div class="text-danger" *ngIf="f['assettitle'].touched && f['assettitle'].invalid">
@@ -383,26 +392,27 @@
                                 </div>
                                 <div class="col-lg-4 col-sm-12 ">
 
-                                    @if ( getDocumentByKey( slot.title)) {
+                                    @if ( getDocumentByKey( slot.key)) {
 
+                                    <div class="text-label mt-0"> Upload Document <span class="text-danger">*</span>
+                                    </div>
 
-
-                                    <div class="addcust-img-box mt-4" [ngClass]="{'disabled-div' : isViewMode}">
-                                        <p class="text-label file-name" [title]="getDocumentName(slot.title,false)">
-                                            {{ getDocumentName(slot.title) }}
+                                    <div class="addcust-img-box mt-2" [ngClass]="{'disabled-div' : isViewMode}">
+                                        <p class="text-label file-name" [title]="getDocumentName(slot.key,false)">
+                                            {{ getDocumentName(slot.key) }}
                                         </p>
 
                                         <div class="icons">
-                                            <span class="view" (click)="viewImage(getDocumentUrl(slot.title))">
+                                            <span class="view" (click)="viewImage(getDocumentUrl(slot.key))">
                                                 <img src="/assets/images/icons/eyered.svg">
                                             </span>
 
                                             <span class="download"
-                                                (click)="downloadImage(getDocumentUrl(slot.title), getDocumentName(slot.title))">
+                                                (click)="downloadImage(getDocumentUrl(slot.key), getDocumentName(slot.key))">
                                                 <img src="/assets/images/icons/import-red.svg">
                                             </span>
 
-                                            <span class="delete" (click)="deleteImage(slot.title, 'other', slot.id)">
+                                            <span class="delete" (click)="deleteImage(slot.key, 'other', slot.id)">
                                                 <img src="/assets/images/icons/close.svg">
                                             </span>
                                         </div>
@@ -410,10 +420,8 @@
 
                                     } @else {
 
-
-
                                     <app-uploadbtn [config]="basicConfig" [disabled]="isViewMode"
-                                        (uploadStarted)="onUploadStarted($event,  slot.title,'OTHER' ,'OTHER_INCOME','OTHER')"
+                                        (uploadStarted)="onUploadStarted($event,  slot.key,'OTHER' ,'OTHER_INCOME','OTHER',slot.title)"
                                         [disabled]="!slot.title && slot.title.trim().length === 0" [uploadViaApi]="true"
                                         [fileuploadresponse]="handleresponse" [required]="true" label="Other Documents">
                                     </app-uploadbtn>
@@ -423,7 +431,8 @@
                                 </div>
                                 <div class="col-lg-4 d-flex justify-content-end align-items-end mt-5">
                                     <span class="delete d-none d-lg-block"
-                                        (click)="removeOtherDocument('other',slot.id)" [ngClass]="{'disabled-div': isViewMode}">
+                                        (click)="removeOtherDocument('other',slot.id)"
+                                        [ngClass]="{'disabled-div': isViewMode}">
                                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
                                             viewBox="0 0 24 24" fill="none">
                                             <path
@@ -488,7 +497,8 @@
                             @if( hasDocument('year1')){
                             <div class="text-label">Year 1<span class="text-danger">*</span></div>
                             <div class="addcust-img-box mt-2" [ngClass]="{'disabled-div' : isViewMode}">
-                                <p class="text-label file-name" [title]="getDocumentName('year1',false)">{{ getDocumentName('year1') }}</p>
+                                <p class="text-label file-name" [title]="getDocumentName('year1',false)">{{
+                                    getDocumentName('year1') }}</p>
                                 <div class="icons">
                                     <span class="view" (click)="viewImage(getDocumentUrl('year1'))"><img
                                             src="/assets/images/icons/eyered.svg" alt="view"></span>
@@ -512,7 +522,8 @@
                             @if( hasDocument('year2')){
                             <div class="text-label">Year 2<span class="text-danger">*</span></div>
                             <div class="addcust-img-box mt-2" [ngClass]="{'disabled-div' : isViewMode}">
-                                <p class="text-label file-name" [title]="getDocumentName('year2',false)">{{ getDocumentName('year2') }}</p>
+                                <p class="text-label file-name" [title]="getDocumentName('year2',false)">{{
+                                    getDocumentName('year2') }}</p>
                                 <div class="icons">
                                     <span class="view" (click)="viewImage(getDocumentUrl('year2'))"><img
                                             src="/assets/images/icons/eyered.svg" alt="view"></span>
@@ -535,7 +546,8 @@
                             @if( hasDocument('year3')){
                             <div class="text-label">Year 3<span class="text-danger">*</span></div>
                             <div class="addcust-img-box mt-2" [ngClass]="{'disabled-div' : isViewMode}">
-                                <p class="text-label file-name" [title]="getDocumentName('year3',false)">{{ getDocumentName('year3') }}</p>
+                                <p class="text-label file-name" [title]="getDocumentName('year3',false)">{{
+                                    getDocumentName('year3') }}</p>
                                 <div class="icons">
                                     <span class="view" (click)="viewImage(getDocumentUrl('year3'))"><img
                                             src="/assets/images/icons/eyered.svg" alt="view"></span>
@@ -579,7 +591,8 @@
                             @if( hasDocument('businessITR1')){
                             <div class="text-label">Year 1<span class="text-danger">*</span></div>
                             <div class="addcust-img-box mt-2" [ngClass]="{'disabled-div' : isViewMode}">
-                                <p class="text-label file-name" [title]="getDocumentName('businessITR1',false)">{{ getDocumentName('businessITR1') }}</p>
+                                <p class="text-label file-name" [title]="getDocumentName('businessITR1',false)">{{
+                                    getDocumentName('businessITR1') }}</p>
                                 <div class="icons">
                                     <span class="view" (click)="viewImage(getDocumentUrl('businessITR1'))"><img
                                             src="/assets/images/icons/eyered.svg" alt="view"></span>
@@ -602,7 +615,8 @@
                             @if( hasDocument('businessITR2')){
                             <div class="text-label">Year 2<span class="text-danger">*</span></div>
                             <div class="addcust-img-box mt-2" [ngClass]="{'disabled-div' : isViewMode}">
-                                <p class="text-label file-name" [title]="getDocumentName('businessITR2',false)">{{ getDocumentName('businessITR2') }}</p>
+                                <p class="text-label file-name" [title]="getDocumentName('businessITR2',false)">{{
+                                    getDocumentName('businessITR2') }}</p>
                                 <div class="icons">
                                     <span class="view" (click)="viewImage(getDocumentUrl('businessITR2'))"><img
                                             src="/assets/images/icons/eyered.svg" alt="view"></span>
@@ -625,7 +639,8 @@
                             @if( hasDocument('businessITR3')){
                             <div class="text-label">Year 3<span class="text-danger">*</span></div>
                             <div class="addcust-img-box mt-2" [ngClass]="{'disabled-div' : isViewMode}">
-                                <p class="text-label file-name" [title]="getDocumentName('businessITR3',false)">{{ getDocumentName('businessITR3') }}</p>
+                                <p class="text-label file-name" [title]="getDocumentName('businessITR3',false)">{{
+                                    getDocumentName('businessITR3') }}</p>
                                 <div class="icons">
                                     <span class="view" (click)="viewImage(getDocumentUrl('businessITR3'))"><img
                                             src="/assets/images/icons/eyered.svg" alt="view"></span>
@@ -668,7 +683,8 @@
                             @if( hasDocument('businessGST')){
                             <div class="text-label">1 Year GST Return<span class="text-danger">*</span></div>
                             <div class="addcust-img-box mt-2" [ngClass]="{'disabled-div' : isViewMode}">
-                                <p class="text-label file-name" [title]="getDocumentName('businessGST',false)">{{ getDocumentName('businessGST') }}</p>
+                                <p class="text-label file-name" [title]="getDocumentName('businessGST',false)">{{
+                                    getDocumentName('businessGST') }}</p>
                                 <div class="icons">
                                     <span class="view" (click)="viewImage(getDocumentUrl('businessGST'))"><img
                                             src="/assets/images/icons/eyered.svg" alt="view"></span>
@@ -712,7 +728,9 @@
                             @if( hasDocument('businessBankstatement')){
                             <div class="text-label">1 Year bank statement<span class="text-danger">*</span></div>
                             <div class="addcust-img-box mt-2" [ngClass]="{'disabled-div' : isViewMode}">
-                                <p class="text-label file-name" [title]="getDocumentName('businessBankstatement',false)">{{ getDocumentName('businessBankstatement') }}</p>
+                                <p class="text-label file-name"
+                                    [title]="getDocumentName('businessBankstatement',false)">{{
+                                    getDocumentName('businessBankstatement') }}</p>
                                 <div class="icons">
                                     <span class="view" (click)="viewImage(getDocumentUrl('businessBankstatement'))"><img
                                             src="/assets/images/icons/eyered.svg" alt="view"></span>
@@ -763,7 +781,8 @@
                                 <div class="col-lg-4 col-sm-12">
 
                                     <app-inputfield label="Title" [required]="true" placeholder="Enter text here"
-                                        [(ngModel)]="slot.title" [ngModelOptions]="{ standalone: true }" [ngClass]="{'disabled-div': isViewMode}"
+                                        [(ngModel)]="slot.title" [ngModelOptions]="{ standalone: true }"
+                                        [ngClass]="{'disabled-div': isViewMode}"
                                         (input)="main.restrictInput($event, 'text')" [maxlength]="25">
                                     </app-inputfield>
 
@@ -779,22 +798,25 @@
 
                                 <div class="col-lg-4 col-sm-12 ">
 
-                                    @if ( getDocumentByKey(slot.title)) {
+                                    @if ( getDocumentByKey(slot.key)) {
+                                    <div class="text-label mt-0"> Upload Document <span class="text-danger">*</span>
+                                    </div>
 
-                                    <div class="addcust-img-box mt-4" [ngClass]="{'disabled-div' : isViewMode}">
-                                        <p class="text-label file-name" [title]="getDocumentName('slot.title',false)">
-                                            {{ getDocumentName(slot.title) }}
+                                    <div class="addcust-img-box mt-2" [ngClass]="{'disabled-div' : isViewMode}">
+                                        <p class="text-label file-name" [title]="getDocumentName(slot.key,false)">
+                                            {{ getDocumentName(slot.key) }}
                                         </p>
 
                                         <div class="icons">
-                                            <span class="view" (click)="viewImage(getDocumentUrl(slot.title))">
+                                            <span class="view" (click)="viewImage(getDocumentUrl(slot.key))">
                                                 <img src="/assets/images/icons/eyered.svg">
                                             </span>
                                             <span class="download"
-                                                (click)="downloadImage(getDocumentUrl(slot.title),getDocumentName(slot.title))">
+                                                (click)="downloadImage(getDocumentUrl(slot.key),getDocumentName(slot.key))">
                                                 <img src="/assets/images/icons/import-red.svg">
                                             </span>
-                                            <span class="delete" (click)="deleteImage(slot.title, 'otherbusiness', slot.id)">
+                                            <span class="delete"
+                                                (click)="deleteImage(slot.key, 'otherbusiness', slot.id)">
                                                 <img src="/assets/images/icons/close.svg">
                                             </span>
                                         </div>
@@ -807,7 +829,7 @@
                                     <app-uploadbtn label="Other Documents" [config]="basicConfig" [required]="true"
                                         [disabled]="!slot.title && slot.title.trim().length === 0" [uploadViaApi]="true"
                                         [fileuploadresponse]="handleresponse" [disabled]="isViewMode"
-                                        (uploadStarted)="onUploadStarted($event, slot.title,'BUSINESS', 'OTHER_BUSSINESS_INCOME', 'OTHER')">
+                                        (uploadStarted)="onUploadStarted($event, slot.key,'BUSINESS', 'OTHER_BUSSINESS_INCOME', 'OTHER', slot.title)">
                                     </app-uploadbtn>
 
                                     }
@@ -817,7 +839,8 @@
 
                                 <div class="col-lg-4 d-flex justify-content-end align-items-end mt-5">
                                     <span class="delete d-none d-lg-block"
-                                        (click)="removeOtherDocument('otherbusiness',slot.id)" [ngClass]="{'disabled-div': isViewMode}">
+                                        (click)="removeOtherDocument('otherbusiness',slot.id)"
+                                        [ngClass]="{'disabled-div': isViewMode}">
                                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
                                             viewBox="0 0 24 24" fill="none">
                                             <path
@@ -848,7 +871,7 @@
                         <!-- Add button -->
                         <div class="col-lg-4 col-sm-12 mt-20">
                             <app-buttons label="Add Other Document" class="btn btn-icon Add btncustomClass"
-                                [ngClass]="{'disabled-div' : isViewMode}" [outline]="true" 
+                                [ngClass]="{'disabled-div' : isViewMode}" [outline]="true"
                                 (click)="addOtherBusinessDocument()" [disabled]="isViewMode">
 
                             </app-buttons>
@@ -872,8 +895,8 @@
         <div class="col-lg-4  d-flex justify-content-end">
             <app-buttons type="button" label="Back" class="btn btncustomClass" [outline]="true" (click)="back()">
             </app-buttons>
-            <app-buttons type="button" label="Next" class="btn btncustomClass" color="primary" (click)="next()" [ngClass]="{'disabled-div' : !allRequiredFilesUploaded}"
-                [disabled]="!allRequiredFilesUploaded">
+            <app-buttons type="button" label="Next" class="btn btncustomClass" color="primary" (click)="next()"
+                [ngClass]="{'disabled-div' : !allRequiredFilesUploaded}" [disabled]="!allRequiredFilesUploaded">
             </app-buttons>
 
         </div>
@@ -887,7 +910,8 @@
             </app-buttons>
 
             <app-buttons type="button" label="Save" class="btn btncustomClass" color="primary"
-                (click)="saveSummaryEdit()" [disabled]="!allRequiredFilesUploaded" [ngClass]="{'disabled-div' : !allRequiredFilesUploaded}">
+                (click)="saveSummaryEdit()" [disabled]="!allRequiredFilesUploaded"
+                [ngClass]="{'disabled-div' : !allRequiredFilesUploaded}">
             </app-buttons>
 
         </div>

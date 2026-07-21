@@ -1014,10 +1014,10 @@
                                 <div class="common-details-box1">
                                     <div class="d-flex justify-content-between flex-row align-self-stretch">
                                         <label class="text-body-1 fw-bold blue-text">Basic Info</label>
-                                        <button class="btn btn-sm btn-outline-danger px-4"
+                                        <!-- <button class="btn btn-sm btn-outline-danger px-4"
                                             (click)="editCoApplicant(coapp,'co-basicinfo')">
                                             Edit
-                                        </button>
+                                        </button> -->
                                     </div>
 
                                     <hr class="hrclass" />
@@ -1224,13 +1224,13 @@
                                                             <div class="info-item d-flex flex-column">
                                                                 <label class="text-label">Other Document
                                                                     Name</label>
-                                                                <div class="text-label-data fw-bold">{{ doc.name
+                                                                <div class="text-label-data fw-bold">{{ (doc.name)
                                                                     || '-'
                                                                     }}</div>
                                                             </div>
                                                             <div class="info-item d-flex flex-column">
                                                                 <label class="text-label">Other Document</label>
-                                                                <div class="text-label-data fw-bold">{{ doc.url
+                                                                <div class="text-label-data fw-bold">{{ getFileName(doc.url)
                                                                     || '-'
                                                                     }}</div>
                                                             </div>
@@ -1275,7 +1275,7 @@
                                                             </div>
                                                             <div class="info-item d-flex flex-column">
                                                                 <label class="text-label">Other Document</label>
-                                                                <div class="text-label-data fw-bold">{{ doc.url
+                                                                <div class="text-label-data fw-bold">{{ getFileName(doc.url)
                                                                     || '-'
                                                                     }}</div>
                                                             </div>
@@ -1289,7 +1289,7 @@
                                                                     docType.key ===
                                                                     'business_finance_3_years' ? (i + 1) : '' }}
                                                                 </label>
-                                                                <div class="text-label-data fw-bold">{{ doc.url
+                                                                <div class="text-label-data fw-bold">{{ getFileName(doc.url)
                                                                     || '-'
                                                                     }}</div>
                                                             </div>

@@ -756,7 +756,7 @@ export class Incomeinfo {
 
     if (type === 'other') {
       deleteDoc = this.otherIncomeSlots.find(slot => slot.id === id);
-    } else if(type === 'otherbusiness') {
+    } else if (type === 'otherbusiness') {
       deleteDoc = this.otherBusinessSlots.find(slot => slot.id === id);
     }
 
@@ -765,36 +765,68 @@ export class Incomeinfo {
     }
   }
 
-  removeOtherDocument(type: 'other' | 'otherbusiness', id: number): void {
-  
+  removeOtherDocument12(type: 'other' | 'otherbusiness', id: number): void {
+
     let deleteDoc: any;
 
     if (type === 'other') {
       deleteDoc = this.otherIncomeSlots.find(slot => slot.id === id);
-    } else if(type === 'otherbusiness') {
+    } else if (type === 'otherbusiness') {
       deleteDoc = this.otherBusinessSlots.find(slot => slot.id === id);
     }
 
 
-  if (!deleteDoc) return;
+    if (!deleteDoc) return;
 
-  const doc = this.getDocumentByKey(deleteDoc.key);
+    const doc = this.getDocumentByKey(deleteDoc.key);
 
-  if (deleteDoc) {
-    // uploaded document -> call delete API
-    this.deleteImage(deleteDoc.key, type, id);
-  } else {
-    // only title exists -> just remove UI section
-    if (type === 'other') {
-      this.otherIncomeSlots =
-        this.otherIncomeSlots.filter(x => x.id !== id);
-    } else  if (type === 'otherbusiness')  {
-      this.otherBusinessSlots =
-        this.otherBusinessSlots.filter(x => x.id !== id);
+    if (doc) {
+      // uploaded document -> call delete API
+      this.deleteImage(deleteDoc.key, type, id);
+    } else {
+      // only title exists -> just remove UI section
+      if (type === 'other') {
+        this.otherIncomeSlots =
+          this.otherIncomeSlots.filter(x => x.id !== id);
+      } else if (type === 'otherbusiness') {
+        this.otherBusinessSlots =
+          this.otherBusinessSlots.filter(x => x.id !== id);
+      }
+
+      this.cd.detectChanges();
     }
-
-    this.cd.detectChanges();
   }
+  removeOtherDocument(type: 'other' | 'otherbusiness', id: number): void {
+
+  const slots =
+    type === 'other'
+      ? this.otherIncomeSlots
+      : this.otherBusinessSlots;
+
+  const slot = slots.find(x => x.id === id);
+
+  if (!slot) return;
+
+  const doc = this.allDocuments.find(
+    d =>
+      d.slotKey === slot.key ||
+      d.title === slot.title
+  );
+
+  if (doc) {
+    this.deleteImage(slot.key, type, id);
+    return;
+  }
+
+  if (type === 'other') {
+    this.otherIncomeSlots =
+      this.otherIncomeSlots.filter(x => x.id !== id);
+  } else {
+    this.otherBusinessSlots =
+      this.otherBusinessSlots.filter(x => x.id !== id);
+  }
+
+  this.cd.detectChanges();
 }
   onFileChange(result: UploadResult, key: string,
     subcategory: 'LAST_3_MONTHS' | 'FORM_16' | 'BANK_STATEMENT_1_YEAR' | 'ITR_LAST_3_YEARS' | 'OTHER_INCOME',
@@ -854,10 +886,10 @@ export class Incomeinfo {
     fd.append('subcategory', subcategory);
     fd.append('applicantId', apiApplicantId);
 
-    if(subcategory === "OTHER_INCOME" || subcategory === "OTHER_BUSSINESS_INCOME"){
-      if(this.otherIncomeSlots.length > 0){
+    if (subcategory === "OTHER_INCOME" || subcategory === "OTHER_BUSSINESS_INCOME") {
+      if (this.otherIncomeSlots.length > 0) {
         index = this.otherIncomeSlots.length - 1;
-      } else if(this.otherBusinessSlots.length > 0){
+      } else if (this.otherBusinessSlots.length > 0) {
         index = this.otherBusinessSlots.length - 1;
       }
     }
@@ -868,7 +900,7 @@ export class Incomeinfo {
         : key;
 
 
-    fd.append(`files[${index}].title`,  finalTitle);
+    fd.append(`files[${index}].title`, finalTitle);
     fd.append(`files[${index}].type`, type);
     fd.append(`files[${index}].file`, result.file);
 
@@ -882,14 +914,27 @@ export class Incomeinfo {
 
         const uploadedData = this.normalizeUploadResponse(res.data, key, category, subcategory, type, othertitle);
 
+        const responseDocs: Document[] =
+          uploadedData?.uploadedDocuments || [];
+
+        const newDocs = responseDocs.filter(newDoc =>
+          !this.allDocuments.some(existingDoc =>
+            existingDoc.documentId === newDoc.documentId
+          )
+        );
+
+        this.uploadedrespfiles.push({
+          ...uploadedData,
+          uploadedDocuments: newDocs
+        });
+
         this.uploadedrespfiles.push(uploadedData);
 
-        const newDocs = uploadedData?.uploadedDocuments;
+        // const newDocs = uploadedData?.uploadedDocuments;
 
         this.allDocuments = [...this.allDocuments, ...newDocs];
-
         this.rebuildDocumentMap();
-        this.restoreSlotsFromDocuments();
+        // this.restoreSlotsFromDocuments();
         this.cd.detectChanges();
 
         this.uploadedFiles = { ...  this.uploadedFiles }
@@ -915,7 +960,7 @@ export class Incomeinfo {
         this.stepperService.setStepData(this.getStepRoute(), stepData);
 
         // this.getAllDocuments();
-        // this.cd.detectChanges();
+        this.cd.detectChanges();
       },
       error: (err) => {
 
@@ -924,6 +969,7 @@ export class Incomeinfo {
       }
     });
   }
+
   private normalizeUploadResponse(
     data: any,
     slotKey: string,
@@ -934,19 +980,57 @@ export class Incomeinfo {
   ): any {
     if (!data) return data;
 
-     const finalTitle =(title && title.toString().trim())? title.toString().trim(): slotKey;
-
-    const uploadedDocuments = data.uploadedDocuments || [];
-
-    const normalizedDocuments = uploadedDocuments.map((doc: any, index: number) => ({
+    //  const finalTitle =(title && title.toString().trim())? title.toString().trim(): slotKey;
+    const finalTitle = title?.trim() || slotKey;
+    // const uploadedDocuments = data.uploadedDocuments || [];
+    const uploadedDocuments = Array.isArray(data.uploadedDocuments) ? data.uploadedDocuments : []
+    const normalizedDocuments11 = uploadedDocuments.map((doc: any, index: number) => ({
       ...doc,
-      slotKey: slotKey,
+      slotKey,
       title: doc.title || finalTitle || slotKey,
       type: doc.type || type,
       category: doc.category || category,
       subcategory: doc.subcategory || subcategory,
       slotIndex: index
     }));
+    const normalizedDocuments = uploadedDocuments.map(
+    (doc: any, index: number): Document => {
+      // Check whether this document already exists.
+      const existingDoc = this.allDocuments.find(existing =>
+        existing.documentId === doc.documentId
+      );
+
+      // Existing summary document keeps its original slotKey.
+      if (existingDoc) {
+        return {
+          ...existingDoc,
+          ...doc,
+          slotKey: existingDoc.slotKey,
+          title: existingDoc.title,
+          fileName:
+            doc.fileName ||
+            doc.url ||
+            existingDoc.fileName
+        };
+      }
+
+      // Only the newly uploaded document gets the current row key.
+      return {
+        ...doc,
+        slotKey,
+        title: finalTitle,
+        fileName:
+          doc.fileName ||
+          doc.url ||
+          doc.name ||
+          '',
+        type: doc.type || type,
+        category: doc.category || category,
+        subcategory: doc.subcategory || subcategory,
+        slotIndex: index
+      };
+    }
+  );
 
     return {
       ...data,
@@ -1011,23 +1095,24 @@ export class Incomeinfo {
     return doc?.fileName || doc?.title || 'No file uploaded';  // Use fileName!
   }
 
-getDocumentName(
-  key: any,truncate=true
-): any {
-  const file = this.getDocumentByKey(key);
+  getDocumentName(
+    key: any, truncate = true
+  ): any {
+    const file = this.getDocumentByKey(key);
 
-  if (!file) return '';
+    if (!file) return '';
 
-  const fileName =
-    file instanceof File
-      ? file.name
-      : file.fileName || file.name || '';
+    const fileName =
+      file instanceof File
+        ? file.name
+        : file.fileName || file.name || '';
 
-  
+
     if (!truncate || fileName.length <= 30) {
-          return fileName; }
-            return `${fileName.substring(0, 30)}...`;
-}
+      return fileName;
+    }
+    return `${fileName.substring(0, 30)}...`;
+  }
 
   getDocumentUrl(key: string): string {
     const doc = this.getDocumentByKey(key);
@@ -1120,7 +1205,7 @@ getDocumentName(
     return doc || null;
   }
 
-  getDocumentByKey(key: string): Document | null {
+  getDocumentByKey1(key: string): Document | null {
     if (!key || !key.trim() || !this.allDocuments?.length) return null;
 
 
@@ -1147,6 +1232,22 @@ getDocumentName(
 
   }
 
+  getDocumentByKey(key: string): Document | null {
+    const normalizedKey = String(key || '').trim();
+
+    if (!normalizedKey || !this.allDocuments?.length) {
+      return null;
+    }
+
+    return (
+      this.documentMap[normalizedKey] ||
+      this.allDocuments.find(doc =>
+        doc.slotKey === normalizedKey ||
+        doc.documentId === normalizedKey
+      ) ||
+      null
+    );
+  }
 
   hasDocument(documentKey: string): boolean {
     return !!this.getDocumentByKey(documentKey);
@@ -1204,7 +1305,7 @@ getDocumentName(
     this.msgBox.open({
       title: 'Are you sure want to Remove?',
       message: ``,
-      showCancel: true, okText:'Yes',
+      showCancel: true, okText: 'Yes',
       onOk: () => {
         const docToDelete = this.getDocumentByKey(key);
         if (!docToDelete) return;
@@ -1415,17 +1516,17 @@ getDocumentName(
       // Other income
       (income.otherIncome || []).forEach((item: any, i: number) => {
         const title = item.name || `Other Income ${i + 1}`;
-
+        const slotKey = `other_income_${i + 1}`;
         this.otherIncomeSlots.push({
           id: i + 1,
-          key: `other_income_${i + 1}`,
+          key: slotKey,
           title
         });
 
         this.allDocuments.push(
           this.buildSummaryDoc(
             item,
-            title,
+            slotKey,
             'OTHER',
             'OTHER',
             'OTHER_INCOME',
@@ -1497,17 +1598,17 @@ getDocumentName(
       // other business income
       (business.otherBussinessincome || []).forEach((item: any, i: number) => {
         const title = item.name || `Other Business ${i + 1}`;
-
+ const slotKey = `other_business_${i + 1}`;
         this.otherBusinessSlots.push({
           id: i + 1,
-          key: title || `other_business_${i + 1}`,
+          key: slotKey,
           title
         });
 
         this.allDocuments.push(
           this.buildSummaryDoc(
             item,
-            title,
+            slotKey,
             'OTHER',
             'OTHER',
             'OTHER_BUSSINESS_INCOME',
@@ -1853,7 +1954,7 @@ getDocumentName(
       otherBusinessSlots: this.otherBusinessSlots
     });
   }
-  private rebuildDocumentMap(): void {
+  private rebuildDocumentMap1(): void {
     this.documentMap = {};
 
     for (const doc of this.allDocuments || []) {
@@ -1868,6 +1969,19 @@ getDocumentName(
       keys.forEach((k: any) => {
         this.documentMap[String(k)] = doc;
       });
+    }
+  }
+  private rebuildDocumentMap(): void {
+    this.documentMap = {};
+
+    for (const doc of this.allDocuments || []) {
+      if (doc.slotKey) {
+        this.documentMap[String(doc.slotKey)] = doc;
+      }
+
+      if (doc.documentId) {
+        this.documentMap[String(doc.documentId)] = doc;
+      }
     }
   }
 
@@ -2028,7 +2142,7 @@ getDocumentName(
       this.otherIncomeSlots?.some(slot =>
         slot.key === fileKey || slot.title === fileKey
       );
-       const isOtherIncome = this.otherIncomeSlots?.find(slot =>    slot.key === fileKey || slot.title === fileKey );
+    const isOtherIncome = this.otherIncomeSlots?.find(slot => slot.key === fileKey || slot.title === fileKey);
 
     if (isOtherIncome) {
       return {
@@ -2045,7 +2159,7 @@ getDocumentName(
       this.otherBusinessSlots?.some(slot =>
         slot.key === fileKey || slot.title === fileKey
       );
-const isOtherBusiness = this.otherBusinessSlots?.find(slot =>   slot.key === fileKey || slot.title === fileKey );
+    const isOtherBusiness = this.otherBusinessSlots?.find(slot => slot.key === fileKey || slot.title === fileKey);
 
     if (isOtherBusiness) {
       return {
@@ -2095,7 +2209,7 @@ const isOtherBusiness = this.otherBusinessSlots?.find(slot =>   slot.key === fil
     this.msgBox.open({
       title: 'Are you sure you want to exit?',
       message: ``,
-      showCancel: true,
+      showCancel: true, okText:'Yes',
       onOk: () => {
         const key = this.getStorageKey();
 

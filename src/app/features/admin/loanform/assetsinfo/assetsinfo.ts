@@ -711,7 +711,7 @@ export class Assetsinfo implements OnInit {
       bankname: [''],
       description: [''],
       bankamt: ['', [Validators.required, this.nonZeroValidator]],
-      maturitydate: ['', [Validators.required, this.dateMinValidator(() => new Date())]]
+      maturitydate: ['', [Validators.required, this.validDateValidator, this.dateMinValidator(() => new Date())]]
     });
   }
   addFD() {
@@ -1888,7 +1888,20 @@ export class Assetsinfo implements OnInit {
 
     };
   };
+validDateValidator(control: any) {
+  const value = control.value;
 
+  if (!value) return null;
+
+  const date = new Date(value);
+
+  // Invalid date
+  if (isNaN(date.getTime())) {
+    return { invalidDate: true };
+  }
+
+  return null;
+}
   nonZeroValidator(control: any) {
     const raw = control.value;
 
@@ -2526,7 +2539,7 @@ export class Assetsinfo implements OnInit {
     this.msgBox.open({
       title: 'Are you sure you want to exit?',
       message: ``,
-      showCancel: true,
+      showCancel: true, okText:'Yes',
       onOk: () => {
         // const result1 = this.buildAssetsPayload();
 

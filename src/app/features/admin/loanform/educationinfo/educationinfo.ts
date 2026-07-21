@@ -2567,7 +2567,7 @@ isOtherInstituteSelected(step: StepKey): boolean {
     this.msgBox.open({
       title: 'Are you sure you want to exit?',
       message: ``,
-      showCancel: true,
+      showCancel: true, okText:'Yes',
       onOk: async () => {
 
         const step = this.activeEducation as StepKey;

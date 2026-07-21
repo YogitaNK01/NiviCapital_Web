@@ -21,7 +21,7 @@
                                 </span>
                             </div>
                             <div class="flex-grow-1"></div>
-                            <div class="ms-auto d-flex align-items-center p-0" *ngIf="acc.key !== 'kyc'" >
+                            <div class="ms-auto d-flex align-items-center p-0" *ngIf="acc.key !== 'basic' && acc.key !== 'kyc'" >
                                 <app-buttons type="button" label="Edit" class="btn editbtn p-0"  (click)="goTocoappEdit(acc.key, $event)" 
                                     [outline]="true"></app-buttons>
 
@@ -143,7 +143,7 @@
                                     <div class="text-label-data fw-bold">{{field.value === 'M'?'Male' : field.value ===
                                         'F'?'Female' : 'Third Gender'}}</div>
                                     } @else {
-                                    <div class="text-label-data fw-bold">{{field.value}}</div>
+                                    <div class="text-label-data fw-bold">{{ field.label =='Upload Applicant Photo'?  getFileName(field.value) : field.value}}</div>
                                     }
                                 </div>
                             </div>
@@ -266,7 +266,7 @@
                                                     </div>
                                                     <div class="info-item d-flex flex-column">
                                                         <label class="text-label">Other Document</label>
-                                                        <div class="text-label-data fw-bold">{{ doc.url || '-' }}</div>
+                                                        <div class="text-label-data fw-bold">{{ getFileName(doc.url) || '-' }}</div>
                                                     </div>
                                                 </ng-container>
 
@@ -277,7 +277,7 @@
                                                             {{ docType.key === 'salarySlips' || docType.key === 'itrs' ?
                                                             (i + 1) : '' }}
                                                         </label>
-                                                        <div class="text-label-data fw-bold">{{ doc.url || '-' }}</div>
+                                                        <div class="text-label-data fw-bold">{{ getFileName(doc.url )|| '-' }}</div>
                                                     </div>
                                                 </ng-template>
 
@@ -301,7 +301,7 @@
                                                     </div>
                                                     <div class="info-item d-flex flex-column">
                                                         <label class="text-label">Other Document</label>
-                                                        <div class="text-label-data fw-bold">{{ doc.url || '-' }}</div>
+                                                        <div class="text-label-data fw-bold">{{ getFileName(doc.url) || '-' }}</div>
                                                     </div>
                                                 </ng-container>
 
@@ -312,7 +312,7 @@
                                                             {{ docType.key === 'business_itr_3_years' || docType.key ===
                                                             'business_finance_3_years' ? (i + 1) : '' }}
                                                         </label>
-                                                        <div class="text-label-data fw-bold">{{ doc.url || '-' }}</div>
+                                                        <div class="text-label-data fw-bold">{{ getFileName(doc.url) || '-' }}</div>
                                                     </div>
                                                 </ng-template>
 

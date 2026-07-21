@@ -1226,7 +1226,7 @@ export class Edudetails {
     this.msgBox.open({
       title: 'Are you sure you want to exit?',
       message: ``,
-      showCancel: true,
+      showCancel: true, okText:'Yes',
       onOk: () => {
         if (!this.basicform) return;
         // const key = `educationdetailsData_${this.applicantId}`;

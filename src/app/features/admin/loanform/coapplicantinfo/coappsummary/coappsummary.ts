@@ -144,6 +144,7 @@ export class Coappsummary {
     private router: Router, private route: ActivatedRoute, public main: Main, private apiservice: Addcustomerservice) { }
 
   ngOnInit(): void {
+   this.stepperService.markStepCompleted('co-summaryinfo');
     let Allids = this.stepperService.getLoanId();
 
     this.applicantId = Allids[0];
@@ -592,4 +593,14 @@ export class Coappsummary {
       }
     });
   }
+
+  //show 35 char with ... only if filename is bigger
+     getFileName(filename:any,maxLength: number = 30): string {
+  const fileName = filename || '';
+    if (fileName.length <= maxLength) {
+          return fileName; 
+        }
+            return `${fileName.substring(0, maxLength)}...`;
+}
+
 }

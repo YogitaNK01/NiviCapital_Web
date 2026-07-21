@@ -2103,7 +2103,7 @@ export class Liabilitiesinfo {
     this.msgBox.open({
       title: 'Are you sure you want to exit?',
       message: ``,
-      showCancel: true,
+      showCancel: true, okText:'Yes',
       onOk: () => {
 
 
@@ -2539,7 +2539,7 @@ export class Liabilitiesinfo {
                 const stepRoute = this.getStepRoute();
                 this.stepperService.markStepCompleted(stepRoute);
                 this.stepperService.setStepData(stepRoute, this.liabilityForm.getRawValue());
-                this.stepperService.next();
+                // this.stepperService.next();
               }
             },
             error: (err) => {

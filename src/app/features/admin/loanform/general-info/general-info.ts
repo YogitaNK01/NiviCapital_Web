@@ -453,7 +453,7 @@ minEndCourseDate: any = null;
   }
 
   getStepRoute() {
-    return this.isCoApplicant ? 'co-generalinfo' : 'generalinfo';
+    return this.isCoApplicant ? 'co-generalinfo' : 'genralinfo';
   }
 
   //store data in form
@@ -1700,7 +1700,7 @@ minEndCourseDate: any = null;
     this.msgBox.open({
       title: 'Are you sure you want to exit?',
       message: ``,
-      showCancel: true,
+      showCancel: true, okText:'Yes',
       onOk: () => {
         const formdata = this.activeForm.value;
 
