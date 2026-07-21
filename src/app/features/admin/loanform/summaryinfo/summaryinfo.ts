@@ -657,7 +657,8 @@ private isCompletedCoApplicant(coapp: any): boolean {
         queryParams: {
           coApplicantIndex: coapp.index,
           coApplicantId: coapp.applicantId,
-          mode: 'existing'
+          mode: 'view',
+          fromSummary: true
         }
       }
     );

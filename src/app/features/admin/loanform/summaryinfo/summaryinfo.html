@@ -565,9 +565,17 @@
 
                                             <div class="info-item d-flex flex-column">
                                                 <label class="text-label">{{ field.label }}</label>
-                                                <div class="text-label-data fw-bold">
+                                                <!-- <div class="text-label-data fw-bold">
                                                     {{ field.value || '-' }}
-                                                </div>
+                                                </div> -->
+                                                 <div class="text-label-data fw-bold">
+                                                                    {{
+                                                                    field.key === 'leavingCertificateUrl' ||
+                                                                    field.key === 'otherDocumentUrl'
+                                                                    ? getFileName(field.value, 30)
+                                                                    : (field.value || '-')
+                                                                    }}
+                                                                </div>
                                             </div>
 
                                             <!--   INSERT MARKSHEET RIGHT AFTER LOCATION -->

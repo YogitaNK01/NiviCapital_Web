@@ -74,8 +74,10 @@
   }
 }
 .step:last-child.active ,.step:last-child.active.completed {
+  
   background: $secondary-50 !important;
   border-bottom: 3px solid $secondary-700;
+   border-radius: 0 12px 12px 0;
 }
 
 .step.upcoming,

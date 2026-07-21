@@ -284,24 +284,24 @@ export class Uploadkyc implements OnDestroy, AfterViewInit {
 
     let finalData: any = null;
 
-      finalData = this.mergeKycData(  normalizedSummary, draftData,parsedLocal  );
+      // finalData = this.mergeKycData(  normalizedSummary, draftData,parsedLocal  );
 
-    // // 1) Full submitted summary should always win
-    // if (this.isKycComplete(normalizedSummary)) {
-    //   finalData = normalizedSummary;
-    // }
-    // // 2) Else draft data (partial save-exit)
-    // else if (this.hasAnyKycData(draftData)) {
-    //   finalData = draftData;
-    // }
-    // // 3) Else local fallback
-    // else if (this.hasAnyKycData(parsedLocal)) {
-    //   finalData = parsedLocal;
-    // }
-    // // 4) Else partial summary fallback
-    // else if (this.hasAnyKycData(normalizedSummary)) {
-    //   finalData = normalizedSummary;
-    // }
+    // 1) Full submitted summary should always win
+    if (this.isKycComplete(normalizedSummary)) {
+      finalData = normalizedSummary;
+    }
+    // 2) Else draft data (partial save-exit)
+    else if (this.hasAnyKycData(draftData)) {
+      finalData = draftData;
+    }
+    // 3) Else local fallback
+    else if (this.hasAnyKycData(parsedLocal)) {
+      finalData = parsedLocal;
+    }
+    // 4) Else partial summary fallback
+    else if (this.hasAnyKycData(normalizedSummary)) {
+      finalData = normalizedSummary;
+    }
 
     if (!finalData) {
       this.lastSavedPayload = null;
@@ -311,10 +311,8 @@ export class Uploadkyc implements OnDestroy, AfterViewInit {
     this.patchKycInfo(finalData);
     this.lastSavedPayload = this.normalizeKycPayload(finalData);
 
-    // localStorage.setItem(key, JSON.stringify(finalData));
-    if (draftData) {
-      localStorage.setItem(key, JSON.stringify(draftData));
-    }
+    localStorage.setItem(key, JSON.stringify(finalData));
+    
     const stepRoute = this.isCoApplicant ? 'co-kyc' : 'kycinfo';
 
     if (this.isKycComplete(finalData)) {

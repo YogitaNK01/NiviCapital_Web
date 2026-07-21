@@ -331,7 +331,7 @@
                                 <div class="text-dp-3-regular d-flex align-items-center justify-content-between">
                                     FD {{ i + 1 }}
                                     <span *ngIf="fixedDeposits.length > 1" (click)="removeitem(i,'fd')"
-                                        class="delete-icon px-2">
+                                        class="delete-icon px-2" [ngClass]="{'disabled-div': isViewMode}">
                                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
                                             viewBox="0 0 24 24" fill="none">
                                             <path
@@ -622,7 +622,7 @@
                                 <div class="text-dp-3-regular d-flex align-items-center justify-content-between">
                                     Assets {{ i + 1 }}
                                     <span *ngIf="otherassets.length > 1" (click)="removeitem(i,'other')"
-                                        class="delete-icon px-2">
+                                        class="delete-icon px-2" [ngClass]="{'disabled-div': isViewMode}">
                                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
                                             viewBox="0 0 24 24" fill="none">
                                             <path

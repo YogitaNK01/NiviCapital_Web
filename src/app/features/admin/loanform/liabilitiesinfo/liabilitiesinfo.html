@@ -72,7 +72,7 @@
 
 
                                 <!-- <span class="delete-icon px-2" (click)="removeAccordion(acc.key, i, $event)"> -->
-                                <span class="delete-icon px-2" (click)="removeAccordion(acc, i, $event)">
+                                <span class="delete-icon px-2" (click)="removeAccordion(acc, i, $event)" [ngClass]="{'disabled-div': isViewMode}">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
                                         fill="none">
                                         <path
@@ -158,7 +158,7 @@
 
                         <div class="text-dp-3-regular d-flex align-items-center justify-content-between">
                             {{ loan.get('type')?.value }}
-                            <span *ngIf="loans.controls.length>1" (click)="removeitem(i,'loantype')">
+                            <span *ngIf="loans.controls.length>1" (click)="removeitem(i,'loantype')" [ngClass]="{'disabled-div': isViewMode}">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
                                     fill="none">
                                     <path
@@ -285,7 +285,7 @@
                                 <div class="text-dp-3-regular d-flex align-items-center justify-content-between">
                                     Credit Card {{ i + 1 }}
                                     <span *ngIf="getFormArray('creditcard').controls.length > 1"
-                                        (click)="removeitem(i,'creditcard')">
+                                        (click)="removeitem(i,'creditcard')" [ngClass]="{'disabled-div': isViewMode}">
                                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
                                             viewBox="0 0 24 24" fill="none">
                                             <path
@@ -443,7 +443,7 @@
                                 <div class="text-dp-3-regular d-flex align-items-center justify-content-between">
                                     BNPL {{ i + 1 }}
                                     <span *ngIf="getFormArray('bnpl').controls.length > 1"
-                                        (click)="removeitem(i,'bnpl')">
+                                        (click)="removeitem(i,'bnpl')" [ngClass]="{'disabled-div': isViewMode}">
                                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
                                             viewBox="0 0 24 24" fill="none">
                                             <path
@@ -582,7 +582,7 @@
 
                                 <div class="text-dp-3-regular d-flex align-items-center justify-content-between">
                                     Liability {{ i + 1 }}
-                                    <span *ngIf="other.length > 1" (click)="removeitem(i,'other')">
+                                    <span *ngIf="other.length > 1" (click)="removeitem(i,'other')" [ngClass]="{'disabled-div': isViewMode}">
                                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
                                             viewBox="0 0 24 24" fill="none">
                                             <path

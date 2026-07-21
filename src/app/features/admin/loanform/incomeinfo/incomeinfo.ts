@@ -285,6 +285,9 @@ export class Incomeinfo {
   constructor(private fb: FormBuilder, private stepperService: Loanstepperservice, private router: Router, private cd: ChangeDetectorRef, private msgBox: Msgboxservice, public loanformservice: Loanformservice, private route: ActivatedRoute, public main: Main, private storageservice: Storage) { }
   async ngOnInit(): Promise<void> {
     this.isCoApplicant = this.router.url.includes('co-applicant');
+//  this.stepperService.restoreLoanEditContext();
+//    this.stepperService.restoreLoanIdFromSession();
+//      if (this.isCoApplicant) {  this.stepperService.restoreCoAppIdFromSession(); }
 
     this.stepperService.setStepperType(
       this.isCoApplicant ? 'CO_APPLICANT' : 'MAIN'
@@ -928,7 +931,7 @@ export class Incomeinfo {
           uploadedDocuments: newDocs
         });
 
-        this.uploadedrespfiles.push(uploadedData);
+        // this.uploadedrespfiles.push(uploadedData);
 
         // const newDocs = uploadedData?.uploadedDocuments;
 
@@ -2102,7 +2105,7 @@ export class Incomeinfo {
           }
 
           return {
-            section,
+            section,applicantId,
             data
           };
         }),
@@ -2116,7 +2119,7 @@ export class Incomeinfo {
           );
 
           return of({
-            section,
+            section,applicantId,
             data: null
           });
         })
