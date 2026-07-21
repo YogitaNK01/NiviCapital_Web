@@ -236,10 +236,7 @@
 }
 
 
-/*
- * When a step containing sub-steps is followed by another step,
- * extend the next step's connector upward to remove the gap.
- */
+
 .step:has(.sub-stepper) + .step::before {
   top: calc(-30px - #{$spacing_6});
   height: calc(100% + #{$spacing_6});

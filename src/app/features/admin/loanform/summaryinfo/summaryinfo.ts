@@ -817,7 +817,9 @@ private isCompletedCoApplicant(coapp: any): boolean {
       console.log(res);
       if (res.status === "success") {
          this.formSvc.clearSummaryEditFlow();
-           this.formSvc.clearSummaryEducationEditFlow();
+           this.formSvc.clearSummaryEducationEditFlow?.();
+             this.stepperService.clearSummaryEducationEditFlow();
+             sessionStorage.removeItem( 'summaryEducationLockState'  );
              sessionStorage.removeItem('coAppIds');
 
         this.submitDescription = `Application Reference Number : ${res.application.referenceNumber}`;

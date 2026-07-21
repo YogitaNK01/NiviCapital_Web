@@ -972,7 +972,7 @@ export class Edudetails {
       qualificationtitle: data.otherQualification || '',
 
 
-      institute:  
+      institute:
         data.lastInstitutionName
       ,
       institutetitle: data.otherInstitutionName || ''
@@ -1260,24 +1260,25 @@ export class Edudetails {
   }
 
 
+  private isActualSummaryEducationFlow(): boolean {
+    const params = this.route.snapshot.queryParams;
 
+    const hasSummaryQuery =
+      params['fromSummary'] === true ||
+      params['fromSummary'] === 'true';
+
+    return (
+      hasSummaryQuery &&
+      this.formSvc.isSummaryEditFlow() &&
+      this.stepperService.isSummaryEducationEditFlow()
+    );
+  }
   next() {
     if (this.basicform.invalid) return;
 
     this.hasProceededOnce = true;
     this.previousEducationId = this.basicform.value.qualification;
 
-    // const qualificationId = this.basicform.value.qualification;
-
-    // let input =
-
-    // {
-    //   "applicantId": this.applicantId,
-    //   "lastQualificationId": this.basicform.value.qualification,
-    //   'otherQualification': this.isOtherQualification ? this.basicform.value.qualificationtitle : '',
-    //   "lastInstitutionId": this.basicform.value.institute,
-    //   "otherInstitutionName": this.isOtherEducation ? this.basicform.value.institutetitle : ''
-    // }
     const raw = this.basicform.getRawValue();
 
     const qualificationId = this.resolveQualificationId(raw.qualification);
@@ -1308,8 +1309,9 @@ export class Edudetails {
           );
           this.lastSavedPayload = { ...input };
           this.saveEducationBasic();
-          if (this.isFromSummary || this.stepperService.isSummaryEducationEditFlow()) {
-
+          // if (this.isFromSummary || this.stepperService.isSummaryEducationEditFlow()) {
+          const isSummaryFlow = this.isActualSummaryEducationFlow();
+          if (isSummaryFlow) {
             this.router.navigate(['educationinfo'], {
               relativeTo: this.route,
               queryParams: {
