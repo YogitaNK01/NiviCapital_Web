@@ -2286,17 +2286,17 @@ private createKycLocalCache(input: any): any {
           uploaded: !!identity?.aadhaarFrontUrl
         },
         aadharback: {
-          fileName: identity?.aadhaarBackUrl || identity?.aadhaarBackDocument.fileName || '',
+          fileName: identity?.aadhaarBackUrl || this.getFileNameFromUrl(identity?.aadhaarBackUrl) || identity?.aadhaarBackDocument.fileName || '',
           fileUrl: identity?.aadhaarBackDocument.viewUrl || identity?.aadhaarBackUrl || '',
           uploaded: !!identity?.aadhaarBackUrl
         },
         pan: {
-          fileName: identity?.panCardUrl || identity?.panDocument.fileName || '',
+          fileName: identity?.panCardUrl || this.getFileNameFromUrl(identity?.panCardUrl) || identity?.panDocument.fileName || '',
           fileUrl: identity?.panDocument.viewUrl || identity?.panCardUrl || '',
           uploaded: !!identity?.panCardUrl
         },
         passport: {
-          fileName: identity?.passportUrl || identity?.passportDocument.fileName || '',
+          fileName: identity?.passportUrl || this.getFileNameFromUrl(identity?.passportUrl) || identity?.passportDocument.fileName || '',
           fileUrl: identity?.passportDocument.viewUrl || identity?.passportUrl || '',
           uploaded: !!identity?.passportUrl
         },
@@ -2305,6 +2305,11 @@ private createKycLocalCache(input: any): any {
             other?.supportingDocumentUrl ||
             current?.supportingDocumentUrl ||
             permanent?.supportingDocumentUrl ||
+            this.getFileNameFromUrl(
+        other?.supportingDocumentUrl ||
+        current?.supportingDocumentUrl ||
+        permanent?.supportingDocumentUrl
+      ) ||
             '',
           fileUrl:
             other?.supportingDocumentUrl ||
