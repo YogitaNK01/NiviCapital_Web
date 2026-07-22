@@ -308,6 +308,8 @@ ngAfterViewInit(): void {
     const summarySection =
       summaryApplicant?.kyc ||
       summaryApplicant?.kycInfo ||
+      summaryApplicant?.KYC ||
+      summaryApplicant?.Kyc ||
       null;
 
 
@@ -395,6 +397,19 @@ private mergeKycData(
       ? `kycinfo_coapp_${this.applicationId}_${coApplicantId}`
       : `kycinfo_coapp_${this.applicationId}_temp_${index}`;
   }
+
+  private getStableStorageKey(): string {
+  if (!this.isCoApplicant) {
+    return this.getStorageKey();
+  }
+
+  const index =
+    this.stepperService.getCurrentCoApplicantIndex() ||
+    Number(this.route.snapshot.queryParams['coApplicantIndex']) ||
+    1;
+
+  return `kycinfo_coapp_${this.applicationId}_index_${index}`;
+}
 
   isPassportRequired(): boolean {
     // Main applicant + fresh flow only
@@ -2279,50 +2294,152 @@ private createKycLocalCache(input: any): any {
           : [])
       ],
 
+     
       fileMeta: {
-        aadharfront: {
-          fileName: identity?.aadhaarFrontUrl || identity?.aadhaarFrontDocument.fileName || this.getFileNameFromUrl(identity?.aadhaarFrontUrl) || '',
-          fileUrl: identity?.aadhaarFrontDocument.viewUrl || identity?.aadhaarFrontUrl || '',
-          uploaded: !!identity?.aadhaarFrontUrl
-        },
-        aadharback: {
-          fileName: identity?.aadhaarBackUrl || this.getFileNameFromUrl(identity?.aadhaarBackUrl) || identity?.aadhaarBackDocument.fileName || '',
-          fileUrl: identity?.aadhaarBackDocument.viewUrl || identity?.aadhaarBackUrl || '',
-          uploaded: !!identity?.aadhaarBackUrl
-        },
-        pan: {
-          fileName: identity?.panCardUrl || this.getFileNameFromUrl(identity?.panCardUrl) || identity?.panDocument.fileName || '',
-          fileUrl: identity?.panDocument.viewUrl || identity?.panCardUrl || '',
-          uploaded: !!identity?.panCardUrl
-        },
-        passport: {
-          fileName: identity?.passportUrl || this.getFileNameFromUrl(identity?.passportUrl) || identity?.passportDocument.fileName || '',
-          fileUrl: identity?.passportDocument.viewUrl || identity?.passportUrl || '',
-          uploaded: !!identity?.passportUrl
-        },
-        secaddress: {
-          fileName:
-            other?.supportingDocumentUrl ||
-            current?.supportingDocumentUrl ||
-            permanent?.supportingDocumentUrl ||
-            this.getFileNameFromUrl(
+  aadharfront: {
+    fileName:
+      identity?.aadhaarFrontDocument?.fileName ||
+      this.getFileNameFromUrl(
+        identity?.aadhaarFrontUrl
+      ) ||
+      '',
+
+    fileUrl:
+      identity?.aadhaarFrontDocument?.viewUrl ||
+      identity?.aadhaarFrontDocument?.fileUrl ||
+      identity?.aadhaarFrontUrl ||
+      '',
+
+    viewUrl:
+      identity?.aadhaarFrontDocument?.viewUrl ||
+      identity?.aadhaarFrontDocument?.fileUrl ||
+      identity?.aadhaarFrontUrl ||
+      '',
+
+    uploaded: !!(
+      identity?.aadhaarFrontDocument?.fileName ||
+      identity?.aadhaarFrontUrl
+    )
+  },
+
+  aadharback: {
+    fileName:
+      identity?.aadhaarBackDocument?.fileName ||
+      this.getFileNameFromUrl(
+        identity?.aadhaarBackUrl
+      ) ||
+      '',
+
+    fileUrl:
+      identity?.aadhaarBackDocument?.viewUrl ||
+      identity?.aadhaarBackDocument?.fileUrl ||
+      identity?.aadhaarBackUrl ||
+      '',
+
+    viewUrl:
+      identity?.aadhaarBackDocument?.viewUrl ||
+      identity?.aadhaarBackDocument?.fileUrl ||
+      identity?.aadhaarBackUrl ||
+      '',
+
+    uploaded: !!(
+      identity?.aadhaarBackDocument?.fileName ||
+      identity?.aadhaarBackUrl
+    )
+  },
+
+  pan: {
+    fileName:
+      identity?.panDocument?.fileName ||
+      this.getFileNameFromUrl(
+        identity?.panCardUrl
+      ) ||
+      '',
+
+    fileUrl:
+      identity?.panDocument?.viewUrl ||
+      identity?.panDocument?.fileUrl ||
+      identity?.panCardUrl ||
+      '',
+
+    viewUrl:
+      identity?.panDocument?.viewUrl ||
+      identity?.panDocument?.fileUrl ||
+      identity?.panCardUrl ||
+      '',
+
+    uploaded: !!(
+      identity?.panDocument?.fileName ||
+      identity?.panCardUrl
+    )
+  },
+
+  passport: {
+    fileName:
+      identity?.passportDocument?.fileName ||
+      this.getFileNameFromUrl(
+        identity?.passportUrl
+      ) ||
+      '',
+
+    fileUrl:
+      identity?.passportDocument?.viewUrl ||
+      identity?.passportDocument?.fileUrl ||
+      identity?.passportUrl ||
+      '',
+
+    viewUrl:
+      identity?.passportDocument?.viewUrl ||
+      identity?.passportDocument?.fileUrl ||
+      identity?.passportUrl ||
+      '',
+
+    uploaded: !!(
+      identity?.passportDocument?.fileName ||
+      identity?.passportUrl
+    )
+  },
+
+  secaddress: {
+    fileName:
+      other?.supportingDocument?.fileName ||
+      current?.supportingDocument?.fileName ||
+      permanent?.supportingDocument?.fileName ||
+      this.getFileNameFromUrl(
         other?.supportingDocumentUrl ||
         current?.supportingDocumentUrl ||
         permanent?.supportingDocumentUrl
       ) ||
-            '',
-          fileUrl:
-            other?.supportingDocumentUrl ||
-            current?.supportingDocumentUrl ||
-            permanent?.supportingDocumentUrl ||
-            '',
-          uploaded: !!(
-            other?.supportingDocumentUrl ||
-            current?.supportingDocumentUrl ||
-            permanent?.supportingDocumentUrl
-          )
-        }
-      }
+      '',
+
+    fileUrl:
+      other?.supportingDocument?.viewUrl ||
+      current?.supportingDocument?.viewUrl ||
+      permanent?.supportingDocument?.viewUrl ||
+      other?.supportingDocumentUrl ||
+      current?.supportingDocumentUrl ||
+      permanent?.supportingDocumentUrl ||
+      '',
+
+    viewUrl:
+      other?.supportingDocument?.viewUrl ||
+      current?.supportingDocument?.viewUrl ||
+      permanent?.supportingDocument?.viewUrl ||
+      other?.supportingDocumentUrl ||
+      current?.supportingDocumentUrl ||
+      permanent?.supportingDocumentUrl ||
+      '',
+
+    uploaded: !!(
+      other?.supportingDocument?.fileName ||
+      current?.supportingDocument?.fileName ||
+      permanent?.supportingDocument?.fileName ||
+      other?.supportingDocumentUrl ||
+      current?.supportingDocumentUrl ||
+      permanent?.supportingDocumentUrl
+    )
+  }
+}
     };
   }
 
