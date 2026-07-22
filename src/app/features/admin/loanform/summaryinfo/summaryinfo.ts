@@ -514,7 +514,7 @@ private isCompletedCoApplicant(coapp: any): boolean {
       },
 
 
-      incomeDetails: data?.incomeDetails || {
+      incomeDetails: this.sortIncomeDocuments(data?.incomeDetails) || {
         editUrl: '',
         salarySlips: [],
         bankStatements: [],
@@ -523,7 +523,7 @@ private isCompletedCoApplicant(coapp: any): boolean {
         otherIncome: []
       },
 
-      incomeBusinessDetails: data?.incomeBusinessDetails || {
+      incomeBusinessDetails: this.sortIncomeDocuments(data?.incomeBusinessDetails) || {
         editUrl: '',
         business_gst_1_year: [],
         business_itr_3_years: [],
@@ -918,6 +918,51 @@ private isCompletedCoApplicant(coapp: any): boolean {
       this.hasArrayData(this.incomeBusinessDetails, businessKeys)
     );
   }
+//sorted income documents
+  private getDocumentSequence(document: any): number {
+  const value = String(
+    document?.name ||
+    document?.documentName ||
+    document?.title ||
+    ''
+  )
+    .trim()
+    .toLowerCase();
+
+  const match = value.match(/(\d+)\s*$/);
+
+  return match ? Number(match[1]) : Number.MAX_SAFE_INTEGER;
+}
+
+private sortIncomeDocuments(income: any): any {
+  if (!income) {
+    return income;
+  }
+
+  const sortableKeys = [
+    'salarySlips',
+    'itrs',
+    'business_finance_3_years',
+    'business_itr_3_years'
+  ];
+
+  const sortedIncome = {
+    ...income
+  };
+
+  sortableKeys.forEach(key => {
+    sortedIncome[key] = Array.isArray(income[key])
+      ? [...income[key]].sort(
+          (first: any, second: any) =>
+            this.getDocumentSequence(first) -
+            this.getDocumentSequence(second)
+        )
+      : [];
+  });
+
+  return sortedIncome;
+}
+
   formatInr(value: number): string {
     return new Intl.NumberFormat('en-IN').format(value);
   }
