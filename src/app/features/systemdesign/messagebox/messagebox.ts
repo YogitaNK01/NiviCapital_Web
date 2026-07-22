@@ -56,15 +56,9 @@ export class Messagebox {
 
 };
 constructor(private stepperService:Loanstepperservice){}
-  onOk1() {
-    this.ok.emit();
-    // this.close.emit();
-  }
+ 
 
-  onCancel1() {
-    this.cancel.emit();
-    // this.close.emit();
-  }
+
   onOk() {
     this.ok.emit();
     this.close();

@@ -623,23 +623,7 @@ export class Incomeinfo {
     );
   }
 
-  private hasCompleteSummaryIncome1(income: any, business: any): boolean {
-    if (this.currentApplicantState?.issalaried) {
-      return !!(
-        income?.salarySlips?.length >= 3 &&
-        income?.bankStatements?.length >= 1 &&
-        income?.form16?.length >= 1 &&
-        income?.itrs?.length >= 3
-      );
-    }
 
-    return !!(
-      business?.business_finance_3_years?.length >= 3 &&
-      business?.business_itr_3_years?.length >= 3 &&
-      business?.business_gst_1_year?.length >= 1 &&
-      business?.business_bank_statement_1_year?.length >= 1
-    );
-  }
   private hasCompleteSummaryIncome(income: any, business: any): boolean {
     const hasCompleteIncome =
       !!(
@@ -752,53 +736,7 @@ export class Incomeinfo {
     return this.incomeForm.controls;
   }
 
-  removeOtherDocument1(type: 'other' | 'otherbusiness', id: number): void {
-
-
-    let deleteDoc: any;
-
-    if (type === 'other') {
-      deleteDoc = this.otherIncomeSlots.find(slot => slot.id === id);
-    } else if (type === 'otherbusiness') {
-      deleteDoc = this.otherBusinessSlots.find(slot => slot.id === id);
-    }
-
-    if (deleteDoc?.key) {
-      this.deleteImage(deleteDoc.key, type, id);
-    }
-  }
-
-  removeOtherDocument12(type: 'other' | 'otherbusiness', id: number): void {
-
-    let deleteDoc: any;
-
-    if (type === 'other') {
-      deleteDoc = this.otherIncomeSlots.find(slot => slot.id === id);
-    } else if (type === 'otherbusiness') {
-      deleteDoc = this.otherBusinessSlots.find(slot => slot.id === id);
-    }
-
-
-    if (!deleteDoc) return;
-
-    const doc = this.getDocumentByKey(deleteDoc.key);
-
-    if (doc) {
-      // uploaded document -> call delete API
-      this.deleteImage(deleteDoc.key, type, id);
-    } else {
-      // only title exists -> just remove UI section
-      if (type === 'other') {
-        this.otherIncomeSlots =
-          this.otherIncomeSlots.filter(x => x.id !== id);
-      } else if (type === 'otherbusiness') {
-        this.otherBusinessSlots =
-          this.otherBusinessSlots.filter(x => x.id !== id);
-      }
-
-      this.cd.detectChanges();
-    }
-  }
+ 
   removeOtherDocument(type: 'other' | 'otherbusiness', id: number): void {
 
   const slots =
@@ -1043,31 +981,7 @@ export class Incomeinfo {
     };
   }
 
-  getAllDocuments1() {
-    const docs: Document[] = [];
 
-    this.uploadedrespfiles.forEach(item => {
-      if (item.uploadedDocuments?.length > 0) {
-        docs.push(...item.uploadedDocuments);
-      }
-    });
-
-
-    console.log("Raw docs:", docs);
-
-    // Use type as key, fallback to filename
-    this.documentMap = docs.reduce((map, doc) => {
-      const key = doc.type || doc.fileName?.trim() || doc.documentId! || doc.title!;
-      if (key) {
-        map[key] = doc;
-      }
-      return map;
-    }, {} as { [key: string]: Document });
-
-    console.log("documentMap keys:", Object.keys(this.documentMap));
-    this.allDocuments = docs;
-    this.rebuildDocumentMap();
-  }
   getAllDocuments() {
     const uploadDocs: Document[] = [];
 
@@ -1093,10 +1007,6 @@ export class Incomeinfo {
     this.rebuildDocumentMap();
   }
 
-  getDocumentName1(key: any): any {
-    const doc = this.getDocumentByKey(key);
-    return doc?.fileName || doc?.title || 'No file uploaded';  // Use fileName!
-  }
 
   getDocumentName(
     key: any, truncate = true
@@ -1150,15 +1060,6 @@ export class Incomeinfo {
       : this.requiredBusinessDocs;
 
     const missing = required.filter(key => !this.getDocumentByKey(key));
-
-    // console.log('Required docs:', required);
-    // console.log('Available docs:', this.allDocuments.map(d => ({
-    //   slotKey: d.slotKey,
-    //   title: d.title,
-    //   fileName: d.fileName,
-    //   type: d.type
-    // })));
-    // console.log('Missing docs:', missing);
 
     return missing.length === 0;
   }
@@ -1259,23 +1160,7 @@ export class Incomeinfo {
     window.open(url, '_blank');
   }
 
-  downloadImage1(url: string, filename: string): void {
-    fetch(url)
-      .then(res => res.blob())
-      .then(blob => {
 
-        const blobUrl = window.URL.createObjectURL(blob);
-
-        const link = document.createElement('a');
-        link.href = blobUrl;
-        link.download = filename;
-        link.click();
-
-        window.URL.revokeObjectURL(blobUrl);
-
-      });
-
-  }
   downloadImage(url: string, filename: string): void {
     if (!url || url === 'NA') {
       console.error('Invalid document URL');

@@ -388,23 +388,7 @@ export class Referenceinfo implements OnInit {
       mnameCtrl?.updateValueAndValidity();
     }
   }
-  onmiddlename1(value: boolean) {
-    this.ismiddlename[this.currentRefIndex] = value;
 
-    const array =
-      this.currentRefIndex === 0
-        ? this.reference1Array
-        : this.reference2Array;
-
-    const mnameCtrl = array.at(0).get('mname');
-
-    if (value) {
-      mnameCtrl?.reset();
-      mnameCtrl?.disable();
-    } else {
-      mnameCtrl?.enable();
-    }
-  }
   searchMobile(mobile: string) {
     const searchedMobile = String(mobile || '').trim();
      if (!/^[6-9][0-9]{9}$/.test(searchedMobile)) {    return;  }
@@ -1253,27 +1237,7 @@ handleMobileAction(): void {
 
     this.finishAfterSaveOrNoChange();
   }
-  next1() {
-    if (this.reference1Filled && this.reference2Filled) {
 
-      const payload = {
-        reference1: this.reference1Array.getRawValue(),
-        reference2: this.reference2Array.getRawValue(),
-        reference1Filled: this.reference1Filled,
-        reference2Filled: this.reference2Filled
-      };
-
-
-      this.loanformservice.referenceInfoData = payload;
-      const key = `referenceinfoData_main${this.applicantId}`;
-      localStorage.setItem(key, JSON.stringify(payload));
-      this.stepperService.markStepCompleted('referenceinfo');
-      this.stepperService.setStepData('referenceinfo', payload);
-      this.stepperService.next();
-    }
-
-
-  }
 
 
   //edit from summary enable and disbale

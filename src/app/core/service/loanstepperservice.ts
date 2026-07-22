@@ -270,27 +270,6 @@ export class Loanstepperservice {
   }
 
 
-  restoreCompletedSteps1() {
-    if (!this.applicantId) return;
-
-    const key =
-      this.stepperType === 'CO_APPLICANT'
-        ? this.getCoApplicantCompletedKey()
-        : this.getMainCompletedKey();
-
-    const saved = localStorage.getItem(key);
-
-    if (saved) {
-      const parsed = JSON.parse(saved);
-
-      this.completedSteps = Array.isArray(parsed)
-        ? new Set<string>(parsed)
-        : new Set<string>();
-    } else {
-      this.completedSteps = new Set<string>();
-    }
-
-  }
   restoreCompletedSteps() {
     const saved = localStorage.getItem(this.getCompletedStepsKey());
 
@@ -797,28 +776,6 @@ hydrateMainProgressFromSummary(summary: any): void {
     return { isAsset: this.formSvc.isasset, isIncome: this.formSvc.isincome, issalaried: this.formSvc.issalaried, coursetypeug: this.formSvc.coursetypeug };
   }
 
-  next1() {
-    const cleanUrl = this.router.url.split('?')[0];
-    const lastSegment = cleanUrl.split('/').pop(); // could be 'educationinfo', 'educationDetails', etc.
-
-    // If you are inside education child route, treat current step as 'educationDetails'
-    const currentStepRoute = lastSegment === 'educationinfo' ? 'educationDetails' : lastSegment;
-
-    const index = this.steps.findIndex(s => s.route === currentStepRoute);
-    if (index === -1) return;
-
-    if (index < this.steps.length - 1) {
-      const nextRoute = this.steps[index + 1].route;
-      this.router.navigate(['/loanform', nextRoute], {
-        queryParams: {
-          applicantId: this.applicantId,
-          applicationId: this.applicationId,
-          custName: this.custName,
-          custARN: this.custARN
-        }
-      });
-    }
-  }
 
   next() {
     const cleanUrl = this.router.url.split('?')[0];
@@ -878,30 +835,7 @@ hydrateMainProgressFromSummary(summary: any): void {
     }
   }
 
-  previous1() {
 
-
-    const cleanUrl = this.router.url.split('?')[0];
-    const lastSegment = cleanUrl.split('/').pop();
-    const currentStepRoute = (lastSegment === 'educationinfo' || lastSegment === 'edusection') ? 'educationDetails' : lastSegment;
-
-    const steps = this.stepsSubject.getValue();   // IMPORTANT
-    const index = steps.findIndex(s => s.route === currentStepRoute);
-    if (index === -1) return;
-
-
-    if (index > 0) {
-      const prevRoute = this.steps[index - 1].route;
-      this.router.navigate(['/loanform', prevRoute], {
-        queryParams: {
-          applicantId: this.applicantId,
-          applicationId: this.applicationId,
-          custName: this.custName,
-          custARN: this.custARN
-        }
-      });
-    }
-  }
 
   previous() {
 
@@ -1119,26 +1053,7 @@ this.router.navigate([...basePath, prevRoute], {
   }
 
   // clear queryparam of education
-  getCleanQueryParamsForRoute1(route: string, currentParams: any = {}) {
-    const isEducationRoute =
-      route === 'educationDetails' ||
-      route === 'educationinfo';
-
-    if (isEducationRoute) {
-      return {
-        ...currentParams
-      };
-    }
-
-    return {
-      ...currentParams,
-      qualificationlabel: null,
-      qualificationId: null,
-      section: null,
-      fromSummary: null,
-      mode: null
-    };
-  }
+ 
   getCleanQueryParamsForRoute(route: string, currentParams: any = {}) {
   const isEducationRoute =
     route === 'educationDetails' ||

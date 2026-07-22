@@ -719,16 +719,6 @@ if (
   }
 
 
-
-  gendercheck1(value: string): void {
-    this.gendercheckvalue = value
-    this.additionalinfoForm.patchValue({
-      gender: value
-    });
-
-    this.additionalinfoForm.get('gender')?.updateValueAndValidity();
-
-  }
   gendercheck(value: string): void {
     this.gendercheckvalue = value;
 
@@ -766,16 +756,6 @@ if (
       url: fileUrl,
       isExisting: true
     };
-  }
-
-  getLocalFileName1(key: string): string {
-    if (this.uploadedFiles[key]) {
-      return this.uploadedFiles[key].name;
-    }
-    if (this.localFiles[key]) {
-      return this.localFiles[key].name;
-    }
-    return 'No file uploaded';
   }
 
   getLocalFileName(

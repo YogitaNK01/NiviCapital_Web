@@ -341,44 +341,35 @@ this.filteredData = [];
     this.addcustomerservice.customersearch(input).subscribe({
       next: (res) => {
         console.log(res);
-        let respdata = res.data[0]
-        const row: TransformedUserData = {
-          custId: respdata.custId ?? '-',
-          ncId: respdata.ncId ?? '-',
-          firstName: respdata.firstName ?? '-',
-          lastName: respdata.lastName ?? '-',
-          mobile: respdata.mobile ?? '-',
-          email: respdata.email ?? '-',
-          status: respdata.status ?? '-',
-          kycStatus: respdata.kycStatus ?? '-',
+        let respdata = res?.data 
+        // const row: TransformedUserData = {
+        this.filteredData = respdata.map(
+                (item: any): TransformedUserData => ({
+          custId: item.custId ?? '-',
+          ncId: item.ncId ?? '-',
+          firstName: item.firstName ?? '-',
+          lastName: item.lastName ?? '-',
+          mobile: item.mobile ?? '-',
+          email: item.email ?? '-',
+          status: item.status ?? '-',
+          kycStatus: item.kycStatus ?? '-',
+          createdAt: item.custId ?? '-',
+          userId: item.userInitiateId ?? '-'
+        // };
+})
+    );
 
-          createdAt: respdata.custId ?? '-',
-          userId: respdata.userInitiateId ?? '-'
-
-        };
-
-
-
-        this.filteredData = [row];
-
+        // this.filteredData = [row];
         this.nodata = false;
         this.hidepagination = true;   // hide pagination in search
         this.cdr.detectChanges();
-
-
-        console.log('Search API Result displayed in table:', row);
-
-
-
-
+        console.log('Search API Result displayed in table:', this.filteredData);
 
       },
       error: (err) => {
         console.error("error msg", err);
       }
     })
-
-
   }
 
 

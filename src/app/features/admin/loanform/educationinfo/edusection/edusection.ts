@@ -321,31 +321,7 @@ this.group.patchValue({
 
 
 
-  SelectedInstitute1(values: string | string[]) {
-    const ids = Array.isArray(values) ? values : [values];
-
-    const selected = this.seleactInstitute.filter(s =>
-      ids.includes(s.value)
-    );
-
-    this.selectedInstituteLabel = selected.map(s => s.label).join(', ');
-    this.selectedInstituteID = selected.map(s => s.value).join(', ');
-
-
-    this.isOtherEducation = selected.some(
-      s => s.label.trim().toLowerCase() === 'other'
-    )
-
-
-    const control = this.group.get('institutename');
-    control?.setValue(ids);
-    control?.markAsDirty();
-    control?.markAsTouched();
-    control?.updateValueAndValidity();
-
-
-
-  }
+ 
 SelectedInstitute(values: string | string[]) {
   const ids = Array.isArray(values) ? values : [values];
   const selectedId = ids[0] || '';
@@ -472,42 +448,8 @@ SelectedInstitute(values: string | string[]) {
     );
   }
 
-  restoreDropdownValues1() {
 
-    const step = this.stepKey;
-    const saved = this.group.value;
-
-    if (!saved) return;
-
-    //   Institute restore
-    if (saved.institutename) {
-      const found = this.seleactInstitute.find(i =>
-        i.value === saved.institutename
-      );
-
-      if (found) {
-        this.selectedInstituteLabel = found.label;
-        this.isOtherEducation = (found?.label ?? '').trim().toLowerCase() === 'other';
-        this.group.get('institutename')?.setValue(found.value, { emitEvent: false });
-         this.group.get('institutetitle')?.setValue(saved.institutetitle, { emitEvent: false });
-      }
-    }
-
-    //  Location restore
-    if (saved.location) {
-      const foundLoc = this.selectlocation.find(l =>
-        l.value === saved.location
-      );
-
-      if (foundLoc) {
-        this.selectedLocationLabel = foundLoc.label;
-
-        this.isOtherLocation = (foundLoc?.label ?? '').trim().toLowerCase() === 'other';
-
-        this.group.get('location')?.setValue(foundLoc.value, { emitEvent: false });
-      }
-    }
-  }restoreDropdownValues() {
+  restoreDropdownValues() {
   const saved = this.group.getRawValue();
 
   if (!saved) return;
@@ -1235,52 +1177,7 @@ getOtherFileName(slot: any, truncate = true): string {
       gropudata: { title: value }
     });
   }
-  private rebuildOtherDocuments1(): void {
-    if (!this.stepKey) return;
 
-    //    use stepKey, not educationType
-    const prefix = `${this.stepKey}_other_`;
-
-    const keys = [
-      ...Object.keys(this.otherDocMap || {}).filter(k => k.startsWith(prefix)),
-      ...Object.keys(this.uploadedFiles || {}).filter(k => k.startsWith(prefix)),
-      ...Object.keys(this.savedFileMeta || {}).filter(k => k.startsWith(prefix))
-    ];
-
-    const uniqueKeys = [...new Set(keys)].sort((a, b) => {
-      return this.extractOtherIndex(a) - this.extractOtherIndex(b);
-    });
-
-    this.otherDocuments = uniqueKeys.map((key) => {
-      const index = this.extractOtherIndex(key);
-
-      const file =
-        this.uploadedFiles[key] ||
-        this.savedFileMeta[key] ||
-        null;
-
-      const metaTitle = file && !(file instanceof File)
-        ? (file as any)?.title
-        : null;
-
-      return {
-        id: index,   //    keep actual index
-        key,
-        title:
-          this.otherDocMap[key]?.title ||
-          (metaTitle && metaTitle !== 'OTHER' ? metaTitle : '') ||
-          '',
-        file
-      };
-    });
-
-    // keep counter in sync so Add More gives next correct id
-    this.slotCounter = this.otherDocuments.length
-      ? Math.max(...this.otherDocuments.map(x => x.id))
-      : 0;
-
-    this.cd.detectChanges();
-  }
   private rebuildOtherDocuments(): void {
   if (!this.stepKey) return;
 

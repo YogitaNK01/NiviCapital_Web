@@ -387,11 +387,6 @@ private restoreCustomerDetails(): void {
 
 
 
-  goToStep1(step: number) {
-    this.currentStep = step;
-    this.maxAllowedStep = Math.max(this.maxAllowedStep, step);
-  }
-
 goToStep(step: number): void {
   if (step < 0 || step >= this.steps.length) {
     return;

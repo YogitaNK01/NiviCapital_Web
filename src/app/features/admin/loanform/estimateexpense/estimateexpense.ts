@@ -227,10 +227,7 @@ export class Estimateexpense {
 
   }
 
-  getStorageKey11() {
-    return `estimateExpenseData_main_${this.applicationId}_${this.stepperService.getLoanId()?.[0]}`;
 
-  }
   getStorageKey() {
     return this.storageservice.getStorageKey(
       'estimateExpenseData',
@@ -239,21 +236,7 @@ export class Estimateexpense {
       this.isCoApplicant
     );
   }
-  getStorageKey1() {
-    const main_ApplicantId = this.stepperService.getLoanId()?.[0];
-    const co_ApplicantId = this.stepperService.getCo_appId()?.[0];
-    const index = this.stepperService.getCurrentCoApplicantIndex();
-
-    return this.storageservice.getStorageKey(
-      'estimateExpenseData',
-      this.applicationId,
-      this.applicantId,
-      this.isCoApplicant,
-      // main_ApplicantId ?? undefined,
-      // co_ApplicantId ?? undefined, 
-      // index
-    );
-  }
+ 
   getStepRoute() {
     return this.isCoApplicant ? 'co-expense' : 'expense';
   }

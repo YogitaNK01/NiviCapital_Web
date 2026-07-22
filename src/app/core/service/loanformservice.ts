@@ -255,19 +255,7 @@ export class Loanformservice {
     );
   }
 
-  submitAdditionalInfo1(payload: any, id: string, edit: boolean): Observable<ApiResponse<any>> {
-     if(edit){
-      return this.http.put<ApiResponse<any>>(
-        `${this.baseUrl}/v1/los/applications/${id}/personal-info`,
-        payload
-      );
-    }
-    
-    return this.http.post<ApiResponse<any>>(
-      `${this.baseUrl}/v1/los/applications/${id}/personal-info`,
-      payload
-    );
-  }
+
 submitAdditionalInfo(
   payload: any,
   id: string,

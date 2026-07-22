@@ -256,19 +256,7 @@ localStorage.removeItem(
       }
     });
   }
-  loadCoApplicants1() {
-    const saved = localStorage.getItem(this.getCoappListKey());
-    this.coApplicants = saved ? JSON.parse(saved) : [];
-
-    this.coApplicants = this.coApplicants
-      .sort((a: any, b: any) => Number(a.index) - Number(b.index))
-      .map((coapp: any) => ({
-        ...coapp,
-        // status: this.getCoApplicantStatus(coapp)
-      }));
-
-    this.updateCoApplicantStepStatus();
-  }
+ 
   loadCoApplicants() {
     const saved = localStorage.getItem(this.getCoappListKey());
     this.coApplicants = saved ? JSON.parse(saved) : [];

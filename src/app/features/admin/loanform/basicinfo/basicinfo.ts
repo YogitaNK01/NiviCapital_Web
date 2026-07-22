@@ -1202,26 +1202,10 @@ export class Basicinfo {
       return;
     }
 
-    //  if (this.isCoApplicant) {
-    //     this.patchCoApplicantInfo(parsed);
-    //   } else {
     this.patchBasicInfo(parsed);
-    // }
-
-    // this.patchCoApplicantInfo(parsed); // or patchGeneralInfo / patchAdditionalInfo
   }
 
-  back1() {
-    this.loanform.coappStep = 1;
-    const currentIndex = this.stepperService.getCurrentCoApplicantIndex();
-    this.router.navigate(
-      ['/loanform', 'co-applicantdetails', 'coapplicantinfo'],
-      {
-        queryParams: { coApplicantIndex: currentIndex, mode: 'new' },
-        replaceUrl: true
-      }
-    );
-  }
+  
   back() {
     const currentIndex =
       this.stepperService.getCurrentCoApplicantIndex() ||

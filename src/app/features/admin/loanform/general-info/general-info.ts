@@ -617,41 +617,7 @@ minEndCourseDate: any = null;
         });
     }
   }
-  listenToChanges1() {
-    // checkedasset change
-    this.activeForm.get('checkedasset')?.valueChanges.subscribe(value => {
-      this.checkassetOnChange(value);
-    });
-    this.activeForm.get('co_checkedasset')?.valueChanges.subscribe(value => {
-      this.co_checkassetOnChange(value);
-    });
-
-    // course start date change
-    if (!this.isCoApplicant) {
-      this.registerForm.get('coursestartdate')?.valueChanges.subscribe((startDate) => {
-        if (!startDate) return;
-
-        const start = new Date(startDate);
-        start.setHours(0, 0, 0, 0);
-        this.calculatedEndDate = start;
-
-        const endCtrl = this.registerForm.get('courseenddate');
-        endCtrl?.reset();
-        endCtrl?.updateValueAndValidity();
-      });
-    }
-
-    // occupation change
-    this.activeForm.get('occupation')?.valueChanges.subscribe(value => {
-
-      if (this.isCoApplicant) {
-        this.handleCoApplicantOccupationChange(value);
-      } else {
-        this.handleOccupationChange(value);
-      }
-
-    });
-  }
+ 
   buildCoApplicantPayload(formdata: any) {
     return {
       applicationId: this.applicationId,
@@ -742,27 +708,7 @@ minEndCourseDate: any = null;
     console.log(this.registerForm.value);
   }
   //main applicant radiobutton for assets
-  checkassetOnChange1(event: any) {
-    this.checkboxasset = event;
-    if (this.checkboxasset === 'Yes') {
-      this.formSvc.isasset = true;
-      localStorage.setItem('isasset', JSON.stringify(this.formSvc.isasset));
-      this.stepperService.rebuildSteps();
-
-      this.stepperService.setvalues(
-        this.formSvc.isasset,
-        this.formSvc.isincome,
-        this.formSvc.issalaried
-      );
-    } else {
-      this.formSvc.isasset = false;
-      localStorage.setItem('isasset', JSON.stringify(this.formSvc.isasset));
-      this.stepperService.rebuildSteps();
-      this.stepperService.setvalues(this.formSvc.isasset, this.formSvc.isincome, this.formSvc.issalaried);
-    }
-
-    console.log(event);
-  }
+ 
   checkassetOnChange(value: any) {
     const isAsset = value === 'Yes';
 
@@ -771,9 +717,7 @@ minEndCourseDate: any = null;
     this.registerForm.get('checkedasset')?.setValue(value, {
       emitEvent: false
     });
-    // this.registerForm.get('checkedasset')?.markAsTouched();
-    // this.registerForm.get('checkedasset')?.updateValueAndValidity();
-
+   
     this.stepperService.setApplicantValues('main', {
       isasset: isAsset,
       isincome: this.formSvc.applicantState.isincome,
@@ -795,9 +739,7 @@ minEndCourseDate: any = null;
     this.coapp_registerForm.get('co_checkedasset')?.setValue(value, {
       emitEvent: false
     });
-    // this.coapp_registerForm.get('co_checkedasset')?.markAsTouched();
-    // this.coapp_registerForm.get('co_checkedasset')?.updateValueAndValidity();
-
+   
     this.stepperService.setApplicantValues('coapp', {
       isasset: isAsset,
       isincome: this.formSvc.coApplicantState.isincome,
@@ -822,10 +764,6 @@ minEndCourseDate: any = null;
       this.formSvc.coApplicantState.isincome = isIncome;
       this.formSvc.coApplicantState.issalaried = isSalaried;
 
-      // localStorage.setItem(
-      //   'coApplicantState',
-      //   JSON.stringify(this.formSvc.coApplicantState)
-      // );
       localStorage.setItem(
         this.stepperService.getCoApplicantStateKey(),
         JSON.stringify(this.formSvc.coApplicantState)
@@ -1258,79 +1196,7 @@ minEndCourseDate: any = null;
 
     };
   };
-  private dateMinValidator11(getMinDate: () => Date): ValidatorFn {
-    return (control: AbstractControl): ValidationErrors | null => {
-      const value = control.value;
-
-      if (value === null || value === undefined || value === '') {
-        return null;
-      }
-
-      const selectedDate = this.parseStrictDate(value);
-
-      // Invalid date will be handled by validDateValidator.
-      if (!selectedDate) {
-        return null;
-      }
-
-      const minimumDate = getMinDate();
-
-      if (
-        !(minimumDate instanceof Date) ||
-        Number.isNaN(minimumDate.getTime())
-      ) {
-        return null;
-      }
-
-      const normalizedMinimumDate = new Date(
-        minimumDate.getFullYear(),
-        minimumDate.getMonth(),
-        minimumDate.getDate()
-      );
-
-      normalizedMinimumDate.setHours(0, 0, 0, 0);
-
-      return selectedDate < normalizedMinimumDate
-        ? { minDateError: true }
-        : null;
-    };
-  }
-  private endDateValidator11(): ValidatorFn {
-    return (control: AbstractControl): ValidationErrors | null => {
-      const endValue = control.value;
-
-      if (
-        endValue === null ||
-        endValue === undefined ||
-        endValue === ''
-      ) {
-        return null;
-      }
-
-      const startValue =
-        control.parent?.get('coursestartdate')?.value;
-
-      if (
-        startValue === null ||
-        startValue === undefined ||
-        startValue === ''
-      ) {
-        return null;
-      }
-
-      const startDate = this.parseStrictDate(startValue);
-      const endDate = this.parseStrictDate(endValue);
-
-      // invalidDate is handled by validDateValidator.
-      if (!startDate || !endDate) {
-        return null;
-      }
-
-      return endDate <= startDate
-        ? { invalidEndDate: true }
-        : null;
-    };
-  }
+ 
   private parseStrictDate(value: unknown): Date | null {
     if (!value) {
       return null;
@@ -1443,21 +1309,7 @@ minEndCourseDate: any = null;
         : { invalidDate: true };
     };
   }
-  formatDate1(date: any): string | null {
-    if (!date) return null;
 
-    // If Moment
-    if (date._isAMomentObject) {
-      return date.format('DD/MM/YYYY');
-    }
-
-    // If JS Date
-    if (date instanceof Date) {
-      return date.toISOString().split('T')[0];
-    }
-
-    return null;
-  }
   formatDate(date: any): string | null {
     if (!date) return null;
 

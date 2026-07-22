@@ -125,6 +125,13 @@ export class Uploadkyc implements OnDestroy, AfterViewInit {
   isEditMode = false;
   isSummaryEditMode = false;
   viewOnly = false;
+
+  //on server kyc data is get removed
+  private initReady = false;
+private viewReady = false;
+private kycLoaded = false;
+
+
   constructor(public main: Main, private addcustomerservice: Addcustomerservice, private cd: ChangeDetectorRef, private route: ActivatedRoute, private stepperService: Loanstepperservice, private loanservice: Loanformservice, private msgBox: Msgboxservice, private router: Router) { }
 
   async ngOnInit(): Promise<void> {
@@ -215,14 +222,38 @@ export class Uploadkyc implements OnDestroy, AfterViewInit {
       setTimeout(() => { this.applyKycViewMode(); });
     }
 
+    this.initReady = true;
+this.tryLoadKyc();
+
   }
 
+ngAfterViewInit(): void {
+  this.viewReady = true;
+  this.tryLoadKyc();
+}
+  // ngAfterViewInit(): void {
+  //   setTimeout(() => {
+  //     this.loadKycForBothFlows();
+  //   }, 0);
+  // }
 
-  ngAfterViewInit(): void {
-    setTimeout(() => {
-      this.loadKycForBothFlows();
-    }, 0);
+  private tryLoadKyc(): void {
+  if (
+    !this.initReady ||
+    !this.viewReady ||
+    this.kycLoaded ||
+    !this.kycForm
+  ) {
+    return;
   }
+
+  this.kycLoaded = true;
+
+  this.loadKycForBothFlows().catch(error => {
+    this.kycLoaded = false;
+    console.error('Failed to load KYC data', error);
+  });
+}
 
   private async loadKycForBothFlows() {
     const key1 = this.isCoApplicant
@@ -705,19 +736,6 @@ private mergeKycData(
 
 
 
-
-  states1() {
-    this.main.getIndianstates().subscribe((res: any) => {
-      const list = res.data ?? res;
-
-      this.stateOptions = list.map((s: any) => ({
-        value: s.id,
-        label: s.name
-      }));
-
-      this.currstateOptions = [...this.stateOptions];
-    });
-  }
   states(): Promise<void> {
     return new Promise((resolve) => {
       this.main.getIndianstates().subscribe((res: any) => {
@@ -2141,30 +2159,7 @@ private createKycLocalCache(input: any): any {
       return null;
     }
   }
-  private async getSummarySection(sectionKey: string): Promise<any> {
-    if (!this.applicationId) return null;
 
-    try {
-      const res: any = await firstValueFrom(
-        this.loanservice.getSummary(this.applicationId)
-      );
-
-      if (!res || res.status !== 'success') return null;
-
-      return this.loanservice.getApplicantSectionFromSummary(
-        res,
-        sectionKey,
-        {
-          isCoApplicant: this.isCoApplicant,
-          coApplicantId: this.stepperService.getCo_appId()?.[0],
-          coApplicantIndex: this.stepperService.getCurrentCoApplicantIndex()
-        }
-      );
-    } catch (error) {
-      console.error(`Failed to get summary section: ${sectionKey}`, error);
-      return null;
-    }
-  }
   private normalizeSummaryKyc(data: any): any {
     if (!data) return null;
 
@@ -2286,24 +2281,24 @@ private createKycLocalCache(input: any): any {
 
       fileMeta: {
         aadharfront: {
-          fileName: identity.aadhaarFrontUrl || identity.aadhaarFrontDocument.fileName || '',
-          fileUrl: identity.aadhaarFrontDocument.viewUrl || identity.aadhaarFrontUrl || '',
-          uploaded: !!identity.aadhaarFrontUrl
+          fileName: identity?.aadhaarFrontUrl || identity?.aadhaarFrontDocument.fileName || this.getFileNameFromUrl(identity?.aadhaarFrontUrl) || '',
+          fileUrl: identity?.aadhaarFrontDocument.viewUrl || identity?.aadhaarFrontUrl || '',
+          uploaded: !!identity?.aadhaarFrontUrl
         },
         aadharback: {
-          fileName: identity.aadhaarBackUrl || identity.aadhaarBackDocument.fileName || '',
-          fileUrl: identity.aadhaarBackDocument.viewUrl || identity.aadhaarBackUrl || '',
-          uploaded: !!identity.aadhaarBackUrl
+          fileName: identity?.aadhaarBackUrl || identity?.aadhaarBackDocument.fileName || '',
+          fileUrl: identity?.aadhaarBackDocument.viewUrl || identity?.aadhaarBackUrl || '',
+          uploaded: !!identity?.aadhaarBackUrl
         },
         pan: {
-          fileName: identity.panCardUrl || identity.panDocument.fileName || '',
-          fileUrl: identity.panDocument.viewUrl || identity.panCardUrl || '',
-          uploaded: !!identity.panCardUrl
+          fileName: identity?.panCardUrl || identity?.panDocument.fileName || '',
+          fileUrl: identity?.panDocument.viewUrl || identity?.panCardUrl || '',
+          uploaded: !!identity?.panCardUrl
         },
         passport: {
-          fileName: identity.passportUrl || identity.passportDocument.fileName || '',
-          fileUrl: identity.passportDocument.viewUrl || identity.passportUrl || '',
-          uploaded: !!identity.passportUrl
+          fileName: identity?.passportUrl || identity?.passportDocument.fileName || '',
+          fileUrl: identity?.passportDocument.viewUrl || identity?.passportUrl || '',
+          uploaded: !!identity?.passportUrl
         },
         secaddress: {
           fileName:
@@ -2325,6 +2320,19 @@ private createKycLocalCache(input: any): any {
       }
     };
   }
+
+  private getFileNameFromUrl(url: any): string {
+  if (!url || typeof url !== 'string') {
+    return '';
+  }
+
+  try {
+    const cleanUrl = url.split('?')[0];
+    return decodeURIComponent(cleanUrl.substring(cleanUrl.lastIndexOf('/') + 1));
+  } catch {
+    return '';
+  }
+}
   private hasAnyKycData(data: any): boolean {
     if (!data) return false;
 

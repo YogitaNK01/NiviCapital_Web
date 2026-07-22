@@ -179,10 +179,7 @@ export class Checkcontact implements OnInit {
 
   return 'default';
 }
-  addcustomer1() {
-    this.router.navigate(['/admin/customer/addcustomer'], { queryParams: { phone: this.mobilenumber, id: this.number_id } });
-
-  }
+ 
   addcustomer(): void {
   this.service.setState({
     phone: this.mobilenumber,

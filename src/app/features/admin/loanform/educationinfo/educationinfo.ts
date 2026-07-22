@@ -966,14 +966,7 @@ isOtherInstituteSelected(step: StepKey): boolean {
       }
     });
   }
-  hasLocalFile1(level: EducationType, docType: DocType, index?: number): boolean {
-    // return !!this.uploadedFiles[this.buildDocKey(level, docType, index)];
 
-    const key = this.buildKey(level as StepKey, this.normalizeDocType(docType), index);
-
-    return !!this.uploadedFiles[key] || !!this.savedFileMeta[key];
-
-  }
   hasLocalFile(level: any, docType: DocType, index?: number): boolean {
     const file = this.getStoredFileMeta(
       level as StepKey,
@@ -984,29 +977,6 @@ isOtherInstituteSelected(step: StepKey): boolean {
     return !!file;
   }
 
-  getLocalFileName1(level: EducationType, docType: DocType, index?: number): string {
-    const f = this.uploadedFiles[this.buildDocKey(level, docType, index)] as File | null;
-    return f?.name || '';
-  }
-  getLocalFileName11(level: any, docType: DocType, index?: number): string {
-    const key = this.buildKey(
-      level as StepKey,
-      this.normalizeDocType(docType),
-      index
-    );
-
-    const file: any = this.uploadedFiles[key];
-
-    if (file instanceof File) {
-      return file.name;
-    }
-
-    return this.savedFileMeta[key]?.fileName ||
-      this.savedFileMeta[key]?.name ||
-      file?.fileName ||
-      file?.name ||
-      '';
-  }
   getLocalFileName(level: any, docType: DocType, index?: number,truncate=true): string {
     const file: any = this.getStoredFileMeta(
       level as StepKey,
@@ -2627,88 +2597,7 @@ isOtherInstituteSelected(step: StepKey): boolean {
     });
   }
 
-  private buildEducationSaveExitFormData1(sectionKey: string): FormData {
-    const step = this.activeEducation as StepKey;
-    const form = this.educationForms[step] as FormGroup;
-    const fd = new FormData();
 
-    // const sectionKey = this.getCurrentEducationSectionKey();
-    const subcategory = this.stepToSubcategory[step];
-
-    // fd.append('action', 'auto-save');
-    fd.append('sectionKey', sectionKey);
-    fd.append('applicationId', this.applicationId);
-    fd.append('applicantId', this.applicantId);
-    fd.append('category', 'EDUCATION');
-    fd.append('subcategory', subcategory);
-
-    if (step === 'ielts') {
-      fd.append('score', form.get('score')?.value || '');
-
-      const file = this.getFile(step, 'ielts');
-      if (file instanceof File) {
-        fd.append('files[0].type', 'UPLOAD_CERTIFICATE');
-        fd.append('files[0].file', file);
-      }
-
-      return fd;
-    }
-
-    if (step === 'offerletter') {
-      const file = this.getFile(step, 'offerletter');
-
-      if (file instanceof File) {
-        fd.append('files[0].type', 'UPLOAD_CERTIFICATE');
-        fd.append('files[0].file', file);
-      }
-
-      return fd;
-    }
-
-    const raw = form.getRawValue();
-
-    const instituteId =
-      raw.instituteId ||
-      this.educationFormState[step]?.instituteId ||
-      '';
-
-    fd.append('instituteId', instituteId);
-
-    fd.append('otherInstituteName', form.get('institutetitle')?.value);
-    fd.append('yearOfPassing', form.get('passingyear')?.value || '');
-    fd.append('percentageCgpa', form.get('per_cgpa')?.value || '');
-    fd.append('locationId', this.resolveLocationId(form.get('location')?.value) || '');
-    fd.append('otherLocationName', form.get('otherLocation')?.value || '');
-
-    let fileIndex = 0;
-
-    const reqDocs = this.requiredDocs(step);
-
-    reqDocs.forEach(r => {
-      const file = this.getFile(step, r.doc, r.index);
-
-      if (file instanceof File) {
-        fd.append(`files[${fileIndex}].type`, r.apiType);
-        fd.append(`files[${fileIndex}].file`, file);
-        fileIndex++;
-      }
-    });
-
-    Object.keys(this.uploadedFiles)
-      .filter(key => key.startsWith(`${step}_other_`))
-      .forEach(key => {
-        const file = this.uploadedFiles[key];
-
-        if (file instanceof File) {
-          fd.append(`files[${fileIndex}].type`, 'OTHER');
-          fd.append(`files[${fileIndex}].title`, this.otherDocMap[key]?.title || 'Other Document');
-          fd.append(`files[${fileIndex}].file`, file);
-          fileIndex++;
-        }
-      });
-
-    return fd;
-  }
   private async buildEducationSaveExitFormData(sectionKey: string): Promise<FormData> {
     const step = this.activeEducation as StepKey;
     const form = this.educationForms[step] as FormGroup;
@@ -3336,16 +3225,7 @@ isOtherInstituteSelected(step: StepKey): boolean {
     return this.resolveOptionValue(this.cityOptions, rawValue);
   }
 
-  private resolveOptionValue1(list: any[], rawValue: any): string {
-    const normalized = this.normalizeDropdownValue(rawValue);
 
-    if (!normalized) return '';
-
-    const existsAsValue = list.some((x: any) => x.value === normalized);
-    if (existsAsValue) return normalized;
-
-    return this.getValueByLabel(list, normalized);
-  }
   private resolveOptionValue(list: any[], rawValue: any): string {
   const normalized = this.normalizeDropdownValue(rawValue);
 
@@ -3631,112 +3511,7 @@ isOtherInstituteSelected(step: StepKey): boolean {
 
     return null;
   }
-  private async appendUpdateItem1(
-    fd: FormData,
-    itemIndex: number,
-    key: string,
-    apiType: string,
-    fileOrMeta: any,
-    form?: FormGroup,
-    title?: string,
-    existingMeta?: any
-  ): Promise<void> {
-
-
-
-
-    const meta =
-      existingMeta ||
-      this.savedFileMeta[key] ||
-      (!(this.uploadedFiles[key] instanceof File) ? this.uploadedFiles[key] : null) ||
-      fileOrMeta ||
-      {};
-
-    const documentId = meta?.documentId || '';
-
-
-    // for PUT existing docs should always carry documentId
-    if (documentId) {
-      fd.append(`items[${itemIndex}].documentId`, documentId);
-    }
-
-
-    if (form) {
-      fd.append(
-        `items[${itemIndex}].yearOfPassing`,
-        this.normalizeDropdownValue(form.get('passingyear')?.value) || ''
-      );
-
-      const raw = form.getRawValue();
-
-      fd.append(
-        `items[${itemIndex}].instituteId`,
-        raw.instituteId ||
-        this.educationFormState[this.getCurrentStep()]?.instituteId ||
-        ''
-      );
-      fd.append(
-        `items[${itemIndex}].locationId`,
-        this.resolveLocationId(form.get('location')?.value) || ''
-      );
-
-      fd.append(
-        `items[${itemIndex}].percentageCgpa`,
-        form.get('per_cgpa')?.value || ''
-      );
-
-      fd.append(
-        `items[${itemIndex}].otherInstituteName`,
-        form.get('institutetitle')?.value || ''
-      );
-
-      fd.append(
-        `items[${itemIndex}].otherLocationName`,
-        form.get('otherLocation')?.value || ''
-      );
-    }
-
-    fd.append(`items[${itemIndex}].file.type`, apiType);
-
-    if (title) {
-      fd.append(`items[${itemIndex}].title`, title);
-    }
-
-    // Case 1: user selected new file
-    if (fileOrMeta instanceof File) {
-      fd.append(`items[${itemIndex}].file.file`, fileOrMeta, fileOrMeta.name);
-      return;
-    }
-
-    // Case 2: file came from summary/API as metadata with viewUrl
-    const viewUrl =
-      meta.viewUrl ||
-      meta.fileUrl ||
-      meta.publicUrl ||
-      fileOrMeta?.viewUrl ||
-      fileOrMeta?.fileUrl ||
-      fileOrMeta?.publicUrl ||
-      '';
-
-    if (viewUrl) {
-      try {
-        const fileFromUrl = await this.urlToFile(
-          viewUrl,
-          meta.fileName || meta.name || fileOrMeta?.fileName || fileOrMeta?.name || 'document'
-        );
-
-        fd.append(
-          `items[${itemIndex}].file.file`,
-          fileFromUrl,
-          fileFromUrl.name
-        );
-      } catch (error) {
-        console.error('Failed to convert viewUrl to File for:', key, error);
-      }
-    } else {
-      console.warn('No viewUrl found for existing file:', key, meta);
-    }
-  }
+ 
   private async appendUpdateItem(
     fd: FormData,
     fileIndex: number,
