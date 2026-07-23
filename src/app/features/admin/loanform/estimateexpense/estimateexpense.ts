@@ -95,10 +95,16 @@ export class Estimateexpense {
   description1 = `Great ! Your Estimated Expense Details\n Uploaded Successfully.`;
   summarySection: any = [];
 
+   isDataLoading = true;
+loadError = '';
   constructor(private fb: FormBuilder, private stepperService: Loanstepperservice, private cd: ChangeDetectorRef, private loanformservice: Loanformservice,
     private router: Router, private route: ActivatedRoute, public main: Main, private msgBox: Msgboxservice, private storageservice: Storage) { }
 
   async ngOnInit() {
+
+     this.isDataLoading = true;
+  this.loadError = '';
+try {
     this.isCoApplicant = this.router.url.includes('co-applicant');
     this.stepperService.setStepperType(
       this.isCoApplicant ? 'CO_APPLICANT' : 'MAIN'
@@ -218,15 +224,45 @@ export class Estimateexpense {
       this.miscgexpAsync()
     ]);
 
-    if (this.viewOnly) {
-      this.expenseForm.disable({ emitEvent: false });
-    }
+    // if (this.viewOnly) {
+    //   this.expenseForm.disable({ emitEvent: false });
+    // }
 
     await this.loadEstimatedExpenseForBothFlows();
 
+} catch (error) {
+    console.error(
+      'Failed to initialize estimate expense page',
+      error
+    );
 
+    this.loadError =
+      'Unable to load estimate expense details. Please try again.';
+  } finally {
+    this.isDataLoading = false;
+
+    this.applyCurrentFormMode();
+
+    this.cd.detectChanges();
+  }
   }
 
+//loading data
+  private applyCurrentFormMode(): void {
+  if (!this.expenseForm) {
+    return;
+  }
+
+  if (this.isViewMode && !this.isEditMode) {
+    this.expenseForm.disable({
+      emitEvent: false
+    });
+  } else {
+    this.expenseForm.enable({
+      emitEvent: false
+    });
+  }
+}
 
   getStorageKey() {
     return this.storageservice.getStorageKey(
@@ -1437,11 +1473,24 @@ export class Estimateexpense {
 
   //edit from summary enable and disbale
 
-  enableForm() {
-    this.isViewMode = false;
-    this.isEditMode = true;
-    this.expenseForm.enable();
+  enableForm(): void {
+  if (this.isDataLoading) {
+    return;
   }
+
+  this.originalFormValue =
+    this.expenseForm.getRawValue();
+
+  this.isViewMode = false;
+  this.isEditMode = true;
+  this.viewOnly = false;
+
+  this.expenseForm.enable({
+    emitEvent: false
+  });
+
+  this.cd.detectChanges();
+}
 
   cancelSummaryEdit() {
     if (this.isEditMode && this.originalFormValue) {

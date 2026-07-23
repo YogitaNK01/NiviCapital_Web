@@ -138,11 +138,19 @@ export class Assetsinfo implements OnInit {
 
   description1 = `Great ! Your Assets Info Details\n Uploaded Successfully.`;
   summarySection: any = {};
-  constructor(private fb: FormBuilder, public main: Main, private route: ActivatedRoute, private msgBox: Msgboxservice, private storageservice: Storage,
+
+ isDataLoading = true;
+loadError = ''; 
+
+constructor(private fb: FormBuilder, public main: Main, private route: ActivatedRoute, private msgBox: Msgboxservice, private storageservice: Storage,
     private stepperService: Loanstepperservice, private formSvc: Loanformservice, private cd: ChangeDetectorRef, private router: Router) { }
 
 
   async ngOnInit() {
+
+     this.isDataLoading = true;
+  this.loadError = '';
+try {
     this.isCoApplicant = this.router.url.includes('co-applicant');
 
     this.stepperService.setStepperType(
@@ -236,11 +244,43 @@ export class Assetsinfo implements OnInit {
     await this.loadPropertyMaster();
 
     await this.loadAssetsForBothFlows()
-    if (this.viewOnly) {
-      this.assetsForm.disable({ emitEvent: false });
-    }
+   } catch (error) {
+    console.error(
+      'Failed to initialize assets page',
+      error
+    );
+
+    this.loadError =
+      'Unable to load assets details. Please try again.';
+  } finally {
+    this.isDataLoading = false;
+
+    /*
+     * Apply the current mode only after data has been patched.
+     */
+    this.applyCurrentFormMode();
+
+    this.cd.detectChanges();
+  }
 
   }
+
+  //loading data
+  private applyCurrentFormMode(): void {
+  if (!this.assetsForm) {
+    return;
+  }
+
+  if (this.isViewMode && !this.isEditMode) {
+    this.assetsForm.disable({
+      emitEvent: false
+    });
+  } else {
+    this.assetsForm.enable({
+      emitEvent: false
+    });
+  }
+}
   applyApplicantViewMode(queryParams: any) {
     const isFromSummaryRoute =
       queryParams['fromSummary'] === true ||
@@ -2596,11 +2636,24 @@ validDateValidator(control: any) {
 
 
   //edit from summary
-  enableForm() {
-    this.isViewMode = false;
-    this.isEditMode = true;
-    this.assetsForm.enable();
+  enableForm(): void {
+  if (this.isDataLoading) {
+    return;
   }
+
+  this.originalFormValue =
+    this.assetsForm.getRawValue();
+
+  this.isViewMode = false;
+  this.isEditMode = true;
+  this.viewOnly = false;
+
+  this.assetsForm.enable({
+    emitEvent: false
+  });
+
+  this.cd.detectChanges();
+}
 
   cancelSummaryEdit() {
     if (this.isEditMode && this.originalFormValue) {

@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, Input } from '@angular/core';
+import { Component, OnInit, Input, ChangeDetectorRef } from '@angular/core';
 import { Loanformservice } from '../../../../core/service/loanformservice';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, ValidatorFn, AbstractControl, ValidationErrors } from '@angular/forms';
 import { Inputfield } from '../../../systemdesign/inputfield/inputfield';
@@ -155,9 +155,14 @@ minEndCourseDate: any = null;
   editSuccess: any = false;
   description1 = `Great ! Your General Info Details\n Uploaded Successfully.`;
 
-  constructor(private fb: FormBuilder, private formSvc: Loanformservice, private router: Router, private storageservice: Storage, private stepperService: Loanstepperservice, private msgBox: Msgboxservice, private route: ActivatedRoute, public mainservice: Main) { }
-  async ngOnInit() {
+   isDataLoading = true;
+loadError = '';
 
+  constructor(private fb: FormBuilder, private formSvc: Loanformservice, private router: Router, private cd: ChangeDetectorRef,private storageservice: Storage, private stepperService: Loanstepperservice, private msgBox: Msgboxservice, private route: ActivatedRoute, public mainservice: Main) { }
+  async ngOnInit() {
+ this.isDataLoading = true;
+  this.loadError = '';
+try {
     this.isCoApplicant = this.router.url.includes('co-applicant');
 
     this.stepperService.setStepperType(
@@ -313,12 +318,46 @@ minEndCourseDate: any = null;
     this.listenToChanges();
     await this.loadGeneralInfoForBothFlows()
 
-    if (this.viewOnly) {
-      this.activeForm.disable({ emitEvent: false });
-    }
+    // if (this.viewOnly) {
+    //   this.activeForm.disable({ emitEvent: false });
+    // }
+} catch (error) {
+    console.error(
+      'Failed to initialize general page',
+      error
+    );
 
+    this.loadError =
+      'Unable to load general details. Please try again.';
+  } finally {
+    this.isDataLoading = false;
+
+    /*
+     * Apply the current mode only after data has been patched.
+     */
+    this.applyCurrentFormMode();
+
+    this.cd.detectChanges();
+  }
 
   }
+
+  //loading data
+  private applyCurrentFormMode(): void {
+  if (!this.activeForm) {
+    return;
+  }
+
+  if (this.isViewMode && !this.isEditMode) {
+    this.activeForm.disable({
+      emitEvent: false
+    });
+  } else {
+    this.activeForm.enable({
+      emitEvent: false
+    });
+  }
+}
   applyApplicantViewMode(queryParams: any) {
     const isFromSummaryRoute =
       queryParams['fromSummary'] === true ||
@@ -1801,12 +1840,25 @@ minEndCourseDate: any = null;
 
   //edit from summary enable and disbale
 
-  enableForm() {
-    this.isViewMode = false;
-    this.isEditMode = true;
-    this.viewOnly = false;
-    this.activeForm.enable();
+ 
+   enableForm(): void {
+  if (this.isDataLoading) {
+    return;
   }
+
+  this.originalFormValue =
+    this.activeForm.getRawValue();
+
+  this.isViewMode = false;
+  this.isEditMode = true;
+  this.viewOnly = false;
+
+  this.activeForm.enable({
+    emitEvent: false
+  });
+
+  this.cd.detectChanges();
+}
 
   cancelSummaryEdit() {
     if (this.isEditMode && this.originalFormValue) {

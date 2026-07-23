@@ -282,12 +282,16 @@ export class Incomeinfo {
   description1 = `Great ! Your Income Details\n Uploaded Successfully.`;
   deletedDocs: any = []
 
+   isDataLoading = true;
+loadError = '';
   constructor(private fb: FormBuilder, private stepperService: Loanstepperservice, private router: Router, private cd: ChangeDetectorRef, private msgBox: Msgboxservice, public loanformservice: Loanformservice, private route: ActivatedRoute, public main: Main, private storageservice: Storage) { }
   async ngOnInit(): Promise<void> {
+
+     this.isDataLoading = true;
+  this.loadError = '';
+try {
     this.isCoApplicant = this.router.url.includes('co-applicant');
-//  this.stepperService.restoreLoanEditContext();
-//    this.stepperService.restoreLoanIdFromSession();
-//      if (this.isCoApplicant) {  this.stepperService.restoreCoAppIdFromSession(); }
+
 
     this.stepperService.setStepperType(
       this.isCoApplicant ? 'CO_APPLICANT' : 'MAIN'
@@ -360,12 +364,45 @@ export class Incomeinfo {
 
     await this.loadIncomeForBothFlows();
 
-    if (this.viewOnly) {
-      this.incomeForm.disable({ emitEvent: false });
-    }
+    // if (this.viewOnly) {
+    //   this.incomeForm.disable({ emitEvent: false });
+    // }
+} catch (error) {
+    console.error(
+      'Failed to initialize income page',
+      error
+    );
 
+    this.loadError =
+      'Unable to load income details. Please try again.';
+  } finally {
+    this.isDataLoading = false;
+
+    /*
+     * Apply the current mode only after data has been patched.
+     */
+    this.applyCurrentFormMode();
+
+    this.cd.detectChanges();
+  }
   }
 
+  //loading data
+  private applyCurrentFormMode(): void {
+  if (!this.incomeForm) {
+    return;
+  }
+
+  if (this.isViewMode && !this.isEditMode) {
+    this.incomeForm.disable({
+      emitEvent: false
+    });
+  } else {
+    this.incomeForm.enable({
+      emitEvent: false
+    });
+  }
+}
   applyApplicantViewMode(queryParams: any) {
     const isFromSummaryRoute =
       queryParams['fromSummary'] === true ||
@@ -2274,11 +2311,24 @@ export class Incomeinfo {
   }
 
   //edit from summary enable and disbale
-  enableForm() {
-    this.isViewMode = false;
-    this.isEditMode = true;
-    this.incomeForm.enable();
+  enableForm(): void {
+  if (this.isDataLoading) {
+    return;
   }
+
+  this.originalFormValue =
+    this.incomeForm.getRawValue();
+
+  this.isViewMode = false;
+  this.isEditMode = true;
+  this.viewOnly = false;
+
+  this.incomeForm.enable({
+    emitEvent: false
+  });
+
+  this.cd.detectChanges();
+}
 
   cancelSummaryEdit() {
     if (this.isEditMode && this.originalFormValue) {

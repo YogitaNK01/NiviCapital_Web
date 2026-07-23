@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, input, Input, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, input, Input, OnInit } from '@angular/core';
 import { ReactiveFormsModule, FormGroup, Validators, FormBuilder, MinLengthValidator, MaxLengthValidator } from '@angular/forms';
 import { Buttons } from '../../../systemdesign/buttons/buttons';
 import { Checkbox } from '../../../systemdesign/checkbox/checkbox';
@@ -97,10 +97,16 @@ export class Additionalinfo implements OnInit {
   editSuccess: any = false;
 
   description1 = `Great ! Your Additional Info Details\n Uploaded Successfully.`;
-  constructor(private fb: FormBuilder, public main: Main, private route: ActivatedRoute, private router: Router, private stepperService: Loanstepperservice,
-    private formSvc: Loanformservice, private msgBox: Msgboxservice, private storageservice: Storage) { }
-  async ngOnInit() {
 
+   isDataLoading = true;
+loadError = '';
+
+  constructor(private fb: FormBuilder, public main: Main, private route: ActivatedRoute, private router: Router, private stepperService: Loanstepperservice,
+    private formSvc: Loanformservice, private msgBox: Msgboxservice, private storageservice: Storage,private cd: ChangeDetectorRef) { }
+  async ngOnInit() {
+ this.isDataLoading = true;
+  this.loadError = '';
+try {
     this.isCoApplicant = this.router.url.includes('co-applicant');
 
     this.stepperService.setStepperType(
@@ -216,13 +222,44 @@ export class Additionalinfo implements OnInit {
 
     await this.loadAdditionalInfoForBothFlows();
 
-    if (this.viewOnly) {
-      this.additionalinfoForm.disable({ emitEvent: false });
-    }
+    // if (this.viewOnly) {
+    //   this.additionalinfoForm.disable({ emitEvent: false });
+    // }
+} catch (error) {
+    console.error(
+      'Failed to initialize additional info page',
+      error
+    );
+
+    this.loadError =
+      'Unable to load additional details. Please try again.';
+  } finally {
+    this.isDataLoading = false;
+
+    
+    this.applyCurrentFormMode();
+
+    this.cd.detectChanges();
+  }
 
   }
 
+//loading data
+  private applyCurrentFormMode(): void {
+  if (!this.additionalinfoForm) {
+    return;
+  }
 
+  if (this.isViewMode && !this.isEditMode) {
+    this.additionalinfoForm.disable({
+      emitEvent: false
+    });
+  } else {
+    this.additionalinfoForm.enable({
+      emitEvent: false
+    });
+  }
+}
   applyApplicantViewMode(queryParams: any) {
   const isFromSummaryRoute =
     queryParams['fromSummary'] === true ||
@@ -1238,11 +1275,24 @@ if (
   }
 
   //edit from summary enable and disbale
-  enableForm() {
-    this.isViewMode = false;
-    this.isEditMode = true;
-    this.additionalinfoForm.enable();
+ enableForm(): void {
+  if (this.isDataLoading) {
+    return;
   }
+
+  this.originalFormValue =
+    this.additionalinfoForm.getRawValue();
+
+  this.isViewMode = false;
+  this.isEditMode = true;
+  this.viewOnly = false;
+
+  this.additionalinfoForm.enable({
+    emitEvent: false
+  });
+
+  this.cd.detectChanges();
+}
 
   disableAdditionalInfoForm() {
     this.additionalinfoForm.disable({ emitEvent: false });

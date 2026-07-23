@@ -135,11 +135,16 @@ export class Liabilitiesinfo {
   description1 = `Great ! Your Liabilities Info Details\n Uploaded Successfully.`;
   summarySection: any = [];
 
+  isDataLoading = true;
+loadError = '';
   constructor(private fb: FormBuilder, public main: Main, private route: ActivatedRoute, private msgBox: Msgboxservice, private router: Router, private storageservice: Storage,
     private stepperService: Loanstepperservice, private formSvc: Loanformservice, private cd: ChangeDetectorRef) { }
 
 
   async ngOnInit() {
+    this.isDataLoading = true;
+  this.loadError = '';
+try {
     this.isCoApplicant = this.router.url.includes('co-applicant');
 
 
@@ -227,13 +232,45 @@ export class Liabilitiesinfo {
 
     await this.loadMasters();
     await this.loadliabilityForBothFlows()
-    if (this.viewOnly) {
-      this.liabilityForm.disable({ emitEvent: false });
-    }
+    // if (this.viewOnly) {
+    //   this.liabilityForm.disable({ emitEvent: false });
+    // }
 
+ } catch (error) {
+    console.error(
+      'Failed to initialize liability page',
+      error
+    );
 
+    this.loadError =
+      'Unable to load liability details. Please try again.';
+  } finally {
+    this.isDataLoading = false;
+
+    /*
+     * Apply the current mode only after data has been patched.
+     */
+    this.applyCurrentFormMode();
+
+    this.cd.detectChanges();
+  }
+  }
+//loading data
+  private applyCurrentFormMode(): void {
+  if (!this.liabilityForm) {
+    return;
   }
 
+  if (this.isViewMode && !this.isEditMode) {
+    this.liabilityForm.disable({
+      emitEvent: false
+    });
+  } else {
+    this.liabilityForm.enable({
+      emitEvent: false
+    });
+  }
+}
   applyApplicantViewMode(queryParams: any) {
     const isFromSummaryRoute =
       queryParams['fromSummary'] === true ||
@@ -2618,11 +2655,24 @@ export class Liabilitiesinfo {
 
   //edit from summary enable and disbale
 
-  enableForm() {
-    this.isViewMode = false;
-    this.isEditMode = true;
-    this.liabilityForm.enable();
+ enableForm(): void {
+  if (this.isDataLoading) {
+    return;
   }
+
+  this.originalFormValue =
+    this.liabilityForm.getRawValue();
+
+  this.isViewMode = false;
+  this.isEditMode = true;
+  this.viewOnly = false;
+
+  this.liabilityForm.enable({
+    emitEvent: false
+  });
+
+  this.cd.detectChanges();
+}
 
   cancelSummaryEdit() {
     if (this.isEditMode && this.originalFormValue) {

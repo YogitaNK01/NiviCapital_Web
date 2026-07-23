@@ -126,11 +126,18 @@ export class Monthlyexpenditureinfo {
   description1 = `Great ! Your Monthly Expenditure Info Details\n Uploaded Successfully.`;
   summarySection: any = {};
 
+   isDataLoading = true;
+loadError = '';
+
   constructor(private fb: FormBuilder, public main: Main, private route: ActivatedRoute, private msgBox: Msgboxservice, private router: Router, private storageservice: Storage,
     private stepperService: Loanstepperservice, private formSvc: Loanformservice, private cd: ChangeDetectorRef) { }
 
 
   async ngOnInit() {
+
+     this.isDataLoading = true;
+  this.loadError = '';
+try {
     this.isCoApplicant = this.router.url.includes('co-applicant');
     this.stepperService.setStepperType(
       this.isCoApplicant ? 'CO_APPLICANT' : 'MAIN'
@@ -224,13 +231,46 @@ export class Monthlyexpenditureinfo {
 
     await this.loadMonthlyExpenditureForBothFlows();
 
-    if (this.viewOnly) {
-      this.monthlyExpenditureForm.disable({ emitEvent: false });
-    }
+    // if (this.viewOnly) {
+    //   this.monthlyExpenditureForm.disable({ emitEvent: false });
+    // }
 
+} catch (error) {
+    console.error(
+      'Failed to initialize monthly expenditure page',
+      error
+    );
 
+    this.loadError =
+      'Unable to load monthly expenditure details. Please try again.';
+  } finally {
+    this.isDataLoading = false;
+
+    /*
+     * Apply the current mode only after data has been patched.
+     */
+    this.applyCurrentFormMode();
+
+    this.cd.detectChanges();
+  }
   }
 
+  //loading data
+  private applyCurrentFormMode(): void {
+  if (!this.monthlyExpenditureForm) {
+    return;
+  }
+
+  if (this.isViewMode && !this.isEditMode) {
+    this.monthlyExpenditureForm.disable({
+      emitEvent: false
+    });
+  } else {
+    this.monthlyExpenditureForm.enable({
+      emitEvent: false
+    });
+  }
+}
    applyApplicantViewMode(queryParams: any) {
   const isFromSummaryRoute =
     queryParams['fromSummary'] === true ||
@@ -1595,12 +1635,24 @@ export class Monthlyexpenditureinfo {
 
   //edit from summary enable and disbale
 
-  enableForm() {
-    this.isViewMode = false;
-    this.isEditMode = true;
-    this.monthlyExpenditureForm.enable();
+ enableForm(): void {
+  if (this.isDataLoading) {
+    return;
   }
 
+  this.originalFormValue =
+    this.monthlyExpenditureForm.getRawValue();
+
+  this.isViewMode = false;
+  this.isEditMode = true;
+  this.viewOnly = false;
+
+  this.monthlyExpenditureForm.enable({
+    emitEvent: false
+  });
+
+  this.cd.detectChanges();
+}
   cancelSummaryEdit() {
     if (this.isEditMode && this.originalFormValue) {
       this.monthlyExpenditureForm.patchValue(this.originalFormValue);

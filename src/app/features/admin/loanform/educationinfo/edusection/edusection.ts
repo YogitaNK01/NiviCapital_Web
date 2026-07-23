@@ -171,20 +171,14 @@ export class Edusection {
 
   editSuccess: any = false;
   description1 = `Great ! Your Additional Info Details\n Uploaded Successfully.`;
+
+  @Input() isDataLoading = false;
   constructor(private fb: FormBuilder, private stepperService: Loanstepperservice, private cd: ChangeDetectorRef, private route: ActivatedRoute, private router: Router,
     public main: Main, private msgBox: Msgboxservice, public loanformservice: Loanformservice, private storageservice: Storage) { }
 
 
   ngOnInit(): void {
 
-    // this.group.reset({
-    //   institutename: '',
-    //   institutetitle: '',
-    //   passingyear: 'Year of Passing',
-    //   per_cgpa: 'Percentage / CGPA ',
-    //   location: '',
-    //   otherLocation: ''
-    // });
 this.group.patchValue({
   passingyear: this.group.get('passingyear')?.value || 'Year of Passing',
   per_cgpa: this.group.get('per_cgpa')?.value || 'Percentage / CGPA '
@@ -195,8 +189,7 @@ this.group.patchValue({
 
     this.applicantId = Allids[0];
     this.applicationId = Allids[1];
-    // this.custName = Allids[2];
-    // this.custARN = Allids[3];
+   
 
     const queryParams = this.route.snapshot.queryParams;
     this.isSummaryEditMode =
@@ -244,7 +237,21 @@ this.group.patchValue({
 
   }
 
+ private applyCurrentFormMode(): void {
+  if (!this.group) {
+    return;
+  }
 
+  if (this.isViewModeon && !this.isEditMode) {
+    this.group.disable({
+      emitEvent: false
+    });
+  } else {
+    this.group.enable({
+      emitEvent: false
+    });
+  }
+}
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['sectionType'] || changes['title'] || changes['stepKey']) {
       this.initSection();      //   run every time step changes
@@ -258,7 +265,15 @@ this.group.patchValue({
     ) {
       this.rebuildOtherDocuments();
     }
-
+// if (
+//     changes['isViewModeon'] ||
+//     changes['isEditMode'] ||
+//     changes['isDataLoading']
+//   ) {
+//     if (!this.isDataLoading) {
+//       this.applyCurrentFormMode();
+//     }
+//   }
   }
 
   private initSection(): void {
@@ -1283,7 +1298,7 @@ onOtherTitleInput(slot: any, event: any): void {
 
   }
 
-  onEditClick() {
+onEditClick() {
     this.isViewModeon = false;
     this.isEditMode = true;
 
@@ -1300,66 +1315,5 @@ onOtherTitleInput(slot: any, event: any): void {
       queryParamsHandling: 'merge'
     });
   }
-  // cancelSummaryEdit() {
-  //   if (this.isEditMode && this.originalFormValue) {
-  //     this.group.patchValue(this.originalFormValue);
-  //   }
-  //   this.isViewModeon = false;
-  //   this.isEditMode = false;
-  //   this.loanformservice.clearSummaryEditFlow();
-  //   // this.router.navigate(['/applications', this.applicationId, 'summary']);
-  // }
-  // saveSummaryEdit() {
-  //   // this.submitAttempted = true;
 
-  //   // if (!this.canProceed) {
-  //   //   this.basicform.markAllAsTouched();
-  //   //   return;
-  //   // }
-
-  //   const formdata = this.group.getRawValue();
-  //   const input = '';
-
-  //   this.loanformservice.selectedqualification(input, this.applicationId).subscribe({
-  //     next: (res: any) => {
-  //       if (res.status === 'success') {
-  //         // const key = this.getStorageKey();
-  //         // localStorage.setItem(key, JSON.stringify(input));
-  //         this.storageservice.saveSectionData(
-  //           'additionalinfo',
-  //           this.applicationId,
-  //           this.applicantId,
-  //           false,
-  //           input
-  //         );
-
-  //         this.loanformservice.additionalInfoData = input;
-
-
-  //         // this.lastSavedPayload = { ...input };
-
-
-  //         // this.editSuccess = true;
-
-
-  //       }
-  //     },
-  //     error: (err) => {
-  //       console.error('Additional info update failed', err);
-  //     }
-  //   });
-  // }
-  // // edit sucess popup
-  // onCancel() {
-  //   this.editSuccess = false;
-  // }
-
-  // handleSuccessAction(action: string) {
-  //   if (action === "OK") {
-  //     this.editSuccess = false;
-  //     this.isViewModeon = true;
-  //     this.isEditMode = false;
-  //     //  this.activeForm.disable();
-  //   }
-  // }
 }

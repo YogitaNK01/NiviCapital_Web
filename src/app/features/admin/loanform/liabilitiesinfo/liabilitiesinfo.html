@@ -31,7 +31,7 @@
                         class="btn btn-icon edit btncustomClass editBtnClass"
                         color="primary"
                         (click)="enableForm()"
-                        [disabled]="!isViewMode">
+                        [disabled]="isDataLoading">
                         <img src="assets/images/icons/edit-white.svg" alt="edit">
                     </app-buttons>
                 </div>
