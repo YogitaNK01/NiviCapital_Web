@@ -790,13 +790,6 @@ hydrateMainProgressFromSummary(summary: any): void {
       currentStepRoute = 'educationDetails';
     }
 
-    //  Co-applicant child route case: /coapplicantinfo/co-basicinfo
-    // if (lastSegment.startsWith('co-')) {
-    //   lastSegment = segments.at(-2) || lastSegment; //  'coapplicantinfo'
-    // }
-
-
-
     const routeMap: Record<string, string> = {
       educationinfo: 'educationDetails',
       coapplicantinfo: 'co-applicantdetails'
@@ -821,16 +814,12 @@ hydrateMainProgressFromSummary(summary: any): void {
           : ['/loanform'];
 
 
-      // this.router.navigate(['/loanform', nextRoute], {
-      // this.router.navigate([...basePath, nextRoute], {
-      //   queryParamsHandling: 'merge'
-      // });
       const currentParams = this.router.routerState.snapshot.root.queryParams;
       const cleanedParams = this.getCleanQueryParamsForRoute(nextRoute, currentParams);
 
       this.router.navigate([...basePath, nextRoute], {
         queryParams: cleanedParams,
-        queryParamsHandling: 'merge'
+        // queryParamsHandling: 'merge'
       });
     }
   }
@@ -873,16 +862,13 @@ hydrateMainProgressFromSummary(summary: any): void {
           : ['/loanform'];
 
 
-      // this.router.navigate(['/loanform', prevRoute], {
-      // this.router.navigate([...basePath, prevRoute], {
-      //   queryParamsHandling: 'merge'
-      // });
+   
       const currentParams = this.router.routerState.snapshot.root.queryParams;
 const cleanedParams = this.getCleanQueryParamsForRoute(prevRoute, currentParams);
 
 this.router.navigate([...basePath, prevRoute], {
   queryParams: cleanedParams,
-  queryParamsHandling: 'merge'
+  // queryParamsHandling: 'merge'
 });
 
     }
@@ -1059,6 +1045,10 @@ this.router.navigate([...basePath, prevRoute], {
     route === 'educationDetails' ||
     route === 'educationinfo';
 
+     if (!isEducationRoute) {
+    return {};
+  }
+
   const cleanParams: any = {};
 
   // ✅ Keep summary edit params only if user came from summary
@@ -1072,6 +1062,9 @@ this.router.navigate([...basePath, prevRoute], {
     if (currentParams['mode']) {
       cleanParams.mode = currentParams['mode'];
     }
+    // cleanParams.mode =
+    //   currentParams['mode'] || 'view';
+    // cleanParams.section = 'education';
   }
 
   // ✅ Keep education params only for education pages

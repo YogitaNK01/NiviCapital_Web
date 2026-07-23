@@ -232,7 +232,7 @@ this.group.patchValue({
     this.cityNames();
     this.selectpassingyr = this.buildYearOptions(20);
     this.initSection();
-
+    this.applyCurrentFormMode();
 
 
   }
@@ -265,15 +265,15 @@ this.group.patchValue({
     ) {
       this.rebuildOtherDocuments();
     }
-// if (
-//     changes['isViewModeon'] ||
-//     changes['isEditMode'] ||
-//     changes['isDataLoading']
-//   ) {
-//     if (!this.isDataLoading) {
-//       this.applyCurrentFormMode();
-//     }
-//   }
+if (
+    changes['isViewModeon'] ||
+    changes['isEditMode'] ||
+    changes['isDataLoading']
+  ) {
+    if (!this.isDataLoading) {
+      this.applyCurrentFormMode();
+    }
+  }
   }
 
   private initSection(): void {
@@ -1292,17 +1292,24 @@ onOtherTitleInput(slot: any, event: any): void {
     this.group.disable({ emitEvent: false });
   }
 
-  enableAdditionalInfoForm() {
+   enableEducationInfoForm() {
     this.group.enable({ emitEvent: false });
 
 
   }
 
-onEditClick() {
+onEditClick(): void {
+  if (this.isDataLoading) {
+    return;
+  }
+
+  this.editClick.emit();
+}
+  onEditClick1() {
     this.isViewModeon = false;
     this.isEditMode = true;
 
-    this.enableAdditionalInfoForm();
+    this.enableEducationInfoForm();
 
   this.stepperService.unlockSummaryEducationSubsteps();
 

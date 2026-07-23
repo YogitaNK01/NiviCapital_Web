@@ -133,12 +133,16 @@ export class Edudetails {
   editSuccess: any = false;
   description1 = `Great ! Your Additional Info Details\n Uploaded Successfully.`;
 
+  isDataLoading = true;
+  loadError = '';
 
   constructor(private fb: FormBuilder, private stepperService: Loanstepperservice, private cd: ChangeDetectorRef, private formSvc: Loanformservice, private msgBox: Msgboxservice, private msgbox: Msgboxservice,
     private route: ActivatedRoute, private router: Router, private storageservice: Storage) { }
-  async ngOnInit() {
+   async ngOnInit() {
 
-
+ this.isDataLoading = true;
+  this.loadError = '';
+try {
     let Allids = this.stepperService.getLoanId();
 
     this.applicantId = Allids[0];
@@ -187,14 +191,11 @@ export class Edudetails {
 
     await this.loadEducationBasicForBothFlows();
 
-    if (this.viewOnly) {
-      this.basicform.disable({ emitEvent: false });
-    }
-
-
+    // if (this.viewOnly) {
+    //   this.basicform.disable({ emitEvent: false });
+    // }
 
     this.hasProceededOnce = !!this.previousEducationId;
-
 
     const savedQualificationId = this.previousEducationId
       || this.route.snapshot.queryParams['qualificationId'];
@@ -206,8 +207,42 @@ export class Edudetails {
       });
     }
 
+} catch (error) {
+    console.error(
+      'Failed to initialize education details page',
+      error
+    );
 
+    this.loadError =
+      'Unable to load education details. Please try again.';
+  } finally {
+    this.isDataLoading = false;
+
+    /*
+     * Apply the current mode only after data has been patched.
+     */
+    this.applyCurrentFormMode();
+
+    this.cd.detectChanges();
   }
+  }
+
+
+    private applyCurrentFormMode(): void {
+  if (!this.basicform) {
+    return;
+  }
+
+  if (this.isViewMode && !this.isEditMode) {
+    this.basicform.disable({
+      emitEvent: false
+    });
+  } else {
+    this.basicform.enable({
+      emitEvent: false
+    });
+  }
+}
 
   private getEducationDetailsStorageKey(): string {
     return `educationdetailsData_main_${this.stepperService.getLoanId()?.[0]}`;
@@ -1370,7 +1405,7 @@ export class Edudetails {
   }
 
 
-  enableForm() {
+  enableForm1() {
     this.isViewMode = false;
     this.isEditMode = true;
     this.basicform.enable({ emitEvent: false });
@@ -1386,6 +1421,34 @@ export class Edudetails {
     });
   }
 
+     enableForm(): void {
+  if (this.isDataLoading) {
+    return;
+  }
+
+  this.originalFormValue =
+    this.basicform.getRawValue();
+
+  this.isViewMode = false;
+  this.isEditMode = true;
+  this.viewOnly = false;
+
+  this.basicform.enable({
+    emitEvent: false
+  });
+
+  this.stepperService.unlockSummaryEducationSubsteps();
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: {
+        fromSummary: true,
+        mode: 'edit',
+        section: 'education'
+      },
+      // queryParamsHandling: 'merge'
+    });
+  this.cd.detectChanges();
+}
   disableAdditionalInfoForm() {
     this.basicform.disable({ emitEvent: false });
   }

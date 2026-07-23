@@ -239,7 +239,7 @@ export class Educationinfo implements OnInit {
 
   instituteOptions: { label: string; value: string }[] = [];
   cityOptions: { label: string; value: string }[] = [];
-
+private summaryEducationLoaded = false;
   //edit from summary
   isFromSummary = false;
   isViewMode = false;
@@ -264,11 +264,17 @@ export class Educationinfo implements OnInit {
     };
   private persistedEducationSteps: Partial<Record<StepKey, boolean>> = {};
 
+
+  isDataLoading = true;
+loadError = '';
+
   constructor(private fb: FormBuilder, private stepperService: Loanstepperservice, private cd: ChangeDetectorRef, private formSvc: Loanformservice, private msgBox: Msgboxservice,
     private route: ActivatedRoute, private router: Router, private msgbox: Msgboxservice, public main: Main, private storageservice: Storage) { }
   async ngOnInit(): Promise<void> {
 
-
+ this.isDataLoading = true;
+   this.loadError = '';
+     try {
     let Allids = this.stepperService.getLoanId();
 
     this.applicantId = Allids[0];
@@ -355,6 +361,7 @@ export class Educationinfo implements OnInit {
           } else if (this.isViewMode) {
             this.educationForms[step]?.disable({ emitEvent: false });
           }
+          this.cd.detectChanges();
         }, 200);
 
 
@@ -389,6 +396,7 @@ export class Educationinfo implements OnInit {
               } else if (this.isViewMode) {
                 this.educationForms[step]?.disable({ emitEvent: false });
               }
+              this.cd.detectChanges();
             }, 200);
 
           });
@@ -408,16 +416,7 @@ export class Educationinfo implements OnInit {
 
           this.hasUnsavedChanges = true;
 
-          // this.educationFormState[step] = {
-          //   ...raw,
-
-          //   institutename: (raw.institutename),
-          //   institutetitle: raw.institutetitle || '',
-          //   location: this.resolveLocationId(raw.location),
-          //   otherLocation: raw.otherLocation || '',
-
-          //   passingyear: this.normalizeDropdownValue(raw.passingyear),
-          // };
+         
 
           this.educationFormState[step] = {
             ...raw,
@@ -461,12 +460,50 @@ export class Educationinfo implements OnInit {
       this.group.get('otherLocation')?.updateValueAndValidity();
     }
 
+      } catch (error) {
+    console.error(
+      'Failed to initialize education page',
+      error
+    );
+
+    this.loadError =
+      'Unable to load education details. Please try again.';
+  } finally {
+    this.isDataLoading = false;
+
+    this.applyEducationFormMode();
+
+    this.cd.detectChanges();
+  }
+
 
   }
+//load data
+  private applyEducationFormMode(): void {
+  Object.values(
+    this.educationForms || {}
+  ).forEach((form: any) => {
+    if (!(form instanceof FormGroup)) {
+      return;
+    }
+
+    if (this.isViewMode && !this.isEditMode) {
+      form.disable({
+        emitEvent: false
+      });
+    } else {
+      form.enable({
+        emitEvent: false
+      });
+    }
+  });
+}
+
   //check which data to display priority wise
   private async hydrateEducationStep(step: StepKey): Promise<void> {
     if (!step) return;
-
+this.isDataLoading = true;
+  try {
     // 1. local restore
     this.restoreEducationStateFromLocalStorage();
 
@@ -478,7 +515,17 @@ export class Educationinfo implements OnInit {
 
     // 4. restore form UI
     this.restoreFormState(step);
+    } catch (error) {
+    console.error(
+      `Failed to hydrate education step: ${step}`,
+      error
+    );
+  } finally {
+    this.isDataLoading = false;
+    this.applyEducationFormMode();
     this.cd.detectChanges();
+  }
+ 
   }
 
   toggle(index: number) {
@@ -2251,7 +2298,7 @@ isOtherInstituteSelected(step: StepKey): boolean {
   }
   //patch from summary 
   private async loadEducationFromSummary(): Promise<void> {
-    if (!this.applicationId) return;
+    if (!this.applicationId || this.summaryEducationLoaded) return;
 
     try {
       const res: any = await firstValueFrom(
@@ -2276,6 +2323,7 @@ isOtherInstituteSelected(step: StepKey): boolean {
       if (!summaryEducation) return;
 
       this.patchEducationFromSummary(summaryEducation);
+       this.summaryEducationLoaded = true;
     } catch (error) {
       console.error('Failed to load education summary:', error);
     }
@@ -3268,15 +3316,27 @@ isOtherInstituteSelected(step: StepKey): boolean {
     if (this.isFromSummary) {
       this.stepperService.unlockSummaryEducationSubsteps();
     }
-
+this.disableAllEducationForms()
     const form = this.getCurrentForm();
     if (!form) return;
 
-    if (this.isEditMode) {
-      this.enableAllEducationForms();
-    } else if (this.isViewMode) {
-      this.disableAllEducationForms();
-    }
+     if (this.isEditMode) {
+    form.enable({
+      emitEvent: false
+    });
+  } else {
+    form.disable({
+      emitEvent: false
+    });
+  }
+
+  this.cd.detectChanges();
+
+    // if (this.isEditMode) {
+    //   this.enableAllEducationForms();
+    // } else if (this.isViewMode) {
+    //   this.disableAllEducationForms();
+    // }
   }
 
   enableForm() {
@@ -3337,22 +3397,48 @@ isOtherInstituteSelected(step: StepKey): boolean {
     });
   }
 
-  onEditClick() {
-    this.isViewMode = false;
-    this.isEditMode = true;
-
-
-    this.enableAllEducationForms();
-
-    this.router.navigate([], {
-      relativeTo: this.route,
-      queryParams: {
-        fromSummary: true,
-        mode: 'edit'
-      },
-      queryParamsHandling: 'merge'
-    });
+ 
+  onEditClick(): void {
+  if (this.isDataLoading) {
+    return;
   }
+
+  const step =
+    this.activeEducation as StepKey;
+
+  const currentForm =
+    this.educationForms[step] as FormGroup;
+
+  if (!currentForm) {
+    return;
+  }
+
+  this.originalFormValue =
+    currentForm.getRawValue();
+
+  this.isViewMode = false;
+  this.isEditMode = true;
+  this.isFromSummary = true;
+
+  currentForm.enable({
+    emitEvent: false
+  });
+
+  this.stepperService
+    .unlockSummaryEducationSubsteps();
+
+  this.router.navigate([], {
+    relativeTo: this.route,
+    queryParams: {
+      fromSummary: true,
+      mode: 'edit',
+       section: 'education'
+    },
+    queryParamsHandling: 'merge'
+  });
+
+  this.cd.detectChanges();
+}
   cancelSummaryEdit() {
 
 

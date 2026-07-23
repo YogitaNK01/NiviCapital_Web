@@ -4,7 +4,7 @@
     @switch (activeEducation) {
     @case ('10th') {
     <app-edusection [group]="educationForms['10th']" title="10th std" sectionType="school" [stepKey]="activeEducation"
-        [isViewModeon]="isViewMode" [isFromSummary]="isFromSummary" [isEditMode]="isEditMode"
+        [isViewModeon]="isViewMode" [isFromSummary]="isFromSummary" [isEditMode]="isEditMode" [isDataLoading]="isDataLoading"
         (editClick)="onEditClick()" (fileRemoved)="onFileRemovedFromSection($event)" [uploadedFiles]="uploadedFiles"
         [savedFileMeta]="savedFileMeta" [otherDocMap]="otherDocMap" (fileSelected)="onFileSelectedFromSection($event)"
         (otherDocAdded)="onOtherDocAdded($event)" (instituteChanged)="onInstituteChanged($event)">
@@ -13,7 +13,7 @@
 
     @case ('12th') {
     <app-edusection [group]="educationForms['12th']" title="12th std" sectionType="school" [stepKey]="activeEducation"
-        [isViewModeon]="isViewMode" [isFromSummary]="isFromSummary" [isEditMode]="isEditMode"
+        [isViewModeon]="isViewMode" [isFromSummary]="isFromSummary" [isEditMode]="isEditMode" [isDataLoading]="isDataLoading"
         (editClick)="onEditClick()" (fileRemoved)="onFileRemovedFromSection($event)" [uploadedFiles]="uploadedFiles"
         [savedFileMeta]="savedFileMeta" [otherDocMap]="otherDocMap" (fileSelected)="onFileSelectedFromSection($event)"
         (otherDocAdded)="onOtherDocAdded($event)" (instituteChanged)="onInstituteChanged($event)">
@@ -22,7 +22,7 @@
 
     @case ('diploma10') {
     <app-edusection [group]="educationForms.diploma10" title="Diploma (After 10th)" sectionType="diploma"
-        [isViewModeon]="isViewMode" [isFromSummary]="isFromSummary" [isEditMode]="isEditMode"
+        [isViewModeon]="isViewMode" [isFromSummary]="isFromSummary" [isEditMode]="isEditMode" [isDataLoading]="isDataLoading"
         (editClick)="onEditClick()" (fileRemoved)="onFileRemovedFromSection($event)" [stepKey]="activeEducation"
         [uploadedFiles]="uploadedFiles" [savedFileMeta]="savedFileMeta" [otherDocMap]="otherDocMap" (instituteChanged)="onInstituteChanged($event)"
         (otherDocAdded)="onOtherDocAdded($event)" (fileSelected)="onFileSelectedFromSection($event)"  />
@@ -30,7 +30,7 @@
 
     @case ('diploma12') {
     <app-edusection [group]="educationForms.diploma12" title="Diploma (After 12th)" sectionType="diploma"
-        [isViewModeon]="isViewMode" [isFromSummary]="isFromSummary" [isEditMode]="isEditMode"
+        [isViewModeon]="isViewMode" [isFromSummary]="isFromSummary" [isEditMode]="isEditMode" [isDataLoading]="isDataLoading"
         (editClick)="onEditClick()" (fileRemoved)="onFileRemovedFromSection($event)" [stepKey]="activeEducation"
         [uploadedFiles]="uploadedFiles" [savedFileMeta]="savedFileMeta" [otherDocMap]="otherDocMap" (instituteChanged)="onInstituteChanged($event)"
         (otherDocAdded)="onOtherDocAdded($event)" (fileSelected)="onFileSelectedFromSection($event)" />
@@ -38,14 +38,14 @@
 
     @case ('ug') {
     <app-edusection [group]="educationForms.ug" title="Undergraduate" sectionType="bachelors"
-        [isViewModeon]="isViewMode" [isFromSummary]="isFromSummary" [isEditMode]="isEditMode"
+        [isViewModeon]="isViewMode" [isFromSummary]="isFromSummary" [isEditMode]="isEditMode" [isDataLoading]="isDataLoading"
         (editClick)="onEditClick()" (fileRemoved)="onFileRemovedFromSection($event)" [stepKey]="activeEducation"
         [uploadedFiles]="uploadedFiles" [savedFileMeta]="savedFileMeta" [otherDocMap]="otherDocMap" (instituteChanged)="onInstituteChanged($event)"
         (otherDocAdded)="onOtherDocAdded($event)" (fileSelected)="onFileSelectedFromSection($event)" />
     }
 
     @case ('pg') {
-    <app-edusection [group]="educationForms.pg" title="Postgraduate" sectionType="postgrad" [stepKey]="activeEducation"
+    <app-edusection [group]="educationForms.pg" title="Postgraduate" sectionType="postgrad" [stepKey]="activeEducation" [isDataLoading]="isDataLoading"
         [isViewModeon]="isViewMode" [isFromSummary]="isFromSummary" [isEditMode]="isEditMode" (instituteChanged)="onInstituteChanged($event)"
         (editClick)="onEditClick()" (fileRemoved)="onFileRemovedFromSection($event)" [uploadedFiles]="uploadedFiles"
         [savedFileMeta]="savedFileMeta" [otherDocMap]="otherDocMap" (fileSelected)="onFileSelectedFromSection($event)"
@@ -53,14 +53,14 @@
     }
 
     @case ('others12') {
-    <app-edusection [group]="educationForms.others12" title="Others (After 12th)" sectionType="others"
+    <app-edusection [group]="educationForms.others12" title="Others (After 12th)" sectionType="others" [isDataLoading]="isDataLoading"
         [isViewModeon]="isViewMode" [isFromSummary]="isFromSummary" [isEditMode]="isEditMode" (instituteChanged)="onInstituteChanged($event)"
         (editClick)="onEditClick()" (fileRemoved)="onFileRemovedFromSection($event)" [stepKey]="activeEducation"
         [uploadedFiles]="uploadedFiles" [savedFileMeta]="savedFileMeta" [otherDocMap]="otherDocMap"
         (otherDocAdded)="onOtherDocAdded($event)" (fileSelected)="onFileSelectedFromSection($event)" />
     }
     @case ('othersdiploma') {
-    <app-edusection [group]="educationForms.othersdiploma" title="Others (After Diploma)" sectionType="others"
+    <app-edusection [group]="educationForms.othersdiploma" title="Others (After Diploma)" sectionType="others" [isDataLoading]="isDataLoading"
         [isViewModeon]="isViewMode" [isFromSummary]="isFromSummary" [isEditMode]="isEditMode" (instituteChanged)="onInstituteChanged($event)"
         (editClick)="onEditClick()" (fileRemoved)="onFileRemovedFromSection($event)" [stepKey]="activeEducation"
         [uploadedFiles]="uploadedFiles" [savedFileMeta]="savedFileMeta" [otherDocMap]="otherDocMap"
@@ -90,7 +90,7 @@
             <div>
                 <app-buttons *ngIf="isFromSummary" type="button" label="Edit"
                     class="btn btn-icon edit btncustomClass editBtnClass" color="primary" (click)="enableForm()"
-                    [disabled]="!isViewMode">
+                    [disabled]="isDataLoading">
                     <img src="assets/images/icons/edit-white.svg" alt="edit">
                 </app-buttons>
             </div>

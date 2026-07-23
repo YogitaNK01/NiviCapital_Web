@@ -262,7 +262,7 @@ if (cleanUrl.includes('co-applicantdetails')) {
     const stepKey = sub.key;
     this.activeQualificationId = stepKey;
 
-    const flowQualificationId = this.route.snapshot.queryParams['qualificationId'];
+    const flowQualificationId = this.route.snapshot.queryParams['qualificationId'] ||   this.flowQualificationId ||    sub.id;
 
 
     // this.router.navigate([], {
@@ -275,15 +275,18 @@ if (cleanUrl.includes('co-applicantdetails')) {
         // relativeTo: this.route,
         queryParams: {
 
-          
+          fromSummary: true,
+           mode: 'view',
+           section: 'education',
           qualificationlabel: stepKey,
           qualificationId: flowQualificationId
           // qualificationId: sub.id
         },
-        queryParamsHandling: 'merge'
+        // queryParamsHandling: 'merge'
       })
       .then(() => {
         this.activeQualificationId = stepKey;
+           this.cdr.detectChanges();
       });
 
 
