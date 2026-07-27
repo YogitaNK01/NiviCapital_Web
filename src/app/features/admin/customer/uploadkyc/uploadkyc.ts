@@ -131,6 +131,7 @@ export class Uploadkyc implements OnDestroy, AfterViewInit {
 private viewReady = false;
 private kycLoaded = false;
 private isPageRefresh = false;
+isNewFlow = false;
 
   constructor(public main: Main, private addcustomerservice: Addcustomerservice, private cd: ChangeDetectorRef, private route: ActivatedRoute, private stepperService: Loanstepperservice, private loanservice: Loanformservice, private msgBox: Msgboxservice, private router: Router) { }
 
@@ -144,7 +145,7 @@ private isPageRefresh = false;
     )?.type === 'reload';
 
    const params = this.route.snapshot.queryParams;
-
+this.isNewFlow = params['mode'] === 'new';
     const cameFromSummary =
       params['fromSummary'] === true ||
       params['fromSummary'] === 'true' ||
@@ -240,7 +241,7 @@ private isPageRefresh = false;
 ngAfterViewInit(): void {
   this.viewReady = true;
 
-   if (this.isPageRefresh && !this.isSummaryEditMode) {  setTimeout(() => {    
+   if (this.isPageRefresh && this.isNewFlow) {  setTimeout(() => {    
       this.clearKycFormOnRefresh();    });   return;  }
 
   this.tryLoadKyc();
@@ -248,7 +249,7 @@ ngAfterViewInit(): void {
 
 
   private tryLoadKyc(): void {
-    const shouldClearFreshForm = this.isPageRefresh &&  !this.isSummaryEditMode;
+    const shouldClearFreshForm = this.isPageRefresh && this.isNewFlow;
   if (
     shouldClearFreshForm ||
     !this.initReady ||
@@ -1815,7 +1816,7 @@ private createKycLocalCache(input: any): any {
     const localData = localStorage.getItem(key);
     const parsedLocal = localData ? JSON.parse(localData) : null;
     const apiApplicantId = this.getApiApplicantId();
-    const apiData = await this.getSavedKycInfo(apiApplicantId, parsedLocal.custid);
+    const apiData = await this.getSavedKycInfo(apiApplicantId, parsedLocal.custid || this.custId || '');
 
     if (!apiApplicantId) {
 

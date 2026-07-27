@@ -898,6 +898,64 @@ this.router.navigate([...basePath, prevRoute], {
     return this.formData[step];
   }
 
+ private buildFormKey(step: string): string {
+  if (this.stepperType === 'CO_APPLICANT') {
+    const coApplicantId =
+      this.co_applicantId ||
+      `temp-${this.getCurrentCoApplicantIndex()}`;
+
+    return `CO_APPLICANT_${coApplicantId}_${step}`;
+  }
+
+  const mainApplicantId =
+    this.applicantId || 'default-main-applicant';
+
+  return `MAIN_${mainApplicantId}_${step}`;
+}
+
+setStepData1(step: string, data: any): void {
+  const key = this.buildFormKey(step);
+
+  const ownerApplicantId =  this.stepperType === 'CO_APPLICANT'
+        ? this.co_applicantId
+        : this.applicantId
+
+  this.formData[key] = {
+    ...data,
+    ownerApplicantId: String(ownerApplicantId || '')
+     
+  };
+}
+
+getStepData1(step: string): any {
+  const key = this.buildFormKey(step);
+  const data = this.formData[key];
+
+  if (!data) {
+    return null;
+  }
+
+  const expectedApplicantId =
+    this.stepperType === 'CO_APPLICANT'
+      ? this.co_applicantId
+      : this.applicantId;
+
+  if (
+    data.ownerApplicantId &&
+    String(data.ownerApplicantId) !== String(expectedApplicantId)
+  ) {
+    console.warn('Ignoring step data belonging to another applicant', {
+      expectedApplicantId,
+      actualApplicantId: data.ownerApplicantId,
+      key
+    });
+
+    return null;
+  }
+
+  return data;
+}
+
   getAllData() {
     return this.formData;
   }
