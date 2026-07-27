@@ -371,32 +371,67 @@ localStorage.removeItem(
       current.index
     );
 
+    this.coappSummaryData = null;
     this.loanfornservice.getCoappSummary(this.applicationId, current.applicantId).subscribe({
       next: (res: any) => {
         if (res.status === "success") {
           this.coappSummaryData = res.data;
+
+           // Calculate route only after current co-applicant data is loaded.
+      const resumeRoute = isCompletedCoapp
+        ? 'co-summaryinfo'
+        : this.getResumeRouteForCoApplicant(current);
+
+      this.router.navigate(
+        ['coapplicantinfo', resumeRoute],
+        {
+          relativeTo: this.route,
+          queryParams: {
+            coApplicantIndex: current.index,
+            mode: isCompletedCoapp ? 'view' : 'existing',
+            fromSummary: isCompletedCoapp ? true : null
+          }
+        }
+      );
         }
       },
       error: (err: any) => {
         console.log(err);
+
+         // Safe fallback if summary API fails.
+      const resumeRoute = isCompletedCoapp
+        ? 'co-summaryinfo'
+        : 'co-generalinfo';
+
+      this.router.navigate(
+        ['coapplicantinfo', resumeRoute],
+        {
+          relativeTo: this.route,
+          queryParams: {
+            coApplicantIndex: current.index,
+            mode: isCompletedCoapp ? 'view' : 'existing',
+            fromSummary: isCompletedCoapp ? true : null
+          }
+        }
+      );
       }
     })
 
-    const resumeRoute = isCompletedCoapp
-      ? 'co-summaryinfo'
-      : this.getResumeRouteForCoApplicant(current);
+    // const resumeRoute = isCompletedCoapp
+    //   ? 'co-summaryinfo'
+    //   : this.getResumeRouteForCoApplicant(current);
 
-    this.router.navigate(
-      ['coapplicantinfo', resumeRoute],
-      {
-        relativeTo: this.route,
-        queryParams: {
-          coApplicantIndex: current.index,
-          mode: isCompletedCoapp ? 'view' : 'existing',
-          fromSummary: isCompletedCoapp ? true : null
-        }
-      }
-    );
+    // this.router.navigate(
+    //   ['coapplicantinfo', resumeRoute],
+    //   {
+    //     relativeTo: this.route,
+    //     queryParams: {
+    //       coApplicantIndex: current.index,
+    //       mode: isCompletedCoapp ? 'view' : 'existing',
+    //       fromSummary: isCompletedCoapp ? true : null
+    //     }
+    //   }
+    // );
   }
 
   private getResumeRouteForCoApplicant(coapp: any): string {
@@ -405,12 +440,17 @@ localStorage.removeItem(
       coapp.applicantId
     );
 
-    let coappSteps = this.coApplicantStepRoutes;
+    let coappSteps = [...this.coApplicantStepRoutes];
 
     if (this.coappSummaryData) {
       const occupation = this.coappSummaryData?.generalInfo?.occupationInfo?.occupation;
       if (occupation === "Unemployed" || occupation === "Housewife / Homemaker") {
         coappSteps = coappSteps.filter((item: any) => item !== "co-incomeinfo");
+      }
+
+      const hasAssets = this.toBoolean( this.coappSummaryData?.generalInfo?.hasAssets);
+      if (!hasAssets) {
+        coappSteps = coappSteps.filter((item: any) => item !== "co-assetsinfo");
       }
     }
 
@@ -419,6 +459,19 @@ localStorage.removeItem(
     );
 
     return firstIncomplete || 'co-summaryinfo';
+  }
+    private toBoolean(value: unknown): boolean {
+    if (value === true || value === 1) {
+      return true;
+    }
+
+    if (typeof value === 'string') {
+      return ['true', 'yes', '1'].includes(
+        value.trim().toLowerCase()
+      );
+    }
+
+    return false;
   }
 
   //delete 

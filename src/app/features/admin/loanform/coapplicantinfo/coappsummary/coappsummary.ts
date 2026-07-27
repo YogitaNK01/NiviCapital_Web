@@ -144,7 +144,7 @@ export class Coappsummary {
     private router: Router, private route: ActivatedRoute, public main: Main, private apiservice: Addcustomerservice) { }
 
   ngOnInit(): void {
-   this.stepperService.markStepCompleted('co-summaryinfo');
+    this.stepperService.markStepCompleted('co-summaryinfo');
     let Allids = this.stepperService.getLoanId();
 
     this.applicantId = Allids[0];
@@ -253,8 +253,18 @@ export class Coappsummary {
   }
 
   getcoappSummarydetails() {
+    const requestedApplicantId = String(this.applicantId);
     this.formSvc.getCoappSummary(this.applicationId, this.applicantId).subscribe(
       (res: any) => {
+
+        if (
+          res?.status !== 'success' ||
+          !res?.data
+        ) {
+          this.resetSummaryVisibility();
+          return;
+        }
+
         if (res && res.status === 'success' && res.data) {
           const data = res.data;
           this.summaryData = data;
@@ -266,20 +276,43 @@ export class Coappsummary {
           const generalInfoData = SummaryHelper.extractcoappGeneralInfo(data.generalInfo);
           this.currentOccupation = generalInfoData.currentOccupation;
           this.courseDetailsFields = generalInfoData.courseDetailsFields;
-          this.isasset = this.courseDetailsFields.some((field: any) => field.label === 'Do you have Assets?' && field.value === 'Yes');
+          // this.isasset = this.courseDetailsFields.some((field: any) => field.label === 'Do you have Assets?' && field.value === 'Yes');
+
+          const assetField = this.courseDetailsFields.find(
+            (field: any) =>
+              this.normalizeText(field?.label) === 'do you have assets?'
+          );
+
+          this.isasset = data.generalInfo?.hasAssets != null
+            ? this.toBoolean(data.generalInfo.hasAssets)
+            : this.toBoolean(assetField?.value);
 
           const occupation = this.normalizeOccupation(this.currentOccupation);
 
-
-
           this.isEmployed = occupation === 'employed';
-          this.isSelfEmployed = occupation === 'self employed' || occupation === 'Self-employed';
+          this.isSelfEmployed = occupation === 'self employed';
           this.showIncome = this.isEmployed || this.isSelfEmployed;
 
+          const isExcludedOccupation = occupation === 'housewife' || occupation === 'housewife / homemaker' || occupation === 'unemployed';
+
+          // this.showAssets =
+          //   this.isasset === true &&
+          //   occupation !== 'housewife' &&
+          //   occupation !== 'housewife / homemaker';
+
+
+
           this.showAssets =
-            this.isasset === true &&
-            occupation !== 'housewife' &&
-            occupation !== 'housewife / homemaker';
+            this.isasset &&
+            !isExcludedOccupation;
+
+
+
+          this.assetsSections = this.showAssets
+            ? SummaryHelper.extractAssetsInfo(
+              data.assets || {}
+            )
+            : [];
 
           this.filteredAccordions = this.accordions.filter(acc => {
 
@@ -293,7 +326,30 @@ export class Coappsummary {
           });
 
 
+          const currentState = {
+            isasset: this.showAssets,
+            isincome: this.showIncome,
+            issalaried: this.isEmployed
+          };
 
+          this.formSvc.coApplicantState = {
+            ...this.formSvc.coApplicantState,
+            ...currentState
+          };
+
+          const stateKey = this.stepperService.getCoApplicantStateKey();
+
+          localStorage.setItem(
+            stateKey,
+            JSON.stringify(currentState)
+          );
+
+          this.stepperService.setApplicantValues(
+            'coapp',
+            currentState
+          );
+
+          this.stepperService.rebuildSteps();
 
           const additionalInfoData = SummaryHelper.extractAdditionalInfo(data.additionalInfo, 'CO_APPLICANT');
           this.additionalInfoFields = additionalInfoData;
@@ -321,7 +377,6 @@ export class Coappsummary {
           };
 
 
-          // this.monthlyExpenditure = res.data.monthlyExpenditure || this.monthlyExpenditure;
           this.monthlyExpenditure = { ...this.monthlyExpenditure, ...(res.data.monthlyExpenditure || {}) };
 
           const allFields = [
@@ -331,38 +386,48 @@ export class Coappsummary {
             { key: 'transportation', label: 'Transportation' },
             { key: 'schoolEducationFees', label: 'School Education Fees' },
             { key: 'medicalMedicines', label: 'Medical / Medicines' },
-            //  { key: 'otherRecurringExpenses', label: 'Other Recurring Expenses' }
           ];
 
           // this.monthlyExpenditureFields = allFields.filter(field => this.monthlyExpenditure[field.key] != null);
           this.monthlyExpenditureFields = allFields.filter(field =>
             this.hasMonthlyValue(this.monthlyExpenditure[field.key])
           );
-          this.totalMonthlyExpenditure = res.data.monthlyExpenditure.totalMonthlyInr;
+          this.totalMonthlyExpenditure = res.data.monthlyExpenditure?.totalMonthlyInr ?? 0;
           this.accordions[7].amount = this.totalMonthlyExpenditure;
 
 
           this.assetsSections = SummaryHelper.extractAssetsInfo(res.data.assets);
           console.log("assetsSections", this.assetsSections);
 
-          this.totalassetsval = res.data.assets.totalAssets;
-          // this.accordions[6].amount = this.totalassetsval;
-
-
+          this.totalassetsval = res.data.assets?.totalAssets ?? 0;
+          
           this.liabilitiesSections = SummaryHelper.extractLiabilitiesInfo(res.data.liabilities);
-          this.totalliabilities = res.data.liabilities.totalLiabilities;
-          // this.accordions[7].amount = this.totalliabilities;
-
-
-
+          this.totalliabilities = res.data.liabilities?.totalLiabilities ?? 0;
+          
+          this.summaryLoaded = true;
           this.cd.detectChanges();
         }
       },
       (error) => {
+        this.resetSummaryVisibility();
         console.error('Error fetching summary details:', error);
       }
     );
   }
+private resetSummaryVisibility(): void {
+  this.isasset = false;
+  this.showAssets = false;
+  this.showIncome = false;
+  this.assetsSections = [];
+
+  this.filteredAccordions = this.accordions.filter(
+    acc =>
+      acc.key !== 'assets' &&
+      acc.key !== 'income'
+  );
+
+  this.summaryLoaded = true;
+}
 
   submitsummary() {
 
@@ -485,6 +550,26 @@ export class Coappsummary {
       .trim();
   }
 
+  private normalizeText(value: unknown): string {
+    return String(value ?? '')
+      .trim()
+      .toLowerCase()
+      .replace(/\s+/g, ' ');
+  }
+
+  private toBoolean(value: unknown): boolean {
+    if (value === true || value === 1) {
+      return true;
+    }
+
+    if (typeof value === 'string') {
+      return ['true', 'yes', '1'].includes(
+        value.trim().toLowerCase()
+      );
+    }
+
+    return false;
+  }
   submit() { }
 
   labelDisplayMap: { [key: string]: string } = {
@@ -595,12 +680,12 @@ export class Coappsummary {
   }
 
   //show 35 char with ... only if filename is bigger
-     getFileName(filename:any,maxLength: number = 30): string {
-  const fileName = filename || '';
+  getFileName(filename: any, maxLength: number = 30): string {
+    const fileName = filename || '';
     if (fileName.length <= maxLength) {
-          return fileName; 
-        }
-            return `${fileName.substring(0, maxLength)}...`;
-}
+      return fileName;
+    }
+    return `${fileName.substring(0, maxLength)}...`;
+  }
 
 }

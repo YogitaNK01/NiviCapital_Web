@@ -130,11 +130,33 @@ export class Uploadkyc implements OnDestroy, AfterViewInit {
   private initReady = false;
 private viewReady = false;
 private kycLoaded = false;
-
+private isPageRefresh = false;
 
   constructor(public main: Main, private addcustomerservice: Addcustomerservice, private cd: ChangeDetectorRef, private route: ActivatedRoute, private stepperService: Loanstepperservice, private loanservice: Loanformservice, private msgBox: Msgboxservice, private router: Router) { }
 
   async ngOnInit(): Promise<void> {
+
+  this.isPageRefresh =
+    (
+      performance.getEntriesByType(
+        'navigation'
+      )[0] as PerformanceNavigationTiming | undefined
+    )?.type === 'reload';
+
+   const params = this.route.snapshot.queryParams;
+
+    const cameFromSummary =
+      params['fromSummary'] === true ||
+      params['fromSummary'] === 'true' ||
+      this.loanservice.isSummaryEditFlow();
+
+    this.isSummaryEditMode = cameFromSummary;
+
+
+    this.viewOnly =
+      this.isSummaryEditMode &&
+      params['mode'] !== 'edit';
+
     this.isCoApplicant = this.router.url.includes('coapplicantinfo');
     this.stepperService.setStepperType(
       this.isCoApplicant ? 'CO_APPLICANT' : 'MAIN'
@@ -201,19 +223,7 @@ private kycLoaded = false;
     this.requiredDocs.forEach(k => this.uploadedFiles[k] = null);
     this.optionalDocs.forEach(k => this.uploadedFiles[k] = null);
 
-    const params = this.route.snapshot.queryParams;
-
-    const cameFromSummary =
-      params['fromSummary'] === true ||
-      params['fromSummary'] === 'true' ||
-      this.loanservice.isSummaryEditFlow();
-
-    this.isSummaryEditMode = cameFromSummary;
-
-
-    this.viewOnly =
-      this.isSummaryEditMode &&
-      params['mode'] !== 'edit';
+   
 
     if (this.isSummaryEditMode) {
       this.isViewMode = true;
@@ -223,22 +233,24 @@ private kycLoaded = false;
     }
 
     this.initReady = true;
-this.tryLoadKyc();
+     this.tryLoadKyc();
 
   }
 
 ngAfterViewInit(): void {
   this.viewReady = true;
+
+   if (this.isPageRefresh && !this.isSummaryEditMode) {  setTimeout(() => {    
+      this.clearKycFormOnRefresh();    });   return;  }
+
   this.tryLoadKyc();
 }
-  // ngAfterViewInit(): void {
-  //   setTimeout(() => {
-  //     this.loadKycForBothFlows();
-  //   }, 0);
-  // }
+
 
   private tryLoadKyc(): void {
+    const shouldClearFreshForm = this.isPageRefresh &&  !this.isSummaryEditMode;
   if (
+    shouldClearFreshForm ||
     !this.initReady ||
     !this.viewReady ||
     this.kycLoaded ||
@@ -327,10 +339,10 @@ ngAfterViewInit(): void {
     else if (this.hasAnyKycData(draftData)) {
       finalData = draftData;
     }
-    // 3) Else local fallback
-    else if (this.hasAnyKycData(parsedLocal)) {
-      finalData = parsedLocal;
-    }
+    // // 3) Else local fallback
+    // else if (this.hasAnyKycData(parsedLocal)) {
+    //   // finalData = parsedLocal;
+    // }
     // 4) Else partial summary fallback
     else if (this.hasAnyKycData(normalizedSummary)) {
       finalData = normalizedSummary;
@@ -338,6 +350,7 @@ ngAfterViewInit(): void {
 
     if (!finalData) {
       this.lastSavedPayload = null;
+      localStorage.removeItem(key);
       return; // fresh form remains empty
     }
 
@@ -353,38 +366,7 @@ ngAfterViewInit(): void {
     }
   }
 
-private mergeKycData(
-  summaryData: any,
-  draftData: any,
-  localData: any
-): any {
-  const baseData = {
-    ...(localData || {}),
-    ...(summaryData || {}),
-    ...(draftData || {})
-  };
 
-  const fileMeta = this.mergeFileMeta(
-    this.mergeFileMeta(
-      localData?.fileMeta,
-      summaryData?.fileMeta
-    ),
-    draftData?.fileMeta
-  );
-
-  return {
-    ...baseData,
-
-    addresses:
-      draftData?.addresses?.length
-        ? draftData.addresses
-        : summaryData?.addresses?.length
-          ? summaryData.addresses
-          : localData?.addresses || [],
-
-    fileMeta
-  };
-}
   getStorageKey() {
     if (!this.isCoApplicant) {
       return `kycinfo_main_${this.applicationId}_${this.stepperService.getLoanId()?.[0]}`;
@@ -398,18 +380,7 @@ private mergeKycData(
       : `kycinfo_coapp_${this.applicationId}_temp_${index}`;
   }
 
-  private getStableStorageKey(): string {
-  if (!this.isCoApplicant) {
-    return this.getStorageKey();
-  }
-
-  const index =
-    this.stepperService.getCurrentCoApplicantIndex() ||
-    Number(this.route.snapshot.queryParams['coApplicantIndex']) ||
-    1;
-
-  return `kycinfo_coapp_${this.applicationId}_index_${index}`;
-}
+ 
 
   isPassportRequired(): boolean {
     // Main applicant + fresh flow only
@@ -1876,6 +1847,40 @@ private createKycLocalCache(input: any): any {
 
     }, 0);
   }
+//clear data on refresh
+private clearKycFormOnRefresh(): void {
+  Object.values(this.uploadedPreviewUrls).forEach(url => {
+    if (url?.startsWith('blob:')) {
+      URL.revokeObjectURL(url);
+    }
+  });
+
+  this.files = {};
+  this.uploadedFiles = {};
+  this.uploadedFileMeta = {};
+  this.uploadedPreviewUrls = {};
+
+  this.requiredDocs.forEach(key => {
+    this.uploadedFiles[key] = null;
+  });
+
+  this.optionalDocs.forEach(key => {
+    this.uploadedFiles[key] = null;
+  });
+
+  this.lastSavedPayload = null;
+
+  this.addressType = 'same';
+  this.isDifferentAddress = false;
+  this.selectedSecondaryProof = null;
+
+  this.isPermanentMailingChecked = true;
+  this.isCurrentMailingChecked = false;
+
+  this.kycForm?.resetForm();
+
+  this.cd.detectChanges();
+}
 
   // edit flow = patch from summary
 
@@ -2133,37 +2138,64 @@ private createKycLocalCache(input: any): any {
         this.applicantId;
 
       const coApplicantIndex =
-        this.stepperService.getCurrentCoApplicantIndex() ||
-        Number(
-          this.route.snapshot.queryParams['coApplicantIndex']
-        );
+        Number(this.route.snapshot.queryParams['coApplicantIndex'] ) ||
+        this.stepperService.getCurrentCoApplicantIndex() ;
 
-      return (
-        // Best match: applicant ID
-        applicants.find(
-          (applicant: any) =>
-            coApplicantId &&
-            String(applicant?.applicantId) ===
-            String(coApplicantId)
-        ) ||
+      // return (
+      //   // Best match: applicant ID
+      //   applicants.find(
+      //     (applicant: any) =>
+      //       coApplicantId &&
+      //       String(applicant?.applicantId) ===
+      //       String(coApplicantId)
+      //   ) ||
 
-        // Fallback: co-applicant index
-        applicants.find((applicant: any) => {
-          const applicantType =
-            String(applicant?.applicantType || '').toUpperCase();
+      //   // Fallback: co-applicant index
+      //   applicants.find((applicant: any) => {
+      //     const applicantType =
+      //       String(applicant?.applicantType || '').toUpperCase();
 
-          const indexFromType = Number(
-            applicantType.match(/\d+/)?.[0]
-          );
+      //     const indexFromType = Number(
+      //       applicantType.match(/\d+/)?.[0]
+      //     );
 
-          return (
-            applicantType.startsWith('CO_APPLICANT') &&
-            indexFromType === Number(coApplicantIndex)
-          );
-        }) ||
+      //     return (
+      //       applicantType.startsWith('CO_APPLICANT') &&
+      //       indexFromType === Number(coApplicantIndex)
+      //     );
+      //   }) ||
 
-        null
-      );
+      //   null
+      // );
+
+    
+
+return (
+  // First match the co-applicant currently shown in the URL
+  applicants.find((applicant: any) => {
+    const applicantType =
+      String(applicant?.applicantType || '').toUpperCase();
+
+    const indexFromType = Number(
+      applicantType.match(/\d+/)?.[0]
+    );
+
+    return (
+      applicantType.startsWith('CO_APPLICANT') &&
+      indexFromType === Number(coApplicantIndex)
+    );
+  }) ||
+
+  // Fallback to applicant ID
+  applicants.find(
+    (applicant: any) =>
+      coApplicantId &&
+      String(applicant?.applicantId) ===
+      String(coApplicantId)
+  ) ||
+
+  null
+);
 
     } catch (error) {
       console.error(

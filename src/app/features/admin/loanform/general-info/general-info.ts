@@ -184,10 +184,7 @@ try {
       storedCoAppData = {};
     }
 
-    const index =
-      storedCoAppData?.coApplicantIndex ||
-      Number(this.route.snapshot.queryParams['coApplicantIndex']) ||
-      1;
+    const index = Number(this.route.snapshot.queryParams['coApplicantIndex']) ||  storedCoAppData?.coApplicantIndex || 1;
 
     this.stepperService.setCurrentCoApplicantIndex(index);
 
@@ -303,7 +300,7 @@ try {
     }
 
     localStorage.setItem(currentUserKey, this.applicantId);
-    this.stepperService.rebuildSteps();
+    // this.stepperService.rebuildSteps();
 
     // this.getOccupationdetails();
     await this.getOccupationdetailsAsync();
@@ -317,10 +314,8 @@ try {
     }
     this.listenToChanges();
     await this.loadGeneralInfoForBothFlows()
-
-    // if (this.viewOnly) {
-    //   this.activeForm.disable({ emitEvent: false });
-    // }
+this.stepperService.rebuildSteps();
+    
 } catch (error) {
     console.error(
       'Failed to initialize general page',
@@ -535,7 +530,12 @@ try {
     if (this.isCoApplicant) {
       this.patchCoApplicantInfo(finalData);
 
-      this.co_checkassetOnChange(finalData.hasAssets ? 'Yes' : 'No');
+      // this.co_checkassetOnChange(finalData.hasAssets ? 'Yes' : 'No');
+const hasAssets = this.toBoolean(finalData.hasAssets);
+
+this.co_checkassetOnChange(
+  hasAssets ? 'Yes' : 'No'
+);
 
       this.handleCoApplicantOccupationChange(
         finalData.currentOccupationId ||
@@ -770,10 +770,11 @@ try {
 
   //co-applicant radiobutton for assets
   co_checkassetOnChange(value: any) {
-    const isAsset = value === 'Yes';
+    // const isAsset = value === 'Yes';
 
-    this.checkboxasset = value;
-
+    // this.checkboxasset = value;
+const isAsset = this.toBoolean(value);
+ this.checkboxasset = isAsset ? 'Yes' : 'No';
 
     this.coapp_registerForm.get('co_checkedasset')?.setValue(value, {
       emitEvent: false
@@ -785,7 +786,7 @@ try {
       issalaried: this.formSvc.coApplicantState.issalaried
     });
 
-    localStorage.setItem('co_isasset', JSON.stringify(isAsset));
+    // localStorage.setItem('co_isasset', JSON.stringify(isAsset));
   }
 
 
@@ -797,7 +798,7 @@ try {
       selected?.label === 'Employed' || selected?.label === 'Self-employed';
     const isSalaried = selected?.label === 'Employed';
 
-    this.stepperService.rebuildSteps();
+    // this.stepperService.rebuildSteps();
 
     if (this.isCoApplicant) {
       this.formSvc.coApplicantState.isincome = isIncome;
@@ -825,7 +826,7 @@ try {
 
   }
 
-  handleCoApplicantOccupationChange(value: any) {
+  handleCoApplicantOccupationChange1(value: any) {
     const selected = this.selectoccupation.find(o => o.value === value);
 
     const isIncome =
@@ -847,6 +848,71 @@ try {
     });
 
   }
+  handleCoApplicantOccupationChange(value: any): void {
+  const selected = this.selectoccupation.find(
+    option => String(option.value) === String(value)
+  );
+
+  const occupation = (selected?.label || '')
+    .trim()
+    .toLowerCase();
+
+  const isIncome =
+    occupation === 'employed' ||
+    occupation === 'self-employed' ||
+    occupation === 'self employed';
+
+  const isSalaried = occupation === 'employed';
+
+  const assetFormValue = this.coapp_registerForm
+    .get('co_checkedasset')
+    ?.value;
+
+  const isAsset = this.toBoolean(assetFormValue);
+
+  const currentState = {
+    isincome: isIncome,
+    issalaried: isSalaried,
+    isasset: isAsset
+  };
+
+  this.formSvc.coApplicantState = {
+    ...this.formSvc.coApplicantState,
+    ...currentState
+  };
+
+  const stateKey = this.stepperService.getCoApplicantStateKey(
+    // this.applicationId,
+    // this.applicantId
+  );
+
+  localStorage.setItem(
+    stateKey,
+    JSON.stringify(currentState)
+  );
+
+  this.stepperService.setApplicantValues(
+    'coapp',
+    currentState
+  );
+
+  // this.stepperService.rebuildSteps();
+}
+
+private toBoolean(value: unknown): boolean {
+  if (value === true || value === 1) {
+    return true;
+  }
+
+  if (typeof value === 'string') {
+    return ['true', 'yes', '1'].includes(
+      value.trim().toLowerCase()
+    );
+  }
+
+  return false;
+}
+
   get f() {
     return this.registerForm.controls;
   }
@@ -1546,20 +1612,19 @@ try {
       this.formatRelation(data.relationWithApplicant) ||
       '';
 
-    const hasAssets =
+    const hasAssets1 =
       data.hasAssets === true ||
       data.hasAssets === 'true';
-
+const hasAssets = this.toBoolean(data.hasAssets);
 
     this.coapp_registerForm.patchValue({
       occupation: occupation,
       annualincome: annualIncome,
       relationship: relationship,
-
-      co_checkedasset: data.hasAssets ? 'Yes' : 'No'
+      co_checkedasset: hasAssets ? 'Yes' : 'No'
     }, { emitEvent: false });
 
-    this.checkboxasset = data.hasAssets ? 'Yes' : 'No';
+    this.checkboxasset = hasAssets ? 'Yes' : 'No';
 
 
     // important for custom dropdown display
