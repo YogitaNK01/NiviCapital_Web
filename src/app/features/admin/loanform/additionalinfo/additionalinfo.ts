@@ -1173,6 +1173,36 @@ if (
   getStepRoute() {
     return this.isCoApplicant ? 'co-additionalinfo' : 'additionalinfo';
   }
+  private goToNextStep(): void {
+  if (this.isCoApplicant) {
+    const index =
+      Number(
+        this.route.snapshot.queryParamMap.get(
+          'coApplicantIndex'
+        )
+      ) ||
+      Number(
+        this.stepperService.getCurrentCoApplicantIndex()
+      );
+
+    this.router.navigate(
+      ['../co-kyc'],
+      {
+        relativeTo: this.route,
+        queryParams: {
+          coApplicantIndex: index,
+          mode:
+            this.route.snapshot.queryParamMap.get('mode') ||
+            'existing'
+        }
+      }
+    );
+
+    return;
+  }
+
+  this.stepperService.next();
+}
   next() {
     this.submitAttempted = true;
     let formdata = this.additionalinfoForm.getRawValue();
@@ -1208,7 +1238,8 @@ if (
       this.stepperService.markStepCompleted(stepRoute);
       this.stepperService.setStepData(stepRoute, formdata);
 
-      this.stepperService.next();
+      // this.stepperService.next();
+      this.goToNextStep();
       return;
     }
 
@@ -1240,7 +1271,8 @@ if (
           this.stepperService.markStepCompleted(stepRoute);
           this.stepperService.setStepData(stepRoute, formdata);
 
-          this.stepperService.next();
+          // this.stepperService.next();
+          this.goToNextStep();
         }
 
       },

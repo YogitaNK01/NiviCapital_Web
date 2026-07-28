@@ -268,7 +268,7 @@ export class SummaryHelper {
 
     const supportingDoc = {
       label: 'Supporting Document',
-      value: addr.supportingDocumentUrl
+      value: this.getFileName(addr.supportingDocumentUrl,30)
     };
 
 
