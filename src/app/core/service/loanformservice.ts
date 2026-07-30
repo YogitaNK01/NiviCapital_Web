@@ -651,7 +651,13 @@ submitAdditionalInfo(
         
     );
   }
-
+  // show deleted coappliacnt
+   getdeletedCoapp(id1: string): Observable<ApiResponse<any>> {
+    return this.http.get<ApiResponse<any>>(
+      `${this.baseUrl}/v1/los/applications/${id1}/co-applicants/retry`,{}
+        
+    );
+  }
   // *************************pdf *************************
 
 
