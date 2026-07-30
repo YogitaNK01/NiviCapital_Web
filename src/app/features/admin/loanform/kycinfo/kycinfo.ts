@@ -64,6 +64,7 @@ export class Kycinfo {
   passportmissing: boolean = false;
   passportuploadfailure: boolean = false;
   selectedPassportFile: File | null = null;
+passportPreviewUrl = '';
 
   isSummaryLoading = false;
   summaryLoaded = false;
@@ -241,7 +242,7 @@ export class Kycinfo {
   }
 
 
-  onFileChange(result: UploadResult, key: string) {
+  onFileChange1(result: UploadResult, key: string) {
     console.log(!result.file);
     if (!result.file) {
       this.passportmissing = false;
@@ -255,6 +256,31 @@ export class Kycinfo {
     }
   }
 
+  onFileChange(result: UploadResult, key: string) {
+  if (!result.file) {
+    this.passportmissing = false;
+    return;
+  }
+
+  this.selectedPassportFile = result.file;
+if (this.selectedPassportFile) {
+      this.passportmissing = false;
+    }
+    
+  this.passportFileName = result.file.name;
+  this.passportDisplayName = this.getFileName(result.file.name, 30);
+
+  if (this.passportPreviewUrl) {
+    URL.revokeObjectURL(this.passportPreviewUrl);
+  }
+
+  this.passportPreviewUrl =
+    URL.createObjectURL(result.file);
+
+  this.passportmissing = false;
+  this.passportuploadfailure = false;
+  this.cd.detectChanges();
+}
   getFileName(filename: any, maxLength: number = 22): string {
     const fileName = filename || '';
     if (fileName.length <= maxLength) {

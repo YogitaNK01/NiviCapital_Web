@@ -100,6 +100,7 @@ export class Additionalinfo implements OnInit {
 
    isDataLoading = true;
 loadError = '';
+loadedFromSaveExit = false;
 
   constructor(private fb: FormBuilder, public main: Main, private route: ActivatedRoute, private router: Router, private stepperService: Loanstepperservice,
     private formSvc: Loanformservice, private msgBox: Msgboxservice, private storageservice: Storage,private cd: ChangeDetectorRef) { }
@@ -412,6 +413,8 @@ try {
     const normalizedSummary = this.normalizeAdditionalInfo(summarySection);
     const normalizedDraft = this.normalizeAdditionalInfo(draftData);
     const normalizedLocal = this.normalizeAdditionalInfo(parsedLocal);
+
+     this.loadedFromSaveExit = !!normalizedDraft?.items?.length;
 
     let finalData: any = null;
 
@@ -1232,7 +1235,7 @@ if (
     const hasChanged = this.isPayloadChanged(input, this.lastSavedPayload);
 
     const stepRoute = this.getStepRoute();
-    if (!hasChanged) {
+    if (!hasChanged && !this.loadedFromSaveExit) {
       console.log('No changes detected, skipping API');
 
       this.stepperService.markStepCompleted(stepRoute);

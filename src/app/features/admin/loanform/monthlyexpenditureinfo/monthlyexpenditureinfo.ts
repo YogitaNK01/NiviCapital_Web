@@ -128,6 +128,7 @@ export class Monthlyexpenditureinfo {
 
    isDataLoading = true;
 loadError = '';
+loadedFromSaveExit = false;
 
   constructor(private fb: FormBuilder, public main: Main, private route: ActivatedRoute, private msgBox: Msgboxservice, private router: Router, private storageservice: Storage,
     private stepperService: Loanstepperservice, private formSvc: Loanformservice, private cd: ChangeDetectorRef) { }
@@ -466,6 +467,7 @@ try {
     const normalizedDraft = this.normalizeMonthlyExpenditure(draftData);
     const normalizedLocal = this.normalizeMonthlyExpenditure(parsedLocal);
 
+     this.loadedFromSaveExit = !!normalizedDraft?.items?.length;
     let finalData: any = null;
 
     const summaryComplete =
@@ -1570,7 +1572,7 @@ try {
 
     const stepRoute = this.getStepRoute();
 
-    if (!hasChanged) {
+    if (!hasChanged && !this.loadedFromSaveExit) {
       console.log('No changes, skip API');
       this.stepperService.markStepCompleted(stepRoute);
       this.stepperService.setStepData(stepRoute, this.monthlyExpenditureForm.getRawValue());

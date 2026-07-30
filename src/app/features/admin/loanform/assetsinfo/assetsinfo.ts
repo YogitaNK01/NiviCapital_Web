@@ -142,6 +142,8 @@ export class Assetsinfo implements OnInit {
  isDataLoading = true;
 loadError = ''; 
 
+loadedFromSaveExit = false;
+
 constructor(private fb: FormBuilder, public main: Main, private route: ActivatedRoute, private msgBox: Msgboxservice, private storageservice: Storage,
     private stepperService: Loanstepperservice, private formSvc: Loanformservice, private cd: ChangeDetectorRef, private router: Router) { }
 
@@ -463,6 +465,7 @@ try {
     const normalizedDraft = this.normalizeAssets(draftData);
     const normalizedLocal = this.normalizeAssets(parsedLocal);
 
+    this.loadedFromSaveExit = !!normalizedDraft?.items?.length;
 
     let finalData;
     if (this.isFromSummary) {
@@ -2428,7 +2431,7 @@ validDateValidator(control: any) {
 
     const stepRoute = this.getStepRoute();
 
-    if (!hasChanged) {
+    if (!hasChanged && !this.loadedFromSaveExit) {
       console.log("No changes, skip API");
 
       this.stepperService.markStepCompleted(stepRoute);

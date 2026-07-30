@@ -157,6 +157,7 @@ minEndCourseDate: any = null;
 
    isDataLoading = true;
 loadError = '';
+loadedFromSaveExit = false;
 
   constructor(private fb: FormBuilder, private formSvc: Loanformservice, private router: Router, private cd: ChangeDetectorRef,private storageservice: Storage, private stepperService: Loanstepperservice, private msgBox: Msgboxservice, private route: ActivatedRoute, public mainservice: Main) { }
   async ngOnInit() {
@@ -522,6 +523,7 @@ this.stepperService.rebuildSteps();
         (parsedLocal ? this.mapLocalToApiFormat(parsedLocal) : null);
     }
 
+     this.loadedFromSaveExit = !!draftData?.items?.length;
     if (!finalData) {
       this.lastSavedPayload = null;
       return;
@@ -1881,7 +1883,7 @@ const hasAssets = this.toBoolean(data.hasAssets);
 
     const hasChanged = this.isPayloadChanged(currentPayload, this.lastSavedPayload);
 
-    if (!hasChanged) {
+    if (!hasChanged && !this.loadedFromSaveExit) {
       console.log('No changes detected, skipping API call');
 
       if (this.isCoApplicant) {
