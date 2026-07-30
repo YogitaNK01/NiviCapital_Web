@@ -410,11 +410,20 @@ try {
     this.isOtherEducation = selected.some(
       s => s.label.trim().toLowerCase() === 'other');
 
-    // if (this.selectedInstituteLabel.toLowerCase() === 'other') {
-    //   this.isOtherEducation = true;
-    // } else {
-    //   this.isOtherEducation = false;
-    // }
+const titleControl = this.basicform.get('institutetitle');
+
+if (this.isOtherEducation) {
+  titleControl?.setValidators([
+    Validators.required,
+    Validators.minLength(2),
+    Validators.maxLength(100)
+  ]);
+} else {
+  titleControl?.clearValidators();
+  titleControl?.setValue('', { emitEvent: false });
+}
+
+titleControl?.updateValueAndValidity({ emitEvent: false });
 
     this.saveEducationBasic();
 
@@ -425,11 +434,7 @@ try {
     )
 
 
-    // const control = this.group.get('institutename');
-    // control?.setValue(ids);
-    // control?.markAsDirty();
-    // control?.markAsTouched();
-    // control?.updateValueAndValidity();
+   
   }
 
 
@@ -447,19 +452,7 @@ try {
         this.seleactInstitute = [...res];
       });
     }
-    // if (value === 'other') {
-    //   const otherItem = this.seleactInstitute.find(
-    //     item => item.label.toLowerCase() === 'other'
-    //   );
-
-    //   this.filteredInstitutes = otherItem ? [otherItem] : [];
-    //   return;
-    // }
-
-    // //  Normal search
-    // this.filteredInstitutes = this.seleactInstitute.filter(item =>
-    //   item.label.toLowerCase().includes(value)
-    // );
+ 
   }
 
 
@@ -575,9 +568,20 @@ try {
 
     this.isOtherQualification = this.selectedQualificationLabel.toLowerCase().includes('other');
 
-    // this.isOtherEducation = selected.some(
-    //   s => s.label.trim().toLowerCase() === 'other'
-    // )
+const titleControl = this.basicform.get('qualificationtitle');
+
+if (this.isOtherQualification) {
+  titleControl?.setValidators([
+    Validators.required,
+    Validators.minLength(2),
+    Validators.maxLength(100)
+  ]);
+} else {
+  titleControl?.clearValidators();
+  titleControl?.setValue('', { emitEvent: false });
+}
+
+titleControl?.updateValueAndValidity({ emitEvent: false });
 
     if (!this.hasProceededOnce) {
       this.previousEducationId = newId;

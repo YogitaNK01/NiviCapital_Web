@@ -509,7 +509,7 @@ try {
       this.formSvc.monthlyExpenditureData = finalData;
     }
 
-    this.patchMonthlyExpenditure();
+    this.patchMonthlyExpenditure(finalData);
 
     const snapshot = this.buildMonthlyExpPayloadWithApplicantId();
 
@@ -1034,40 +1034,16 @@ try {
     }
   }
 
-  // edit flow = patch from summary
-  async patchFromSummary() {
-    const section = await this.getSummarySection('monthlyExpenditure');
-    const data = this.normalizeMonthlyExpenditure(section);
 
-    if (!data) return;
 
-    if (this.isCoApplicant) {
-      this.formSvc.co_monthlyExpenditureData = data;
-    } else {
-      this.formSvc.monthlyExpenditureData = data;
-    }
+  patchMonthlyExpenditure(inputData?:any) {
 
-    this.patchMonthlyExpenditure();
-
-    const snapshot = this.buildMonthlyExpPayloadWithApplicantId();
-
-    this.lastSavedPayload = snapshot.invalid
-      ? null
-      : {
-        applicantId: snapshot.applicantId,
-        items: snapshot.items
-      };
-
-    this.calculateGrandTotal();
-    this.cd.detectChanges();
-  }
-
-  patchMonthlyExpenditure() {
-    const data = this.isCoApplicant
+   
+    const data =  inputData || (this.isCoApplicant
       ? this.formSvc.co_monthlyExpenditureData
-      : this.formSvc.monthlyExpenditureData;
-    if (!data || !data.items) return;
-
+      : this.formSvc.monthlyExpenditureData);
+    
+ if (!data || !data.items) return;
     const items = data.items;
 
     this.selectedexpenditure = [];

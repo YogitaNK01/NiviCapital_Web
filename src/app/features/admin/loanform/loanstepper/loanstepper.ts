@@ -264,8 +264,25 @@ if (cleanUrl.includes('co-applicantdetails')) {
 
     const flowQualificationId = this.route.snapshot.queryParams['qualificationId'] ||   this.flowQualificationId ||    sub.id;
 
+const currentParams = this.route.snapshot.queryParams;
+   // Summary mode must be decided only by current URL.
+  const isFromSummary =
+    currentParams['fromSummary'] === true ||
+    currentParams['fromSummary'] === 'true';
 
-    // this.router.navigate([], {
+  const queryParams: any = {
+    qualificationlabel: stepKey,
+    qualificationId: flowQualificationId
+  };
+
+   if (isFromSummary) {
+    queryParams.fromSummary = true;
+    queryParams.mode = currentParams['mode'] || 'view';
+    queryParams.section = 'education';
+  } else {
+    // Clear any stale service-level summary state.
+    // this.stepservice.clearSummaryEducationEditFlow();
+  }
 
     this.router.navigate(
       // ['/loanform/educationinfo'],
@@ -273,16 +290,8 @@ if (cleanUrl.includes('co-applicantdetails')) {
       {
 
         // relativeTo: this.route,
-        queryParams: {
-
-          fromSummary: true,
-           mode: 'view',
-           section: 'education',
-          qualificationlabel: stepKey,
-          qualificationId: flowQualificationId
-          // qualificationId: sub.id
-        },
-        // queryParamsHandling: 'merge'
+        queryParams 
+       
       })
       .then(() => {
         this.activeQualificationId = stepKey;

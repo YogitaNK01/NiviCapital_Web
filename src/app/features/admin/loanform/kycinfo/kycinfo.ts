@@ -72,7 +72,9 @@ export class Kycinfo {
   panDisplayName: string = '';
   passportDisplayName: string = '';
   otherDocumentDisplayName: string = '';
-  constructor(private fb: FormBuilder, private stepperService: Loanstepperservice, private cd: ChangeDetectorRef, private loanformservice: Loanformservice, private route: ActivatedRoute) { }
+   isFromSummary = false;
+
+  constructor(private fb: FormBuilder, public stepperService: Loanstepperservice, private cd: ChangeDetectorRef, private loanformservice: Loanformservice, private route: ActivatedRoute) { }
 
   ngOnInit(): void {
     this.stepperService.rebuildSteps();

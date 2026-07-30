@@ -497,7 +497,7 @@ try {
       this.formSvc.aseetsInfoData = finalData;
     }
 
-    this.patchAssetsData(finalData);
+    this.patchAssetsData(finalData,this.isFromSummary);
 
     this.calculateGrandTotal();
 
@@ -1324,77 +1324,7 @@ try {
       });
     });
   }
-  allAssetCatagory1() {
-    this.formSvc.getAllAssets().subscribe((res: any) => {
-      const list = res.data ?? res;
-      console.log("list:", list);
-
-      this.groupIdMap = list.reduce((acc: any, item: any) => {
-        if (!acc[item.name]) {
-          acc[item.name] = [];
-        }
-        acc[item.name].push(item.id);
-        return acc;
-      }, {});
-
-      const uniqueGroups = [...new Set(list.map((s: any) => s.name))];
-
-      const sortedGroups = uniqueGroups.sort(
-        (a: any, b: any) =>
-          this.assetOrder.indexOf(a) - this.assetOrder.indexOf(b)
-      );
-
-      this.assetsCatagories = uniqueGroups.map((group: any) => ({
-        value: group,
-        label: this.formatTitle(group),
-        code: group
-      }));
-
-      this.accordions = uniqueGroups.map((group: any) => ({
-        title: this.accordianTitle(group),
-        alwaysOpen: true,
-        key: this.accordianTitle(group)
-      }));
-      this.assetCodeMap = list.reduce((acc: any, item: any) => {
-        acc[item.code] = item.id;
-        return acc;
-      }, {});
-
-      this.formSvc.selectedAssets('INVESTMENTS').subscribe((invRes: any) => {
-        const invList = invRes.data ?? invRes;
-
-        this.selectInvestments = invList.map((s: any) => ({
-          value: s.id,
-          label: s.name,
-          code: s.code
-        }));
-
-        invList.forEach((item: any) => {
-          this.assetCodeMap[item.code] = item.id;
-        });
-
-        console.log('assetCodeMap after investments:', this.assetCodeMap);
-
-
-        // if (this.formSvc.aseetsInfoData) {
-        //   this.patchAssetsData();
-        //   this.lastSavedPayload = this.buildAssetsPayload();
-        // }
-        const savedData = this.isCoApplicant
-          ? this.formSvc.co_aseetsInfoData
-          : this.formSvc.aseetsInfoData;
-
-        if (savedData) {
-          this.patchAssetsData();
-          this.lastSavedPayload = this.buildAssetsPayloadWithApplicantId();
-        }
-        this.cd.detectChanges();
-        console.log(this.assetCodeMap);
-
-      });
-    });
-
-  }
+ 
 
   accordianTitle(text: string) {
 
@@ -1823,70 +1753,7 @@ validDateValidator(control: any) {
 
     return numeric === 0 ? { zeroNotAllowed: true } : null;
   }
-  //edit flow =patch from summary
-
-  patchFromSummary() {
-    if (!this.formSvc.isEditFlow()) return;
-
-    const data = this.formSvc.getSummarySection('assets');
-    if (!data) return;
-
-    const items = [
-      ...(data.gold || []).map((x: any) => ({
-        assetCategory: 'GOLD',
-        assetType: x.assetType || 'GOLD',
-        valueInr: x.valueInr || 0
-      })),
-
-      ...(data.liquidAssets || []).map((x: any) => ({
-        assetCategory: 'LIQUID_ASSET',
-        assetType: x.assetType || '',
-        amountInr: x.amountInr || 0,
-        type: x.type || ''
-      })),
-
-      ...(data.properties || []).map((x: any) => ({
-        assetCategory: 'PROPERTY',
-        assetType: x.assetType || '',
-        propertyId: x.propertyId || '',
-        ownershipType: x.ownershipType || '',
-        marketValueInr: x.marketValueInr || 0,
-        location: x.location || ''
-      })),
-
-      ...(data.fixedDeposits || []).map((x: any) => ({
-        assetCategory: 'FIXED_DEPOSIT',
-        assetType: x.assetType || '',
-        bankName: x.bankName || '',
-        amountInr: x.amountInr || 0,
-        maturityDate: x.maturityDate || '',
-        description: x.description || ''
-      })),
-
-      ...(data.investments || []).map((x: any) => ({
-        assetCategory: 'INVESTMENT',
-        assetType: x.assetType || '',
-        type: x.type || '',
-        valueInr: x.valueInr || 0
-      })),
-
-      ...(data.otherAssets || []).map((x: any) => ({
-        assetCategory: 'OTHER_ASSET',
-        assetType: x.assetType || '',
-        type: x.type || 'Other',
-        valueInr: x.valueInr || 0
-      }))
-    ];
-
-    const mappedData = {
-      totalAssets: data.totalAssets || 0,
-      items
-    };
-
-    this.formSvc.aseetsInfoData = mappedData;
-    this.patchAssetsData();
-    this.lastSavedPayload = this.buildAssetsPayload();
-  }
+ 
   parseDate(dateStr: string): Date | null {
     if (!dateStr) return null;
 
@@ -1899,7 +1766,7 @@ validDateValidator(control: any) {
     return new Date(+year, +month - 1, +day);
   }
 
-  patchAssetsData(inputData?: any) {
+  patchAssetsData(inputData?: any,fromSummary: boolean = false) {
 
     const data = inputData || (
       this.isCoApplicant
@@ -1942,7 +1809,7 @@ validDateValidator(control: any) {
         this.selectedAssets.push(this.normalizeToAccordionKey('GOLD'));
 
         this.assetsForm.get('gold')?.patchValue({
-          goldvalue: item.valueInr
+          goldvalue: this.formatIndian(item.valueInr?.toString() || '0'),  // (item.valueInr)
         });
       }
 
@@ -1953,9 +1820,9 @@ validDateValidator(control: any) {
         const liquidGroup = this.assetsForm.get('liquidAssets');
 
         if (!liquidGroup?.value.cashinhand) {
-          liquidGroup?.patchValue({ cashinhand: item.valueInr });
+          liquidGroup?.patchValue({ cashinhand:  this.formatIndian(item.valueInr?.toString() || '0')  });
         } else {
-          liquidGroup?.patchValue({ savingbalance: item.valueInr });
+          liquidGroup?.patchValue({ savingbalance:  this.formatIndian(item.valueInr?.toString() || '0') });
         }
       }
 
@@ -1968,7 +1835,7 @@ validDateValidator(control: any) {
         group.patchValue({
           propertytype: item.propertyId || item.propertyType || '',
           ownershiptype: item.ownershipType,
-          marketval: item.valueInr,
+          marketval:  this.formatIndian(item.valueInr?.toString() || '0'),
           location: item.location
         });
 
@@ -1984,8 +1851,8 @@ validDateValidator(control: any) {
         group.patchValue({
           bankname: item.bankId || this.getBankIdByName(item.bankName),
           description: item.description || '',
-          bankamt: item.valueInr,
-          maturitydate: (item.maturityDate)
+          bankamt: this.formatIndian(item.valueInr?.toString() || '0'),
+          maturitydate: fromSummary ?this.parseDate(item.maturityDate):item.maturityDate
         });
 
         this.fixedDeposits.push(group);
@@ -2018,7 +1885,7 @@ validDateValidator(control: any) {
 
         group.patchValue({
           type: formType,
-          value: item.valueInr,
+          value:  this.formatIndian(item.valueInr?.toString() || '0'),
           name: code === 'OTHERS' ? item.assetType : ''
         });
 
@@ -2033,7 +1900,7 @@ validDateValidator(control: any) {
 
         group.patchValue({
           assettype: item.assetType,
-          assetamt: item.valueInr
+          assetamt:  this.formatIndian(item.valueInr?.toString() || '0')
         });
 
         this.otherassets.push(group);
