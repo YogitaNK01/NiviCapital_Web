@@ -552,11 +552,11 @@
     <hr class="footer-hr-class" *ngIf="isCoApplicant" [ngClass]="{'m-0':isCoApplicant}">
     <div class="loan-footerbtns row w-100  d-flex justify-content-between align-items-center" *ngIf="isCoApplicant">
 
-      <div class="col-lg-4 pointer">
+      <div class="col-lg-4 pointer" *ngIf="!stepperService.isCoApplicantStepCompleted('co-summaryinfo')">
         <img src="../assets/images/icons/save.svg">
         <span class="text-dp-3-regular mx-2 blue-text" (click)="saveExit()"> Save and Exit</span>
       </div>
-      <div class="col-lg-4  d-flex justify-content-end">
+      <div class="col-lg-4  d-flex justify-content-end ms-auto">
         <app-buttons type="button" label="Back" class="btn btncustomClass" [outline]="true" (click)="back()">
         </app-buttons>
         <app-buttons type="button" label="Next" class="btn btncustomClass" color="primary" (click)="next()"
