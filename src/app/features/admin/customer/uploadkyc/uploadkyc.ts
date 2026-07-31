@@ -274,24 +274,63 @@ ngAfterViewInit(): void {
       : `kycinfo_main_${this.stepperService.getLoanId()?.[0]}`;
 
     const key = this.getStorageKey();
-    // const localData = localStorage.getItem(key);
-    // const parsedLocal = localData ? JSON.parse(localData) : null;
-    let parsedLocal: any = null;
-    try {
-      const localData = localStorage.getItem(key);
-      parsedLocal = localData ? JSON.parse(localData) : null;
-    }
-    catch { parsedLocal = null; }
-
-    const apiApplicantId = this.getApiApplicantId();
+  
+     const apiApplicantId = this.getApiApplicantId();
     if (!apiApplicantId) { console.error('Applicant ID is missing'); return; }
 
-    const custid_data =
+
+
+let parsedLocal: any = null;
+
+try {
+  const localData = localStorage.getItem(key);
+  parsedLocal = localData ? JSON.parse(localData) : null;
+
+  // Same index may belong to a newly created applicant.
+  // Never use cache belonging to the deleted applicant.
+  if (
+    parsedLocal?.applicantId &&
+    String(parsedLocal.applicantId) !== String(apiApplicantId)
+  ) {
+    console.warn('Removing KYC cache of previous applicant', {
+      cachedApplicantId: parsedLocal.applicantId,
+      currentApplicantId: apiApplicantId,
+      key
+    });
+
+    localStorage.removeItem(key);
+    parsedLocal = null;
+  }
+} catch {
+  localStorage.removeItem(key);
+  parsedLocal = null;
+}
+
+
+   
+    const storedCoApp = this.isCoApplicant
+  ? this.getCurrentCoApplicantFromList()
+  : null;
+
+const custid_data = this.isCoApplicant
+  ? (
+      storedCoApp?.custId ||
+      storedCoApp?.cifId ||
+      storedCoApp?.customerId ||
       parsedLocal?.custId ||
       this.co_userid?.custId ||
+      this.co_userid?.cifId ||
+      this.co_userid?.customerId ||
+      ''
+    )
+  : (
+      parsedLocal?.custId ||
       this.userid?.custId ||
+      this.userid?.cifId ||
+      this.userid?.customerId ||
       this.custId ||
-      '';
+      ''
+    );
 
     if (!apiApplicantId) {
       return;
@@ -299,10 +338,7 @@ ngAfterViewInit(): void {
 
 
 
-    // const [draftData, summaryApplicant] = await Promise.all([
-    //   this.getSavedKycInfo(apiApplicantId, custid_data),
-    //   this.getCurrentApplicantFromSummary()
-    // ]);
+  
     const summaryApplicant = await this.getCurrentApplicantFromSummary();
     this.custId =
       summaryApplicant?.customerId ||
@@ -316,8 +352,13 @@ ngAfterViewInit(): void {
     this.lastName = summaryApplicant?.lastName ||
       '';
 
-    const draftData = await this.getSavedKycInfo(apiApplicantId, this.custId);
-
+    const draftData1 = await this.getSavedKycInfo(apiApplicantId, this.custId);
+const draftData = this.custId
+  ? await this.getSavedKycInfo(
+      apiApplicantId,
+      this.custId
+    )
+  : null;
     const summarySection =
       summaryApplicant?.kyc ||
       summaryApplicant?.kycInfo ||
@@ -387,7 +428,7 @@ ngAfterViewInit(): void {
     // Main applicant + fresh flow only
     return !this.isCoApplicant && !this.editMode;
   }
-  getCurrentCoApplicantFromList() {
+  getCurrentCoApplicantFromList1() {
     const mainApplicantId = this.stepperService.getLoanId()?.[0];
     const index = this.stepperService.getCurrentCoApplicantIndex();
 
@@ -396,6 +437,24 @@ ngAfterViewInit(): void {
 
     return list.find((x: any) => Number(x.index) === Number(index));
   }
+  getCurrentCoApplicantFromList() {
+  const index =
+    Number(
+      this.route.snapshot.queryParams['coApplicantIndex']
+    ) ||
+    this.stepperService.getCurrentCoApplicantIndex();
+
+  const saved = localStorage.getItem(
+    `coApplicants_${this.applicationId}`
+  );
+
+  const list = saved ? JSON.parse(saved) : [];
+
+  return list.find(
+    (item: any) =>
+      Number(item.index) === Number(index)
+  );
+}
 
   getApiApplicantId() {
     if (!this.isCoApplicant) {
@@ -1018,10 +1077,12 @@ ngAfterViewInit(): void {
     }
   }
   private getCurrentCoApplicantStoredData(): any {
-    const index =
-      this.stepperService.getCurrentCoApplicantIndex() ||
-      Number(this.route.snapshot.queryParams['coApplicantIndex']) ||
-      1;
+   const index =
+  Number(
+    this.route.snapshot.queryParams['coApplicantIndex']
+  ) ||
+  this.stepperService.getCurrentCoApplicantIndex() ||
+  1;
 
     const key = `coApplicants_${this.applicationId}`;
     const saved = localStorage.getItem(key);
@@ -1101,25 +1162,25 @@ ngAfterViewInit(): void {
       : null;
 
     const custId = this.editMode
-      ? this.editUserData.custId
-      : this.isCoApplicant
-        ? (
-          this.co_userid?.custId ||
-          this.co_userid?.cifId ||
-          this.co_userid?.customerId ||
-          storedCoApp?.custId ||
-          storedCoApp?.cifId ||
-          storedCoApp?.customerId ||
-          this.custId ||
-          ''
-        )
-        : (
-          this.userid?.custId ||
-          this.userid?.cifId ||
-          this.userid?.customerId ||
-          this.custId ||
-          ''
-        );
+  ? this.editUserData.custId
+  : this.isCoApplicant
+    ? (
+      storedCoApp?.custId ||
+      storedCoApp?.cifId ||
+      storedCoApp?.customerId ||
+      this.custId ||
+      this.co_userid?.custId ||
+      this.co_userid?.cifId ||
+      this.co_userid?.customerId ||
+      ''
+    )
+    : (
+      this.userid?.custId ||
+      this.userid?.cifId ||
+      this.userid?.customerId ||
+      this.custId ||
+      ''
+    );
 
     const firstName = this.editMode
       ? this.editUserData.fname
@@ -1304,27 +1365,26 @@ private createKycLocalCache(input: any): any {
     const storedCoApp = this.isCoApplicant
       ? this.getCurrentCoApplicantStoredData()
       : null;
-
-    const custId = this.editMode
-      ? this.editUserData?.custId
-      : this.isCoApplicant
-        ? (
-          this.co_userid?.custId ||
-          this.co_userid?.cifId ||
-          this.co_userid?.customerId ||
-          storedCoApp?.custId ||
-          storedCoApp?.cifId ||
-          storedCoApp?.customerId ||
-          this.custId ||
-          ''
-        )
-        : (
-          this.userid?.custId ||
-          this.userid?.cifId ||
-          this.userid?.customerId ||
-          this.custId ||
-          ''
-        );
+const custId = this.editMode
+  ? this.editUserData.custId
+  : this.isCoApplicant
+    ? (
+      storedCoApp?.custId ||
+      storedCoApp?.cifId ||
+      storedCoApp?.customerId ||
+      this.custId ||
+      this.co_userid?.custId ||
+      this.co_userid?.cifId ||
+      this.co_userid?.customerId ||
+      ''
+    )
+    : (
+      this.userid?.custId ||
+      this.userid?.cifId ||
+      this.userid?.customerId ||
+      this.custId ||
+      ''
+    );
 
     this.msgBox.open({
       title: 'Are you sure you want to exit?',
@@ -1711,6 +1771,19 @@ private createKycLocalCache(input: any): any {
                 localOnly: false
               };
             };
+
+            if (
+  data?.applicantId &&
+  String(data.applicantId) !== String(applicantId)
+) {
+  console.warn('Ignoring KYC returned for another applicant', {
+    requestedApplicantId: applicantId,
+    returnedApplicantId: data.applicantId
+  });
+
+  resolve(null);
+  return;
+}
 
             data = {
               ...data,
@@ -2142,58 +2215,63 @@ private clearKycFormOnRefresh(): void {
         Number(this.route.snapshot.queryParams['coApplicantIndex'] ) ||
         this.stepperService.getCurrentCoApplicantIndex() ;
 
-      // return (
-      //   // Best match: applicant ID
-      //   applicants.find(
-      //     (applicant: any) =>
-      //       coApplicantId &&
-      //       String(applicant?.applicantId) ===
-      //       String(coApplicantId)
-      //   ) ||
+      
 
-      //   // Fallback: co-applicant index
-      //   applicants.find((applicant: any) => {
-      //     const applicantType =
-      //       String(applicant?.applicantType || '').toUpperCase();
 
-      //     const indexFromType = Number(
-      //       applicantType.match(/\d+/)?.[0]
-      //     );
+// return (
+//   // First match the co-applicant currently shown in the URL
+//   applicants.find((applicant: any) => {
+//     const applicantType =
+//       String(applicant?.applicantType || '').toUpperCase();
 
-      //     return (
-      //       applicantType.startsWith('CO_APPLICANT') &&
-      //       indexFromType === Number(coApplicantIndex)
-      //     );
-      //   }) ||
+//     const indexFromType = Number(
+//       applicantType.match(/\d+/)?.[0]
+//     );
 
-      //   null
-      // );
+//     return (
+//       applicantType.startsWith('CO_APPLICANT') &&
+//       indexFromType === Number(coApplicantIndex)
+//     );
+//   }) ||
 
-    
+//   // Fallback to applicant ID
+//   applicants.find(
+//     (applicant: any) =>
+//       coApplicantId &&
+//       String(applicant?.applicantId) ===
+//       String(coApplicantId)
+//   ) ||
+
+//   null
+// );
 
 return (
-  // First match the co-applicant currently shown in the URL
-  applicants.find((applicant: any) => {
-    const applicantType =
-      String(applicant?.applicantType || '').toUpperCase();
-
-    const indexFromType = Number(
-      applicantType.match(/\d+/)?.[0]
-    );
-
-    return (
-      applicantType.startsWith('CO_APPLICANT') &&
-      indexFromType === Number(coApplicantIndex)
-    );
-  }) ||
-
-  // Fallback to applicant ID
+  // Applicant ID is the unique owner of KYC data
   applicants.find(
     (applicant: any) =>
       coApplicantId &&
       String(applicant?.applicantId) ===
-      String(coApplicantId)
+        String(coApplicantId)
   ) ||
+
+  // Use index only when there is no applicant ID
+  (!coApplicantId
+    ? applicants.find((applicant: any) => {
+        const applicantType =
+          String(
+            applicant?.applicantType || ''
+          ).toUpperCase();
+
+        const indexFromType = Number(
+          applicantType.match(/\d+/)?.[0]
+        );
+
+        return (
+          applicantType.startsWith('CO_APPLICANT') &&
+          indexFromType === Number(coApplicantIndex)
+        );
+      })
+    : null) ||
 
   null
 );

@@ -1227,6 +1227,7 @@ export class Basicinfo {
   }
   next() {
     console.log('FNAME =>', this.registerForm.get('fname')?.value);
+ const currentMode =this.route.snapshot.queryParamMap.get('mode') || 'existing';
 
     if (this.registerForm.invalid) {
       this.registerForm.markAllAsTouched();
@@ -1366,7 +1367,7 @@ export class Basicinfo {
         this.router.navigate([], {
           relativeTo: this.route,
           queryParams: {
-            mode: 'existing',
+            mode: currentMode,
             coApplicantIndex: this.stepperService.getCurrentCoApplicantIndex(),
 
           },

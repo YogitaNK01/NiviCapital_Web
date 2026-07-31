@@ -136,9 +136,10 @@ try {
     }
 
     const index =
-      storedCoAppData?.coApplicantIndex ||
-      Number(this.route.snapshot.queryParams['coApplicantIndex']) ||
-      1;
+  Number(this.route.snapshot.queryParams['coApplicantIndex']) ||
+  Number(storedCoAppData?.coApplicantIndex) ||
+  this.stepperService.getCurrentCoApplicantIndex() ||
+  1;
 
     this.stepperService.setCurrentCoApplicantIndex(index);
 
@@ -959,6 +960,27 @@ if (
         data.gender == "F" ? "Female" : "Third Gender";
     const genderValue = this.normalizeGenderToUi(data.gender);
 
+    console.log('fatherNoMiddleName', data.fatherNoMiddleName);
+
+    const noSpouseMiddleName = 
+  !data.spouseMiddleName || data.spouseMiddleName.trim() === '' ;
+
+const noFatherMiddleName =
+  !data.fatherMiddleName || data.fatherMiddleName.trim() === '';
+
+const noMotherMiddleName =
+  !data.motherMiddleName || data.motherMiddleName.trim() === '';
+
+this.additionalinfoForm.patchValue({
+  spouseNoMiddleName: noSpouseMiddleName,
+  fatherNoMiddleName: noFatherMiddleName,
+  motherNoMiddleName: noMotherMiddleName
+});
+
+this.isspousemiddlename = noSpouseMiddleName;
+this.isfathermiddlename = noFatherMiddleName;
+this.ismothermiddlename = noMotherMiddleName;
+
     this.additionalinfoForm.patchValue({
 
       uploadphoto: this.profilePhotoUrl || '',
@@ -969,15 +991,15 @@ if (
       s_fname: data.spouseFirstName || '',
       s_mname: data.spouseMiddleName || '',
       s_lname: data.spouseLastName || '',
-      spouseNoMiddleName: !!data.spouseNoMiddleName,
+      spouseNoMiddleName: noSpouseMiddleName, //!data.spouseNoMiddleName,
       f_fname: data.fatherFirstName || '',
       f_mname: data.fatherMiddleName || '',
       f_lname: data.fatherLastName || '',
-      fatherNoMiddleName: !!data.fatherNoMiddleName,
+      fatherNoMiddleName: noFatherMiddleName,
       m_fname: data.motherFirstName || '',
       m_mname: data.motherMiddleName || '',
       m_lname: data.motherLastName || '',
-      motherNoMiddleName: !!data.motherNoMiddleName,
+      motherNoMiddleName: noMotherMiddleName, //!data.motherNoMiddleName,
 
 
 
@@ -993,7 +1015,7 @@ if (
 
     this.restoreMiddleNameState();
 
-  }
+}
 
   private restoreMiddleNameState() {
     const form = this.additionalinfoForm;
@@ -1002,16 +1024,17 @@ if (
       form.get('m_mname')?.reset();
       form.get('m_mname')?.disable();
     }
+     else {    form.get('m_mname')?.enable({ emitEvent: false });  }
 
     if (form.get('fatherNoMiddleName')?.value) {
       form.get('f_mname')?.reset();
       form.get('f_mname')?.disable();
-    }
+    }else {    form.get('f_mname')?.enable({ emitEvent: false });  }
 
     if (form.get('spouseNoMiddleName')?.value) {
       form.get('s_mname')?.reset();
       form.get('s_mname')?.disable();
-    }
+    } else {  form.get('s_mname')?.enable({ emitEvent: false });}
   }
 
   onMotherNoMiddleNameChange(checked: boolean) {
@@ -1176,17 +1199,32 @@ if (
   getStepRoute() {
     return this.isCoApplicant ? 'co-additionalinfo' : 'additionalinfo';
   }
-  private goToNextStep(): void {
+  private goToNextStep1(): void {
   if (this.isCoApplicant) {
-    const index =
+
+    let storedCoAppData: any = {};
+
+    try {
+      storedCoAppData = JSON.parse(
+        sessionStorage.getItem('coAppIds') || '{}'
+      );
+    } catch {
+      storedCoAppData = {};
+    }
+
+     const index =
       Number(
         this.route.snapshot.queryParamMap.get(
           'coApplicantIndex'
         )
       ) ||
+      Number(storedCoAppData?.coApplicantIndex) ||
       Number(
         this.stepperService.getCurrentCoApplicantIndex()
-      );
+      ) ||
+      1;
+
+    this.stepperService.setCurrentCoApplicantIndex(index);
 
     this.router.navigate(
       ['../co-kyc'],
@@ -1197,6 +1235,36 @@ if (
           mode:
             this.route.snapshot.queryParamMap.get('mode') ||
             'existing'
+        }
+      }
+    );
+
+    return;
+  }
+
+  this.stepperService.next();
+}
+
+private goToNextStep(): void {
+   const currentMode = this.route.snapshot.queryParamMap.get('mode') || 'existing';
+  if (this.isCoApplicant) {
+    const index =
+      Number(
+        this.route.snapshot.queryParamMap.get(
+          'coApplicantIndex'
+        )
+      ) ||
+      this.stepperService.getCurrentCoApplicantIndex();
+
+    this.stepperService.setCurrentCoApplicantIndex(index);
+
+    this.router.navigate(
+      ['../co-kyc'],
+      {
+        relativeTo: this.route,
+        queryParams: {
+          coApplicantIndex: index,
+          mode: currentMode
         }
       }
     );

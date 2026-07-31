@@ -211,19 +211,33 @@ export class Coappsummary {
       return;
     }
 
-    const key = `coApplicants_${mainApplicantId}`;
+    const key = `coApplicants_${this.applicantId}`;
     const saved = localStorage.getItem(key);
     const coApplicants = saved ? JSON.parse(saved) : [];
 
     const currentIndex = this.getCurrentCoApplicantIndex();
 
-    const currentCoapp = coApplicants.find(
+    const currentCoapp1 = coApplicants.find(
       (x: any) =>
         Number(x.index) === Number(currentIndex) ||
         (this.applicantId && String(x.applicantId) === String(this.applicantId))
     );
 
-    this.isSummarySubmitted = !!currentCoapp?.completed;
+    const currentCoapp = this.applicantId
+  ? coApplicants.find(
+      (x: any) =>
+        String(x.applicantId) === String(this.applicantId)
+    )
+  : coApplicants.find(
+      (x: any) =>
+        Number(x.index) === Number(currentIndex)
+    );
+
+    // this.isSummarySubmitted = !!currentCoapp?.completed;
+    this.isSummarySubmitted =
+  currentCoapp?.status === 'COMPLETED' ||
+  currentCoapp?.status === 'SUBMITTED' ||
+  currentCoapp?.completed === true;
   }
 
   get isSubmitDisabled(): boolean {
@@ -449,13 +463,13 @@ private resetSummaryVisibility(): void {
           this.updateSubmittedCoApplicantInLocalStorage();
           this.isSummarySubmitted = true;
           this.isSubmittingSummary = false;
-          this.formSvc.getAllCoapp(this.applicationId).subscribe({
+          // this.formSvc.getAllCoapp(this.applicationId).subscribe({
 
-            next: (res: any) => {
-              this.router.navigate(['/loanform/co-applicantdetails']);
-            }, error: (err) => { }
-          });
-          // this.router.navigate(['/loanform/co-applicantdetails']);
+          //   next: (res: any) => {
+          //     this.router.navigate(['/loanform/co-applicantdetails']);
+          //   }, error: (err) => { }
+          // });
+          this.router.navigate(['/loanform/co-applicantdetails']);
         }
       },
 
@@ -474,9 +488,14 @@ private resetSummaryVisibility(): void {
     const currentIndex = this.stepperService.getCurrentCoApplicantIndex();
 
     list = list.map((item: any) => {
-      const isSameCoapp =
+      const isSameCoapp1 =
         Number(item.index) === Number(currentIndex) ||
         item.applicantId === this.applicantId;
+
+        const isSameCoapp = this.applicantId
+  ? String(item.applicantId) === String(this.applicantId)
+  : Number(item.index) === Number(currentIndex);
+``
 
       if (!isSameCoapp) {
         return item;
@@ -509,7 +528,7 @@ private resetSummaryVisibility(): void {
 
     const coApplicantIndex = this.getCurrentCoApplicantIndex();
 
-    const key = `coApplicants_${mainApplicantId}`;
+    const key = `coApplicants_${this.applicationId}`;
     const saved = localStorage.getItem(key);
     let coApplicants = saved ? JSON.parse(saved) : [];
 
@@ -525,11 +544,26 @@ private resetSummaryVisibility(): void {
       completed: true
     };
 
+    // if (existingIndex >= 0) {
+    //   coApplicants[existingIndex] = coappObj;
+    // } else {
+    //   coApplicants.push(coappObj);
+    // }
+
     if (existingIndex >= 0) {
-      coApplicants[existingIndex] = coappObj;
-    } else {
-      coApplicants.push(coappObj);
-    }
+  coApplicants[existingIndex] = {
+    ...coApplicants[existingIndex],
+    ...coappObj,
+    status: 'COMPLETED',
+    uiStatus: 'COMPLETED'
+  };
+} else {
+  coApplicants.push({
+    ...coappObj,
+    status: 'COMPLETED',
+    uiStatus: 'COMPLETED'
+  });
+}
 
     coApplicants = coApplicants.sort((a: any, b: any) => Number(a.index) - Number(b.index));
 

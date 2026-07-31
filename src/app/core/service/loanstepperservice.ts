@@ -1103,11 +1103,22 @@ getStepData1(step: string): any {
     route === 'educationDetails' ||
     route === 'educationinfo';
 
-     if (!isEducationRoute) {
-    return {};
-  }
+  //    if (!isEducationRoute) {
+  //   return {};
+  // }
 
   const cleanParams: any = {};
+
+  // Preserve selected co-applicant across all co-applicant steps
+  if (this.stepperType === 'CO_APPLICANT') {
+    cleanParams.coApplicantIndex =
+      Number(currentParams['coApplicantIndex']) ||
+      this.getCurrentCoApplicantIndex();
+
+    cleanParams.mode =
+      currentParams['mode'] ||
+      'existing';
+  }
 
   // ✅ Keep summary edit params only if user came from summary
   const isFromSummary =
@@ -1120,12 +1131,10 @@ getStepData1(step: string): any {
     if (currentParams['mode']) {
       cleanParams.mode = currentParams['mode'];
     }
-    // cleanParams.mode =
-    //   currentParams['mode'] || 'view';
-    // cleanParams.section = 'education';
+  
   }
 
-  // ✅ Keep education params only for education pages
+  // Keep education params only for education pages
   if (isEducationRoute) {
     if (currentParams['qualificationlabel']) {
       cleanParams.qualificationlabel = currentParams['qualificationlabel'];

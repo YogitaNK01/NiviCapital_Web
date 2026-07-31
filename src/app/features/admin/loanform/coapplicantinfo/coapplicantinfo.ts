@@ -133,9 +133,12 @@ export class Coapplicantinfo implements OnInit {
   private getCoApplicantListKey(): string {
     return `coApplicants_${this.applicationId}`;
   }
-  isPhoneValid(): boolean {
-    return this.prefillPhone && this.prefillPhone.toString().length === 10;
-  }
+
+isPhoneValid(): boolean {
+  const phone = String(this.prefillPhone || '').trim();
+
+  return /^[6-9][0-9]{9}$/.test(phone);
+}
 
 
 

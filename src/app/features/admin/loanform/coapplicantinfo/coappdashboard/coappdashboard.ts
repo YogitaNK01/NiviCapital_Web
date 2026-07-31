@@ -67,7 +67,7 @@ export class Coappdashboard implements OnInit {
     this.custName = Allids[2];
     this.arnid = Allids[3];
 
-    this.getAllcoapplicants();
+    
     if (!this.applicantId || !this.applicationId) {
       console.error('Loan context missing after refresh');
       return;
@@ -104,8 +104,8 @@ export class Coappdashboard implements OnInit {
       }
     }
 
-    this.loadCoApplicants();
-
+    // this.loadCoApplicants();
+this.getAllcoapplicants();
     this.loadRemovedCoApplicants();
 
 
@@ -123,6 +123,17 @@ export class Coappdashboard implements OnInit {
 
 
     const nextIndex = this.getNextAvailableCoApplicantIndex();
+
+    const removedAtSameIndex = this.removedCoApplicants.find(
+  item => Number(item.index) === Number(nextIndex)
+);
+
+if (removedAtSameIndex?.applicantId) {
+  localStorage.removeItem(
+    `kycinfo_coapp_${this.applicationId}_${removedAtSameIndex.applicantId}`
+  );
+}
+
     sessionStorage.removeItem('coAppIds');
     sessionStorage.removeItem('coapp_cifdetails');
     sessionStorage.removeItem('pendingCoAppContext');
@@ -155,9 +166,9 @@ export class Coappdashboard implements OnInit {
 
     this.loanfornservice.coappStep = 1;
 
-localStorage.removeItem(
-  `coapp_mobile_submitted_${this.applicantId}_${nextIndex}`
-);
+    localStorage.removeItem(
+      `coapp_mobile_submitted_${this.applicantId}_${nextIndex}`
+    );
 
     this.router.navigate(
       ['coapplicantinfo'],
@@ -190,6 +201,7 @@ localStorage.removeItem(
   //get all applicants
 
   getAllcoapplicants() {
+    this.coApplicants = [];
     this.loanfornservice.getAllCoapp(this.applicationId).subscribe({
       next: (res: any) => {
         console.log('Co-applicants API response:', res);
@@ -256,7 +268,7 @@ localStorage.removeItem(
       }
     });
   }
- 
+
   loadCoApplicants() {
     const saved = localStorage.getItem(this.getCoappListKey());
     this.coApplicants = saved ? JSON.parse(saved) : [];
@@ -324,13 +336,13 @@ localStorage.removeItem(
 
     if (!current) return;
 
-     // ✅ Existing coapp should open stepper, not mobile screen
-  this.loanfornservice.coappStep = 2;
+    // ✅ Existing coapp should open stepper, not mobile screen
+    this.loanfornservice.coappStep = 2;
 
-  localStorage.setItem(
-    `coapp_mobile_submitted_${this.applicantId}_${current.index}`,
-    'true'
-  );
+    localStorage.setItem(
+      `coapp_mobile_submitted_${this.applicantId}_${current.index}`,
+      'true'
+    );
 
     sessionStorage.removeItem('pendingCoAppContext');
 
@@ -377,43 +389,43 @@ localStorage.removeItem(
         if (res.status === "success") {
           this.coappSummaryData = res.data;
 
-           // Calculate route only after current co-applicant data is loaded.
-      const resumeRoute = isCompletedCoapp
-        ? 'co-summaryinfo'
-        : this.getResumeRouteForCoApplicant(current);
+          // Calculate route only after current co-applicant data is loaded.
+          const resumeRoute = isCompletedCoapp
+            ? 'co-summaryinfo'
+            : this.getResumeRouteForCoApplicant(current);
 
-      this.router.navigate(
-        ['coapplicantinfo', resumeRoute],
-        {
-          relativeTo: this.route,
-          queryParams: {
-            coApplicantIndex: current.index,
-            mode: isCompletedCoapp ? 'view' : 'existing',
-            fromSummary: isCompletedCoapp ? true : null
-          }
-        }
-      );
+          this.router.navigate(
+            ['coapplicantinfo', resumeRoute],
+            {
+              relativeTo: this.route,
+              queryParams: {
+                coApplicantIndex: current.index,
+                mode: isCompletedCoapp ? 'view' : 'existing',
+                fromSummary: isCompletedCoapp ? true : null
+              }
+            }
+          );
         }
       },
       error: (err: any) => {
         console.log(err);
 
-         // Safe fallback if summary API fails.
-      const resumeRoute = isCompletedCoapp
-        ? 'co-summaryinfo'
-        : 'co-generalinfo';
+        // Safe fallback if summary API fails.
+        const resumeRoute = isCompletedCoapp
+          ? 'co-summaryinfo'
+          : 'co-generalinfo';
 
-      this.router.navigate(
-        ['coapplicantinfo', resumeRoute],
-        {
-          relativeTo: this.route,
-          queryParams: {
-            coApplicantIndex: current.index,
-            mode: isCompletedCoapp ? 'view' : 'existing',
-            fromSummary: isCompletedCoapp ? true : null
+        this.router.navigate(
+          ['coapplicantinfo', resumeRoute],
+          {
+            relativeTo: this.route,
+            queryParams: {
+              coApplicantIndex: current.index,
+              mode: isCompletedCoapp ? 'view' : 'existing',
+              fromSummary: isCompletedCoapp ? true : null
+            }
           }
-        }
-      );
+        );
       }
     })
 
@@ -460,7 +472,7 @@ localStorage.removeItem(
 
     return firstIncomplete || 'co-summaryinfo';
   }
-    private toBoolean(value: unknown): boolean {
+  private toBoolean(value: unknown): boolean {
     if (value === true || value === 1) {
       return true;
     }
@@ -683,7 +695,7 @@ localStorage.removeItem(
 
 
             // this.clearCoApplicantLocalData(index, current.applicantId); not clearing data as want to retrive
-
+            this.getAllcoapplicants();
             this.loadCoApplicants();
             this.loadRemovedCoApplicants();
             this.updateCoApplicantStepStatus();
@@ -705,11 +717,23 @@ localStorage.removeItem(
   }
   loadRemovedCoApplicants() {
     const saved = localStorage.getItem(this.getRemovedCoappListKey());
-    this.removedCoApplicants = saved ? JSON.parse(saved) : [];
+
+    this.loanfornservice.getdeletedCoapp(this.applicationId).subscribe({
+      next: (res) => { 
+        console.log("resposne",res.data)
+
+          this.removedCoApplicants = res.data;
 
     this.removedCoApplicants = this.removedCoApplicants.sort(
       (a: any, b: any) => Number(a.index) - Number(b.index)
     );
+      },
+      error: (err) => {
+         console.log("resposne error",err)
+       }
+
+    })
+  
   }
 
   private saveRemovedCoApplicants() {
@@ -762,9 +786,8 @@ localStorage.removeItem(
             );
 
             this.saveRemovedCoApplicants();
-
-            this.loadCoApplicants();
             this.getAllcoapplicants();
+            this.loadCoApplicants();
             this.loadRemovedCoApplicants();
             this.updateCoApplicantStepStatus();
             this.cd.detectChanges();
