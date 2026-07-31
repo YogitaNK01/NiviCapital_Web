@@ -28,7 +28,7 @@ export class TableData {
       ncId: item.ncId ?? "-",
       loantype: item.loanType ?? "-",
       disbursedAmount: item.disbursedAmount ?? "-",
-      outstandingBalance: item.outstandingBalance ?? "-",
+      outstandingBalance: "-",
       loanStatus: item.loanStatus ?? "-",
       // Id: item.id ?? "-"
 
