@@ -208,7 +208,7 @@
 
                     </div>
 
-                    <app-checkbox [checked]="isspousemiddlename" [indeterminate]="false" 
+                    <app-checkbox [checked]="isspousemiddlename" [indeterminate]="false" formControlName="spouseNoMiddleName"
                         label="I don’t have middle name" (checkedChange)="onmiddlename($event)" [ngClass]="{'disabled-div' : isViewMode}">
                     </app-checkbox>
                     <div class="text-danger mt-1" *ngIf="
@@ -291,7 +291,7 @@
 
                     </div>
 
-                    <app-checkbox [checked]="isfathermiddlename" [indeterminate]="false"
+                    <app-checkbox [checked]="isfathermiddlename" [indeterminate]="false" formControlName="fatherNoMiddleName"
                         label="I don’t have middle name" (checkedChange)="onfathermiddlename($event)" [ngClass]="{'disabled-div' : isViewMode}">
                     </app-checkbox>
                     <div class="text-danger mt-1" *ngIf="!isfathermiddlename && submitAttempted && !f['f_mname'].value">
@@ -371,7 +371,7 @@
                         </div>
 
                     </div>
-                    <app-checkbox [checked]="ismothermiddlename" [indeterminate]="false"
+                    <app-checkbox [checked]="ismothermiddlename" [indeterminate]="false" formControlName="motherNoMiddleName"
                         label="I don’t have middle name" (checkedChange)="onmothermiddlename($event)" [ngClass]="{'disabled-div' : isViewMode}">
                     </app-checkbox>
                     <div class="text-danger mt-1" *ngIf="!ismothermiddlename && submitAttempted && !f['m_mname'].value">
