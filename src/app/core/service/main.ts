@@ -43,8 +43,8 @@ interface CustomerFlowState {  phone: string;
   providedIn: 'root'
 })
 export class Main {
-  // private baseUrl = environment.apiBaseUrl;
-  private baseUrl = "/nivicapsit/api";
+  private baseUrl = environment.apiBaseUrl;
+  // private baseUrl = "/nivicapsit/api";
   private kycSubject = new BehaviorSubject<any>(this.getFromSession());
   kyc$ = this.kycSubject.asObservable();
 

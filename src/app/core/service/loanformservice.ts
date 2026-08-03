@@ -33,8 +33,8 @@ interface OptionItem {
 export class Loanformservice {
 
   form!: FormGroup;
-  // private baseUrl = environment.apiBaseUrl;
-  private baseUrl = "/nivicapsit/api";
+  private baseUrl = environment.apiBaseUrl;
+  // private baseUrl = "/nivicapsit/api";
 
   kycdetailsID: any;
 

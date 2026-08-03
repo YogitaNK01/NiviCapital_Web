@@ -10,6 +10,8 @@ import {
 import { catchError, filter, switchMap, take } from 'rxjs/operators';
 import { BehaviorSubject, throwError } from 'rxjs';
 import { Router } from '@angular/router';
+import { environment } from '../../../environments/environment';
+
 
 
 @Injectable()
@@ -17,7 +19,7 @@ import { Router } from '@angular/router';
 export class AuthInterceptor implements HttpInterceptor {
   private isRefreshing = false;
   private refreshTokenSubject = new BehaviorSubject<any>(null);
-
+  private baseUrl = environment.apiBaseUrl;
   constructor(private router: Router, private http: HttpClient,) { }
   intercept(req: HttpRequest<any>, next: HttpHandler) {
     const request = req.clone({ withCredentials: true });
@@ -41,8 +43,8 @@ export class AuthInterceptor implements HttpInterceptor {
         }
         this.isRefreshing = true;
         this.refreshTokenSubject.next(null);
-
-        return this.http.post('/nivicapsit/api/auth/refresh',
+        let url = `${this.baseUrl}/auth/refresh`;
+        return this.http.post(url,
           {}, { withCredentials: true }).pipe(
             switchMap((res: any) => {
               console.log('Refresh Success');
