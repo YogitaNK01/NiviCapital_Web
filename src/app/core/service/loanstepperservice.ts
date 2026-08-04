@@ -482,14 +482,15 @@ hydrateMainProgressFromSummary(summary: any): void {
         key = 'othersdiploma';
 
       }
-      else if (name.includes('undergraduate')) {
-        key = 'ug';
-
-      }
       else if (name.includes('postgraduate')) {
         key = 'pg';
 
       }
+      else if (name.includes('undergraduate')) {
+        key = 'ug';
+
+      }
+      
       else if (name.includes('10th')) {
         key = '10th';
       } else if (name.includes('12th')) {

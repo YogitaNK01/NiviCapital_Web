@@ -138,111 +138,111 @@ export class Edudetails {
 
   constructor(private fb: FormBuilder, private stepperService: Loanstepperservice, private cd: ChangeDetectorRef, private formSvc: Loanformservice, private msgBox: Msgboxservice, private msgbox: Msgboxservice,
     private route: ActivatedRoute, private router: Router, private storageservice: Storage) { }
-   async ngOnInit() {
+  async ngOnInit() {
 
- this.isDataLoading = true;
-  this.loadError = '';
-try {
-    let Allids = this.stepperService.getLoanId();
+    this.isDataLoading = true;
+    this.loadError = '';
+    try {
+      let Allids = this.stepperService.getLoanId();
 
-    this.applicantId = Allids[0];
-    this.applicationId = Allids[1];
-    this.custName = Allids[2];
-    this.custARN = Allids[3];
-
-
-
-    this.selectedcoursetype = localStorage.getItem('coursetypeug') === 'true';
-    console.log('aaaaaaaaaaaaa', this.selectedcoursetype)
-
-    this.basicform = this.fb.group({
-      qualification: ['', [Validators.required, this.qualificationVsCourseTypeValidator()]],
-      // qualification: ['', [Validators.required]],
-      qualificationtitle: ['', [Validators.minLength(2), Validators.maxLength(100)]],
-      institute: ['', Validators.required],
-      institutetitle: ['', [Validators.minLength(2), Validators.maxLength(100)]]
-    })
+      this.applicantId = Allids[0];
+      this.applicationId = Allids[1];
+      this.custName = Allids[2];
+      this.custARN = Allids[3];
 
 
 
-    this.route.queryParams.subscribe((params) => {
-      this.isFromSummary =
-        params['fromSummary'] === true ||
-        params['fromSummary'] === 'true' ||
-        this.formSvc.isSummaryEditFlow();
+      this.selectedcoursetype = localStorage.getItem('coursetypeug') === 'true';
+      console.log('aaaaaaaaaaaaa', this.selectedcoursetype)
 
-      this.isViewMode = this.isFromSummary && params['mode'] !== 'edit';
-      this.isEditMode = this.isFromSummary && params['mode'] === 'edit';
-
-      if (this.isFromSummary) {
-        this.stepperService.startSummaryEducationEditFlow();
-      }
-
-      if (this.isViewMode) {
-        this.basicform.disable({ emitEvent: false });
-      } else {
-        this.basicform.enable({ emitEvent: false });
-      }
-    });
+      this.basicform = this.fb.group({
+        qualification: ['', [Validators.required, this.qualificationVsCourseTypeValidator()]],
+        // qualification: ['', [Validators.required]],
+        qualificationtitle: ['', [Validators.minLength(2), Validators.maxLength(100)]],
+        institute: ['', Validators.required],
+        institutetitle: ['', [Validators.minLength(2), Validators.maxLength(100)]]
+      })
 
 
 
-    await this.loadEducationMasters();
+      this.route.queryParams.subscribe((params) => {
+        this.isFromSummary =
+          params['fromSummary'] === true ||
+          params['fromSummary'] === 'true' ||
+          this.formSvc.isSummaryEditFlow();
 
-    await this.loadEducationBasicForBothFlows();
+        this.isViewMode = this.isFromSummary && params['mode'] !== 'edit';
+        this.isEditMode = this.isFromSummary && params['mode'] === 'edit';
 
-    // if (this.viewOnly) {
-    //   this.basicform.disable({ emitEvent: false });
-    // }
+        if (this.isFromSummary) {
+          this.stepperService.startSummaryEducationEditFlow();
+        }
 
-    this.hasProceededOnce = !!this.previousEducationId;
-
-    const savedQualificationId = this.previousEducationId
-      || this.route.snapshot.queryParams['qualificationId'];
-
-    if (savedQualificationId) {
-      this.formSvc.getselectedEducation(savedQualificationId).subscribe(res => {
-        this.educationdetails = res.data ?? res;
-        this.stepperService.setEducationSubSteps(this.educationdetails);
+        if (this.isViewMode) {
+          this.basicform.disable({ emitEvent: false });
+        } else {
+          this.basicform.enable({ emitEvent: false });
+        }
       });
+
+
+
+      await this.loadEducationMasters();
+
+      await this.loadEducationBasicForBothFlows();
+
+      // if (this.viewOnly) {
+      //   this.basicform.disable({ emitEvent: false });
+      // }
+
+      this.hasProceededOnce = !!this.previousEducationId;
+
+      const savedQualificationId = this.previousEducationId
+        || this.route.snapshot.queryParams['qualificationId'];
+
+      if (savedQualificationId) {
+        this.formSvc.getselectedEducation(savedQualificationId).subscribe(res => {
+          this.educationdetails = res.data ?? res;
+          this.stepperService.setEducationSubSteps(this.educationdetails);
+        });
+      }
+
+    } catch (error) {
+      console.error(
+        'Failed to initialize education details page',
+        error
+      );
+
+      this.loadError =
+        'Unable to load education details. Please try again.';
+    } finally {
+      this.isDataLoading = false;
+
+      /*
+       * Apply the current mode only after data has been patched.
+       */
+      this.applyCurrentFormMode();
+
+      this.cd.detectChanges();
+    }
+  }
+
+
+  private applyCurrentFormMode(): void {
+    if (!this.basicform) {
+      return;
     }
 
-} catch (error) {
-    console.error(
-      'Failed to initialize education details page',
-      error
-    );
-
-    this.loadError =
-      'Unable to load education details. Please try again.';
-  } finally {
-    this.isDataLoading = false;
-
-    /*
-     * Apply the current mode only after data has been patched.
-     */
-    this.applyCurrentFormMode();
-
-    this.cd.detectChanges();
+    if (this.isViewMode && !this.isEditMode) {
+      this.basicform.disable({
+        emitEvent: false
+      });
+    } else {
+      this.basicform.enable({
+        emitEvent: false
+      });
+    }
   }
-  }
-
-
-    private applyCurrentFormMode(): void {
-  if (!this.basicform) {
-    return;
-  }
-
-  if (this.isViewMode && !this.isEditMode) {
-    this.basicform.disable({
-      emitEvent: false
-    });
-  } else {
-    this.basicform.enable({
-      emitEvent: false
-    });
-  }
-}
 
   private getEducationDetailsStorageKey(): string {
     return `educationdetailsData_main_${this.stepperService.getLoanId()?.[0]}`;
@@ -410,20 +410,20 @@ try {
     this.isOtherEducation = selected.some(
       s => s.label.trim().toLowerCase() === 'other');
 
-const titleControl = this.basicform.get('institutetitle');
+    const titleControl = this.basicform.get('institutetitle');
 
-if (this.isOtherEducation) {
-  titleControl?.setValidators([
-    Validators.required,
-    Validators.minLength(2),
-    Validators.maxLength(100)
-  ]);
-} else {
-  titleControl?.clearValidators();
-  titleControl?.setValue('', { emitEvent: false });
-}
+    if (this.isOtherEducation) {
+      titleControl?.setValidators([
+        Validators.required,
+        Validators.minLength(2),
+        Validators.maxLength(100)
+      ]);
+    } else {
+      titleControl?.clearValidators();
+      titleControl?.setValue('', { emitEvent: false });
+    }
 
-titleControl?.updateValueAndValidity({ emitEvent: false });
+    titleControl?.updateValueAndValidity({ emitEvent: false });
 
     this.saveEducationBasic();
 
@@ -434,7 +434,7 @@ titleControl?.updateValueAndValidity({ emitEvent: false });
     )
 
 
-   
+
   }
 
 
@@ -452,7 +452,7 @@ titleControl?.updateValueAndValidity({ emitEvent: false });
         this.seleactInstitute = [...res];
       });
     }
- 
+
   }
 
 
@@ -568,20 +568,20 @@ titleControl?.updateValueAndValidity({ emitEvent: false });
 
     this.isOtherQualification = this.selectedQualificationLabel.toLowerCase().includes('other');
 
-const titleControl = this.basicform.get('qualificationtitle');
+    const titleControl = this.basicform.get('qualificationtitle');
 
-if (this.isOtherQualification) {
-  titleControl?.setValidators([
-    Validators.required,
-    Validators.minLength(2),
-    Validators.maxLength(100)
-  ]);
-} else {
-  titleControl?.clearValidators();
-  titleControl?.setValue('', { emitEvent: false });
-}
+    if (this.isOtherQualification) {
+      titleControl?.setValidators([
+        Validators.required,
+        Validators.minLength(2),
+        Validators.maxLength(100)
+      ]);
+    } else {
+      titleControl?.clearValidators();
+      titleControl?.setValue('', { emitEvent: false });
+    }
 
-titleControl?.updateValueAndValidity({ emitEvent: false });
+    titleControl?.updateValueAndValidity({ emitEvent: false });
 
     if (!this.hasProceededOnce) {
       this.previousEducationId = newId;
@@ -828,7 +828,15 @@ titleControl?.updateValueAndValidity({ emitEvent: false });
         this.applyEducationChange(newId);
         this.navigateToFirstEducationStep(newId);
       },
+      // onOk: () => {
+      //   this.previousEducationId = newId;
 
+      //   this.basicform.patchValue({
+      //     qualification: newId
+      //   }, { emitEvent: false });
+
+      //   this.persistChangedEducationAndNavigate(newId);
+      // },
       onCancel: () => {
         this.basicform.patchValue({
           qualification: this.previousEducationId
@@ -837,6 +845,51 @@ titleControl?.updateValueAndValidity({ emitEvent: false });
     });
   }
 
+  private persistChangedEducationAndNavigate(
+    newQualificationId: string
+  ): void {
+    const input = this.buildEduDetailsPayload();
+
+    const inputdata = {
+      action: 'auto-save',
+      sectionKey: 'SAVE_LAST_QUALIFICATION',
+      applicationId: this.applicationId,
+      applicantId: this.applicantId,
+      jsonData: input
+    };
+
+    this.formSvc.saveandExit(inputdata).subscribe({
+      next: () => {
+        this.previousEducationId = newQualificationId;
+        this.hasProceededOnce = true;
+
+        this.formSvc.educationdetailsData = {
+          ...input
+        };
+
+        const key = this.getEducationDetailsStorageKey();
+
+        localStorage.setItem(
+          key,
+          JSON.stringify(input)
+        );
+
+        this.saveEducationBasic();
+
+        this.applyEducationChange(newQualificationId);
+
+        this.navigateToFirstEducationStep(
+          newQualificationId
+        );
+      },
+      error: error => {
+        console.error(
+          'Failed to save updated education selection',
+          error
+        );
+      }
+    });
+  }
   private applyEducationChange(qualificationId: string) {
     if (this.basicform.invalid) return;
     this.selectedID = qualificationId;
@@ -1031,6 +1084,7 @@ titleControl?.updateValueAndValidity({ emitEvent: false });
     if (this.previousEducationId) {
       this.formSvc.getselectedEducation(this.previousEducationId).subscribe(res => {
         this.educationdetails = res.data ?? res;
+        this.stepperService.resetEducationSubSteps();
         this.stepperService.setEducationSubSteps(this.educationdetails);
       });
     }
@@ -1425,23 +1479,23 @@ titleControl?.updateValueAndValidity({ emitEvent: false });
     });
   }
 
-     enableForm(): void {
-  if (this.isDataLoading) {
-    return;
-  }
+  enableForm(): void {
+    if (this.isDataLoading) {
+      return;
+    }
 
-  this.originalFormValue =
-    this.basicform.getRawValue();
+    this.originalFormValue =
+      this.basicform.getRawValue();
 
-  this.isViewMode = false;
-  this.isEditMode = true;
-  this.viewOnly = false;
+    this.isViewMode = false;
+    this.isEditMode = true;
+    this.viewOnly = false;
 
-  this.basicform.enable({
-    emitEvent: false
-  });
+    this.basicform.enable({
+      emitEvent: false
+    });
 
-  this.stepperService.unlockSummaryEducationSubsteps();
+    this.stepperService.unlockSummaryEducationSubsteps();
     this.router.navigate([], {
       relativeTo: this.route,
       queryParams: {
@@ -1451,8 +1505,8 @@ titleControl?.updateValueAndValidity({ emitEvent: false });
       },
       // queryParamsHandling: 'merge'
     });
-  this.cd.detectChanges();
-}
+    this.cd.detectChanges();
+  }
   disableAdditionalInfoForm() {
     this.basicform.disable({ emitEvent: false });
   }

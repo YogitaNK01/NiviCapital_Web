@@ -348,7 +348,7 @@ loadError = '';
 
         this.activeEducation = step;
 
-        this.restoreEducationStateFromLocalStorage();
+        // this.restoreEducationStateFromLocalStorage();
         setTimeout(async () => {
 
           await this.hydrateEducationStep(step);
@@ -385,8 +385,8 @@ loadError = '';
 
             this.syncPersistedStepsWithCurrentOrder();
             this.isEducationFlowInitialized = true;
-            this.saveEducationStateToLocalStorage();
-            this.restoreEducationStateFromLocalStorage();
+            // this.saveEducationStateToLocalStorage();
+            // this.restoreEducationStateFromLocalStorage();
 
             setTimeout(() => {
               this.restoreFormState(step);
@@ -436,7 +436,7 @@ loadError = '';
             this.educationFormState[step]
           );
 
-          this.saveEducationStateToLocalStorage();
+          // this.saveEducationStateToLocalStorage();
         }
       });
     });
@@ -505,7 +505,7 @@ loadError = '';
 this.isDataLoading = true;
   try {
     // 1. local restore
-    this.restoreEducationStateFromLocalStorage();
+    // this.restoreEducationStateFromLocalStorage();
 
     // 2. summary for completed sections
     await this.loadEducationFromSummary();
@@ -744,6 +744,7 @@ this.isDataLoading = true;
 
   onSectionFileChange(step: StepKey, doc: DocType, index: number | undefined, result: UploadResult) {
     if (!result?.file) return;
+    this.hasUnsavedChanges = true;
     const doc1 = this.normalizeDocType(doc);
 
     const key = this.buildKey(step, doc1, index ?? 0);
@@ -751,7 +752,7 @@ this.isDataLoading = true;
     this.uploadedFiles = { ...this.uploadedFiles };
 
     this.saveCurrentFormState();
-    this.saveEducationStateToLocalStorage();
+    // this.saveEducationStateToLocalStorage();
 
     this.cd.detectChanges();
   }
@@ -792,7 +793,7 @@ this.isDataLoading = true;
       this.savedFileMeta = { ...this.savedFileMeta };
 
       this.saveCurrentFormState();
-      this.saveEducationStateToLocalStorage();
+      // this.saveEducationStateToLocalStorage();
       this.cd.detectChanges();
       return;
     }
@@ -806,7 +807,7 @@ this.isDataLoading = true;
     this.uploadedFiles = { ...this.uploadedFiles };
 
     this.saveCurrentFormState();
-    this.saveEducationStateToLocalStorage();
+    // this.saveEducationStateToLocalStorage();
     this.cd.detectChanges();
   }
 
@@ -894,6 +895,7 @@ isOtherInstituteSelected(step: StepKey): boolean {
   }
   onFileChange(step: StepKey, doc: DocType, result: UploadResult) {
     if (!result?.file) return;
+    this.hasUnsavedChanges = true;
     const normalizedDoc = this.normalizeDocType(doc);
     const index = doc === 'marksheet' ? 0 : undefined;
 
@@ -1121,6 +1123,7 @@ isOtherInstituteSelected(step: StepKey): boolean {
   // back btn functionality
 
   back() {
+    const step = this.activeEducation as StepKey;
     if (this.hasUnsavedChanges) {
       this.msgbox.open({
         type: 'unsaved',
@@ -1130,14 +1133,15 @@ isOtherInstituteSelected(step: StepKey): boolean {
         okText: 'Yes, Discard',
         cancelText: 'Cancel',
         onOk: () => {
-          this.hasUnsavedChanges = false;
+          // this.hasUnsavedChanges = false;
+          this.clearUnsavedEducationStep(step);
           this.performEducationBack();
         }
       });
       return;
     }
 
-    this.saveCurrentFormState();
+    // this.saveCurrentFormState();
     this.performEducationBack();
   }
 
@@ -1171,7 +1175,7 @@ isOtherInstituteSelected(step: StepKey): boolean {
 
     this.stepperService.setEducationStepData(step, normalized);
   }
-  private performEducationBack() {
+  private performEducationBack1() {
 
     if (!this.isEducationFlowInitialized) {
       this.stepperService.previous();
@@ -1205,6 +1209,81 @@ isOtherInstituteSelected(step: StepKey): boolean {
       }
     });
   }
+  private performEducationBack(): void {
+  const currentStep =
+    this.activeEducation as StepKey;
+
+  let previousStep: StepKey | null = null;
+
+  // Offer Letter must always go back to IELTS/PTE.
+  if (currentStep === 'offerletter') {
+    previousStep = 'ielts';
+  }
+
+  // IELTS/PTE must go back to the previous education step,
+  // normally PG or UG.
+  else if (currentStep === 'ielts') {
+    const ieltsIndex =
+      this.educationOrder.indexOf('ielts');
+
+    if (ieltsIndex > 0) {
+      previousStep =
+        this.educationOrder[ieltsIndex - 1] as StepKey;
+    } else if (
+      this.educationOrder.includes('pg')
+    ) {
+      previousStep = 'pg';
+    } else if (
+      this.educationOrder.includes('ug')
+    ) {
+      previousStep = 'ug';
+    }
+  }
+
+  // Normal education-step navigation.
+  else {
+    const index =
+      this.educationOrder.indexOf(currentStep);
+
+    if (index > 0) {
+      previousStep =
+        this.educationOrder[index - 1] as StepKey;
+    }
+  }
+
+  if (previousStep) {
+    this.activeEducation = previousStep;
+
+    this.restoreFormState(previousStep);
+
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: {
+        qualificationId:
+          this.flowQualificationId,
+
+        qualificationlabel:
+          previousStep
+      },
+      queryParamsHandling: 'merge'
+    });
+
+    return;
+  }
+
+  // Only the first education step returns to education details.
+  this.router.navigate(
+    ['/loanform/educationDetails'],
+    {
+      queryParams: {
+        applicantId: this.applicantId,
+        applicationId: this.applicationId,
+        custName: this.custName,
+        custARN: this.custARN
+      }
+    }
+  );
+}
   private persistEducationState() {
     sessionStorage.setItem(
       'educationState',
@@ -1222,6 +1301,140 @@ isOtherInstituteSelected(step: StepKey): boolean {
     );
   }
 
+private clearUnsavedEducationStep(step: StepKey): void {
+  const form = this.educationForms[step] as FormGroup;
+  const prefix = `${step}_`;
+
+  // Reset all form fields for the active education step.
+  if (step === 'ielts') {
+    form?.reset(
+      {
+        score: ''
+      },
+      {
+        emitEvent: false
+      }
+    );
+  } else if (step === 'offerletter') {
+    form?.reset(
+      {
+        offerLetter: null
+      },
+      {
+        emitEvent: false
+      }
+    );
+  } else {
+    form?.reset(
+      {
+        instituteId: '',
+        instituteName: '',
+        institutename: '',
+        institutetitle: '',
+        passingyear: '',
+        per_cgpa: '',
+        location: '',
+        otherLocation: '',
+        marksheet: null,
+        lc: null
+      },
+      {
+        emitEvent: false
+      }
+    );
+  }
+
+  // Remove all newly selected files for this step.
+  Object.keys(this.uploadedFiles || {})
+    .filter(key => key.startsWith(prefix))
+    .forEach(key => {
+      delete this.uploadedFiles[key];
+    });
+
+  // Remove file metadata for an unsaved step.
+  if (!this.isStepPersisted(step)) {
+    Object.keys(this.savedFileMeta || {})
+      .filter(key => key.startsWith(prefix))
+      .forEach(key => {
+        delete this.savedFileMeta[key];
+      });
+  }
+
+  // Remove other document rows for this step.
+  Object.keys(this.otherDocMap || {})
+    .filter(key => key.startsWith(prefix))
+    .forEach(key => {
+      delete this.otherDocMap[key];
+    });
+
+  // Remove current form values from component cache.
+  delete this.educationFormState[step];
+
+  // Remove current form values from the stepper service.
+  this.stepperService.setEducationStepData(step, null);
+
+  // Remove current step values from local storage.
+  const storageKey = this.getEducationStateKey();
+  const storedValue = localStorage.getItem(storageKey);
+
+  if (storedValue) {
+    try {
+      const parsed = JSON.parse(storedValue);
+
+      if (parsed.educationFormState) {
+        delete parsed.educationFormState[step];
+      }
+
+      if (parsed.uploadedFileMeta) {
+        Object.keys(parsed.uploadedFileMeta)
+          .filter(key => key.startsWith(prefix))
+          .forEach(key => {
+            delete parsed.uploadedFileMeta[key];
+          });
+      }
+
+      if (parsed.otherDocMap) {
+        Object.keys(parsed.otherDocMap)
+          .filter(key => key.startsWith(prefix))
+          .forEach(key => {
+            delete parsed.otherDocMap[key];
+          });
+      }
+
+      localStorage.setItem(
+        storageKey,
+        JSON.stringify(parsed)
+      );
+    } catch (error) {
+      console.error(
+        'Failed to clear discarded education state:',
+        error
+      );
+    }
+  }
+
+  this.uploadedFiles = {
+    ...this.uploadedFiles
+  };
+
+  this.savedFileMeta = {
+    ...this.savedFileMeta
+  };
+
+  this.otherDocMap = {
+    ...this.otherDocMap
+  };
+
+  form?.markAsPristine();
+  form?.markAsUntouched();
+  form?.updateValueAndValidity({
+    emitEvent: false
+  });
+
+  this.hasUnsavedChanges = false;
+
+  this.cd.detectChanges();
+}
 
   //-----------------disable next btn --------------------
 
