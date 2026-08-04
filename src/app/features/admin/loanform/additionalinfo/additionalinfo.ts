@@ -1009,9 +1009,6 @@ this.ismothermiddlename = noMotherMiddleName;
     // this.gendercheck(genderValue);
 
 
-    this.isfathermiddlename = !!data.fatherNoMiddleName;
-    this.ismothermiddlename = !!data.motherNoMiddleName;
-    this.isspousemiddlename = !!data.spouseNoMiddleName;
 
     this.restoreMiddleNameState();
 

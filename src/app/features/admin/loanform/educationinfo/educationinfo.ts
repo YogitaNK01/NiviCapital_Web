@@ -3437,6 +3437,9 @@ private clearUnsavedEducationStep(step: StepKey): void {
 
         }
         else {
+          sessionStorage.removeItem(
+'educationFlowQualificationId'
+);
           this.stepperService.markStepCompleted('educationDetails');
           this.stepperService.next();
         }
@@ -3471,6 +3474,7 @@ private clearUnsavedEducationStep(step: StepKey): void {
         queryParamsHandling: 'merge'
       });
     } else {
+  
       this.stepperService.markStepCompleted('educationDetails');
       this.stepperService.next();
     }

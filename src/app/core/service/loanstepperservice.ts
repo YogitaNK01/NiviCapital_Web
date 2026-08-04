@@ -623,6 +623,16 @@ hydrateMainProgressFromSummary(summary: any): void {
 
   //for main applicant
   setLoanId(id1: string, id2: string, name: string, arn: string) {
+
+    if (
+this.applicantId &&
+this.applicantId !== id1
+) {
+sessionStorage.removeItem(
+'educationFlowQualificationId'
+);
+}
+
     this.applicantId = id1;
     this.applicationId = id2;
     this.custName = name;

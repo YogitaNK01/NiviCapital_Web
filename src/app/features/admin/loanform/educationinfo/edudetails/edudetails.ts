@@ -201,6 +201,8 @@ export class Edudetails {
         || this.route.snapshot.queryParams['qualificationId'];
 
       if (savedQualificationId) {
+        sessionStorage.setItem('educationFlowQualificationId',savedQualificationId
+);
         this.formSvc.getselectedEducation(savedQualificationId).subscribe(res => {
           this.educationdetails = res.data ?? res;
           this.stepperService.setEducationSubSteps(this.educationdetails);
@@ -823,10 +825,19 @@ export class Edudetails {
         removingSections: !isAdd ? options.removingLabels : []
       },
 
+      // onOk: () => {
+      //   this.previousEducationId = newId;
+      //   this.applyEducationChange(newId);
+      //   this.navigateToFirstEducationStep(newId);
+      // },
       onOk: () => {
         this.previousEducationId = newId;
-        this.applyEducationChange(newId);
-        this.navigateToFirstEducationStep(newId);
+
+        this.basicform.patchValue({
+          qualification: newId
+        }, { emitEvent: false });
+
+        this.persistChangedEducationAndNavigate(newId);
       },
       // onOk: () => {
       //   this.previousEducationId = newId;
@@ -906,10 +917,11 @@ export class Edudetails {
     const stepKey = this.normalizeQualification(
       this.getAddingSectionLabel(newId)
     );
-
+sessionStorage.setItem('educationFlowQualificationId',newId);
     this.router.navigate(['/loanform/educationinfo'], {
       queryParams: {
-        qualificationlabel: stepKey
+        qualificationId: newId,
+        qualificationlabel: '10th'
       },
       queryParamsHandling: 'merge'
     });
@@ -1283,7 +1295,7 @@ export class Edudetails {
     const instituteId =
       data.lastInstitutionId ||
       data.instituteId ||
-      data.institutionId ;
+      data.institutionId;
 
     const normalized = {
       applicantId: this.applicantId,
@@ -1319,7 +1331,7 @@ export class Edudetails {
     this.msgBox.open({
       title: 'Are you sure you want to exit?',
       message: ``,
-      showCancel: true, okText:'Yes',
+      showCancel: true, okText: 'Yes',
       onOk: () => {
         if (!this.basicform) return;
         // const key = `educationdetailsData_${this.applicantId}`;

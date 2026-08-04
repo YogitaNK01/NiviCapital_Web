@@ -61,9 +61,24 @@ export class Loanstepper implements OnInit {
 
       //  Only rebuild submenu if flow qualificationId changed
       const qid = params['qualificationId'];
-      if (qid && qid !== this.flowQualificationId) {
+
+      const savedFlowId = sessionStorage.getItem(
+  'educationFlowQualificationId'
+);
+
+// First education load
+if (!this.flowQualificationId) {
+  this.flowQualificationId =
+    savedFlowId || qid || null;
+}
+
+      if (qid && qid !== this.flowQualificationId ) {
         this.flowQualificationId = qid;
 
+        sessionStorage.setItem(
+    'educationFlowQualificationId',
+    qid
+  );
         this.formSvc.getselectedEducation(qid).subscribe(res => {
           this.educationdetails = res.data ?? res;
 
@@ -211,10 +226,24 @@ if (cleanUrl.includes('co-applicantdetails')) {
 
     
 // lock all substeps until Edit button is clicked
-  if (this.stepservice.isSummaryEducationEditFlow()) {
-    return !this.stepservice.areSummaryEducationSubstepsUnlocked();
-  }
+  // if (this.stepservice.isSummaryEducationEditFlow()) {
+  //   return !this.stepservice.areSummaryEducationSubstepsUnlocked();
+  // }
 
+  const params =
+  this.route.snapshot.queryParams;
+
+const isSummaryRoute =
+  params['fromSummary'] === true ||
+  params['fromSummary'] === 'true';
+
+if (
+  isSummaryRoute &&
+  this.stepservice.isSummaryEducationEditFlow()
+) {
+  return !this.stepservice
+    .areSummaryEducationSubstepsUnlocked();
+}
 
     const children = parentStep.children;
 
@@ -252,17 +281,32 @@ if (cleanUrl.includes('co-applicantdetails')) {
 
   }
 
-  openEducationSubStep(sub: any, event: Event) {
+  openEducationSubStep1(sub: any, event: Event,parentIndex: number,subIndex: number) {
+    event.preventDefault();
     event.stopPropagation();
     
-  if (this.stepservice.isEducationSubStepperLocked()) {
-    return;
-  }
+  if (
+this.isSubStepperDisabled(parentIndex, subIndex) ||
+this.stepservice.isEducationSubStepperLocked()
+) {
+
+return;
+
+}
 
     const stepKey = sub.key;
+
+    const qualificationId =
+this.flowQualificationId ||
+this.route.snapshot.queryParams['qualificationId'] ||   sub.id;
+if (!qualificationId) {
+console.error('Education flow qualification ID is missing'
+);
+return;
+}
     this.activeQualificationId = stepKey;
 
-    const flowQualificationId = this.route.snapshot.queryParams['qualificationId'] ||   this.flowQualificationId ||    sub.id;
+    // const flowQualificationId = this.route.snapshot.queryParams['qualificationId'] ||   this.flowQualificationId ||    sub.id;
 
 const currentParams = this.route.snapshot.queryParams;
    // Summary mode must be decided only by current URL.
@@ -271,8 +315,8 @@ const currentParams = this.route.snapshot.queryParams;
     currentParams['fromSummary'] === 'true';
 
   const queryParams: any = {
-    qualificationlabel: stepKey,
-    qualificationId: flowQualificationId
+    qualificationlabel: stepKey,qualificationId
+    // qualificationId: flowQualificationId
   };
 
    if (isFromSummary) {
@@ -301,6 +345,90 @@ const currentParams = this.route.snapshot.queryParams;
 
   }
 
+  openEducationSubStep(
+  sub: any,
+  event: Event,
+  parentIndex: number,
+  subIndex: number
+): void {
+  event.preventDefault();
+  event.stopPropagation();
+
+  const currentParams =
+    this.route.snapshot.queryParams;
+
+  const isFromSummary =
+    currentParams['fromSummary'] === true ||
+    currentParams['fromSummary'] === 'true';
+
+  const isSummaryLocked =
+    isFromSummary &&
+    this.stepservice.isEducationSubStepperLocked();
+
+  if (
+    this.isSubStepperDisabled(
+      parentIndex,
+      subIndex
+    ) ||
+    isSummaryLocked
+  ) {
+    return;
+  }
+
+  const stepKey = sub.key;
+
+  /*
+   * Always use the highest qualification flow ID.
+   * Never use sub.id as qualificationId.
+   */
+  const qualificationId =
+    sessionStorage.getItem(
+      'educationFlowQualificationId'
+    ) ||
+    this.flowQualificationId ||
+    currentParams['qualificationId'];
+
+  if (!qualificationId) {
+    console.error(
+      'Education flow qualification ID is missing'
+    );
+    return;
+  }
+
+  this.activeQualificationId = stepKey;
+
+  const queryParams: any = {
+    qualificationlabel: stepKey,
+    qualificationId,
+ educationStepId: sub.id,
+    /*
+     * Marks this navigation as a submenu click,
+     * so ngOnInit does not rebuild the submenu.
+     */
+    educationStepClick: true
+  };
+
+  if (isFromSummary) {
+    queryParams.fromSummary = true;
+    queryParams.mode =
+      currentParams['mode'] || 'view';
+    queryParams.section = 'education';
+  }
+  this.activeQualificationId = sub.key;
+  this.router.navigate(
+    [
+      '/loanform',
+      'educationDetails',
+      'educationinfo'
+    ],
+    {
+      queryParams
+    }
+  ).then(() => {
+    // this.activeQualificationId = stepKey;
+    this.cdr.detectChanges();
+  });
+}
   isInsideEducation(): boolean {
     return (
       this.router.url.includes('educationDetails') ||

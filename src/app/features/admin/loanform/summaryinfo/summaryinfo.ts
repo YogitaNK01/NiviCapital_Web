@@ -821,6 +821,9 @@ private isCompletedCoApplicant(coapp: any): boolean {
              this.stepperService.clearSummaryEducationEditFlow();
              sessionStorage.removeItem( 'summaryEducationLockState'  );
              sessionStorage.removeItem('coAppIds');
+             sessionStorage.removeItem(
+'educationFlowQualificationId'
+);
 
         this.submitDescription = `Application Reference Number : ${res.application.referenceNumber}`;
         return;
