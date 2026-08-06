@@ -20,8 +20,8 @@ export class Login {
   constructor(private router: Router, private main: Main, private msgBox: Msgboxservice) { }
 
   loginData = {
-    username: 'yogita@nivicap.com',
-    password: 'admin123',
+    username: '',
+    password: '',
     isloginChecked: true
   };
 
