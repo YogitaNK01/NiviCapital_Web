@@ -1004,6 +1004,14 @@ isOtherInstituteSelected(step: StepKey): boolean {
       onOk: () => {
         const key = this.buildKey(level as StepKey, this.normalizeDocType(docType), index);
 
+        const deleteDoc =
+this.uploadedFiles?.[key] ||
+this.savedFileMeta?.[key] ||
+null;
+        if(deleteDoc?.documentId){
+          this.deleteItemArr([deleteDoc?.documentId]);
+        }
+
         delete this.uploadedFiles[key];
         delete this.savedFileMeta[key];
 
@@ -1015,7 +1023,20 @@ isOtherInstituteSelected(step: StepKey): boolean {
       }
     });
   }
-
+  deleteItemArr(idArr: any){
+    this.formSvc.deleteEducationDoc({
+      applicationId: this.applicationId,
+      applicantId: this.applicantId,
+      documentIds: idArr
+    }).subscribe({
+      next: (res) => {
+        console.log(res);
+      },
+      error: (error) => {
+        console.log(error);
+      }
+    });
+  }
   hasLocalFile(level: any, docType: DocType, index?: number): boolean {
     const file = this.getStoredFileMeta(
       level as StepKey,
