@@ -235,7 +235,8 @@ if (cleanUrl.includes('co-applicantdetails')) {
 
 const isSummaryRoute =
   params['fromSummary'] === true ||
-  params['fromSummary'] === 'true';
+  params['fromSummary'] === 'true'
+  ||  this.formSvc.isSummaryEditFlow();;
 
 if (
   isSummaryRoute &&
@@ -255,6 +256,16 @@ if (
     //  allow all completed
     const stepKey = children[subIndex].key;
 
+    const isApplicationCompleted =
+  this.stepservice.isMainStepCompleted('co-applicantdetails') ||
+  this.stepservice.isMainStepCompleted('summaryinfo');
+
+if (
+  !isSummaryRoute &&
+  isApplicationCompleted
+) {
+  return false;
+}
     if (this.stepperService.isEducationStepCompleted(stepKey)) {
       return false;
     }

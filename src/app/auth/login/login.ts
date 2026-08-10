@@ -30,7 +30,7 @@ export class Login {
   }
 
   onSubmit(form: NgForm): void {
-      //  this.router.navigate(['admin/dashboard']);
+    //  this.router.navigate(['admin/dashboard']);
     // Validate form before submission
     if (!form.valid) {
       this.msgBox.open({
@@ -57,14 +57,17 @@ export class Login {
     this.main.getLogin(inputobj).subscribe({
       next: (res) => {
         this.isLoading = false;
-           const lastLogin = res.lastLoginDateTime;
-
+        const lastLogin = res.lastLoginDateTime;
+        const fullName = res.fullName;
+        if (fullName) {
+          this.main.setFullName(fullName);
+        }
         if (lastLogin) {
           this.main.setLastLogin(lastLogin);
         }
-        
+
         this.router.navigate(['admin/dashboard']);
-       
+
       },
       error: (err) => {
         this.isLoading = false;

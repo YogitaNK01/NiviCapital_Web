@@ -528,7 +528,7 @@ hydrateMainProgressFromSummary(summary: any): void {
     }
 
   }
-  private restoreEducationProgress() {
+  private restoreEducationProgress1() {
     if (!this.applicantId) return;
 
     const saved = localStorage.getItem(this.getEducationProgressKey());
@@ -539,7 +539,35 @@ hydrateMainProgressFromSummary(summary: any): void {
       this.completedEducationSections = new Set();
     }
   }
+private restoreEducationProgress(): void {
+  if (!this.applicantId) {
+   
+    return;
+  }
 
+  const key = this.getEducationProgressKey();
+  const saved = localStorage.getItem(key);
+
+
+  if (!saved) {
+    this.completedEducationSections =
+      new Set<string>();
+
+    return;
+  }
+
+  try {
+    const parsed = JSON.parse(saved);
+
+    this.completedEducationSections =
+      Array.isArray(parsed)
+        ? new Set<string>(parsed)
+        : new Set<string>();
+  } catch {
+    this.completedEducationSections =
+      new Set<string>();
+  }
+}
 
   getCompletedEducationSections(): Set<string> {
     return this.completedEducationSections;
