@@ -36,8 +36,8 @@ export interface UserData {
 }
 
 interface CustomerFlowState {  phone: string;
-   userId: string;  currentStep: number;
-  }
+   userId: string;  currentStep: number; custId?: string;  fname?: string;  lname?: string; }
+  
 
 @Injectable({
   providedIn: 'root'

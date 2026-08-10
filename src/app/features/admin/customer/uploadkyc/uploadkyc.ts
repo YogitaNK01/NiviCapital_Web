@@ -1162,7 +1162,8 @@ const draftData = this.custId
       : null;
 
     const custId = this.editMode
-  ? this.editUserData.custId
+  ? this.editUserData.custId :
+  this.userid? this.userid.cifId
   : this.isCoApplicant
     ? (
       storedCoApp?.custId ||
