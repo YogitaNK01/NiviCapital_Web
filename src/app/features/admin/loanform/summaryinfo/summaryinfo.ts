@@ -335,7 +335,7 @@ summaryLoadError = '';
               0
             );
 
-            // keep your existing main UI working
+            // keep existing main UI working
             this.bindMainApplicantSummary(this.mainApplicantSummary);
           }
 

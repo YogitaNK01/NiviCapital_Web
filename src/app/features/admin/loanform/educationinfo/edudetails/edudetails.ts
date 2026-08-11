@@ -755,18 +755,10 @@ export class Edudetails {
       message: `
       You originally selected ${oldLabel}as your last qualification.<br>
       Adding a${newLabel} section will update your highest qualification.`,
-      // message: `You have updated your last qualification from
-      // <b>${oldLabel}</b> to <b>${newLabel}</b>.<br>
-      // As a result, the following sections will be removed.`
+ 
 
       okText: 'Yes, Update',
       cancelText: 'No',
-
-      // comparisonData: {
-      //   currentSections: this.getCurrentSections(),
-      //   removingSections: [oldLabel],
-      //   addingSections: ''
-      // },
 
       comparisonData: {
         currentSections: this.getCurrentSectionsForPopup(this.previousEducationId!), //    stable

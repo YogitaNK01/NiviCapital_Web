@@ -276,7 +276,7 @@ ngAfterViewInit(): void {
     const key = this.getStorageKey();
   
      const apiApplicantId = this.getApiApplicantId();
-    if (!apiApplicantId) { console.error('Applicant ID is missing'); return; }
+    if (!apiApplicantId) {  return; }
 
 
 
@@ -425,8 +425,8 @@ const draftData = this.custId
  
 
   isPassportRequired(): boolean {
-    // Main applicant + fresh flow only
-    return !this.isCoApplicant && !this.editMode;
+    // return !this.isCoApplicant && !this.editMode;
+     return !this.isCoApplicant;
   }
   getCurrentCoApplicantFromList1() {
     const mainApplicantId = this.stepperService.getLoanId()?.[0];

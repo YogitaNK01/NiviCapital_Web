@@ -1551,7 +1551,7 @@ try {
     switch (type) {
       case 'property':
         array = this.properties;
-        accKey = 'Property/ Land Assets';  // Match your acc.key
+        accKey = 'Property/ Land Assets';  // Match  acc.key
         break;
       case 'fd':
         array = this.fixedDeposits;
@@ -1612,7 +1612,7 @@ try {
   }
 
 
-  // Add this getter to your component
+ 
   get isNextDisabled(): boolean {
     const form = this.assetsForm.value;
 

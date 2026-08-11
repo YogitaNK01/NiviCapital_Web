@@ -3862,8 +3862,7 @@ this.disableAllEducationForms()
       fd.append(`files[${fileIndex}].title`, title);
     }
 
-    // Optional: if your update API needs documentId, keep this.
-    // If backend does not need it in files[], remove this block.
+    
     const documentId =
       fileOrMeta.documentId ||
       this.savedFileMeta[key]?.documentId ||
