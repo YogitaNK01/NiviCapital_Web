@@ -71,7 +71,7 @@ export class AddCustomer implements OnInit {
     },
     {
       title: 'KYC',
-      desc: 'Verify the customer’s identity with documents.'
+      desc: "Verify the customer's identity with documents."
     },
     {
       title: 'Create NC ID',
