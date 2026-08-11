@@ -264,11 +264,11 @@ restoreCoApplicantState() {
     cleanUrl.includes(route)
   );
 
-  console.log('Coapp route check:', {
-    cleanUrl,
-    mode,
-    isChildStepperRoute
-  });
+  // console.log('Coapp route check:', {
+  //   cleanUrl,
+  //   mode,
+  //   isChildStepperRoute
+  // });
 
   /**
    * Parent page + mode=new means show mobile number page

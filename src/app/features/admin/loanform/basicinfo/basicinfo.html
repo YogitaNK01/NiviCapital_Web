@@ -159,7 +159,7 @@
                                     (input)="main.restrictInput($event, 'number')" [showPhonePrefix]="true"
                                     [showPhonePrefixnumber]="true"
                                     [rightButtonText]="!otpsent && !otpVerifiedOk ? 'Send OTP' : ''"
-                                    (rightButtonClick)="sendOtp()" [state]="otpState" [ngClass]="{'disabled-div': !otpVerifiedOk}"></app-inputfield>
+                                    (rightButtonClick)="sendOtp()" [state]="otpState" [ngClass]="{'disabled-div': true}"></app-inputfield>
 
                             </div>
                             <div *ngIf="!hasExistingCif && !otpsent" class="d-flex">
