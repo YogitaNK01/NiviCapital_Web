@@ -267,7 +267,7 @@ private summaryEducationLoaded = false;
 
   isDataLoading = true;
 loadError = '';
-
+private forceNextApiForDraft = false;
   constructor(private fb: FormBuilder, private stepperService: Loanstepperservice, private cd: ChangeDetectorRef, private formSvc: Loanformservice, private msgBox: Msgboxservice,
     private route: ActivatedRoute, private router: Router, private msgbox: Msgboxservice, public main: Main, private storageservice: Storage) { }
   async ngOnInit(): Promise<void> {
@@ -1772,7 +1772,7 @@ private clearUnsavedEducationStep(step: StepKey): void {
   }
 
 
-  private async loadSavedEducationInfoFromApi(step: StepKey) {
+  private async loadSavedEducationInfoFromApi(step: StepKey,forceNextApi: boolean = true) {
     if (!this.applicationId || !this.applicantId || !step) return;
 
     const savedData = await this.getSavedSectionEducationInfo();
@@ -1787,6 +1787,9 @@ private clearUnsavedEducationStep(step: StepKey): void {
     const localKey = `educationInfoData_${this.applicantId}_${sectionKey}`;
     localStorage.setItem(localKey, JSON.stringify(savedData));
     this.saveEducationStateToLocalStorage();
+    if(forceNextApi){
+      this.forceNextApiForDraft = true;
+    }
     this.cd.detectChanges();
 
   }
@@ -3425,7 +3428,7 @@ private clearUnsavedEducationStep(step: StepKey): void {
 
 
         //  refresh current step data from saved section API
-        await this.loadSavedEducationInfoFromApi(step);
+        await this.loadSavedEducationInfoFromApi(step,false);
 
         //  then refresh summary (if summary now contains latest saved docs)
         await this.loadEducationFromSummary();
@@ -4060,7 +4063,7 @@ this.disableAllEducationForms()
   }
 
   private shouldCallNextApi(step: StepKey): boolean {
-    return this.hasUnsavedChanges || !this.isStepPersisted(step);
+    return  this.forceNextApiForDraft || this.hasUnsavedChanges || !this.isStepPersisted(step);
   }
   private syncPersistedStepsWithCurrentOrder(): void {
     const allowed = new Set(this.educationOrder as StepKey[]);
@@ -4099,7 +4102,7 @@ this.disableAllEducationForms()
     this.formSvc.uploadIncome(fd, this.applicationId, true).subscribe({
       next: async (res: any) => {
         if (res?.status === 'success') {
-
+          this.forceNextApiForDraft = false;
           this.markStepPersisted(step);
           this.hasUnsavedChanges = false;
 
