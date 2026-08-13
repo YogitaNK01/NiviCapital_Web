@@ -524,7 +524,7 @@ export class GeneralInfo implements OnInit {
         (parsedLocal ? this.mapLocalToApiFormat(parsedLocal) : null);
     }
 
-    this.loadedFromSaveExit = !!draftData?.items?.length;
+    this.loadedFromSaveExit = !!draftData;
     if (!finalData) {
       this.lastSavedPayload = null;
       return;
