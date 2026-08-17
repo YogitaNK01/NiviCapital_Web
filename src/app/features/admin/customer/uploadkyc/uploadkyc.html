@@ -199,7 +199,7 @@
 
           <app-inputfield type="text" name="Passport" ngModel [required]="isPassportRequired()" #Passport="ngModel"
             label="Passport" placeholder="Enter 8 digit passport number" helpText="Help text"
-            pattern="^[A-Z][0-9]{7}$" [maxlength]="8" [uppercase]="true">
+            pattern="^(?:[A-Z][0-9]{7}|[A-Z]{2}[0-9]{6})$" [maxlength]="8" [uppercase]="true">
           </app-inputfield>
 
           <div class="text-danger mt-1" *ngIf="Passport.invalid && Passport.touched">
