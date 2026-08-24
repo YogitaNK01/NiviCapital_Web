@@ -21,18 +21,6 @@ pipeline {
             }
         }
 
-        stage('Build Docker Image') {
-            steps {
-                sh '''
-                echo "===== Building Docker Image ====="
-
-                docker build -t ${IMAGE_NAME}:latest .
-
-                docker images | grep ${IMAGE_NAME}
-                '''
-            }
-        }
-
         stage('Verify Docker Network') {
             steps {
                 sh '''
@@ -44,6 +32,41 @@ pipeline {
                 }
 
                 echo "Network ${NETWORK_NAME} exists"
+                '''
+            }
+        }
+
+        stage('Angular SIT Build Validation') {
+            steps {
+                sh '''
+                echo "===== Install Dependencies ====="
+                npm ci
+
+                echo "===== Angular SIT Build ====="
+                npx ng build --configuration=sit
+
+                echo "===== Verify SIT API URL ====="
+                grep -R "nivicapsit/api" dist/ || true
+
+                echo "===== Verify PROD URL Not Present ====="
+                if grep -R "prod-sp1.nivicap.com" dist/ ; then
+                    echo "ERROR: Production URL found in SIT build"
+                    exit 1
+                fi
+
+                echo "SIT Build Validation Successful"
+                '''
+            }
+        }
+
+        stage('Build Docker Image') {
+            steps {
+                sh '''
+                echo "===== Building Docker Image ====="
+
+                docker build --no-cache -t ${IMAGE_NAME}:latest .
+
+                docker images | grep ${IMAGE_NAME}
                 '''
             }
         }
@@ -142,6 +165,26 @@ pipeline {
             }
         }
 
+        stage('Verify Deployed UI Build') {
+            steps {
+                sh '''
+                CONTAINER_NAME=$(cat container_name.txt)
+
+                echo "===== Verify SIT UI Build ====="
+
+                docker exec ${CONTAINER_NAME} sh -c "
+                grep -R 'nivicapsit/api' /usr/share/nginx/html || true
+                "
+
+                echo "===== Verify NO Production URL ====="
+
+                docker exec ${CONTAINER_NAME} sh -c "
+                grep -R 'prod-sp1.nivicap.com' /usr/share/nginx/html && exit 1 || true
+                "
+                '''
+            }
+        }
+
         stage('Keep Latest 5 UI Containers') {
             steps {
                 sh '''
@@ -208,7 +251,6 @@ pipeline {
 
                 echo "===== Container Inspect ====="
                 docker inspect "${CONTAINER_NAME}" || true
-
             fi
 
             echo "===== Port Status ====="
