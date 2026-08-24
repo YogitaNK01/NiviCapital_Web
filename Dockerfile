@@ -12,7 +12,7 @@ RUN npm ci
 COPY . .
 
 # Build Angular application
-RUN npm run build --configuration=dev
+RUN npm run build --configuration=sit
 
 # Stage 2 - Nginx Runtime
 FROM nginx:alpine
