@@ -32,7 +32,7 @@
               "src/styles/styles.scss"
             ],
             "scripts": [
-               "node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"
+              "node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"
             ],
             "stylePreprocessorOptions": {
               "includePaths": [
@@ -53,13 +53,24 @@
                   "maximumWarning": "20kB",
                   "maximumError": "30kB"
                 }
-                
               ],
               "outputHashing": "all",
               "fileReplacements": [
                 {
                   "replace": "src/environments/environment.ts",
                   "with": "src/environments/environment.prod.ts"
+                }
+              ]
+            },
+            "sit": {
+              "optimization": true,
+              "extractLicenses": true,
+              "sourceMap": false,
+              "outputHashing": "all",
+              "fileReplacements": [
+                {
+                  "replace": "src/environments/environment.ts",
+                  "with": "src/environments/environment.sit.ts"
                 }
               ]
             },
@@ -85,6 +96,9 @@
             },
             "development": {
               "buildTarget": "Nivicapital:build:development"
+            },
+            "sit": {
+              "buildTarget": "Nivicapital:build:sit"
             }
           },
           "defaultConfiguration": "development",
