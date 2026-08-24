@@ -3,8 +3,8 @@ pipeline {
     agent any
 
     environment {
-        IMAGE_NAME      = "nivicap-ui"
-        NETWORK_NAME    = "nivi-app-ui-network"
+        IMAGE_NAME      = "nivicap-sit-ui"
+        NETWORK_NAME    = "nivi-sit-app-ui-network"
         HOST_PORT       = "8081"
         CONTAINER_PORT  = "80"
     }
