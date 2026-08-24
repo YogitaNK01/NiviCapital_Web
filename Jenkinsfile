@@ -52,7 +52,7 @@ pipeline {
                 echo "Stopping only running UI containers..."
 
                 docker ps \
-                  --filter "name=nivi-ui-" \
+                  --filter "name=nivicap-sit-ui" \
                   -q | xargs -r docker stop
 
                 sleep 5
@@ -64,7 +64,7 @@ pipeline {
             steps {
                 sh '''
                 TIMESTAMP=$(date +%d-%m-%Y-%H-%M-%S)
-                CONTAINER_NAME="nivi-ui-${TIMESTAMP}"
+                CONTAINER_NAME="nivicap-sit-ui${TIMESTAMP}"
 
                 echo "Deploying Container: ${CONTAINER_NAME}"
 
@@ -135,7 +135,7 @@ pipeline {
                 echo "Keeping latest 5 UI containers..."
 
                 CONTAINERS=$(docker ps -a \
-                    --filter "name=nivi-ui-" \
+                    --filter "name=nivicap-sit-ui" \
                     --format "{{.ID}} {{.CreatedAt}}" \
                     | sort -rk2 \
                     | awk '{print $1}')
@@ -156,7 +156,7 @@ pipeline {
                 echo "Running UI Containers"
                 echo "================================"
 
-                docker ps -a --filter "name=nivi-ui-"
+                docker ps -a --filter "nivicap-sit-ui"
 
                 echo "================================"
                 echo "Network Containers"
@@ -182,7 +182,7 @@ pipeline {
             echo "UI Deployment Successful"
             echo "================================"
 
-            docker ps | grep nivi-ui || true
+            docker ps | grep nivicap-sit-ui || true
             '''
         }
 
@@ -210,7 +210,7 @@ pipeline {
             ss -tulpn | grep ${HOST_PORT} || true
 
             echo "===== API Status ====="
-            docker ps | grep nivi-api || true
+            docker ps | grep nivicap-sit-ui || true
             '''
         }
     }
