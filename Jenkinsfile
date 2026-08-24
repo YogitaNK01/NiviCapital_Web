@@ -3,10 +3,10 @@ pipeline {
     agent any
 
     environment {
-        IMAGE_NAME      = "nivicap-sit-ui"
-        NETWORK_NAME    = "nivi-sit-app-ui-network"
-        HOST_PORT       = "8081"
-        CONTAINER_PORT  = "80"
+        IMAGE_NAME     = "nivicap-sit-ui"
+        NETWORK_NAME   = "nivi-sit-app-ui-network"
+        HOST_PORT      = "8081"
+        CONTAINER_PORT = "80"
     }
 
     stages {
@@ -14,6 +14,7 @@ pipeline {
         stage('Workspace Validation') {
             steps {
                 sh '''
+                echo "===== Workspace ====="
                 pwd
                 ls -ltr
                 '''
@@ -23,33 +24,34 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 sh '''
-                docker buildx build -t ${IMAGE_NAME}:latest .
+                echo "===== Building Docker Image ====="
+
+                docker build -t ${IMAGE_NAME}:latest .
+
+                docker images | grep ${IMAGE_NAME}
                 '''
             }
         }
 
-        stage('Ensure Docker Network') {
+        stage('Verify Docker Network') {
             steps {
                 sh '''
-                docker network inspect ${NETWORK_NAME} >/dev/null 2>&1 || \
-                docker network create ${NETWORK_NAME}
+                echo "===== Verify Network ====="
+
+                docker network inspect ${NETWORK_NAME} >/dev/null 2>&1 || {
+                    echo "Network ${NETWORK_NAME} not found"
+                    exit 1
+                }
+
+                echo "Network ${NETWORK_NAME} exists"
                 '''
             }
         }
 
-        stage('Check API Container') {
+        stage('Stop Existing UI Containers') {
             steps {
                 sh '''
-                echo "===== Existing API Containers ====="
-                docker ps -a | grep nivi-api || true
-                '''
-            }
-        }
-
-        stage('Stop Running UI Containers') {
-            steps {
-                sh '''
-                echo "Stopping only running UI containers..."
+                echo "===== Stop Existing UI Containers ====="
 
                 docker ps \
                   --filter "name=nivicap-sit-ui" \
@@ -60,57 +62,67 @@ pipeline {
             }
         }
 
-        stage('Deploy New UI Container') {
+        stage('Deploy UI Container') {
             steps {
                 sh '''
-                TIMESTAMP=$(date +%d-%m-%Y-%H-%M-%S)
-                CONTAINER_NAME="nivicap-sit-ui${TIMESTAMP}"
+                TIMESTAMP=$(date +%Y%m%d%H%M%S)
 
-                echo "Deploying Container: ${CONTAINER_NAME}"
+                CONTAINER_NAME="nivicap-sit-ui-${TIMESTAMP}"
+
+                echo "Deploying: ${CONTAINER_NAME}"
 
                 docker run -d \
-                    --name "${CONTAINER_NAME}" \
-                    --network "${NETWORK_NAME}" \
-                    --restart unless-stopped \
-                    -p ${HOST_PORT}:${CONTAINER_PORT} \
-                    --label app=nivi-ui \
-                    ${IMAGE_NAME}:latest
+                  --name "${CONTAINER_NAME}" \
+                  --network "${NETWORK_NAME}" \
+                  --restart unless-stopped \
+                  -p ${HOST_PORT}:${CONTAINER_PORT} \
+                  --label app=nivicap-sit-ui \
+                  ${IMAGE_NAME}:latest
 
                 echo "${CONTAINER_NAME}" > container_name.txt
 
                 sleep 10
-
-                echo "Verifying container existence..."
 
                 docker ps -a | grep "${CONTAINER_NAME}"
                 '''
             }
         }
 
-        stage('Verify UI Health') {
+        stage('Container Verification') {
             steps {
                 sh '''
                 CONTAINER_NAME=$(cat container_name.txt)
 
-                echo "================================"
-                echo "Container Status"
-                echo "================================"
+                echo "===== Container Status ====="
+
                 docker ps -a | grep "${CONTAINER_NAME}"
 
-                echo "================================"
-                echo "Waiting for UI Startup"
-                echo "================================"
+                echo "===== Network Details ====="
+
+                docker inspect ${CONTAINER_NAME} \
+                --format '{{range $name,$net := .NetworkSettings.Networks}}{{$name}} -> {{$net.IPAddress}}{{println}}{{end}}'
+                '''
+            }
+        }
+
+        stage('UI Health Check') {
+            steps {
+                sh '''
+                echo "===== UI Health Check ====="
 
                 SUCCESS=0
 
-                for i in $(seq 1 12)
+                for i in $(seq 1 20)
                 do
-                    echo "Health Check Attempt $i"
+                    echo "Attempt $i/20"
 
-                    if curl -fs http://localhost:${HOST_PORT} >/dev/null 2>&1
-                    then
+                    HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:${HOST_PORT} || true)
+
+                    echo "HTTP_CODE=${HTTP_CODE}"
+
+                    if [ "${HTTP_CODE}" = "200" ]; then
+                        echo "UI Application is Healthy"
                         SUCCESS=1
-                        echo "UI Application is healthy."
                         break
                     fi
 
@@ -118,10 +130,11 @@ pipeline {
                 done
 
                 if [ $SUCCESS -ne 1 ]; then
-                    echo "UI failed health check"
+
+                    CONTAINER_NAME=$(cat container_name.txt)
 
                     echo "===== Container Logs ====="
-                    docker logs "${CONTAINER_NAME}" || true
+                    docker logs ${CONTAINER_NAME}
 
                     exit 1
                 fi
@@ -132,19 +145,14 @@ pipeline {
         stage('Keep Latest 5 UI Containers') {
             steps {
                 sh '''
-                echo "Keeping latest 5 UI containers..."
+                echo "===== Cleanup Old Containers ====="
 
-                CONTAINERS=$(docker ps -a \
-                    --filter "name=nivicap-sit-ui" \
-                    --format "{{.ID}} {{.CreatedAt}}" \
-                    | sort -rk2 \
-                    | awk '{print $1}')
-
-                COUNT=$(echo "$CONTAINERS" | wc -l)
-
-                if [ "$COUNT" -gt 5 ]; then
-                    echo "$CONTAINERS" | tail -n +6 | xargs -r docker rm -f
-                fi
+                docker ps -a \
+                  --filter "name=nivicap-sit-ui-" \
+                  --format "{{.Names}}" \
+                  | sort -r \
+                  | tail -n +6 \
+                  | xargs -r docker rm -f
                 '''
             }
         }
@@ -152,21 +160,15 @@ pipeline {
         stage('Deployment Summary') {
             steps {
                 sh '''
-                echo "================================"
-                echo "Running UI Containers"
-                echo "================================"
+                echo "===== Running UI Containers ====="
 
-                docker ps -a --filter "nivicap-sit-ui"
+                docker ps | grep nivicap-sit-ui || true
 
-                echo "================================"
-                echo "Network Containers"
-                echo "================================"
+                echo "===== Docker Network ====="
 
                 docker network inspect ${NETWORK_NAME}
 
-                echo "================================"
-                echo "Port Validation"
-                echo "================================"
+                echo "===== UI Response ====="
 
                 curl -I http://localhost:${HOST_PORT}
                 '''
@@ -177,6 +179,7 @@ pipeline {
     post {
 
         success {
+
             sh '''
             echo "================================"
             echo "UI Deployment Successful"
@@ -187,6 +190,7 @@ pipeline {
         }
 
         failure {
+
             sh '''
             echo "================================"
             echo "UI Deployment Failed"
@@ -202,15 +206,19 @@ pipeline {
                 echo "===== Container Logs ====="
                 docker logs "${CONTAINER_NAME}" || true
 
-                echo "===== Inspect ====="
+                echo "===== Container Inspect ====="
                 docker inspect "${CONTAINER_NAME}" || true
+
             fi
 
             echo "===== Port Status ====="
             ss -tulpn | grep ${HOST_PORT} || true
+            '''
+        }
 
-            echo "===== API Status ====="
-            docker ps | grep nivicap-sit-ui || true
+        always {
+            sh '''
+            rm -f container_name.txt || true
             '''
         }
     }
