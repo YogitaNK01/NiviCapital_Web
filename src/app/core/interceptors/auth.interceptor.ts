@@ -6,6 +6,7 @@ import {
   HttpEvent,
   HttpClient,
   HttpErrorResponse,
+  HttpXsrfTokenExtractor,
 } from '@angular/common/http';
 import { catchError, filter, switchMap, take } from 'rxjs/operators';
 import { BehaviorSubject, throwError } from 'rxjs';
@@ -20,8 +21,18 @@ export class AuthInterceptor implements HttpInterceptor {
   private isRefreshing = false;
   private refreshTokenSubject = new BehaviorSubject<any>(null);
   private baseUrl = environment.apiBaseUrl;
-  constructor(private router: Router, private http: HttpClient,) { }
+  constructor(private router: Router, private http: HttpClient,private xsrfTokenExtractor: HttpXsrfTokenExtractor
+) { }
   intercept(req: HttpRequest<any>, next: HttpHandler) {
+
+console.log('URL:', req.url);
+console.log('XSRF:', this.xsrfTokenExtractor.getToken());
+
+
+console.log('Cookie:', document.cookie);
+
+console.log('Angular token:', this.xsrfTokenExtractor.getToken());
+
     const request = req.clone({ withCredentials: true });
 
     return next.handle(request).pipe(
