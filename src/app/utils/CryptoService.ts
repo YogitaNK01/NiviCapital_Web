@@ -1,12 +1,14 @@
 import { Injectable } from '@angular/core';
+import { environment } from '../../environments/environment';
+
 
 @Injectable({
   providedIn: 'root'
 })
 export class CryptoService {
 
-  private readonly SECRET ='1nj12rPWeN4p2Jpk39cQ7GsYAZR8ZK14';
 
+private readonly SECRET = environment.secret;
 
   private encoder = new TextEncoder();
   private decoder = new TextDecoder();
