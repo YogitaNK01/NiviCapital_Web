@@ -1,7 +1,7 @@
 import { ApplicationConfig, provideBrowserGlobalErrorListeners, provideZoneChangeDetection } from '@angular/core';
 import { provideRouter } from '@angular/router';
 import { routes } from './app.routes';
-import { provideHttpClient, HTTP_INTERCEPTORS, withInterceptorsFromDi, withXsrfConfiguration } from '@angular/common/http';
+import { provideHttpClient, HTTP_INTERCEPTORS, withInterceptorsFromDi, withXsrfConfiguration, withFetch } from '@angular/common/http';
 import { AuthInterceptor } from './core/interceptors/auth.interceptor';
 import { ErrorInterceptor } from './core/interceptors/error.interceptor';
 import { LoggingInterceptor } from './core/interceptors/logging.interceptor';
@@ -12,18 +12,20 @@ export const appConfig: ApplicationConfig = {
     provideBrowserGlobalErrorListeners(),
     provideZoneChangeDetection({ eventCoalescing: true }),
     provideRouter(routes),
+
     provideHttpClient(
-  withInterceptorsFromDi(),
-  withXsrfConfiguration({
-    cookieName: 'XSRF-TOKEN',
-    headerName: 'X-XSRF-TOKEN'
-  })
-),
-    // Provide interceptors
-    // { provide: HTTP_INTERCEPTORS, useClass: CachingInterceptor, multi: true },
-    // { provide: HTTP_INTERCEPTORS, useClass: LoggingInterceptor, multi: true },
+      withFetch(),
+
+      withXsrfConfiguration({
+        cookieName: 'XSRF-TOKEN',
+        headerName: 'X-XSRF-TOKEN'
+      }),
+
+      withInterceptorsFromDi()
+    ),
+
     { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true },
     { provide: HTTP_INTERCEPTORS, useClass: ErrorInterceptor, multi: true },
   ]
 };
-
+ 

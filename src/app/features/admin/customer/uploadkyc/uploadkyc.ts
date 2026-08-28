@@ -17,6 +17,9 @@ import { Loanstepperservice } from '../../../../core/service/loanstepperservice'
 import { NgForm } from '@angular/forms';
 import { Successbox } from '../successbox/successbox';
 import { firstValueFrom } from 'rxjs';
+import { CryptoService } from '../../../../utils/CryptoService';
+
+
 
 interface OptionItem {
   label: string;
@@ -133,7 +136,7 @@ private kycLoaded = false;
 private isPageRefresh = false;
 isNewFlow = false;
 
-  constructor(public main: Main, private addcustomerservice: Addcustomerservice, private cd: ChangeDetectorRef, private route: ActivatedRoute, public stepperService: Loanstepperservice, private loanservice: Loanformservice, private msgBox: Msgboxservice, private router: Router) { }
+  constructor(public main: Main, private addcustomerservice: Addcustomerservice, private cd: ChangeDetectorRef, private route: ActivatedRoute, public stepperService: Loanstepperservice, private loanservice: Loanformservice, private msgBox: Msgboxservice, private router: Router,private cryptoService:CryptoService) { }
 
   async ngOnInit(): Promise<void> {
 
@@ -632,20 +635,37 @@ else if (this.hasAnyKycData(parsedLocal)) {
 
 
     // text fields
-    fd.append('kycData', JSON.stringify({
+    // fd.append('kycData', JSON.stringify({
+    //   firstName: kycPayload.firstName,
+    //   lastName: kycPayload.lastName,
+    //   dob: kycPayload.dob,
+    //   aadhaarNumber: kycPayload.aadhaarNumber,
+    //   panNumber: kycPayload.panNumber,
+    //   passportNo: kycPayload.passportNo,
+    //   addresses: kycPayload.addresses,
+    //   secondaryAddressProof: kycPayload.selectedSecondaryProof ,
+
+    // }));
 
 
-      firstName: kycPayload.firstName,
-      lastName: kycPayload.lastName,
-      dob: kycPayload.dob,
-      aadhaarNumber: kycPayload.aadhaarNumber,
-      panNumber: kycPayload.panNumber,
-      passportNo: kycPayload.passportNo,
-      addresses: kycPayload.addresses,
-      secondaryAddressProof: kycPayload.selectedSecondaryProof ,
+    
+const kycData = {
 
+  firstName: kycPayload.firstName,
+  lastName: kycPayload.lastName,
+  dob: kycPayload.dob,
 
-    }));
+  aadhaarNumber: kycPayload.aadhaarNumber? await this.cryptoService.encrypt(kycPayload.aadhaarNumber): '',
+  panNumber: kycPayload.panNumber? await this.cryptoService.encrypt(kycPayload.panNumber): '',
+  passportNo: kycPayload.passportNo? await this.cryptoService.encrypt(kycPayload.passportNo): '',
+  addresses: kycPayload.addresses,
+  secondaryAddressProof:kycPayload.selectedSecondaryProof
+};
+fd.append(
+  'kycData',
+  JSON.stringify(kycData)
+);
+
 
 
     fd.append('custId', kycPayload.custId);

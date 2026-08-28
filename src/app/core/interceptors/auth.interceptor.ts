@@ -25,13 +25,16 @@ export class AuthInterceptor implements HttpInterceptor {
 ) { }
   intercept(req: HttpRequest<any>, next: HttpHandler) {
 
+
 console.log('URL:', req.url);
-console.log('XSRF:', this.xsrfTokenExtractor.getToken());
+console.log('document.cookie:', document.cookie);
+console.log(
+  'Angular XSRF:',
+  this.xsrfTokenExtractor.getToken()
+);
 
 
-console.log('Cookie:', document.cookie);
 
-console.log('Angular token:', this.xsrfTokenExtractor.getToken());
 
     const request = req.clone({ withCredentials: true });
 

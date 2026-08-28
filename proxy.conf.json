@@ -5,7 +5,14 @@
     "changeOrigin": true,
     "logLevel": "debug"
   },
-
+  
+  "/nivicapsit": {
+    "target": "http://192.168.5.46:8080",
+    "secure": false,
+    "changeOrigin": true,
+    "logLevel": "debug"
+  },
+  
   
   "/api": {
     "target": "http://192.168.5.46:8080",
