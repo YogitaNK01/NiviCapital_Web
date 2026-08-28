@@ -2067,6 +2067,10 @@ onStartDateChanged(event: unknown): void {
   endControl?.updateValueAndValidity({
     emitEvent: false
   });
+
+  if (endControl?.value && endControl.invalid) {
+endControl.markAsTouched();
+}
 }
 
 onEndDateChanged(event: unknown): void {
