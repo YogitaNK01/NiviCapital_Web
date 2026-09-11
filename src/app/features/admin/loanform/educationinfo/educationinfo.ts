@@ -155,6 +155,7 @@ export class Educationinfo implements OnInit {
   uploadedFiles: Record<string, File | null> = {};
   uploadedFiles1: Record<string, File | Record<string, any> | null> = {};
   private educationFormState: Record<string, any> = {};
+  uploadingEducationFiles: Record<string, boolean> = {};
 
   uploadeddata: any;
 
@@ -758,7 +759,7 @@ this.isDataLoading = true;
   }
 
 
-  onFileSelectedFromSection(e: {
+  onFileSelectedFromSection1(e: {
     step: StepKey;
     control: 'marksheet' | 'lc' | 'other';
     index?: number;
@@ -811,6 +812,118 @@ this.isDataLoading = true;
     this.cd.detectChanges();
   }
 
+  onFileSelectedFromSection(e: {
+  step: StepKey;
+  control: 'marksheet' | 'lc' | 'other';
+  index?: number;
+  file: File | null;
+  gropudata?: { title?: string };
+}): void {
+  const fg = this.educationForms[e.step] as FormGroup;
+
+  fg?.get(e.control)?.setValue(e.file);
+  fg?.get(e.control)?.markAsTouched();
+  fg?.get(e.control)?.updateValueAndValidity();
+
+  this.hasUnsavedChanges = true;
+
+  // Other document
+  if (e.control === 'other') {
+    const index = e.index ?? 0;
+    const key = this.buildKey(e.step, 'other', index);
+    const title = e.gropudata?.title?.trim() || '';
+
+    if (e.file === null) {
+      delete this.uploadedFiles[key];
+      delete this.savedFileMeta[key];
+      delete this.otherDocMap[key];
+
+      this.uploadedFiles = {
+        ...this.uploadedFiles
+      };
+
+      this.savedFileMeta = {
+        ...this.savedFileMeta
+      };
+
+      this.otherDocMap = {
+        ...this.otherDocMap
+      };
+
+      this.cd.detectChanges();
+      return;
+    }
+
+    this.otherDocMap[key] = {
+      title
+    };
+
+    this.uploadedFiles[key] = e.file;
+
+    this.otherDocMap = {
+      ...this.otherDocMap
+    };
+
+    this.uploadedFiles = {
+      ...this.uploadedFiles
+    };
+this.hasUnsavedChanges = true;
+this.cd.detectChanges();
+// this.uploadOtherDocuments(e.step)
+    this.uploadSingleEducationDocument(
+      e.step,
+      'other',
+      e.file,
+      index,
+      title
+    );
+
+    return;
+  }
+
+  // Marksheet or LC
+  const normalizedDoc = this.normalizeDocType(e.control);
+
+  const index =
+    e.control === 'marksheet'
+      ? (e.index ?? 0)
+      : undefined;
+
+  const key = this.buildKey(
+    e.step,
+    normalizedDoc,
+    index
+  );
+
+  if (e.file === null) {
+    delete this.uploadedFiles[key];
+    delete this.savedFileMeta[key];
+
+    this.uploadedFiles = {
+      ...this.uploadedFiles
+    };
+
+    this.savedFileMeta = {
+      ...this.savedFileMeta
+    };
+
+    this.cd.detectChanges();
+    return;
+  }
+
+  this.uploadedFiles[key] = e.file;
+
+  this.uploadedFiles = {
+    ...this.uploadedFiles
+  };
+
+  this.uploadSingleEducationDocument(
+    e.step,
+    normalizedDoc,
+    e.file,
+    index
+  );
+}
 
   getFile(step: StepKey, doc: DocType, index?: number) {
     return this.getStoredFileMeta(step, doc, index);
@@ -893,7 +1006,7 @@ isOtherInstituteSelected(step: StepKey): boolean {
   getEducationGroup(key: string): FormGroup {
     return this.educationForm.get(key) as FormGroup;
   }
-  onFileChange(step: StepKey, doc: DocType, result: UploadResult) {
+  onFileChange1(step: StepKey, doc: DocType, result: UploadResult) {
     if (!result?.file) return;
     this.hasUnsavedChanges = true;
     const normalizedDoc = this.normalizeDocType(doc);
@@ -909,7 +1022,50 @@ isOtherInstituteSelected(step: StepKey): boolean {
     fg?.get(doc)?.updateValueAndValidity();
     this.cd.detectChanges();
   }
+onFileChange(
+  step: StepKey,
+  docType: DocType,
+  result: UploadResult
+): void {
+  const file = result?.file ?? null;
+  const normalizedDoc = this.normalizeDocType(docType);
+  const key = this.buildKey(
+    step,
+    normalizedDoc
+  );
 
+  if (!file) {
+    delete this.uploadedFiles[key];
+    delete this.savedFileMeta[key];
+
+    this.uploadedFiles = {
+      ...this.uploadedFiles
+    };
+
+    this.savedFileMeta = {
+      ...this.savedFileMeta
+    };
+
+    this.cd.detectChanges();
+    return;
+  }
+
+  this.uploadedFiles[key] = file;
+
+  this.uploadedFiles = {
+    ...this.uploadedFiles
+  };
+
+  this.hasUnsavedChanges = true;
+
+  this.uploadSingleEducationDocument(
+    step,
+    normalizedDoc,
+    file
+  );
+
+  this.cd.detectChanges();
+}
   buildDocKey(level: EducationType, docType: DocType, index?: number): string {
     // return index ? `${level}_${docType}_${index}` : `${level}_${docType}`;
 
@@ -1014,6 +1170,16 @@ null;
 
         delete this.uploadedFiles[key];
         delete this.savedFileMeta[key];
+
+        const form =
+  this.educationForms[level as StepKey] as FormGroup;
+
+if (docType === 'offerletter') {
+  form?.get('offerLetter')?.setValue(
+    null,
+    { emitEvent: false }
+  );
+}
 
         this.uploadedFiles = { ...this.uploadedFiles };
         this.savedFileMeta = { ...this.savedFileMeta };
@@ -1465,6 +1631,16 @@ private clearUnsavedEducationStep(step: StepKey): void {
 
 
     if (!form) return false;
+
+    const hasUploadInProgress = Object.entries(
+  this.uploadingEducationFiles
+).some(([key, uploading]) =>
+  key.startsWith(`${step}_`) && uploading
+);
+
+if (hasUploadInProgress) {
+  return false;
+}
 
     //  PG → Nothing mandatory
     if (step === 'pg') return true;
@@ -2007,11 +2183,37 @@ private clearUnsavedEducationStep(step: StepKey): void {
 
     this.cd.detectChanges();
   }
-  private hasFileOrSavedMeta(step: StepKey, doc: DocType, index?: number): boolean {
+  private hasFileOrSavedMeta1(step: StepKey, doc: DocType, index?: number): boolean {
     const key = this.buildKey(step, this.normalizeDocType(doc), index);
 
     return this.uploadedFiles[key] instanceof File || !!this.savedFileMeta[key];
   }
+  private hasFileOrSavedMeta(
+  step: StepKey,
+  doc: DocType,
+  index?: number
+): boolean {
+  const key = this.buildKey(
+    step,
+    this.normalizeDocType(doc),
+    index
+  );
+
+  if (this.uploadingEducationFiles[key]) {
+    return false;
+  }
+
+  return !!(
+    this.savedFileMeta[key]?.documentId ||
+    (
+      this.savedFileMeta[key]?.uploaded &&
+      (
+        this.savedFileMeta[key]?.viewUrl ||
+        this.savedFileMeta[key]?.objectKey
+      )
+    )
+  );
+}
   private normalizeDropdownValue(value: any): any {
     if (Array.isArray(value)) {
       return value.length ? value[0] : '';
@@ -2066,6 +2268,66 @@ private clearUnsavedEducationStep(step: StepKey): void {
       otherDocMap: this.otherDocMap
     };
   }
+
+  // payload for next btn click
+private buildEducationMetadataPayload(step: StepKey): any {
+  const form = this.educationForms[step] as FormGroup;
+  const raw = form.getRawValue();
+
+  const basePayload: any = {
+    category: 'EDUCATION',
+    subcategory: this.stepToSubcategory[step],
+    applicantId: this.applicantId
+  };
+
+  // IELTS/PTE contains score only.
+  // Certificate is already uploaded through single-file API.
+  if (step === 'ielts') {
+    return {
+      ...basePayload,
+      score: Number(raw.score)
+    };
+  }
+
+  // Offer Letter has no additional metadata fields.
+  // Document is already uploaded separately.
+  if (step === 'offerletter') {
+    return basePayload;
+  }
+
+  const instituteId =
+    raw.instituteId ||
+    this.educationFormState[step]?.instituteId ||
+    this.resolveInstituteId(raw.institutename) ||
+    '';
+
+  return {
+    ...basePayload,
+
+    instituteId,
+
+    locationId:
+      this.resolveLocationId(raw.location) ||
+      '',
+
+    yearOfPassing:
+      this.normalizeDropdownValue(raw.passingyear) ||
+      '',
+
+    percentageCgpa:
+      raw.per_cgpa !== null &&
+      raw.per_cgpa !== undefined &&
+      raw.per_cgpa !== ''
+        ? Number(raw.per_cgpa)
+        : null,
+
+    otherInstituteName:
+      raw.institutetitle || '',
+
+    otherLocationName:
+      raw.otherLocation || ''
+  };
+}
   private getFileKeyFromApiType(
     step: StepKey,
     type: string,
@@ -3076,7 +3338,7 @@ private clearUnsavedEducationStep(step: StepKey): void {
     });
   }
 
-  async next() {
+  async next1() {
     console.log("next---");
 
     const step = this.activeEducation as StepKey;
@@ -3474,6 +3736,28 @@ private clearUnsavedEducationStep(step: StepKey): void {
       }
     });
   }
+
+
+private completeEducationStepAndMove(
+  step: StepKey
+): void {
+  this.stepperService
+    .markEducationSectionComplete(step);
+
+  const currentIndex =
+    this.educationOrder.indexOf(step);
+
+  if (currentIndex >= 0) {
+    for (let i = 0; i <= currentIndex; i++) {
+      this.stepperService
+        .markEducationSectionComplete(
+          this.educationOrder[i]
+        );
+    }
+  }
+
+  this.moveToNextEducationStep(step);
+}
 
   //move to next if nothing changes
   private moveToNextEducationStep(step: StepKey): void {
@@ -4173,4 +4457,529 @@ this.disableAllEducationForms()
       ...Object.keys(this.otherDocMap || {}).filter(k => k.startsWith(prefix))
     ].filter((v, i, arr) => arr.indexOf(v) === i);
   }
+
+  //single file upload
+  private uploadSingleEducationDocument(
+  step: StepKey,
+  doc: DocType,
+  file: File,
+  index?: number,
+  title?: string
+): void {
+  const normalizedDoc = this.normalizeDocType(doc);
+//   if (normalizedDoc === 'other') {
+// return;
+//   }
+  const key = this.buildKey(step, normalizedDoc, index);
+
+  const fd = new FormData();
+
+  fd.append('category', 'EDUCATION');
+  fd.append('subcategory', this.stepToSubcategory[step]);
+  fd.append('applicantId', this.applicantId);
+
+ 
+
+  // fd.append(
+  //   'files[0].type',
+  //   this.getEducationDocumentType(key)
+  // );
+
+  // fd.append(
+  //   'files[0].file',
+  //   file,
+  //   file.name
+  // );
+
+  const requestIndex = 0;
+
+fd.append(
+  `files[${requestIndex}].type`,
+  this.getEducationDocumentType(key)
+);
+
+if (normalizedDoc === 'other') {
+  fd.append(
+    `files[${requestIndex}].title`,
+    title?.trim() || 'Other Document'
+  );
+}
+
+fd.append(
+  `files[${requestIndex}].file`,
+  file,
+  file.name
+);
+
+  this.uploadingEducationFiles[key] = true;
+  this.uploadingEducationFiles = {
+    ...this.uploadingEducationFiles
+  };
+
+  this.formSvc.uploadIncome(
+    fd,
+    this.applicationId,
+    this.isEditMode
+  ).subscribe({
+    next: (res: any) => {
+      const responseData =
+        res?.data?.data ||
+        res?.data ||
+        {};
+
+      const uploadedDocuments =
+        responseData.uploadedDocuments ||
+        responseData.documents ||
+        [];
+
+      const uploadedDocument =
+        uploadedDocuments[uploadedDocuments.length - 1] ||
+        responseData.uploadedDocument ||
+        responseData.document ||
+        null;
+
+      if (!uploadedDocument) {
+        console.error(
+          'Education upload succeeded, but document metadata was not found:',
+          res
+        );
+
+        delete this.uploadingEducationFiles[key];
+        this.uploadingEducationFiles = {
+          ...this.uploadingEducationFiles
+        };
+
+        this.cd.detectChanges();
+        return;
+      }
+
+      const apiType =
+        uploadedDocument.type ||
+        this.getEducationDocumentType(key);
+
+      const meta = {
+        key,
+
+        documentId:
+          uploadedDocument.documentId ||
+          uploadedDocument.id ||
+          '',
+
+        name:
+          uploadedDocument.fileName ||
+          uploadedDocument.name ||
+          file.name,
+
+        fileName:
+          uploadedDocument.fileName ||
+          uploadedDocument.name ||
+          file.name,
+
+        title:
+          uploadedDocument.title ||
+          title ||
+          apiType,
+
+        type: apiType,
+
+        viewUrl:
+          uploadedDocument.viewUrl ||
+          uploadedDocument.fileUrl ||
+          uploadedDocument.publicUrl ||
+          '',
+
+        fileUrl:
+          uploadedDocument.fileUrl ||
+          uploadedDocument.viewUrl ||
+          '',
+
+        publicUrl:
+          uploadedDocument.publicUrl ||
+          '',
+
+        objectKey:
+          uploadedDocument.objectKey ||
+          '',
+
+        uploaded: true
+      };
+
+      /*
+       * Replace local File with persisted API metadata.
+       * This ensures Next considers this an already uploaded document.
+       */
+      this.savedFileMeta[key] = meta;
+      this.uploadedFiles[key] = meta as any;
+
+  
+
+      delete this.uploadingEducationFiles[key];
+
+      this.savedFileMeta = {
+        ...this.savedFileMeta
+      };
+
+      this.uploadedFiles = {
+        ...this.uploadedFiles
+      };
+
+      this.otherDocMap = {
+        ...this.otherDocMap
+      };
+
+      this.uploadingEducationFiles = {
+        ...this.uploadingEducationFiles
+      };
+
+      this.hasUnsavedChanges = true;
+
+      this.saveCurrentFormState();
+      this.saveEducationStateToLocalStorage();
+
+      this.cd.detectChanges();
+    },
+
+    error: (err: any) => {
+      console.error(
+        'Single education document upload failed:',
+        err
+      );
+
+      /*
+       * Remove failed local selection so that validation does not
+       * incorrectly consider the document uploaded.
+       */
+      delete this.uploadedFiles[key];
+      delete this.savedFileMeta[key];
+      delete this.uploadingEducationFiles[key];
+
+
+      this.uploadedFiles = {
+        ...this.uploadedFiles
+      };
+
+      this.savedFileMeta = {
+        ...this.savedFileMeta
+      };
+
+      this.uploadingEducationFiles = {
+        ...this.uploadingEducationFiles
+      };
+
+      const errorMessage =
+        err?.error?.message ||
+        'Failed to upload education document. Please try again.';
+
+      console.error(errorMessage);
+
+      this.cd.detectChanges();
+    }
+  });
+}
+//upload other documnets to pass index file[0],file[1]
+private uploadOtherDocuments(
+  step: StepKey
+): Promise<void> {
+  return new Promise((resolve, reject) => {
+    const otherKeys = Object.keys(
+      this.uploadedFiles || {}
+    )
+      .filter(key =>
+        key.startsWith(`${step}_other_`) &&
+        this.uploadedFiles[key] instanceof File
+      )
+      .sort((a, b) => {
+        const aRowId = Number(
+          a.match(/_other_(\d+)$/)?.[1] ?? 0
+        );
+
+        const bRowId = Number(
+          b.match(/_other_(\d+)$/)?.[1] ?? 0
+        );
+
+        return aRowId - bRowId;
+      });
+
+    // No new Other documents to upload.
+    if (!otherKeys.length) {
+      resolve();
+      return;
+    }
+
+    const fd = new FormData();
+
+    fd.append('category', 'EDUCATION');
+    fd.append(
+      'subcategory',
+      this.stepToSubcategory[step]
+    );
+    fd.append('applicantId', this.applicantId);
+
+    otherKeys.forEach((key, requestIndex) => {
+      const file =
+        this.uploadedFiles[key] as File;
+
+      const title =
+        this.otherDocMap[key]?.title?.trim() ||
+        'Other Document';
+
+      fd.append(
+        `files[${requestIndex}].type`,
+        'OTHER'
+      );
+
+      fd.append(
+        `files[${requestIndex}].title`,
+        title
+      );
+
+      fd.append(
+        `files[${requestIndex}].file`,
+        file,
+        file.name
+      );
+
+      this.uploadingEducationFiles[key] = true;
+    });
+
+    this.uploadingEducationFiles = {
+      ...this.uploadingEducationFiles
+    };
+
+    this.formSvc.uploadIncome(
+      fd,
+      this.applicationId,
+      this.isEditMode
+    ).subscribe({
+      next: (res: any) => {
+        const responseData =
+          res?.data?.data ||
+          res?.data ||
+          {};
+
+        const uploadedDocuments =
+          responseData.uploadedDocuments ||
+          responseData.documents ||
+          [];
+
+        otherKeys.forEach((key, responseIndex) => {
+          const oldFile =
+            this.uploadedFiles[key] as File;
+
+          const uploadedDocument =
+            uploadedDocuments[responseIndex];
+
+          if (!uploadedDocument) {
+            delete this.uploadingEducationFiles[key];
+            return;
+          }
+
+          const title =
+            uploadedDocument.title ||
+            this.otherDocMap[key]?.title ||
+            'Other Document';
+
+          const meta = {
+            key,
+
+            documentId:
+              uploadedDocument.documentId ||
+              uploadedDocument.id ||
+              '',
+
+            name:
+              uploadedDocument.fileName ||
+              uploadedDocument.name ||
+              oldFile.name,
+
+            fileName:
+              uploadedDocument.fileName ||
+              uploadedDocument.name ||
+              oldFile.name,
+
+            title,
+
+            type:
+              uploadedDocument.type ||
+              'OTHER',
+
+            viewUrl:
+              uploadedDocument.viewUrl ||
+              uploadedDocument.fileUrl ||
+              uploadedDocument.publicUrl ||
+              '',
+
+            fileUrl:
+              uploadedDocument.fileUrl ||
+              uploadedDocument.viewUrl ||
+              '',
+
+            publicUrl:
+              uploadedDocument.publicUrl ||
+              '',
+
+            objectKey:
+              uploadedDocument.objectKey ||
+              '',
+
+            uploaded: true
+          };
+
+          this.savedFileMeta[key] = meta;
+          this.uploadedFiles[key] = meta as any;
+
+          this.otherDocMap[key] = {
+            title
+          };
+
+          delete this.uploadingEducationFiles[key];
+        });
+
+        this.savedFileMeta = {
+          ...this.savedFileMeta
+        };
+
+        this.uploadedFiles = {
+          ...this.uploadedFiles
+        };
+
+        this.otherDocMap = {
+          ...this.otherDocMap
+        };
+
+        this.uploadingEducationFiles = {
+          ...this.uploadingEducationFiles
+        };
+
+        this.saveCurrentFormState();
+        this.saveEducationStateToLocalStorage();
+        this.cd.detectChanges();
+
+        resolve();
+      },
+
+      error: (err: any) => {
+        otherKeys.forEach(key => {
+          delete this.uploadingEducationFiles[key];
+        });
+
+        this.uploadingEducationFiles = {
+          ...this.uploadingEducationFiles
+        };
+
+        this.cd.detectChanges();
+        reject(err);
+      }
+    });
+  });
+}
+
+  async next(): Promise<void> {
+  const step = this.activeEducation as StepKey;
+  const form = this.educationForms[step] as FormGroup;
+
+  if (!form) return;
+
+  // PG is optional
+  if (step === 'pg' && !this.hasPgData(form, step)) {
+    this.moveToNextEducationStep(step);
+    return;
+  }
+
+
+
+  if (!this.canProceedToNext()) {
+    this.showValidationErrors(step);
+    return;
+  }
+
+  this.saveCurrentFormState();
+  this.persistEducationState();
+
+  this.stepperService.setEducationStepData(
+    step,
+    {
+      ...form.getRawValue(),
+
+      instituteId:
+        form.get('instituteId')?.value ||
+        this.educationFormState[step]?.instituteId ||
+        '',
+
+      instituteName:
+        form.get('instituteName')?.value ||
+        form.get('institutename')?.value ||
+        '',
+
+      institutename:
+        form.get('institutename')?.value ||
+        '',
+
+      location: this.resolveLocationId(
+        form.get('location')?.value
+      ),
+
+      institutetitle:
+        form.get('institutetitle')?.value ||
+        '',
+
+      otherLocation:
+        form.get('otherLocation')?.value ||
+        ''
+    }
+  );
+
+  if (!this.shouldCallNextApi(step)) {
+this.completeEducationStepAndMove(step);
+return;
+}
+
+const payload = this.buildEducationMetadataPayload(step);
+
+  this.formSvc.saveEducationMetadata(
+    payload,
+    this.applicationId,
+    this.isEditMode
+  ).subscribe({
+    next: async (res: any) => {
+      this.markStepPersisted(step);
+      this.hasUnsavedChanges = false;
+      this.forceNextApiForDraft = false;
+
+      this.stepperService.markEducationSectionComplete(step);
+
+      // const currentIndex =
+      //   this.educationOrder.indexOf(step);
+
+      // for (let i = 0; i <= currentIndex; i++) {
+      //   this.stepperService.markEducationSectionComplete(
+      //     this.educationOrder[i]
+      //   );
+      // }
+
+      this.saveCurrentFormState();
+      this.saveEducationStateToLocalStorage();
+this.completeEducationStepAndMove(step);
+     
+      // await this.loadSavedEducationInfoFromApi(
+      //   step,
+      //   false
+      // );
+
+      // this.moveToNextEducationStep(step);
+    },
+
+    error: (err: any) => {
+      console.error(
+        'Failed to save education field data:',
+        err
+      );
+
+      alert(
+        err?.error?.message ||
+        'Failed to save education details.'
+      );
+    }
+  });
+}
 }

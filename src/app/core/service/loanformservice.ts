@@ -336,17 +336,24 @@ submitAdditionalInfo(
     );
   }
 
+  // ************************* saveEducation Metadata (institute name ,percentage,location etc)  *************************
+
+  saveEducationMetadata(payload: any, id: string,edit?:boolean): Observable<ApiResponse<any>> {
+
+    const url = `${this.baseUrl}/v1/los/applications/${id}/documents/metadata`;
+
+    return this.http.post<ApiResponse<any>>(url, payload);
+
+  }
+
   // ************************* Income   *************************
 
   uploadIncome(payload: any, id: string,edit?:boolean): Observable<ApiResponse<any>> {
 
-    const url = `${this.baseUrl}/v1/los/applications/${id}/documents/batch`;
+    const url = `${this.baseUrl}/v1/los/applications/${id}/documents/upload`;
 
     return this.http.post<ApiResponse<any>>(url, payload);
 
-  
-
-  
   }
 
   deleteIncome(payload: any): Observable<ApiResponse<any>> {

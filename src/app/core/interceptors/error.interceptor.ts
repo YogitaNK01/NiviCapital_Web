@@ -72,10 +72,12 @@ export class ErrorInterceptor implements HttpInterceptor {
       break;
 
     case 404:
-      errorMessage =
-        error.error?.message ??
-        'The requested resource could not be found.';
-      break;
+      // errorMessage =
+      //   error.error?.message ??
+      //   'The requested resource could not be found.';
+      // break;
+      showPopup = false; // AuthInterceptor handles this
+      return throwError(() => error);
 
     case 408:
       errorMessage =

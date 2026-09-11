@@ -133,6 +133,15 @@ private kycLoaded = false;
 private isPageRefresh = false;
 isNewFlow = false;
 
+private readonly kycFileFieldMap: Record<string, string> = {
+  pan: 'panFile',
+  aadharfront: 'aadharFrontFile',
+  aadharback: 'aadharBackFile',
+  passport: 'passportFile',
+  secaddress: 'utilityBillFile'
+};
+uploadingKycFiles: Record<string, boolean> = {};
+
   constructor(public main: Main, private addcustomerservice: Addcustomerservice, private cd: ChangeDetectorRef, private route: ActivatedRoute, public stepperService: Loanstepperservice, private loanservice: Loanformservice, private msgBox: Msgboxservice, private router: Router) { }
 
   async ngOnInit(): Promise<void> {
